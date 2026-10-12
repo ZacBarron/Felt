@@ -7,8 +7,8 @@ import type { ChartSpec } from '@felt/core';
  * outputs, good enough to start drilling structure. They are not solver
  * exact. Replace or extend them with solver output (see docs/SOLVER_DATA.md).
  *
- * Late position seats face the same players behind them at 6 and 9 handed,
- * so LJ through SB share ranges across table sizes; 9 handed adds the
+ * Late position seats face the same players behind them at 6 and 9-handed,
+ * so LJ through SB share ranges across table sizes; 9-handed adds the
  * tighter UTG, UTG+1 and UTG+2 seats in front.
  */
 
@@ -68,7 +68,7 @@ function bbVsBtn(tableSize: number): ChartSpec {
 }
 
 export const STARTER_CHARTS: ChartSpec[] = [
-  // 9 handed: the live full ring game.
+  // 9-handed: the live full ring game.
   rfi(9, 'UTG', RFI['UTG-9']),
   rfi(9, 'UTG+1', RFI['UTG+1-9']),
   rfi(9, 'UTG+2', RFI['UTG+2-9']),
@@ -103,7 +103,7 @@ export const STARTER_CHARTS: ChartSpec[] = [
     ],
   },
 
-  // 6 handed: online 6-max and short handed live tables.
+  // 6-handed: online 6-max and short handed live tables.
   rfi(6, 'UTG', RFI.LJ),
   rfi(6, 'HJ', RFI.HJ),
   rfi(6, 'CO', RFI.CO),

@@ -1,10 +1,11 @@
 import { PALETTES, type Palette } from '../state/settings';
 import { CheckIcon } from './icons';
+import { onRadioKeys } from './radioKeys';
 
 /** Theme swatches: a slice of each theme's felt with its accent. */
 export function ThemePicker({ value, onChange }: { value: Palette; onChange: (p: Palette) => void }) {
   return (
-    <div className="theme-picker" role="radiogroup" aria-label="Theme">
+    <div className="theme-picker" role="radiogroup" onKeyDown={onRadioKeys} aria-label="Theme">
       {PALETTES.map((p) => {
         const active = p.id === value;
         return (

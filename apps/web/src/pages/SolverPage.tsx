@@ -147,7 +147,7 @@ export function SolverPage() {
   const results = useRef<HTMLDivElement>(null);
   const solvedAt = solver.solved?.seconds;
   useEffect(() => {
-    if (solvedAt !== undefined) results.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (solvedAt !== undefined) results.current?.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
   }, [solvedAt]);
 
   const choosePreset = (p: Preset) => {
@@ -238,7 +238,7 @@ export function SolverPage() {
 
       <section>
         <h2 className="section-title">Spot</h2>
-        <div className="chips" role="radiogroup" aria-label="Spot">
+        <div className="chips" role="group" aria-label="Spot">
           {PRESETS.map((p) => (
             <button key={p.id} className="chip" aria-pressed={p.id === presetId && !custom} data-haptic="select" onClick={() => choosePreset(p)}>
               {p.label}
@@ -330,11 +330,11 @@ export function SolverPage() {
             <span className="footnote">{solver.running ? 'Solving' : 'Solved'}</span>
             <span className={`pill ${solver.solved && solver.solved.exploitability <= 0.5 ? 'pill-good' : 'pill-tint'} num`}>
               {(solver.solved ?? solver.progress)?.exploitability !== undefined
-                ? `${Math.min(99.99, (solver.solved ?? solver.progress)!.exploitability).toFixed(2)}% of pot`
+                ? `Exploitability ${Math.min(99.99, (solver.solved ?? solver.progress)!.exploitability).toFixed(2)}%`
                 : 'Starting'}
             </span>
           </div>
-          <div className="check-bar" style={{ marginTop: 10 }}>
+          <div className="check-bar" style={{ marginTop: 10 }} aria-hidden="true">
             <span
               style={{
                 width: `${solver.solved ? 100 : Math.max(4, Math.min(96, 100 - Math.log10(Math.max(0.01, solver.progress?.exploitability ?? 100)) * 30 - 20))}%`,
@@ -351,7 +351,10 @@ export function SolverPage() {
 
       {solver.solved && view && (
         <section className="stack" style={{ gap: '0.8rem' }}>
-          <div className="chips" aria-label="Line">
+          <h2 className="section-title" id="solver-line" style={{ marginBottom: 0 }}>
+            Line
+          </h2>
+          <div className="chips" role="group" aria-labelledby="solver-line">
             <button className="chip" aria-pressed={path.length === 0} onClick={() => go([], [])}>
               Start
             </button>

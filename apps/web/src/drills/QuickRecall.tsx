@@ -3,7 +3,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { actionColor } from '../components/actionColors';
 import { MixBar } from '../components/MixBar';
 import { PlayingCard } from '../components/PlayingCard';
-import { RangeGrid } from '../components/RangeGrid';
+import { describeMix, RangeGrid } from '../components/RangeGrid';
 import { SeatStrip } from '../components/SeatStrip';
 import { haptic } from '../haptics';
 import { BottomBar } from '../ui/BottomBar';
@@ -22,9 +22,9 @@ interface Props {
 const FLIP_MS = 560 + 90;
 
 const VERDICTS = {
-  right: { text: 'Correct', color: 'var(--green)', Icon: CheckIcon, haptic: 'success' as const },
-  mix: { text: 'Rare mix', color: 'var(--orange)', Icon: MinusIcon, haptic: 'warning' as const },
-  wrong: { text: 'Not quite', color: 'var(--red)', Icon: CloseIcon, haptic: 'error' as const },
+  right: { text: 'Correct', color: 'var(--green-text)', Icon: CheckIcon, haptic: 'success' as const },
+  mix: { text: 'Part of the mix', color: 'var(--orange-text)', Icon: MinusIcon, haptic: 'warning' as const },
+  wrong: { text: 'Not quite', color: 'var(--red-text)', Icon: CloseIcon, haptic: 'error' as const },
 };
 
 /** "You are UTG+1 with KTo, folded to you. Raise or fold?" Timed, then shows the full mix. */
@@ -56,7 +56,9 @@ export function QuickRecall({ chart, hand, targetMs, onAnswer, onNext }: Props) 
   // Keyboard on laptops: 1, 2, 3 pick an action; Enter or Space moves on.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLSelectElement) return;
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      // Never hijack a key meant for another control, such as Save or the tab bar.
+      if (e.target instanceof Element && e.target.closest('input, select, textarea, button, a')) return;
       if (!answer) {
         const i = Number(e.key) - 1;
         if (i >= 0 && i < choices.length) choose(choices[i]);
@@ -70,7 +72,8 @@ export function QuickRecall({ chart, hand, targetMs, onAnswer, onNext }: Props) 
   }, [answer, choices, choose, onNext]);
 
   useEffect(() => {
-    if (answer) revealRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    if (answer)
+      revealRef.current?.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'nearest' });
   }, [answer]);
 
   const kind = answer ? (answer.outcome.accuracy === 1 ? 'right' : answer.outcome.accuracy > 0 ? 'mix' : 'wrong') : undefined;
@@ -110,6 +113,10 @@ export function QuickRecall({ chart, hand, targetMs, onAnswer, onNext }: Props) 
         </div>
       </div>
 
+      <div role="status" aria-live="polite" className="sr-only">
+        {answer && verdict ? `${verdict.text}. ${describeMix(hand, mix)}.` : ''}
+      </div>
+
       {answer && verdict && (
         <div ref={revealRef} className="card stack reveal" style={{ gap: '0.9rem' }}>
           <div className="row between">
@@ -119,7 +126,7 @@ export function QuickRecall({ chart, hand, targetMs, onAnswer, onNext }: Props) 
               </span>
               {verdict.text}
             </div>
-            <span className={`pill ${fast ? 'pill-good' : ''} num`}>{(answer.outcome.responseMs / 1000).toFixed(1)}s</span>
+            <span className={`pill ${fast && kind === 'right' ? 'pill-good' : ''} num`}>{(answer.outcome.responseMs / 1000).toFixed(1)}s</span>
           </div>
           <div className="row between">
             <strong style={{ fontSize: '1.1rem' }}>{hand}</strong>
@@ -134,7 +141,7 @@ export function QuickRecall({ chart, hand, targetMs, onAnswer, onNext }: Props) 
 
       <BottomBar>
         {!answer ? (
-          <div style={{ display: 'grid', gridTemplateColumns: `repeat(${choices.length}, 1fr)`, gap: 10 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: `repeat(${choices.length}, minmax(0, 1fr))`, gap: 8 }}>
             {choices.map((c, i) => (
               <button
                 key={c}

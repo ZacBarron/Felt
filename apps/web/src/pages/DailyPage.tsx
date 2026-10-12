@@ -23,13 +23,13 @@ import { ratingSnapshot, streakNow } from '../state/rating';
 import { addHandsToReview } from '../state/review';
 import { BottomBar } from '../ui/BottomBar';
 import { plural, signed } from '../ui/format';
-import { ChevronRightIcon, CloseIcon, FlameIcon } from '../ui/icons';
+import { CheckIcon, ChevronRightIcon, CloseIcon, FlameIcon, MinusIcon } from '../ui/icons';
 import { ProgressRing } from '../ui/ProgressRing';
 import { useBodyClass } from '../ui/useBodyClass';
 
 type ChartDecision = Extract<Decision, { kind: 'chart' }> & { difficulty: number };
 
-/** Every rated edge hand of every 9 handed chart, and every lesson quiz: the same pool for everyone. */
+/** Every rated edge hand of every 9-handed chart, and every lesson quiz: the same pool for everyone. */
 function dailyPool() {
   // Equilibrium charts only, and only hands where some answer is wrong.
   const charts: ChartDecision[] = STARTER_CHARTS.filter((s) => s.tableSize === 9 && s.basis === 'gto').flatMap((spec) => {
@@ -111,21 +111,23 @@ function Result({ number, items, scores, before, after }: { number: number; item
   return (
     <div className="stack focus-column lesson-done">
       <div className="card stack reveal daily-result" style={{ alignItems: 'center', textAlign: 'center', gap: '0.9rem' }}>
-        <div className="footnote">Felt Daily #{number}</div>
+        <div className="footnote">Daily challenge #{number}</div>
         <ProgressRing value={right / scores.length} size={116} stroke={11} label={`${right} of ${scores.length} right`}>
           <span className="display num" style={{ fontSize: '2.2rem' }} aria-hidden="true">
             {right}/{scores.length}
           </span>
         </ProgressRing>
-        <div className="daily-grid" aria-hidden="true">
+        <div className="daily-grid" role="img" aria-label={scores.map((s, i) => `${i + 1}: ${verdict(s).toLowerCase()}`).join(', ')}>
           {scores.map((s, i) => (
-            <span key={i} className={s >= 1 ? 'good' : s > 0 ? 'mix' : 'bad'} style={{ animationDelay: `${i * 90}ms` }} />
+            <span key={i} className={s >= 1 ? 'good' : s > 0 ? 'mix' : 'bad'} style={{ animationDelay: `${i * 90}ms` }}>
+              {s >= 1 ? <CheckIcon size={16} /> : s > 0 ? <MinusIcon size={16} /> : <CloseIcon size={16} />}
+            </span>
           ))}
         </div>
         <div className="row" style={{ justifyContent: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
           <span className="pill num">
             Rating {provisional ? '~' : ''}
-            {Math.round(after)} ({signed(delta)})
+            {Math.round(after)} ({signed(delta, 0)})
           </span>
           {!!streak?.streak && (
             <span className="pill pill-tint">
@@ -228,7 +230,7 @@ export function DailyPage() {
           </button>
         </div>
         <div className="hero daily-hero reveal">
-          <div className="hero-label">Felt Daily #{number}</div>
+          <div className="hero-label">Daily challenge #{number}</div>
           <h1 className="display pro-title">Five decisions. Same for everyone.</h1>
           <p className="pro-sub">
             Three range decisions that get harder, and two questions from the lessons. Every answer counts toward your Felt Rating.

@@ -57,7 +57,7 @@ export function ReviewPage() {
         <button className="icon-btn glass" aria-label="End session" onClick={() => navigate(savedOnly ? '/saved' : '/')}>
           <CloseIcon size={18} />
         </button>
-        <div className="progress" aria-label={`Card ${index + 1} of ${queue.length}`}>
+        <div className="progress" role="progressbar" aria-label="Review" aria-valuemin={0} aria-valuemax={queue.length} aria-valuenow={index} aria-valuetext={`Card ${index + 1} of ${queue.length}`}>
           <span style={{ width: `${progress * 100}%` }} />
         </div>
         <span className="footnote num" style={{ minWidth: 40, textAlign: 'right' }}>
@@ -121,14 +121,14 @@ function SessionDone({ results, onReload }: { results: { accuracy: number; ms: n
           </>
         )}
         <p className="footnote" style={{ maxWidth: 360, margin: 0 }}>
-          Missed cards come back in a few minutes. New cards unlock tomorrow, or raise the daily limit in Settings.
+          Missed cards come back in a few minutes. New cards arrive tomorrow. For more now, raise New cards per day in Settings.
         </p>
         <div className="row" style={{ justifyContent: 'center' }}>
           <button className="btn" onClick={onReload}>
-            Check again
+            Refresh
           </button>
           <Link to="/drills" className="btn btn-primary">
-            <DrillsIcon size={19} /> Free practice
+            <DrillsIcon size={19} /> Practice any chart
           </Link>
         </div>
       </div>

@@ -89,13 +89,21 @@ export function LessonPage() {
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (finished) return;
+      if (finished || e.metaKey || e.ctrlKey || e.altKey) return;
+      // Leave keys alone when a control has focus: Enter belongs to that button, arrows to text and groups.
+      if (e.target instanceof Element && e.target.closest('input, textarea, select, button, a, [role="radiogroup"], [role="grid"]')) return;
       if (e.key === 'ArrowRight' || e.key === 'Enter') next();
       if (e.key === 'ArrowLeft') back();
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   });
+
+  // Each new step is read from the top by screen readers.
+  const stage = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (i > 0) stage.current?.focus({ preventScroll: true });
+  }, [i]);
 
   if (!entry || !content) {
     return (
@@ -129,7 +137,7 @@ export function LessonPage() {
           </div>
           {quizCount > 0 && (
             <div className="pill pill-good num">
-              {correct} of {quizCount} checks right
+              {correct} of {quizCount} questions right
             </div>
           )}
         </div>
@@ -168,7 +176,7 @@ export function LessonPage() {
         <button className="icon-btn glass" aria-label="Close lesson" onClick={() => navigate('/learn')}>
           <CloseIcon size={18} />
         </button>
-        <div className="segments" aria-label={`Step ${i + 1} of ${steps.length}`}>
+        <div className="segments" role="progressbar" aria-label="Lesson" aria-valuemin={1} aria-valuemax={steps.length} aria-valuenow={i + 1} aria-valuetext={`Step ${i + 1} of ${steps.length}`}>
           {steps.map((_, n) => (
             <span key={n} className={n < i ? 'done' : n === i ? 'current' : undefined} />
           ))}
@@ -191,6 +199,8 @@ export function LessonPage() {
 
       <div
         key={`${key}:${i}`}
+        ref={stage}
+        tabIndex={-1}
         className={`lesson-stage ${dir === 1 ? 'from-right' : 'from-left'}`}
         onTouchStart={(e) => (touch.current = { x: e.touches[0].clientX, y: e.touches[0].clientY })}
         onTouchEnd={(e) => {

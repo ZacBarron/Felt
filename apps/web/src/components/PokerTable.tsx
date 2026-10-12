@@ -87,12 +87,12 @@ export function PokerTable({ seats, board, pot, format = (bb) => `${fmt(bb)}bb` 
               </div>
               <div
                 style={{
-                  background: seat.isHero ? 'var(--tint)' : 'var(--surface)',
-                  color: seat.isHero ? '#fff' : 'var(--label)',
+                  background: seat.isHero ? 'var(--tint-fill)' : 'var(--surface)',
+                  color: seat.isHero ? 'var(--on-tint)' : 'var(--label)',
                   boxShadow: '0 2px 8px rgba(0,0,0,.18)',
                   borderRadius: 8,
                   padding: compact ? '1px 5px' : '2px 10px',
-                  fontSize: compact ? 10 : 12,
+                  fontSize: compact ? 11 : 12,
                   textAlign: 'center',
                   minWidth: compact ? 48 : 70,
                 }}

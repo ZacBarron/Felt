@@ -15,12 +15,15 @@ import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { haptic } from '../haptics';
 import { StepView } from '../lesson/StepView';
 import { canOpenLesson } from '../state/access';
+import { track } from '../state/events';
 import { recordLessonQuiz } from '../state/rating';
 import { entryFor, LESSON_ENTRIES, lessonPath, markTested, moduleEntries, quizSteps } from '../state/lessons';
 import { useSettings } from '../state/settings';
 import { BottomBar } from '../ui/BottomBar';
-import { CheckIcon, CloseIcon, LockIcon, SkipIcon } from '../ui/icons';
+import { CloseIcon, LockIcon, SkipIcon } from '../ui/icons';
+import { plural } from '../ui/format';
 import { ProgressRing } from '../ui/ProgressRing';
+import { Toggle } from '../ui/Toggle';
 import { useBodyClass } from '../ui/useBodyClass';
 
 type Quiz = Extract<LessonStep, { kind: 'quiz' }>;
@@ -52,7 +55,7 @@ function QuestionScreen({
         <button className="icon-btn glass" aria-label="Stop the test" onClick={onClose}>
           <CloseIcon size={18} />
         </button>
-        <div className="check-bar" aria-label={`${Math.round(progress * 100)}% done`}>
+        <div className="check-bar" role="progressbar" aria-label="Test progress" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(progress * 100)}>
           <span style={{ width: `${Math.max(4, progress * 100)}%` }} />
         </div>
       </div>
@@ -78,11 +81,16 @@ function QuestionScreen({
   );
 }
 
+function moduleTitle(id: string) {
+  const [t, m] = id.split('/');
+  return CURRICULUM.find((x) => x.id === t)?.modules.find((x) => x.id === m)?.title;
+}
+
 function minutesOf(keys: readonly string[]) {
   return keys.reduce((m, k) => m + (entryFor(k)?.content?.minutes ?? 0), 0);
 }
 
-/** What the test found: lessons skipped and lessons to learn, with the next step. */
+/** What the test found: lessons tested out and lessons to learn, with the next step. */
 function Results({ title, result, back }: { title: string; result: CheckResult; back: string }) {
   const { settings } = useSettings();
   const navigate = useNavigate();
@@ -93,20 +101,20 @@ function Results({ title, result, back }: { title: string; result: CheckResult; 
   return (
     <div className="stack focus-column lesson-done">
       <div className="card stack reveal" style={{ alignItems: 'center', textAlign: 'center', padding: '2rem 1.25rem', gap: '0.9rem' }}>
-        <ProgressRing value={result.correct / Math.max(1, result.total)} size={116} stroke={11}>
-          <span className="display num" style={{ fontSize: '2rem' }}>
+        <ProgressRing value={result.correct / Math.max(1, result.total)} size={116} stroke={11} label={`${result.correct} of ${result.total} right`}>
+          <span className="display num" style={{ fontSize: '2rem' }} aria-hidden="true">
             {result.correct}/{result.total}
           </span>
         </ProgressRing>
         <div>
           <div className="footnote">{title}</div>
           <h1 className="display" style={{ fontSize: '2.2rem', fontWeight: 400, lineHeight: 1.05 }}>
-            {toLearn.length === 0 ? 'You know this' : result.passed.length ? 'Nearly there' : 'Worth learning'}
+            {toLearn.length === 0 ? 'You know this' : `${plural(toLearn.length, 'lesson')} to learn`}
           </h1>
         </div>
         {result.passed.length > 0 && (
           <div className="pill pill-good num">
-            {result.passed.length} {result.passed.length === 1 ? 'lesson' : 'lessons'} skipped, {saved} min saved
+            {plural(result.passed.length, 'lesson')} tested out, {saved} min saved
           </div>
         )}
       </div>
@@ -130,7 +138,7 @@ function Results({ title, result, back }: { title: string; result: CheckResult; 
       )}
       {result.passed.length > 0 && (
         <section>
-          <h2 className="section-title">Skipped</h2>
+          <h2 className="section-title">Tested out</h2>
           <div className="list">
             {result.passed.map((k) => (
               <div key={k} className="list-row">
@@ -250,37 +258,76 @@ export function PlacementPage() {
   const fromOnboarding = params.get('from') === 'onboarding';
   const { settings, update } = useSettings();
   const [state, setState] = useState(() => startPlacement(placementModules()));
+  const [kept, setKept] = useState<Set<string>>(new Set());
+  // Placement state keeps only the current topic's answers, so count the whole test here.
+  const [tally, setTally] = useState({ right: 0, asked: 0 });
   const exit = () => navigate(fromOnboarding ? '/welcome?step=plan' : '/learn');
 
   if (state.done) {
-    const skipped = placementSkips(state);
-    const placedTitle = state.placedAt
-      ? CURRICULUM.flatMap((t) => t.modules.map((m) => ({ id: `${t.id}/${m.id}`, title: m.title }))).find((m) => m.id === state.placedAt)?.title
-      : undefined;
+    const proven = placementSkips(state);
+    const skipped = proven.filter((k) => !kept.has(k.split('/').slice(0, 2).join('/')));
+    const { right, asked } = tally;
+    const placedTitle = state.placedAt ? moduleTitle(state.placedAt) : undefined;
+    const byModule = [...new Set(proven.map((k) => k.split('/').slice(0, 2).join('/')))].map((id) => ({
+      id,
+      title: moduleTitle(id) ?? id,
+      count: proven.filter((k) => k.startsWith(`${id}/`)).length,
+    }));
     return (
       <div className="stack focus-column lesson-done">
         <div className="card stack reveal" style={{ alignItems: 'center', textAlign: 'center', padding: '2rem 1.25rem', gap: '0.9rem' }}>
-          <ProgressRing value={state.cleared.length / Math.max(1, state.modules.length)} size={116} stroke={11}>
-            <CheckIcon size={42} style={{ color: 'var(--tint)' }} />
+          <ProgressRing value={right / Math.max(1, asked)} size={116} stroke={11} label={`${right} of ${asked} right`}>
+            <span className="display num" style={{ fontSize: '2.2rem' }} aria-hidden="true">
+              {right}/{asked}
+            </span>
           </ProgressRing>
           <div>
-            <div className="footnote">Your level</div>
+            <div className="footnote">Your starting point</div>
             <h1 className="display" style={{ fontSize: '2.2rem', fontWeight: 400, lineHeight: 1.05 }}>
               {placedTitle ? `Start at ${placedTitle}` : 'You cleared the core path'}
             </h1>
           </div>
           <p className="muted" style={{ margin: 0 }}>
             {skipped.length > 0
-              ? `${skipped.length} lessons marked as known, about ${minutesOf(skipped)} minutes you will not have to spend.`
-              : 'Starting from the first lesson is the fastest way up from here.'}
+              ? `${plural(skipped.length, 'lesson')} marked as tested out, about ${minutesOf(skipped)} minutes saved. You can open any of them later.`
+              : 'Start with the first lesson. Everything stays in your plan.'}
           </p>
         </div>
+        {byModule.length > 0 && (
+          <section>
+            <h2 className="section-title">Tested out</h2>
+            <div className="list">
+              {byModule.map((m) => (
+                <div key={m.id} className="list-row">
+                  <span className="grow">
+                    <span style={{ display: 'block' }}>{m.title}</span>
+                    <span className="footnote">{kept.has(m.id) ? 'Stays in your plan' : plural(m.count, 'lesson')}</span>
+                  </span>
+                  <Toggle
+                    label={`Skip ${m.title}`}
+                    checked={!kept.has(m.id)}
+                    onChange={(skip) =>
+                      setKept((k) => {
+                        const next = new Set(k);
+                        if (skip) next.delete(m.id);
+                        else next.add(m.id);
+                        return next;
+                      })
+                    }
+                  />
+                </div>
+              ))}
+            </div>
+            <div className="section-footer">Turn a topic off to keep its lessons in your plan.</div>
+          </section>
+        )}
         <BottomBar>
           <button
             className="btn btn-primary btn-lg btn-block swap-in"
             onClick={async () => {
               await markTested(skipped);
               update({ ...settings, profile: { ...settings.profile, placedAt: state.placedAt ?? 'all' } });
+              track('placement_completed', { right, asked, skipped: skipped.length, placedAt: state.placedAt ?? 'all' });
               exit();
             }}
           >
@@ -301,6 +348,7 @@ export function PlacementPage() {
       onClose={exit}
       onDone={(correct) => {
         window.scrollTo({ top: 0 });
+        setTally((t) => ({ right: t.right + (correct ? 1 : 0), asked: t.asked + 1 }));
         setState((s) => answerPlacement(s, correct));
       }}
     />

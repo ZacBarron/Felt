@@ -96,7 +96,7 @@ export function stakesLabel(stakes: Stakes): string {
 
 export const PRESETS: Record<string, { label: string; settings: GameSettings }> = {
   'live-1-3': {
-    label: 'Live 1/3, 9 handed',
+    label: 'Live 1/3, 9-handed',
     settings: {
       format: 'cash',
       venue: 'live',
@@ -108,7 +108,7 @@ export const PRESETS: Record<string, { label: string; settings: GameSettings }> 
     },
   },
   'live-2-5': {
-    label: 'Live 2/5, 9 handed',
+    label: 'Live 2/5, 9-handed',
     settings: {
       format: 'cash',
       venue: 'live',
@@ -132,7 +132,7 @@ export const PRESETS: Record<string, { label: string; settings: GameSettings }> 
     },
   },
   'mtt-9max': {
-    label: 'Tournament, 9 handed',
+    label: 'Tournament, 9-handed',
     settings: {
       format: 'mtt',
       venue: 'live',

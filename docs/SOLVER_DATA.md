@@ -4,7 +4,7 @@ GTO answers are only as good as the data behind them. This doc covers where Felt
 
 ## Current state
 
-The starter charts in `packages/content/src/charts.ts` are hand-written approximations of widely published 100bb solutions for 9 handed and 6 handed cash. They are marked `source: 'starter-approx'` and the UI labels them. They are good enough to learn structure (which hands open from which seat) but not for fine frequencies. The BTN vs limper chart is marked `basis: 'exploit'`, since limped pots have no clean GTO answer.
+The starter charts in `packages/content/src/charts.ts` are hand-written approximations of widely published 100bb solutions for 9-handed and 6-handed cash. They are marked `source: 'starter-approx'` and the UI labels them. They are good enough to learn structure (which hands open from which seat) but not for fine frequencies. The BTN vs limper chart is marked `basis: 'exploit'`, since limped pots have no clean GTO answer.
 
 The Spot Lab decision demo uses illustrative numbers and says so.
 

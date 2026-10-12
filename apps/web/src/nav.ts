@@ -2,6 +2,7 @@ import {
   BookmarkIcon,
   DrillsIcon,
   ExploitsIcon,
+  ImportIcon,
   type IconComponent,
   LabIcon,
   LearnIcon,
@@ -21,7 +22,7 @@ export interface NavItem {
   to: string;
   label: string;
   icon: IconComponent;
-  /** Tile color when shown as a Settings style row. */
+  /** Tile color when shown as a Settings style row. Spruce for all, so action colors keep their meaning. */
   color: string;
 }
 
@@ -29,31 +30,31 @@ export const NAV_SECTIONS: { section: string; items: NavItem[] }[] = [
   {
     section: 'Train',
     items: [
-      { to: '/', label: 'Today', icon: TodayIcon, color: 'var(--red)' },
-      { to: '/review', label: 'Review', icon: ReviewIcon, color: 'var(--tint)' },
-      { to: '/daily', label: 'Daily challenge', icon: TrophyIcon, color: 'var(--green)' },
-      { to: '/drills', label: 'Drills', icon: DrillsIcon, color: 'var(--orange)' },
-      { to: '/learn', label: 'Learn', icon: LearnIcon, color: 'var(--orange)' },
-      { to: '/scenarios', label: 'Scenarios', icon: ScenariosIcon, color: 'var(--indigo)' },
+      { to: '/', label: 'Today', icon: TodayIcon, color: 'var(--base-500)' },
+      { to: '/review', label: 'Review', icon: ReviewIcon, color: 'var(--base-500)' },
+      { to: '/daily', label: 'Daily challenge', icon: TrophyIcon, color: 'var(--base-500)' },
+      { to: '/drills', label: 'Drills', icon: DrillsIcon, color: 'var(--base-500)' },
+      { to: '/learn', label: 'Learn', icon: LearnIcon, color: 'var(--base-500)' },
+      { to: '/scenarios', label: 'Scenarios', icon: ScenariosIcon, color: 'var(--base-500)' },
     ],
   },
   {
     section: 'Study',
     items: [
-      { to: '/ranges', label: 'Ranges', icon: RangesIcon, color: 'var(--red)' },
-      { to: '/saved', label: 'Saved', icon: BookmarkIcon, color: 'var(--orange)' },
-      { to: '/solver', label: 'Solver', icon: SolverIcon, color: 'var(--indigo)' },
-      { to: '/lab', label: 'Spot Lab', icon: LabIcon, color: 'var(--green)' },
-      { to: '/exploit', label: 'Exploits', icon: ExploitsIcon, color: 'var(--purple)' },
+      { to: '/ranges', label: 'Ranges', icon: RangesIcon, color: 'var(--base-500)' },
+      { to: '/saved', label: 'Saved', icon: BookmarkIcon, color: 'var(--base-500)' },
+      { to: '/solver', label: 'Solver', icon: SolverIcon, color: 'var(--base-500)' },
+      { to: '/lab', label: 'Spot Lab', icon: LabIcon, color: 'var(--base-500)' },
+      { to: '/exploit', label: 'Exploits', icon: ExploitsIcon, color: 'var(--base-500)' },
     ],
   },
   {
-    section: 'Play',
+    section: 'Your game',
     items: [
-      { to: '/log', label: 'Log', icon: LogIcon, color: 'var(--teal)' },
-      { to: '/you', label: 'You', icon: StatsIcon, color: 'var(--pink)' },
-      { to: '/import', label: 'Import hands', icon: LogIcon, color: 'var(--teal)' },
-      { to: '/settings', label: 'Settings', icon: SettingsIcon, color: 'var(--gray)' },
+      { to: '/log', label: 'Log', icon: LogIcon, color: 'var(--base-500)' },
+      { to: '/you', label: 'You', icon: StatsIcon, color: 'var(--base-500)' },
+      { to: '/import', label: 'Import', icon: ImportIcon, color: 'var(--base-500)' },
+      { to: '/settings', label: 'Settings', icon: SettingsIcon, color: 'var(--base-500)' },
     ],
   },
 ];
@@ -68,5 +69,5 @@ export const TABS: NavItem[] = [
   byPath('/learn'),
   byPath('/review'),
   byPath('/ranges'),
-  { to: '/more', label: 'More', icon: MoreIcon, color: 'var(--gray)' },
+  { to: '/more', label: 'More', icon: MoreIcon, color: 'var(--base-500)' },
 ];

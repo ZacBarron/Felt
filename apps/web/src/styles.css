@@ -39,7 +39,7 @@
 
   /* Labels */
   --label: #14201d;
-  --label-2: rgba(40, 46, 42, 0.62);
+  --label-2: rgba(40, 46, 42, 0.74);
   --label-3: rgba(40, 46, 42, 0.32);
 
   /* Brand */
@@ -48,7 +48,7 @@
   --base-700: #134a42;
   --base-500: #21604f;
   --accent: #e3b261;
-  --accent-deep: #9a6a1e;
+  --accent-deep: #7d5414;
   --ink: var(--base-900);
   --felt-1: #2a7461;
   --felt-2: #165244;
@@ -81,6 +81,11 @@
   --green-text: #1d7a3e;
   --red-text: #c2302a;
   --orange-text: #a85700;
+
+  /* Action buttons: white text needs a darker fill on paper. */
+  --action-mix: 72%;
+  --on-action: #fff;
+  --action-sheen: rgba(255, 255, 255, 0.14);
 
   /* Solver action colors. Fold stays neutral. */
   --act-raise: var(--red);
@@ -116,7 +121,7 @@
 
   color-scheme: light;
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
-  font-size: 17px;
+  font-size: 106.25%;
   line-height: 1.35;
   letter-spacing: -0.012em;
   color: var(--label);
@@ -151,6 +156,11 @@
     --green-text: #3ccf72;
     --red-text: #ff6b60;
     --orange-text: #ffa64a;
+    --action-mix: 100%;
+    --on-action: var(--base-950);
+    --action-sheen: rgba(255, 255, 255, 0.2);
+    --act-call: #24a157;
+    --act-check: #24a157;
     --glass-bg: rgba(26, 33, 30, 0.6);
     --glass-edge: rgba(255, 255, 255, 0.16);
     --glass-sheen: rgba(255, 255, 255, 0.06);
@@ -185,6 +195,11 @@
   --green-text: #3ccf72;
   --red-text: #ff6b60;
   --orange-text: #ffa64a;
+  --action-mix: 100%;
+  --on-action: var(--base-950);
+  --action-sheen: rgba(255, 255, 255, 0.2);
+  --act-call: #24a157;
+  --act-check: #24a157;
   --gray: #8f8b83;
   --glass-bg: rgba(26, 33, 30, 0.6);
   --glass-edge: rgba(255, 255, 255, 0.16);
@@ -236,7 +251,7 @@ p {
 }
 
 .faint {
-  color: var(--label-3);
+  color: var(--label-2);
 }
 
 .num {
@@ -716,22 +731,25 @@ button:disabled {
 }
 
 .icon-btn {
-  min-height: 40px;
-  min-width: 40px;
-  width: 40px;
+  min-height: 44px;
+  min-width: 44px;
+  width: 44px;
   padding: 0;
 }
 
 /* Action button in a solver color, set via --c. Capsule with a glass sheen. */
 .btn-action {
   --c: var(--gray);
-  color: #fff;
+  color: var(--on-action);
   min-height: 58px;
-  font-size: 1.06rem;
+  min-width: 0;
+  padding: 0 0.7rem;
+  white-space: nowrap;
+  font-size: clamp(0.88rem, 3.9vw, 1.06rem);
   font-weight: 650;
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.26), rgba(255, 255, 255, 0) 52%),
-    var(--c);
+    linear-gradient(180deg, var(--action-sheen), rgba(255, 255, 255, 0) 45%),
+    color-mix(in srgb, var(--c) var(--action-mix), #000);
   box-shadow:
     inset 0 0.5px 0 rgba(255, 255, 255, 0.55),
     inset 0 -0.5px 0 rgba(0, 0, 0, 0.12),
@@ -770,7 +788,7 @@ select,
 input {
   font: inherit;
   /* 16px or more stops iOS from zooming into the field on focus. */
-  font-size: 17px;
+  font-size: max(16px, 1rem);
   color: var(--label);
   background: var(--fill);
   border: none;
@@ -815,7 +833,7 @@ label {
 }
 
 .segmented button {
-  min-height: 32px;
+  min-height: 36px;
   background: transparent;
   color: var(--label);
   border-radius: 999px;
@@ -917,7 +935,7 @@ label {
 
 .chip {
   flex: none;
-  min-height: 36px;
+  min-height: 44px;
   padding: 0 1rem;
   background: var(--surface);
   color: var(--label);
@@ -926,9 +944,14 @@ label {
 }
 
 .chip[aria-pressed='true'] {
-  background: var(--label);
-  color: var(--bg);
+  background: color-mix(in srgb, var(--tint) 14%, var(--surface));
+  color: var(--tint);
+  box-shadow: inset 0 0 0 1.5px var(--tint);
   font-weight: 600;
+}
+
+.card .chip:not([aria-pressed='true']) {
+  background: var(--fill);
 }
 
 /* Pills */
@@ -1075,15 +1098,15 @@ table.kv td:last-child {
 /* Grades */
 .grade-best,
 .grade-correct {
-  color: var(--green);
+  color: var(--green-text);
 }
 
 .grade-inaccuracy {
-  color: var(--orange);
+  color: var(--orange-text);
 }
 
 .grade-mistake {
-  color: var(--orange);
+  color: var(--orange-text);
 }
 
 .grade-blunder {
@@ -1212,12 +1235,15 @@ table.kv td:last-child {
   font-size: clamp(7px, 2.3vw, 12px);
   font-weight: 600;
   letter-spacing: -0.04em;
-  color: var(--label-3);
+  color: var(--label-2);
   pointer-events: none;
 }
 
 .range-cell.plays .label {
   color: #fff;
+  text-shadow:
+    0 0 2px rgba(0, 0, 0, 0.45),
+    0 1px 1px rgba(0, 0, 0, 0.3);
 }
 
 .range-cell.selected {
@@ -1229,7 +1255,9 @@ table.kv td:last-child {
 
 .range-cell.marked {
   z-index: 1;
-  box-shadow: inset 0 0 0 2px var(--yellow);
+  box-shadow:
+    inset 0 0 0 2px var(--label),
+    inset 0 0 0 3.5px var(--yellow);
   animation: pop 320ms var(--spring) both;
 }
 
@@ -1424,7 +1452,8 @@ table.kv td:last-child {
     bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom));
     z-index: 35;
     padding: 0.9rem 1rem 0.6rem;
-    background: linear-gradient(180deg, transparent, color-mix(in srgb, var(--bg) 88%, transparent) 40%);
+    /* Fades in over the first line so a caption above the buttons always sits on the page color. */
+    background: linear-gradient(180deg, transparent, color-mix(in srgb, var(--bg) 94%, transparent) 0.9rem);
   }
 
   body.has-bottom-bar {
@@ -1445,8 +1474,11 @@ table.kv td:last-child {
   *::before,
   *::after {
     animation-duration: 1ms !important;
+    animation-delay: 0s !important;
     animation-iteration-count: 1 !important;
     transition-duration: 1ms !important;
+    transition-delay: 0s !important;
+    scroll-behavior: auto !important;
   }
 }
 
@@ -1458,9 +1490,14 @@ table.kv td:last-child {
   }
 }
 
-.list-row input:focus {
+.list-row input:focus-visible {
+  outline: 2px solid var(--tint);
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
+input:focus:not(:focus-visible) {
   outline: none;
-  color: var(--tint) !important;
 }
 
 /* Brand hero: the one surface that wears the brand gradient ----------- */
@@ -1525,16 +1562,28 @@ table.kv td:last-child {
 }
 
 .hero-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
   font-size: 0.75rem;
   font-weight: 650;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--accent);
+  color: rgba(255, 255, 255, 0.92);
+}
+
+/* Brass stays as a mark beside the label; as small text on felt it is too faint to read. */
+.hero-label::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
 }
 
 .hero-sub {
   font-size: 0.9rem;
-  color: rgba(255, 255, 255, 0.72);
+  color: rgba(255, 255, 255, 0.9);
 }
 
 .hero-progress {
@@ -1648,12 +1697,24 @@ table.kv td:last-child {
 .idea {
   position: relative;
   overflow: hidden;
-  border-left: 3px solid var(--tint-fill);
+}
+
+.idea::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 1.1rem;
+  bottom: 1.1rem;
+  width: 3px;
+  border-radius: 0 2px 2px 0;
+  background: var(--tint-fill);
 }
 
 .idea h3 {
-  font-size: 1.75rem;
-  line-height: 1.08;
+  font-family: inherit;
+  font-size: 1.15rem;
+  font-weight: 650;
+  line-height: 1.25;
   margin: 0.6rem 0 0.4rem;
   max-width: 22ch;
 }
@@ -1666,8 +1727,8 @@ table.kv td:last-child {
 }
 
 .pill-exploit {
-  background: color-mix(in srgb, var(--purple) 15%, transparent);
-  color: var(--purple);
+  background: color-mix(in srgb, var(--tint) 14%, transparent);
+  color: var(--tint);
 }
 
 /* Per chart progress */
@@ -1701,6 +1762,9 @@ table.kv td:last-child {
   grid-template-columns: repeat(7, 1fr);
   gap: 0.25rem;
   text-align: center;
+  list-style: none;
+  margin: 0;
+  padding: 0;
 }
 
 .week .day {
@@ -1910,7 +1974,8 @@ table.kv td:last-child {
 .theme-swatch .swatch {
   position: relative;
   width: 100%;
-  aspect-ratio: 1 / 1.1;
+  aspect-ratio: 1;
+  max-height: 72px;
   border-radius: 14px;
   margin-bottom: 0.35rem;
   box-shadow: inset 0 0 0 0.5px rgba(0, 0, 0, 0.15);
@@ -2083,13 +2148,18 @@ table.kv td:last-child {
 }
 
 .lesson-card-title {
-  font-size: 1.35rem;
-  line-height: 1.08;
+  font-size: 1.06rem;
+  font-weight: 650;
+  line-height: 1.2;
   flex: 1;
 }
 
 .lesson-card-meta {
   margin-top: 0.4rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-wrap: wrap;
 }
 
 /* Lesson player */
@@ -2176,7 +2246,7 @@ table.kv td:last-child {
 .lesson-lead {
   font-size: 1.15rem;
   line-height: 1.5;
-  color: var(--label-2);
+  color: var(--label);
   margin: 0;
 }
 
@@ -2333,7 +2403,7 @@ table.kv td:last-child {
 }
 
 .evidence-solver {
-  color: var(--orange);
+  color: var(--orange-text);
 }
 
 .evidence-exploit {
@@ -2380,7 +2450,7 @@ table.kv td:last-child {
 
 .choice.correct {
   background: color-mix(in srgb, var(--green) 14%, var(--surface));
-  color: var(--green);
+  color: var(--green-text);
   box-shadow: inset 0 0 0 2px var(--green);
   opacity: 1;
 }
@@ -2392,7 +2462,7 @@ table.kv td:last-child {
 
 .choice.wrong {
   background: color-mix(in srgb, var(--red) 12%, var(--surface));
-  color: var(--red);
+  color: var(--red-text);
   box-shadow: inset 0 0 0 2px var(--red);
   animation: shake 420ms var(--ease);
   opacity: 1;
@@ -2485,7 +2555,7 @@ table.kv td:last-child {
 
 .intro-cover .cover {
   border-radius: 26px;
-  aspect-ratio: 16 / 10;
+  aspect-ratio: 2 / 1;
 }
 
 .intro-cover .cover-figure {
@@ -2588,7 +2658,7 @@ body.onboarding .shell {
   width: 24px;
   height: 24px;
   border-radius: 50%;
-  box-shadow: inset 0 0 0 1.5px var(--label-3);
+  box-shadow: inset 0 0 0 1.5px var(--label-2);
   color: var(--on-tint);
 }
 
@@ -2685,8 +2755,8 @@ body.onboarding .shell {
 }
 
 .onb-pledge {
-  font-family: var(--font-display);
-  font-size: 1.3rem;
+  font-size: 1.15rem;
+  font-weight: 600;
   line-height: 1.3;
   text-align: center;
   padding: 0.4rem 1rem 0;
@@ -2785,7 +2855,8 @@ body.onboarding .shell {
   display: inline-flex;
   align-items: center;
   gap: 0.3rem;
-  padding: 0.3rem 0.75rem;
+  min-height: 44px;
+  padding: 0 0.9rem;
   border-radius: 999px;
   background: color-mix(in srgb, var(--tint) 13%, transparent);
   color: var(--tint);
@@ -2887,7 +2958,7 @@ body.onboarding .shell {
   width: 24px;
   height: 24px;
   border-radius: 50%;
-  box-shadow: inset 0 0 0 1.5px var(--label-3);
+  box-shadow: inset 0 0 0 1.5px var(--label-2);
   color: var(--on-tint);
 }
 
@@ -2993,6 +3064,9 @@ body.has-bottom-bar .pro-page {
 .solver-field input:disabled,
 .solver-field textarea:disabled {
   color: var(--label-2);
+  background: transparent;
+  padding-inline: 0;
+  resize: none;
 }
 
 .solver-row {
@@ -3205,7 +3279,7 @@ body.has-bottom-bar .pro-page {
   width: 22px;
   height: 22px;
   border-radius: 50%;
-  box-shadow: inset 0 0 0 1.5px var(--label-3);
+  box-shadow: inset 0 0 0 1.5px var(--label-2);
   color: var(--on-tint);
 }
 
@@ -3292,7 +3366,7 @@ body.has-bottom-bar .pro-page {
 }
 
 .winrate-unit {
-  font-family: inherit;
+  font-family: -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
   font-size: 1rem;
   color: var(--label-2);
 }
@@ -3430,7 +3504,7 @@ label.list-row {
 }
 
 .on-felt {
-  color: rgba(255, 255, 255, 0.78);
+  color: rgba(255, 255, 255, 0.9);
 }
 
 .tier-bar {
@@ -3556,4 +3630,107 @@ label.list-row {
   flex: none;
   min-width: 3.6rem;
   text-align: right;
+}
+
+/* Accessibility pass ---------------------------------------------------- */
+
+/* Keep focused controls clear of the fixed nav bar, tab bar and bottom bar. */
+html {
+  scroll-padding-top: calc(60px + env(safe-area-inset-top));
+  scroll-padding-bottom: calc(var(--tabbar-h) + var(--bottombar-h) + env(safe-area-inset-bottom) + 16px);
+}
+
+/* Brass focus rings vanish on the felt; use white there. */
+.hero :focus-visible,
+.daily-hero :focus-visible,
+.onb-intro-felt :focus-visible,
+.lesson-felt :focus-visible,
+.felt-strip :focus-visible {
+  outline-color: #fff;
+}
+
+/* Headings that take focus on a new step should not show a ring. */
+h1[tabindex='-1']:focus,
+h2[tabindex='-1']:focus {
+  outline: none;
+}
+
+/* Controls need a 3:1 boundary. */
+.toggle[aria-checked='false'] {
+  box-shadow: inset 0 0 0 1.5px var(--label-2);
+}
+
+.toggle::before {
+  content: '';
+  position: absolute;
+  inset: -6px -4px;
+}
+
+/* Raise and bet segments carry a stripe so they do not rely on red versus green. */
+.range-cell .seg[data-act^='raise'],
+.range-cell .seg[data-act$='bet'],
+.range-cell .seg[data-act='allin'],
+.range-cell .seg[data-act='jam'],
+.mix-seg[data-act^='raise'],
+.mix-seg[data-act$='bet'] {
+  background-image: repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.28) 0 2px, transparent 2px 5px);
+}
+
+.daily-grid span {
+  display: grid;
+  place-items: center;
+  color: #fff;
+}
+
+.focus-anchor:focus,
+.lesson-stage:focus {
+  outline: none;
+}
+
+/* Visual review pass ---------------------------------------------------- */
+
+.grow {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Suits written in lesson text follow the four color deck. */
+.suit-h {
+  color: var(--suit-h);
+}
+
+.suit-d {
+  color: var(--suit-d);
+}
+
+.suit-c {
+  color: var(--suit-c);
+}
+
+.suit-s {
+  color: var(--label);
+}
+
+.card .explain {
+  background: var(--fill);
+}
+
+input[type='number']::-webkit-inner-spin-button,
+input[type='number']::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type='number'] {
+  -moz-appearance: textfield;
+}
+
+.plan-stat svg {
+  color: var(--tint);
+}
+
+/* Keep the bright pattern tiles out from behind the paywall headline. */
+.pro-hero .hero-pattern {
+  -webkit-mask-image: radial-gradient(circle at 85% 12%, #000 12%, transparent 50%);
+  mask-image: radial-gradient(circle at 85% 12%, #000 12%, transparent 50%);
 }

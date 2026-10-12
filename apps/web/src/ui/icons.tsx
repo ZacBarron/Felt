@@ -147,6 +147,17 @@ export function LogIcon(p: IconProps) {
   );
 }
 
+/** Import: an arrow down into a tray. */
+export function ImportIcon(p: IconProps) {
+  return (
+    <Svg {...p}>
+      <path d="M4.5 14v3.25a2.25 2.25 0 0 0 2.25 2.25h10.5a2.25 2.25 0 0 0 2.25-2.25V14" {...fillProps(p.filled)} />
+      <path d="M12 4v10.5" />
+      <path d="m8 10.5 4 4 4-4" />
+    </Svg>
+  );
+}
+
 export function StatsIcon(p: IconProps) {
   return (
     <Svg {...p}>

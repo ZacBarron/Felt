@@ -18,7 +18,7 @@ export function Chips<T extends string>({ value, options, onChange, ariaLabel }:
           data-haptic="select"
           onClick={(e) => {
             onChange(o.value);
-            e.currentTarget.scrollIntoView({ behavior: 'smooth', inline: 'nearest', block: 'nearest' });
+            e.currentTarget.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', inline: 'nearest', block: 'nearest' });
           }}
         >
           {o.label}

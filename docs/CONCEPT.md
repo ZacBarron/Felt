@@ -14,7 +14,7 @@ Play close to GTO by default, know exactly why, and deviate on purpose when an o
 
 | | |
 | --- | --- |
-| Main game | Live cash, 1/3 NL, 9 handed |
+| Main game | Live cash, 1/3 NL, 9-handed |
 | Also wants | Online, other stakes and table sizes, tournaments |
 | Devices | About 80% phone, 20% laptop |
 | Solver | None owned yet (see [SOLVER_DATA.md](SOLVER_DATA.md) for how we get solver data anyway) |
@@ -34,7 +34,7 @@ Priority order follows the main game: live full ring cash first, then online and
 
 ## GTO and the live 1/3 game
 
-GTO is the baseline: it is what you fall back on when you know nothing, and it is what makes you hard to exploit. But a 9 handed 1/3 game is far from equilibrium. Typical pool tendencies:
+GTO is the baseline: it is what you fall back on when you know nothing, and it is what makes you hard to exploit. But a 9-handed 1/3 game is far from equilibrium. Typical pool tendencies:
 
 - Lots of limping and big, inconsistent open sizes (often 4 to 6bb).
 - Multiway pots, where solver heads-up strategies apply only loosely.

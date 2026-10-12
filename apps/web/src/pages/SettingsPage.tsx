@@ -5,7 +5,7 @@ import { haptic, hapticsSupported } from '../haptics';
 import { isPro, restorePurchases } from '../state/access';
 import { db } from '../state/db';
 import { exportEvents } from '../state/events';
-import { cueCopy, goalCopy } from '../state/goals';
+import { cueCopy } from '../state/goals';
 import { studyReminder, trialReminder } from '../state/reminders';
 import { chartsForGame } from '../state/charts';
 import { type Appearance, useSettings } from '../state/settings';
@@ -68,6 +68,7 @@ export function SettingsPage() {
         <div className="list">
           <Row label="Format">
             <Segmented
+              ariaLabel="Format"
               value={g.format}
               onChange={(format) => setGame({ format })}
               options={[
@@ -78,6 +79,7 @@ export function SettingsPage() {
           </Row>
           <Row label="Venue">
             <Segmented
+              ariaLabel="Venue"
               value={g.venue}
               onChange={(venue) => setGame({ venue })}
               options={[
@@ -95,7 +97,7 @@ export function SettingsPage() {
         </div>
         {!fit.exact && (
           <div className="section-footer" style={{ color: 'var(--orange)' }}>
-            No {g.tableSize}-handed {g.format} charts yet, so drills use the {fit.tableSize}-handed charts.
+            No {g.tableSize}-handed {g.format === 'mtt' ? 'tournament' : 'cash'} charts yet, so drills use the {fit.tableSize}-handed charts.
           </div>
         )}
       </section>
@@ -103,8 +105,9 @@ export function SettingsPage() {
       <section>
         <h2 className="section-title">Stakes</h2>
         <div className="list">
-          <Row label="Show amounts in">
+          <Row label="Amounts">
             <Segmented
+              ariaLabel="Amounts"
               value={g.units}
               onChange={(units) => setGame({ units })}
               options={[
@@ -119,9 +122,10 @@ export function SettingsPage() {
           <NumberRow label="Ante" value={g.stakes.ante} onChange={(v) => setGame({ stakes: { ...g.stakes, ante: v || undefined } })} />
           <Row label="Currency">
             <input
+              aria-label="Currency"
               value={g.stakes.currency}
               onChange={(e) => setGame({ stakes: { ...g.stakes, currency: e.target.value } })}
-              style={{ width: 110, textAlign: 'right', background: 'transparent', padding: 0 }}
+              style={{ width: 110, textAlign: 'right', background: 'transparent', padding: 0, color: 'var(--label-2)' }}
             />
           </Row>
         </div>
@@ -185,7 +189,7 @@ export function SettingsPage() {
       <section>
         <h2 className="section-title">Your plan</h2>
         <div className="list">
-          <Row label="Daily goal" hint={goalCopy(settings.profile.goal)?.label}>
+          <Row label="Daily study time">
             <Stepper
               label="minutes a day"
               value={settings.profile.dailyMinutes}
@@ -238,6 +242,7 @@ export function SettingsPage() {
         <div className="list">
           <Row label="Appearance">
             <Segmented<Appearance>
+              ariaLabel="Appearance"
               value={settings.ui.appearance}
               onChange={(appearance) => update({ ...settings, ui: { ...settings.ui, appearance } })}
               options={[

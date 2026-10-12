@@ -1,6 +1,6 @@
 # Roadmap
 
-Ordered for the main game (live 1/3 cash, 9 handed, on a phone) and so the core loop (learn, drill, review) works as early as possible.
+Ordered for the main game (live 1/3 cash, 9-handed, on a phone) and so the core loop (learn, drill, review) works as early as possible.
 
 ## Phase 0: Foundation (done)
 
@@ -15,10 +15,10 @@ Ordered for the main game (live 1/3 cash, 9 handed, on a phone) and so the core 
 
 ## Phase 1: Range trainer, spaced repetition, settings (mostly done)
 
-- [x] Game settings: cash or tournament, live or online, 2 to 10 handed, stakes, straddle, ante, rake, stack depth, money or bb display
-- [x] Presets: live 1/3 and 2/5 full ring, online 6-max, tournament 9 handed
+- [x] Game settings: cash or tournament, live or online, 2 to 10-handed, stakes, straddle, ante, rake, stack depth, money or bb display
+- [x] Presets: live 1/3 and 2/5 full ring, online 6-max, tournament 9-handed
 - [x] Seat names for every table size; charts fall back to the nearest table size that has charts
-- [x] Starter 9 handed charts: every open from UTG to SB, BB vs BTN, BTN vs one limper (exploit)
+- [x] Starter 9-handed charts: every open from UTG to SB, BB vs BTN, BTN vs one limper (exploit)
 - [x] Local persistence with IndexedDB (Dexie): cards and review logs
 - [x] Quick recall drill: seat strip, real cards, timed, full mix and chart shown after
 - [x] Range painting drill: drag to paint (touch friendly), scored per combo, misses outlined
@@ -123,7 +123,7 @@ See [SOLVER_DATA.md](SOLVER_DATA.md).
 | Question | Answer |
 | --- | --- |
 | Formats | All, live cash first |
-| Main game | 1/3 NL, 9 handed |
+| Main game | 1/3 NL, 9-handed |
 | Solver | None owned; we generate our own data (Phase 3) |
 | Devices | Both, 80% phone, so phone first |
 | Learning style | Confirmed (see CONCEPT.md) |

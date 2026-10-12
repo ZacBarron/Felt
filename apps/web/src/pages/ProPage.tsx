@@ -10,6 +10,7 @@ import { BrandMark, HeroPattern } from '../ui/Brand';
 import { BottomBar } from '../ui/BottomBar';
 import { BellIcon, CheckIcon, CloseIcon, LearnIcon, LockIcon, SolverIcon, StatsIcon } from '../ui/icons';
 import { useBodyClass } from '../ui/useBodyClass';
+import { onRadioKeys } from '../ui/radioKeys';
 
 const WRITTEN = LESSON_ENTRIES.filter((e) => e.content);
 const PRO_LESSONS = WRITTEN.filter((e) => !isLessonFree(e.key)).length;
@@ -122,7 +123,7 @@ export function ProPage() {
         <h1 className="display pro-title">{HEADLINES[from] ?? 'Train every spot, every street'}</h1>
       </div>
 
-      <div className="plan-options" role="radiogroup" aria-label="Choose a plan">
+      <div className="plan-options" role="radiogroup" onKeyDown={onRadioKeys} aria-label="Choose a plan">
         {PLANS.map((p) => (
           <button
             key={p.id}

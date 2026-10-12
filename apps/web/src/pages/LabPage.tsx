@@ -119,7 +119,7 @@ export function LabPage() {
             <table className="kv">
               <tbody>
                 <tr>
-                  <td>Villain range (BB flat vs BTN)</td>
+                  <td>BB calling range vs a BTN open</td>
                   <td>{(rangePercent(BB_CALL) * 100).toFixed(1)}% of hands</td>
                 </tr>
                 {madeHand && (
@@ -159,11 +159,11 @@ export function LabPage() {
                 <td>{(potOdds(potFacing, bet) * 100).toFixed(1)}%</td>
               </tr>
               <tr>
-                <td>MDF (defend at least)</td>
+                <td>Minimum defense (MDF)</td>
                 <td>{(mdf(pot, bet) * 100).toFixed(1)}%</td>
               </tr>
               <tr>
-                <td>Bluff needs folds</td>
+                <td>Folds your bluff needs</td>
                 <td>{(bluffBreakeven(pot, bet) * 100).toFixed(1)}%</td>
               </tr>
               {equity && (
@@ -196,7 +196,7 @@ export function LabPage() {
         />
         {graded && (
           <div className="row">
-            <strong className={`grade-${graded.grade}`}>{graded.grade.toUpperCase()}</strong>
+            <strong className={`grade-${graded.grade}`}>{graded.grade[0].toUpperCase() + graded.grade.slice(1)}</strong>
             <span className="muted">
               EV loss {graded.evLoss.toFixed(2)}bb ({(graded.evLossPctPot * 100).toFixed(1)}% of pot). Best: {graded.best.label}.
             </span>

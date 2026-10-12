@@ -459,7 +459,7 @@ export const PREFLOP_MORE_LESSONS: LessonContent[] = [
         kind: 'text',
         title: 'Early opens fold less',
         body: [
-          'A UTG range is already strong. In Felt’s 9 handed starter charts, QQ+ and AK are **22%** of the UTG range (15% of the 6 max UTG range) but only **6%** of the button range. Most of a button range is hands that were fine to open and cannot stand a 3bet.',
+          'A UTG range is already strong. In Felt’s 9-handed starter charts, QQ+ and AK are **22%** of the UTG range (15% of the 6-max UTG range) but only **6%** of the button range. Most of a button range is hands that were fine to open and cannot stand a 3bet.',
           'So early openers continue with a larger share of their range against a 3bet, and button openers fold a larger share.',
         ],
         evidence: 'solver',
@@ -482,7 +482,7 @@ export const PREFLOP_MORE_LESSONS: LessonContent[] = [
         question: 'Why does a UTG opener fold a smaller share of its range to a 3bet than a button opener?',
         choices: ['UTG is always in position', 'The 3bet is always smaller against UTG', 'Its range is much stronger to begin with'],
         answer: 2,
-        explain: 'In Felt’s 9 handed charts, QQ+ and AK are 22% of the UTG range and 6% of the button range. The button opened many hands that cannot continue.',
+        explain: 'In Felt’s 9-handed charts, QQ+ and AK are 22% of the UTG range and 6% of the button range. The button opened many hands that cannot continue.',
       },
       {
         kind: 'quiz',

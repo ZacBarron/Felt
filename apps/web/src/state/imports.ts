@@ -53,13 +53,13 @@ export async function clearImports() {
 
 const RFI_CHARTS = STARTER_CHARTS.filter((s) => s.spot === 'rfi' && s.tableSize === 9).map((spec) => ({ spec, chart: buildChart(spec) }));
 
-/** Opening raise frequency in Felt's 9 handed chart for a seat (UTG through SB) and hand. */
+/** Opening raise frequency in Felt's 9-handed chart for a seat (UTG through SB) and hand. */
 export function chartOpenFreq(seat: string, hand: string): number | undefined {
   const found = RFI_CHARTS.find((c) => c.spec.hero === seat);
   return found ? (actionRange(found.chart, 'raise').get(hand) ?? 0) : undefined;
 }
 
-/** Share of all hands the 9 handed chart opens from a seat, weighted by combos. */
+/** Share of all hands the 9-handed chart opens from a seat, weighted by combos. */
 export function chartOpenRate(seat: string): number | undefined {
   const found = RFI_CHARTS.find((c) => c.spec.hero === seat);
   return found ? (actionFrequencies(found.chart).raise ?? 0) : undefined;

@@ -26,7 +26,7 @@ export function PlayingCard(props: Props) {
           <span className="face">
             <CardFace {...props} deal={false} delayMs={0} />
           </span>
-          <span className="back">
+          <span className="back" aria-hidden="true">
             <CardFace {...props} card={undefined} deal={false} delayMs={0} />
           </span>
         </span>
@@ -35,6 +35,8 @@ export function PlayingCard(props: Props) {
   }
   return <CardFace {...props} />;
 }
+
+const RANK_NAMES: Record<string, string> = { A: 'Ace', K: 'King', Q: 'Queen', J: 'Jack', T: 'Ten', '9': 'Nine', '8': 'Eight', '7': 'Seven', '6': 'Six', '5': 'Five', '4': 'Four', '3': 'Three', '2': 'Two' };
 
 function CardFace({ card, size = 'md', deal, delayMs = 0 }: Props) {
   const s = SIZES[size];
@@ -63,6 +65,8 @@ function CardFace({ card, size = 'md', deal, delayMs = 0 }: Props) {
           border: `${size === 'lg' ? 4 : 2}px solid #fff`,
           boxShadow: '0 2px 6px rgba(0,0,0,.3)',
         }}
+        role="img"
+        aria-label="Face down card"
       />
     );
   }
@@ -82,10 +86,15 @@ function CardFace({ card, size = 'md', deal, delayMs = 0 }: Props) {
           ? '0 14px 30px rgba(0,0,0,.22), 0 2px 6px rgba(0,0,0,.12), inset 0 0 0 0.5px rgba(0,0,0,.12)'
           : '0 2px 5px rgba(0,0,0,.25), inset 0 0 0 0.5px rgba(0,0,0,.15)',
       }}
-      aria-label={`${rankOf(card)} of ${{ c: 'clubs', d: 'diamonds', h: 'hearts', s: 'spades' }[suit]}`}
+      role="img"
+      aria-label={`${RANK_NAMES[rankOf(card)] ?? rankOf(card)} of ${{ c: 'clubs', d: 'diamonds', h: 'hearts', s: 'spades' }[suit]}`}
     >
-      <span style={{ fontSize: s.rank, letterSpacing: '-0.04em' }}>{rankOf(card)}</span>
-      <span style={{ fontSize: s.suit }}>{SUIT_SYMBOLS[suit]}</span>
+      <span aria-hidden="true" style={{ fontSize: s.rank, letterSpacing: '-0.04em' }}>
+        {rankOf(card)}
+      </span>
+      <span aria-hidden="true" style={{ fontSize: s.suit }}>
+        {SUIT_SYMBOLS[suit]}
+      </span>
     </span>
   );
 }

@@ -50,8 +50,8 @@ export function LearnPage() {
             <SkipIcon size={22} />
           </span>
           <span className="grow">
-            <span style={{ display: 'block', fontWeight: 650 }}>Find your level</span>
-            <span className="footnote">A short test that skips every lesson you already know.</span>
+            <span style={{ display: 'block', fontWeight: 650 }}>Find where to start</span>
+            <span className="footnote">A short test. Lessons you prove you know are marked tested out.</span>
           </span>
           <ChevronRightIcon size={16} className="chev" />
         </Link>
@@ -114,7 +114,7 @@ function LessonCard({ entry, state, locked }: { entry: LessonEntry; state?: Stor
       {content ? <LessonCover cover={content.cover} /> : <div className="cover cover-md cover-soon" />}
       <div className="lesson-card-body">
         <div className="caption">{entry.moduleTitle}</div>
-        <div className="display lesson-card-title">{entry.title}</div>
+        <div className="lesson-card-title">{entry.title}</div>
         <div className="lesson-card-meta">
           {!content ? (
             <span className="pill">Soon</span>
@@ -124,7 +124,7 @@ function LessonCard({ entry, state, locked }: { entry: LessonEntry; state?: Stor
             </span>
           ) : state?.status === 'tested' ? (
             <span className="pill pill-good">
-              <SkipIcon size={12} /> Skipped
+              <SkipIcon size={12} /> Tested out
             </span>
           ) : locked ? (
             <span className="pill">

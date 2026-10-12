@@ -447,7 +447,7 @@ export function heroStats(hands: readonly HeroHand[]): HeroStats {
   };
 }
 
-/** The 9 handed opening seat with this many players left to act behind it. */
+/** The 9-handed opening seat with this many players left to act behind it. */
 export const SEAT_BY_BEHIND: Record<number, string> = { 8: 'UTG', 7: 'UTG+1', 6: 'UTG+2', 5: 'LJ', 4: 'HJ', 3: 'CO', 2: 'BTN', 1: 'SB' };
 
 /**
@@ -459,7 +459,7 @@ export function chartComparable(h: HeroHand): boolean {
 }
 
 export interface OpenDeviation {
-  /** The chart seat used for comparison (9 handed). */
+  /** The chart seat used for comparison (9-handed). */
   seat: string;
   hand: HandClass;
   /** Raise frequency in the chart for this hand. */

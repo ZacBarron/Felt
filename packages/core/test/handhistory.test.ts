@@ -157,7 +157,7 @@ describe('hero stats and leaks', () => {
   });
 
   it('compares only deep cash hands, by players left behind, and only near pure deviations', () => {
-    // The cash hand is a 6 handed CO open: three players behind, so the 9 handed CO chart.
+    // The cash hand is a 6-handed CO open: three players behind, so the 9-handed CO chart.
     const cashOnly = (seat: string, hand: string) => (seat === 'CO' && hand === 'KQs' ? 0.04 : undefined);
     expect(openDeviations(views, cashOnly)).toEqual([{ seat: 'CO', hand: 'KQs', chartRaise: 0.04, heroAction: 'raise', kind: 'too loose', count: 1 }]);
     // A 10% open is a mix, not a leak.

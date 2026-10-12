@@ -46,6 +46,7 @@ function SavedRow({ item, card }: { item: SavedItem; card?: StoredCard }) {
           {item.kind === 'solver-spot' && item.spot && <SolverSpotQuiz spot={item.spot} footer={false} />}
           <textarea
             className="saved-note-input"
+            aria-label="Note"
             rows={2}
             placeholder="Add a note: why this matters to you"
             value={note}
@@ -104,7 +105,7 @@ export function SavedPage() {
         </div>
       ) : (
         <>
-          <div className="chips" role="radiogroup" aria-label="Filter">
+          <div className="chips" role="group" aria-label="Filter">
             {(
               [
                 ['all', 'All'],
@@ -124,7 +125,7 @@ export function SavedPage() {
           </div>
           <BottomBar>
             <Link to="/review?deck=saved" className="btn btn-primary btn-lg btn-block">
-              Review saved ({items.length})
+              {due > 0 ? `Review saved, ${due} due` : `Go through all ${items.length} again`}
             </Link>
           </BottomBar>
         </>

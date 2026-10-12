@@ -9,7 +9,7 @@ import { FlameIcon } from '../ui/icons';
 import { PageHeader } from '../ui/PageHeader';
 import { Segmented } from '../ui/Segmented';
 
-/** Free practice on any chart. Does not touch the review schedule. */
+/** Practice on any chart. Does not touch the review schedule. */
 export function DrillsPage() {
   const { settings } = useSettings();
   const [params] = useSearchParams();

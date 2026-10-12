@@ -120,7 +120,7 @@ export function PracticePage() {
         <button className="icon-btn glass" aria-label="End practice" onClick={() => navigate('/you')}>
           <CloseIcon size={18} />
         </button>
-        <div className="check-bar">
+        <div className="check-bar" role="progressbar" aria-label="Practice" aria-valuemin={0} aria-valuemax={items.length} aria-valuenow={index} aria-valuetext={`Decision ${index + 1} of ${items.length}`}>
           <span style={{ width: `${(index / items.length) * 100}%` }} />
         </div>
         <span className="pill">{DOMAIN_LABELS[item.domain]}</span>

@@ -2,6 +2,7 @@ import { type Chart, type DrillOutcome, type HandMix, type PaintScore, scorePain
 import { useMemo, useRef, useState } from 'react';
 import { actionColor } from '../components/actionColors';
 import { RangeGrid } from '../components/RangeGrid';
+import { plural } from '../ui/format';
 import { SeatStrip } from '../components/SeatStrip';
 import { haptic } from '../haptics';
 import { BottomBar } from '../ui/BottomBar';
@@ -94,13 +95,13 @@ export function PaintDrill({ chart, targetMs, onAnswer, onNext }: Props) {
           </div>
         ) : (
           <div className="row reveal" style={{ gap: '1rem' }}>
-            <ProgressRing value={result.accuracy} size={74} stroke={8} color={scoreColor}>
+            <ProgressRing value={result.accuracy} size={74} stroke={8} color={scoreColor} label={`${Math.round(result.accuracy * 100)}% right`}>
               <span className="num" style={{ fontWeight: 700, fontSize: '1.05rem' }}>
                 {Math.round(result.accuracy * 100)}%
               </span>
             </ProgressRing>
             <div className="stack" style={{ gap: '0.4rem', flex: 1, minWidth: 160 }}>
-              <strong>{result.wrong.length === 0 ? 'Perfect chart' : `${result.wrong.length} hands missed`}</strong>
+              <strong role="status">{result.wrong.length === 0 ? 'Perfect chart' : `${plural(result.wrong.length, 'hand')} missed`}</strong>
               <span className="footnote">
                 {result.wrong.length > 0 && 'Misses are outlined in yellow.'}
               </span>

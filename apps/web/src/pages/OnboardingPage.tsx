@@ -14,6 +14,7 @@ import { BrandMark, HeroPattern, TAGLINE, Wordmark } from '../ui/Brand';
 import { BottomBar } from '../ui/BottomBar';
 import { BellIcon, CheckIcon, ChevronLeftIcon, ClockIcon, LockIcon, SkipIcon, TargetIcon } from '../ui/icons';
 import { useBodyClass } from '../ui/useBodyClass';
+import { onRadioKeys } from '../ui/radioKeys';
 
 /**
  * First run. Short, personal and honest: every question changes the plan,
@@ -334,7 +335,7 @@ export function OnboardingPage() {
       sub: 'Your goal decides which lessons come first.',
       ready: !!profile.goal,
       body: (
-        <div className="onb-choices" role="radiogroup" aria-labelledby="onb-title">
+        <div className="onb-choices" role="radiogroup" onKeyDown={onRadioKeys} aria-labelledby="onb-title">
           {GOALS.map((g) => (
             <Choice key={g.id} selected={profile.goal === g.id} label={g.label} note={g.note} onClick={() => setProfile({ goal: g.id })} />
           ))}
@@ -346,7 +347,7 @@ export function OnboardingPage() {
       sub: 'Charts, stakes and examples follow your game. You can change it any time.',
       ready: true,
       body: (
-        <div className="onb-choices" role="radiogroup" aria-labelledby="onb-title">
+        <div className="onb-choices" role="radiogroup" onKeyDown={onRadioKeys} aria-labelledby="onb-title">
           {GAMES.map((g) => (
             <Choice key={g.id} selected={game === g.id} label={g.label} note={g.note} onClick={() => setGame(g.id)} />
           ))}
@@ -379,7 +380,7 @@ export function OnboardingPage() {
       sub: 'Small and daily beats long and rare. You can change it later.',
       ready: true,
       body: (
-        <div className="onb-choices" role="radiogroup" aria-labelledby="onb-title">
+        <div className="onb-choices" role="radiogroup" onKeyDown={onRadioKeys} aria-labelledby="onb-title">
           {DAILY_OPTIONS.map((d) => {
             const weeks = Math.ceil(remainingMinutes(progress) / d.minutes / 7);
             return (
@@ -400,7 +401,7 @@ export function OnboardingPage() {
       sub: 'Tying practice to something you already do every day makes it stick.',
       ready: !!profile.cue,
       body: (
-        <div className="onb-choices" role="radiogroup" aria-labelledby="onb-title">
+        <div className="onb-choices" role="radiogroup" onKeyDown={onRadioKeys} aria-labelledby="onb-title">
           {CUES.map((c) => (
             <Choice key={c.id} selected={profile.cue === c.id} label={c.label} onClick={() => setProfile({ cue: c.id })} />
           ))}

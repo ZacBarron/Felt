@@ -1,5 +1,5 @@
 import { type Chart, chartItemDifficulty, type DrillOutcome } from '@felt/core';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { StepView } from '../lesson/StepView';
 import { isLessonFree } from '../state/access';
 import { getChart } from '../state/charts';
@@ -30,11 +30,15 @@ interface Props {
 /** Renders a decision, records it toward the Felt Rating, and reports the score. */
 export function DecisionItem({ decision, source, last, onScore, onNext }: Props) {
   const [answered, setAnswered] = useState(false);
+  // A new decision is read from the top by screen readers.
+  const top = useRef<HTMLDivElement>(null);
+  useEffect(() => top.current?.focus({ preventScroll: true }), []);
 
   if (decision.kind === 'chart') {
     const chart = getChart(decision.chartId);
     if (!chart) return null;
     return (
+      <div ref={top} tabIndex={-1} className="focus-anchor">
       <QuickRecall
         chart={chart}
         hand={decision.hand}
@@ -47,6 +51,7 @@ export function DecisionItem({ decision, source, last, onScore, onNext }: Props)
         }}
         onNext={onNext}
       />
+      </div>
     );
   }
 
@@ -55,7 +60,7 @@ export function DecisionItem({ decision, source, last, onScore, onNext }: Props)
   if (!entry || step?.kind !== 'quiz') return null;
   return (
     <>
-      <div className="lesson-stage from-right">
+      <div className="lesson-stage from-right focus-anchor" ref={top} tabIndex={-1}>
         <div className="footnote" style={{ marginBottom: '0.4rem' }}>
           {entry.trackTitle}, {entry.title}
           {!isLessonFree(entry.key) && <span className="pill pro-pill">Pro lesson</span>}

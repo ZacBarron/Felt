@@ -20,7 +20,7 @@ interface Props {
 const EVIDENCE: Record<Evidence, { label: string; title: string }> = {
   math: { label: 'Exact math', title: 'Follows from the rules and arithmetic' },
   solver: { label: 'Solver pattern, approximate', title: 'How equilibrium strategies tend to play. Directional, not exact frequencies.' },
-  exploit: { label: 'Pool tendency', title: 'An assumption about players. Check it against your own hands.' },
+  exploit: { label: 'Player tendency', title: 'An assumption about players. Check it against your own hands.' },
 };
 
 function EvidenceTag({ evidence }: { evidence?: Evidence }) {
@@ -252,11 +252,15 @@ function Quiz({
             <button key={c} className={`choice${state}`} data-haptic="off" onClick={() => choose(i)} disabled={done && i !== chosen && i !== step.answer}>
               <span className="choice-key">{String.fromCharCode(65 + i)}</span>
               <span style={{ flex: 1 }}>{c}</span>
-              {done && i === step.answer && <CheckIcon size={18} />}
-              {done && i === chosen && !right && <CloseIcon size={16} />}
+              {done && i === step.answer && <CheckIcon size={18} aria-hidden="true" />}
+              {done && i === chosen && !right && <CloseIcon size={16} aria-hidden="true" />}
+              {done && <span className="sr-only">{i === step.answer ? ', correct answer' : i === chosen ? ', your answer' : ''}</span>}
             </button>
           );
         })}
+      </div>
+      <div role="status" aria-live="polite" className="sr-only">
+        {done ? (right ? 'Correct.' : `Not quite. The answer is ${step.choices[step.answer]}.`) : ''}
       </div>
       {done && (
         <div className={`explain reveal ${right ? 'good' : 'bad'}`}>

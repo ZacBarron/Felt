@@ -130,7 +130,10 @@ export function App() {
             <Icon size={25} filled={i === activeTab} />
             {label}
             {to === '/review' && reviewCount > 0 && (
-              <span className="badge-dot num">{reviewCount > 99 ? '99+' : reviewCount}</span>
+              <span className="badge-dot num">
+                {reviewCount > 99 ? '99+' : reviewCount}
+                <span className="sr-only"> due</span>
+              </span>
             )}
           </NavLink>
         ))}

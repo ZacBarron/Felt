@@ -163,13 +163,13 @@ export function SolverSpotQuiz({
       {choice && (
         <div className="card stack reveal" style={{ gap: '0.7rem' }}>
           <div className="row between">
-            <strong style={{ color: verdict === 1 ? 'var(--green)' : verdict ? 'var(--orange)' : 'var(--red)' }}>
-              {verdict === 1 ? 'Correct' : verdict ? 'Rare mix' : 'Not quite'}
+            <strong role="status" style={{ color: verdict === 1 ? 'var(--green-text)' : verdict ? 'var(--orange-text)' : 'var(--red-text)' }}>
+              {verdict === 1 ? 'Correct' : verdict ? 'Part of the mix' : 'Not quite'}
             </strong>
             <span className="footnote">You chose {labels[choice]}</span>
           </div>
           <MixBar mix={mix} labels={labels} />
-          <div className="footnote">Felt Solver, accurate to {spot.exploitability.toFixed(2)}% of the pot.</div>
+          <div className="footnote">Felt Solver. Exploitability {spot.exploitability.toFixed(2)}% of the pot.</div>
         </div>
       )}
       {footer && !choice && (

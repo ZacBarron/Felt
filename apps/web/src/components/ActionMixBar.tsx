@@ -18,10 +18,12 @@ export function ActionMixBar({ actions, reveal = true, onChoose, chosen }: Props
   return (
     <div className="stack" style={{ gap: '0.6rem' }}>
       {reveal && (
-        <div className="reveal" style={{ display: 'flex', height: 28, borderRadius: 999, overflow: 'hidden', gap: 2 }}>
+        <div className="reveal" style={{ display: 'flex', height: 28, borderRadius: 999, overflow: 'hidden', gap: 2 }} aria-hidden="true">
           {actions.map((a) => (
             <div
               key={a.id}
+              className="mix-seg"
+              data-act={a.id}
               title={`${a.label} ${Math.round(a.frequency * 100)}%`}
               style={{
                 width: `${a.frequency * 100}%`,
@@ -47,6 +49,7 @@ export function ActionMixBar({ actions, reveal = true, onChoose, chosen }: Props
             key={a.id}
             onClick={() => onChoose?.(a.id)}
             disabled={!onChoose || reveal}
+            aria-pressed={chosen === a.id}
             data-haptic="off"
             style={{
               display: 'grid',

@@ -14,7 +14,7 @@ import { buildQueue, masteryForCharts, todayStats } from '../state/review';
 import { useSettings } from '../state/settings';
 import { HeroPattern } from '../ui/Brand';
 import { plural } from '../ui/format';
-import { CheckIcon, ChevronRightIcon, FlameIcon, ReviewIcon } from '../ui/icons';
+import { CheckIcon, ChevronRightIcon, FlameIcon } from '../ui/icons';
 import { PageHeader } from '../ui/PageHeader';
 import { ProgressRing } from '../ui/ProgressRing';
 import { useCountUp } from '../ui/useCountUp';
@@ -186,18 +186,6 @@ export function DashboardPage() {
         ))}
       </section>
 
-      {nextLesson && !lessonToday && remaining > 0 && (
-        <Link to="/review" className="card placement-card">
-          <span className="placement-icon" aria-hidden="true">
-            <ReviewIcon size={22} />
-          </span>
-          <span className="grow">
-            <span style={{ display: 'block', fontWeight: 650 }}>Review, {plural(remaining, 'card')}</span>
-            <span className="footnote">About {minutes} min. Spaced so you keep what you learn.</span>
-          </span>
-          <ChevronRightIcon size={16} className="chev" />
-        </Link>
-      )}
 
       {stats && stats.reviewedToday > 0 && (
         <section className="reveal">
@@ -216,7 +204,7 @@ export function DashboardPage() {
           <Link to="/ranges" className="card focus-card">
             <MasteryGrid chart={nowLearning.chart} hands={nowLearning.hands} />
             <div className="focus-copy">
-              <div className="display" style={{ fontSize: '1.9rem', lineHeight: 1.05 }}>
+              <div style={{ fontSize: '1.15rem', fontWeight: 650, lineHeight: 1.2 }}>
                 {nowLearning.chart.spec.title}
               </div>
               <div className="footnote" style={{ marginTop: 4 }}>
@@ -246,16 +234,19 @@ export function DashboardPage() {
           {!!streak?.best && streak.best > streak.streak && <span className="footnote num">Best streak {streak.best}</span>}
         </div>
         <div className="card">
-          <div className="week">
+          <ul className="week" aria-label={`Studied on ${(stats?.week ?? []).filter((d) => d.done).length} of the last 7 days`}>
             {(stats?.week ?? []).map((d, i) => (
-              <div key={i} className={`day${d.today ? ' today' : ''}`}>
-                <span className={`dot${d.done ? ' done' : ''}`} style={{ animationDelay: `${i * 40}ms` }}>
+              <li key={i} className={`day${d.today ? ' today' : ''}`}>
+                <span className={`dot${d.done ? ' done' : ''}`} style={{ animationDelay: `${i * 40}ms` }} aria-hidden="true">
                   <CheckIcon size={15} />
                 </span>
-                {d.label}
-              </div>
+                <span aria-hidden="true">{d.label}</span>
+                <span className="sr-only">
+                  {d.today ? 'Today' : d.label}, {d.done ? 'studied' : 'not studied'}
+                </span>
+              </li>
             ))}
-          </div>
+          </ul>
         </div>
         {streak && (
           <div className="section-footer">
@@ -272,7 +263,7 @@ export function DashboardPage() {
           <div className="row between">
             <span className={`pill ${idea.basis === 'exploit' ? 'pill-exploit' : ''}`}>{idea.topic}</span>
           </div>
-          <h3 className="display">{idea.title}</h3>
+          <h3>{idea.title}</h3>
           <p>{idea.body}</p>
         </article>
       </section>
