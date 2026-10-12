@@ -5,6 +5,7 @@ import pkg from './package.json';
 
 // A build for sharing as a hosted test page: relative asset paths, in-memory
 // routes and no service worker. See scripts/artifact-page.mjs.
+declare const process: { env: Record<string, string | undefined> };
 const artifact = process.env.FELT_TARGET === 'artifact';
 
 export default defineConfig({
