@@ -8,3 +8,6 @@ coverage/
 .env.*
 !.env.example
 apps/web/dist-artifact
+apps/server/data
+*.sqlite
+*.sqlite-*
