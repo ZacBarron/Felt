@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { DrillRunner } from '../drills/DrillRunner';
 import { haptic } from '../haptics';
 import { chartsForGame } from '../state/charts';
-import { buildQueue, type QueueItem, recordAnswer, RELEARN_WINDOW_MS } from '../state/review';
+import { buildQueue, buildSavedDeck, type QueueItem, recordAnswer, RELEARN_WINDOW_MS } from '../state/review';
 import { useSettings } from '../state/settings';
 import { CheckIcon, CloseIcon, DrillsIcon } from '../ui/icons';
 import { PageHeader } from '../ui/PageHeader';
@@ -18,6 +18,8 @@ function CountUp({ value }: { value: number }) {
 export function ReviewPage() {
   const { settings } = useSettings();
   const navigate = useNavigate();
+  const [params] = useSearchParams();
+  const savedOnly = params.get('deck') === 'saved';
   const [queue, setQueue] = useState<QueueItem[]>();
   const [index, setIndex] = useState(0);
   const [results, setResults] = useState<{ accuracy: number; ms: number }[]>([]);
@@ -25,12 +27,16 @@ export function ReviewPage() {
   const [attempt, setAttempt] = useState(0);
 
   const load = useCallback(async () => {
-    const { charts } = chartsForGame(settings.game);
-    const { due, fresh } = await buildQueue(charts, settings.study.newPerDay);
-    setQueue([...due, ...fresh]);
+    if (savedOnly) {
+      setQueue(await buildSavedDeck());
+    } else {
+      const { charts } = chartsForGame(settings.game);
+      const { due, fresh } = await buildQueue(charts, settings.study.newPerDay);
+      setQueue([...due, ...fresh]);
+    }
     setIndex(0);
     setResults([]);
-  }, [settings.game, settings.study.newPerDay]);
+  }, [settings.game, settings.study.newPerDay, savedOnly]);
 
   useEffect(() => {
     void load();
@@ -48,7 +54,7 @@ export function ReviewPage() {
   return (
     <div className="stack focus-column">
       <div className="focus-top">
-        <button className="icon-btn glass" aria-label="End session" onClick={() => navigate('/')}>
+        <button className="icon-btn glass" aria-label="End session" onClick={() => navigate(savedOnly ? '/saved' : '/')}>
           <CloseIcon size={18} />
         </button>
         <div className="progress" aria-label={`Card ${index + 1} of ${queue.length}`}>

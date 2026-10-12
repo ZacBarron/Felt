@@ -7,10 +7,11 @@ import { RangeGrid } from '../components/RangeGrid';
 import { haptic } from '../haptics';
 import { canUse } from '../state/access';
 import { getChart } from '../state/charts';
+import { saveSolverSpot } from '../state/saved';
 import { useSettings } from '../state/settings';
 import type { FromWorker, NodeView, RangeInput, SpotInput } from '../solver/protocol';
 import { BottomBar } from '../ui/BottomBar';
-import { LockIcon, SolverIcon } from '../ui/icons';
+import { BookmarkIcon, LockIcon, SolverIcon } from '../ui/icons';
 import { PageHeader } from '../ui/PageHeader';
 
 const chartRange = (id: string, action: string): [string, number][] => {
@@ -214,6 +215,22 @@ export function SolverPage() {
     return m;
   }, [view]);
   const selectedClass = view?.classes.find(([c]) => c === selected);
+  const [savedHand, setSavedHand] = useState<string>();
+  const saveSpot = async () => {
+    if (!view || view.kind !== 'action' || !selectedClass || !solver.solved) return;
+    await saveSolverSpot({
+      board: view.board,
+      pot: view.pot!,
+      player: view.player!,
+      line: labels,
+      hand: selectedClass[0],
+      actions: view.actions,
+      mix: selectedClass[2],
+      exploitability: solver.solved.exploitability,
+    });
+    haptic('success');
+    setSavedHand(`${selectedClass[0]}@${path.join('.')}`);
+  };
 
   return (
     <div className="stack" style={{ gap: '1.4rem' }}>
@@ -361,11 +378,28 @@ export function SolverPage() {
               <div className="card" style={{ padding: '0.6rem' }}>
                 <RangeGrid mixes={mixes} selected={selected} onSelect={setSelected} />
               </div>
-              {selectedClass && (
-                <div className="footnote">
-                  {selectedClass[0]}, {selectedClass[1].toFixed(1)} combos:{' '}
-                  {view.actions.map((a, i) => `${a.label} ${Math.round(selectedClass[2][i] * 100)}%`).join(', ')}
+              {selectedClass ? (
+                <div className="card solver-hand">
+                  <div className="grow">
+                    <strong>{selectedClass[0]}</strong>
+                    <span className="footnote">
+                      {' '}
+                      {selectedClass[1].toFixed(1)} combos:{' '}
+                      {view.actions.map((a, i) => `${a.label} ${Math.round(selectedClass[2][i] * 100)}%`).join(', ')}
+                    </span>
+                  </div>
+                  {savedHand === `${selectedClass[0]}@${path.join('.')}` ? (
+                    <span className="pill pill-good">
+                      <BookmarkIcon size={12} filled /> Saved
+                    </span>
+                  ) : (
+                    <button className="test-out" data-haptic="off" onClick={() => void saveSpot()}>
+                      <BookmarkIcon size={14} /> Save
+                    </button>
+                  )}
                 </div>
+              ) : (
+                <div className="footnote">Tap a hand to see its strategy and save it to your review deck.</div>
               )}
               <div className="list">
                 {view.actions.map((a, i) => (

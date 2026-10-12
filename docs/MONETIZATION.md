@@ -39,6 +39,7 @@ Skipped lessons show as "Skipped" and count as complete. The plan and Today both
 - **Daily goal ring** on Today, measured from real review time and finished lessons.
 - **Next lesson** on Today and Learn follows the player's path: the lesson in progress, then the placement module, then focus areas, then curriculum order.
 - **Streaks** from review days (already in place).
+- **Saves** turn curiosity into memory: anything bookmarked joins the review deck, ahead of the new card limit, so the things a player cared about come back on schedule.
 - Next: reminder notifications at a chosen time, streak freeze, weekly summary.
 
 ## Felt Pro

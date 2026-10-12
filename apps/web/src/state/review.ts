@@ -11,6 +11,10 @@ import {
   studyStreak,
 } from '@felt/core';
 import { db, type StoredCard } from './db';
+import { SAVED_TARGET_MS, savedCardId } from './saved';
+
+/** chartId used by review cards made from saved items. */
+export const SAVED_CHART = 'saved';
 
 const scheduler = createScheduler();
 
@@ -20,8 +24,9 @@ export const RELEARN_WINDOW_MS = 15 * 60 * 1000;
 export interface QueueItem {
   id: string;
   chartId: string;
-  mode: 'quick' | 'paint';
+  mode: 'quick' | 'paint' | 'saved';
   hand?: string;
+  savedId?: string;
   targetMs: number;
   isNew: boolean;
 }
@@ -37,6 +42,7 @@ const toItem = (c: Omit<StoredCard, 'fsrs' | 'due' | 'createdAt'>, isNew: boolea
   chartId: c.chartId,
   mode: c.mode,
   hand: c.hand,
+  savedId: c.savedId,
   targetMs: c.targetMs,
   isNew,
 });
@@ -49,10 +55,38 @@ export async function buildQueue(charts: readonly Chart[], newPerDay: number, no
     chartIds.has(c.chartId),
   ).length;
   const { due, fresh } = selectQueue(known, deckForCharts(charts), { now, newPerDay, newIntroducedToday });
+  const saved = await savedQueue(now);
   return {
-    due: due.map((c) => toItem(c, false)),
-    fresh: fresh.map((s) => toItem(s, true)),
+    due: [...due.map((c) => toItem(c, false)), ...saved.due],
+    // Saves were chosen by the player, so they skip the new card limit and come first.
+    fresh: [...saved.fresh, ...fresh.map((s) => toItem(s, true))],
   };
+}
+
+/** Every saved item, due or not, for a saved only session. Reviewing early is fine with FSRS. */
+export async function buildSavedDeck(): Promise<QueueItem[]> {
+  const items = await db.saved.orderBy('createdAt').toArray();
+  const cards = new Set((await db.cards.where('chartId').equals(SAVED_CHART).primaryKeys()) as string[]);
+  return items.map((item) => {
+    const id = savedCardId(item.id);
+    return { id, chartId: SAVED_CHART, mode: 'saved', savedId: item.id, targetMs: SAVED_TARGET_MS, isNew: !cards.has(id) };
+  });
+}
+
+/** Saved items: cards that are due, and saves that have no card yet. */
+async function savedQueue(now: Date) {
+  const items = await db.saved.toArray();
+  const cards = new Map((await db.cards.where('chartId').equals(SAVED_CHART).toArray()).map((c) => [c.id, c]));
+  const due: QueueItem[] = [];
+  const fresh: QueueItem[] = [];
+  for (const item of items.sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime())) {
+    const id = savedCardId(item.id);
+    const card = cards.get(id);
+    const q: QueueItem = { id, chartId: SAVED_CHART, mode: 'saved', savedId: item.id, targetMs: SAVED_TARGET_MS, isNew: !card };
+    if (!card) fresh.push(q);
+    else if (card.due <= now) due.push(q);
+  }
+  return { due, fresh };
 }
 
 /** Schedules the card with FSRS and logs the review. Returns the next due date. */
@@ -65,6 +99,7 @@ export async function recordAnswer(item: QueueItem, outcome: DrillOutcome, now =
       chartId: item.chartId,
       mode: item.mode,
       hand: item.hand,
+      savedId: item.savedId,
       targetMs: item.targetMs,
       fsrs: card,
       due: card.due,

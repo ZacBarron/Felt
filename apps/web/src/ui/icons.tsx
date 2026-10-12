@@ -298,4 +298,13 @@ export function TrophyIcon(p: IconProps) {
   );
 }
 
+/** Save: a bookmark ribbon. */
+export function BookmarkIcon(p: IconProps) {
+  return (
+    <Svg {...p}>
+      <path d="M7 4.5h10a1 1 0 0 1 1 1v14.25l-6-3.9-6 3.9V5.5a1 1 0 0 1 1-1Z" fill={p.filled ? 'currentColor' : 'none'} />
+    </Svg>
+  );
+}
+
 export type IconComponent = (p: IconProps) => React.ReactElement;

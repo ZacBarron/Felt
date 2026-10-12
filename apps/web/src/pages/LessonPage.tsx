@@ -1,16 +1,17 @@
 import { useLiveQuery } from 'dexie-react-hooks';
 import { useEffect, useRef, useState } from 'react';
-import { Link, Navigate, useNavigate, useParams } from 'react-router-dom';
+import { Link, Navigate, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { haptic } from '../haptics';
 import { LessonCover } from '../lesson/LessonCover';
 import { StepView } from '../lesson/StepView';
 import { canOpenLesson } from '../state/access';
 import { getChart } from '../state/charts';
+import { lessonStepId, saveLessonStep, unsave } from '../state/saved';
 import { useSettings } from '../state/settings';
 import { db } from '../state/db';
 import { entryFor, lessonPath, nextLesson, saveLesson } from '../state/lessons';
 import { BottomBar } from '../ui/BottomBar';
-import { CheckIcon, ChevronRightIcon, CloseIcon } from '../ui/icons';
+import { BookmarkIcon, CheckIcon, ChevronRightIcon, CloseIcon } from '../ui/icons';
 import { ProgressRing } from '../ui/ProgressRing';
 import { useBodyClass } from '../ui/useBodyClass';
 
@@ -20,7 +21,10 @@ export function LessonPage() {
   const content = entry?.content;
   const navigate = useNavigate();
   const { settings } = useSettings();
+  const [search] = useSearchParams();
+  const jumpTo = search.get('step');
   const saved = useLiveQuery(() => db.lessons.get(key), [key], null);
+  const [toast, setToast] = useState<string>();
   const [index, setIndex] = useState<number>();
   const [dir, setDir] = useState<1 | -1>(1);
   const [answers, setAnswers] = useState<Record<number, number>>({});
@@ -31,13 +35,28 @@ export function LessonPage() {
   // Resume where you left off, once the saved progress has loaded.
   useEffect(() => {
     if (index !== undefined || saved === null || !content) return;
-    const resume = saved && saved.status === 'started' ? Math.min(saved.step, content.steps.length - 1) : 0;
+    const resume =
+      jumpTo !== null ? Math.min(Math.max(0, Number(jumpTo) || 0), content.steps.length - 1)
+      : saved && saved.status === 'started' ? Math.min(saved.step, content.steps.length - 1)
+      : 0;
     setIndex(resume);
     if (!saved) void saveLesson(key, { step: 0 });
-  }, [saved, content, index, key]);
+  }, [saved, content, index, key, jumpTo]);
 
   const steps = content?.steps ?? [];
   const i = index ?? 0;
+  const stepSaved = useLiveQuery(() => db.saved.get(lessonStepId(key, i)), [key, i]);
+  const toggleSave = async () => {
+    if (stepSaved) {
+      await unsave(stepSaved.id);
+      setToast('Removed from saved');
+    } else {
+      await saveLessonStep(key, i);
+      haptic('success');
+      setToast('Saved. It will come back in review.');
+    }
+    window.setTimeout(() => setToast(undefined), 2200);
+  };
   const step = steps[i];
   const isQuiz = step?.kind === 'quiz';
   const canContinue = !isQuiz || answers[i] !== undefined;
@@ -153,7 +172,21 @@ export function LessonPage() {
             <span key={n} className={n < i ? 'done' : n === i ? 'current' : undefined} />
           ))}
         </div>
+        <button
+          className={`icon-btn glass save-btn${stepSaved ? ' on' : ''}`}
+          aria-label={stepSaved ? 'Remove from saved' : 'Save this screen'}
+          aria-pressed={!!stepSaved}
+          data-haptic="off"
+          onClick={() => void toggleSave()}
+        >
+          <BookmarkIcon size={18} filled={!!stepSaved} />
+        </button>
       </div>
+      {toast && (
+        <div className="toast reveal" role="status">
+          {toast}
+        </div>
+      )}
 
       <div
         key={`${key}:${i}`}

@@ -49,6 +49,7 @@ See [MONETIZATION.md](MONETIZATION.md).
 - [x] Daily goal ring and next lesson on Today
 - [x] Felt Pro paywall with plan cards, trial timeline and honest fine print; free tier is the first module of every track
 - [x] Developer switch for Pro, onboarding replay and progress reset
+- [x] Saves: bookmark any lesson screen or solver hand; a Saved page with notes; every save becomes a review card (quizzes graded, other screens as self graded flashcards, solver hands graded against the solver's mix), plus a saved only review session
 - [ ] Connect a store (App Store, Play, web checkout) to `purchase()`
 - [ ] Reminder notifications and streak freeze
 

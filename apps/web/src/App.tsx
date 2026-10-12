@@ -14,6 +14,7 @@ import { PlannedPage } from './pages/PlannedPage';
 import { ProPage } from './pages/ProPage';
 import { RangesPage } from './pages/RangesPage';
 import { ReviewPage } from './pages/ReviewPage';
+import { SavedPage } from './pages/SavedPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { SolverPage } from './pages/SolverPage';
 import { chartsForGame } from './state/charts';
@@ -105,6 +106,7 @@ export function App() {
             <Route path="/check/:track/:module/:lesson" element={<CheckPage />} />
             <Route path="/pro" element={<ProPage />} />
             <Route path="/solver" element={<SolverPage />} />
+            <Route path="/saved" element={<SavedPage />} />
             <Route path="/more" element={<MorePage />} />
             <Route path="/scenarios" element={<PlannedPage feature="scenarios" />} />
             <Route path="/exploit" element={<PlannedPage feature="exploit" />} />

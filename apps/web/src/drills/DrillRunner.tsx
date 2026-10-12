@@ -3,6 +3,7 @@ import { getChart } from '../state/charts';
 import type { QueueItem } from '../state/review';
 import { PaintDrill } from './PaintDrill';
 import { QuickRecall } from './QuickRecall';
+import { SavedCard } from './SavedCard';
 
 interface Props {
   item: QueueItem;
@@ -12,6 +13,7 @@ interface Props {
 
 /** Renders the right drill for a queue item. */
 export function DrillRunner({ item, onAnswer, onNext }: Props) {
+  if (item.mode === 'saved') return <SavedCard savedId={item.savedId!} targetMs={item.targetMs} onAnswer={onAnswer} onNext={onNext} />;
   const chart = getChart(item.chartId);
   if (!chart) return <p className="muted">This chart no longer exists. Skipping.</p>;
   if (item.mode === 'paint') return <PaintDrill chart={chart} targetMs={item.targetMs} onAnswer={onAnswer} onNext={onNext} />;

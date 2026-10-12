@@ -1,4 +1,5 @@
 import {
+  BookmarkIcon,
   DrillsIcon,
   ExploitsIcon,
   type IconComponent,
@@ -38,6 +39,7 @@ export const NAV_SECTIONS: { section: string; items: NavItem[] }[] = [
     section: 'Study',
     items: [
       { to: '/ranges', label: 'Ranges', icon: RangesIcon, color: 'var(--red)' },
+      { to: '/saved', label: 'Saved', icon: BookmarkIcon, color: 'var(--orange)' },
       { to: '/solver', label: 'Solver', icon: SolverIcon, color: 'var(--indigo)' },
       { to: '/lab', label: 'Spot Lab', icon: LabIcon, color: 'var(--green)' },
       { to: '/exploit', label: 'Exploits', icon: ExploitsIcon, color: 'var(--purple)' },

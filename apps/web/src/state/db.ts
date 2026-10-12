@@ -5,13 +5,44 @@ import Dexie, { type EntityTable } from 'dexie';
 export interface StoredCard {
   id: string;
   chartId: string;
-  mode: 'quick' | 'paint';
+  mode: 'quick' | 'paint' | 'saved';
   hand?: string;
+  /** For saved cards: the SavedItem this card reviews. */
+  savedId?: string;
   targetMs: number;
   fsrs: FsrsCard;
   /** Mirrors fsrs.due so it can be indexed. */
   due: Date;
   createdAt: Date;
+}
+
+/** A frozen solver decision: everything needed to quiz it without solving again. */
+export interface SavedSolverSpot {
+  board: string;
+  pot: number;
+  /** Who acts: 0 out of position, 1 in position. */
+  player: 0 | 1;
+  /** The actions taken to reach this decision, for display. */
+  line: string[];
+  hand: string;
+  actions: { id: string; label: string }[];
+  /** The solver's frequency for each action with this hand class. */
+  mix: number[];
+  exploitability: number;
+}
+
+/** Something the player chose to keep. Each one also becomes a review card. */
+export interface SavedItem {
+  id: string;
+  kind: 'lesson-step' | 'solver-spot';
+  title: string;
+  /** Where it came from, for display. */
+  source: string;
+  createdAt: Date;
+  note?: string;
+  lessonKey?: string;
+  step?: number;
+  spot?: SavedSolverSpot;
 }
 
 export interface StoredReview {
@@ -40,6 +71,7 @@ export const db = new Dexie('felt') as Dexie & {
   cards: EntityTable<StoredCard, 'id'>;
   reviews: EntityTable<StoredReview, 'id'>;
   lessons: EntityTable<StoredLesson, 'key'>;
+  saved: EntityTable<SavedItem, 'id'>;
 };
 
 db.version(1).stores({
@@ -49,4 +81,8 @@ db.version(1).stores({
 
 db.version(2).stores({
   lessons: 'key, status, updatedAt',
+});
+
+db.version(3).stores({
+  saved: 'id, kind, createdAt, lessonKey',
 });
