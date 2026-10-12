@@ -16,18 +16,18 @@ export function SeatStrip({ spec }: { spec: ChartSpec }) {
           <div key={seat} style={{ textAlign: 'center' }}>
             <div
               style={{
-                height: 6,
+                height: 5,
                 borderRadius: 3,
-                marginBottom: 4,
-                background: hero ? 'var(--accent)' : folded ? 'var(--surface-3)' : 'var(--border-strong)',
-                boxShadow: hero ? '0 0 10px rgba(61,220,151,.6)' : undefined,
+                marginBottom: 5,
+                background: hero ? 'var(--tint)' : 'var(--fill-2)',
+                opacity: folded ? 0.45 : 1,
               }}
             />
             <div
               style={{
-                fontSize: seats.length > 6 ? 9.5 : 11,
-                fontWeight: hero ? 800 : 600,
-                color: hero ? 'var(--accent)' : folded ? 'var(--faint)' : 'var(--muted)',
+                fontSize: seats.length > 6 ? 10 : 11.5,
+                fontWeight: hero ? 700 : 500,
+                color: hero ? 'var(--tint)' : folded ? 'var(--label-3)' : 'var(--label-2)',
                 whiteSpace: 'nowrap',
                 letterSpacing: '-0.02em',
               }}

@@ -30,24 +30,29 @@ function useReviewCount() {
 export function App() {
   const location = useLocation();
   const reviewCount = useReviewCount();
-  const badge = (to: string) =>
-    to === '/review' && reviewCount > 0 ? <span className="badge-dot num">{reviewCount > 99 ? '99+' : reviewCount}</span> : null;
+  const tabIndex = TABS.findIndex((t) => t.to === location.pathname);
+  // Pages reached through More keep More selected.
+  const activeTab = tabIndex === -1 ? TABS.length - 1 : tabIndex;
 
   return (
     <div className="shell">
-      <nav className="nav" aria-label="Main">
+      <nav className="nav glass" aria-label="Main">
         <div className="brand">
           <img src="/icon-192.png" alt="" />
           Felt
         </div>
         {NAV_SECTIONS.map(({ section, items }) => (
           <div key={section} className="nav-group">
-            <div className="section eyebrow">{section}</div>
+            <div className="section">{section}</div>
             {items.map(({ to, label, icon: Icon }) => (
               <NavLink key={to} to={to} end={to === '/'} data-haptic="select">
-                <Icon size={18} strokeWidth={2.2} />
-                <span style={{ flex: 1 }}>{label}</span>
-                {to === '/review' && reviewCount > 0 && <span className="pill pill-accent num">{reviewCount}</span>}
+                {({ isActive }) => (
+                  <>
+                    <Icon size={22} filled={isActive} />
+                    <span>{label}</span>
+                    {to === '/review' && reviewCount > 0 && <span className="count">{reviewCount}</span>}
+                  </>
+                )}
               </NavLink>
             ))}
           </div>
@@ -72,12 +77,15 @@ export function App() {
           </Routes>
         </div>
       </main>
-      <nav className="tabbar" aria-label="Tabs">
-        {TABS.map(({ to, label, icon: Icon }) => (
-          <NavLink key={to} to={to} end={to === '/'} data-haptic="select">
-            <Icon size={23} strokeWidth={2.1} />
+      <nav className="tabbar glass" aria-label="Tabs">
+        <span className="tab-indicator" style={{ transform: `translateX(${activeTab * 100}%)` }} />
+        {TABS.map(({ to, label, icon: Icon }, i) => (
+          <NavLink key={to} to={to} end={to === '/'} data-haptic="select" className={i === activeTab ? 'active' : undefined}>
+            <Icon size={25} filled={i === activeTab} />
             {label}
-            {badge(to)}
+            {to === '/review' && reviewCount > 0 && (
+              <span className="badge-dot num">{reviewCount > 99 ? '99+' : reviewCount}</span>
+            )}
           </NavLink>
         ))}
       </nav>

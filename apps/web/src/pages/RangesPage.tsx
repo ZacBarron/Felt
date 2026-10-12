@@ -8,6 +8,7 @@ import { actionLabels } from '../drills/labels';
 import { chartsForGame } from '../state/charts';
 import { useSettings } from '../state/settings';
 import { Chips } from '../ui/Chips';
+import { PageHeader } from '../ui/PageHeader';
 
 export function RangesPage() {
   const { settings } = useSettings();
@@ -22,12 +23,7 @@ export function RangesPage() {
 
   return (
     <div className="stack">
-      <div>
-        <h1>Ranges</h1>
-        <p className="muted" style={{ margin: 0 }}>
-          Every cell splits by how often the hand takes each action. Tap a hand for its mix.
-        </p>
-      </div>
+      <PageHeader title="Ranges" subtitle="Every cell splits by how often the hand takes each action. Tap a hand for its mix." />
 
       <Chips
         value={chart.spec.id}
@@ -38,36 +34,36 @@ export function RangesPage() {
 
       <div className="row" style={{ gap: '0.4rem' }}>
         <span className="pill">{chartFormatLabel(chart.spec)}</span>
-        {chart.spec.basis === 'exploit' && <span className="pill pill-warn">exploit, not GTO</span>}
-        {chart.spec.source === 'starter-approx' && <span className="pill">starter approximation</span>}
-        {!fit.exact && <span className="pill pill-warn">no {settings.game.tableSize}-handed charts yet</span>}
+        {chart.spec.basis === 'exploit' && <span className="pill pill-warn">Exploit, not GTO</span>}
+        {chart.spec.source === 'starter-approx' && <span className="pill">Starter approximation</span>}
+        {!fit.exact && <span className="pill pill-warn">No {settings.game.tableSize}-handed charts yet</span>}
       </div>
 
       <div className="grid-2" style={{ alignItems: 'start' }}>
         <div className="stack" style={{ gap: '0.75rem' }}>
           <SeatStrip spec={chart.spec} />
           {chart.spec.versus && (
-            <div className="muted" style={{ fontSize: '0.88rem' }}>
+            <div className="footnote">
               {chart.spec.versus}
             </div>
           )}
           <RangeGrid mixes={chart.mixes} selected={selected} onSelect={setSelected} />
         </div>
 
-        <div className="stack" style={{ position: 'sticky', top: '1rem' }}>
+        <div className="stack" style={{ position: 'sticky', top: '4.5rem' }}>
           <div className="card stack reveal" key={selected} style={{ gap: '0.7rem' }}>
             <div className="row between">
-              <strong style={{ fontSize: '1.4rem', letterSpacing: '-0.02em' }}>{selected}</strong>
+              <strong style={{ fontSize: '1.5rem', letterSpacing: '-0.03em' }}>{selected}</strong>
               <span className="pill num">{comboCount(selected)} combos</span>
             </div>
             <MixBar mix={mix} labels={labels} />
           </div>
 
           <div className="card">
-            <div className="eyebrow" style={{ marginBottom: '0.4rem' }}>
+            <div className="footnote" style={{ marginBottom: '0.5rem' }}>
               Whole range
             </div>
-            <div style={{ display: 'flex', height: 10, borderRadius: 5, overflow: 'hidden', marginBottom: '0.5rem' }}>
+            <div style={{ display: 'flex', height: 12, borderRadius: 999, overflow: 'hidden', gap: 2, marginBottom: '0.5rem' }}>
               {sortActions(Object.keys(totals)).map((a) => (
                 <span key={a} style={{ width: `${totals[a] * 100}%`, background: actionColor(a), opacity: a === 'fold' ? 0.5 : 1 }} />
               ))}

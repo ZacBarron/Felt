@@ -42,8 +42,8 @@ export function PokerTable({ seats, board, pot, format = (bb) => `${fmt(bb)}bb` 
           position: 'absolute',
           inset: 'var(--felt-inset)',
           borderRadius: '50% / 50%',
-          background: 'radial-gradient(ellipse at center, #1b7a51 0%, var(--felt) 55%, var(--felt-edge) 100%)',
-          border: '10px solid #3a2a1c',
+          background: 'radial-gradient(ellipse at 50% 40%, #3b8063 0%, var(--felt) 55%, var(--felt-dark) 100%)',
+          border: '9px solid #2b2420',
           boxShadow: 'inset 0 0 40px rgba(0,0,0,.45), 0 8px 30px rgba(0,0,0,.5)',
         }}
       />
@@ -87,9 +87,9 @@ export function PokerTable({ seats, board, pot, format = (bb) => `${fmt(bb)}bb` 
               </div>
               <div
                 style={{
-                  background: seat.isHero ? 'var(--accent)' : 'var(--surface-2)',
-                  color: seat.isHero ? '#06120c' : 'var(--text)',
-                  border: '1px solid var(--border)',
+                  background: seat.isHero ? 'var(--tint)' : 'var(--surface)',
+                  color: seat.isHero ? '#fff' : 'var(--label)',
+                  boxShadow: '0 2px 8px rgba(0,0,0,.18)',
                   borderRadius: 8,
                   padding: compact ? '1px 5px' : '2px 10px',
                   fontSize: compact ? 10 : 12,
@@ -116,7 +116,7 @@ export function PokerTable({ seats, board, pot, format = (bb) => `${fmt(bb)}bb` 
                   gap: 4,
                 }}
               >
-                <span style={{ width: 12, height: 12, borderRadius: '50%', background: '#f5d90a', border: '2px dashed #8a6d00' }} />
+                <span style={{ width: 12, height: 12, borderRadius: '50%', background: '#fff', border: '3px dashed var(--red)' }} />
                 {format(seat.bet)}
               </div>
             ) : null}

@@ -1,10 +1,11 @@
 import { ALL_HAND_CLASSES, boundaryHands, chartFormatLabel, PAINT_TARGET_MS, RECALL_TARGET_MS } from '@felt/core';
-import { Flame } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { DrillRunner } from '../drills/DrillRunner';
 import { chartsForGame } from '../state/charts';
 import { useSettings } from '../state/settings';
 import { Chips } from '../ui/Chips';
+import { FlameIcon } from '../ui/icons';
+import { PageHeader } from '../ui/PageHeader';
 import { Segmented } from '../ui/Segmented';
 
 /** Free practice on any chart. Does not touch the review schedule. */
@@ -28,22 +29,22 @@ export function DrillsPage() {
 
   return (
     <div className="stack">
-      <div className="page-head">
-        <div>
-          <h1>Drills</h1>
-          <p className="muted">Free practice. Your review schedule is not affected.</p>
-        </div>
-        {mode === 'quick' && score.total > 0 && (
-          <div className="row" style={{ gap: '0.5rem' }}>
-            <span className="pill num">
-              {score.right}/{score.total}
-            </span>
-            <span className={`pill num ${score.streak >= 5 ? 'pill-warn' : ''}`}>
-              <Flame size={13} /> {score.streak} (best {score.best})
-            </span>
-          </div>
-        )}
-      </div>
+      <PageHeader
+        title="Drills"
+        subtitle="Free practice. Your review schedule is not affected."
+        trailing={
+          mode === 'quick' && score.total > 0 ? (
+            <div className="row" style={{ gap: '0.4rem', marginBottom: 6, flexWrap: 'nowrap' }}>
+              <span className="pill num">
+                {score.right}/{score.total}
+              </span>
+              <span className={`pill num ${score.streak >= 5 ? 'pill-warn' : ''}`}>
+                <FlameIcon size={12} /> {score.streak}
+              </span>
+            </div>
+          ) : undefined
+        }
+      />
 
       <Chips
         value={chart.spec.id}
@@ -65,7 +66,7 @@ export function DrillsPage() {
             { value: 'paint', label: 'Paint chart' },
           ]}
         />
-        <span className="pill">{chartFormatLabel(chart.spec)}</span>
+        <span className="footnote">{chartFormatLabel(chart.spec)}</span>
       </div>
 
       <DrillRunner

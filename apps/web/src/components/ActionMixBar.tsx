@@ -18,7 +18,7 @@ export function ActionMixBar({ actions, reveal = true, onChoose, chosen }: Props
   return (
     <div className="stack" style={{ gap: '0.6rem' }}>
       {reveal && (
-        <div className="reveal" style={{ display: 'flex', height: 28, borderRadius: 8, overflow: 'hidden' }}>
+        <div className="reveal" style={{ display: 'flex', height: 28, borderRadius: 999, overflow: 'hidden', gap: 2 }}>
           {actions.map((a) => (
             <div
               key={a.id}
@@ -56,8 +56,9 @@ export function ActionMixBar({ actions, reveal = true, onChoose, chosen }: Props
               textAlign: 'left',
               justifyContent: 'stretch',
               minHeight: 50,
-              borderColor: chosen === a.id ? 'var(--text)' : undefined,
-              borderWidth: chosen === a.id ? 2 : 1,
+              background: 'var(--surface)',
+              boxShadow: chosen === a.id ? 'inset 0 0 0 2px var(--tint)' : undefined,
+              borderRadius: 16,
               opacity: reveal && chosen !== a.id ? 0.85 : 1,
             }}
           >

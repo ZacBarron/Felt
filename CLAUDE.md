@@ -21,6 +21,10 @@ Personal poker training app. Read docs/CONCEPT.md and docs/ROADMAP.md before sta
 
 ## UI conventions (apps/web)
 
+- Design language is iOS 26 Liquid Glass: system font, iOS system colors (blue tint, no neon), light and dark from the system or the Appearance setting, inset grouped lists, capsule controls, and the `.glass` material only for things that float (tab bar, sidebar, nav bar, toolbars). Content itself sits on plain grouped surfaces.
+- Colors come from the CSS tokens in `styles.css` (`--tint`, `--green`, `--red`, `--label-2`, `--surface`, ...). Never hard code a color in a component unless it is a playing card or the felt.
+- Icons come from `src/ui/icons.tsx`, drawn for this app on a 24pt grid. Do not add an icon library.
+- Glass rims use box-shadow only. A masked pseudo element rim disables the backdrop blur in Chromium. When screenshotting with Playwright, launch with `--use-angle=swiftshader --enable-unsafe-swiftshader` or blur will not render.
 - Phone first. Primary actions go in `<BottomBar>` (thumb zone, above the tab bar). Inputs stay at 16px so iOS does not zoom.
 - Every `button` and link gets a press state from `styles.css` and a light haptic from the global listener in `haptics.ts`. Set `data-haptic="select"` for choices, or `data-haptic="off"` when the handler plays its own feedback (`haptic('success' | 'warning' | 'error')`).
 - Never leave a transform on an ancestor of fixed elements: page and reveal animations use `backwards` fill, not `both`.

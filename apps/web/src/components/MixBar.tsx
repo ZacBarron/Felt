@@ -6,7 +6,7 @@ export function MixBar({ mix, labels }: { mix: HandMix; labels: Record<string, s
   const actions = sortActions(Object.keys(mix));
   return (
     <div className="stack" style={{ gap: '0.35rem' }}>
-      <div style={{ display: 'flex', height: 22, borderRadius: 6, overflow: 'hidden' }}>
+      <div style={{ display: 'flex', height: 12, borderRadius: 999, overflow: 'hidden', gap: 2 }}>
         {actions.map((a) => (
           <div key={a} style={{ width: `${mix[a] * 100}%`, background: actionColor(a), opacity: a === 'fold' ? 0.6 : 1 }} />
         ))}

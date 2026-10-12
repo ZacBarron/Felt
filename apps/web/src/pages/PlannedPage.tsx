@@ -1,5 +1,5 @@
-import { CircleDashed } from 'lucide-react';
 import { NAV_ITEMS } from '../nav';
+import { PageHeader } from '../ui/PageHeader';
 
 const FEATURES = {
   scenarios: {
@@ -8,28 +8,28 @@ const FEATURES = {
     phase: 'Phase 5',
     points: [
       'Play full hands street by street against a solver strategy',
-      'Every decision graded by EV loss: best, correct, inaccuracy, mistake, blunder',
+      'Every decision graded by EV loss, from best to blunder',
       'Replay your own logged hands as scenarios',
     ],
   },
   exploit: {
     to: '/exploit',
-    title: 'Exploits and tells',
+    title: 'Exploits',
     phase: 'Phase 6',
     points: [
-      'Villain profiles (nit, TAG, LAG, station, maniac) with their typical leaks',
-      'See how the GTO strategy shifts when a leak is node locked',
-      'Tells library rated by reliability, plus notes you attach to real opponents',
+      'Player profiles (nit, TAG, LAG, station, maniac) and their typical leaks',
+      'How the GTO strategy shifts when you lock in a leak',
+      'A tells library rated by reliability, plus notes on real opponents',
     ],
   },
   log: {
     to: '/log',
-    title: 'Session and hand log',
+    title: 'Log',
     phase: 'Phase 2',
     points: [
       'One tap session start and stop with buy in, cash out and stakes',
-      'Hand entry in under 20 seconds: card picker, seat chips, action shorthand',
-      'Flag hands for review; flagged hands become Spot Lab and scenario material',
+      'Hand entry in under 20 seconds: card picker, seats, action shorthand',
+      'Flag hands to review later in the Spot Lab and as scenarios',
     ],
   },
   stats: {
@@ -37,36 +37,35 @@ const FEATURES = {
     title: 'Stats',
     phase: 'Phase 2',
     points: [
-      'Results: profit, bb per hour, bankroll graph, variance bands',
+      'Results: profit, big blinds per hour, bankroll graph, variance bands',
       'Skill: drill accuracy and speed by topic, EV loss trend, retention',
-      'Leak finder: seats and spot types where you lose the most',
+      'Leak finder: the seats and spots where you lose the most',
     ],
   },
 } as const;
 
 export function PlannedPage({ feature }: { feature: keyof typeof FEATURES }) {
   const f = FEATURES[feature];
-  const Icon = NAV_ITEMS.find((n) => n.to === f.to)?.icon ?? CircleDashed;
+  const nav = NAV_ITEMS.find((n) => n.to === f.to)!;
+  const Icon = nav.icon;
   return (
-    <div className="stack">
-      <div className="card card-accent stack" style={{ alignItems: 'flex-start', gap: '0.9rem', padding: '1.5rem 1.25rem' }}>
-        <span className="tile">
-          <span className="icon" style={{ width: 52, height: 52, borderRadius: 16, color: 'var(--accent)', marginBottom: 0 }}>
-            <Icon size={26} />
-          </span>
+    <div className="stack" style={{ gap: '1.6rem' }}>
+      <PageHeader title={f.title} />
+      <div className="card stack" style={{ alignItems: 'center', textAlign: 'center', padding: '2rem 1.25rem', gap: '0.8rem' }}>
+        <span className="icon-tile" style={{ width: 64, height: 64, borderRadius: 18, background: nav.color }}>
+          <Icon size={32} strokeWidth={1.8} />
         </span>
-        <div>
-          <span className="pill pill-accent">Coming in {f.phase}</span>
-          <h1 style={{ marginTop: '0.5rem', marginBottom: 0 }}>{f.title}</h1>
-        </div>
-        <div className="stack" style={{ gap: '0.6rem' }}>
-          {f.points.map((p) => (
-            <div key={p} className="row" style={{ flexWrap: 'nowrap', alignItems: 'flex-start', gap: '0.6rem' }}>
-              <CircleDashed size={18} className="faint" style={{ flex: 'none', marginTop: 2 }} />
-              <span>{p}</span>
-            </div>
-          ))}
-        </div>
+        <h2>Coming in {f.phase}</h2>
+        <p className="footnote" style={{ margin: 0, maxWidth: 360 }}>
+          Here is what this screen will do.
+        </p>
+      </div>
+      <div className="list">
+        {f.points.map((p) => (
+          <div key={p} className="list-row">
+            <span className="grow">{p}</span>
+          </div>
+        ))}
       </div>
     </div>
   );

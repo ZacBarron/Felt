@@ -17,13 +17,14 @@ import {
   rangeToCombos,
   type StrategyNode,
 } from '@felt/core';
-import { RotateCcw } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { haptic } from '../haptics';
 import { ActionMixBar } from '../components/ActionMixBar';
 import { PokerTable, type Seat } from '../components/PokerTable';
 import { getChart } from '../state/charts';
 import { useSettings } from '../state/settings';
+import { UndoIcon } from '../ui/icons';
+import { PageHeader } from '../ui/PageHeader';
 
 // Illustrative node for the demo. Real nodes come from solver imports (Phase 5).
 const DEMO_NODE: StrategyNode = {
@@ -85,16 +86,13 @@ export function LabPage() {
 
   return (
     <div className="stack">
-      <div>
-        <div className="eyebrow">Single raised pot · flop</div>
-        <h1>Spot Lab</h1>
-        <p className="muted">
-          BTN opens 2.5bb, BB calls, BB checks the flop. See the spot, your equity against BB's actual calling range, the pot
-          math for any bet, and the GTO mix with the EV of every option.
-        </p>
-      </div>
+      <PageHeader
+        title="Spot Lab"
+        kicker="Single raised pot, flop"
+        subtitle="BTN opens, BB calls and checks the flop. Your equity against BB's real calling range, the pot math for any bet, and the EV of every option."
+      />
 
-      <div className="card">
+      <div className="card" style={{ padding: '0.5rem' }}>
         <PokerTable
           pot={pot}
           board={typeof board === 'string' ? [] : board}
@@ -202,8 +200,8 @@ export function LabPage() {
             <span className="muted">
               EV loss {graded.evLoss.toFixed(2)}bb ({(graded.evLossPctPot * 100).toFixed(1)}% of pot). Best: {graded.best.label}.
             </span>
-            <button className="btn btn-ghost" onClick={() => setChosen(undefined)}>
-              <RotateCcw size={16} /> Try again
+            <button className="btn btn-plain" onClick={() => setChosen(undefined)}>
+              <UndoIcon size={18} /> Try again
             </button>
           </div>
         )}

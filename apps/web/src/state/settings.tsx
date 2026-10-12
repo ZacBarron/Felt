@@ -7,8 +7,11 @@ export interface StudySettings {
   newPerDay: number;
 }
 
+export type Appearance = 'system' | 'light' | 'dark';
+
 export interface UiSettings {
   haptics: boolean;
+  appearance: Appearance;
 }
 
 export interface AppSettings {
@@ -17,7 +20,7 @@ export interface AppSettings {
   ui: UiSettings;
 }
 
-const DEFAULTS: AppSettings = { game: DEFAULT_SETTINGS, study: { newPerDay: 15 }, ui: { haptics: true } };
+const DEFAULTS: AppSettings = { game: DEFAULT_SETTINGS, study: { newPerDay: 15 }, ui: { haptics: true, appearance: 'system' } };
 const KEY = 'felt.settings.v1';
 
 function load(): AppSettings {
@@ -35,10 +38,27 @@ function load(): AppSettings {
   }
 }
 
+/** Sets data-theme for the CSS and keeps the browser chrome color in step. */
+function applyAppearance(appearance: Appearance) {
+  const root = document.documentElement;
+  if (appearance === 'system') delete root.dataset.theme;
+  else root.dataset.theme = appearance;
+  const media = window.matchMedia('(prefers-color-scheme: dark)');
+  const update = () => {
+    const dark = appearance === 'dark' || (appearance === 'system' && media.matches);
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', dark ? '#000000' : '#f2f2f7');
+  };
+  update();
+  media.addEventListener('change', update);
+  return () => media.removeEventListener('change', update);
+}
+
 const SettingsContext = createContext<{ settings: AppSettings; update: (next: AppSettings) => void } | null>(null);
 
 export function SettingsProvider({ children }: { children: ReactNode }) {
   const [settings, setSettings] = useState<AppSettings>(load);
+  useEffect(() => applyAppearance(settings.ui.appearance), [settings.ui.appearance]);
+
   useEffect(() => {
     setHapticsEnabled(settings.ui.haptics);
     try {

@@ -1,5 +1,4 @@
 import { type Chart, type DrillOutcome, handClassCombos, scoreRecall } from '@felt/core';
-import { Check, Minus, X } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { actionColor } from '../components/actionColors';
 import { MixBar } from '../components/MixBar';
@@ -8,6 +7,7 @@ import { RangeGrid } from '../components/RangeGrid';
 import { SeatStrip } from '../components/SeatStrip';
 import { haptic } from '../haptics';
 import { BottomBar } from '../ui/BottomBar';
+import { CheckIcon, CloseIcon, MinusIcon } from '../ui/icons';
 import { actionLabels, spotLine } from './labels';
 
 interface Props {
@@ -19,9 +19,9 @@ interface Props {
 }
 
 const VERDICTS = {
-  right: { text: 'Correct', color: 'var(--accent)', Icon: Check, haptic: 'success' as const },
-  mix: { text: 'Rare mix', color: 'var(--warn)', Icon: Minus, haptic: 'warning' as const },
-  wrong: { text: 'Wrong', color: 'var(--danger)', Icon: X, haptic: 'error' as const },
+  right: { text: 'Correct', color: 'var(--green)', Icon: CheckIcon, haptic: 'success' as const },
+  mix: { text: 'Rare mix', color: 'var(--orange)', Icon: MinusIcon, haptic: 'warning' as const },
+  wrong: { text: 'Not quite', color: 'var(--red)', Icon: CloseIcon, haptic: 'error' as const },
 };
 
 /** "You are UTG+1 with KTo, folded to you. Raise or fold?" Timed, then shows the full mix. */
@@ -78,15 +78,18 @@ export function QuickRecall({ chart, hand, targetMs, onAnswer, onNext }: Props) 
       <div className={`card stack ${kind === 'right' ? 'flash-good' : kind ? 'flash-bad' : ''}`} style={{ gap: '0.8rem' }}>
         <div className="row between">
           <div>
-            <div className="eyebrow">{spotLine(chart) || 'Your action'}</div>
-            <div style={{ fontWeight: 800, fontSize: '1.15rem', letterSpacing: '-0.01em' }}>
-              {chart.spec.hero} <span className="muted" style={{ fontWeight: 600 }}>· {chart.spec.tableSize}-handed · {chart.spec.stackBb}bb</span>
+            <div className="footnote">{spotLine(chart) || 'Your action'}</div>
+            <div style={{ fontWeight: 700, fontSize: '1.3rem', letterSpacing: '-0.02em' }}>
+              {chart.spec.hero}{' '}
+              <span className="muted" style={{ fontWeight: 500, fontSize: '1rem' }}>
+                {chart.spec.tableSize}-handed, {chart.spec.stackBb}bb
+              </span>
             </div>
           </div>
-          {chart.spec.basis === 'exploit' && <span className="pill pill-warn">exploit</span>}
+          {chart.spec.basis === 'exploit' && <span className="pill pill-warn">Exploit</span>}
         </div>
         <SeatStrip spec={chart.spec} />
-        <div className="row" style={{ justifyContent: 'center', padding: '0.9rem 0 0.4rem', gap: 10 }}>
+        <div className="row" style={{ justifyContent: 'center', padding: '1.1rem 0 0.6rem', gap: 12 }}>
           {combo.map((c, i) => (
             <PlayingCard key={c} card={c} size="lg" deal delayMs={i * 90} />
           ))}
@@ -97,7 +100,6 @@ export function QuickRecall({ chart, hand, targetMs, onAnswer, onNext }: Props) 
             style={{
               width: '100%',
               animation: `drain ${targetMs * 2.5}ms linear both`,
-              background: 'linear-gradient(90deg, var(--gold), var(--accent))',
               animationPlayState: answer ? 'paused' : 'running',
             }}
           />
@@ -108,16 +110,16 @@ export function QuickRecall({ chart, hand, targetMs, onAnswer, onNext }: Props) 
         <div ref={revealRef} className="card stack reveal" style={{ gap: '0.9rem' }}>
           <div className="row between">
             <div className="verdict" style={{ color: verdict.color }}>
-              <span className="badge" style={{ background: verdict.color, color: 'var(--accent-ink)' }}>
-                <verdict.Icon size={20} strokeWidth={3} />
+              <span className="badge" style={{ background: verdict.color }}>
+                <verdict.Icon size={18} />
               </span>
               {verdict.text}
             </div>
-            <span className={`pill ${fast ? 'pill-accent' : ''} num`}>{(answer.outcome.responseMs / 1000).toFixed(1)}s</span>
+            <span className={`pill ${fast ? 'pill-good' : ''} num`}>{(answer.outcome.responseMs / 1000).toFixed(1)}s</span>
           </div>
           <div className="row between">
-            <strong style={{ fontSize: '1.05rem' }}>{hand}</strong>
-            <span className="muted" style={{ fontSize: '0.85rem' }}>
+            <strong style={{ fontSize: '1.1rem' }}>{hand}</strong>
+            <span className="footnote">
               You chose {labels[answer.choice]}
             </span>
           </div>
