@@ -216,6 +216,16 @@ export function SettingsPage() {
       <section>
         <h2 className="section-title">Study</h2>
         <div className="list">
+          <Row label="Untimed drills" hint="Hides the timer. Speed no longer affects when cards come back.">
+            <Toggle label="Untimed drills" checked={!!settings.study.untimed} onChange={(untimed) => update({ ...settings, study: { ...settings.study, untimed } })} />
+          </Row>
+          <Row label="Keyboard shortcuts" hint="Number keys answer drills, Enter moves on">
+            <Toggle
+              label="Keyboard shortcuts"
+              checked={settings.study.shortcuts !== false}
+              onChange={(shortcuts) => update({ ...settings, study: { ...settings.study, shortcuts } })}
+            />
+          </Row>
           <Row label="New cards per day" hint="About 6 seconds each">
             <Stepper
               label="new cards"

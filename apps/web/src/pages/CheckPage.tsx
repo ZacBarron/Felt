@@ -10,12 +10,13 @@ import {
   scoreCheckpoint,
   startPlacement,
 } from '@felt/core';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { haptic } from '../haptics';
 import { StepView } from '../lesson/StepView';
 import { canOpenLesson } from '../state/access';
 import { track } from '../state/events';
+import { clearPlacement, loadPlacement, savePlacement } from '../state/placementProgress';
 import { recordLessonQuiz } from '../state/rating';
 import { entryFor, LESSON_ENTRIES, lessonPath, markTested, moduleEntries, quizSteps } from '../state/lessons';
 import { useSettings } from '../state/settings';
@@ -40,11 +41,14 @@ function QuestionScreen({
   progress,
   onClose,
   onDone,
+  closeLabel = 'Stop the test',
 }: {
   question: CheckQuestion;
   progress: number;
   onClose: () => void;
   onDone: (correct: boolean) => void;
+  /** Shown on the close button, e.g. that the place is saved. */
+  closeLabel?: string;
 }) {
   const [choice, setChoice] = useState<number>();
   const quiz = quizFor(question);
@@ -52,7 +56,7 @@ function QuestionScreen({
   return (
     <div className="stack focus-column">
       <div className="focus-top">
-        <button className="icon-btn glass" aria-label="Stop the test" onClick={onClose}>
+        <button className="icon-btn glass" aria-label={closeLabel} onClick={onClose}>
           <CloseIcon size={18} />
         </button>
         <div className="check-bar" role="progressbar" aria-label="Test progress" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(progress * 100)}>
@@ -76,6 +80,12 @@ function QuestionScreen({
         >
           {choice === undefined ? 'Choose an answer' : 'Continue'}
         </button>
+        {choice === undefined && (
+          // Guessing among three answers adds noise to a test that decides what to skip. An honest "not sure" keeps the lesson in the plan.
+          <button className="btn btn-plain btn-block" onClick={() => onDone(false)}>
+            Not sure, keep this lesson
+          </button>
+        )}
       </BottomBar>
     </div>
   );
@@ -257,10 +267,16 @@ export function PlacementPage() {
   const [params] = useSearchParams();
   const fromOnboarding = params.get('from') === 'onboarding';
   const { settings, update } = useSettings();
-  const [state, setState] = useState(() => startPlacement(placementModules()));
+  // A test left halfway resumes where it stopped.
+  const [resumed] = useState(loadPlacement);
+  const [state, setState] = useState(() => resumed?.state ?? startPlacement(placementModules()));
   const [kept, setKept] = useState<Set<string>>(new Set());
   // Placement state keeps only the current topic's answers, so count the whole test here.
-  const [tally, setTally] = useState({ right: 0, asked: 0 });
+  const [tally, setTally] = useState(() => resumed?.tally ?? { right: 0, asked: 0 });
+  useEffect(() => {
+    if (state.done) clearPlacement();
+    else if (tally.asked > 0) savePlacement({ state, tally });
+  }, [state, tally]);
   const exit = () => navigate(fromOnboarding ? '/welcome?step=plan' : '/learn');
 
   if (state.done) {
@@ -346,6 +362,7 @@ export function PlacementPage() {
       question={q}
       progress={answered / (answered + remainingMax)}
       onClose={exit}
+      closeLabel="Stop the test. Your place is saved."
       onDone={(correct) => {
         window.scrollTo({ top: 0 });
         setTally((t) => ({ right: t.right + (correct ? 1 : 0), asked: t.asked + 1 }));

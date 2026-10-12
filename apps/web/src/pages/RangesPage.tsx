@@ -49,7 +49,7 @@ export function RangesPage() {
               {chart.spec.versus}
             </div>
           )}
-          <RangeGrid key={chart.spec.id} mixes={chart.mixes} selected={selected} onSelect={setSelected} />
+          <RangeGrid key={chart.spec.id} mixes={chart.mixes} reach={chart.reach} selected={selected} onSelect={setSelected} />
         </div>
 
         <div className="stack" style={{ position: 'sticky', top: '4.5rem' }}>

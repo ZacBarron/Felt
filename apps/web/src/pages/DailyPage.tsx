@@ -45,15 +45,17 @@ function dailyPool() {
 }
 
 /**
- * Three range decisions that get harder (a mixed hand, a near pure edge,
- * then a paint level hand), with two lesson questions between them.
+ * Three range decisions that get harder (a mixed hand, an edge of an opening
+ * range, then an edge when facing a raise or 3bet), with two lesson
+ * questions between them.
  */
 export function dailyItems(date = new Date()): Decision[] {
   const { charts, quizzes } = dailyPool();
+  const spotOf = (c: ChartDecision) => getChart(c.chartId)?.spec.spot;
   const bands = [
     charts.filter((c) => c.difficulty < DIFFICULTY.chartEdge),
-    charts.filter((c) => c.difficulty === DIFFICULTY.chartEdge),
-    charts.filter((c) => c.difficulty > DIFFICULTY.chartEdge),
+    charts.filter((c) => c.difficulty === DIFFICULTY.chartEdge && spotOf(c) === 'rfi'),
+    charts.filter((c) => c.difficulty >= DIFFICULTY.chartEdge && spotOf(c) !== 'rfi'),
   ];
   const c = bands.map((band, i) => dailyPicks(band.length ? band : charts, date, 1, 10 + i)[0]);
   const q = dailyPicks(quizzes, date, 2, 2);

@@ -1,4 +1,4 @@
-import { ALL_HAND_CLASSES, boundaryHands, PAINT_TARGET_MS, RECALL_TARGET_MS } from '@felt/core';
+import { ALL_HAND_CLASSES, boundaryHands, PAINT_TARGET_MS, reaches, RECALL_TARGET_MS } from '@felt/core';
 import { useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { DrillRunner } from '../drills/DrillRunner';
@@ -28,7 +28,7 @@ export function DrillsPage() {
   // Mostly edge hands, sometimes any hand, so the obvious ones stay honest too.
   const hand = useMemo(() => {
     if (!chart) return undefined;
-    const pool = Math.random() < 0.8 ? boundaryHands(chart) : ALL_HAND_CLASSES;
+    const pool = Math.random() < 0.8 ? boundaryHands(chart) : ALL_HAND_CLASSES.filter((h) => reaches(chart, h));
     return pool[Math.floor(Math.random() * pool.length)];
   }, [chart, round]);
 

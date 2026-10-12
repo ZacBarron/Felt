@@ -89,7 +89,7 @@ export function LessonPage() {
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (finished || e.metaKey || e.ctrlKey || e.altKey) return;
+      if (finished || settings.study.shortcuts === false || e.metaKey || e.ctrlKey || e.altKey) return;
       // Leave keys alone when a control has focus: Enter belongs to that button, arrows to text and groups.
       if (e.target instanceof Element && e.target.closest('input, textarea, select, button, a, [role="radiogroup"], [role="grid"]')) return;
       if (e.key === 'ArrowRight' || e.key === 'Enter') next();

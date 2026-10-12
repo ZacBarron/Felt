@@ -10,6 +10,8 @@ interface Props {
   onPaint?: (hand: HandClass) => void;
   /** Cells to flag, e.g. misses after a painting drill. */
   marked?: ReadonlySet<HandClass>;
+  /** Hands that can reach the spot; others are greyed out. */
+  reach?: ReadonlySet<HandClass>;
 }
 
 /**
@@ -18,7 +20,7 @@ interface Props {
  */
 const HANDS: HandClass[] = Array.from({ length: 169 }, (_, i) => gridHandClass(Math.floor(i / 13), i % 13));
 
-export function RangeGrid({ mixes, selected, onSelect, onPaint, marked }: Props) {
+export function RangeGrid({ mixes, selected, onSelect, onPaint, marked, reach }: Props) {
   const painting = useRef(false);
 
   const handAt = (x: number, y: number): HandClass | undefined =>
@@ -82,7 +84,10 @@ export function RangeGrid({ mixes, selected, onSelect, onPaint, marked }: Props)
             const segments = sortActions(Object.keys(mix));
             const playsAtAll = segments.some((a) => a !== 'fold');
             const isMarked = marked?.has(hand);
-            const classes = ['range-cell', selected === hand && 'selected', isMarked && 'marked', playsAtAll && 'plays'].filter(Boolean).join(' ');
+            const unreached = reach && !reach.has(hand);
+            const classes = ['range-cell', selected === hand && 'selected', isMarked && 'marked', playsAtAll && 'plays', unreached && 'unreached']
+              .filter(Boolean)
+              .join(' ');
             return (
               <button
                 key={hand}
@@ -92,7 +97,7 @@ export function RangeGrid({ mixes, selected, onSelect, onPaint, marked }: Props)
                 data-haptic={onPaint ? 'off' : 'select'}
                 tabIndex={hand === active ? 0 : -1}
                 aria-selected={selected === hand}
-                aria-label={describeMix(hand, mix) + (isMarked ? ', missed' : '')}
+                aria-label={unreached ? `${hand}: never in this spot` : describeMix(hand, mix) + (isMarked ? ', missed' : '')}
                 style={{ '--wave': r + c } as React.CSSProperties}
                 title={describeMix(hand, mix)}
                 onFocus={() => setActive(hand)}

@@ -134,7 +134,7 @@ export function StepView({ step, onAnswer, answered }: Props) {
           {chart && (
             <div className="card stack" style={{ gap: '0.75rem' }}>
               <SeatStrip spec={chart.spec} />
-              <RangeGrid mixes={chart.mixes} marked={step.highlight ? new Set(step.highlight) : undefined} />
+              <RangeGrid mixes={chart.mixes} reach={chart.reach} marked={step.highlight ? new Set(step.highlight) : undefined} />
             </div>
           )}
           <p className="lesson-p">

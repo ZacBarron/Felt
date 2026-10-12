@@ -9,6 +9,7 @@ import { haptic } from '../haptics';
 import { BottomBar } from '../ui/BottomBar';
 import { CheckIcon, CloseIcon, MinusIcon } from '../ui/icons';
 import { actionLabels, spotLine } from './labels';
+import { untimedMs, useSettings } from '../state/settings';
 
 interface Props {
   chart: Chart;
@@ -29,6 +30,9 @@ const VERDICTS = {
 
 /** "You are UTG+1 with KTo, folded to you. Raise or fold?" Timed, then shows the full mix. */
 export function QuickRecall({ chart, hand, targetMs, onAnswer, onNext }: Props) {
+  const { settings } = useSettings();
+  const untimed = !!settings.study.untimed;
+  const shortcuts = settings.study.shortcuts !== false;
   const started = useRef(performance.now() + FLIP_MS);
   const revealRef = useRef<HTMLDivElement>(null);
   const [answer, setAnswer] = useState<{ choice: string; outcome: DrillOutcome }>();
@@ -44,17 +48,18 @@ export function QuickRecall({ chart, hand, targetMs, onAnswer, onNext }: Props) 
     (choice: string) => {
       if (answer) return;
       const responseMs = Math.max(0, performance.now() - started.current);
-      const outcome = { accuracy: scoreRecall(mix, choice), responseMs, targetMs };
+      const outcome = { accuracy: scoreRecall(mix, choice), responseMs: untimed ? untimedMs(targetMs) : responseMs, targetMs };
       const kind = outcome.accuracy === 1 ? 'right' : outcome.accuracy > 0 ? 'mix' : 'wrong';
       haptic(VERDICTS[kind].haptic);
       setAnswer({ choice, outcome });
       onAnswer(outcome);
     },
-    [answer, mix, targetMs, onAnswer],
+    [answer, mix, targetMs, onAnswer, untimed],
   );
 
   // Keyboard on laptops: 1, 2, 3 pick an action; Enter or Space moves on.
   useEffect(() => {
+    if (!shortcuts) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.metaKey || e.ctrlKey || e.altKey) return;
       // Never hijack a key meant for another control, such as Save or the tab bar.
@@ -69,7 +74,7 @@ export function QuickRecall({ chart, hand, targetMs, onAnswer, onNext }: Props) 
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [answer, choices, choose, onNext]);
+  }, [answer, choices, choose, onNext, shortcuts]);
 
   useEffect(() => {
     if (answer)
@@ -102,7 +107,7 @@ export function QuickRecall({ chart, hand, targetMs, onAnswer, onNext }: Props) 
           ))}
         </div>
         {/* Speed bar: drains over the time an answer still counts as "Good". */}
-        <div className="progress" style={{ height: 4, opacity: answer ? 0 : 1, transition: 'opacity 200ms' }} aria-hidden="true">
+        <div className="progress" style={{ height: 4, opacity: answer || untimed ? 0 : 1, transition: 'opacity 200ms' }} aria-hidden="true">
           <span
             style={{
               width: '100%',
@@ -126,7 +131,7 @@ export function QuickRecall({ chart, hand, targetMs, onAnswer, onNext }: Props) 
               </span>
               {verdict.text}
             </div>
-            <span className={`pill ${fast && kind === 'right' ? 'pill-good' : ''} num`}>{(answer.outcome.responseMs / 1000).toFixed(1)}s</span>
+            {!untimed && <span className={`pill ${fast && kind === 'right' ? 'pill-good' : ''} num`}>{(answer.outcome.responseMs / 1000).toFixed(1)}s</span>}
           </div>
           <div className="row between">
             <strong style={{ fontSize: '1.1rem' }}>{hand}</strong>
@@ -135,7 +140,7 @@ export function QuickRecall({ chart, hand, targetMs, onAnswer, onNext }: Props) 
             </span>
           </div>
           <MixBar mix={mix} labels={labels} />
-          <RangeGrid mixes={chart.mixes} selected={hand} />
+          <RangeGrid mixes={chart.mixes} reach={chart.reach} selected={hand} />
         </div>
       )}
 
@@ -152,7 +157,7 @@ export function QuickRecall({ chart, hand, targetMs, onAnswer, onNext }: Props) 
                 aria-keyshortcuts={String(i + 1)}
               >
                 {labels[c]}
-                <kbd className="kbd">{i + 1}</kbd>
+                {shortcuts && <kbd className="kbd">{i + 1}</kbd>}
               </button>
             ))}
           </div>

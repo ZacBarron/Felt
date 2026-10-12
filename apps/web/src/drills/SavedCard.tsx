@@ -11,6 +11,7 @@ import { db, type SavedItem, type SavedSolverSpot } from '../state/db';
 import { entryFor, lessonPath } from '../state/lessons';
 import { BottomBar } from '../ui/BottomBar';
 import { BookmarkIcon } from '../ui/icons';
+import { untimedMs, useSettings } from '../state/settings';
 
 interface Props {
   savedId: string;
@@ -45,6 +46,7 @@ function Header({ item }: { item: SavedItem }) {
 function SavedQuiz({ item, targetMs, onAnswer, onNext }: Props & { item: SavedItem }) {
   const step = entryFor(item.lessonKey!)!.content!.steps[item.step!];
   const started = useRef(performance.now());
+  const untimed = !!useSettings().settings.study.untimed;
   const [done, setDone] = useState(false);
   if (step.kind !== 'quiz') return null;
   return (
@@ -54,7 +56,7 @@ function SavedQuiz({ item, targetMs, onAnswer, onNext }: Props & { item: SavedIt
         step={step}
         onAnswer={(choice) => {
           setDone(true);
-          onAnswer({ accuracy: choice === step.answer ? 1 : 0, responseMs: performance.now() - started.current, targetMs });
+          onAnswer({ accuracy: choice === step.answer ? 1 : 0, responseMs: untimed ? untimedMs(targetMs) : performance.now() - started.current, targetMs });
         }}
       />
       {item.note && <p className="saved-note">{item.note}</p>}

@@ -3734,3 +3734,12 @@ input[type='number'] {
   -webkit-mask-image: radial-gradient(circle at 85% 12%, #000 12%, transparent 50%);
   mask-image: radial-gradient(circle at 85% 12%, #000 12%, transparent 50%);
 }
+
+/* Hands that never reach the spot, e.g. hands the opener folded before a 3bet. */
+.range-cell.unreached {
+  opacity: 0.3;
+}
+
+.range-cell.unreached .seg {
+  background-image: none;
+}

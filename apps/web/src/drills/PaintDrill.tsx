@@ -2,6 +2,7 @@ import { type Chart, type DrillOutcome, type HandMix, type PaintScore, scorePain
 import { useMemo, useRef, useState } from 'react';
 import { actionColor } from '../components/actionColors';
 import { RangeGrid } from '../components/RangeGrid';
+import { untimedMs, useSettings } from '../state/settings';
 import { plural } from '../ui/format';
 import { SeatStrip } from '../components/SeatStrip';
 import { haptic } from '../haptics';
@@ -21,6 +22,7 @@ interface Props {
 /** Paint the whole chart from memory, then compare against the answer. */
 export function PaintDrill({ chart, targetMs, onAnswer, onNext }: Props) {
   const started = useRef(performance.now());
+  const untimed = !!useSettings().settings.study.untimed;
   const labels = actionLabels(chart);
   const brushes = [...chart.spec.actions.map((a) => a.id), 'fold'];
   const [brush, setBrush] = useState(brushes[0]);
@@ -48,7 +50,7 @@ export function PaintDrill({ chart, targetMs, onAnswer, onNext }: Props) {
     const score = scorePainting(chart, painted);
     haptic(score.accuracy >= 0.9 ? 'success' : score.accuracy >= 0.6 ? 'warning' : 'error');
     setResult(score);
-    onAnswer({ accuracy: score.accuracy, responseMs: performance.now() - started.current, targetMs });
+    onAnswer({ accuracy: score.accuracy, responseMs: untimed ? untimedMs(targetMs) : performance.now() - started.current, targetMs });
   };
 
   const scoreColor = !result ? undefined : result.accuracy >= 0.9 ? 'var(--green)' : result.accuracy >= 0.6 ? 'var(--orange)' : 'var(--red)';
@@ -120,6 +122,7 @@ export function PaintDrill({ chart, targetMs, onAnswer, onNext }: Props) {
 
         <RangeGrid
           mixes={result && view === 'answer' ? chart.mixes : paintedMixes}
+          reach={chart.reach}
           onPaint={result ? undefined : paint}
           marked={result ? new Set(result.wrong) : undefined}
         />

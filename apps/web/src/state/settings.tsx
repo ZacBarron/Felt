@@ -5,6 +5,18 @@ import { setHapticsEnabled } from '../haptics';
 export interface StudySettings {
   /** New review cards introduced per day. */
   newPerDay: number;
+  /** No timer in drills. Speed stops counting toward review scheduling; the rating never used it. */
+  untimed?: boolean;
+  /** Number keys answer and Enter moves on in drills. Off for Voice Control and switch users. */
+  shortcuts?: boolean;
+}
+
+/**
+ * Response time reported for an untimed answer: inside the "Good" window,
+ * so a right answer schedules like a steady one, never as slow.
+ */
+export function untimedMs(targetMs: number) {
+  return targetMs * 2;
 }
 
 export type Appearance = 'system' | 'light' | 'dark';
@@ -76,7 +88,7 @@ export interface AppSettings {
 
 const DEFAULTS: AppSettings = {
   game: DEFAULT_SETTINGS,
-  study: { newPerDay: 15 },
+  study: { newPerDay: 15, untimed: false, shortcuts: true },
   ui: { haptics: true, appearance: 'system', palette: 'card-room' },
   profile: { onboarded: false, focus: [], dailyMinutes: 10 },
   access: { pro: false },

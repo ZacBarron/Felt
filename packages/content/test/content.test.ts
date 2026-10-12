@@ -1,4 +1,4 @@
-import { actionRange, buildChart, positionsFor, rangePercent } from '@felt/core';
+import { actionFrequencies, actionRange, buildChart, positionsFor, rangePercent } from '@felt/core';
 import { describe, expect, it } from 'vitest';
 import { CURRICULUM, STARTER_CHARTS } from '../src';
 
@@ -18,6 +18,40 @@ describe('starter charts', () => {
     const order = ['utg', 'utgp1', 'utgp2', 'lj', 'hj', 'co', 'btn'].map((p) => open(`9max-100-rfi-${p}`));
     for (let i = 1; i < order.length; i++) expect(order[i]).toBeGreaterThan(order[i - 1]);
     expect(open('6max-100-rfi-utg')).toBeLessThan(open('6max-100-rfi-hj'));
+  });
+
+  const chart = (id: string) => buildChart(STARTER_CHARTS.find((c) => c.id === id)!);
+  const plays = (id: string) => 1 - (actionFrequencies(chart(id)).fold ?? 0);
+
+  it('defend the big blind wider against later openers', () => {
+    expect(plays('9max-100-bb-vs-btn')).toBeGreaterThan(plays('9max-100-bb-vs-co'));
+    expect(plays('9max-100-bb-vs-co')).toBeGreaterThan(plays('9max-100-bb-vs-utg'));
+  });
+
+  it('keep defense and 3bet sizes near published 100bb solutions', () => {
+    const f = (id: string) => actionFrequencies(chart(id));
+    expect(f('9max-100-bb-vs-btn')['3bet']).toBeGreaterThan(0.08);
+    expect(f('9max-100-bb-vs-co')['3bet']).toBeGreaterThan(0.06);
+    expect(f('9max-100-bb-vs-utg')['3bet']).toBeLessThan(0.05);
+    expect(f('9max-100-sb-vs-btn')['3bet']).toBeGreaterThan(0.12);
+    expect(f('9max-100-sb-vs-btn')['3bet']).toBeLessThan(0.2);
+  });
+
+  it('facing a 3bet, act only with hands that opened, and fold some of them', () => {
+    for (const spec of STARTER_CHARTS.filter((s) => s.spot === 'vs-3bet')) {
+      const c = buildChart(spec);
+      expect(c.reach).toBeDefined();
+      for (const [hand, mix] of c.mixes) if ((mix.fold ?? 0) < 1) expect(c.reach!.has(hand)).toBe(true);
+      const reached = [...c.reach!];
+      const folds = reached.filter((h) => (c.mixes.get(h)!.fold ?? 0) > 0.5).length;
+      expect(folds / reached.length).toBeGreaterThan(0.3);
+      // The nuts never fold.
+      expect(c.mixes.get('AA')!.fold).toBeUndefined();
+    }
+  });
+
+  it('every chart says what it assumes', () => {
+    for (const spec of STARTER_CHARTS) expect(spec.note, spec.id).toBeTruthy();
   });
 });
 

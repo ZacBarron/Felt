@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { CURRICULUM } from '@felt/content';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { Link } from 'react-router-dom';
@@ -9,8 +10,10 @@ import { pathPrefs } from '../state/goals';
 import { useSettings } from '../state/settings';
 import { CheckIcon, ChevronRightIcon, LockIcon, SkipIcon } from '../ui/icons';
 import { PageHeader } from '../ui/PageHeader';
+import { loadPlacement } from '../state/placementProgress';
 
 export function LearnPage() {
+  const placementSaved = useMemo(() => !!loadPlacement(), []);
   const progress = useLiveQuery(lessonProgress, [], new Map<string, StoredLesson>());
   const { settings } = useSettings();
   const pro = isPro(settings.access);
@@ -50,8 +53,10 @@ export function LearnPage() {
             <SkipIcon size={22} />
           </span>
           <span className="grow">
-            <span style={{ display: 'block', fontWeight: 650 }}>Find where to start</span>
-            <span className="footnote">A short test. Lessons you prove you know are marked tested out.</span>
+            <span style={{ display: 'block', fontWeight: 650 }}>{placementSaved ? 'Continue the placement test' : 'Find where to start'}</span>
+            <span className="footnote">
+              {placementSaved ? 'Pick up where you stopped.' : 'A short test. Lessons you prove you know are marked tested out.'}
+            </span>
           </span>
           <ChevronRightIcon size={16} className="chev" />
         </Link>

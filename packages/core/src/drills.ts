@@ -1,4 +1,4 @@
-import type { Chart, HandMix } from './charts';
+import { type Chart, type HandMix, reaches } from './charts';
 import { ALL_HAND_CLASSES, comboCount, type HandClass } from './ranges';
 
 /**
@@ -38,6 +38,7 @@ export function isMixed(mix: HandMix): boolean {
 export function boundaryHands(chart: Chart): HandClass[] {
   const primary = ALL_HAND_CLASSES.map((h) => primaryAction(chart.mixes.get(h) ?? { fold: 1 }));
   return ALL_HAND_CLASSES.filter((hand, i) => {
+    if (!reaches(chart, hand)) return false;
     if (isMixed(chart.mixes.get(hand) ?? { fold: 1 })) return true;
     const row = Math.floor(i / 13);
     const col = i % 13;
@@ -47,7 +48,8 @@ export function boundaryHands(chart: Chart): HandClass[] {
       for (let dc = -1; dc <= 1; dc++) {
         const r = row + dr;
         const c = col + dc;
-        if ((dr || dc) && r >= 0 && r < 13 && c >= 0 && c < 13) neighbours.push([r, c]);
+        // Hands that never reach the spot are not edges: a 4bet hand next to an unopened hand is not borderline.
+        if ((dr || dc) && r >= 0 && r < 13 && c >= 0 && c < 13 && reaches(chart, ALL_HAND_CLASSES[r * 13 + c])) neighbours.push([r, c]);
       }
     }
     return neighbours.some(([r, c]) => primary[r * 13 + c] !== primary[i]);
@@ -79,6 +81,7 @@ export function scorePainting(chart: Chart, painted: ReadonlyMap<HandClass, stri
   let wrongCombos = 0;
   let relevantCombos = 0;
   for (const hand of ALL_HAND_CLASSES) {
+    if (!reaches(chart, hand)) continue;
     const mix = chart.mixes.get(hand) ?? { fold: 1 };
     const answer = painted.get(hand) ?? 'fold';
     const plays = 1 - (mix.fold ?? 0) > 1e-9;

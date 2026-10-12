@@ -33,6 +33,12 @@ export interface ChartSpec {
   source: 'starter-approx' | 'solver-import' | 'custom';
   /** What the chart assumes that a player might not, such as the open size. Shown with the chart. */
   note?: string;
+  /**
+   * Hands that can reach this spot, e.g. the opening range for a chart that
+   * faces a 3bet. Other hands are never drilled or scored. Omit when every
+   * hand can be dealt into the spot.
+   */
+  reach?: string;
   actions: ChartActionSpec[];
 }
 
@@ -65,6 +71,13 @@ export type HandMix = Record<string, number>;
 export interface Chart {
   spec: ChartSpec;
   mixes: Map<HandClass, HandMix>;
+  /** Hands that can reach the spot, when the spec limits them. */
+  reach?: ReadonlySet<HandClass>;
+}
+
+/** Whether a hand can be in this spot at all. */
+export function reaches(chart: Chart, hand: HandClass): boolean {
+  return !chart.reach || chart.reach.has(hand);
 }
 
 export function buildChart(spec: ChartSpec): Chart {
@@ -83,7 +96,9 @@ export function buildChart(spec: ChartSpec): Chart {
     if (left > 1e-9) mix.fold = left;
     mixes.set(hand, mix);
   }
-  return { spec, mixes };
+  if (!spec.reach) return { spec, mixes };
+  const reach = new Set([...parseRange(spec.reach)].filter(([, f]) => f > 0).map(([h]) => h));
+  return { spec, mixes, reach };
 }
 
 /** Share of all combos that take each action. */

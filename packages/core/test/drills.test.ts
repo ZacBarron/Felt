@@ -88,3 +88,46 @@ describe('studyStreak', () => {
     expect(studyStreak([d('2026-10-09T20:00:00')], now)).toBe(0);
   });
 });
+
+describe('charts with a limited reach', () => {
+  const spec: ChartSpec = {
+    id: 'reach-test',
+    title: 'Open vs 3bet',
+    game: 'cash',
+    tableSize: 9,
+    stackBb: 100,
+    hero: 'UTG',
+    spot: 'vs-3bet',
+    basis: 'gto',
+    source: 'custom',
+    reach: 'TT+, AQs+, AKo',
+    actions: [
+      { id: '4bet', label: '4bet', range: 'KK+' },
+      { id: 'call', label: 'Call', range: 'QQ, JJ, AQs+, AKo' },
+    ],
+  };
+  const chart = buildChart(spec);
+
+  it('only drills hands that can reach the spot', () => {
+    const edges = boundaryHands(chart);
+    expect(edges.every((h) => chart.reach!.has(h))).toBe(true);
+    // TT folds next to JJ calling: a real edge. 99 never opened, so it is not drilled.
+    expect(edges).toContain('TT');
+    expect(edges).not.toContain('99');
+  });
+
+  it('scores a painting only on reachable hands', () => {
+    const painted = new Map([
+      ['AA', '4bet'],
+      ['KK', '4bet'],
+      ['QQ', 'call'],
+      ['JJ', 'call'],
+      ['AKs', 'call'],
+      ['AQs', 'call'],
+      ['AKo', 'call'],
+      // Painting a hand that never opened does not count against you.
+      ['72o', 'call'],
+    ]);
+    expect(scorePainting(chart, painted).accuracy).toBe(1);
+  });
+});
