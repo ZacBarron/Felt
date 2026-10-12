@@ -2229,6 +2229,22 @@ table.kv td:last-child {
   font-weight: 650;
 }
 
+.lesson-table th:not(:first-child),
+.lesson-table td:not(:first-child) {
+  padding-left: 0.75rem;
+}
+
+/* Columns of words read better left aligned and at regular weight */
+.lesson-table .text-col {
+  text-align: left !important;
+  font-weight: 400 !important;
+}
+
+.lesson-table td.text-col {
+  font-size: 0.92rem;
+  line-height: 1.3;
+}
+
 /* The one felt surface on a hand step */
 .lesson-felt {
   display: flex;
@@ -2249,6 +2265,59 @@ table.kv td:last-child {
 
 .callout-exploit {
   border-left-color: var(--purple);
+}
+
+.callout-theory {
+  border-left-color: var(--tint);
+}
+
+.pill-theory {
+  background: color-mix(in srgb, var(--tint) 14%, transparent);
+  color: var(--tint);
+}
+
+/* Where a lesson claim comes from: exact math, a solver pattern, or a pool read */
+.lesson-title-row {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.45rem;
+}
+
+.evidence {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--label-2);
+}
+
+.evidence::before {
+  content: '';
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.evidence-math {
+  color: var(--green);
+}
+
+.evidence-solver {
+  color: var(--orange);
+}
+
+.evidence-exploit {
+  color: var(--purple);
+}
+
+.reading-row .reading-title {
+  display: block;
+  font-weight: 600;
+  font-style: italic;
 }
 
 .lesson-question {

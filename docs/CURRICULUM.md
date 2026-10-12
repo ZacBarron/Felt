@@ -14,7 +14,19 @@ Suggested order: Foundations math, then Preflop RFI and BB defense in parallel w
 
 ## Where lessons live
 
-Lesson content is in [`packages/content/src/lessons.ts`](../packages/content/src/lessons.ts), keyed `track/module/lesson` to match the curriculum. Step kinds: `intro`, `text`, `formula`, `table`, `chart`, `hand`, `callout` (tip or exploit), `quiz` and `takeaway`. Tests check that every chart and card reference is real and that every chart quiz answer agrees with the chart.
+Lesson content is in [`packages/content/src/lessons/`](../packages/content/src/lessons/), one file per track, keyed `track/module/lesson` to match the curriculum. Step kinds: `intro`, `text`, `formula`, `table`, `chart`, `hand`, `board`, `callout` (tip, exploit or theory), `quiz` and `takeaway`. Each lesson is `core` or `advanced`.
+
+## Accuracy policy
+
+Accuracy is the product, so lessons do not simplify a claim until it is wrong.
+
+- **Label the evidence.** Steps that state facts carry `evidence`, shown in the app:
+  - `math`: exact, from the rules or arithmetic. Every number of this kind is recomputed by the content tests with `@felt/core` (pot odds, MDF, alpha, bluff share, EV, outs, implied odds, SPR, geometric sizing, combo counts).
+  - `solver`: how equilibrium strategies tend to play. Directional only, and labelled approximate until Felt's own solver packs back each claim with numbers.
+  - `exploit`: an assumption about a player pool, to check against logged hands.
+- **State the limits.** MDF is a river concept; raw equity is not realized equity; raise or fold small blind play is a simplification of a strategy that also limps. Lessons say so.
+- **Compute, do not recall.** Range numbers (for example the share of each range with 80% or more equity on a flop) are computed from Felt's own charts, and the note under the table says how.
+- **Own words.** Lessons teach in Felt's words. Books that cover the same ground in more depth are listed under `reading` and shown on the finish screen. The main references are Matthew Janda's *Applications of No-Limit Hold'em* (2013) and *No-Limit Hold'em for Advanced Players* (2017), with Ed Miller's *The Course* (2015) for live pool exploits.
 
 ## Lesson anatomy
 

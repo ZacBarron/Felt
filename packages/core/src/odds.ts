@@ -74,3 +74,18 @@ export function ruleOf2And4(outs: number, cardsToCome: 1 | 2): number {
 export function spr(effectiveStack: number, pot: number): number {
   return effectiveStack / pot;
 }
+
+/**
+ * Geometric bet sizing: the single pot fraction that, bet on each of the
+ * remaining `streets`, gets the effective stack in exactly by the last one.
+ * Each bet of f times the pot grows the pot by (1 + 2f).
+ */
+export function geometricBetFraction(pot: number, effectiveStack: number, streets: number): number {
+  if (streets < 1) throw new Error('Need at least one street');
+  return (Math.pow(1 + (2 * effectiveStack) / pot, 1 / streets) - 1) / 2;
+}
+
+/** Equity estimate from outs on the flop with the over 8 outs correction: outs x 4 minus (outs - 8). */
+export function ruleOfFourCorrected(outs: number): number {
+  return (outs * 4 - Math.max(0, outs - 8)) / 100;
+}

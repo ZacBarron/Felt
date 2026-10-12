@@ -33,7 +33,9 @@ Ordered for the main game (live 1/3 cash, 9 handed, on a phone) and so the core 
 - [x] Lesson player: one idea per screen (text, formulas, tables, charts, hands on felt, callouts, quick checks, takeaways), story style progress, swipe and keyboard navigation, resume where you left off, completion with practice links
 - [x] 11 lessons: pot odds, MDF and alpha, combos and blockers, outs, equity realization, early and late position opens, small blind, big blind defense, live pool tendencies, punishing limpers (quiz answers tested against the charts)
 - [x] Themes: Card room (brand default), Ink, Oxblood, Cobalt
-- [ ] More lessons: the remaining curriculum, starting with postflop textures and c-betting
+- [x] 29 lessons across foundations (EV and indifference, implied odds, SPR and geometric sizing, range vs range, range and nut advantage, range shapes), postflop (textures, c-betting in position, sizing, defending c-bets, check raising, turn cards, bluff selection, bluff catching) and exploitation (node locking, stations, nits, sizing tells)
+- [x] Accuracy pass: every lesson claim labelled exact math, solver pattern (approximate) or pool tendency; every math number recomputed in tests; range numbers computed from Felt's charts; further reading on the finish screen
+- [ ] More lessons: c-betting out of position, 3bet pots, probing, barreling, multiway, cold 3betting and flatting, stack depth, tells, mindset
 - [ ] Chart editor: enter or paste any chart (range notation) as a `custom` source
 
 ## Phase 2: Live game essentials
@@ -62,7 +64,7 @@ See [SOLVER_DATA.md](SOLVER_DATA.md).
 - [ ] Equity estimation drill (hand vs range) scored by error
 - [ ] Spot Lab: build any spot (seats, stacks, actions), equity in a Web Worker
 - [ ] Range vs range equity and equity distribution charts
-- [ ] Foundations track lessons
+- [x] Foundations track lessons
 
 ## Phase 5: Scenarios and challenges
 

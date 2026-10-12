@@ -128,6 +128,23 @@ export function LessonPage() {
             </Link>
           )}
         </div>
+        {content.reading && content.reading.length > 0 && (
+          <section>
+            <h2 className="section-title">Go deeper</h2>
+            <div className="list">
+              {content.reading.map((r) => (
+                <div key={r.title} className="list-row reading-row">
+                  <span className="grow">
+                    <span className="reading-title">{r.title}</span>
+                    <span className="footnote">
+                      {r.author}, {r.year}
+                    </span>
+                  </span>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
         <BottomBar>
           <Link to="/learn" className="btn btn-primary btn-lg btn-block swap-in">
             Back to Learn
@@ -164,7 +181,7 @@ export function LessonPage() {
       >
         {i === 0 && (
           <div className="footnote" style={{ marginBottom: '0.4rem' }}>
-            {entry.trackTitle}, {entry.moduleTitle} · {content.minutes} min
+            {entry.trackTitle}, {entry.moduleTitle} · {content.minutes} min{content.level === 'advanced' ? ' · Advanced' : ''}
           </div>
         )}
         {step && <StepView step={step} answered={answers[i]} onAnswer={(choice) => setAnswers((a) => ({ ...a, [i]: choice }))} />}

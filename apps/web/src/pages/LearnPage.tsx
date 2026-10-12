@@ -86,6 +86,7 @@ function LessonCard({ entry, state }: { entry: LessonEntry; state?: StoredLesson
           ) : (
             <span className="caption">{content.minutes} min</span>
           )}
+          {content?.level === 'advanced' && state?.status !== 'done' && <span className="pill">Advanced</span>}
         </div>
       </div>
     </>

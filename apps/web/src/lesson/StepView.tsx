@@ -1,4 +1,4 @@
-import type { LessonStep } from '@felt/content';
+import type { Evidence, LessonStep } from '@felt/content';
 import { parseCards } from '@felt/core';
 import { useState } from 'react';
 import { PlayingCard } from '../components/PlayingCard';
@@ -17,6 +17,38 @@ interface Props {
   answered?: number;
 }
 
+const EVIDENCE: Record<Evidence, { label: string; title: string }> = {
+  math: { label: 'Exact math', title: 'Follows from the rules and arithmetic' },
+  solver: { label: 'Solver pattern, approximate', title: 'How equilibrium strategies tend to play. Directional, not exact frequencies.' },
+  exploit: { label: 'Pool tendency', title: 'An assumption about players. Check it against your own hands.' },
+};
+
+function EvidenceTag({ evidence }: { evidence?: Evidence }) {
+  if (!evidence) return null;
+  const e = EVIDENCE[evidence];
+  return (
+    <span className={`evidence evidence-${evidence}`} title={e.title}>
+      {e.label}
+    </span>
+  );
+}
+
+function StepTitle({ title, evidence }: { title: string; evidence?: Evidence }) {
+  return (
+    <div className="lesson-title-row">
+      <h2 className="display lesson-h2">{title}</h2>
+      <EvidenceTag evidence={evidence} />
+    </div>
+  );
+}
+
+/** Numbers, percentages and short comparisons like "20 vs 11%" stay right aligned. */
+function isNumeric(cell: string): boolean {
+  return /^[\d\s.,%+−\-/×÷≈:]+$/.test(cell.replace(/\bvs\b/g, ''));
+}
+
+const CALLOUT_LABEL = { tip: 'Tip', exploit: 'Exploit', theory: 'Theory' } as const;
+
 export function StepView({ step, onAnswer, answered }: Props) {
   switch (step.kind) {
     case 'intro':
@@ -31,7 +63,7 @@ export function StepView({ step, onAnswer, answered }: Props) {
     case 'text':
       return (
         <div className="lesson-step">
-          <h2 className="display lesson-h2">{step.title}</h2>
+          <StepTitle title={step.title} evidence={step.evidence} />
           {step.body.map((p, i) => (
             <p key={i} className="lesson-p">
               <Rich text={p} />
@@ -61,16 +93,19 @@ export function StepView({ step, onAnswer, answered }: Props) {
           </p>
         </div>
       );
-    case 'table':
+    case 'table': {
+      const textCols = step.columns.map((_, j) => j > 0 && step.rows.some((r) => !isNumeric(r[j])));
       return (
         <div className="lesson-step">
-          <h2 className="display lesson-h2">{step.title}</h2>
+          <StepTitle title={step.title} evidence={step.evidence} />
           <div className="card lesson-table">
             <table>
               <thead>
                 <tr>
-                  {step.columns.map((c) => (
-                    <th key={c}>{c}</th>
+                  {step.columns.map((c, j) => (
+                    <th key={c} className={textCols[j] ? 'text-col' : undefined}>
+                      {c}
+                    </th>
                   ))}
                 </tr>
               </thead>
@@ -78,7 +113,9 @@ export function StepView({ step, onAnswer, answered }: Props) {
                 {step.rows.map((r, i) => (
                   <tr key={i} style={{ animationDelay: `${i * 45}ms` }}>
                     {r.map((cell, j) => (
-                      <td key={j}>{cell}</td>
+                      <td key={j} className={textCols[j] ? 'text-col' : undefined}>
+                        {cell}
+                      </td>
                     ))}
                   </tr>
                 ))}
@@ -88,6 +125,7 @@ export function StepView({ step, onAnswer, answered }: Props) {
           {step.note && <p className="footnote">{step.note}</p>}
         </div>
       );
+    }
     case 'chart': {
       const chart = getChart(step.chartId);
       return (
@@ -128,11 +166,27 @@ export function StepView({ step, onAnswer, answered }: Props) {
           </p>
         </div>
       );
+    case 'board':
+      return (
+        <div className="lesson-step">
+          <StepTitle title={step.title} evidence={step.evidence} />
+          <div className="lesson-felt">
+            <div className="row" style={{ justifyContent: 'center', gap: 6 }}>
+              {parseCards(step.board).map((c, i, all) => (
+                <PlayingCard key={c} card={c} size={all.length <= 3 ? 'lg' : 'md'} deal delayMs={80 + i * 80} />
+              ))}
+            </div>
+          </div>
+          <p className="lesson-p">
+            <Rich text={step.caption} />
+          </p>
+        </div>
+      );
     case 'callout':
       return (
         <div className="lesson-step">
           <div className={`callout callout-${step.tone}`}>
-            <span className={`pill ${step.tone === 'exploit' ? 'pill-exploit' : 'pill-tint'}`}>{step.tone === 'exploit' ? 'Exploit' : 'Tip'}</span>
+            <span className={`pill pill-${step.tone === 'tip' ? 'tint' : step.tone}`}>{CALLOUT_LABEL[step.tone]}</span>
             <h2 className="display lesson-h2" style={{ marginTop: '0.6rem' }}>
               {step.title}
             </h2>
