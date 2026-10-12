@@ -211,21 +211,21 @@ export function OnboardingPage() {
       <div className="onb-intro">
         <div className="onb-intro-felt">
           <HeroPattern />
-          <div className="onb-intro-mark reveal">
-            <BrandMark size={84} />
+          <div className="onb-intro-mark">
+            <BrandMark size={84} animate />
           </div>
-          <div className="reveal" style={{ animationDelay: '120ms' }}>
+          <div className="reveal" style={{ animationDelay: '900ms' }}>
             <Wordmark height={40} color="#fff" />
           </div>
-          <p className="onb-tagline reveal" style={{ animationDelay: '200ms' }}>
+          <p className="onb-tagline reveal" style={{ animationDelay: '1050ms' }}>
             {TAGLINE}
           </p>
         </div>
         <div className="onb-intro-copy">
-          <h1 ref={heading} tabIndex={-1} className="display onb-title reveal" style={{ animationDelay: '260ms' }}>
+          <h1 ref={heading} tabIndex={-1} className="display onb-title reveal" style={{ animationDelay: '1100ms' }}>
             Make better decisions at the table.
           </h1>
-          <p className="muted reveal" style={{ animationDelay: '320ms' }}>
+          <p className="muted reveal" style={{ animationDelay: '1200ms' }}>
             Learn the right play for the spots you face. Every answer shows how sure we are. It takes a few minutes a day.
           </p>
         </div>
@@ -262,7 +262,7 @@ export function OnboardingPage() {
       return (
         <div className="stack focus-column onb-building" aria-live="polite">
           <div className="onb-spinner">
-            <BrandMark size={64} />
+            <BrandMark size={64} animate />
           </div>
           <h1 ref={heading} tabIndex={-1} className="display onb-title">
             Building your plan

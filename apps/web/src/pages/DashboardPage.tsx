@@ -1,5 +1,5 @@
 import { ideaForDay } from '@felt/content';
-import { actionRange, challengeNumber, currentRating, handClassCombos, stakesLabel, tierLabel } from '@felt/core';
+import { actionRange, challengeNumber, currentRating, handClassCombos, isProvisional, nextTier, tierLabel } from '@felt/core';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { Link } from 'react-router-dom';
 import { MasteryGrid } from '../components/MasteryGrid';
@@ -12,6 +12,7 @@ import { lessonPath, lessonProgress, pickNextLesson } from '../state/lessons';
 import { ratingSnapshot, streakNow } from '../state/rating';
 import { buildQueue, masteryForCharts, todayStats } from '../state/review';
 import { useSettings } from '../state/settings';
+import { Avatar } from '../ui/Avatar';
 import { HeroPattern } from '../ui/Brand';
 import { plural } from '../ui/format';
 import { CheckIcon, ChevronRightIcon, FlameIcon } from '../ui/icons';
@@ -79,8 +80,14 @@ export function DashboardPage() {
         title="Today"
         kicker={date}
         trailing={
-          <Link to="/you" className="pill rating-chip" style={{ textDecoration: 'none', marginBottom: 4 }}>
-            {rating && rating.games > 0 ? `${Math.round(rating.rating)} · ${tierLabel(rating)}` : `${stakesLabel(g.stakes)} ${g.venue}`}
+          <Link to="/you" className="today-me" aria-label={rating && rating.games > 0 ? `Felt Rating ${Math.round(rating.rating)}, ${tierLabel(rating)}` : 'You'}>
+            <Avatar
+              name={settings.profile.name}
+              photo={settings.profile.photo}
+              size={50}
+              progress={rating && rating.games > 0 && !isProvisional(rating) ? nextTier(rating.rating)?.progress : undefined}
+            />
+            <span className="today-me-rating num">{rating && rating.games > 0 ? Math.round(rating.rating) : 'Get rated'}</span>
           </Link>
         }
       />

@@ -1,5 +1,5 @@
-import { type Chart, type DrillOutcome, type HandMix, type PaintScore, scorePainting } from '@felt/core';
-import { useMemo, useRef, useState } from 'react';
+import { type Chart, type DrillOutcome, type HandMix, type MixBrush, mixBrushes, type MixPaintScore, scoreMixPainting, scorePainting } from '@felt/core';
+import { useRef, useState } from 'react';
 import { actionColor } from '../components/actionColors';
 import { RangeGrid } from '../components/RangeGrid';
 import { untimedMs, useSettings } from '../state/settings';
@@ -10,7 +10,10 @@ import { BottomBar } from '../ui/BottomBar';
 import { UndoIcon } from '../ui/icons';
 import { ProgressRing } from '../ui/ProgressRing';
 import { Segmented } from '../ui/Segmented';
+import { Toggle } from '../ui/Toggle';
 import { actionLabels, spotLine } from './labels';
+
+type PaintScoreLike = ReturnType<typeof scorePainting>;
 
 interface Props {
   chart: Chart;
@@ -22,32 +25,39 @@ interface Props {
 /** Paint the whole chart from memory, then compare against the answer. */
 export function PaintDrill({ chart, targetMs, onAnswer, onNext }: Props) {
   const started = useRef(performance.now());
-  const untimed = !!useSettings().settings.study.untimed;
+  const { settings, update } = useSettings();
+  const untimed = !!settings.study.untimed;
+  const mixes = settings.study.paintMixes !== false;
   const labels = actionLabels(chart);
-  const brushes = [...chart.spec.actions.map((a) => a.id), 'fold'];
-  const [brush, setBrush] = useState(brushes[0]);
-  const [painted, setPainted] = useState<Map<string, string>>(new Map());
-  const [result, setResult] = useState<PaintScore>();
+  const short = Object.fromEntries(Object.entries(labels).map(([id, l]) => [id, l.replace(/\s+[\d.]+bb$/, '')]));
+  const brushes: MixBrush[] = mixes
+    ? mixBrushes(chart, short)
+    : chart.spec.actions.map((a) => ({ id: a.id, label: short[a.id], mix: { [a.id]: 1 } }));
+  const [brushId, setBrushId] = useState(brushes[0].id);
+  const brush = brushes.find((b) => b.id === brushId) ?? brushes[0];
+  const [erase, setErase] = useState(false);
+  const [painted, setPainted] = useState<Map<string, HandMix>>(new Map());
+  const [result, setResult] = useState<MixPaintScore | (PaintScoreLike & { closeness?: undefined })>();
   const [view, setView] = useState<'answer' | 'yours'>('answer');
 
-  const paintedMixes = useMemo(
-    () => new Map<string, HandMix>([...painted].map(([hand, action]) => [hand, { [action]: 1 }])),
-    [painted],
-  );
+  const key = (m?: HandMix) => (m ? JSON.stringify(m) : 'fold');
 
   const paint = (hand: string) => {
-    if ((painted.get(hand) ?? 'fold') === brush) return;
+    const want = erase ? undefined : brush.mix;
+    if (key(painted.get(hand)) === key(want)) return;
     haptic('select');
     setPainted((prev) => {
       const next = new Map(prev);
-      if (brush === 'fold') next.delete(hand);
-      else next.set(hand, brush);
+      if (!want) next.delete(hand);
+      else next.set(hand, want);
       return next;
     });
   };
 
   const submit = () => {
-    const score = scorePainting(chart, painted);
+    const score = mixes
+      ? scoreMixPainting(chart, painted)
+      : scorePainting(chart, new Map([...painted].map(([h, m]) => [h, Object.keys(m)[0]])));
     haptic(score.accuracy >= 0.9 ? 'success' : score.accuracy >= 0.6 ? 'warning' : 'error');
     setResult(score);
     onAnswer({ accuracy: score.accuracy, responseMs: untimed ? untimedMs(targetMs) : performance.now() - started.current, targetMs });
@@ -70,33 +80,12 @@ export function PaintDrill({ chart, targetMs, onAnswer, onNext }: Props) {
         <SeatStrip spec={chart.spec} />
         <div className="footnote">
           {spotLine(chart) && <span style={{ display: 'block' }}>{spotLine(chart)}</span>}
-          A mixed hand counts as right if you paint any action it takes 25% of the time or more.
+          {mixes
+            ? 'Paint how often you take each action. A hand counts as right when your mix is within 20% of the chart.'
+            : 'A mixed hand counts as right if you paint any action it takes 25% of the time or more.'}
         </div>
 
-        {!result ? (
-          <div className="row between">
-            <Segmented
-              value={brush}
-              onChange={setBrush}
-              ariaLabel="Brush"
-              options={brushes.map((b) => ({
-                value: b,
-                label:
-                  b === 'fold' ? (
-                    'Erase'
-                  ) : (
-                    <span className="row" style={{ gap: 6 }}>
-                      <span style={{ width: 10, height: 10, borderRadius: 3, background: actionColor(b) }} />
-                      {labels[b].split(' ')[0]}
-                    </span>
-                  ),
-              }))}
-            />
-            <span className="footnote num">
-              {plural(painted.size, 'hand')} painted
-            </span>
-          </div>
-        ) : (
+        {result && (
           <div className="row reveal" style={{ gap: '1rem' }}>
             <ProgressRing value={result.accuracy} size={74} stroke={8} color={scoreColor} label={`${Math.round(result.accuracy * 100)}% right`}>
               <span className="num" style={{ fontWeight: 700, fontSize: '1.05rem' }}>
@@ -106,6 +95,7 @@ export function PaintDrill({ chart, targetMs, onAnswer, onNext }: Props) {
             <div className="stack" style={{ gap: '0.4rem', flex: 1, minWidth: 160 }}>
               <strong role="status">{result.wrong.length === 0 ? 'Perfect chart' : `${plural(result.wrong.length, 'hand')} missed`}</strong>
               <span className="footnote">
+                {result.closeness !== undefined && `Your frequencies match ${Math.round(result.closeness * 100)}% of the chart. `}
                 {result.wrong.length > 0 && 'Hands you missed have an outline.'}
               </span>
               <Segmented
@@ -122,11 +112,69 @@ export function PaintDrill({ chart, targetMs, onAnswer, onNext }: Props) {
         )}
 
         <RangeGrid
-          mixes={result && view === 'answer' ? chart.mixes : paintedMixes}
+          mixes={result && view === 'answer' ? chart.mixes : painted}
           reach={chart.reach}
           onPaint={result ? undefined : paint}
           marked={result ? new Set(result.wrong) : undefined}
         />
+        {!result && (
+          <div className="stack" style={{ gap: '0.6rem' }}>
+            <div className="brush-rows" role="radiogroup" aria-label="Brush">
+              {groupBrushes(brushes).map((row) => (
+                <div key={row.key} className="brush-row">
+                  <span className="brush-name">
+                    <MixSwatch mix={row.brushes[0].mix} />
+                    {row.name}
+                  </span>
+                  <span className="brush-levels">
+                    {row.brushes.map((b) => (
+                      <button
+                        key={b.id}
+                        role="radio"
+                        aria-checked={!erase && b.id === brush.id}
+                        aria-label={b.label}
+                        className={`brush${!erase && b.id === brush.id ? ' on' : ''}`}
+                        data-haptic="select"
+                        onClick={() => {
+                          setBrushId(b.id);
+                          setErase(false);
+                        }}
+                      >
+                        {row.levels ? <span className="num">{levelOf(b)}</span> : b.label}
+                      </button>
+                    ))}
+                  </span>
+                </div>
+              ))}
+              <div className="brush-row">
+                <span className="brush-name">
+                  <MixSwatch mix={{ fold: 1 }} />
+                  Fold
+                </span>
+                <span className="brush-levels">
+                  <button role="radio" aria-checked={erase} className={`brush${erase ? ' on' : ''}`} data-haptic="select" onClick={() => setErase(true)}>
+                    Erase
+                  </button>
+                </span>
+              </div>
+            </div>
+            <div className="row between">
+              <span className="row" style={{ gap: '0.6rem', fontSize: '0.9rem' }}>
+                <Toggle
+                  checked={mixes}
+                  label="Paint mixes"
+                  onChange={(on) => {
+                    update({ ...settings, study: { ...settings.study, paintMixes: on } });
+                    setPainted(new Map());
+                    setBrushId('');
+                  }}
+                />
+                <span aria-hidden="true">Paint mixes</span>
+              </span>
+              <span className="footnote num">{plural(painted.size, 'hand')} painted</span>
+            </div>
+          </div>
+        )}
       </div>
 
       <BottomBar>
@@ -148,3 +196,34 @@ export function PaintDrill({ chart, targetMs, onAnswer, onNext }: Props) {
     </div>
   );
 }
+
+/** A tiny cell showing a brush's mix the way the range grid draws it. */
+function MixSwatch({ mix }: { mix: HandMix }) {
+  const parts = Object.entries(mix).filter(([a]) => a !== 'fold');
+  const fold = 1 - parts.reduce((t, [, f]) => t + f, 0);
+  return (
+    <span className="swatch" aria-hidden="true">
+      {parts.map(([a, f]) => (
+        <span key={a} style={{ width: `${f * 100}%`, background: actionColor(a) }} />
+      ))}
+      {fold > 1e-9 && <span style={{ width: `${fold * 100}%`, background: actionColor('fold'), opacity: 0.22 }} />}
+    </span>
+  );
+}
+
+/** Brushes laid out as one row per action, with the even splits on their own row. */
+function groupBrushes(brushes: MixBrush[]): { key: string; name: string; levels: boolean; brushes: MixBrush[] }[] {
+  const rows: { key: string; name: string; levels: boolean; brushes: MixBrush[] }[] = [];
+  for (const b of brushes) {
+    const action = b.id.includes('+') ? '+' : b.id.split(':')[0];
+    let row = rows.find((r) => r.key === action);
+    if (!row) {
+      row = { key: action, name: action === '+' ? 'Split' : b.label, levels: action !== '+', brushes: [] };
+      rows.push(row);
+    }
+    row.brushes.push(b);
+  }
+  return rows;
+}
+
+const levelOf = (b: MixBrush) => `${Math.round(Object.values(b.mix)[0] * 100)}%`;

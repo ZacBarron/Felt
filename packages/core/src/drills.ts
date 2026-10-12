@@ -101,6 +101,92 @@ export function scorePainting(chart: Chart, painted: ReadonlyMap<HandClass, stri
   };
 }
 
+/** How far a painted mix may sit from the chart and still count as right. */
+export const MIX_TOLERANCE = 0.2;
+
+/**
+ * Share of play that differs between two mixes (total variation distance).
+ * Fold fills whatever the listed actions leave, so {raise: 0.75} means
+ * raise 75% and fold 25%. 0 is identical, 1 shares nothing.
+ */
+export function mixDistance(a: HandMix, b: HandMix): number {
+  const actions = new Set([...Object.keys(a), ...Object.keys(b)].filter((x) => x !== 'fold'));
+  const sum = (m: HandMix) => [...actions].reduce((t, x) => t + (m[x] ?? 0), 0);
+  let diff = Math.abs(1 - sum(a) - (1 - sum(b)));
+  for (const x of actions) diff += Math.abs((a[x] ?? 0) - (b[x] ?? 0));
+  return diff / 2;
+}
+
+export interface MixPaintScore extends PaintScore {
+  /** 1 minus the combo weighted average distance, over the hands that matter. */
+  closeness: number;
+}
+
+/**
+ * Scores a chart painted with frequencies. A hand is right when the painted
+ * mix is within MIX_TOLERANCE of the chart. Unpainted hands count as fold,
+ * and hands that never reach the spot are skipped.
+ */
+export function scoreMixPainting(chart: Chart, painted: ReadonlyMap<HandClass, HandMix>): MixPaintScore {
+  const wrong: HandClass[] = [];
+  let wrongCombos = 0;
+  let relevantCombos = 0;
+  let distance = 0;
+  for (const hand of ALL_HAND_CLASSES) {
+    if (!reaches(chart, hand)) continue;
+    const mix = chart.mixes.get(hand) ?? { fold: 1 };
+    const answer = painted.get(hand) ?? { fold: 1 };
+    const plays = (m: HandMix) => Object.entries(m).some(([a, f]) => a !== 'fold' && f > 1e-9);
+    if (!plays(mix) && !plays(answer)) continue;
+    const combos = comboCount(hand);
+    const d = mixDistance(mix, answer);
+    relevantCombos += combos;
+    distance += d * combos;
+    if (d > MIX_TOLERANCE + 1e-9) {
+      wrong.push(hand);
+      wrongCombos += combos;
+    }
+  }
+  return {
+    accuracy: relevantCombos === 0 ? 1 : 1 - wrongCombos / relevantCombos,
+    closeness: relevantCombos === 0 ? 1 : 1 - distance / relevantCombos,
+    wrong,
+    wrongCombos,
+    relevantCombos,
+  };
+}
+
+/** A paint brush: the mix it lays down and a short name for it. */
+export interface MixBrush {
+  id: string;
+  label: string;
+  mix: HandMix;
+}
+
+/**
+ * Brushes for painting a chart with frequencies: each action at 100, 75, 50
+ * and 25 percent (the rest folds), plus an even split for each pair of
+ * actions the chart really mixes, like 3bet or call.
+ */
+export function mixBrushes(chart: Chart, labels: Record<string, string> = {}): MixBrush[] {
+  const actions = chart.spec.actions.map((a) => a.id).filter((a) => a !== 'fold');
+  const name = (a: string) => labels[a] ?? a;
+  const out: MixBrush[] = [];
+  for (const a of actions) {
+    for (const f of [1, 0.75, 0.5, 0.25]) {
+      out.push({ id: `${a}:${f}`, label: f === 1 ? name(a) : `${name(a)} ${f * 100}%`, mix: { [a]: f } });
+    }
+  }
+  for (let i = 0; i < actions.length; i++) {
+    for (let j = i + 1; j < actions.length; j++) {
+      const [a, b] = [actions[i], actions[j]];
+      const mixes = [...chart.mixes.values()].some((m) => (m[a] ?? 0) >= 0.2 && (m[b] ?? 0) >= 0.2);
+      if (mixes) out.push({ id: `${a}+${b}`, label: `${name(a)} or ${name(b)}`, mix: { [a]: 0.5, [b]: 0.5 } });
+    }
+  }
+  return out;
+}
+
 export interface CardSeed {
   id: string;
   kind: 'range-recall';

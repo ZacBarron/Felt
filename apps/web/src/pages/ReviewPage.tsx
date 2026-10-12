@@ -185,7 +185,7 @@ function SessionDone({ results, onMore }: { results: { accuracy: number; ms: num
         <p className="footnote" style={{ maxWidth: 360, margin: 0 }}>
           {onMore
             ? 'Your due cards are done. Keep going with extra practice. It picks the cards closest to slipping and adds new ones.'
-            : 'You have practiced every card for your game. Try another chart in Drills, or come back later.'}
+            : 'You have practiced every card for your game. Paint or quiz any chart in Ranges, or come back later.'}
         </p>
       </div>
       <BottomBar>
@@ -194,7 +194,7 @@ function SessionDone({ results, onMore }: { results: { accuracy: number; ms: num
             Keep going
           </button>
         )}
-        <Link to="/drills" className={`btn btn-lg btn-block ${onMore ? 'btn-plain' : 'btn-primary'}`}>
+        <Link to="/ranges?mode=quick" className={`btn btn-lg btn-block ${onMore ? 'btn-plain' : 'btn-primary'}`}>
           <DrillsIcon size={19} /> Practice any chart
         </Link>
         <Link to="/" className="btn btn-plain btn-block">

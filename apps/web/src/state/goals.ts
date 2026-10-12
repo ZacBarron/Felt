@@ -35,9 +35,8 @@ export const DAILY_OPTIONS: { minutes: number; note: string }[] = [
 
 /** Study cues for an if-then plan: "When I ..., I will study". */
 export const CUES: { id: string; label: string; phrase: string; time: [number, number] }[] = [
-  { id: 'coffee', label: 'With my morning coffee', phrase: 'have my morning coffee', time: [8, 0] },
-  { id: 'commute', label: 'On my commute', phrase: 'start my commute', time: [8, 30] },
-  { id: 'lunch', label: 'On my lunch break', phrase: 'take my lunch break', time: [12, 30] },
+  { id: 'coffee', label: 'When I start my day', phrase: 'start my day', time: [8, 0] },
+  { id: 'lunch', label: 'On a break', phrase: 'take a break', time: [12, 30] },
   { id: 'before-play', label: 'Before I play', phrase: 'sit down to play', time: [18, 0] },
   { id: 'evening', label: 'In the evening', phrase: 'wind down in the evening', time: [21, 0] },
 ];

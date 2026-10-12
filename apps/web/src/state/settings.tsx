@@ -10,6 +10,8 @@ export interface StudySettings {
   untimed?: boolean;
   /** Number keys answer and Enter moves on in drills. Off for Voice Control and switch users. */
   shortcuts?: boolean;
+  /** Paint charts with frequencies (75%, 50%, splits) rather than one action per hand. On unless turned off. */
+  paintMixes?: boolean;
 }
 
 /**
@@ -57,6 +59,10 @@ export interface Profile {
   committedAt?: string;
   /** Module placement started at, or 'all' when it cleared everything. */
   placedAt?: string;
+  /** Name shown on your avatar. Optional. */
+  name?: string;
+  /** Small square photo as a JPEG data URL, about 160px. Optional. */
+  photo?: string;
 }
 
 /**

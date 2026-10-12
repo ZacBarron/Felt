@@ -143,7 +143,7 @@ export function LessonPage() {
         </div>
         <div className="list with-icons">
           {practice && (
-            <Link to={`/drills?chart=${practice}`} className="list-row">
+            <Link to={`/ranges?chart=${practice}&mode=quick`} className="list-row">
               <span className="grow">
                 <span style={{ display: 'block', fontWeight: 600 }}>Practice this chart</span>
                 <span className="footnote">Drill {getChart(practice)?.spec.title} one hand at a time</span>

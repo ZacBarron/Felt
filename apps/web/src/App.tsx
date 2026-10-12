@@ -5,13 +5,13 @@ import { NAV_SECTIONS, TABS } from './nav';
 import { CheckPage, PlacementPage } from './pages/CheckPage';
 import { DailyPage } from './pages/DailyPage';
 import { DashboardPage } from './pages/DashboardPage';
-import { DrillsPage } from './pages/DrillsPage';
 import { ImportPage } from './pages/ImportPage';
 import { LabPage } from './pages/LabPage';
 import { LearnPage } from './pages/LearnPage';
 import { LessonPage } from './pages/LessonPage';
 import { MorePage } from './pages/MorePage';
 import { OnboardingPage } from './pages/OnboardingPage';
+import { Moments } from './components/Moments';
 import { ExploitsPage } from './pages/ExploitsPage';
 import { LogPage } from './pages/LogPage';
 import { ScenariosPage } from './pages/ScenariosPage';
@@ -93,6 +93,7 @@ export function App() {
 
   return (
     <div className="shell">
+      <Moments />
       <nav className="nav glass" aria-label="Main">
         <Link to="/" className="brand" aria-label="Felt home">
           <Lockup size={30} />
@@ -120,7 +121,7 @@ export function App() {
           <Routes location={location}>
             <Route path="/" element={<DashboardPage />} />
             <Route path="/review" element={<ReviewPage />} />
-            <Route path="/drills" element={<DrillsPage />} />
+            <Route path="/drills" element={<RangesPage />} />
             <Route path="/learn" element={<LearnPage />} />
             <Route path="/learn/*" element={<LessonPage />} />
             <Route path="/ranges" element={<RangesPage />} />

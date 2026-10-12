@@ -7,6 +7,9 @@ import {
   type ChartSpec,
   deckForCharts,
   primaryAction,
+  mixBrushes,
+  mixDistance,
+  scoreMixPainting,
   scorePainting,
   scoreRecall,
   selectQueue,
@@ -57,6 +60,51 @@ describe('scorePainting', () => {
     const score = scorePainting(chart, missedTens);
     expect(score.wrong).toEqual(['TT']);
     expect(score.accuracy).toBeCloseTo(1 - 6 / (30 + 4 + 4));
+  });
+});
+
+describe('mix painting', () => {
+  it('measures the share of play that differs', () => {
+    expect(mixDistance({ raise: 1 }, { raise: 1 })).toBe(0);
+    expect(mixDistance({ raise: 1 }, { fold: 1 })).toBe(1);
+    expect(mixDistance({ raise: 0.6 }, { raise: 0.5 })).toBeCloseTo(0.1);
+    expect(mixDistance({ threeBet: 0.4, call: 0.6 }, { threeBet: 0.5, call: 0.5 })).toBeCloseTo(0.1);
+    expect(mixDistance({ threeBet: 0.4, call: 0.6 }, { call: 0.75 })).toBeCloseTo(0.4);
+  });
+
+  it('counts a mix right within the tolerance', () => {
+    const exact = new Map<string, Record<string, number>>([...'TT JJ QQ KK AA AKs'.split(' ')].map((h) => [h, { raise: 1 }]));
+    exact.set('AQs', { raise: 0.5 });
+    const s = scoreMixPainting(chart, exact);
+    expect(s.accuracy).toBe(1);
+    expect(s.closeness).toBe(1);
+
+    // Painting the 50% hand as always raise is 0.5 away: wrong.
+    const pure = new Map(exact);
+    pure.set('AQs', { raise: 1 });
+    expect(scoreMixPainting(chart, pure).wrong).toEqual(['AQs']);
+
+    // A full step off (75% for a 50% hand) is wrong but still closer than pure.
+    const step = new Map(exact);
+    step.set('AQs', { raise: 0.75 });
+    const off = scoreMixPainting(chart, step);
+    expect(off.wrong).toEqual(['AQs']);
+    expect(off.closeness).toBeGreaterThan(scoreMixPainting(chart, pure).closeness);
+  });
+
+  it('offers frequency brushes and splits only for pairs the chart mixes', () => {
+    expect(mixBrushes(chart).map((b) => b.id)).toEqual(['raise:1', 'raise:0.75', 'raise:0.5', 'raise:0.25']);
+    const defend = buildChart({
+      ...spec,
+      spot: 'vs-open',
+      actions: [
+        { id: 'threeBet', label: '3bet', range: 'QQ+, AKs:0.5' },
+        { id: 'call', label: 'Call', range: 'JJ, TT, AKs' },
+      ],
+    });
+    const brushes = mixBrushes(defend, { threeBet: '3bet', call: 'Call' });
+    expect(brushes.at(-1)).toEqual({ id: 'threeBet+call', label: '3bet or Call', mix: { threeBet: 0.5, call: 0.5 } });
+    expect(brushes).toHaveLength(9);
   });
 });
 

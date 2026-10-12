@@ -1,5 +1,5 @@
 import { gridHandClass as handAt } from '@felt/core';
-import { useId } from 'react';
+import { type CSSProperties, useId } from 'react';
 import { WORDMARK_PATH, WORDMARK_VIEWBOX } from './wordmark';
 
 /** The cells of the F, on a 6x6 grid: the stem, a long top arm, a shorter middle arm. */
@@ -20,9 +20,12 @@ export function BrandMark({
   size = 32,
   variant = 'tile',
   themed = true,
+  animate = false,
 }: {
   size?: number;
   variant?: 'tile' | 'glyph';
+  /** Assemble along the diagonal, then light the F, like a solver painting a range. */
+  animate?: boolean;
   /** Follow the active theme. Off for places that must show the master brand. */
   themed?: boolean;
 }) {
@@ -33,7 +36,14 @@ export function BrandMark({
   const gap = tile ? 3.2 : 4;
   const cell = (100 - 2 * pad - (n - 1) * gap) / n;
   return (
-    <svg width={size} height={size} viewBox="0 0 100 100" aria-hidden="true" style={{ flex: 'none', display: 'block' }}>
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 100 100"
+      aria-hidden="true"
+      className={animate ? `mark-anim mark-anim-${variant}` : undefined}
+      style={{ flex: 'none', display: 'block' }}
+    >
       {tile && (
         <>
           <defs>
@@ -58,7 +68,9 @@ export function BrandMark({
             width={cell}
             height={cell}
             rx={cell * 0.26}
+            className={animate ? (lit ? 'cell lit' : 'cell') : undefined}
             style={{
+              ...(animate ? ({ '--d': r + c } as CSSProperties) : null),
               fill: tile ? (lit ? (themed ? 'var(--accent)' : '#e9b866') : 'rgba(255,255,255,.08)') : 'currentColor',
               fillOpacity: tile ? 1 : lit ? 1 : 0.14,
             }}

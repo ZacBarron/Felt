@@ -115,6 +115,8 @@
   --r-card: 24px;
   --r-control: 14px;
   --ease: cubic-bezier(0.25, 0.8, 0.25, 1);
+  /* Slight overshoot for things that settle into place, like a sheet. */
+  --ease-spring: cubic-bezier(0.32, 1.22, 0.5, 1);
   --spring: cubic-bezier(0.34, 1.4, 0.64, 1);
   --tabbar-h: 0px;
   --bottombar-h: 0px;
@@ -1649,7 +1651,8 @@ input:focus:not(:focus-visible) {
   }
 }
 
-.hero .btn-hero {
+.hero .btn-hero,
+.moment .btn-hero {
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.35), rgba(255, 255, 255, 0) 55%),
     var(--accent);
@@ -4166,4 +4169,435 @@ button.evidence {
 
 .log-textarea:focus {
   outline: 2px solid var(--tint);
+}
+
+/* Avatar ------------------------------------------------------------------ */
+
+.avatar {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+}
+
+.avatar-ring {
+  position: absolute;
+  inset: 0;
+  transform: rotate(-90deg);
+}
+
+.avatar-ring circle:last-child {
+  animation: ring-fill 1100ms var(--ease) 200ms backwards;
+}
+
+.avatar-face {
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  overflow: hidden;
+  color: var(--tint);
+  background: color-mix(in srgb, var(--tint) 13%, var(--surface));
+  font-weight: 650;
+  letter-spacing: 0.02em;
+}
+
+.avatar-face img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.today-me {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  margin-bottom: 2px;
+  color: var(--label);
+  text-decoration: none;
+}
+
+.today-me-rating {
+  font-size: 0.8rem;
+  font-weight: 650;
+  color: var(--label-2);
+  font-variant-numeric: tabular-nums;
+}
+
+.avatar-picker {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.avatar-button {
+  position: relative;
+  padding: 0;
+  border: none;
+  background: none;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.avatar-edit {
+  position: absolute;
+  left: 50%;
+  bottom: -4px;
+  transform: translateX(-50%);
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 650;
+  color: var(--on-tint);
+  background: var(--tint-fill);
+}
+
+.you-profile {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.you-name {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  gap: 0.25rem;
+}
+
+/* Game chip and sheet ----------------------------------------------------- */
+
+.game-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-height: 32px;
+  padding: 0.3rem 0.8rem;
+  border: none;
+  border-radius: 999px;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--tint);
+  background: var(--fill);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.sheet {
+  width: 100%;
+  max-width: 560px;
+  max-height: min(88vh, 760px);
+  margin: auto auto 0;
+  padding: 0;
+  border: none;
+  border-radius: 26px 26px 0 0;
+  color: var(--label);
+  background: var(--bg);
+  box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.18);
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+
+.sheet[open] {
+  animation: sheet-up 380ms var(--ease-spring, var(--ease)) backwards;
+}
+
+.sheet::backdrop {
+  background: rgba(8, 12, 11, 0.42);
+  animation: fade-in 260ms ease backwards;
+}
+
+.sheet-body {
+  padding: 0.5rem 1rem calc(1.2rem + env(safe-area-inset-bottom, 0px));
+}
+
+.sheet-grabber {
+  width: 38px;
+  height: 5px;
+  margin: 0 auto;
+  border-radius: 999px;
+  background: var(--fill-3);
+}
+
+@keyframes sheet-up {
+  from {
+    transform: translateY(100%);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (min-width: 761px) {
+  .sheet {
+    margin: auto;
+    border-radius: 26px;
+  }
+}
+
+/* Ranges chart picker: wraps instead of scrolling sideways. */
+.seat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(var(--seat-min, 72px), 1fr));
+  gap: 0.45rem;
+}
+
+.seat-pick {
+  min-height: 36px;
+  white-space: nowrap;
+  padding: 0.35rem 0.6rem;
+  border: none;
+  border-radius: 999px;
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--label);
+  background: var(--surface);
+  box-shadow: inset 0 0 0 1px var(--separator);
+  cursor: pointer;
+  transition:
+    background 180ms var(--ease),
+    color 180ms var(--ease),
+    transform 180ms var(--ease);
+}
+
+.seat-pick.on {
+  color: var(--on-tint);
+  background: var(--tint-fill);
+  box-shadow: none;
+}
+
+/* The mark assembling: cells pop in along the diagonal, then the F lights in a sweep. */
+.mark-anim .cell {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: mark-cell 520ms var(--spring) backwards;
+  animation-delay: calc(var(--d, 0) * 50ms + 80ms);
+}
+
+.mark-anim-tile .cell.lit {
+  animation:
+    mark-cell 520ms var(--spring) backwards,
+    mark-lit-tile 700ms var(--ease) backwards;
+  animation-delay:
+    calc(var(--d, 0) * 50ms + 80ms),
+    calc(var(--d, 0) * 70ms + 620ms);
+}
+
+.mark-anim-glyph .cell.lit {
+  animation:
+    mark-cell 520ms var(--spring) backwards,
+    mark-lit-glyph 700ms var(--ease) backwards;
+  animation-delay:
+    calc(var(--d, 0) * 50ms + 80ms),
+    calc(var(--d, 0) * 70ms + 620ms);
+}
+
+@keyframes mark-cell {
+  from {
+    transform: scale(0.2);
+    opacity: 0;
+  }
+}
+
+@keyframes mark-lit-tile {
+  from {
+    fill: rgba(255, 255, 255, 0.08);
+  }
+}
+
+@keyframes mark-lit-glyph {
+  from {
+    fill-opacity: 0.14;
+  }
+}
+
+/* Moments: full screen marks of real progress ------------------------------ */
+
+.moment {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  padding: calc(3rem + env(safe-area-inset-top, 0px)) 1.5rem calc(1.5rem + env(safe-area-inset-bottom, 0px));
+  color: #fff;
+  background: var(--brand-gradient);
+  overflow: hidden;
+  isolation: isolate;
+  animation: moment-in 420ms var(--ease) backwards;
+}
+
+/* A slow brass light turning behind the mark. */
+.moment-rays {
+  position: absolute;
+  left: 50%;
+  top: 38%;
+  width: 160vmax;
+  height: 160vmax;
+  margin: -80vmax 0 0 -80vmax;
+  z-index: -1;
+  background: repeating-conic-gradient(from 0deg, rgba(233, 184, 102, 0.1) 0deg 6deg, transparent 6deg 24deg);
+  -webkit-mask-image: radial-gradient(circle, #000 0%, transparent 24%);
+  mask-image: radial-gradient(circle, #000 0%, transparent 24%);
+  animation:
+    fade-in 1200ms ease 300ms backwards,
+    rays-turn 40s linear infinite;
+}
+
+.moment-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  text-align: center;
+  max-width: 420px;
+}
+
+.moment-kicker {
+  margin-top: 1.4rem;
+  font-size: 0.8rem;
+  font-weight: 650;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--on-felt-accent);
+  animation: rise 500ms var(--ease) 900ms backwards;
+}
+
+.moment-title {
+  margin: 0;
+  font-size: clamp(2.8rem, 12vw, 4.2rem);
+  line-height: 1;
+  text-wrap: balance;
+  animation: moment-title 900ms var(--ease) 1000ms backwards;
+}
+
+.moment-number {
+  font-size: 1.15rem;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+  animation: rise 500ms var(--ease) 1300ms backwards;
+}
+
+.moment-number span {
+  font-weight: 500;
+  opacity: 0.75;
+}
+
+.moment-sub {
+  margin: 0.2rem 0 0;
+  max-width: 30ch;
+  opacity: 0.82;
+  animation: rise 500ms var(--ease) 1450ms backwards;
+}
+
+.moment-cta {
+  max-width: 420px;
+  animation: rise 500ms var(--ease) 1700ms backwards;
+}
+
+@keyframes moment-in {
+  from {
+    opacity: 0;
+  }
+}
+
+/* The title wipes in from the left, like a stroke of ink. */
+@keyframes moment-title {
+  from {
+    opacity: 0;
+    clip-path: inset(0 100% 0 0);
+    letter-spacing: 0.04em;
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+@keyframes rays-turn {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Paint brushes: one row per action, its frequencies as small capsules. */
+.brush-rows {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.brush-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.brush-name {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  width: 5.6rem;
+  flex: none;
+  font-size: 0.85rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.brush-levels {
+  display: flex;
+  flex: 1;
+  gap: 0.3rem;
+  min-width: 0;
+}
+
+.brush {
+  flex: 1;
+  min-width: 0;
+  min-height: 36px;
+  padding: 0.25rem 0.4rem;
+  border: none;
+  border-radius: 999px;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--label);
+  background: var(--fill);
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition:
+    background 160ms var(--ease),
+    color 160ms var(--ease);
+}
+
+.brush.on {
+  color: var(--on-tint);
+  background: var(--tint-fill);
+}
+
+.swatch {
+  display: inline-flex;
+  flex: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: inset 0 0 0 1px var(--separator);
+}
+
+.swatch > span {
+  display: block;
+  height: 100%;
 }

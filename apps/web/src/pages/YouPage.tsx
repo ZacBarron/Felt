@@ -26,6 +26,7 @@ import { DOMAIN_LABELS, ratingSnapshot, streakNow } from '../state/rating';
 import { useSettings } from '../state/settings';
 import { signed } from '../ui/format';
 import { ChevronRightIcon, TargetIcon, LeagueIcon } from '../ui/icons';
+import { AvatarPicker } from '../ui/Avatar';
 import { PageHeader } from '../ui/PageHeader';
 import { useCountUp } from '../ui/useCountUp';
 
@@ -158,6 +159,20 @@ export function YouPage() {
   return (
     <div className="stack" style={{ gap: '1.5rem' }}>
       <PageHeader title="You" subtitle="Your rating and what it is worth at the table" back={{ to: '/more', label: 'More' }} />
+
+      <section className="you-profile">
+        <AvatarPicker name={settings.profile.name} photo={settings.profile.photo} onPhoto={(photo) => update({ ...settings, profile: { ...settings.profile, photo } })} />
+        <label className="you-name">
+          <span className="footnote">Your name</span>
+          <input
+            value={settings.profile.name ?? ''}
+            placeholder="Optional"
+            maxLength={40}
+            autoComplete="nickname"
+            onChange={(e) => update({ ...settings, profile: { ...settings.profile, name: e.target.value || undefined } })}
+          />
+        </label>
+      </section>
 
       <section className="hero you-hero">
         <div className="hero-label">Felt Rating</div>
