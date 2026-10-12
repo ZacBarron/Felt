@@ -45,6 +45,14 @@ self.onmessage = (e: MessageEvent<ToWorker>) => {
       post({ type: 'node', path: msg.path, view: view(msg.path) });
       return;
     }
+    if (msg.type === 'hand') {
+      if (!solver) throw new Error('Nothing solved yet');
+      const { node } = solver.walk(msg.path);
+      if (node.kind !== 'action') throw new Error('Not a decision');
+      const r = solver.actionEVs(msg.path, parseCards(msg.cards) as [Card, Card]);
+      post({ type: 'hand', path: msg.path, view: { actions: r.actions.map((a) => ({ id: actionId(a, node.pot), label: a.label })), evs: r.evs, strategy: r.strategy, pot: node.pot } });
+      return;
+    }
     const { spot } = msg;
     stopped = false;
     const board = parseCards(spot.board);

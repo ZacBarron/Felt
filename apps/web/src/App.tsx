@@ -12,7 +12,9 @@ import { LearnPage } from './pages/LearnPage';
 import { LessonPage } from './pages/LessonPage';
 import { MorePage } from './pages/MorePage';
 import { OnboardingPage } from './pages/OnboardingPage';
-import { PlannedPage } from './pages/PlannedPage';
+import { ExploitsPage } from './pages/ExploitsPage';
+import { LogPage } from './pages/LogPage';
+import { ScenariosPage } from './pages/ScenariosPage';
 import { PracticePage } from './pages/PracticePage';
 import { ProPage } from './pages/ProPage';
 import { RangesPage } from './pages/RangesPage';
@@ -132,9 +134,10 @@ export function App() {
             <Route path="/solver" element={<SolverPage />} />
             <Route path="/saved" element={<SavedPage />} />
             <Route path="/more" element={<MorePage />} />
-            <Route path="/scenarios" element={<PlannedPage feature="scenarios" />} />
-            <Route path="/exploit" element={<PlannedPage feature="exploit" />} />
-            <Route path="/log" element={<PlannedPage feature="log" />} />
+            <Route path="/scenarios" element={<ScenariosPage />} />
+            <Route path="/scenarios/:id" element={<ScenariosPage />} />
+            <Route path="/exploit" element={<ExploitsPage />} />
+            <Route path="/log" element={<LogPage />} />
             <Route path="/stats" element={<Navigate to="/you" replace />} />
             <Route path="/you" element={<YouPage />} />
             <Route path="/daily" element={<DailyPage />} />

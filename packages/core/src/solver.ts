@@ -679,6 +679,30 @@ export class PostflopSolver {
     return out;
   }
 
+  /**
+   * EV of each action for one of the acting player's hands at the node found
+   * by `path`, in chips, against the opponent's range as it reaches that node.
+   * The difference between the best action and a chosen one is the EV lost.
+   */
+  actionEVs(path: readonly number[], combo: [Card, Card]): { actions: SolverAction[]; evs: number[]; strategy: number[] } {
+    const { node, reach } = this.walk(path);
+    if (node.kind !== 'action') throw new Error('Not a decision');
+    const p = node.player;
+    const hands = this.hands[p];
+    const i = hands.cards.findIndex(([a, b]) => (a === combo[0] && b === combo[1]) || (a === combo[1] && b === combo[0]));
+    if (i < 0) throw new Error('That hand is not in the range at this decision');
+    const opp = this.hands[1 - p];
+    const [a, b] = hands.cards[i];
+    let oppWeight = 0;
+    opp.cards.forEach(([c, d], j) => {
+      if (a !== c && a !== d && b !== c && b !== d) oppWeight += reach[1 - p][j];
+    });
+    const evs = node.children.map((child) => this.evaluateNode(child, p, reach[p], reach[1 - p], false)[i] / oppWeight);
+    const avg = this.averageStrategy(node);
+    const n = hands.cards.length;
+    return { actions: node.actions, evs, strategy: node.actions.map((_, x) => avg[x * n + i]) };
+  }
+
   /** Overall action frequencies at an action node for the acting player's range. */
   aggregate(node: ActionNode, reach: Float64Array): number[] {
     const avg = this.averageStrategy(node);

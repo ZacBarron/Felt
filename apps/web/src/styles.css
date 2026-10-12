@@ -4005,3 +4005,165 @@ button.evidence {
   line-height: 1.4;
   color: var(--label-2);
 }
+
+/* Scenarios --------------------------------------------------------------- */
+
+.scenario-board {
+  padding: 0.9rem;
+  border-radius: 18px;
+}
+
+.scenario-actions .list-row.chosen {
+  background: color-mix(in srgb, var(--tint) 9%, var(--surface));
+}
+
+.scenario-bar {
+  display: block;
+  height: 6px;
+  margin-top: 6px;
+  border-radius: 999px;
+  background: var(--fill);
+  overflow: hidden;
+}
+
+.scenario-bar > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  transform-origin: left;
+  animation: bar-grow 600ms var(--ease) backwards;
+}
+
+@keyframes bar-grow {
+  from {
+    transform: scaleX(0);
+  }
+}
+
+.grade-pill.grade-best,
+.grade-pill.grade-good {
+  color: var(--green-text);
+  background: color-mix(in srgb, var(--green) 14%, transparent);
+}
+
+.grade-pill.grade-inaccuracy {
+  color: var(--label-2);
+}
+
+.grade-pill.grade-mistake,
+.grade-pill.grade-blunder {
+  color: var(--red-text);
+  background: color-mix(in srgb, var(--red) 12%, transparent);
+}
+
+/* Exploits ---------------------------------------------------------------- */
+
+.exploit-card > summary {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  cursor: pointer;
+}
+
+.exploit-card > summary::after {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-right: 2px solid var(--label-3);
+  border-bottom: 2px solid var(--label-3);
+  transform: rotate(-45deg);
+  transition: transform 200ms var(--ease);
+  flex: none;
+}
+
+.exploit-card[open] > summary::after {
+  transform: rotate(45deg);
+}
+
+.exploit-h {
+  margin: 0 0 0.3rem;
+  font-size: 0.8rem;
+  font-weight: 650;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--label-2);
+}
+
+.exploit-list {
+  margin: 0;
+  padding-left: 1.1rem;
+  display: grid;
+  gap: 0.35rem;
+}
+
+.exploit-result {
+  margin-top: 0.6rem;
+}
+
+/* Log --------------------------------------------------------------------- */
+
+.log-live {
+  text-align: center;
+  align-items: stretch;
+}
+
+.log-timer {
+  font-size: 2.6rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.live-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-right: 4px;
+  border-radius: 50%;
+  background: var(--green);
+  animation: live-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes live-pulse {
+  50% {
+    opacity: 0.35;
+  }
+}
+
+.log-field label {
+  color: var(--label);
+}
+
+.log-input {
+  width: 55%;
+  max-width: 220px;
+  flex: none;
+}
+
+.log-input input,
+.log-input select {
+  text-align: right;
+  background: transparent;
+  padding-right: 0;
+}
+
+.log-input input[aria-invalid='true'] {
+  color: var(--red-text);
+}
+
+.log-textarea {
+  font: inherit;
+  font-size: max(16px, 1rem);
+  width: 100%;
+  min-height: 6rem;
+  padding: 0.7rem 0.9rem;
+  border: none;
+  border-radius: 14px;
+  color: var(--label);
+  background: var(--surface);
+  resize: vertical;
+}
+
+.log-textarea:focus {
+  outline: 2px solid var(--tint);
+}

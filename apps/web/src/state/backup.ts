@@ -6,7 +6,7 @@ import { db } from './db';
  * so a cleared browser or a new phone does not cost months of review.
  */
 
-const TABLES = ['cards', 'reviews', 'lessons', 'saved', 'answers', 'daily', 'hands', 'sessions', 'events'] as const;
+const TABLES = ['cards', 'reviews', 'lessons', 'saved', 'answers', 'daily', 'hands', 'sessions', 'events', 'scenarios', 'logged'] as const;
 const SETTINGS_KEY = 'felt.settings.v1';
 const FORMAT = 'felt-backup';
 

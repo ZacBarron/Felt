@@ -1,6 +1,6 @@
 import { actionFrequencies, actionRange, buildChart, positionsFor, rangePercent } from '@felt/core';
 import { describe, expect, it } from 'vitest';
-import { CURRICULUM, STARTER_CHARTS } from '../src';
+import { CURRICULUM, PLAYER_TYPES, STARTER_CHARTS, TELLS } from '../src';
 
 describe('starter charts', () => {
   it('use real seat names for their table size', () => {
@@ -209,5 +209,30 @@ describe('lessons', () => {
     expect(scoreRecall(mix('9max-100-bb-vs-btn', 'A4s'), 'call')).toBe(1);
     expect(mix('9max-100-iso-btn-vs-1limp', '44')).toEqual({ raise: 0.5, call: 0.5 });
     expect(primaryAction(mix('9max-100-iso-btn-vs-1limp', 'ATo'))).toBe('raise');
+  });
+});
+
+describe('exploits', () => {
+  it('keeps player type stats possible', () => {
+    for (const p of PLAYER_TYPES) {
+      expect(p.stats.vpip[0]).toBeLessThanOrEqual(p.stats.vpip[1]);
+      expect(p.stats.pfr[0]).toBeLessThanOrEqual(p.stats.pfr[1]);
+      // You cannot raise preflop more often than you put money in.
+      expect(p.stats.pfr[1]).toBeLessThanOrEqual(p.stats.vpip[1]);
+      expect(p.leaks.length).toBeGreaterThan(0);
+      expect(p.adjust.length).toBeGreaterThan(0);
+    }
+  });
+
+  it('rates few tells as strong and has unique ids', () => {
+    expect(TELLS.filter((t) => t.reliability === 'strong').length).toBeLessThanOrEqual(3);
+    const ids = [...PLAYER_TYPES.map((p) => p.id), ...TELLS.map((t) => t.id)];
+    expect(new Set(ids).size).toBe(ids.length);
+  });
+
+  it('uses no em dashes or semicolons in exploit copy', () => {
+    const text = JSON.stringify([PLAYER_TYPES, TELLS]);
+    expect(text).not.toMatch(/—/);
+    expect(text).not.toMatch(/;/);
   });
 });

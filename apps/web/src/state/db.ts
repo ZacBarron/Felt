@@ -93,6 +93,33 @@ export interface StoredHand {
   raw: string;
 }
 
+/** A finished scenario: the river grade from Felt Solver and whether preflop matched the chart. */
+export interface StoredScenario {
+  id: string;
+  at: Date;
+  grade: 'best' | 'good' | 'inaccuracy' | 'mistake' | 'blunder';
+  preflopRight: boolean;
+  lossBb: number;
+}
+
+/** A hand written down at the table, to study later. */
+export interface LoggedHand {
+  id?: number;
+  at: Date;
+  sessionId?: number;
+  /** Hero's cards, like 'AhKd'. Optional: sometimes you only remember the spot. */
+  cards?: string;
+  position?: string;
+  board?: string;
+  /** What happened, in the player's own words or shorthand. */
+  action: string;
+  /** Result in big blinds, when known. */
+  resultBb?: number;
+  /** Flagged to look at again. */
+  flagged: boolean;
+  note?: string;
+}
+
 /** A live session imported from a spreadsheet or bankroll app. */
 export interface StoredSession {
   id?: number;
@@ -102,6 +129,12 @@ export interface StoredSession {
   stakes?: string;
   bb?: number;
   importedAt: Date;
+  /** Where it came from: a spreadsheet import or the Log. */
+  source?: 'csv' | 'log';
+  venue?: string;
+  buyIn?: number;
+  cashOut?: number;
+  note?: string;
 }
 
 /** A product event, kept on this device for measuring what works. Nothing is uploaded. */
@@ -156,6 +189,8 @@ export const db = new Dexie('felt') as Dexie & {
   hands: EntityTable<StoredHand, 'id'>;
   sessions: EntityTable<StoredSession, 'id'>;
   events: EntityTable<StoredEvent, 'id'>;
+  scenarios: EntityTable<StoredScenario, 'id'>;
+  logged: EntityTable<LoggedHand, 'id'>;
 };
 
 db.version(1).stores({
@@ -209,3 +244,9 @@ db.version(7)
         }
       }),
   );
+
+// Version 8 adds scenario results and hands logged at the table.
+db.version(8).stores({
+  scenarios: 'id, at',
+  logged: '++id, at, sessionId, flagged',
+});

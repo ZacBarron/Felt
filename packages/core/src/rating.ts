@@ -189,6 +189,8 @@ export const DIFFICULTY = {
   lessonAdvanced: 1600,
   /** A decision from a saved solver spot: the player chose it after seeing the answer, so it is not rated as the hardest item. */
   solverSpot: 1450,
+  /** A river decision in a scenario, graded by Felt Solver for the hero's exact hand. */
+  scenarioRiver: 1500,
 } as const;
 
 /**

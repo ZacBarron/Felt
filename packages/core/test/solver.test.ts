@@ -36,6 +36,16 @@ describe('postflop solver', () => {
     const call = facing.node.actions.findIndex((a) => a.kind === 'call');
     expect(solver.aggregate(facing.node, facing.reach[0])[call]).toBeCloseTo(0.5, 1);
 
+    // Per hand action values: at equilibrium, mixed hands are indifferent, and value hands gain by betting.
+    const qj = solver.actionEVs([0, bet], parseCards('QhJh') as [number, number]);
+    const ev = (r: typeof qj, kind: string) => r.evs[r.actions.findIndex((a) => a.kind === kind)];
+    expect(ev(qj, 'call')).toBeCloseTo(ev(qj, 'fold'), 1);
+    const sixFive = solver.actionEVs([0], parseCards('6h5h') as [number, number]);
+    expect(ev(sixFive, 'bet')).toBeCloseTo(ev(sixFive, 'check'), 1);
+    const kings = solver.actionEVs([0], parseCards('KhKd') as [number, number]);
+    // Betting a set wins the 10 chip pot plus a call half the time: 5 chips more than checking.
+    expect(ev(kings, 'bet') - ev(kings, 'check')).toBeCloseTo(5, 1);
+
     // Game value: in position wins the pot with sets, and earns from the bluffs being exactly break even.
     const [ev0, ev1] = solver.rangeEV();
     expect(ev0 + ev1).toBeCloseTo(10, 6);
