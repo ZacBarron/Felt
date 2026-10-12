@@ -18,17 +18,22 @@ interface Props {
 }
 
 const EVIDENCE: Record<Evidence, { label: string; title: string }> = {
-  math: { label: 'Exact math', title: 'Follows from the rules and arithmetic' },
-  solver: { label: 'Solver pattern, approximate', title: 'How equilibrium strategies tend to play. Directional, not exact frequencies.' },
-  exploit: { label: 'Player tendency', title: 'An assumption about players. Check it against your own hands.' },
+  math: { label: 'Exact math', title: 'This is pure math, so it is always true.' },
+  solver: { label: 'Approximate solver pattern', title: 'This is how solvers tend to play. Treat it as a direction, not an exact number.' },
+  exploit: { label: 'Player tendency', title: 'This is what many players tend to do. Check it against your own games.' },
 };
 
 function EvidenceTag({ evidence }: { evidence?: Evidence }) {
   if (!evidence) return null;
   const e = EVIDENCE[evidence];
+  const [open, setOpen] = useState(false);
+  // The explanation opens on tap, so touch and screen reader users get it too.
   return (
-    <span className={`evidence evidence-${evidence}`} title={e.title}>
-      {e.label}
+    <span className="evidence-wrap">
+      <button type="button" className={`evidence evidence-${evidence}`} aria-expanded={open} onClick={() => setOpen((o) => !o)}>
+        {e.label}
+      </button>
+      {open && <span className="evidence-note">{e.title}</span>}
     </span>
   );
 }
@@ -201,7 +206,7 @@ export function StepView({ step, onAnswer, answered }: Props) {
     case 'takeaway':
       return (
         <div className="lesson-step">
-          <h2 className="display lesson-h2">Remember</h2>
+          <h2 className="display lesson-h2">Key points</h2>
           <div className="takeaways">
             {step.points.map((p, i) => (
               <div key={i} className="takeaway" style={{ animationDelay: `${120 + i * 110}ms` }}>
@@ -242,7 +247,7 @@ function Quiz({
   return (
     <div className="lesson-step">
       <div className="pill pill-tint" style={{ alignSelf: 'flex-start' }}>
-        Quick check
+        Question
       </div>
       <h2 className="lesson-question">{step.question}</h2>
       <div className="choices">

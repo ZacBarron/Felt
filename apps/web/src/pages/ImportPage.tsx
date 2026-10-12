@@ -67,8 +67,16 @@ export function ImportPage() {
       const r = await importSessionCsv(t);
       parts.push(
         r.sessions.length
-          ? `${plural(r.sessions.length, 'session')} read${r.tournaments ? `, ${plural(r.tournaments, 'tournament')} left out` : ''}${r.skipped ? `, ${plural(r.skipped, 'row')} skipped` : ''}. Length from “${r.columns.hours}”, result from “${r.columns.profit ?? `${r.columns.cashOut} minus ${r.columns.buyIn}`}”.`
-          : 'No sessions found. Felt needs a column for session length (hours, duration or minutes) and one for the result (profit, net, result, or buy in and cash out).',
+          ? [
+              `Found ${plural(r.sessions.length, 'session')}.`,
+              r.tournaments ? `We left out ${plural(r.tournaments, 'tournament')}.` : '',
+              r.skipped ? `We skipped ${plural(r.skipped, 'row')} we could not read.` : '',
+              `Length came from the ${r.columns.hours} column.`,
+              r.columns.profit ? `Results came from the ${r.columns.profit} column.` : `Results are ${r.columns.cashOut} minus ${r.columns.buyIn}.`,
+            ]
+              .filter(Boolean)
+              .join(' ')
+          : 'We did not find any sessions. Your file needs a column for how long you played, like Hours. It also needs a result column, like Profit, or Buy in and Cash out columns.',
       );
     }
     setCsvResult(parts.join(' '));
@@ -95,8 +103,8 @@ export function ImportPage() {
         <h2 className="section-title">Hand histories</h2>
         <div className="card stack import-card">
           <p className="import-copy">
-            Import hand history text files from PokerStars, GGPoker and sites that use the same format. Felt reads your seat, results and preflop
-            decisions. Everything stays on this device.
+            Import hand history files from PokerStars, GGPoker or any site with the same format. Felt reads your preflop decisions and results.
+            Everything stays on this device.
           </p>
           <input
             ref={handInput}
@@ -143,8 +151,8 @@ export function ImportPage() {
           )}
         </div>
         <div className="section-footer">
-          <strong>PokerTracker 4 or Holdem Manager 3:</strong> Felt cannot open their databases, which live on your computer. Export your hands from the
-          tracker as hand history text (PokerStars format), then import the files here.
+          <strong>Using PokerTracker 4 or Holdem Manager 3?</strong> Felt cannot open their databases. Export your hands as PokerStars hand histories.
+          Then import those files here.
         </div>
       </section>
 
@@ -164,15 +172,14 @@ export function ImportPage() {
               </div>
               {stats.sd100 !== undefined && (
                 <div className="footnote num">
-                  95% range {signed(stats.bbPer100 - half, 0)} to {signed(stats.bbPer100 + half, 0)} bb/100. Standard deviation {stats.sd100.toFixed(0)}{' '}
-                  bb/100.
+                  Your real win rate is likely between {signed(stats.bbPer100 - half, 0)} and {signed(stats.bbPer100 + half, 0)} bb per 100 hands.
                 </div>
               )}
             </div>
             {resultsAreNoise(stats.hands, sd) && (
               <div className="explain">
-                <strong>Too few hands to tell.</strong> Your results cannot yet separate a winner from a loser: the range above is the honest answer. It
-                narrows to plus or minus 10 bb/100 at about {Math.round((100 * (1.96 * sd) ** 2) / 100 / 1000)}k hands.
+                <strong>It is too early to tell.</strong> This many hands cannot show whether you are winning. The range narrows to about 10 bb per 100
+                hands either way at {(Math.round((100 * (1.96 * sd) ** 2) / 100 / 1000) * 1000).toLocaleString()} hands.
               </div>
             )}
             <div className="import-stats">
@@ -193,25 +200,27 @@ export function ImportPage() {
                 <span className="footnote">WTSD</span>
               </div>
               <div>
-                <span className="num">{stats.cbetChances ? pct(stats.cbet) : 'n/a'}</span>
+                <span className="num">{stats.cbetChances ? pct(stats.cbet) : 'None yet'}</span>
                 <span className="footnote">Flop c-bet</span>
               </div>
               <div>
-                <span className="num">{stats.foldTo3betChances ? pct(stats.foldTo3bet) : 'n/a'}</span>
+                <span className="num">{stats.foldTo3betChances ? pct(stats.foldTo3bet) : 'None yet'}</span>
                 <span className="footnote">Fold to 3bet</span>
               </div>
               <div>
-                <span className="num">{stats.aggression !== undefined ? stats.aggression.toFixed(1) : 'n/a'}</span>
+                <span className="num">{stats.aggression !== undefined ? stats.aggression.toFixed(1) : 'None yet'}</span>
                 <span className="footnote">Aggression</span>
               </div>
               <div>
-                <span className="num">{stats.wtsd > 0 ? pct(stats.wsd) : 'n/a'}</span>
+                <span className="num">{stats.wtsd > 0 ? pct(stats.wsd) : 'None yet'}</span>
                 <span className="footnote">Won at showdown</span>
               </div>
             </div>
             <div className="footnote">
-              Flop c-bet: bets when you raised last before the flop and it was checked to you ({plural(stats.cbetChances, 'chance')}). Fold to 3bet: after
-              you raised ({plural(stats.foldTo3betChances, 'chance')}). Aggression: bets and raises per call after the flop. Small samples swing a lot.
+              VPIP is how often you put money in before the flop. PFR is how often you raised. WTSD is how often you went to showdown after seeing a
+              flop. Flop c-bet counts your bets after raising preflop when it was checked to you ({plural(stats.cbetChances, 'chance')}). Fold to 3bet
+              counts folds after you raised and someone 3bet ({plural(stats.foldTo3betChances, 'chance')}). Aggression is your bets and raises per call
+              after the flop. Small samples swing a lot.
             </div>
           </div>
           <div className="list" style={{ marginTop: '0.75rem' }}>
@@ -228,7 +237,7 @@ export function ImportPage() {
               </div>
             ))}
           </div>
-          <div className="section-footer">bb/100 by seat. The blinds lose money for everyone; compare them with each other, not with the button.</div>
+          <div className="section-footer">Win rate by seat, in bb per 100 hands. The blinds lose money for everyone. Compare them with each other, not with the button.</div>
         </section>
       )}
 
@@ -244,18 +253,18 @@ export function ImportPage() {
                   <span className="grow">
                     <span style={{ fontWeight: 600 }}>{r.seat}</span>
                     <span className="footnote" style={{ display: 'block' }}>
-                      {plural(r.chances, 'chance')}, chart {pct(chart)}
+                      Chart opens {pct(chart)}, from {plural(r.chances, 'chance')}
                     </span>
                   </span>
                   <span className="num stat-col">{pct(r.rate)}</span>
-                  <span className={`pill ${off ? 'pill-warn' : 'pill-good'}`}>{off ? (r.rate > chart ? 'Loose' : 'Tight') : 'In range'}</span>
+                  <span className={`pill ${off ? 'pill-warn' : 'pill-good'}`}>{off ? (r.rate > chart ? 'Loose' : 'Tight') : 'On target'}</span>
                 </div>
               );
             })}
           </div>
           <div className="section-footer">
-            Seats are matched by how many players are left to act, so a 6-max cutoff is compared with the 9-handed cutoff chart. Only cash hands at least
-            60bb deep without a straddle count. A seat is flagged only when the chart rate falls outside your 95% range.
+            We match seats by how many players act after you. So your 6-max cutoff is compared with the 9-handed cutoff chart. Only cash hands with 60bb or
+            more and no straddle count. We flag a seat only when the chart is clearly outside your likely range.
           </div>
         </section>
       )}
@@ -266,7 +275,7 @@ export function ImportPage() {
           {leaks.length === 0 ? (
             <div className="card" style={{ padding: '1rem' }}>
               <p className="import-copy" style={{ margin: 0 }}>
-                None found. Every open and fold either matched the chart or was a hand the chart mixes.
+                No differences found. Every open and fold matched the chart or was part of the mix.
               </p>
             </div>
           ) : (
@@ -286,7 +295,7 @@ export function ImportPage() {
                             : `You folded. The chart opens it ${pct(l.chartRaise)} of the time.`}
                       </span>
                     </span>
-                    <span className={`pill ${l.kind === 'too tight' ? 'pill-tint' : 'pill-warn'}`}>{l.count}×</span>
+                    <span className={`pill ${l.kind === 'too tight' ? 'pill-tint' : 'pill-warn'}`}>{plural(l.count, 'time')}</span>
                   </div>
                 ))}
               </div>
@@ -296,8 +305,9 @@ export function ImportPage() {
             </>
           )}
           <div className="section-footer">
-            Compared with Felt’s approximate starter charts, which assume 2.5bb online opens. Only near pure differences show: opening a hand the chart
-            opens 5% of the time or less, or folding one it opens 95% or more. Small blind limps are a valid strategy and are not listed.
+            We compare against Felt's approximate starter charts, which assume a 2.5bb open. We only list clear differences. That means opening a hand
+            the chart opens 5% of the time or less, or folding one it opens 95% of the time or more. Small blind limps are a fine strategy, so we leave
+            them out.
           </div>
         </section>
       )}
@@ -305,7 +315,7 @@ export function ImportPage() {
       <section>
         <h2 className="section-title">Live sessions</h2>
         <div className="card stack import-card">
-          <p className="import-copy">Import a CSV from a bankroll app or spreadsheet with a date, a session length and a result (or buy in and cash out).</p>
+          <p className="import-copy">Import a CSV file from a bankroll app or spreadsheet. It needs a date, how long you played and your result. Buy in and cash out columns work too.</p>
           <input
             ref={csvInput}
             type="file"
@@ -347,7 +357,7 @@ export function ImportPage() {
           )}
         </div>
         <div className="section-footer">
-          Imported results feed your win rate on <Link to="/you">You</Link>.
+          Your imported results feed the win rate on the <Link to="/you">You</Link> page.
         </div>
       </section>
 
@@ -362,7 +372,7 @@ export function ImportPage() {
             setCsvResult(undefined);
           }}
         >
-          Remove imported data
+          Remove all imported hands and sessions
         </button>
       )}
     </div>

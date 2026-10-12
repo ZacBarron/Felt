@@ -131,7 +131,7 @@ async function upload(baseVersion: number) {
       write({ conflict: cloud, error: undefined });
       return;
     }
-    write({ error: e instanceof Error ? e.message : 'Sync failed.' });
+    write({ error: e instanceof Error ? e.message : 'Sync did not work. Felt will try again soon.' });
     throw e;
   }
 }

@@ -10,10 +10,7 @@ What Felt is not: a casino, a trading app, a crypto product. No neon, no chips r
 
 ## Voice
 
-- Short, confident, plain. "Start review", not "Let's crush it!"
-- Talks like a sharp coach: specific, never hype. "Not quite" instead of "WRONG".
-- Numbers are stated without spin. Approximate data always says so.
-- No em dashes in copy.
+Felt sounds like a good coach sitting next to you: calm, direct and warm. The full guide, with sentence rules, accessibility, mechanics and the glossary, is [VOICE.md](VOICE.md).
 
 ## Logo
 

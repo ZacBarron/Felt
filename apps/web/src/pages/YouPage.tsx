@@ -62,14 +62,14 @@ function DomainRow({ label, r }: { label: string; r: SkillRating }) {
       <span className="grow" style={{ minWidth: 0 }}>
         <span className="row between">
           <span style={{ fontWeight: 600 }}>{label}</span>
-          <span className="num">{r.games ? `${isProvisional(r) ? '~' : ''}${Math.round(r.rating)}` : 'Not rated'}</span>
+          <span className="num">{r.games ? Math.round(r.rating) : 'Not rated'}</span>
         </span>
         <span className="domain-bar">
           <span style={{ width: r.games ? `${pct * 100}%` : 0, opacity: isProvisional(r) ? 0.45 : 1 }} />
         </span>
         <span className="footnote">
           {r.games
-            ? `${isProvisional(r) ? 'Provisional' : tierLabel(r)}, ${r.games} ${r.games === 1 ? 'answer' : 'answers'}`
+            ? `${tierLabel(r)}, ${r.games} ${r.games === 1 ? 'answer' : 'answers'}`
             : 'Answer questions in this area to get a rating'}
         </span>
       </span>
@@ -79,11 +79,11 @@ function DomainRow({ label, r }: { label: string; r: SkillRating }) {
 
 const assumptionFields = (currency: string): { key: keyof TableAssumptions; label: string; step: number }[] => [
   { key: 'poolRating', label: 'Average Felt Rating at your table', step: 25 },
-  { key: 'edgeScale', label: 'Largest possible edge before costs (bb/100)', step: 5 },
+  { key: 'edgeScale', label: 'Best possible edge before rake, in bb per 100 hands', step: 5 },
   { key: 'flopShare', label: 'Share of hands that see a flop', step: 0.05 },
-  { key: 'flopPotBb', label: 'Average pot when there is a flop (bb)', step: 1 },
-  { key: 'tipPerPot', label: `Tip per pot won (${currency})`, step: 0.5 },
-  { key: 'sd100', label: 'Standard deviation (bb/100)', step: 5 },
+  { key: 'flopPotBb', label: 'Average pot after the flop, in big blinds', step: 1 },
+  { key: 'tipPerPot', label: `Tip per pot you win, in ${currency}`, step: 0.5 },
+  { key: 'sd100', label: 'How much results swing, in bb per 100 hands', step: 5 },
   { key: 'handsPerHour', label: 'Hands per hour', step: 1 },
 ];
 
@@ -121,7 +121,7 @@ export function YouPage() {
         hands: Math.round(sessionHours * a.handsPerHour),
         bb: gameSessions.reduce((t, x) => t + x.profit / (x.bb ?? g.stakes.bb), 0),
         sd: undefined,
-        label: `${gameSessions.length} imported ${gameSessions.length === 1 ? 'session' : 'sessions'}, ${Math.round(sessionHours)} hours at about ${a.handsPerHour} hands an hour`,
+        label: `${gameSessions.length} imported ${gameSessions.length === 1 ? 'session' : 'sessions'} over ${Math.round(sessionHours)} hours`,
       }
     : undefined;
   // Use whichever source covers more hands; typed results only when nothing was imported.
@@ -145,7 +145,7 @@ export function YouPage() {
     update({ ...settings, assumptions: { ...settings.assumptions, [key]: value } });
 
   const share = async () => {
-    const text = `My Felt Rating is ${provisional ? '~' : ''}${Math.round(overall.rating)} (${tierLabel(overall)})${streak?.streak ? `, ${streak.streak} day streak` : ''}.`;
+    const text = `My Felt Rating is ${Math.round(overall.rating)}${provisional ? ' and still settling' : `. My tier is ${tierLabel(overall)}`}.${streak?.streak ? ` I'm on a ${streak.streak} day streak.` : ''}`;
     try {
       if (navigator.share) await navigator.share({ text: `${text}\n${location.origin}` });
       else await navigator.clipboard.writeText(`${text}\n${location.origin}`);
@@ -157,13 +157,13 @@ export function YouPage() {
 
   return (
     <div className="stack" style={{ gap: '1.5rem' }}>
-      <PageHeader title="You" subtitle="Your rating, your strengths, and what they are worth at the table" back={{ to: '/more', label: 'More' }} />
+      <PageHeader title="You" subtitle="Your rating and what it is worth at the table" back={{ to: '/more', label: 'More' }} />
 
       <section className="hero you-hero">
         <div className="hero-label">Felt Rating</div>
         <div className="row" style={{ alignItems: 'baseline', gap: '0.6rem' }}>
           <span className="display num you-rating" aria-label={rated ? `${provisional ? 'About ' : ''}${Math.round(overall.rating)}` : 'Not rated yet'}>
-            {rated ? `${provisional ? '~' : ''}${shown}` : '–'}
+            {rated ? shown : 'Not rated'}
           </span>
           {rated && <span className="pill pill-on-felt">{tierLabel(overall)}</span>}
         </div>
@@ -171,8 +171,8 @@ export function YouPage() {
           {!rated
             ? 'Answer a few questions to get rated. The placement test or a daily challenge is the fastest way.'
             : provisional
-              ? 'Provisional. Your tier appears once your rating settles, after a few dozen answers.'
-              : `95% sure your true rating is between ${Math.round(lo)} and ${Math.round(hi)}.`}
+              ? 'Your rating is still settling. You get a tier after a few dozen answers.'
+              : `We are 95% sure your rating is between ${Math.round(lo)} and ${Math.round(hi)}.`}
         </div>
         {next && (
           <div className="tier-progress">
@@ -192,7 +192,7 @@ export function YouPage() {
           <span className="pill pill-on-felt num">
             {overall.games} rated {overall.games === 1 ? 'answer' : 'answers'}
           </span>
-          {bestRating > 0 && <span className="pill pill-on-felt num">Best {Math.round(bestRating)}</span>}
+          {bestRating > 0 && <span className="pill pill-on-felt num">Best ever {Math.round(bestRating)}</span>}
         </div>
         {rated && (
           <button className="btn btn-lg btn-block btn-hero" onClick={() => void share()} data-haptic="off">
@@ -207,7 +207,7 @@ export function YouPage() {
         </span>
         <span className="grow">
           <span style={{ display: 'block', fontWeight: 650 }}>Weekly league</span>
-          <span className="footnote">Real players near your rating, ranked by rating gained this week.</span>
+          <span className="footnote">Compete with real players near your rating. Whoever gains the most this week ranks highest.</span>
         </span>
         <ChevronRightIcon size={16} className="chev" />
       </Link>
@@ -218,7 +218,7 @@ export function YouPage() {
         </span>
         <span className="grow">
           <span style={{ display: 'block', fontWeight: 650 }}>Practice at your level</span>
-          <span className="footnote">10 decisions picked so you get about 8 in 10 right, with more from your weakest area.</span>
+          <span className="footnote">Answer 10 decisions picked for your level. More of them come from your weakest area.</span>
         </span>
         <ChevronRightIcon size={16} className="chev" />
       </Link>
@@ -230,7 +230,7 @@ export function YouPage() {
             <DomainRow key={d} label={DOMAIN_LABELS[d]} r={currentRating(snap.domains[d])} />
           ))}
         </div>
-        <div className="section-footer">Each answer is weighed by how hard the question is. A hard one right moves your rating more.</div>
+        <div className="section-footer">Harder questions count for more. Getting a hard one right moves your rating the most.</div>
       </section>
 
       <section>
@@ -240,7 +240,7 @@ export function YouPage() {
         <div className="card winrate-card">
           <div className="row between" style={{ alignItems: 'flex-end' }}>
             <div>
-              <div className="footnote">{blended ? 'Model blended with your results' : 'Model estimate from your rating'}</div>
+              <div className="footnote">{blended ? 'Our estimate, using your results too' : 'Our estimate from your rating'}</div>
               <div className="display num winrate-main">
                 {signed(best.mean, 1)}
                 <span className="winrate-unit"> bb/100</span>
@@ -253,21 +253,27 @@ export function YouPage() {
           </div>
           <div className="winrate-range">
             <span className="footnote num">
-              95% range {signed(best.mean - 1.96 * best.sd, 0)} to {signed(best.mean + 1.96 * best.sd, 0)} bb/100
+              Likely between {signed(best.mean - 1.96 * best.sd, 0)} and {signed(best.mean + 1.96 * best.sd, 0)} bb per 100 hands
             </span>
           </div>
           <div className="winrate-lines">
             <div className="row between">
-              <span>Your edge over the table, before costs (model)</span>
+              <span>
+                Your skill edge before rake <span className="pill">Estimate</span>
+              </span>
               <span className="num">{signed(model.edge, 1)}</span>
             </div>
             <div className="row between">
-              <span>Rake you pay</span>
+              <span>
+                Rake you pay <span className="pill">Math</span>
+              </span>
               <span className="num">{signed(-model.costs.rakePer100, 1)}</span>
             </div>
             {model.costs.tipsPer100 > 0 && (
               <div className="row between">
-                <span>Tips</span>
+                <span>
+                  Tips you pay <span className="pill">Math</span>
+                </span>
                 <span className="num">{signed(-model.costs.tipsPer100, 1)}</span>
               </div>
             )}
@@ -277,10 +283,10 @@ export function YouPage() {
             </div>
           </div>
           <p className="footnote" style={{ margin: 0 }}>
-            Rake and tips are computed from your rake rules and the assumed pot sizes below. The edge is a model that compares your rating with an
-            assumed table average; each 100 rating points is worth about {signed(per100Points, 1)} bb/100 ({perHour(per100Points)} an hour) here. Your
-            results take over as they grow.
-            {blended && ` They carry ${Math.round(blended.weightOnResults * 100)}% of the weight now.`}
+            Rake and tips are plain math from your rake settings. Your edge is our estimate from comparing your rating with a typical table. Here, each 100
+            rating points is worth about {signed(per100Points, 1)} bb per 100 hands. That is about {perHour(per100Points)} an hour. As your real results
+            grow, they count for more.
+            {blended && ` Right now they count for ${Math.round(blended.weightOnResults * 100)}%.`} bb/100 means big blinds won per 100 hands.
           </p>
         </div>
       </section>
@@ -302,7 +308,7 @@ export function YouPage() {
             <Link to="/import" className="list-row">
               <span className="grow">
                 <span style={{ display: 'block', fontWeight: 600, color: 'var(--tint)' }}>Import hands or sessions</span>
-                <span className="footnote">Hand histories, tracker exports or a bankroll CSV</span>
+                <span className="footnote">Hand histories or a bankroll CSV file</span>
               </span>
               <ChevronRightIcon size={16} className="chev" />
             </Link>
@@ -318,7 +324,7 @@ export function YouPage() {
               />
             </label>
             <label className="list-row">
-              <span className="grow">Profit ({g.stakes.currency})</span>
+              <span className="grow">Profit in {g.stakes.currency}</span>
               <input
                 className="you-input num"
                 type="number"
@@ -332,16 +338,17 @@ export function YouPage() {
         )}
         <div className="section-footer">
           {source && resultsAreNoise(source.hands, sd)
-            ? 'Your results cannot yet tell a winner from a loser, so your rating carries most of the estimate. '
+            ? 'You do not have enough results yet to show if you are winning. For now, the estimate leans on your rating. '
             : ''}
-          Results alone need about {Math.round(handsForPrecision(10, sd) / 1000)}k hands, roughly {Math.round(handsForPrecision(10, sd) / a.handsPerHour / 100) * 100}{' '}
-          hours of live play, to pin a win rate within 10 bb/100. That is why Felt combines them with your rating.
+          Results alone need about {(Math.round(handsForPrecision(10, sd) / 1000) * 1000).toLocaleString()} hands to pin down your win rate. That is
+          roughly {(Math.round(handsForPrecision(10, sd) / a.handsPerHour / 100) * 100).toLocaleString()} hours of play. So Felt combines your results
+          with your rating.
         </div>
       </section>
 
       <section>
         <button className="list-row card assumptions-toggle" aria-expanded={showAssumptions} onClick={() => setShowAssumptions((s) => !s)}>
-          <span className="grow">Model assumptions</span>
+          <span className="grow">What the estimate assumes</span>
           <span className="footnote">{showAssumptions ? 'Hide' : 'Show and edit'}</span>
         </button>
         {showAssumptions && (
@@ -366,7 +373,7 @@ export function YouPage() {
           </div>
         )}
         <div className="section-footer">
-          Defaults are Felt’s starting estimates for your game, not measurements. See <Link to="/settings">Settings</Link> for the rake rules.
+          These starting numbers are our best guesses for your game. Change any of them if you know better. Rake is set in <Link to="/settings">Settings</Link>.
         </div>
       </section>
     </div>

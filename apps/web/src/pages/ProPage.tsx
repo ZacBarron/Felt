@@ -1,27 +1,23 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { haptic } from '../haptics';
-import { annualSavings, formatPrice, isLessonFree, isPro, PLANS, type PlanOption, purchase, restorePurchases } from '../state/access';
+import { defaultAssumptions, formatAmount, skillEdge, stakesLabel } from '@felt/core';
+import { annualSavings, canOpenLesson, formatPrice, isLessonFree, isPro, PLANS, type PlanOption, purchase, restorePurchases } from '../state/access';
+import { pathPrefs } from '../state/goals';
+import { ratingSnapshot } from '../state/rating';
 import { refreshMe } from '../state/api';
 import { track } from '../state/events';
 import { LESSON_ENTRIES } from '../state/lessons';
 import { trialReminder } from '../state/reminders';
-import { useSettings } from '../state/settings';
+import { type Access, type Profile, useSettings } from '../state/settings';
 import { BrandMark, HeroPattern } from '../ui/Brand';
 import { BottomBar } from '../ui/BottomBar';
-import { BellIcon, CheckIcon, CloseIcon, LearnIcon, LockIcon, SolverIcon, StatsIcon } from '../ui/icons';
+import { BellIcon, CloseIcon, LearnIcon, SolverIcon, StatsIcon } from '../ui/icons';
 import { useBodyClass } from '../ui/useBodyClass';
 import { onRadioKeys } from '../ui/radioKeys';
 
 const WRITTEN = LESSON_ENTRIES.filter((e) => e.content);
 const PRO_LESSONS = WRITTEN.filter((e) => !isLessonFree(e.key)).length;
-
-/** Only what Pro adds. Test outs, review, drills, the daily challenge and imports are free for everyone. */
-const BENEFITS = [
-  { icon: LearnIcon, title: `${PRO_LESSONS} more lessons`, note: `Every one of the ${WRITTEN.length}, from postflop and river play to exploits and tournaments` },
-  { icon: SolverIcon, title: 'Solve your own spots', note: 'Any board, ranges, pot and stack in Felt Solver' },
-  { icon: StatsIcon, title: 'Everything added later', note: 'New lessons and tools come with the subscription' },
-];
 
 function perMonth(plan: PlanOption) {
   return plan.period === 'year' ? plan.price / 12 : plan.price;
@@ -32,8 +28,8 @@ function dateIn(days: number) {
 }
 
 const HEADLINES: Record<string, string> = {
-  onboarding: 'Add every lesson to your plan',
-  lesson: 'This lesson is part of Felt Pro',
+  onboarding: 'Train every spot you play',
+  lesson: 'This lesson is in Felt Pro',
   check: 'Unlock the lessons you need',
   solver: 'Solve your own spots',
 };
@@ -52,6 +48,10 @@ export function ProPage() {
   const [planId, setPlanId] = useState<PlanOption['id']>('annual');
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string>();
+  const [rating, setRating] = useState<number>();
+  useEffect(() => {
+    void ratingSnapshot().then((r) => r.overall.games > 0 && setRating(r.overall.rating));
+  }, []);
   const plan = PLANS.find((p) => p.id === planId)!;
   const close = () => {
     track('paywall_dismissed', { from });
@@ -136,101 +136,86 @@ export function ProPage() {
     }
   };
 
+  const g = settings.game;
+  const assumptions = { ...defaultAssumptions(g), ...settings.assumptions };
+  const base = rating ?? assumptions.poolRating;
+  const per100 = skillEdge(base + 100, assumptions) - skillEdge(base, assumptions);
+  const perHour = (per100 * assumptions.handsPerHour) / 100;
+  const inPlan = planProLessons(settings.profile, settings.access);
+  const charge = dateIn(plan.trialDays);
+
   return (
-    <div className="stack focus-column pro-page">
-      <div className="focus-top">
+    <div className="pro-page focus-column">
+      <div className="focus-top pro-top">
         <button className="icon-btn glass" aria-label="Close" onClick={close} data-haptic="off">
           <CloseIcon size={18} />
         </button>
+        <button className="link-btn footnote" onClick={() => void restore()}>
+          Restore purchases
+        </button>
       </div>
 
-      <div className="hero pro-hero reveal">
-        <HeroPattern />
-        <BrandMark size={44} />
-        <div className="hero-label">Felt Pro</div>
-        <h1 className="display pro-title">{HEADLINES[from] ?? 'Train every spot, every street'}</h1>
-      </div>
+      <header className="pro-head">
+        <div className="pro-eyebrow">
+          <BrandMark size={22} /> Felt Pro
+        </div>
+        <h1 className="display pro-head-title">{HEADLINES[from] ?? 'Train every spot you play'}</h1>
+      </header>
 
-      <div className="plan-options" role="radiogroup" onKeyDown={onRadioKeys} aria-label="Choose a plan">
+      <ul className="pro-values" aria-label="What Felt Pro adds">
+        <li>
+          <span className="pro-benefit-icon" aria-hidden="true">
+            <LearnIcon size={20} />
+          </span>
+          <span className="grow">
+            <strong>{PRO_LESSONS} more lessons</strong>
+            <span className="footnote">{inPlan > 0 ? `${inPlan} of them are in your plan.` : 'River play, exploits and tournaments.'}</span>
+          </span>
+        </li>
+        <li>
+          <span className="pro-benefit-icon" aria-hidden="true">
+            <SolverIcon size={20} />
+          </span>
+          <span className="grow">
+            <strong>Solve your own spots</strong>
+            <span className="footnote">Any board, range and stack size.</span>
+          </span>
+        </li>
+        <li>
+          <span className="pro-benefit-icon" aria-hidden="true">
+            <StatsIcon size={20} />
+          </span>
+          <span className="grow">
+            <strong>Turn skill into winnings</strong>
+            <span className="footnote">
+              {per100 > 0.05
+                ? `By our estimate, 100 more rating points is worth about ${g.units === 'money' ? `${formatAmount(Math.round(perHour), g)} an hour` : `${per100.toFixed(1)} bb per 100 hands`} at ${stakesLabel(g.stakes)} ${g.venue}.`
+                : 'Your Felt Rating shows every step you take.'}
+            </span>
+          </span>
+        </li>
+      </ul>
+
+      <div className="plan-tiles" role="radiogroup" onKeyDown={onRadioKeys} aria-label="Choose a plan">
         {PLANS.map((p) => (
           <button
             key={p.id}
             role="radio"
             aria-checked={p.id === planId}
-            className={`plan-option${p.id === planId ? ' selected' : ''}`}
+            className={`plan-tile${p.id === planId ? ' selected' : ''}`}
             data-haptic="select"
             onClick={() => setPlanId(p.id)}
           >
             {p.id === 'annual' && <span className="plan-badge">Save {annualSavings()}%</span>}
-            <span className="plan-radio" aria-hidden="true">
-              {p.id === planId && <CheckIcon size={14} />}
-            </span>
-            <span className="grow">
-              <span className="plan-label">{p.label}</span>
-              <span className="footnote">
-                {p.trialDays > 0 ? `${p.trialDays} days free, then ` : ''}
-                {formatPrice(p.price)} a {p.period}
-              </span>
-            </span>
-            <span className="plan-price num">
+            <span className="plan-label">{p.label}</span>
+            <span className="plan-tile-price num">
               {formatPrice(perMonth(p))}
-              <span className="footnote">/mo</span>
+              <span className="footnote"> a month</span>
             </span>
+            <span className="footnote">{p.period === 'year' ? `${formatPrice(p.price)} a year` : 'Billed monthly'}</span>
           </button>
         ))}
       </div>
-
-      <div className="list pro-benefits">
-        {BENEFITS.map(({ icon: Icon, title, note }) => (
-          <div key={title} className="list-row">
-            <span className="pro-benefit-icon" aria-hidden="true">
-              <Icon size={20} />
-            </span>
-            <span className="grow">
-              <span style={{ display: 'block', fontWeight: 600 }}>{title}</span>
-              <span className="footnote">{note}</span>
-            </span>
-          </div>
-        ))}
-      </div>
-      <p className="footnote pro-free-note">
-        Always free: the daily challenge, review and drills, placement and test outs, saves, imports, and the first topic of every track.
-      </p>
-
-      {plan.trialDays > 0 && (
-        <section>
-          <h2 className="section-title">How the trial works</h2>
-          <div className="trial-timeline card">
-            <div className="trial-step">
-              <span className="trial-dot" aria-hidden="true">
-                <LockIcon size={14} />
-              </span>
-              <div>
-                <strong>Today</strong>
-                <div className="footnote">Everything unlocks. No charge.</div>
-              </div>
-            </div>
-            <div className="trial-step">
-              <span className="trial-dot" aria-hidden="true">
-                <BellIcon size={14} />
-              </span>
-              <div>
-                <strong>{dateIn(plan.trialDays - 2)}</strong>
-                <div className="footnote">Two days left. After you start, you can add a calendar reminder for this day.</div>
-              </div>
-            </div>
-            <div className="trial-step">
-              <span className="trial-dot" aria-hidden="true">
-                <CheckIcon size={14} />
-              </span>
-              <div>
-                <strong>{dateIn(plan.trialDays)}</strong>
-                <div className="footnote">You are charged {formatPrice(plan.price)}. Cancel before then and you pay nothing.</div>
-              </div>
-            </div>
-          </div>
-        </section>
-      )}
 
       {message && (
         <div className="explain bad reveal" role="alert">
@@ -238,30 +223,35 @@ export function ProPage() {
         </div>
       )}
 
-      <p className="footnote pro-fine">
-        Renews automatically until you cancel. Cancel any time in the store you subscribed through.
-        <br />
-        <button className="link-btn" onClick={restore}>
-          Restore purchases
-        </button>
-        {' · '}
-        <Link to="/terms" className="link-btn">
-          Terms
-        </Link>
-        {' · '}
-        <Link to="/privacy" className="link-btn">
-          Privacy
-        </Link>
-      </p>
+      <details className="pro-details">
+        <summary>How the trial and billing work</summary>
+        <div className="stack" style={{ gap: '0.5rem', paddingTop: '0.5rem' }}>
+          {plan.trialDays > 0 && (
+            <p>
+              Today everything unlocks for free. On {dateIn(plan.trialDays - 2)}, you have 2 days left. On {charge}, you pay {formatPrice(plan.price)}.
+              Cancel before then and you pay nothing.
+            </p>
+          )}
+          <p>It renews until you cancel. You can cancel any time in Account or in the store you used.</p>
+          <p>Always free: review, drills, the daily challenge, placement, saves, imports and the first topic of every track.</p>
+          <p>
+            <Link to="/terms" className="link-btn">
+              Terms
+            </Link>
+            {' · '}
+            <Link to="/privacy" className="link-btn">
+              Privacy
+            </Link>
+          </p>
+        </div>
+      </details>
 
       <BottomBar>
         <div className="pro-cta-price footnote">
-          {plan.trialDays > 0
-            ? `${plan.trialDays} days free, then ${formatPrice(plan.price)} a year (${formatPrice(perMonth(plan))}/mo). Charged ${dateIn(plan.trialDays)}.`
-            : `${formatPrice(plan.price)} a month. Cancel any time.`}
+          {plan.trialDays > 0 ? `Free until ${charge}. Then ${formatPrice(plan.price)} a year.` : `${formatPrice(plan.price)} a month. Cancel any time.`}
         </div>
         <button className="btn btn-primary btn-lg btn-block" onClick={buy} disabled={busy} data-haptic="off">
-          {busy ? 'One moment' : plan.trialDays > 0 ? `Start ${plan.trialDays} day free trial` : `Subscribe for ${formatPrice(plan.price)} a month`}
+          {busy ? 'One moment' : plan.trialDays > 0 ? 'Start my free week' : 'Subscribe'}
         </button>
         <button className="btn btn-plain btn-block pro-later" onClick={close}>
           {from === 'onboarding' ? 'Continue with the free plan' : 'Not now'}
@@ -269,4 +259,10 @@ export function ProPage() {
       </BottomBar>
     </div>
   );
+}
+
+/** Pro lessons among the modules the player's goals and focus bring forward. */
+function planProLessons(profile: Profile, access: Access): number {
+  const modules = new Set(pathPrefs(profile).focus);
+  return LESSON_ENTRIES.filter((e) => e.content && !canOpenLesson(e.key, access) && modules.has(e.key.split('/').slice(0, 2).join('/'))).length;
 }

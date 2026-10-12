@@ -6,7 +6,7 @@ export const GOALS: { id: Goal; label: string; note: string; plan: string }[] = 
   { id: 'move-up', label: 'Move up in stakes', note: 'Get good enough for bigger games', plan: 'move up in stakes' },
   { id: 'go-pro', label: 'Play professionally', note: 'Poker as a real income', plan: 'play at a professional level' },
   { id: 'master-gto', label: 'Master GTO', note: 'Understand why solvers play the way they do', plan: 'master GTO' },
-  { id: 'tournaments', label: 'Go deep in tournaments', note: 'Short stacks, ICM, final tables', plan: 'go deep in tournaments' },
+  { id: 'tournaments', label: 'Go deep in tournaments', note: 'Short stacks and final tables', plan: 'go deep in tournaments' },
 ];
 
 export const EXPERIENCE: { id: Experience; label: string; note: string }[] = [
@@ -25,7 +25,13 @@ export const FOCUS: { id: Focus; label: string; module: string }[] = [
   { id: 'mental', label: 'Tilt and mindset', module: 'mindset/mental' },
 ];
 
-export const DAILY_OPTIONS: { minutes: number }[] = [{ minutes: 5 }, { minutes: 10 }, { minutes: 15 }, { minutes: 20 }];
+/** What each daily amount buys, never a finish line: there is always more to train. */
+export const DAILY_OPTIONS: { minutes: number; note: string }[] = [
+  { minutes: 5, note: 'Enough for your daily review' },
+  { minutes: 10, note: 'A lesson plus your review' },
+  { minutes: 15, note: 'Your full plan each day' },
+  { minutes: 20, note: 'Your plan plus extra practice' },
+];
 
 /** Study cues for an if-then plan: "When I ..., I will study". */
 export const CUES: { id: string; label: string; phrase: string; time: [number, number] }[] = [

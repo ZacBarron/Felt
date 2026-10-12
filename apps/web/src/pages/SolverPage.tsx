@@ -34,7 +34,7 @@ const PRESETS: Preset[] = [
   {
     id: 'river-barrels',
     label: 'River after two barrels',
-    note: 'BTN opened and bet flop and turn; BB called twice. 100bb stacks, so 85bb are left behind. Missed draws are only the heart combos that had a flush draw.',
+    note: 'BTN opened and bet the flop and turn. BB called both times. Stacks started at 100bb, so 85bb are left. The only missed draws are hearts that had a flush draw.',
     board: 'Kc8h5h2s2d',
     pot: 30,
     stack: 85,
@@ -45,8 +45,8 @@ const PRESETS: Preset[] = [
   },
   {
     id: 'river-preflop',
-    label: 'Toy: preflop ranges on the river',
-    note: 'BTN open vs BB call, checked to the river. A teaching toy: real ranges that check twice would hold far fewer strong hands.',
+    label: 'Simplified river spot',
+    note: 'BTN opens and BB calls. It checks to the river. This is a simplified example, since real ranges that check twice hold far fewer strong hands.',
     board: 'Ks7d2c4h9s',
     pot: 5.5,
     stack: 97.5,
@@ -55,8 +55,8 @@ const PRESETS: Preset[] = [
   },
   {
     id: 'turn-preflop',
-    label: 'Turn, preflop ranges',
-    note: 'Every river card is solved. Takes a few minutes.',
+    label: 'Turn spot with preflop ranges',
+    note: 'This solves every river card, so it takes a few minutes.',
     board: 'Ks7d2c4h',
     pot: 5.5,
     stack: 97.5,
@@ -174,7 +174,7 @@ export function SolverPage() {
       rangeText.forEach((r) => parseComboRange(r));
       return undefined;
     } catch (e) {
-      return e instanceof Error ? e.message : 'Invalid range';
+      return e instanceof Error ? e.message : 'Check this range. Something in it is not a valid hand.';
     }
   }, [custom, rangeText]);
 
@@ -234,7 +234,7 @@ export function SolverPage() {
 
   return (
     <div className="stack" style={{ gap: '1.4rem' }}>
-      <PageHeader title="Solver" back={{ to: '/more', label: 'More' }} subtitle="A near equilibrium for the ranges and sizes you choose, with its exploitability shown" />
+      <PageHeader title="Solver" back={{ to: '/more', label: 'More' }} subtitle="See how to play a spot against a perfect opponent" />
 
       <section>
         <h2 className="section-title">Spot</h2>
@@ -248,12 +248,12 @@ export function SolverPage() {
             {!pro && <LockIcon size={12} />} Custom
           </button>
         </div>
-        <div className="section-footer">{custom ? 'Type any ranges, board and stacks. Ranges take hand classes like KJ or 98s and exact combos like QhJh.' : preset.note}</div>
+        <div className="section-footer">{custom ? 'Enter your own spot. Ranges can use hands like KJ or 98s, or exact cards like QhJh.' : preset.note}</div>
       </section>
 
       <div className="card stack solver-setup" style={{ gap: '0.9rem' }}>
         <label className="solver-field">
-          <span className="footnote">Board (turn or river)</span>
+          <span className="footnote">Board, 4 or 5 cards</span>
           <input value={board} disabled={!custom} onChange={(e) => setBoard(e.target.value)} spellCheck={false} autoCapitalize="none" />
         </label>
         {boardCards && (
@@ -265,11 +265,11 @@ export function SolverPage() {
         )}
         <div className="solver-row">
           <label className="solver-field">
-            <span className="footnote">Pot (bb)</span>
+            <span className="footnote">Pot in big blinds</span>
             <input type="number" inputMode="decimal" value={pot} disabled={!custom} onChange={(e) => setPot(Number(e.target.value))} />
           </label>
           <label className="solver-field">
-            <span className="footnote">Stack behind (bb)</span>
+            <span className="footnote">Stack left, in big blinds</span>
             <input type="number" inputMode="decimal" value={stack} disabled={!custom} onChange={(e) => setStack(Number(e.target.value))} />
           </label>
         </div>
@@ -287,7 +287,7 @@ export function SolverPage() {
         ))}
         {rangeError && <div className="explain bad">{rangeError}</div>}
         <div>
-          <span className="footnote">Bet sizes, % of pot</span>
+          <span className="footnote">Bet sizes as a percent of the pot</span>
           <div className="chips" style={{ marginTop: 6 }}>
             {SIZE_OPTIONS.map((s) => (
               <button
@@ -301,7 +301,7 @@ export function SolverPage() {
               </button>
             ))}
             <button className="chip" aria-pressed={raise} data-haptic="select" onClick={() => setRaise((r) => !r)}>
-              Raises
+              Allow raises
             </button>
           </div>
           <div className="footnote" style={{ marginTop: 6 }}>
@@ -316,8 +316,8 @@ export function SolverPage() {
             <SolverIcon size={22} />
           </span>
           <span className="grow">
-            <span style={{ display: 'block', fontWeight: 650 }}>Solve your own spots with Pro</span>
-            <span className="footnote">The example spots are free. Custom boards, ranges and stacks need Pro.</span>
+            <span style={{ display: 'block', fontWeight: 650 }}>Solve your own spots with Felt Pro</span>
+            <span className="footnote">The example spots are free. Setting up your own spot needs Felt Pro.</span>
           </span>
         </Link>
       )}
@@ -331,7 +331,7 @@ export function SolverPage() {
             <span className={`pill ${solver.solved && solver.solved.exploitability <= 0.5 ? 'pill-good' : 'pill-tint'} num`}>
               {(solver.solved ?? solver.progress)?.exploitability !== undefined
                 ? `Exploitability ${Math.min(99.99, (solver.solved ?? solver.progress)!.exploitability).toFixed(2)}%`
-                : 'Starting'}
+                : 'Starting…'}
             </span>
           </div>
           <div className="check-bar" style={{ marginTop: 10 }} aria-hidden="true">
@@ -343,8 +343,8 @@ export function SolverPage() {
           </div>
           <div className="footnote" style={{ marginTop: 8 }}>
             {solver.solved
-              ? `${solver.solved.iterations} iterations in ${solver.solved.seconds.toFixed(1)}s. A perfect opponent could gain at most ${solver.solved.exploitability.toFixed(2)}% of the pot against this strategy. EV: out of position ${solver.solved.ev[0].toFixed(2)}bb, in position ${solver.solved.ev[1].toFixed(2)}bb.`
-              : `Iteration ${solver.progress?.iterations ?? 0}. Exploitability is how much a perfect opponent could still gain; it falls as the solve converges.`}
+              ? `Solved in ${solver.solved.seconds.toFixed(1)} seconds. A perfect opponent could win at most ${solver.solved.exploitability.toFixed(2)}% of the pot against this strategy. Expected value is ${solver.solved.ev[0].toFixed(2)}bb out of position and ${solver.solved.ev[1].toFixed(2)}bb in position.`
+              : `Still solving. Exploitability is how much a perfect opponent could still win. It drops as the solver improves.`}
           </div>
         </div>
       )}
@@ -352,11 +352,11 @@ export function SolverPage() {
       {solver.solved && view && (
         <section className="stack" style={{ gap: '0.8rem' }}>
           <h2 className="section-title" id="solver-line" style={{ marginBottom: 0 }}>
-            Line
+            Action so far
           </h2>
           <div className="chips" role="group" aria-labelledby="solver-line">
             <button className="chip" aria-pressed={path.length === 0} onClick={() => go([], [])}>
-              Start
+              Start of hand
             </button>
             {labels.map((l, i) => (
               <button key={i} className="chip" aria-pressed={i === labels.length - 1} onClick={() => go(path.slice(0, i + 1), labels.slice(0, i + 1))}>
@@ -402,7 +402,7 @@ export function SolverPage() {
                   )}
                 </div>
               ) : (
-                <div className="footnote">Tap a hand to see its strategy and save it to your review deck.</div>
+                <div className="footnote">Tap a hand to see how to play it. You can save it to your review.</div>
               )}
               <div className="list">
                 {view.actions.map((a, i) => (
@@ -438,8 +438,8 @@ export function SolverPage() {
       )}
 
       <p className="footnote">
-        Felt Solver runs discounted CFR on your device, combo by combo, with exact card removal. It stops once exploitability is a small share of
-        the pot, so the answer is a near equilibrium for the game you define; the ranges and sizes you choose are the assumptions.
+        Felt Solver runs on your device and checks every card combination. It stops when a perfect opponent could gain only a tiny share of the pot.
+        The answer is only as good as the ranges and bet sizes you give it.
       </p>
 
       <BottomBar>

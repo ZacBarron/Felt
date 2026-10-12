@@ -89,7 +89,7 @@ export function LabPage() {
       <PageHeader
         title="Spot Lab"
         kicker="Single raised pot, flop"
-        subtitle="BTN opens, BB calls and checks. Your equity, the pot math, and the EV of every option."
+        subtitle="BTN opens, and BB calls and checks. Work out your equity and the best play."
       />
 
       <div className="card" style={{ padding: '0.5rem' }}>
@@ -114,7 +114,7 @@ export function LabPage() {
               <input value={boardText} onChange={(e) => setBoardText(e.target.value)} size={14} />
             </label>
           </div>
-          {!valid && <p className="grade-blunder">{typeof hero === 'string' ? hero : typeof board === 'string' ? board : 'Duplicate cards'}</p>}
+          {!valid && <p className="grade-blunder">{typeof hero === 'string' ? hero : typeof board === 'string' ? board : 'The same card appears twice.'}</p>}
           {equity && (
             <table className="kv">
               <tbody>
@@ -133,7 +133,7 @@ export function LabPage() {
                   <td>{(equity.equity * 100).toFixed(1)}%</td>
                 </tr>
                 <tr>
-                  <td>Win / tie / lose</td>
+                  <td>Win, tie, lose</td>
                   <td>
                     {(equity.win * 100).toFixed(0)} / {(equity.tie * 100).toFixed(0)} / {(equity.lose * 100).toFixed(0)}
                   </td>
@@ -168,7 +168,7 @@ export function LabPage() {
               </tr>
               {equity && (
                 <tr>
-                  <td>EV of calling (showdown, no further bets)</td>
+                  <td>Value of calling if no one bets again</td>
                   <td className={callEV(potFacing, bet, equity.equity) >= 0 ? 'grade-best' : 'grade-blunder'}>
                     {fmt(callEV(potFacing, bet, equity.equity))}
                   </td>
@@ -182,7 +182,7 @@ export function LabPage() {
       <div className="card stack">
         <div>
           <h2>Your decision: BB checked to you</h2>
-          <p className="muted">Pick an action, then see the GTO mix and the EV of each option. Numbers here are illustrative.</p>
+          <p className="muted">Pick an action. Then see the solver's mix and what each option is worth. These numbers are examples, not real solver output.</p>
         </div>
         <ActionMixBar
           actions={DEMO_NODE.actions}
@@ -198,7 +198,7 @@ export function LabPage() {
           <div className="row">
             <strong className={`grade-${graded.grade}`}>{graded.grade[0].toUpperCase() + graded.grade.slice(1)}</strong>
             <span className="muted">
-              EV loss {graded.evLoss.toFixed(2)}bb ({(graded.evLossPctPot * 100).toFixed(1)}% of pot). Best: {graded.best.label}.
+              You lose {graded.evLoss.toFixed(2)}bb, or {(graded.evLossPctPot * 100).toFixed(1)}% of the pot, against the best play of {graded.best.label}.
             </span>
             <button className="btn btn-plain" onClick={() => setChosen(undefined)}>
               <UndoIcon size={18} /> Try again

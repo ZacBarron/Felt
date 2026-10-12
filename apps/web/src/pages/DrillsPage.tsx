@@ -38,12 +38,12 @@ export function DrillsPage() {
     <div className="stack">
       <PageHeader
         title="Drills"
-        subtitle="Practice any chart. Your reviews stay untouched."
+        subtitle="Practice any chart. This will not change your review schedule."
         trailing={
           mode === 'quick' && score.total > 0 ? (
             <div className="row" style={{ gap: '0.4rem', marginBottom: 6, flexWrap: 'nowrap' }}>
               <span className="pill num">
-                {score.right}/{score.total}
+                {score.right} of {score.total}
               </span>
               <span className={`pill num ${score.streak >= 5 ? 'pill-warn' : ''}`}>
                 <FlameIcon size={12} /> {score.streak}

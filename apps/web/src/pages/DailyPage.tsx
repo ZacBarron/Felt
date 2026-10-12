@@ -23,7 +23,7 @@ import { LESSON_ENTRIES, lessonPath, quizSteps } from '../state/lessons';
 import { ratingSnapshot, streakNow } from '../state/rating';
 import { addHandsToReview } from '../state/review';
 import { BottomBar } from '../ui/BottomBar';
-import { plural, signed } from '../ui/format';
+import { plural } from '../ui/format';
 import { CheckIcon, ChevronRightIcon, CloseIcon, FlameIcon, MinusIcon } from '../ui/icons';
 import { ProgressRing } from '../ui/ProgressRing';
 import { useBodyClass } from '../ui/useBodyClass';
@@ -67,13 +67,14 @@ export function dailyItems(date = new Date()): Decision[] {
 function timeToTomorrow(now = new Date()) {
   const next = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
   const mins = Math.max(0, Math.round((next.getTime() - now.getTime()) / 60_000));
-  return `${Math.floor(mins / 60)}h ${mins % 60}m`;
+  const h = Math.floor(mins / 60);
+  return h > 0 ? `${plural(h, 'hour')} ${plural(mins % 60, 'minute')}` : plural(mins % 60, 'minute');
 }
 
 export function shareText(number: number, scores: number[], rating: SkillRating) {
   const right = scores.filter((s) => s >= 1).length;
-  const shown = `${isProvisional(rating) ? '~' : ''}${Math.round(rating.rating)}`;
-  return `Felt Daily #${number} · ${right}/${scores.length}\n${shareGrid(scores)}\nFelt Rating ${shown} (${tierLabel(rating)})`;
+  const tier = isProvisional(rating) ? 'still settling' : tierLabel(rating);
+  return `Felt Daily #${number}: ${right} of ${scores.length}\n${shareGrid(scores)}\nFelt Rating ${Math.round(rating.rating)}, ${tier}`;
 }
 
 interface Crowd {
@@ -117,7 +118,7 @@ function describe(d: Decision) {
   return { title: entry?.title ?? 'Lesson question', note: entry?.trackTitle ?? '' };
 }
 
-const verdict = (s: number) => (s >= 1 ? 'Right' : s > 0 ? 'Partly right' : 'Missed');
+const verdict = (s: number) => (s >= 1 ? 'Correct' : s > 0 ? 'Part of the mix' : 'Not quite');
 
 function Result({ number, items, scores, before, after }: { number: number; items: Decision[]; scores: number[]; before: number; after: number }) {
   const [copied, setCopied] = useState(false);
@@ -165,7 +166,7 @@ function Result({ number, items, scores, before, after }: { number: number; item
         </div>
         {crowd && crowd.players > 0 && (
           <p className="footnote num" style={{ margin: 0 }}>
-            {crowd.players === 1 ? 'You are the first to finish today.' : `${crowd.players.toLocaleString()} players today.`}
+            {crowd.players === 1 ? 'You are the first to finish today.' : `${crowd.players.toLocaleString()} players have played today.`}
             {crowd.percentile !== undefined && crowd.players > 1 && ` You did better than ${Math.round(crowd.percentile * 100)}% of them.`}
             {crowd.signedOut && (
               <>
@@ -177,8 +178,8 @@ function Result({ number, items, scores, before, after }: { number: number; item
         )}
         <div className="row" style={{ justifyContent: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
           <span className="pill num">
-            Rating {provisional ? '~' : ''}
-            {Math.round(after)} ({signed(delta, 0)})
+            Felt Rating {Math.round(after)}, {delta === 0 ? 'no change' : delta > 0 ? `up ${delta}` : `down ${-delta}`}
+            {provisional && <span className="sr-only">, still settling</span>}
           </span>
           {!!streak?.streak && (
             <span className="pill pill-tint">
@@ -287,12 +288,12 @@ export function DailyPage() {
           <div className="hero-label">Daily challenge #{number}</div>
           <h1 className="display pro-title">Five decisions. Same for everyone.</h1>
           <p className="pro-sub">
-            Three range decisions that get harder, and two questions from the lessons. Every answer counts toward your Felt Rating.
+            You get three range decisions that get harder and two lesson questions. Each answer counts toward your Felt Rating.
           </p>
         </div>
         <BottomBar>
           <button className="btn btn-primary btn-lg btn-block" onClick={begin}>
-            {resumeAt ? `Resume, ${resumeAt} of ${items.length} done` : 'Start'}
+            {resumeAt ? `Resume at decision ${resumeAt + 1} of ${items.length}` : 'Start the challenge'}
           </button>
         </BottomBar>
       </div>

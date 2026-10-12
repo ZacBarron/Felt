@@ -94,17 +94,17 @@ export type PurchaseResult =
 export async function purchase(plan: PlanOption, settings: AppSettings): Promise<PurchaseResult> {
   const features = await serverFeatures();
   if (features?.billing && !(settings.access.devMode && settings.access.devPro !== undefined)) {
-    if (!currentSession()) return { ok: false, reason: 'Sign in first, so Felt Pro is tied to your account on every device.', needsAccount: true };
+    if (!currentSession()) return { ok: false, reason: 'Sign in first. That way Felt Pro works on all your devices.', needsAccount: true };
     try {
       const { url } = await api<{ url: string }>('/billing/checkout', { body: { plan: plan.id } });
       location.assign(url);
       return { ok: 'redirect' };
     } catch (e) {
-      return { ok: false, reason: e instanceof Error ? e.message : 'Checkout could not start.' };
+      return { ok: false, reason: e instanceof Error ? e.message : 'We could not open checkout. Try again in a moment.' };
     }
   }
   if (!settings.access.devMode && !import.meta.env.DEV) {
-    return { ok: false, reason: 'Purchases are not open yet. Your progress is saved, and everything free stays free.' };
+    return { ok: false, reason: 'You cannot buy Felt Pro yet. Your progress is safe, and free features stay free.' };
   }
   const trialEndsAt = plan.trialDays > 0 ? new Date(Date.now() + plan.trialDays * 86_400_000).toISOString() : undefined;
   return { ok: true, access: { ...settings.access, pro: true, plan: plan.id, trialEndsAt } };
@@ -117,13 +117,13 @@ export async function restorePurchases(settings: AppSettings): Promise<PurchaseR
     try {
       const user = await refreshMe();
       if (user?.access.pro) return { ok: true, access: accessFromServer(user.access, settings.access) };
-      return { ok: false, reason: 'No active subscription on this account.' };
+      return { ok: false, reason: 'We did not find a subscription on this account.' };
     } catch (e) {
-      return { ok: false, reason: e instanceof Error ? e.message : 'Could not check your subscription.' };
+      return { ok: false, reason: e instanceof Error ? e.message : 'We could not check your subscription. Try again.' };
     }
   }
   if (settings.access.pro) return { ok: true, access: settings.access };
-  return { ok: false, reason: 'No purchases found for this device.' };
+  return { ok: false, reason: 'We did not find any purchases on this device.' };
 }
 
 /** Opens Stripe's page for changing or cancelling a subscription. */
@@ -133,6 +133,6 @@ export async function manageSubscription(): Promise<string | undefined> {
     location.assign(url);
     return undefined;
   } catch (e) {
-    return e instanceof Error ? e.message : 'Could not open subscription settings.';
+    return e instanceof Error ? e.message : 'We could not open your subscription settings. Try again.';
   }
 }

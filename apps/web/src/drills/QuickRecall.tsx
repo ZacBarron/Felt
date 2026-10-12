@@ -164,7 +164,7 @@ export function QuickRecall({ chart, hand, targetMs, onAnswer, onNext }: Props) 
           </div>
         ) : (
           <button className="btn btn-primary btn-lg btn-block swap-in" onClick={onNext} autoFocus aria-keyshortcuts="Enter">
-            Next
+            Next hand
           </button>
         )}
       </BottomBar>

@@ -7,7 +7,6 @@ import { db } from '../state/db';
 import { useSession } from '../state/api';
 import { exportBackup, importBackup, requestPersistentStorage } from '../state/backup';
 import { exportEvents } from '../state/events';
-import { cueCopy } from '../state/goals';
 import { studyReminder, trialReminder } from '../state/reminders';
 import { chartsForGame } from '../state/charts';
 import { type Appearance, useSettings } from '../state/settings';
@@ -53,12 +52,12 @@ export function SettingsPage() {
     if (!file) return;
     if (!window.confirm('Replace everything on this device with this backup?')) return;
     try {
-      const result = await importBackup(await file.text());
-      setDataMessage(`Restored ${result.rows.toLocaleString()} records. Reloading.`);
+      await importBackup(await file.text());
+      setDataMessage('Backup restored. Felt will reload now.');
       haptic('success');
       setTimeout(() => location.reload(), 900);
     } catch (e) {
-      setDataMessage(e instanceof Error ? e.message : 'That file could not be read.');
+      setDataMessage(e instanceof Error ? e.message : 'We could not read that file. Pick a Felt backup file.');
       haptic('error');
     }
   };
@@ -81,7 +80,7 @@ export function SettingsPage() {
       <Link to="/account" className="list-row card">
         <span className="grow">
           <span style={{ display: 'block', fontWeight: 600 }}>{session ? session.user.email : 'Account'}</span>
-          <span className="footnote">{session ? 'Sync, reminders, leagues and Felt Pro' : 'Sign in to keep progress on every device'}</span>
+          <span className="footnote">{session ? 'Your account and Felt Pro' : 'Sign in to keep your progress on every device'}</span>
         </span>
         <ChevronRightIcon size={16} className="chev" />
       </Link>
@@ -179,12 +178,12 @@ export function SettingsPage() {
         <h2 className="section-title">Rake</h2>
         <div className="list">
           <NumberRow
-            label="Percent"
+            label="Rake percent"
             value={Math.round(g.rake.percent * 1000) / 10}
             onChange={(v) => setGame({ rake: { ...g.rake, percent: v / 100 } })}
             suffix="%"
           />
-          <NumberRow label="Cap" value={g.rake.cap} onChange={(v) => setGame({ rake: { ...g.rake, cap: v } })} />
+          <NumberRow label="Rake cap" value={g.rake.cap} onChange={(v) => setGame({ rake: { ...g.rake, cap: v } })} />
           <NumberRow label="Extra drop" value={g.rake.dropExtra} onChange={(v) => setGame({ rake: { ...g.rake, dropExtra: v } })} />
           <Row label="No flop, no drop">
             <Toggle
@@ -226,7 +225,7 @@ export function SettingsPage() {
           </button>
         </div>
         <div className="section-footer">
-          {restoreMessage ?? 'Cancel or change your plan in the store you subscribed through. Your progress stays either way.'}
+          {restoreMessage ?? 'Cancel or change your plan from your account. Your progress stays either way.'}
         </div>
       </section>
 
@@ -247,7 +246,7 @@ export function SettingsPage() {
           <button className="list-row" onClick={() => studyReminder(settings.profile.cue, settings.profile.dailyMinutes)}>
             <span className="grow">
               <span style={{ display: 'block', color: 'var(--tint)' }}>Add a daily study reminder</span>
-              <span className="footnote">{cueCopy(settings.profile.cue) ? `${cueCopy(settings.profile.cue)!.label}, in your calendar app` : 'Opens in your calendar app'}</span>
+              <span className="footnote">Adds a daily event to your calendar</span>
             </span>
           </button>
           <Link to="/placement" className="list-row">
@@ -263,7 +262,7 @@ export function SettingsPage() {
           <Row label="Untimed drills" hint="Hides the timer. Speed no longer affects when cards come back.">
             <Toggle label="Untimed drills" checked={!!settings.study.untimed} onChange={(untimed) => update({ ...settings, study: { ...settings.study, untimed } })} />
           </Row>
-          <Row label="Keyboard shortcuts" hint="Number keys answer drills, Enter moves on">
+          <Row label="Keyboard shortcuts" hint="Use number keys to answer and Enter to move on">
             <Toggle
               label="Keyboard shortcuts"
               checked={settings.study.shortcuts !== false}
@@ -291,10 +290,10 @@ export function SettingsPage() {
               <span style={{ display: 'block' }}>Stored on this device</span>
               <span className="footnote">
                 {persisted === undefined
-                  ? 'Checking'
+                  ? 'Checking…'
                   : persisted
-                    ? 'Protected: the browser will not clear it to save space.'
-                    : 'Not protected yet. Add Felt to your home screen, or save a backup.'}
+                    ? 'Your browser will not delete it to free up space.'
+                    : 'Your browser could clear this data. Add Felt to your Home Screen or save a backup.'}
               </span>
             </span>
           </div>
@@ -312,7 +311,7 @@ export function SettingsPage() {
         </div>
         <div className="section-footer" role="status">
           {dataMessage ??
-            'Your study, ratings and imported hands live only in this browser. A backup file moves them to a new phone or brings them back after clearing the browser.'}
+            'Your progress lives only in this browser. Save a backup to move it to a new phone or to restore it later.'}
         </div>
       </section>
 
@@ -321,7 +320,7 @@ export function SettingsPage() {
         <div className="list">
           <ThemePicker value={settings.ui.palette} onChange={(palette) => update({ ...settings, ui: { ...settings.ui, palette } })} />
         </div>
-        <div className="section-footer">Card room is the Felt brand. Themes change the felt and accent only; poker colors stay the same.</div>
+        <div className="section-footer">Themes change the table and accent colors. Action colors like raise and fold never change.</div>
       </section>
 
       <section>

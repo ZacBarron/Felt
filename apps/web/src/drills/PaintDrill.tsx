@@ -69,7 +69,8 @@ export function PaintDrill({ chart, targetMs, onAnswer, onNext }: Props) {
         </div>
         <SeatStrip spec={chart.spec} />
         <div className="footnote">
-          {spotLine(chart)}. Mixed hands count if you paint any action they take at least 25% of the time.
+          {spotLine(chart) && <span style={{ display: 'block' }}>{spotLine(chart)}</span>}
+          A mixed hand counts as right if you paint any action it takes 25% of the time or more.
         </div>
 
         {!result ? (
@@ -92,7 +93,7 @@ export function PaintDrill({ chart, targetMs, onAnswer, onNext }: Props) {
               }))}
             />
             <span className="footnote num">
-              {painted.size} painted
+              {plural(painted.size, 'hand')} painted
             </span>
           </div>
         ) : (
@@ -105,15 +106,15 @@ export function PaintDrill({ chart, targetMs, onAnswer, onNext }: Props) {
             <div className="stack" style={{ gap: '0.4rem', flex: 1, minWidth: 160 }}>
               <strong role="status">{result.wrong.length === 0 ? 'Perfect chart' : `${plural(result.wrong.length, 'hand')} missed`}</strong>
               <span className="footnote">
-                {result.wrong.length > 0 && 'Misses are outlined in yellow.'}
+                {result.wrong.length > 0 && 'Hands you missed have an outline.'}
               </span>
               <Segmented
                 value={view}
                 onChange={setView}
                 ariaLabel="Show"
                 options={[
-                  { value: 'answer', label: 'Answer' },
-                  { value: 'yours', label: 'Yours' },
+                  { value: 'answer', label: 'Correct chart' },
+                  { value: 'yours', label: 'Your chart' },
                 ]}
               />
             </div>
@@ -131,7 +132,7 @@ export function PaintDrill({ chart, targetMs, onAnswer, onNext }: Props) {
       <BottomBar>
         {!result ? (
           <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: 10 }}>
-            <button className="btn btn-lg glass" onClick={() => setPainted(new Map())} disabled={painted.size === 0} aria-label="Clear">
+            <button className="btn btn-lg glass" onClick={() => setPainted(new Map())} disabled={painted.size === 0} aria-label="Clear all">
               <UndoIcon size={20} />
             </button>
             <button className="btn btn-primary btn-lg" onClick={submit} data-haptic="off">

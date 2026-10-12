@@ -62,7 +62,7 @@ function SavedQuiz({ item, targetMs, onAnswer, onNext }: Props & { item: SavedIt
       {item.note && <p className="saved-note">{item.note}</p>}
       <BottomBar>
         <button className="btn btn-primary btn-lg btn-block" disabled={!done} onClick={onNext}>
-          {done ? 'Next' : 'Choose an answer'}
+          {done ? 'Next card' : 'Choose an answer'}
         </button>
       </BottomBar>
     </div>
@@ -82,7 +82,7 @@ function SavedFlashcard({ item, targetMs, onAnswer, onNext }: Props & { item: Sa
           <div className="footnote">What do you remember about</div>
           <h2 className="display lesson-h2">{item.title}</h2>
           <p className="muted" style={{ margin: 0 }}>
-            Say it to yourself first, then reveal.
+            Say the answer to yourself. Then tap Show answer.
           </p>
         </div>
       ) : (
@@ -94,7 +94,7 @@ function SavedFlashcard({ item, targetMs, onAnswer, onNext }: Props & { item: Sa
       <BottomBar>
         {!shown ? (
           <button className="btn btn-primary btn-lg btn-block" onClick={() => setShown(true)}>
-            Reveal
+            Show answer
           </button>
         ) : !graded ? (
           <div className="grade-row">
@@ -171,7 +171,7 @@ export function SolverSpotQuiz({
             <span className="footnote">You chose {labels[choice]}</span>
           </div>
           <MixBar mix={mix} labels={labels} />
-          <div className="footnote">Felt Solver. Exploitability {spot.exploitability.toFixed(2)}% of the pot.</div>
+          <div className="footnote">Solved by Felt Solver. Exploitability is {spot.exploitability.toFixed(2)}% of the pot.</div>
         </div>
       )}
       {footer && !choice && (
@@ -195,7 +195,7 @@ function Gone({ text, onNext }: { text: string; onNext: () => void }) {
       <p className="muted">{text}</p>
       <BottomBar>
         <button className="btn btn-primary btn-lg btn-block" onClick={onNext}>
-          Next
+          Next card
         </button>
       </BottomBar>
     </>
@@ -207,7 +207,7 @@ export function SavedCard(props: Props) {
   const item = useLiveQuery(() => db.saved.get(props.savedId), [props.savedId], null);
   const [answered, setAnswered] = useState(false);
   if (item === null) return null;
-  if (!item) return <Gone text="This save was removed." onNext={props.onNext} />;
+  if (!item) return <Gone text="You removed this from Saved." onNext={props.onNext} />;
   if (item.kind === 'solver-spot' && item.spot) {
     return (
       <div className="stack">
@@ -224,7 +224,7 @@ export function SavedCard(props: Props) {
         {answered && (
           <BottomBar>
             <button className="btn btn-primary btn-lg btn-block swap-in" onClick={props.onNext}>
-              Next
+              Next card
             </button>
           </BottomBar>
         )}

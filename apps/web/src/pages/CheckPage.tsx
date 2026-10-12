@@ -78,7 +78,7 @@ function QuestionScreen({
             onDone(choice === quiz.answer);
           }}
         >
-          {choice === undefined ? 'Choose an answer' : 'Continue'}
+          {choice === undefined ? 'Choose an answer' : 'Next question'}
         </button>
         {choice === undefined && (
           // Guessing among three answers adds noise to a test that decides what to skip. An honest "not sure" keeps the lesson in the plan.
@@ -162,7 +162,7 @@ function Results({ title, result, back }: { title: string; result: CheckResult; 
       <BottomBar>
         {first ? (
           <button className="btn btn-primary btn-lg btn-block swap-in" onClick={() => navigate(locked ? `/pro?from=check` : lessonPath(first.key))}>
-            {locked ? `Unlock ${toLearn.length === 1 ? 'this lesson' : `these ${toLearn.length} lessons`}` : `Start: ${first.title}`}
+            {locked ? `Unlock ${toLearn.length === 1 ? 'this lesson' : `these ${toLearn.length} lessons`}` : `Start ${first.title}`}
           </button>
         ) : (
           <Link to={back} className="btn btn-primary btn-lg btn-block swap-in">
@@ -300,12 +300,12 @@ export function PlacementPage() {
           <div>
             <div className="footnote">Your starting point</div>
             <h1 className="display" style={{ fontSize: '2.2rem', fontWeight: 400, lineHeight: 1.05 }}>
-              {placedTitle ? `Start at ${placedTitle}` : 'You cleared the core path'}
+              {placedTitle ? `Start at ${placedTitle}` : 'You know the core lessons'}
             </h1>
           </div>
           <p className="muted" style={{ margin: 0 }}>
             {skipped.length > 0
-              ? `${plural(skipped.length, 'lesson')} marked as tested out, about ${minutesOf(skipped)} minutes saved. You can open any of them later.`
+              ? `You tested out of ${plural(skipped.length, 'lesson')} and saved about ${minutesOf(skipped)} minutes. You can still open any of them.`
               : 'Start with the first lesson. Everything stays in your plan.'}
           </p>
         </div>
@@ -347,7 +347,7 @@ export function PlacementPage() {
               exit();
             }}
           >
-            Continue
+            {fromOnboarding ? 'See my plan' : 'Go to Learn'}
           </button>
         </BottomBar>
       </div>

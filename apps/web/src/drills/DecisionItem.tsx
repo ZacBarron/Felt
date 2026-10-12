@@ -63,7 +63,7 @@ export function DecisionItem({ decision, source, last, onScore, onNext }: Props)
       <div className="lesson-stage from-right focus-anchor" ref={top} tabIndex={-1}>
         <div className="footnote" style={{ marginBottom: '0.4rem' }}>
           {entry.trackTitle}, {entry.title}
-          {!isLessonFree(entry.key) && <span className="pill pro-pill">Pro lesson</span>}
+          {!isLessonFree(entry.key) && <span className="pill pro-pill">Felt Pro lesson</span>}
         </div>
         <StepView
           step={step}
@@ -77,7 +77,7 @@ export function DecisionItem({ decision, source, last, onScore, onNext }: Props)
       </div>
       <BottomBar>
         <button className="btn btn-primary btn-lg btn-block" disabled={!answered} onClick={onNext}>
-          {answered ? (last ? 'See result' : 'Next') : 'Choose an answer'}
+          {answered ? (last ? 'See my results' : 'Next decision') : 'Choose an answer'}
         </button>
       </BottomBar>
     </>

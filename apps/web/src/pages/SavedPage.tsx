@@ -48,7 +48,7 @@ function SavedRow({ item, card }: { item: SavedItem; card?: StoredCard }) {
             className="saved-note-input"
             aria-label="Note"
             rows={2}
-            placeholder="Add a note: why this matters to you"
+            placeholder="Why does this matter to you?"
             value={note}
             onChange={(e) => setNoteText(e.target.value)}
             onBlur={() => void setNote(item.id, note)}
@@ -97,7 +97,7 @@ export function SavedPage() {
             Keep what matters
           </h2>
           <p className="muted" style={{ margin: 0, maxWidth: 340 }}>
-            Tap the bookmark on any lesson screen, or save a hand in the solver. Saves come back in your daily review so they stick.
+            Tap the bookmark on any lesson screen to save it. You can also save hands in the solver. Everything you save comes back in your daily review.
           </p>
           <Link to="/learn" className="btn btn-primary">
             Go to Learn
@@ -125,7 +125,7 @@ export function SavedPage() {
           </div>
           <BottomBar>
             <Link to="/review?deck=saved" className="btn btn-primary btn-lg btn-block">
-              {due > 0 ? `Review saved, ${due} due` : `Go through all ${items.length} again`}
+              {due > 0 ? `Review ${due} saved ${due === 1 ? 'item' : 'items'}` : `Review all ${items.length} again`}
             </Link>
           </BottomBar>
         </>

@@ -15,7 +15,7 @@ export const IDEAS: Idea[] = [
     id: 'pot-odds',
     topic: 'Math',
     title: 'Pot sized bet, 33% to call',
-    body: 'Facing a pot sized bet you call 1 to win 3, so you need 33% equity. Half pot needs 25%.',
+    body: 'Facing a pot sized bet, you call 1 to win 2. So you need 33% equity. A half pot bet needs 25%.',
     basis: 'general',
   },
   {
@@ -29,21 +29,21 @@ export const IDEAS: Idea[] = [
     id: 'bluff-share',
     topic: 'Theory',
     title: 'One bluff for every two value bets',
-    body: 'A balanced pot sized river bet is one third bluffs. At half pot, one quarter.',
+    body: 'A balanced pot sized river bet is one third bluffs. A half pot bet is one quarter bluffs.',
     basis: 'gto',
   },
   {
     id: 'two-and-four',
     topic: 'Math',
     title: 'Outs times four, then two',
-    body: 'On the flop, outs times 4 estimates your equity by the river; on the turn, outs times 2. Nine flush outs is about 35%.',
+    body: 'On the flop, multiply your outs by 4 to estimate your equity by the river. On the turn, multiply by 2. Nine flush outs is about 35%.',
     basis: 'general',
   },
   {
     id: 'combos',
     topic: 'Math',
     title: 'Pairs are rare',
-    body: 'A pair has 6 combos, a suited hand 4, an offsuit hand 12. AK is 16 combos; AA is only 6.',
+    body: 'A pair has 6 combos. A suited hand has 4 and an offsuit hand has 12. So AK has 16 combos, but AA has only 6.',
     basis: 'general',
   },
   {
@@ -71,7 +71,7 @@ export const IDEAS: Idea[] = [
     id: 'suited',
     topic: 'Theory',
     title: 'Suited is worth more than it looks',
-    body: 'Suitedness adds only a few points of raw equity, but flush draws and backdoors make suited hands far easier to play.',
+    body: 'Being suited adds only a few points of equity. But flush draws make suited hands much easier to play.',
     basis: 'general',
   },
   {

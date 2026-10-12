@@ -5,7 +5,7 @@ export function pushBlocker(): string | undefined {
   if (!('serviceWorker' in navigator) || !('PushManager' in window) || !('Notification' in window)) {
     const ios = /iPhone|iPad/.test(navigator.userAgent);
     return ios
-      ? 'On iPhone, add Felt to your home screen first (Share, then Add to Home Screen), then open it from there.'
+      ? 'On iPhone, add Felt to your Home Screen first. Tap Share, then Add to Home Screen. Then open Felt from there.'
       : 'This browser cannot show reminders.';
   }
   if (Notification.permission === 'denied') return 'Notifications are blocked for Felt. Allow them in your browser or phone settings.';

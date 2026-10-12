@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { haptic } from '../haptics';
 import { canOpenLesson, isPro } from '../state/access';
+import { plural } from '../ui/format';
 import type { StoredLesson } from '../state/db';
 import { track } from '../state/events';
 import { CUES, cueCopy, DAILY_OPTIONS, FOCUS, GOALS, goalsLine, pathPrefs } from '../state/goals';
@@ -12,7 +13,7 @@ import { studyReminder } from '../state/reminders';
 import { type Focus, type Profile, useSettings } from '../state/settings';
 import { BrandMark, HeroPattern, TAGLINE, Wordmark } from '../ui/Brand';
 import { BottomBar } from '../ui/BottomBar';
-import { BellIcon, CheckIcon, ChevronLeftIcon, ClockIcon, LockIcon, SkipIcon, TargetIcon } from '../ui/icons';
+import { BellIcon, CheckIcon, ChevronLeftIcon, ClockIcon, LockIcon, SkipIcon } from '../ui/icons';
 import { useBodyClass } from '../ui/useBodyClass';
 import { onRadioKeys } from '../ui/radioKeys';
 import { requestPersistentStorage } from '../state/backup';
@@ -33,12 +34,26 @@ const GAMES = [
   { id: 'mtt-9max', label: 'Tournaments', note: 'Live or online' },
 ] as const;
 
-/** Minutes left to finish the lessons a player can open (or all of them). */
-function remainingMinutes(progress: Map<string, StoredLesson>, canOpen: (key: string) => boolean = () => true) {
-  return LESSON_ENTRIES.filter((e) => e.content && canOpen(e.key) && !isComplete(progress.get(e.key))).reduce((m, e) => m + e.content!.minutes, 0);
-}
-
 const shortDate = (days: number) => new Date(Date.now() + days * 86_400_000).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+
+const dayLabel = (i: number) =>
+  i === 0 ? 'Today' : i === 1 ? 'Tomorrow' : new Date(Date.now() + i * 86_400_000).toLocaleDateString(undefined, { weekday: 'short' });
+
+/** Packs upcoming lessons into days of study, at least one lesson a day. */
+function firstWeek<T extends { content?: { minutes: number } }>(lessons: readonly T[], daily: number, days = 3): T[][] {
+  const out: T[][] = [];
+  let i = 0;
+  for (let d = 0; d < days && i < lessons.length; d++) {
+    const day: T[] = [lessons[i++]];
+    let used = day[0].content?.minutes ?? 5;
+    while (i < lessons.length && used + (lessons[i].content?.minutes ?? 5) <= daily) {
+      used += lessons[i].content?.minutes ?? 5;
+      day.push(lessons[i++]);
+    }
+    out.push(day);
+  }
+  return out;
+}
 
 function Choice({ selected, label, note, onClick, multi }: { selected: boolean; label: string; note?: string; onClick: () => void; multi?: boolean }) {
   return (
@@ -211,7 +226,7 @@ export function OnboardingPage() {
             Make better decisions at the table.
           </h1>
           <p className="muted reveal" style={{ animationDelay: '320ms' }}>
-            Exact math, solver based patterns and player tendencies, each labelled for how sure it is. A few minutes a day.
+            Learn the right play for the spots you face. Every answer shows how sure we are. It takes a few minutes a day.
           </p>
         </div>
         <BottomBar>
@@ -232,15 +247,17 @@ export function OnboardingPage() {
   if (step === 'plan') {
     const goalLine = goalsLine(profile.goals);
     const access = settings.access;
-    const pro = isPro(access);
-    const freeMinutes = remainingMinutes(progress, (k) => canOpenLesson(k, access));
-    const allMinutes = remainingMinutes(progress);
-    const daily = Math.max(1, profile.dailyMinutes);
-    const freeDays = Math.ceil(freeMinutes / daily);
-    const allDays = Math.ceil(allMinutes / daily);
+    const daily = Math.max(5, profile.dailyMinutes);
     const tested = LESSON_ENTRIES.filter((e) => progress.get(e.key)?.status === 'tested').length;
-    const firstUp = recommendedLessons(progress, pathPrefs(profile));
+    const upcoming = recommendedLessons(progress, pathPrefs(profile));
+    const week = firstWeek(upcoming, daily);
     const cue = cueCopy(profile.cue);
+    // A near milestone, not a finish line: the first topic in the plan.
+    const first = upcoming[0];
+    const topicLeft = first
+      ? LESSON_ENTRIES.filter((e) => e.content && e.key.startsWith(`${first.key.split('/').slice(0, 2).join('/')}/`) && !isComplete(progress.get(e.key)))
+      : [];
+    const topicDays = Math.max(1, Math.ceil(topicLeft.reduce((m, e) => m + e.content!.minutes, 0) / daily));
     if (building) {
       return (
         <div className="stack focus-column onb-building" aria-live="polite">
@@ -251,7 +268,7 @@ export function OnboardingPage() {
             Building your plan
           </h1>
           <div className="list">
-            {['Ordering lessons by your goal and focus', 'Applying your placement', 'Setting your daily study time'].map((t, i) => (
+            {['Ordering lessons by your goals', 'Applying your placement test', 'Setting your daily time'].map((t, i) => (
               <div key={t} className="list-row reveal" style={{ animationDelay: `${i * 380}ms` }}>
                 <CheckIcon size={16} style={{ color: 'var(--green-text)' }} />
                 <span className="grow">{t}</span>
@@ -264,65 +281,72 @@ export function OnboardingPage() {
     return (
       <div className="stack focus-column">
         {top}
-        <div className="lesson-stage from-right stack" style={{ gap: '1.1rem' }}>
-          <div>
-            <div className="footnote">Your plan</div>
-            <h1 ref={heading} tabIndex={-1} className="display onb-title">
-              {goalLine ?? 'Your path'}
+        <div className="lesson-stage from-right stack" style={{ gap: '1.25rem' }}>
+          <section className="hero plan-hero">
+            <HeroPattern />
+            <div className="hero-label">Your plan</div>
+            <h1 ref={heading} tabIndex={-1} className="display plan-hero-title">
+              {goalLine ?? 'Get better at poker'}
             </h1>
-          </div>
-          <div className="plan-stats">
-            <div className="plan-stat">
-              <TargetIcon size={20} style={{ color: 'var(--tint)' }} />
-              <div className="num plan-stat-value">{profile.dailyMinutes} min</div>
-              <div className="footnote">each day</div>
-            </div>
-            <div className="plan-stat">
-              <SkipIcon size={20} style={{ color: 'var(--tint)' }} />
-              <div className="num plan-stat-value">{tested}</div>
-              <div className="footnote">tested out</div>
-            </div>
-            <div className="plan-stat">
-              <ClockIcon size={20} style={{ color: 'var(--tint)' }} />
-              <div className="num plan-stat-value">{shortDate(pro ? allDays : freeDays)}</div>
-              <div className="footnote">{pro ? 'every lesson done' : 'free lessons done'}</div>
-            </div>
-          </div>
-          <section>
-            <h2 className="section-title">First up</h2>
-            <div className="list">
-              {firstUp.slice(0, 3).map((e, i) => {
-                const locked = !canOpenLesson(e.key, access);
-                return (
-                  <div key={e.key} className="list-row reveal" style={{ animationDelay: `${i * 70}ms` }}>
-                    <span className="onb-num num">{i + 1}</span>
-                    <span className="grow">
-                      <span style={{ display: 'block', fontWeight: 600 }}>{e.title}</span>
-                      <span className="footnote">
-                        {e.moduleTitle}, {e.content!.minutes} min{locked ? ', Felt Pro' : ''}
-                      </span>
-                    </span>
-                    {locked && <LockIcon size={16} className="muted" aria-hidden="true" />}
-                  </div>
-                );
-              })}
-            </div>
-            <div className="section-footer">
-              {pro
-                ? `At ${profile.dailyMinutes} minutes a day, every lesson is done by ${shortDate(allDays)}.`
-                : `At ${profile.dailyMinutes} minutes a day, the free lessons are done by ${shortDate(freeDays)}; every lesson, with Felt Pro, by ${shortDate(allDays)}.`}{' '}
-              Review keeps what you learn.
+            <p className="plan-hero-pledge">
+              {cue ? `When I ${cue.phrase}, I will study for ${profile.dailyMinutes} minutes.` : `I will study for ${profile.dailyMinutes} minutes a day.`}
+            </p>
+            <div className="plan-hero-chips">
+              <span className="plan-chip">
+                <ClockIcon size={14} /> {profile.dailyMinutes} min a day
+              </span>
+              {tested > 0 && (
+                <span className="plan-chip">
+                  <SkipIcon size={14} /> {plural(tested, 'lesson')} tested out
+                </span>
+              )}
             </div>
           </section>
-          <p className="onb-pledge">{cue ? `When I ${cue.phrase}, I will study ${profile.dailyMinutes} minutes.` : `I will study ${profile.dailyMinutes} minutes a day.`}</p>
+
+          <section>
+            <h2 className="section-title">Your first week</h2>
+            <ol className="list plan-week">
+              {week.map((day, i) => (
+                <li key={i} className="list-row reveal" style={{ animationDelay: `${i * 70}ms` }}>
+                  <span className="plan-day">{dayLabel(i)}</span>
+                  <span className="grow stack" style={{ gap: '0.35rem' }}>
+                    {day.map((e) => (
+                      <span key={e.key} className="plan-lesson">
+                        <span style={{ display: 'block', fontWeight: 600 }}>{e.title}</span>
+                        <span className="footnote">
+                          {e.moduleTitle}, {e.content!.minutes} min
+                          {!canOpenLesson(e.key, access) && (
+                            <span className="pill pro-pill">
+                              <LockIcon size={10} /> Felt Pro
+                            </span>
+                          )}
+                        </span>
+                      </span>
+                    ))}
+                    {i > 0 && <span className="footnote">Plus your review</span>}
+                  </span>
+                </li>
+              ))}
+            </ol>
+            {first && (
+              <div className="section-footer">
+                Finish {first.moduleTitle} by {shortDate(topicDays)}. Review brings back what you learn so it sticks.
+              </div>
+            )}
+          </section>
+
           <button
-            className="btn btn-tinted"
+            className="list-row card plan-reminder"
             onClick={() => {
               studyReminder(profile.cue, profile.dailyMinutes);
               track('reminder_added', { kind: 'study', cue: profile.cue });
             }}
           >
-            <BellIcon size={18} /> Add a daily reminder to my calendar
+            <BellIcon size={20} style={{ color: 'var(--tint)' }} />
+            <span className="grow">
+              <span style={{ display: 'block', fontWeight: 600 }}>Add a daily reminder</span>
+              <span className="footnote">{cue ? `${cue.label}, in your calendar` : 'In your calendar'}</span>
+            </span>
           </button>
         </div>
         <BottomBar>
@@ -356,7 +380,7 @@ export function OnboardingPage() {
     },
     game: {
       title: 'Where do you play most?',
-      sub: 'Charts, stakes and examples follow your game. You can change it any time.',
+      sub: 'Your charts and examples will match this game. You can change it any time.',
       ready: true,
       body: (
         <div className="onb-choices" role="radiogroup" onKeyDown={onRadioKeys} aria-labelledby="onb-title">
@@ -368,7 +392,7 @@ export function OnboardingPage() {
     },
     focus: {
       title: 'What costs you the most money?',
-      sub: 'Pick any. These come first in your plan.',
+      sub: 'Pick as many as you like. They come first in your plan.',
       ready: true,
       body: (
         <div className="onb-choices" role="group" aria-labelledby="onb-title">
@@ -394,13 +418,12 @@ export function OnboardingPage() {
       body: (
         <div className="onb-choices" role="radiogroup" onKeyDown={onRadioKeys} aria-labelledby="onb-title">
           {DAILY_OPTIONS.map((d) => {
-            const weeks = Math.ceil(remainingMinutes(progress) / d.minutes / 7);
             return (
               <Choice
                 key={d.minutes}
                 selected={profile.dailyMinutes === d.minutes}
                 label={`${d.minutes} min a day`}
-                note={`Every lesson in about ${weeks} ${weeks === 1 ? 'week' : 'weeks'}`}
+                note={d.note}
                 onClick={() => setProfile({ dailyMinutes: d.minutes })}
               />
             );
@@ -422,12 +445,13 @@ export function OnboardingPage() {
     },
     level: {
       title: 'Find where to start',
-      sub: 'A short test. Lessons you prove you know are marked tested out; miss a question and that lesson stays in your plan.',
+      sub: 'Take a short test to skip what you already know. Miss a question and that lesson stays in your plan.',
       ready: true,
       body: (
         <ul className="onb-facts">
-          <li>One question from each of up to three lessons per topic</li>
-          <li>About 5 minutes, and it stops once questions get hard</li>
+          <li>Up to 3 questions per topic</li>
+          <li>Takes about 5 minutes</li>
+          <li>Stops when the questions get too hard</li>
           <li>You can retake it any time from Settings</li>
         </ul>
       ),

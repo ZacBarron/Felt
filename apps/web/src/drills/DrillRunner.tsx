@@ -22,7 +22,7 @@ export function DrillRunner({ item, onAnswer, onNext }: Props) {
         <p className="muted">This chart no longer exists.</p>
         <BottomBar>
           <button className="btn btn-primary btn-lg btn-block" onClick={onNext}>
-            Next
+            Next card
           </button>
         </BottomBar>
       </>

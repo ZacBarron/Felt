@@ -149,7 +149,7 @@ export const TIERS: { min: number; name: string }[] = [
 
 /** The tier to show: none until the rating has settled. */
 export function tierLabel(r: SkillRating): string {
-  return r.games === 0 || isProvisional(r) ? 'Unrated' : tierFor(r.rating);
+  return r.games === 0 || isProvisional(r) ? 'Still settling' : tierFor(r.rating);
 }
 
 export function tierFor(rating: number): string {

@@ -37,7 +37,7 @@ export function RangesPage() {
         {chart.spec.source === 'starter-approx' && <span className="pill">Approximate</span>}
         {chart.spec.basis === 'exploit' && <span className="pill pill-exploit">Exploit</span>}
         {!fit.exact && <span className="pill pill-warn">Nearest table size</span>}
-        {Math.abs(settings.game.stackBb - chart.spec.stackBb) >= 30 && <span className="pill pill-warn">Your stacks: {settings.game.stackBb}bb</span>}
+        {Math.abs(settings.game.stackBb - chart.spec.stackBb) >= 30 && <span className="pill pill-warn">You play {settings.game.stackBb}bb</span>}
       </div>
       {chart.spec.note && <div className="footnote">{chart.spec.note}</div>}
 

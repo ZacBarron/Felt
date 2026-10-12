@@ -10,6 +10,7 @@ import { PageHeader } from '../ui/PageHeader';
 import { ProgressRing } from '../ui/ProgressRing';
 import { useBodyClass } from '../ui/useBodyClass';
 import { useCountUp } from '../ui/useCountUp';
+import { plural } from '../ui/format';
 
 function CountUp({ value }: { value: number }) {
   return <>{Math.round(useCountUp(value, 900))}</>;
@@ -45,7 +46,7 @@ export function ReviewPage() {
   const item = queue?.[index];
   useBodyClass('focus-mode', !!item);
 
-  if (!queue) return <p className="muted">Loading your queue...</p>;
+  if (!queue) return <p className="muted">Loading your review…</p>;
 
   if (!item) return <SessionDone results={results} onReload={() => void load()} />;
 
@@ -54,7 +55,7 @@ export function ReviewPage() {
   return (
     <div className="stack focus-column">
       <div className="focus-top">
-        <button className="icon-btn glass" aria-label="End session" onClick={() => navigate(savedOnly ? '/saved' : '/')}>
+        <button className="icon-btn glass" aria-label="End review" onClick={() => navigate(savedOnly ? '/saved' : '/')}>
           <CloseIcon size={18} />
         </button>
         <div className="progress" role="progressbar" aria-label="Review" aria-valuemin={0} aria-valuemax={queue.length} aria-valuenow={index} aria-valuetext={`Card ${index + 1} of ${queue.length}`}>
@@ -106,9 +107,9 @@ function SessionDone({ results, onReload }: { results: { accuracy: number; ms: n
               </div>
             </ProgressRing>
             <div>
-              <h2 className="display" style={{ fontSize: '2rem' }}>Session complete</h2>
+              <h2 className="display" style={{ fontSize: '2rem' }}>Review done</h2>
               <div className="footnote" style={{ marginTop: 4 }}>
-                {results.length} cards, {perfect} perfect, {secs.toFixed(1)}s average
+                You got {perfect} of {plural(results.length, 'card')} perfect. That took {secs.toFixed(1)} seconds per card.
               </div>
             </div>
           </>
@@ -121,11 +122,11 @@ function SessionDone({ results, onReload }: { results: { accuracy: number; ms: n
           </>
         )}
         <p className="footnote" style={{ maxWidth: 360, margin: 0 }}>
-          Missed cards come back in a few minutes. New cards arrive tomorrow. For more now, raise New cards per day in Settings.
+          Missed cards come back in a few minutes. New cards arrive tomorrow. Want more today? Raise New cards per day in Settings.
         </p>
         <div className="row" style={{ justifyContent: 'center' }}>
           <button className="btn" onClick={onReload}>
-            Refresh
+            Check for new cards
           </button>
           <Link to="/drills" className="btn btn-primary">
             <DrillsIcon size={19} /> Practice any chart

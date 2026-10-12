@@ -54,7 +54,7 @@ export function LessonPage() {
     } else {
       await saveLessonStep(key, i);
       haptic('success');
-      setToast('Saved. It will come back in review.');
+      setToast('Saved. You will see it again in review.');
     }
     window.setTimeout(() => setToast(undefined), 2200);
   };
@@ -108,7 +108,7 @@ export function LessonPage() {
   if (!entry || !content) {
     return (
       <div className="stack focus-column" style={{ paddingTop: '3rem' }}>
-        <p className="muted">This lesson is not written yet.</p>
+        <p className="muted">This lesson is not ready yet.</p>
         <Link to="/learn" className="btn">
           Back to Learn
         </Link>
@@ -146,7 +146,7 @@ export function LessonPage() {
             <Link to={`/drills?chart=${practice}`} className="list-row">
               <span className="grow">
                 <span style={{ display: 'block', fontWeight: 600 }}>Practice this chart</span>
-                <span className="footnote">{getChart(practice)?.spec.title}, as quick recall drills</span>
+                <span className="footnote">Drill {getChart(practice)?.spec.title} one hand at a time</span>
               </span>
               <ChevronRightIcon size={16} className="chev" />
             </Link>
@@ -213,7 +213,7 @@ export function LessonPage() {
       >
         {i === 0 && (
           <div className="footnote" style={{ marginBottom: '0.4rem' }}>
-            {entry.trackTitle}, {entry.moduleTitle} · {content.minutes} min{content.level === 'advanced' ? ' · Advanced' : ''}
+            {entry.moduleTitle}, {content.minutes} min{content.level === 'advanced' && <span className="pill" style={{ marginLeft: 6 }}>Advanced</span>}
           </div>
         )}
         {step && <StepView step={step} answered={answers[i]} onAnswer={(choice) => {
@@ -235,7 +235,7 @@ export function LessonPage() {
             </button>
           )}
           <button className="btn btn-primary btn-lg" onClick={next} disabled={!canContinue}>
-            {isQuiz && !canContinue ? 'Choose an answer' : last ? 'Finish' : i === 0 ? 'Start' : 'Continue'}
+            {isQuiz && !canContinue ? 'Choose an answer' : last ? 'Finish lesson' : i === 0 ? 'Start lesson' : 'Continue'}
           </button>
         </div>
       </BottomBar>

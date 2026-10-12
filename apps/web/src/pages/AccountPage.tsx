@@ -18,7 +18,7 @@ function ago(iso?: string) {
   if (mins < 1) return 'just now';
   if (mins < 60) return `${mins} min ago`;
   const hours = Math.round(mins / 60);
-  if (hours < 24) return `${hours} h ago`;
+  if (hours < 24) return `${hours} ${hours === 1 ? 'hour' : 'hours'} ago`;
   return new Date(iso).toLocaleDateString();
 }
 
@@ -44,8 +44,8 @@ export function AccountPage() {
         <div className="card stack" style={{ gap: '0.5rem' }}>
           <strong>Accounts are not available here</strong>
           <p className="footnote" style={{ margin: 0 }}>
-            This copy of Felt runs without the Felt server. Everything works on this device, and Settings, Your data can save a backup file to
-            move your progress.
+            This version of Felt is not connected to our server. Everything still works on this device. To move your progress, save a backup in
+            Settings under Your data.
           </p>
         </div>
       ) : session ? (
@@ -78,7 +78,7 @@ function SignIn() {
       setDevCode(r.devCode);
       track('signin_code_sent');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Could not send a code.');
+      setError(err instanceof Error ? err.message : 'We could not send a code. Check your email address and try again.');
     }
     setBusy(false);
   };
@@ -98,7 +98,7 @@ function SignIn() {
       if (result === 'pulled') location.reload();
     } catch (err) {
       haptic('error');
-      setError(err instanceof Error ? err.message : 'Could not sign in.');
+      setError(err instanceof Error ? err.message : 'That code did not work. Try again or get a new code.');
     }
     setBusy(false);
   };
@@ -106,7 +106,7 @@ function SignIn() {
   return (
     <>
       <p className="muted" style={{ margin: 0 }}>
-        Sign in to keep your progress on every device, get daily study reminders, join leagues and manage Felt Pro. No password: we email you a
+        Sign in to keep your progress on all your devices. You also get study reminders and weekly leagues. There is no password. We email you a
         code.
       </p>
       {!sent ? (
@@ -117,14 +117,14 @@ function SignIn() {
           </label>
           <BottomBar>
             <button type="submit" className="btn btn-primary btn-lg btn-block" disabled={busy || !email}>
-              {busy ? 'Sending' : 'Email me a code'}
+              {busy ? 'Sending…' : 'Email me a code'}
             </button>
           </BottomBar>
         </form>
       ) : (
         <form className="stack" style={{ gap: '0.75rem' }} onSubmit={verify}>
           <label className="stack" style={{ gap: '0.35rem' }}>
-            <span className="footnote">6 digit code sent to {email}</span>
+            <span className="footnote">Enter the 6 digit code we sent to {email}</span>
             <input
               id="account-code"
               inputMode="numeric"
@@ -174,7 +174,7 @@ function SignedIn({ user, features }: { user: ServerUser; features: ServerFeatur
       await fn();
       if (done) setMessage(done);
     } catch (e) {
-      setMessage(e instanceof Error ? e.message : 'That did not work.');
+      setMessage(e instanceof Error ? e.message : 'Something went wrong. Try again.');
     }
     setBusy(false);
   };
@@ -209,16 +209,19 @@ function SignedIn({ user, features }: { user: ServerUser; features: ServerFeatur
           <div className="card stack" style={{ gap: '0.75rem' }}>
             <strong>Choose which progress to keep</strong>
             <p className="footnote" style={{ margin: 0 }}>
-              This device and your account both have progress that the other does not. Felt does not merge them, so nothing is mixed up. Pick one;
-              the other is replaced.
+              This device and your account have different progress. Felt cannot combine them. Pick one to keep. The other will be replaced.
             </p>
-            <button className="btn btn-tinted btn-block" disabled={busy} onClick={() => void run(() => keepCopy('device'), 'Kept this device and saved it to your account.')}>
-              Keep this device
+            <button className="btn btn-tinted btn-block" disabled={busy} onClick={() => void run(() => keepCopy('device'), 'Done. Your account now matches this device.')}>
+              Keep this device's progress
             </button>
             <button className="btn btn-tinted btn-block" disabled={busy} onClick={() => void run(() => keepCopy('cloud'))}>
-              Use my account{sync.conflict.device ? ` (from ${sync.conflict.device}` : ''}
-              {sync.conflict.updatedAt ? `${sync.conflict.device ? ', ' : ' ('}${ago(sync.conflict.updatedAt)})` : sync.conflict.device ? ')' : ''}
+              Use my account's progress
             </button>
+            {(sync.conflict.device || sync.conflict.updatedAt) && (
+              <span className="footnote">
+                Your account was last saved{sync.conflict.device ? ` on ${sync.conflict.device}` : ''}{sync.conflict.updatedAt ? ` ${ago(sync.conflict.updatedAt)}` : ''}.
+              </span>
+            )}
           </div>
         ) : (
           <div className="list">
@@ -268,7 +271,7 @@ function SignedIn({ user, features }: { user: ServerUser; features: ServerFeatur
             </label>
           </div>
           <div className="section-footer">
-            {pushBlocker() ?? (cue ? `You planned to study ${cue.label.toLowerCase()}. Pick the time that matches.` : 'Pick a time you are usually free.')}
+            {pushBlocker() ?? (cue ? `You planned to study when you ${cue.phrase}. Pick a time that matches.` : 'Pick a time you are usually free.')}
           </div>
         </section>
       )}
@@ -305,7 +308,7 @@ function SignedIn({ user, features }: { user: ServerUser; features: ServerFeatur
           {user.leagues && (
             <Link to="/league" className="list-row">
               <span className="grow" style={{ color: 'var(--tint)' }}>
-                This week's league
+                See this week's league
               </span>
             </Link>
           )}
@@ -322,7 +325,7 @@ function SignedIn({ user, features }: { user: ServerUser; features: ServerFeatur
                 <span style={{ display: 'block' }}>{user.access.pro ? (user.access.trialing ? 'Free trial' : 'Active') : 'Free plan'}</span>
                 {user.access.until && user.access.pro && (
                   <span className="footnote">
-                    {user.access.trialing ? 'Trial ends' : 'Renews or ends'} {new Date(user.access.until).toLocaleDateString()}
+                    {user.access.trialing ? 'Trial ends on' : 'Renews on'} {new Date(user.access.until).toLocaleDateString()}
                   </span>
                 )}
               </span>
@@ -360,7 +363,7 @@ function SignedIn({ user, features }: { user: ServerUser; features: ServerFeatur
             <>
               <div className="list-row">
                 <span className="grow footnote">
-                  This deletes your account and its cloud copy for good. Progress on this device stays. Cancel any subscription first.
+                  This permanently deletes your account and your synced progress. Progress on this device stays. Cancel your Felt Pro subscription first.
                 </span>
               </div>
               <button
@@ -376,7 +379,7 @@ function SignedIn({ user, features }: { user: ServerUser; features: ServerFeatur
                 }
               >
                 <span className="grow" style={{ color: 'var(--red-text)', fontWeight: 600 }}>
-                  Delete for good
+                  Delete my account for good
                 </span>
               </button>
               <button className="list-row" onClick={() => setConfirmDelete(false)}>

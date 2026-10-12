@@ -1,5 +1,5 @@
 import { ideaForDay } from '@felt/content';
-import { actionRange, challengeNumber, currentRating, handClassCombos, isProvisional, stakesLabel, tierLabel } from '@felt/core';
+import { actionRange, challengeNumber, currentRating, handClassCombos, stakesLabel, tierLabel } from '@felt/core';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { Link } from 'react-router-dom';
 import { MasteryGrid } from '../components/MasteryGrid';
@@ -57,17 +57,17 @@ export function DashboardPage() {
   const tasks = [
     nextLesson && {
       done: lessonToday,
-      label: lessonToday ? 'Lesson done' : `Lesson: ${nextLesson.title}`,
+      label: lessonToday ? 'Lesson done' : 'Finish a lesson',
       to: lessonPath(nextLesson.key),
       detail: lessonToday ? '' : `${nextLesson.content?.minutes ?? 5} min`,
     },
     {
       done: reviewDone,
-      label: 'Review',
+      label: reviewDone ? 'Review cleared' : 'Clear your review',
       to: reviewDone ? '/practice' : '/review',
-      detail: !stats ? '' : reviewDone ? (stats.reviewedToday ? 'Cleared' : 'Nothing due') : plural(remaining, 'card'),
+      detail: !stats ? '' : reviewDone ? (stats.reviewedToday ? '' : 'Nothing due') : plural(remaining, 'card'),
     },
-    { done: !!dailyDone?.finished || (!!dailyDone && dailyDone.finished === undefined), label: 'Daily challenge', to: '/daily', detail: !dailyDone ? '5 decisions' : dailyDone.finished === false ? `${dailyDone.scores.length} of 5 done` : `${dailyDone.scores.filter((x) => x >= 1).length}/5 right` },
+    { done: !!dailyDone?.finished || (!!dailyDone && dailyDone.finished === undefined), label: dailyDone && dailyDone.finished !== false ? 'Challenge done' : 'Play the daily challenge', to: '/daily', detail: !dailyDone ? '5 decisions' : dailyDone.finished === false ? `${dailyDone.scores.length} of 5 done` : `${dailyDone.scores.filter((x) => x >= 1).length} of 5 right` },
   ].filter(Boolean) as { done: boolean; label: string; to: string; detail: string }[];
   const tasksDone = tasks.filter((t) => t.done).length;
   const touchedCharts = mastery?.filter((m) => m.solid + m.learning > 0) ?? [];
@@ -80,7 +80,7 @@ export function DashboardPage() {
         kicker={date}
         trailing={
           <Link to="/you" className="pill rating-chip" style={{ textDecoration: 'none', marginBottom: 4 }}>
-            {rating && rating.games > 0 ? `${isProvisional(rating) ? '~' : ''}${Math.round(rating.rating)} · ${tierLabel(rating)}` : `${stakesLabel(g.stakes)} ${g.venue}`}
+            {rating && rating.games > 0 ? `${Math.round(rating.rating)} · ${tierLabel(rating)}` : `${stakesLabel(g.stakes)} ${g.venue}`}
           </Link>
         }
       />
@@ -133,7 +133,7 @@ export function DashboardPage() {
                   )}
                 </div>
                 <div className="hero-sub" style={{ textAlign: 'center' }}>
-                  Up next: {nextChart.spec.hero}
+                  Starts with {nextChart.spec.hero}
                 </div>
               </div>
             )}
@@ -193,7 +193,7 @@ export function DashboardPage() {
           <div className="stat-grid three">
             <Stat label="Reviewed" value={stats.reviewedToday} />
             <Stat label="Accuracy" value={Math.round((stats.accuracyToday ?? 0) * 100)} suffix="%" />
-            <Stat label="Avg time" value={stats.avgSecondsToday ?? 0} suffix="s" decimals={1} />
+            <Stat label="Time per card" value={stats.avgSecondsToday ?? 0} suffix="s" decimals={1} />
           </div>
         </section>
       )}
@@ -208,7 +208,7 @@ export function DashboardPage() {
                 {nowLearning.chart.spec.title}
               </div>
               <div className="footnote" style={{ marginTop: 4 }}>
-                {nowLearning.solid} of {nowLearning.total} borderline hands solid
+                You know {nowLearning.solid} of {nowLearning.total} close calls
               </div>
               <div className="legend">
                 <span>
@@ -231,7 +231,7 @@ export function DashboardPage() {
           <span className="section-title" style={{ padding: 0 }}>
             Last 7 days
           </span>
-          {!!streak?.best && streak.best > streak.streak && <span className="footnote num">Best streak {streak.best}</span>}
+          {!!streak?.best && streak.best > streak.streak && <span className="footnote num">Best streak is {plural(streak.best, 'day')}</span>}
         </div>
         <div className="card">
           <ul className="week" aria-label={`Studied on ${(stats?.week ?? []).filter((d) => d.done).length} of the last 7 days`}>
@@ -251,8 +251,8 @@ export function DashboardPage() {
         {streak && (
           <div className="section-footer">
             {streak.bank > 0
-              ? `You have ${streak.bank} streak ${streak.bank === 1 ? 'freeze' : 'freezes'}: each covers one missed day. Seven days in a row earns another.`
-              : 'Study seven days in a row to earn a streak freeze. A freeze covers one missed day.'}
+              ? `You have ${plural(streak.bank, 'streak freeze')}. Each one covers a missed day. Study 7 days in a row to earn another.`
+              : 'Study 7 days in a row to earn a streak freeze. Each one covers a missed day.'}
           </div>
         )}
       </section>
@@ -275,7 +275,7 @@ export function DashboardPage() {
               Your charts
             </span>
             <Link to="/ranges" className="footnote" style={{ color: 'var(--tint)', textDecoration: 'none', fontWeight: 600 }}>
-              All {mastery?.length}
+              See all {mastery?.length}
             </Link>
           </div>
           <div className="list">

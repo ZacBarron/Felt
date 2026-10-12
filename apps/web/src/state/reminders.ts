@@ -45,7 +45,7 @@ export function trialReminder(trialEndsAt: string) {
       start: at,
       minutes: 15,
       alarmMinutes: 0,
-      description: `Your free trial ends on ${end.toLocaleDateString()}. Keep Felt Pro, or cancel before then in the store you subscribed through.`,
+      description: `Your free trial ends on ${end.toLocaleDateString()}. To keep Felt Pro, do nothing. To cancel, open Felt, then Account, then Manage subscription.`,
     }),
   );
 }

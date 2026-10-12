@@ -24,7 +24,7 @@ export function LearnPage() {
 
   return (
     <div className="stack" style={{ gap: '1.6rem' }}>
-      <PageHeader title="Learn" subtitle={`${done} of ${playable.length} lessons complete`} />
+      <PageHeader title="Learn" subtitle={`${done} of ${playable.length} lessons done`} />
 
       {next?.content && (
         <Link to={lessonPath(next.key)} className="hero learn-hero">
@@ -33,7 +33,7 @@ export function LearnPage() {
               <div className="hero-label">{nextState?.status === 'started' ? 'Continue' : 'Up next'}</div>
               <div className="display learn-hero-title">{next.title}</div>
               <div className="hero-sub">
-                {next.trackTitle}, {next.content.minutes} min, {next.content.steps.length} steps
+                {next.content.minutes} min, {next.content.steps.length} steps
               </div>
               {nextState?.status === 'started' && (
                 <div className="hero-progress">
@@ -88,12 +88,12 @@ export function LearnPage() {
                       {!free && !pro && <LockIcon size={13} className="muted" />}
                     </span>
                     {open.length > 0 ? (
-                      <Link to={`/check/${track.id}/${m.id}`} className="test-out" data-haptic="select">
+                      <Link to={`/check/${track.id}/${m.id}`} className="test-out" data-haptic="select" aria-label={`Test out of ${m.title}`}>
                         <SkipIcon size={14} /> Test out
                       </Link>
                     ) : (
                       <span className="pill pill-good">
-                        <CheckIcon size={12} /> Complete
+                        <CheckIcon size={12} /> Done
                       </span>
                     )}
                   </div>
@@ -122,7 +122,7 @@ function LessonCard({ entry, state, locked }: { entry: LessonEntry; state?: Stor
         <div className="lesson-card-title">{entry.title}</div>
         <div className="lesson-card-meta">
           {!content ? (
-            <span className="pill">Soon</span>
+            <span className="pill">Coming soon</span>
           ) : state?.status === 'done' ? (
             <span className="pill pill-good">
               <CheckIcon size={12} /> Done
@@ -133,11 +133,11 @@ function LessonCard({ entry, state, locked }: { entry: LessonEntry; state?: Stor
             </span>
           ) : locked ? (
             <span className="pill">
-              <LockIcon size={12} /> Pro
+              <LockIcon size={12} /> Felt Pro
             </span>
           ) : state?.status === 'started' ? (
             <span className="pill pill-tint num">
-              {state.step} of {content.steps.length}
+              {state.step} of {content.steps.length} steps
             </span>
           ) : (
             <span className="caption">{content.minutes} min</span>

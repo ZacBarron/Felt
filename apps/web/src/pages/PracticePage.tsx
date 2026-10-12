@@ -1,4 +1,4 @@
-import { boundaryHands, chartItemDifficulty, pickAdaptive, type PracticeItem, type SkillDomain, type SkillRating, tierLabel } from '@felt/core';
+import { boundaryHands, chartItemDifficulty, pickAdaptive, type PracticeItem, type SkillDomain, type SkillRating } from '@felt/core';
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { chartChoices, type Decision, DecisionItem } from '../drills/DecisionItem';
@@ -11,7 +11,6 @@ import { useSettings } from '../state/settings';
 import { BottomBar } from '../ui/BottomBar';
 import { CloseIcon } from '../ui/icons';
 import { ProgressRing } from '../ui/ProgressRing';
-import { signed } from '../ui/format';
 import { useBodyClass } from '../ui/useBodyClass';
 
 type Candidate = PracticeItem & { decision: Decision };
@@ -90,7 +89,7 @@ export function PracticePage() {
           </h1>
           {after !== undefined && (
             <span className="pill num">
-              Rating {Math.round(after.rating)} ({signed(after.rating - before, 0)}), {tierLabel(after)}
+              Felt Rating {Math.round(after.rating)}, {Math.round(after.rating - before) === 0 ? 'no change' : after.rating > before ? `up ${Math.round(after.rating - before)}` : `down ${Math.round(before - after.rating)}`}
             </span>
           )}
           <p className="footnote" style={{ margin: 0, maxWidth: 360 }}>

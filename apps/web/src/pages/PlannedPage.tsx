@@ -17,9 +17,9 @@ const FEATURES = {
     title: 'Exploits',
     phase: 'Phase 6',
     points: [
-      'Player profiles (nit, TAG, LAG, station, maniac) and their typical leaks',
-      'How the GTO strategy shifts when you lock in a leak',
-      'A tells library rated by reliability, plus notes on real opponents',
+      'Common player types and their usual leaks',
+      'See how the best play changes against a player with a leak',
+      'A library of tells, rated by how reliable they are',
     ],
   },
   log: {
@@ -27,8 +27,8 @@ const FEATURES = {
     title: 'Log',
     phase: 'Phase 2',
     points: [
-      'One tap session start and stop with buy in, cash out and stakes',
-      'Hand entry in under 20 seconds: card picker, seats, action shorthand',
+      'Start and stop a session with one tap',
+      'Log a hand in under 20 seconds',
       'Flag hands to review later in the Spot Lab and as scenarios',
     ],
   },
@@ -55,7 +55,7 @@ export function PlannedPage({ feature }: { feature: keyof typeof FEATURES }) {
         <span className="icon-tile" style={{ width: 64, height: 64, borderRadius: 18, background: nav.color }}>
           <Icon size={32} strokeWidth={1.8} />
         </span>
-        <h2 className="display" style={{ fontSize: '1.9rem' }}>Not built yet</h2>
+        <h2 className="display" style={{ fontSize: '1.9rem' }}>Coming soon</h2>
       </div>
       <div className="list">
         {f.points.map((p) => (

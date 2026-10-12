@@ -43,23 +43,23 @@ export function LeaguePage() {
     if (!session?.user.leagues) return;
     api<League>('/league')
       .then(setLeague)
-      .catch((e) => setError(e instanceof Error ? e.message : 'Could not load the league.'));
+      .catch((e) => setError(e instanceof Error ? e.message : 'We could not load the league. Try again soon.'));
   }, [session?.user.leagues]);
 
   return (
     <div className="stack" style={{ gap: '1.4rem' }}>
       <PageHeader title="League" subtitle={league ? daysLeft(league.endsAt) : undefined} back={{ to: '/you', label: 'You' }} />
       {server === false ? (
-        <p className="muted">Leagues need the Felt server, which this copy of Felt is running without.</p>
+        <p className="muted">Leagues are not available in this version of Felt.</p>
       ) : !session || !session.user.leagues ? (
         <div className="card stack" style={{ gap: '0.6rem' }}>
           <strong>Weekly leagues</strong>
           <p className="footnote" style={{ margin: 0 }}>
-            Each week you are grouped with up to 29 real players near your Felt Rating. The table ranks rating points gained this week, so the way up is
-            answering harder decisions correctly. Only your display name is shown.
+            Each week, you join up to 29 real players near your Felt Rating. Whoever gains the most rating points ranks highest. Getting hard decisions
+            right is the way up. Other players only see your display name.
           </p>
           <Link to={session ? '/account' : '/account?next=/league'} className="btn btn-tinted btn-block">
-            {session ? 'Join in Account' : 'Sign in to join'}
+            {session ? 'Join from your account' : 'Sign in to join'}
           </Link>
         </div>
       ) : error ? (
