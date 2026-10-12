@@ -1,0 +1,260 @@
+:root {
+  --bg: #0b1410;
+  --surface: #12201a;
+  --surface-2: #1a2c24;
+  --border: #284236;
+  --text: #e8f0ec;
+  --muted: #8fa89c;
+  --accent: #3ddc97;
+  --felt: #145a3c;
+  --felt-edge: #0c3a27;
+
+  /* Action colors follow the convention most solvers use. */
+  --act-raise: #e5484d;
+  --act-3bet: #b8326f;
+  --act-call: #30a46c;
+  --act-check: #30a46c;
+  --act-fold: #3e63dd;
+
+  /* Four color deck. */
+  --suit-s: #e8f0ec;
+  --suit-h: #ff6369;
+  --suit-d: #5b8def;
+  --suit-c: #4cc38a;
+
+  --radius: 10px;
+  color-scheme: dark;
+  font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--text);
+  background: var(--bg);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+}
+
+a {
+  color: var(--accent);
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+  margin: 0 0 0.5rem;
+}
+
+h1 {
+  font-size: 1.6rem;
+}
+
+h2 {
+  font-size: 1.15rem;
+}
+
+p {
+  margin: 0 0 0.75rem;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.shell {
+  display: grid;
+  grid-template-columns: 210px 1fr;
+  min-height: 100vh;
+}
+
+.nav {
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  padding: 1.25rem 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.brand {
+  font-weight: 800;
+  font-size: 1.35rem;
+  letter-spacing: 0.02em;
+  padding: 0 0.6rem 1rem;
+}
+
+.brand span {
+  color: var(--accent);
+}
+
+.nav a {
+  white-space: nowrap;
+  color: var(--muted);
+  text-decoration: none;
+  padding: 0.45rem 0.6rem;
+  border-radius: 8px;
+}
+
+.nav a.active,
+.nav a:hover {
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+.nav .section {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  padding: 0.9rem 0.6rem 0.25rem;
+}
+
+main {
+  padding: 1.75rem;
+  max-width: 1200px;
+  width: 100%;
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem 1.15rem;
+}
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1rem;
+}
+
+.grid-3 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.row {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.stat {
+  font-size: 1.6rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.pill {
+  display: inline-block;
+  font-size: 0.75rem;
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--muted);
+}
+
+button,
+select,
+input {
+  font: inherit;
+  color: var(--text);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.45rem 0.7rem;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:hover {
+  border-color: var(--accent);
+}
+
+button.primary {
+  background: var(--accent);
+  color: #06120c;
+  border-color: var(--accent);
+  font-weight: 600;
+}
+
+label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+table.kv {
+  width: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+
+table.kv td {
+  padding: 0.3rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+table.kv td:last-child {
+  text-align: right;
+  font-weight: 600;
+}
+
+.grade-best,
+.grade-correct {
+  color: var(--act-call);
+}
+
+.grade-inaccuracy {
+  color: #f5d90a;
+}
+
+.grade-mistake {
+  color: #ff9f40;
+}
+
+.grade-blunder {
+  color: var(--act-raise);
+}
+
+@media (max-width: 760px) {
+  .shell {
+    grid-template-columns: 1fr;
+  }
+
+  .nav {
+    flex-direction: row;
+    overflow-x: auto;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    padding: 0.5rem;
+  }
+
+  .nav .section,
+  .brand {
+    display: none;
+  }
+
+  main {
+    padding: 1rem;
+  }
+}
