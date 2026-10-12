@@ -13,3 +13,5 @@ export * from './placement';
 export * from './rating';
 export * from './winrate';
 export * from './habits';
+export * from './handhistory';
+export * from './sessions';

@@ -3352,3 +3352,73 @@ label.list-row {
   align-items: center;
   text-align: left;
 }
+
+/* Import */
+.import-card {
+  padding: 1rem;
+  gap: 0.8rem;
+}
+
+.import-copy {
+  margin: 0;
+  color: var(--label-2);
+  line-height: 1.45;
+}
+
+.import-details summary {
+  cursor: pointer;
+  color: var(--tint);
+  font-weight: 600;
+  padding: 0.2rem 0;
+}
+
+.import-details[open] {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.import-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.5rem;
+  text-align: center;
+}
+
+.import-stats > div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 0.6rem 0.2rem;
+  border-radius: 14px;
+  background: var(--fill);
+}
+
+.import-stats .num {
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+.tier-progress {
+  margin-top: 0.5rem;
+}
+
+.on-felt {
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.tier-bar {
+  display: block;
+  height: 6px;
+  margin-top: 0.35rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.16);
+  overflow: hidden;
+}
+
+.tier-bar span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--on-felt-accent, var(--accent));
+}

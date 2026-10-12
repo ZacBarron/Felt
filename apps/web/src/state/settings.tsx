@@ -35,6 +35,8 @@ export interface Profile {
   focus: Focus[];
   /** Daily study target in minutes. */
   dailyMinutes: number;
+  /** When the player plans to study, as an if-then cue (Gollwitzer 1999). */
+  cue?: string;
   /** ISO date the player committed to their plan. */
   committedAt?: string;
   /** Module placement started at, or 'all' when it cleared everything. */

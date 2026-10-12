@@ -2,29 +2,25 @@ import { STARTER_CHARTS } from '@felt/content';
 import {
   boundaryHands,
   challengeNumber,
-  chartItemDifficulty,
   dailyPicks,
-  type DrillOutcome,
-  isMixed,
   shareGrid,
   tierFor,
 } from '@felt/core';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { QuickRecall } from '../drills/QuickRecall';
+import { type Decision, DecisionItem } from '../drills/DecisionItem';
 import { haptic } from '../haptics';
-import { StepView } from '../lesson/StepView';
 import { getChart } from '../state/charts';
 import { db } from '../state/db';
 import { LESSON_ENTRIES, quizSteps } from '../state/lessons';
-import { ratingSnapshot, recordLessonQuiz, recordRated, streakNow } from '../state/rating';
+import { ratingSnapshot, streakNow } from '../state/rating';
 import { BottomBar } from '../ui/BottomBar';
 import { CloseIcon, FlameIcon } from '../ui/icons';
 import { ProgressRing } from '../ui/ProgressRing';
 import { useBodyClass } from '../ui/useBodyClass';
 
-type DailyItem = { kind: 'chart'; chartId: string; hand: string } | { kind: 'quiz'; key: string; step: number };
+type DailyItem = Decision;
 
 /** Every edge hand of every 9 handed chart, and every lesson quiz: the same pool for everyone. */
 function dailyPool() {
@@ -123,9 +119,8 @@ export function DailyPage() {
   const played = useLiveQuery(() => db.daily.get(number), [number], null);
   const [started, setStarted] = useState(false);
   const [index, setIndex] = useState(0);
-  const [scores, setScores] = useState<number[]>([]);
+  const [, setScores] = useState<number[]>([]);
   const [before, setBefore] = useState<number>();
-  const [answered, setAnswered] = useState(false);
 
   useEffect(() => {
     void ratingSnapshot().then((s) => setBefore(s.overall.rating));
@@ -162,13 +157,6 @@ export function DailyPage() {
     haptic(all.every((s) => s >= 1) ? 'success' : 'heavy');
   };
 
-  const advance = () => {
-    setAnswered(false);
-    window.scrollTo({ top: 0 });
-    if (index + 1 >= items.length) void finish(scores);
-    else setIndex(index + 1);
-  };
-
   const item = items[index];
   const progress = (
     <div className="focus-top">
@@ -184,66 +172,24 @@ export function DailyPage() {
     </div>
   );
 
-  if (item.kind === 'chart') {
-    const chart = getChart(item.chartId)!;
-    return (
-      <div className="stack focus-column">
-        {progress}
-        <QuickRecall
-          key={index}
-          chart={chart}
-          hand={item.hand}
-          targetMs={3000}
-          onAnswer={(o: DrillOutcome) => {
-            setScores((s) => [...s, o.accuracy]);
-            void recordRated({
-              itemId: `daily:${item.chartId}:${item.hand}`,
-              domain: 'preflop',
-              difficulty: chartItemDifficulty(isMixed(chart.mixes.get(item.hand) ?? { fold: 1 }), true),
-              score: o.accuracy,
-              source: 'daily',
-            });
-          }}
-          onNext={() => {
-            setScores((s) => {
-              if (index + 1 >= items.length) void finish(s);
-              return s;
-            });
-            if (index + 1 < items.length) {
-              setIndex(index + 1);
-              window.scrollTo({ top: 0 });
-            }
-          }}
-        />
-      </div>
-    );
-  }
-
-  const entry = LESSON_ENTRIES.find((e) => e.key === item.key)!;
-  const step = entry.content!.steps[item.step];
   return (
     <div className="stack focus-column">
       {progress}
-      <div key={index} className="lesson-stage from-right">
-        <div className="footnote" style={{ marginBottom: '0.4rem' }}>
-          {entry.trackTitle}, {entry.title}
-        </div>
-        <StepView
-          step={step}
-          onAnswer={(choice) => {
-            if (step.kind !== 'quiz') return;
-            const right = choice === step.answer;
-            setScores((s) => [...s, right ? 1 : 0]);
-            setAnswered(true);
-            void recordLessonQuiz(item.key, item.step, right, 'daily');
-          }}
-        />
-      </div>
-      <BottomBar>
-        <button className="btn btn-primary btn-lg btn-block" disabled={!answered} onClick={advance}>
-          {answered ? (index + 1 >= items.length ? 'See result' : 'Next') : 'Choose an answer'}
-        </button>
-      </BottomBar>
+      <DecisionItem
+        key={index}
+        decision={item}
+        source="daily"
+        last={index + 1 >= items.length}
+        onScore={(score) => setScores((s) => [...s, score])}
+        onNext={() => {
+          window.scrollTo({ top: 0 });
+          setScores((s) => {
+            if (index + 1 >= items.length) void finish(s);
+            return s;
+          });
+          if (index + 1 < items.length) setIndex(index + 1);
+        }}
+      />
     </div>
   );
 }

@@ -52,6 +52,7 @@ export const NAV_SECTIONS: { section: string; items: NavItem[] }[] = [
     items: [
       { to: '/log', label: 'Log', icon: LogIcon, color: 'var(--teal)' },
       { to: '/you', label: 'You', icon: StatsIcon, color: 'var(--pink)' },
+      { to: '/import', label: 'Import hands', icon: LogIcon, color: 'var(--teal)' },
       { to: '/settings', label: 'Settings', icon: SettingsIcon, color: 'var(--gray)' },
     ],
   },

@@ -7,7 +7,7 @@ import { PlayingCard } from '../components/PlayingCard';
 import { canOpenLesson } from '../state/access';
 import { chartsForGame, getChart } from '../state/charts';
 import type { StoredLesson } from '../state/db';
-import { goalCopy, pathPrefs } from '../state/goals';
+import { cueCopy, goalCopy, pathPrefs } from '../state/goals';
 import { lessonPath, lessonProgress, pickNextLesson, studyMinutesToday } from '../state/lessons';
 import { ratingSnapshot, streakNow } from '../state/rating';
 import { db } from '../state/db';
@@ -135,7 +135,7 @@ export function DashboardPage() {
             {questsDone === quests.length ? <CheckIcon size={20} style={{ color: 'var(--tint)' }} /> : <span className="num goal-num">{questsDone}/3</span>}
           </ProgressRing>
           <div className="grow">
-            <div className="footnote">{goalCopy(settings.profile.goal)?.label ?? 'Today'}</div>
+            <div className="footnote">{cueCopy(settings.profile.cue)?.label ?? goalCopy(settings.profile.goal)?.label ?? 'Today'}</div>
             <div style={{ fontWeight: 650 }}>{questsDone === quests.length ? 'Perfect day' : "Today's quests"}</div>
           </div>
           {!!streak?.streak && (
@@ -217,6 +217,15 @@ export function DashboardPage() {
             ))}
           </div>
         </div>
+        {streak && (
+          <div className="section-footer">
+            {streak.bank > 0
+              ? `You have ${streak.bank} streak ${streak.bank === 1 ? 'freeze' : 'freezes'}. Miss a day and your streak is safe.`
+              : streak.streak > 0
+                ? 'Study seven days in a row to earn a streak freeze. One missed day will not undo a habit.'
+                : 'Any study counts: a lesson, a review card or the daily challenge.'}
+          </div>
+        )}
       </section>
 
       <section>

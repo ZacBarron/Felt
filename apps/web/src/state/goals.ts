@@ -32,6 +32,17 @@ export const DAILY_OPTIONS: { minutes: number; label: string }[] = [
   { minutes: 20, label: 'Intense' },
 ];
 
+/** Study cues for an if-then plan: "When I ..., I will study". */
+export const CUES: { id: string; label: string; phrase: string }[] = [
+  { id: 'coffee', label: 'With my morning coffee', phrase: 'have my morning coffee' },
+  { id: 'commute', label: 'On my commute', phrase: 'start my commute' },
+  { id: 'lunch', label: 'On my lunch break', phrase: 'take my lunch break' },
+  { id: 'before-play', label: 'Before I play', phrase: 'sit down to play' },
+  { id: 'evening', label: 'In the evening', phrase: 'wind down in the evening' },
+];
+
+export const cueCopy = (id?: string) => CUES.find((c) => c.id === id);
+
 export function goalCopy(goal?: Goal) {
   return GOALS.find((g) => g.id === goal);
 }

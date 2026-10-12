@@ -55,6 +55,6 @@ describe('daily challenge', () => {
   });
 
   it('shares a spoiler free result', () => {
-    expect(shareText(285, [1, 1, 0.5, 0, 1], 1432)).toBe('Felt Daily #285 · 3/5\n🟩🟩🟨🟥🟩\nFelt Rating 1432 (Regular)');
+    expect(shareText(285, [1, 1, 0.5, 0, 1], 1432)).toBe('Felt Daily #285 · 3/5\n🟩🟩🟨🟥🟩\nFelt Rating 1432 (Grinder)');
   });
 });

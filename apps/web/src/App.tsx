@@ -6,12 +6,14 @@ import { CheckPage, PlacementPage } from './pages/CheckPage';
 import { DailyPage } from './pages/DailyPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { DrillsPage } from './pages/DrillsPage';
+import { ImportPage } from './pages/ImportPage';
 import { LabPage } from './pages/LabPage';
 import { LearnPage } from './pages/LearnPage';
 import { LessonPage } from './pages/LessonPage';
 import { MorePage } from './pages/MorePage';
 import { OnboardingPage } from './pages/OnboardingPage';
 import { PlannedPage } from './pages/PlannedPage';
+import { PracticePage } from './pages/PracticePage';
 import { ProPage } from './pages/ProPage';
 import { RangesPage } from './pages/RangesPage';
 import { ReviewPage } from './pages/ReviewPage';
@@ -116,6 +118,8 @@ export function App() {
             <Route path="/stats" element={<Navigate to="/you" replace />} />
             <Route path="/you" element={<YouPage />} />
             <Route path="/daily" element={<DailyPage />} />
+            <Route path="/import" element={<ImportPage />} />
+            <Route path="/practice" element={<PracticePage />} />
           </Routes>
         </div>
       </main>

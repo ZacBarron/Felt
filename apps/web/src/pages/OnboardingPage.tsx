@@ -5,7 +5,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { haptic } from '../haptics';
 import { isPro } from '../state/access';
 import type { StoredLesson } from '../state/db';
-import { DAILY_OPTIONS, EXPERIENCE, FOCUS, GOALS, goalCopy, pathPrefs } from '../state/goals';
+import { CUES, cueCopy, DAILY_OPTIONS, EXPERIENCE, FOCUS, GOALS, goalCopy, pathPrefs } from '../state/goals';
 import { isComplete, LESSON_ENTRIES, lessonProgress, recommendedLessons } from '../state/lessons';
 import { type Focus, type Profile, useSettings } from '../state/settings';
 import { BrandMark, HeroPattern, TAGLINE, Wordmark } from '../ui/Brand';
@@ -19,8 +19,8 @@ import { useBodyClass } from '../ui/useBodyClass';
  * ends in a commitment the player makes on purpose.
  */
 
-type Step = 'intro' | 'goal' | 'game' | 'experience' | 'focus' | 'daily' | 'level' | 'plan';
-const STEPS: Step[] = ['intro', 'goal', 'game', 'experience', 'focus', 'daily', 'level', 'plan'];
+type Step = 'intro' | 'goal' | 'game' | 'experience' | 'focus' | 'daily' | 'when' | 'level' | 'plan';
+const STEPS: Step[] = ['intro', 'goal', 'game', 'experience', 'focus', 'daily', 'when', 'level', 'plan'];
 
 const GAMES = [
   { id: 'live-1-3', label: 'Live cash, 1/2 or 1/3', note: '9 handed, deep and loose' },
@@ -255,7 +255,9 @@ export function OnboardingPage() {
               keep what you learn.
             </div>
           </section>
-          <p className="muted onb-pledge">I will study {profile.dailyMinutes} minutes a day and play every decision on purpose.</p>
+          <p className="muted onb-pledge">
+            {cueCopy(profile.cue) ? `When I ${cueCopy(profile.cue)!.phrase}, I will study ${profile.dailyMinutes} minutes.` : `I will study ${profile.dailyMinutes} minutes a day.`}
+          </p>
         </div>
         <BottomBar>
           <HoldToCommit onDone={commit} />
@@ -340,6 +342,18 @@ export function OnboardingPage() {
               />
             );
           })}
+        </div>
+      ),
+    },
+    when: {
+      title: 'When will you study?',
+      sub: 'Tying practice to something you already do every day makes it stick.',
+      ready: !!profile.cue,
+      body: (
+        <div className="onb-choices" role="radiogroup">
+          {CUES.map((c) => (
+            <Choice key={c.id} selected={profile.cue === c.id} label={c.label} onClick={() => setProfile({ cue: c.id })} />
+          ))}
         </div>
       ),
     },

@@ -56,6 +56,41 @@ export interface StoredAnswer {
   source: 'review' | 'lesson' | 'check' | 'daily';
 }
 
+/** An imported hand, summarized from the hero's seat, with the original text. */
+export interface StoredHand {
+  id: string;
+  at: Date;
+  site: string;
+  game: 'cash' | 'tournament';
+  bb: number;
+  currency?: string;
+  tableMax: number;
+  players: number;
+  position?: string;
+  hand?: string;
+  net: number;
+  netBb: number;
+  vpip: boolean;
+  pfr: boolean;
+  threeBetChance: boolean;
+  threeBet: boolean;
+  openChance: boolean;
+  openAction?: 'raise' | 'limp' | 'fold';
+  sawFlop: boolean;
+  showdown: boolean;
+  raw: string;
+}
+
+/** A live session imported from a spreadsheet or bankroll app. */
+export interface StoredSession {
+  id?: number;
+  date?: Date;
+  hours: number;
+  profit: number;
+  stakes?: string;
+  importedAt: Date;
+}
+
 /** A finished daily challenge. */
 export interface StoredDaily {
   /** Challenge number. */
@@ -95,6 +130,8 @@ export const db = new Dexie('felt') as Dexie & {
   saved: EntityTable<SavedItem, 'id'>;
   answers: EntityTable<StoredAnswer, 'id'>;
   daily: EntityTable<StoredDaily, 'number'>;
+  hands: EntityTable<StoredHand, 'id'>;
+  sessions: EntityTable<StoredSession, 'id'>;
 };
 
 db.version(1).stores({
@@ -113,4 +150,9 @@ db.version(3).stores({
 db.version(4).stores({
   answers: '++id, at, itemId, domain',
   daily: 'number, at',
+});
+
+db.version(5).stores({
+  hands: 'id, at, game, position',
+  sessions: '++id, date, importedAt',
 });

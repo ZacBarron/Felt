@@ -3,6 +3,8 @@ import {
   expectedScore,
   inflateRd,
   isProvisional,
+  nextTier,
+  pickAdaptive,
   ratingInterval,
   replayRatings,
   START_RD,
@@ -61,9 +63,42 @@ describe('Glicko rating', () => {
     expect(hi - lo).toBeCloseTo(2 * 1.96 * overall.rd, 6);
   });
 
-  it('names tiers by rating', () => {
-    expect(tierFor(950)).toBe('Beginner');
-    expect(tierFor(1450)).toBe('Regular');
-    expect(tierFor(2100)).toBe('Elite');
+  it('names tiers every 150 points and shows the next one', () => {
+    expect(tierFor(850)).toBe('Newcomer');
+    expect(tierFor(1200)).toBe('Contender');
+    expect(tierFor(1499)).toBe('Grinder');
+    expect(tierFor(2300)).toBe('World class');
+    expect(nextTier(1460)).toEqual({ name: 'Regular', min: 1500, pointsAway: 40, progress: 110 / 150 });
+    expect(nextTier(2400)).toBeUndefined();
+    // One tier apart is about a 70% expected score.
+    expect(expectedScore(1500, 1350, 0)).toBeCloseTo(0.70, 2);
+  });
+});
+
+describe('adaptive practice', () => {
+  const items = [
+    ...Array.from({ length: 20 }, (_, i) => ({ id: `p${i}`, domain: 'preflop' as const, difficulty: i < 10 ? 1050 : 1550 })),
+    ...Array.from({ length: 20 }, (_, i) => ({ id: `m${i}`, domain: 'math' as const, difficulty: i < 10 ? 1300 : 1600 })),
+  ];
+  const ratings = { preflop: 1300, math: 1600, postflop: 1200, exploit: 1200, theory: 1200 };
+  const rand = (() => {
+    let s = 1;
+    return () => ((s = (s * 16807) % 2147483647) / 2147483647);
+  })();
+
+  it('aims near 80% expected success, favors the weaker area, and interleaves', () => {
+    const picked = pickAdaptive(items, (d) => ratings[d], { n: 9, rand });
+    expect(picked).toHaveLength(9);
+    // Preflop at 1300: the 1050 items are about 80%; math at 1600: the 1300 items are about 85%.
+    expect(picked.filter((p) => p.domain === 'preflop').every((p) => p.difficulty === 1050)).toBe(true);
+    expect(picked.filter((p) => p.domain === 'preflop').length).toBeGreaterThan(picked.filter((p) => p.domain === 'math').length);
+    for (let i = 1; i < picked.length; i++) {
+      if (picked[i].domain === picked[i - 1].domain) expect(picked.slice(i).every((p) => p.domain === picked[i].domain)).toBe(true);
+    }
+  });
+
+  it('skips excluded items', () => {
+    const exclude = new Set(items.filter((i) => i.domain === 'preflop').map((i) => i.id));
+    expect(pickAdaptive(items, (d) => ratings[d], { n: 5, exclude, rand }).every((p) => p.domain === 'math')).toBe(true);
   });
 });

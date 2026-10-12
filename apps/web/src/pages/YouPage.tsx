@@ -6,9 +6,11 @@ import {
   formatAmount,
   handsForPrecision,
   isProvisional,
+  nextTier,
   ratingInterval,
   SKILL_DOMAINS,
   type SkillRating,
+  sessionTotals,
   stakesLabel,
   type TableAssumptions,
   tierFor,
@@ -17,9 +19,10 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { haptic } from '../haptics';
+import { db } from '../state/db';
 import { DOMAIN_LABELS, ratingSnapshot, streakNow } from '../state/rating';
 import { useSettings } from '../state/settings';
-import { FlameIcon } from '../ui/icons';
+import { ChevronRightIcon, FlameIcon, TargetIcon } from '../ui/icons';
 import { PageHeader } from '../ui/PageHeader';
 import { useCountUp } from '../ui/useCountUp';
 
@@ -83,6 +86,11 @@ export function YouPage() {
   const { settings, update } = useSettings();
   const g = settings.game;
   const snap = useLiveQuery(ratingSnapshot, []);
+  const imported = useLiveQuery(async () => {
+    const cash = (await db.hands.where('game').equals('cash').toArray()).filter((h) => h.netBb !== undefined);
+    const sessions = await db.sessions.toArray();
+    return { cash, sessions };
+  }, []);
   const streak = useLiveQuery(() => streakNow(), []);
   const [showAssumptions, setShowAssumptions] = useState(false);
   const overall = snap ? currentRating(snap.overall) : undefined;
@@ -93,12 +101,30 @@ export function YouPage() {
   const a: TableAssumptions = { ...defaultAssumptions(g), ...settings.assumptions };
   const model = estimateWinRate(overall.rating, overall.rd, g, a);
   const results = settings.results;
-  const observed = results && results.hands > 0 ? (results.profit / g.stakes.bb / results.hands) * 100 : undefined;
-  const blended = observed !== undefined ? blendWithResults(model, observed, results!.hands, a.sd100) : undefined;
+  // Results come from imported hands first, then imported live sessions, then what the player typed.
+  const source: { hands: number; bb: number; label: string } | undefined = imported?.cash.length
+    ? { hands: imported.cash.length, bb: imported.cash.reduce((t, h) => t + h.netBb, 0), label: `${imported.cash.length.toLocaleString()} imported hands` }
+    : imported?.sessions.length
+      ? (() => {
+          const t = sessionTotals(imported.sessions);
+          return {
+            hands: Math.round(t.hours * a.handsPerHour),
+            bb: t.profit / g.stakes.bb,
+            label: `${t.sessions} imported sessions, ${Math.round(t.hours)} hours at about ${a.handsPerHour} hands an hour`,
+          };
+        })()
+      : results && results.hands > 0
+        ? { hands: results.hands, bb: results.profit / g.stakes.bb, label: 'the results you entered' }
+        : undefined;
+  const observed = source ? (source.bb / source.hands) * 100 : undefined;
+  const blended = source && observed !== undefined ? blendWithResults(model, observed, source.hands, a.sd100) : undefined;
   const best = blended ?? { ...model, weightOnResults: 0 };
   const perHour = (bb100: number) => formatAmount((bb100 * a.handsPerHour) / 100, g);
   const [lo, hi] = ratingInterval(overall);
   const rated = overall.games > 0;
+  const next = nextTier(overall.rating);
+  // Personal best counts only settled ratings, so early swings do not set a record.
+  const bestRating = Math.max(0, ...snap.history.filter((p) => p.rd <= 110).map((p) => p.rating));
 
   const setAssumption = (key: keyof TableAssumptions, value: number) =>
     update({ ...settings, assumptions: { ...settings.assumptions, [key]: value } });
@@ -129,6 +155,19 @@ export function YouPage() {
             ? `${tierFor(overall.rating)}. 95% sure your true rating is between ${Math.round(lo)} and ${Math.round(hi)}.`
             : 'Answer a few questions to get rated. The placement test or a daily challenge is the fastest way.'}
         </div>
+        {rated && next && (
+          <div className="tier-progress">
+            <div className="row between">
+              <span className="footnote on-felt">{tierFor(overall.rating)}</span>
+              <span className="footnote on-felt num">
+                {next.pointsAway} to {next.name}
+              </span>
+            </div>
+            <span className="tier-bar">
+              <span style={{ width: `${next.progress * 100}%` }} />
+            </span>
+          </div>
+        )}
         <Sparkline points={snap.history} />
         <div className="row" style={{ gap: '0.5rem', marginTop: '0.4rem' }}>
           {!!streak?.streak && (
@@ -139,6 +178,7 @@ export function YouPage() {
           <span className="pill pill-on-felt num">
             {overall.games} rated {overall.games === 1 ? 'answer' : 'answers'}
           </span>
+          {bestRating > 0 && <span className="pill pill-on-felt num">Best {Math.round(bestRating)}</span>}
         </div>
         {rated && (
           <button className="btn btn-lg btn-block btn-hero" onClick={() => void share()} data-haptic="off">
@@ -146,6 +186,17 @@ export function YouPage() {
           </button>
         )}
       </section>
+
+      <Link to="/practice" className="card placement-card">
+        <span className="placement-icon">
+          <TargetIcon size={22} />
+        </span>
+        <span className="grow">
+          <span style={{ display: 'block', fontWeight: 650 }}>Practice at your level</span>
+          <span className="footnote">Ten decisions you should get right about 80% of the time, more from your weakest area.</span>
+        </span>
+        <ChevronRightIcon size={16} className="chev" />
+      </Link>
 
       <section>
         <h2 className="section-title">By area</h2>
@@ -211,34 +262,53 @@ export function YouPage() {
 
       <section>
         <h2 className="section-title">Your results</h2>
-        <div className="list">
-          <label className="list-row">
-            <span className="grow">Hands played</span>
-            <input
-              className="you-input num"
-              type="number"
-              inputMode="numeric"
-              value={results?.hands ?? ''}
-              placeholder="0"
-              onChange={(e) => update({ ...settings, results: { hands: Number(e.target.value) || 0, profit: results?.profit ?? 0 } })}
-            />
-          </label>
-          <label className="list-row">
-            <span className="grow">Profit ({g.stakes.currency})</span>
-            <input
-              className="you-input num"
-              type="number"
-              inputMode="decimal"
-              value={results?.profit ?? ''}
-              placeholder="0"
-              onChange={(e) => update({ ...settings, results: { hands: results?.hands ?? 0, profit: Number(e.target.value) || 0 } })}
-            />
-          </label>
-        </div>
+        {imported && (imported.cash.length > 0 || imported.sessions.length > 0) ? (
+          <Link to="/import" className="list-row card">
+            <span className="grow">
+              <span style={{ display: 'block', fontWeight: 600 }}>
+                {observed !== undefined && `${observed >= 0 ? '+' : ''}${observed.toFixed(1)} bb/100`}
+              </span>
+              <span className="footnote">From {source?.label}</span>
+            </span>
+            <ChevronRightIcon size={16} className="chev" />
+          </Link>
+        ) : (
+          <div className="list">
+            <Link to="/import" className="list-row">
+              <span className="grow">
+                <span style={{ display: 'block', fontWeight: 600, color: 'var(--tint)' }}>Import hands or sessions</span>
+                <span className="footnote">Hand histories, tracker exports or a bankroll CSV</span>
+              </span>
+              <ChevronRightIcon size={16} className="chev" />
+            </Link>
+            <label className="list-row">
+              <span className="grow">Or enter hands played</span>
+              <input
+                className="you-input num"
+                type="number"
+                inputMode="numeric"
+                value={results?.hands ?? ''}
+                placeholder="0"
+                onChange={(e) => update({ ...settings, results: { hands: Number(e.target.value) || 0, profit: results?.profit ?? 0 } })}
+              />
+            </label>
+            <label className="list-row">
+              <span className="grow">Profit ({g.stakes.currency})</span>
+              <input
+                className="you-input num"
+                type="number"
+                inputMode="decimal"
+                value={results?.profit ?? ''}
+                placeholder="0"
+                onChange={(e) => update({ ...settings, results: { hands: results?.hands ?? 0, profit: Number(e.target.value) || 0 } })}
+              />
+            </label>
+          </div>
+        )}
         <div className="section-footer">
-          {observed !== undefined
-            ? `Your results so far: ${observed >= 0 ? '+' : ''}${observed.toFixed(1)} bb/100. `
-            : `Live, about ${a.handsPerHour} hands an hour. `}
+          {source && source.hands < 1500
+            ? `Only about ${source.hands.toLocaleString()} hands so far. Under about 1,500 hands results are mostly luck, so your rating carries most of the estimate. `
+            : ''}
           Results alone need about {Math.round(handsForPrecision(5, a.sd100) / 1000)}k hands to pin a win rate within 5 bb/100, which is why Felt
           combines them with your rating.
         </div>
