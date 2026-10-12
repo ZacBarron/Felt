@@ -1,9 +1,12 @@
+import { currentRating } from '@felt/core';
+import { useLiveQuery } from 'dexie-react-hooks';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { DrillRunner } from '../drills/DrillRunner';
 import { haptic } from '../haptics';
 import { chartsForGame } from '../state/charts';
 import { buildExtra, buildQueue, buildSavedDeck, type QueueItem, recordAnswer, RELEARN_WINDOW_MS } from '../state/review';
+import { ratingSnapshot } from '../state/rating';
 import { useSettings } from '../state/settings';
 import { BottomBar } from '../ui/BottomBar';
 import { CheckIcon, CloseIcon, DrillsIcon } from '../ui/icons';
@@ -36,6 +39,14 @@ export function ReviewPage() {
   // A new key per attempt so a card shown twice in one session starts fresh.
   const [attempt, setAttempt] = useState(0);
   const { charts } = chartsForGame(settings.game);
+  // The rating when this session started, to show what the session changed.
+  const startRating = useRef<number>();
+  useEffect(() => {
+    void ratingSnapshot().then((snap) => {
+      const r = currentRating(snap.overall);
+      if (r.games > 0) startRating.current = r.rating;
+    });
+  }, []);
 
   const moreExtra = useCallback(async () => {
     if (loadingMore.current) return;
@@ -85,11 +96,12 @@ export function ReviewPage() {
   if (!queue) return <p className="muted">Loading your review…</p>;
 
   if (!item) {
-    if (phase === 'extra' && exhausted) return <SessionDone results={results} onMore={null} />;
+    if (phase === 'extra' && exhausted) return <SessionDone results={results} onMore={null} startRating={startRating.current} />;
     if (phase === 'extra') return <p className="muted">Loading more cards…</p>;
     return (
       <SessionDone
         results={results}
+        startRating={startRating.current}
         onMore={() => {
           setPhase('extra');
           setQueue((q) => (q ?? []).slice(0, index));
@@ -147,7 +159,29 @@ export function ReviewPage() {
   );
 }
 
-function SessionDone({ results, onMore }: { results: { accuracy: number; ms: number }[]; onMore: (() => void) | null }) {
+function RatingChange({ from }: { from?: number }) {
+  const now = useLiveQuery(async () => currentRating((await ratingSnapshot()).overall), []);
+  const delta = now && from !== undefined ? Math.round(now.rating - from) : 0;
+  const shown = Math.round(useCountUp(delta, 1100));
+  if (!now || now.games === 0 || (from !== undefined && delta === 0)) return null;
+  return (
+    <div className={`rating-change ${delta > 0 ? 'up' : 'down'}`} role="status">
+      <span className="footnote">{from === undefined ? 'Your first Felt Rating' : 'Felt Rating'}</span>
+      <span className="num rating-change-value">{Math.round(now.rating)}</span>
+      {from !== undefined && <span className="pill num">{shown > 0 ? `+${shown}` : shown}</span>}
+    </div>
+  );
+}
+
+function SessionDone({
+  results,
+  onMore,
+  startRating,
+}: {
+  results: { accuracy: number; ms: number }[];
+  onMore: (() => void) | null;
+  startRating?: number;
+}) {
   const done = results.length > 0;
   const avg = done ? results.reduce((a, r) => a + r.accuracy, 0) / results.length : 0;
   const perfect = results.filter((r) => r.accuracy === 1).length;
@@ -167,6 +201,7 @@ function SessionDone({ results, onMore }: { results: { accuracy: number; ms: num
                 <div className="caption">accuracy</div>
               </div>
             </ProgressRing>
+            <RatingChange from={startRating} />
             <div>
               <h2 className="display" style={{ fontSize: '2rem' }}>Review done</h2>
               <div className="footnote" style={{ marginTop: 4 }}>

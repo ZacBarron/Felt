@@ -159,10 +159,16 @@ function Practice({ chart, mode }: { chart: Chart; mode: 'paint' | 'quick' }) {
       {mode === 'quick' && score.total > 0 && (
         <div className="row" style={{ gap: '0.4rem' }}>
           <span className="pill num">
-            {score.right} of {score.total}
+            <span key={score.right} className="bump">
+              {score.right}
+            </span>{' '}
+            of {score.total}
           </span>
           <span className={`pill num ${score.streak >= 5 ? 'pill-warn' : ''}`}>
-            <FlameIcon size={12} /> {score.streak}
+            <FlameIcon size={12} />{' '}
+            <span key={score.streak} className="bump">
+              {score.streak}
+            </span>
           </span>
           {score.best >= 3 && <span className="pill num">Best {score.best}</span>}
         </div>

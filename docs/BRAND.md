@@ -77,6 +77,9 @@ Motion explains what happened; it never decorates.
 - **Ink:** painted cells fill from the left like a brush stroke.
 - **Liquid selection:** the tab pill stretches as it slides between tabs.
 - **Count up:** headline numbers roll to their value; rings fill.
+- **The mark assembles:** on the welcome screen and in moments, the grid pops in along the diagonal and the F lights in a brass sweep.
+- **Verdicts land:** the badge pops, a soft ring leaves it, and the check draws itself. Mix bars grow from the left.
+- **Moments:** a new tier or a streak milestone gets one short full screen moment on the felt, once, and only on a calm screen (never mid question). The title wipes in like ink. Nothing else earns a takeover.
 - Springs for things you touch, ease out for things that appear. Everything respects Reduce Motion.
 
 ## Materials

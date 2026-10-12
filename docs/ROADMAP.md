@@ -60,16 +60,19 @@ See [MONETIZATION.md](MONETIZATION.md).
 - [x] Practice at your level (about 80% expected success, weaker areas first, interleaved); study cue at onboarding
 - [x] More preflop charts: BB vs CO and UTG, SB vs BTN, BTN vs CO, BTN and UTG facing a 3bet (with reach, so only opened hands are drilled), BTN vs two limpers
 - [x] Untimed drills and a switch for drill keyboard shortcuts; placement with "Not sure" and resume
+- [x] Ranges and Drills in one place: view, paint (with 100/75/50/25% and split brushes, graded by mix distance) or quiz any chart
+- [x] Charts with graded edges in 5% steps, like published solutions
+- [x] Avatar with rating on Today; milestone moments for tiers and streaks; game sheet from Ranges
 - [x] Import stats: flop c-bet, fold to 3bet, aggression and won at showdown, with a stakes filter
 - [ ] Connect a store (App Store, Play, web checkout) to `purchase()`
 - [ ] Verify GGPoker parsing against a real GG export; add Winamax and iPoker formats
 - [x] Calendar reminders (.ics) for the study time and the trial end; local event log with export
 - [x] Copy, accessibility (WCAG 2.2 AA pass) and visual review from simulated expert panels
-- [ ] Server: item calibration, real pool ratings per stake, leagues with real players, push reminders, global daily stats
+- [x] Server: item calibration, real pool ratings per stake, leagues with real players, push reminders, global daily stats
 
 ## Phase 2: Live game essentials
 
-- [ ] Session tracker: one tap start and stop, stakes, buy ins, cash out, venue, notes
+- [x] Session tracker: one tap start and stop, stakes, buy ins, cash out, venue, notes
 - [ ] Fast hand entry on a phone: card picker, seat chips, action shorthand parser, money amounts
 - [ ] Hand replayer on the table component; flag a hand to open it in Spot Lab
 - [ ] Results: profit in money and bb, bb/hour, profit graph, variance bands
@@ -101,25 +104,25 @@ See [SOLVER_DATA.md](SOLVER_DATA.md).
 
 ## Phase 5: Scenarios and challenges
 
-- [ ] Scenario engine: walk a hand tree, grade each decision by EV loss
+- [x] Scenario engine: walk a hand tree, grade each decision by EV loss (12 river scenarios solved on device)
 - [ ] Curated scenario packs per lesson; replay your own logged hands as scenarios
 - [ ] Daily challenge, speed rounds, personal bests, module boss fights
 - [ ] Skill stats: EV loss trend, accuracy by position and street, mastery levels
 
 ## Phase 6: Exploitation and tells
 
-- [ ] Player archetypes and leak profiles
+- [x] Player archetypes and leak profiles
 - [ ] Node locked comparisons: GTO vs best response to each archetype
 - [ ] Opponent notes and tags from the logger, with pool stats over time
-- [ ] Tells library with reliability ratings
+- [x] Tells library with reliability ratings
 
 ## Phase 7: Tournaments, coach and sync
 
 - [ ] Push/fold Nash charts and ICM calculator, computed in `@felt/core`
-- [ ] Tournament track lessons (ICM, bubble, short stack play)
+- [x] Tournament track lessons (ICM, bubble, short stack play)
 - [ ] AI hand review grounded in solver data and your leak history (Claude API)
 - [ ] Voice note hand capture; online hand history import
-- [ ] Optional cloud sync and backup
+- [x] Optional cloud sync and backup
 - [ ] Leak driven study plans
 
 ## Decisions

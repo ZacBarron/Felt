@@ -1135,7 +1135,42 @@ table.kv td:last-child {
   display: grid;
   place-items: center;
   color: #fff;
+  position: relative;
   animation: pop 420ms var(--spring) both;
+}
+
+/* A soft ring leaves the badge as it lands, so the verdict reads at a glance. */
+.verdict .badge::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: inherit;
+  opacity: 0;
+  animation: verdict-ring 700ms var(--ease) 120ms;
+}
+
+/* The check or cross draws itself. */
+.verdict .badge svg :is(path, polyline, line) {
+  stroke-dasharray: 40;
+  animation: draw 420ms var(--ease) 160ms backwards;
+}
+
+@keyframes verdict-ring {
+  from {
+    opacity: 0.45;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(2.2);
+  }
+}
+
+@keyframes draw {
+  from {
+    stroke-dashoffset: 40;
+  }
 }
 
 .flash-good {
@@ -3688,6 +3723,21 @@ h2[tabindex='-1']:focus {
 .range-cell .seg[data-act$='bet'],
 .range-cell .seg[data-act='allin'],
 .range-cell .seg[data-act='jam'],
+.mix-seg {
+  transform-origin: left;
+  animation: bar-grow 560ms var(--ease) 120ms backwards;
+}
+
+.mix-seg + .mix-seg {
+  animation-delay: 220ms;
+}
+
+/* A number that just changed gives a small hop. */
+.bump {
+  display: inline-block;
+  animation: pop 360ms var(--spring) backwards;
+}
+
 .mix-seg[data-act^='raise'],
 .mix-seg[data-act$='bet'] {
   background-image: repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0 2px, transparent 2px 5px);
@@ -4600,4 +4650,29 @@ button.evidence {
 .swatch > span {
   display: block;
   height: 100%;
+}
+
+/* What a session did to your rating, under the accuracy ring. */
+.rating-change {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.5rem 0.35rem 0.9rem;
+  border-radius: 999px;
+  background: var(--fill);
+  animation: rise 500ms var(--ease) 700ms backwards;
+}
+
+.rating-change-value {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.rating-change.up .pill {
+  color: var(--green-text);
+  background: color-mix(in srgb, var(--green) 14%, transparent);
+}
+
+.rating-change.down .pill {
+  color: var(--label-2);
 }
