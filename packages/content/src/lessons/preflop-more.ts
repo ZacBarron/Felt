@@ -69,6 +69,13 @@ export const PREFLOP_MORE_LESSONS: LessonContent[] = [
         title: 'Why bigger out of position',
         body: [
           'Out of position you realize less of your equity, so you charge more for the call and leave less room to play after the flop.',
+        ],
+        evidence: 'solver',
+      },
+      {
+        kind: 'text',
+        title: 'What the size does to SPR',
+        body: [
           'A 3bet to 7.5bb that gets called leaves a pot of 16.5bb with 92.5bb behind: SPR **5.6**. A small blind 3bet to 10bb against the button, called, leaves 21bb with 90bb behind: SPR **4.3**.',
         ],
         evidence: 'math',
@@ -452,7 +459,7 @@ export const PREFLOP_MORE_LESSONS: LessonContent[] = [
         kind: 'text',
         title: 'Early opens fold less',
         body: [
-          'A UTG range is already strong. In Felt’s starter charts, QQ+ and AK are **22%** of the UTG range but only **6%** of the button range. Most of a button range is hands that were fine to open and cannot stand a 3bet.',
+          'A UTG range is already strong. In Felt’s 9 handed starter charts, QQ+ and AK are **22%** of the UTG range (15% of the 6 max UTG range) but only **6%** of the button range. Most of a button range is hands that were fine to open and cannot stand a 3bet.',
           'So early openers continue with a larger share of their range against a 3bet, and button openers fold a larger share.',
         ],
         evidence: 'solver',
@@ -475,7 +482,7 @@ export const PREFLOP_MORE_LESSONS: LessonContent[] = [
         question: 'Why does a UTG opener fold a smaller share of its range to a 3bet than a button opener?',
         choices: ['UTG is always in position', 'The 3bet is always smaller against UTG', 'Its range is much stronger to begin with'],
         answer: 2,
-        explain: 'In Felt’s charts, QQ+ and AK are 22% of the UTG range and 6% of the button range. The button opened many hands that cannot continue.',
+        explain: 'In Felt’s 9 handed charts, QQ+ and AK are 22% of the UTG range and 6% of the button range. The button opened many hands that cannot continue.',
       },
       {
         kind: 'quiz',

@@ -426,7 +426,7 @@ export const THEORY_LESSONS: LessonContent[] = [
         question: 'Flop J♥T♥4♣. 9♥8♥ gets all in against A♠A♦. Who is the favorite?',
         choices: ['A♠A♦, about 65%', '9♥8♥, about 55%', 'Exactly even'],
         answer: 1,
-        explain: 'Flush draw plus open ended straight draw: 15 clean outs twice. The draw holds 55.4%.',
+        explain: 'Flush draw plus open ended straight draw: 15 outs with two cards to come. The draw holds 55.4%.',
       },
       {
         kind: 'quiz',

@@ -138,7 +138,7 @@ export const TOURNAMENT_LESSONS: LessonContent[] = [
           ['15bb', '14.5', '31', '−0.10bb'],
           ['20bb', '19.5', '41', '−0.77bb'],
         ],
-        note: 'Pot 2.5bb (blinds 0.5 and 1, BB ante 1). Assumed BB calling range, for illustration only: 22+, any ace, K2s+, K7o+, Q8s+, QTo+, J9s+, JTo (446 combos). After removing 9♣3♦, 425 of 1,225 hands call, so F = 65.3%. Equity when called is about 30.6% (1,000,000 Monte Carlo trials).',
+        note: 'Pot 2.5bb (blinds 0.5 and 1, BB ante 1). Stacks are measured after antes, and the big blind covers. Assumed BB calling range, for illustration only: 22+, any ace, K2s+, K7o+, Q8s+, QTo+, J9s+, JTo (446 combos). After removing 9♣3♦, 425 of 1,225 hands call, so F = 65.3%. Equity when called is about 30.6% (1,000,000 Monte Carlo trials).',
         evidence: 'math',
       },
       {

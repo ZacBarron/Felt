@@ -240,7 +240,7 @@ export const MINDSET_LESSONS: LessonContent[] = [
         kind: 'callout',
         tone: 'tip',
         title: 'A guideline, not a law',
-        body: 'A common conservative guideline for live cash is **20 to 40 buy ins** for your stake. Lean toward 40 if your win rate is uncertain, since halving the win rate raises risk as much as halving the roll. The real danger is overestimating your win rate, which a live sample rarely pins down.',
+        body: 'A common guideline for live cash is **20 to 40 buy ins** for your stake. Lean toward 40 if your win rate is uncertain, since halving the win rate raises risk as much as halving the roll. The real danger is overestimating your win rate, which a live sample rarely pins down.',
       },
       {
         kind: 'text',

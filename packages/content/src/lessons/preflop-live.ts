@@ -349,7 +349,7 @@ export const PREFLOP_LIVE_LESSONS: LessonContent[] = [
         title: 'More multiway, lower SPR',
         body: [
           'Live straddled pots tend to go multiway: the straddler gets a good price, and many players call because the bigger pot feels worth playing.',
-          'With 100bb stacks, a 6bb open called by the straddle leaves an SPR of **7.0**. With a third player in, **4.8**. Value bet strong hands, play one pair carefully in multiway pots, and bluff less into several players.',
+          'With 100bb stacks, a 6bb open called by the straddle leaves an SPR of **7.0**. With a third player in who had not posted a blind, **4.8**. Value bet strong hands, play one pair carefully in multiway pots, and bluff less into several players.',
         ],
         evidence: 'exploit',
       },

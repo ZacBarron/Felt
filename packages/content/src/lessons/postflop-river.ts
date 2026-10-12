@@ -38,7 +38,7 @@ export const POSTFLOP_RIVER_LESSONS: LessonContent[] = [
           ['KJ', '6', 'Chop'],
           ['KT, K7s to K4s', '16', 'Ahead'],
         ],
-        note: 'Assumed calling range; AK 3bet before the flop. Combos counted exactly with your cards and the board removed: ahead of 16, behind 28.',
+        note: 'Assumed calling range; AK 3bet before the flop, offsuit kings below KT folded earlier. Combos counted exactly with your cards and the board removed: ahead of 16, behind 28. Adding K9o to K5o, which Felt’s big blind chart defends, gives 34 ahead and 38 behind: still a check.',
         evidence: 'math',
       },
       {
@@ -148,7 +148,7 @@ export const POSTFLOP_RIVER_LESSONS: LessonContent[] = [
         body: [
           'Facing a 2x pot bet, villain calls 2 to win 3, so a call needs **40%** equity. At 1.5x pot it needs **37.5%**.',
           'In return you may bluff more: at 2x pot, 40% of your betting range can be bluffs, two bluffs for every three value bets, and a bluff catcher still only breaks even.',
-          'MDF falls to 33.3% at 2x pot. Villain may fold most of their medium hands, but if they fold more than that, your bluffs profit.',
+          'MDF falls to 33.3% at 2x pot: villain may fold up to 66.7% of their range. If they fold more than 66.7%, your bluffs profit.',
         ],
         evidence: 'math',
       },
@@ -159,7 +159,7 @@ export const POSTFLOP_RIVER_LESSONS: LessonContent[] = [
           'An overbet range is the nuts and near nuts plus bluffs. Medium hands do not overbet: worse hands fold to a big bet and better hands call, so the bet only loses value.',
           'Value overbets need hands that beat the bluff catchers that call, almost always. Bluffs need no showdown value and the right blockers.',
         ],
-        evidence: 'math',
+        evidence: 'solver',
       },
       {
         kind: 'hand',
@@ -265,10 +265,18 @@ export const POSTFLOP_RIVER_LESSONS: LessonContent[] = [
         kind: 'text',
         title: 'Facing a small bet',
         body: [
-          'At a quarter pot you need only **16.7%** equity, and MDF is 80%. Folding a bluff catcher to a small bet is rarely right against a balanced player.',
-          'Raise for value when you beat more than half of the hands that call a raise. Raise as a bluff only when you expect many medium hands to fold.',
+          'At a quarter pot you need only **16.7%** equity, and MDF is 80%.',
         ],
         evidence: 'math',
+      },
+      {
+        kind: 'text',
+        title: 'How to respond',
+        body: [
+          'Folding a bluff catcher to a small bet is rarely right against a balanced player.',
+          'Raise for value when you beat more than half of the hands that call a raise. Raise as a bluff only when you expect many medium hands to fold.',
+        ],
+        evidence: 'solver',
       },
       {
         kind: 'callout',
