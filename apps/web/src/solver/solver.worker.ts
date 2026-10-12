@@ -59,7 +59,7 @@ self.onmessage = (e: MessageEvent<ToWorker>) => {
     // Run in slices so a stop message can get through between them.
     const slice = () => {
       if (stopped || !solver) return finish();
-      solver.run(board.length === 5 ? 50 : 10);
+      solver.run(board.length === 5 ? 50 : 25);
       exploitability = solver.exploitability();
       post({ type: 'progress', iterations: solver.iterations, exploitability });
       if (exploitability <= spot.targetPct || solver.iterations >= spot.maxIterations) return finish();
