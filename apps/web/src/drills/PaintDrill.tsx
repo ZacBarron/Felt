@@ -135,7 +135,7 @@ export function PaintDrill({ chart, targetMs, onAnswer, onNext }: Props) {
             </button>
           </div>
         ) : (
-          <button className="btn btn-primary btn-lg btn-block" onClick={onNext} autoFocus>
+          <button className="btn btn-primary btn-lg btn-block swap-in" onClick={onNext} autoFocus>
             Next
           </button>
         )}

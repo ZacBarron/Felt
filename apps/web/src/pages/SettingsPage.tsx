@@ -2,6 +2,7 @@ import { type GameSettings, MAX_TABLE_SIZE, MIN_TABLE_SIZE, positionsFor, PRESET
 import { haptic, hapticsSupported } from '../haptics';
 import { chartsForGame } from '../state/charts';
 import { type Appearance, useSettings } from '../state/settings';
+import { BrandFooter } from '../ui/Brand';
 import { CheckIcon } from '../ui/icons';
 import { PageHeader } from '../ui/PageHeader';
 import { Segmented } from '../ui/Segmented';
@@ -18,10 +19,7 @@ export function SettingsPage() {
 
   return (
     <div className="stack" style={{ gap: '1.6rem' }}>
-      <PageHeader
-        title="Settings"
-        subtitle={`${stakesLabel(g.stakes)} ${g.venue} ${g.format === 'mtt' ? 'tournament' : 'cash'}, ${g.tableSize}-handed`}
-      />
+      <PageHeader title="Settings" />
 
       <section>
         <div className="section-title">Game</div>
@@ -173,6 +171,8 @@ export function SettingsPage() {
           </button>
         </div>
       </section>
+
+      <BrandFooter />
     </div>
   );
 }

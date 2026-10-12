@@ -1,4 +1,4 @@
-import { ALL_HAND_CLASSES, boundaryHands, chartFormatLabel, PAINT_TARGET_MS, RECALL_TARGET_MS } from '@felt/core';
+import { ALL_HAND_CLASSES, boundaryHands, PAINT_TARGET_MS, RECALL_TARGET_MS } from '@felt/core';
 import { useMemo, useState } from 'react';
 import { DrillRunner } from '../drills/DrillRunner';
 import { chartsForGame } from '../state/charts';
@@ -31,7 +31,7 @@ export function DrillsPage() {
     <div className="stack">
       <PageHeader
         title="Drills"
-        subtitle="Free practice. Your review schedule is not affected."
+        subtitle="Practice any chart. Your reviews stay untouched."
         trailing={
           mode === 'quick' && score.total > 0 ? (
             <div className="row" style={{ gap: '0.4rem', marginBottom: 6, flexWrap: 'nowrap' }}>
@@ -66,7 +66,6 @@ export function DrillsPage() {
             { value: 'paint', label: 'Paint chart' },
           ]}
         />
-        <span className="footnote">{chartFormatLabel(chart.spec)}</span>
       </div>
 
       <DrillRunner

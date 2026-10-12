@@ -55,10 +55,7 @@ export function PlannedPage({ feature }: { feature: keyof typeof FEATURES }) {
         <span className="icon-tile" style={{ width: 64, height: 64, borderRadius: 18, background: nav.color }}>
           <Icon size={32} strokeWidth={1.8} />
         </span>
-        <h2>Coming in {f.phase}</h2>
-        <p className="footnote" style={{ margin: 0, maxWidth: 360 }}>
-          Here is what this screen will do.
-        </p>
+        <h2 className="display" style={{ fontSize: '1.9rem' }}>Coming in {f.phase}</h2>
       </div>
       <div className="list">
         {f.points.map((p) => (

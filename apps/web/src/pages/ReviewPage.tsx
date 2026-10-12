@@ -9,6 +9,11 @@ import { CheckIcon, CloseIcon, DrillsIcon } from '../ui/icons';
 import { PageHeader } from '../ui/PageHeader';
 import { ProgressRing } from '../ui/ProgressRing';
 import { useBodyClass } from '../ui/useBodyClass';
+import { useCountUp } from '../ui/useCountUp';
+
+function CountUp({ value }: { value: number }) {
+  return <>{Math.round(useCountUp(value, 900))}</>;
+}
 
 export function ReviewPage() {
   const { settings } = useSettings();
@@ -88,14 +93,14 @@ function SessionDone({ results, onReload }: { results: { accuracy: number; ms: n
           <>
             <ProgressRing value={avg} size={150} stroke={14} color={avg >= 0.9 ? 'var(--green)' : avg >= 0.6 ? 'var(--orange)' : 'var(--red)'}>
               <div>
-                <div className="stat" style={{ fontSize: '2.1rem' }}>
-                  {Math.round(avg * 100)}%
+                <div className="display num" style={{ fontSize: '3rem', lineHeight: 1 }}>
+                  <CountUp value={Math.round(avg * 100)} />%
                 </div>
                 <div className="caption">accuracy</div>
               </div>
             </ProgressRing>
             <div>
-              <h2 style={{ fontSize: '1.4rem' }}>Session complete</h2>
+              <h2 className="display" style={{ fontSize: '2rem' }}>Session complete</h2>
               <div className="footnote" style={{ marginTop: 4 }}>
                 {results.length} cards, {perfect} perfect, {secs.toFixed(1)}s average
               </div>
@@ -106,7 +111,7 @@ function SessionDone({ results, onReload }: { results: { accuracy: number; ms: n
             <span className="icon-tile" style={{ width: 64, height: 64, borderRadius: 18, background: 'var(--green)' }}>
               <CheckIcon size={34} />
             </span>
-            <h2 style={{ fontSize: '1.4rem' }}>All caught up</h2>
+            <h2 className="display" style={{ fontSize: '2rem' }}>All caught up</h2>
           </>
         )}
         <p className="footnote" style={{ maxWidth: 360, margin: 0 }}>

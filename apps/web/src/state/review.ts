@@ -1,4 +1,4 @@
-import { type Chart, createScheduler, deckForCharts, type DrillOutcome, selectQueue, studyStreak } from '@felt/core';
+import { type Chart, createScheduler, dayKey, deckForCharts, type DrillOutcome, selectQueue, studyStreak } from '@felt/core';
 import { db, type StoredCard } from './db';
 
 const scheduler = createScheduler();
@@ -79,6 +79,17 @@ export interface TodayStats {
   avgSecondsToday: number | null;
   streak: number;
   totalCardsStarted: number;
+  /** The last seven days, oldest first, ending today. */
+  week: { label: string; done: boolean; today: boolean }[];
+}
+
+function lastSevenDays(studyDates: readonly Date[], now: Date) {
+  const studied = new Set(studyDates.map(dayKey));
+  return Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(now);
+    d.setDate(d.getDate() - (6 - i));
+    return { label: d.toLocaleDateString(undefined, { weekday: 'narrow' }), done: studied.has(dayKey(d)), today: i === 6 };
+  });
 }
 
 export async function todayStats(charts: readonly Chart[], newPerDay: number, now = new Date()): Promise<TodayStats> {
@@ -94,6 +105,7 @@ export async function todayStats(charts: readonly Chart[], newPerDay: number, no
     accuracyToday: avg(today.map((r) => r.accuracy)),
     avgSecondsToday: quick.length ? avg(quick.map((r) => r.responseMs / 1000)) : null,
     streak: studyStreak(allDates, now),
+    week: lastSevenDays(allDates, now),
     totalCardsStarted: await db.cards.count(),
   };
 }

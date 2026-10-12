@@ -89,7 +89,7 @@ export function LabPage() {
       <PageHeader
         title="Spot Lab"
         kicker="Single raised pot, flop"
-        subtitle="BTN opens, BB calls and checks the flop. Your equity against BB's real calling range, the pot math for any bet, and the EV of every option."
+        subtitle="BTN opens, BB calls and checks. Your equity, the pot math, and the EV of every option."
       />
 
       <div className="card" style={{ padding: '0.5rem' }}>

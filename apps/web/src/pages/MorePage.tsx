@@ -1,4 +1,5 @@
 import { NAV_SECTIONS, TABS } from '../nav';
+import { BrandFooter } from '../ui/Brand';
 import { NavRow } from '../ui/NavRow';
 import { PageHeader } from '../ui/PageHeader';
 
@@ -23,6 +24,7 @@ export function MorePage() {
           </section>
         );
       })}
+      <BrandFooter />
     </div>
   );
 }

@@ -5,6 +5,8 @@ interface Props {
   size?: 'sm' | 'md' | 'lg';
   /** Animate the card being dealt in; the delay staggers a hand. */
   deal?: boolean;
+  /** Deal face down, then flip face up. */
+  flip?: boolean;
   delayMs?: number;
 }
 
@@ -15,7 +17,26 @@ const SIZES = {
 };
 
 /** A real looking card: white face, four color suits. Card back when `card` is undefined. */
-export function PlayingCard({ card, size = 'md', deal, delayMs = 0 }: Props) {
+export function PlayingCard(props: Props) {
+  const { card, flip, delayMs = 0 } = props;
+  if (flip && card !== undefined) {
+    return (
+      <span className="flip">
+        <span className="flip-inner" style={{ animationDelay: `${delayMs}ms` }}>
+          <span className="face">
+            <CardFace {...props} deal={false} delayMs={0} />
+          </span>
+          <span className="back">
+            <CardFace {...props} card={undefined} deal={false} delayMs={0} />
+          </span>
+        </span>
+      </span>
+    );
+  }
+  return <CardFace {...props} />;
+}
+
+function CardFace({ card, size = 'md', deal, delayMs = 0 }: Props) {
   const s = SIZES[size];
   const base: React.CSSProperties = {
     width: s.w,
@@ -36,8 +57,10 @@ export function PlayingCard({ card, size = 'md', deal, delayMs = 0 }: Props) {
         className={deal ? 'deal' : undefined}
         style={{
           ...base,
-          background: 'repeating-linear-gradient(45deg,#2c4f8f,#2c4f8f 3px,#24437a 3px,#24437a 6px)',
-          border: '2px solid #fff',
+          // Brand card back: midnight with a fine cobalt lattice.
+          background:
+            'repeating-linear-gradient(45deg, rgba(91,130,255,.28) 0 1px, transparent 1px 6px), repeating-linear-gradient(-45deg, rgba(91,130,255,.28) 0 1px, transparent 1px 6px), #0b1426',
+          border: `${size === 'lg' ? 4 : 2}px solid #fff`,
           boxShadow: '0 2px 6px rgba(0,0,0,.3)',
         }}
       />

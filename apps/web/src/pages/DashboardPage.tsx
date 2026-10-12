@@ -1,16 +1,14 @@
 import { stakesLabel } from '@felt/core';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { Link } from 'react-router-dom';
-import { NAV_ITEMS } from '../nav';
 import { chartsForGame } from '../state/charts';
 import { todayStats } from '../state/review';
 import { useSettings } from '../state/settings';
-import { DrillsIcon, FlameIcon } from '../ui/icons';
-import { NavRow } from '../ui/NavRow';
+import { HeroPattern } from '../ui/Brand';
+import { CheckIcon, FlameIcon } from '../ui/icons';
 import { PageHeader } from '../ui/PageHeader';
 import { ProgressRing } from '../ui/ProgressRing';
-
-const item = (to: string) => NAV_ITEMS.find((i) => i.to === to)!;
+import { useCountUp } from '../ui/useCountUp';
 
 export function DashboardPage() {
   const { settings } = useSettings();
@@ -21,8 +19,10 @@ export function DashboardPage() {
   );
   const remaining = stats ? stats.dueNow + stats.newAvailable : 0;
   const total = stats ? stats.reviewedToday + remaining : 0;
-  const dayProgress = total > 0 ? (stats?.reviewedToday ?? 0) / total : 1;
+  const progress = total > 0 ? (stats?.reviewedToday ?? 0) / total : 1;
+  const shownRemaining = Math.round(useCountUp(remaining));
   const date = new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' });
+  const minutes = Math.max(1, Math.round((remaining * 6) / 60));
 
   return (
     <div className="stack" style={{ gap: '1.6rem' }}>
@@ -30,92 +30,100 @@ export function DashboardPage() {
         title="Today"
         kicker={date}
         trailing={
-          <Link to="/settings" className="pill" style={{ textDecoration: 'none', marginBottom: 6 }}>
-            {stakesLabel(g.stakes)} {g.venue}, {g.tableSize}-handed
+          <Link to="/settings" className="pill" style={{ textDecoration: 'none', marginBottom: 4 }}>
+            {stakesLabel(g.stakes)} {g.venue}
           </Link>
         }
       />
 
-      <section className="card stack" style={{ gap: '1.1rem' }}>
-        <div className="row" style={{ gap: '1.1rem', flexWrap: 'nowrap' }}>
-          <ProgressRing value={stats ? dayProgress : 0} size={88} stroke={10}>
-            <div>
-              <div className="num" style={{ fontWeight: 700, fontSize: '1.35rem', letterSpacing: '-0.03em' }}>
-                {stats ? remaining : ''}
+      <section className="hero stack" style={{ gap: '1.25rem' }}>
+        <HeroPattern />
+        <div className="row between" style={{ flexWrap: 'nowrap', alignItems: 'flex-end' }}>
+          <div>
+            <div className="caption" style={{ fontWeight: 600, letterSpacing: '0.02em', textTransform: 'uppercase' }}>
+              Daily review
+            </div>
+            {stats && remaining === 0 ? (
+              <div className="display" style={{ fontSize: '2.6rem', lineHeight: 1.05, marginTop: 6 }}>
+                All caught up
               </div>
-              <div className="caption">left</div>
-            </div>
-          </ProgressRing>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div className="footnote">Daily review</div>
-            <div style={{ fontWeight: 700, fontSize: '1.3rem', letterSpacing: '-0.02em' }}>
-              {!stats ? ' ' : remaining === 0 ? 'All caught up' : `${remaining} cards`}
-            </div>
-            <div className="footnote">
-              {!stats
-                ? ''
-                : remaining === 0
-                  ? 'Come back tomorrow, or practice freely.'
-                  : `${stats.dueNow} due, ${stats.newAvailable} new, about ${Math.max(1, Math.round((remaining * 6) / 60))} min`}
-            </div>
+            ) : (
+              <div className="row" style={{ gap: '0.5rem', alignItems: 'baseline', flexWrap: 'nowrap' }}>
+                <span className="display num" style={{ fontSize: '4.25rem', lineHeight: 1 }}>
+                  {stats ? shownRemaining : ''}
+                </span>
+                <span className="footnote">{remaining === 1 ? 'card' : 'cards'}, about {minutes} min</span>
+              </div>
+            )}
           </div>
+          <ProgressRing value={stats ? progress : 0} size={64} stroke={7} color="#fff" track="rgba(255,255,255,.2)">
+            {stats && remaining === 0 ? (
+              <CheckIcon size={24} style={{ color: '#fff' }} />
+            ) : (
+              <span className="num" style={{ fontSize: '0.8rem', fontWeight: 700 }}>
+                {Math.round(progress * 100)}%
+              </span>
+            )}
+          </ProgressRing>
         </div>
         {remaining > 0 ? (
-          <Link to="/review" className="btn btn-primary btn-lg btn-block">
+          <Link to="/review" className="btn btn-lg btn-block btn-hero">
             Start review
           </Link>
         ) : (
-          <Link to="/drills" className="btn btn-tinted btn-lg btn-block">
-            <DrillsIcon size={20} /> Free practice
+          <Link to="/drills" className="btn btn-lg btn-block btn-hero-ghost">
+            Free practice
           </Link>
         )}
       </section>
 
       <section>
-        <div className="section-title">Summary</div>
-        <div className="stat-grid">
-          <Stat
-            label="Streak"
-            value={stats ? `${stats.streak} ${stats.streak === 1 ? 'day' : 'days'}` : ''}
-            accent={<FlameIcon size={15} style={{ color: 'var(--orange)' }} />}
-          />
-          <Stat label="Reviewed" value={stats ? String(stats.reviewedToday) : ''} />
-          <Stat label="Accuracy" value={stats?.accuracyToday != null ? `${Math.round(stats.accuracyToday * 100)}%` : 'None yet'} dim={stats?.accuracyToday == null} />
-          <Stat
-            label="Recall speed"
-            value={stats?.avgSecondsToday != null ? `${stats.avgSecondsToday.toFixed(1)}s` : 'None yet'}
-            dim={stats?.avgSecondsToday == null}
-          />
+        <div className="row between" style={{ padding: '0 1rem 0.4rem' }}>
+          <span className="section-title" style={{ padding: 0 }}>
+            Last 7 days
+          </span>
+          {!!stats?.streak && (
+            <span className="footnote row" style={{ gap: 4, color: 'var(--orange)', fontWeight: 600 }}>
+              <FlameIcon size={14} /> {stats.streak} day streak
+            </span>
+          )}
+        </div>
+        <div className="card">
+          <div className="week">
+            {(stats?.week ?? []).map((d, i) => (
+              <div key={i} className={`day${d.today ? ' today' : ''}`}>
+                <span className={`dot${d.done ? ' done' : ''}`} style={{ animationDelay: `${i * 40}ms` }}>
+                  <CheckIcon size={15} />
+                </span>
+                {d.label}
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
-      <section>
-        <div className="section-title">Study</div>
-        <div className="list with-icons">
-          <NavRow {...rowProps('/ranges')} subtitle="Charts for your game, mixes included" />
-          <NavRow {...rowProps('/drills')} title="Free practice" subtitle="Drill any chart without affecting reviews" />
-          <NavRow {...rowProps('/lab')} subtitle="Equity, pot odds and EV per action" />
-          <NavRow {...rowProps('/learn')} subtitle="The full curriculum" />
-        </div>
-      </section>
+      {stats && stats.reviewedToday > 0 && (
+        <section className="reveal">
+          <div className="section-title">Today so far</div>
+          <div className="stat-grid three">
+            <Stat label="Reviewed" value={stats.reviewedToday} />
+            <Stat label="Accuracy" value={Math.round((stats.accuracyToday ?? 0) * 100)} suffix="%" />
+            <Stat label="Recall" value={stats.avgSecondsToday ?? 0} suffix="s" decimals={1} />
+          </div>
+        </section>
+      )}
     </div>
   );
 }
 
-function rowProps(to: string) {
-  const i = item(to);
-  return { to, icon: i.icon, color: i.color, title: i.label };
-}
-
-function Stat({ label, value, accent, dim }: { label: string; value: string; accent?: React.ReactNode; dim?: boolean }) {
+function Stat({ label, value, suffix = '', decimals = 0 }: { label: string; value: number; suffix?: string; decimals?: number }) {
+  const shown = useCountUp(value);
   return (
     <div>
-      <div className="footnote row" style={{ gap: 4 }}>
-        {accent}
-        {label}
-      </div>
-      <div className="stat" style={dim ? { fontSize: '1.05rem', color: 'var(--label-3)', paddingTop: 6 } : undefined}>
-        {value}
+      <div className="footnote">{label}</div>
+      <div className="display num" style={{ fontSize: '2rem', lineHeight: 1.1 }}>
+        {shown.toFixed(decimals)}
+        {suffix}
       </div>
     </div>
   );

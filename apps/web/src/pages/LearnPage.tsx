@@ -14,7 +14,7 @@ const DRILL_LABELS: Record<string, string> = {
 export function LearnPage() {
   return (
     <div className="stack" style={{ gap: '1.6rem' }}>
-      <PageHeader title="Learn" subtitle="Short lessons that end in drills and feed your daily review. Lesson content is on the way." />
+      <PageHeader title="Learn" subtitle="Short lessons that feed your daily review." />
       {CURRICULUM.map((track) => (
         <section key={track.id}>
           <div className="section-title">{track.title}</div>

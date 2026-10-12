@@ -28,6 +28,7 @@ Ordered for the main game (live 1/3 cash, 9 handed, on a phone) and so the core 
 - [x] Free practice mode that does not touch the schedule
 - [x] Phone layout with a bottom tab bar; installable PWA that works offline
 - [x] Liquid Glass redesign: iOS system colors, light and dark modes, glass tab bar and sidebar, large titles with a collapsing nav bar, inset grouped lists, a custom icon set
+- [x] Brand identity: range grid mark, serif wordmark, cobalt and ink palette, guidelines in BRAND.md, app icons, decluttered Today with a branded hero and week strip, motion (card flip, diagonal grid wave, ink painting, liquid tab pill, count ups)
 - [x] UI pass: press states on every control, haptics (Android vibration, iOS switch tick), thumb zone answer buttons, focus mode for review, animated verdicts and score rings, settings with segmented controls, steppers and toggles, keyboard shortcuts on laptops
 - [ ] Lessons for 9 handed opens and BB defense, each linked to its drill cards
 - [ ] Chart editor: enter or paste any chart (range notation) as a `custom` source

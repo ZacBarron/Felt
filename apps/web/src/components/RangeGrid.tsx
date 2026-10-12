@@ -57,6 +57,7 @@ export function RangeGrid({ mixes, selected, onSelect, onPaint, marked }: Props)
             className={classes}
             data-hand={hand}
             data-haptic={onPaint ? 'off' : 'select'}
+            style={{ '--wave': Math.floor(i / 13) + (i % 13) } as React.CSSProperties}
             title={describeMix(hand, mix)}
             onClick={onPaint ? undefined : () => onSelect?.(hand)}
           >

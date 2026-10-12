@@ -23,7 +23,7 @@ export function RangesPage() {
 
   return (
     <div className="stack">
-      <PageHeader title="Ranges" subtitle="Every cell splits by how often the hand takes each action. Tap a hand for its mix." />
+      <PageHeader title="Ranges" />
 
       <Chips
         value={chart.spec.id}
@@ -32,11 +32,11 @@ export function RangesPage() {
         options={fit.charts.map((c) => ({ value: c.spec.id, label: c.spec.title }))}
       />
 
-      <div className="row" style={{ gap: '0.4rem' }}>
-        <span className="pill">{chartFormatLabel(chart.spec)}</span>
-        {chart.spec.basis === 'exploit' && <span className="pill pill-warn">Exploit, not GTO</span>}
-        {chart.spec.source === 'starter-approx' && <span className="pill">Starter approximation</span>}
-        {!fit.exact && <span className="pill pill-warn">No {settings.game.tableSize}-handed charts yet</span>}
+      <div className="footnote row" style={{ gap: '0.4rem' }}>
+        {chartFormatLabel(chart.spec)}
+        {chart.spec.source === 'starter-approx' && <span className="pill">Approximate</span>}
+        {chart.spec.basis === 'exploit' && <span className="pill pill-warn">Exploit</span>}
+        {!fit.exact && <span className="pill pill-warn">Nearest table size</span>}
       </div>
 
       <div className="grid-2" style={{ alignItems: 'start' }}>
@@ -47,42 +47,33 @@ export function RangesPage() {
               {chart.spec.versus}
             </div>
           )}
-          <RangeGrid mixes={chart.mixes} selected={selected} onSelect={setSelected} />
+          <RangeGrid key={chart.spec.id} mixes={chart.mixes} selected={selected} onSelect={setSelected} />
         </div>
 
         <div className="stack" style={{ position: 'sticky', top: '4.5rem' }}>
           <div className="card stack reveal" key={selected} style={{ gap: '0.7rem' }}>
             <div className="row between">
-              <strong style={{ fontSize: '1.5rem', letterSpacing: '-0.03em' }}>{selected}</strong>
+              <span className="display" style={{ fontSize: '2.2rem', lineHeight: 1 }}>{selected}</span>
               <span className="pill num">{comboCount(selected)} combos</span>
             </div>
             <MixBar mix={mix} labels={labels} />
           </div>
 
-          <div className="card">
-            <div className="footnote" style={{ marginBottom: '0.5rem' }}>
-              Whole range
+          <div className="card stack" style={{ gap: '0.5rem' }}>
+            <div className="row between">
+              <span className="footnote">Whole range</span>
+              <span className="footnote num">
+                {sortActions(Object.keys(totals))
+                  .filter((a) => a !== 'fold')
+                  .map((a) => `${labels[a]?.split(' ')[0] ?? a} ${(totals[a] * 100).toFixed(1)}%`)
+                  .join(', ')}
+              </span>
             </div>
-            <div style={{ display: 'flex', height: 12, borderRadius: 999, overflow: 'hidden', gap: 2, marginBottom: '0.5rem' }}>
+            <div style={{ display: 'flex', height: 8, borderRadius: 999, overflow: 'hidden', gap: 2 }}>
               {sortActions(Object.keys(totals)).map((a) => (
-                <span key={a} style={{ width: `${totals[a] * 100}%`, background: actionColor(a), opacity: a === 'fold' ? 0.5 : 1 }} />
+                <span key={a} style={{ width: `${totals[a] * 100}%`, background: actionColor(a), opacity: a === 'fold' ? 0.35 : 1 }} />
               ))}
             </div>
-            <table className="kv">
-              <tbody>
-                {sortActions(Object.keys(totals)).map((a) => (
-                  <tr key={a}>
-                    <td>
-                      <span
-                        style={{ display: 'inline-block', width: 10, height: 10, borderRadius: 3, background: actionColor(a), marginRight: 8 }}
-                      />
-                      {labels[a] ?? a}
-                    </td>
-                    <td>{(totals[a] * 100).toFixed(1)}%</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
           </div>
         </div>
       </div>

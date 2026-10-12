@@ -1,5 +1,7 @@
 # Felt
 
+*Instinct, trained.*
+
 A personal poker training system for reaching an elite level in No Limit Hold'em: GTO fundamentals, solver charts, spaced repetition, scenario testing, exploitation, session logging, and stats that show real progress.
 
 ## What it does
@@ -53,4 +55,5 @@ docs/              concept, roadmap, architecture, data model, curriculum, solve
 - [ARCHITECTURE.md](docs/ARCHITECTURE.md): stack and key design decisions
 - [DATA_MODEL.md](docs/DATA_MODEL.md): stored entities and the hand shorthand
 - [CURRICULUM.md](docs/CURRICULUM.md): how lessons are taught and mastered
+- [BRAND.md](docs/BRAND.md): logo, color, type, motion and voice
 - [SOLVER_DATA.md](docs/SOLVER_DATA.md): where strategy data comes from, and how we generate it without buying a solver

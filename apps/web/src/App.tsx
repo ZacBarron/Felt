@@ -1,5 +1,6 @@
 import { useLiveQuery } from 'dexie-react-hooks';
-import { NavLink, Route, Routes, useLocation } from 'react-router-dom';
+import { useEffect, useRef } from 'react';
+import { Link, NavLink, Route, Routes, useLocation } from 'react-router-dom';
 import { NAV_SECTIONS, TABS } from './nav';
 import { DashboardPage } from './pages/DashboardPage';
 import { DrillsPage } from './pages/DrillsPage';
@@ -13,6 +14,7 @@ import { SettingsPage } from './pages/SettingsPage';
 import { chartsForGame } from './state/charts';
 import { buildQueue } from './state/review';
 import { useSettings } from './state/settings';
+import { Lockup } from './ui/Brand';
 
 function useReviewCount() {
   const { settings } = useSettings();
@@ -33,14 +35,28 @@ export function App() {
   const tabIndex = TABS.findIndex((t) => t.to === location.pathname);
   // Pages reached through More keep More selected.
   const activeTab = tabIndex === -1 ? TABS.length - 1 : tabIndex;
+  const indicator = useRef<HTMLSpanElement>(null);
+  const firstRender = useRef(true);
+
+  // The selection pill stretches as it slides, like liquid between two tabs.
+  useEffect(() => {
+    if (firstRender.current) {
+      firstRender.current = false;
+      return;
+    }
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    indicator.current?.animate([{ scale: '1 1' }, { scale: '1.22 0.9', offset: 0.4 }, { scale: '1 1' }], {
+      duration: 460,
+      easing: 'cubic-bezier(0.34, 1.4, 0.64, 1)',
+    });
+  }, [activeTab]);
 
   return (
     <div className="shell">
       <nav className="nav glass" aria-label="Main">
-        <div className="brand">
-          <img src="/icon-192.png" alt="" />
-          Felt
-        </div>
+        <Link to="/" className="brand" aria-label="Felt home">
+          <Lockup size={30} />
+        </Link>
         {NAV_SECTIONS.map(({ section, items }) => (
           <div key={section} className="nav-group">
             <div className="section">{section}</div>
@@ -78,7 +94,7 @@ export function App() {
         </div>
       </main>
       <nav className="tabbar glass" aria-label="Tabs">
-        <span className="tab-indicator" style={{ transform: `translateX(${activeTab * 100}%)` }} />
+        <span ref={indicator} className="tab-indicator" style={{ transform: `translateX(${activeTab * 100}%)` }} />
         {TABS.map(({ to, label, icon: Icon }, i) => (
           <NavLink key={to} to={to} end={to === '/'} data-haptic="select" className={i === activeTab ? 'active' : undefined}>
             <Icon size={25} filled={i === activeTab} />

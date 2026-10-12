@@ -18,6 +18,9 @@ interface Props {
   onNext: () => void;
 }
 
+/** The clock starts once both cards have flipped face up. */
+const FLIP_MS = 560 + 90;
+
 const VERDICTS = {
   right: { text: 'Correct', color: 'var(--green)', Icon: CheckIcon, haptic: 'success' as const },
   mix: { text: 'Rare mix', color: 'var(--orange)', Icon: MinusIcon, haptic: 'warning' as const },
@@ -26,7 +29,7 @@ const VERDICTS = {
 
 /** "You are UTG+1 with KTo, folded to you. Raise or fold?" Timed, then shows the full mix. */
 export function QuickRecall({ chart, hand, targetMs, onAnswer, onNext }: Props) {
-  const started = useRef(performance.now());
+  const started = useRef(performance.now() + FLIP_MS);
   const revealRef = useRef<HTMLDivElement>(null);
   const [answer, setAnswer] = useState<{ choice: string; outcome: DrillOutcome }>();
   const combo = useMemo(() => {
@@ -40,7 +43,8 @@ export function QuickRecall({ chart, hand, targetMs, onAnswer, onNext }: Props) 
   const choose = useCallback(
     (choice: string) => {
       if (answer) return;
-      const outcome = { accuracy: scoreRecall(mix, choice), responseMs: performance.now() - started.current, targetMs };
+      const responseMs = Math.max(0, performance.now() - started.current);
+      const outcome = { accuracy: scoreRecall(mix, choice), responseMs, targetMs };
       const kind = outcome.accuracy === 1 ? 'right' : outcome.accuracy > 0 ? 'mix' : 'wrong';
       haptic(VERDICTS[kind].haptic);
       setAnswer({ choice, outcome });
@@ -91,7 +95,7 @@ export function QuickRecall({ chart, hand, targetMs, onAnswer, onNext }: Props) 
         <SeatStrip spec={chart.spec} />
         <div className="row" style={{ justifyContent: 'center', padding: '1.1rem 0 0.6rem', gap: 12 }}>
           {combo.map((c, i) => (
-            <PlayingCard key={c} card={c} size="lg" deal delayMs={i * 90} />
+            <PlayingCard key={c} card={c} size="lg" flip delayMs={i * 90} />
           ))}
         </div>
         {/* Speed bar: drains over the time an answer still counts as "Good". */}
@@ -99,7 +103,7 @@ export function QuickRecall({ chart, hand, targetMs, onAnswer, onNext }: Props) 
           <span
             style={{
               width: '100%',
-              animation: `drain ${targetMs * 2.5}ms linear both`,
+              animation: `drain ${targetMs * 2.5}ms linear ${FLIP_MS}ms both`,
               animationPlayState: answer ? 'paused' : 'running',
             }}
           />
@@ -146,7 +150,7 @@ export function QuickRecall({ chart, hand, targetMs, onAnswer, onNext }: Props) 
             ))}
           </div>
         ) : (
-          <button className="btn btn-primary btn-lg btn-block" onClick={onNext} autoFocus aria-keyshortcuts="Enter">
+          <button className="btn btn-primary btn-lg btn-block swap-in" onClick={onNext} autoFocus aria-keyshortcuts="Enter">
             Next
           </button>
         )}
