@@ -51,10 +51,21 @@ export const GOAL_MODULES: Record<Goal, string[]> = {
   tournaments: ['tournaments/mtt-basics'],
 };
 
-/** Path preferences from a profile: focus areas first, then the modules the goal needs. */
+/** The plan line for the goals a player picked: "To win more at live cash and move up in stakes". */
+export function goalsLine(goals: readonly Goal[]): string | undefined {
+  const plans = goals.map((g) => goalCopy(g)?.plan).filter(Boolean) as string[];
+  if (plans.length === 0) return undefined;
+  if (plans.length === 1) return `To ${plans[0]}`;
+  if (plans.length === 2) return `To ${plans[0]} and ${plans[1]}`;
+  return `Built for your ${plans.length} goals`;
+}
+
+/** Path preferences from a profile: focus areas first, then the modules each goal needs, in the order picked. */
 export function pathPrefs(profile: Profile) {
+  const goals = profile.goals ?? (profile.goal ? [profile.goal] : []);
+  const modules = [...FOCUS.filter((f) => profile.focus.includes(f.id)).map((f) => f.module), ...goals.flatMap((g) => GOAL_MODULES[g])];
   return {
     placedAt: profile.placedAt && profile.placedAt !== 'all' ? profile.placedAt : undefined,
-    focus: [...FOCUS.filter((f) => profile.focus.includes(f.id)).map((f) => f.module), ...(profile.goal ? GOAL_MODULES[profile.goal] : [])],
+    focus: [...new Set(modules)],
   };
 }

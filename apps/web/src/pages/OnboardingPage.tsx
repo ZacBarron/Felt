@@ -6,7 +6,7 @@ import { haptic } from '../haptics';
 import { canOpenLesson, isPro } from '../state/access';
 import type { StoredLesson } from '../state/db';
 import { track } from '../state/events';
-import { CUES, cueCopy, DAILY_OPTIONS, FOCUS, GOALS, goalCopy, pathPrefs } from '../state/goals';
+import { CUES, cueCopy, DAILY_OPTIONS, FOCUS, GOALS, goalsLine, pathPrefs } from '../state/goals';
 import { isComplete, LESSON_ENTRIES, lessonProgress, recommendedLessons } from '../state/lessons';
 import { studyReminder } from '../state/reminders';
 import { type Focus, type Profile, useSettings } from '../state/settings';
@@ -166,7 +166,7 @@ export function OnboardingPage() {
 
   const commit = () => {
     update({ ...settings, profile: { ...profile, onboarded: true, committedAt: new Date().toISOString() } });
-    track('plan_committed', { goal: profile.goal, game, daily: profile.dailyMinutes, cue: profile.cue, focus: profile.focus.length });
+    track('plan_committed', { goals: profile.goals.join(','), game, daily: profile.dailyMinutes, cue: profile.cue, focus: profile.focus.length });
     // The plan is worth keeping: ask the browser not to clear Felt's data.
     void requestPersistentStorage();
     setTimeout(() => navigate(isPro(settings.access) ? '/' : '/pro?from=onboarding', { replace: true }), 450);
@@ -230,7 +230,7 @@ export function OnboardingPage() {
   }
 
   if (step === 'plan') {
-    const goal = goalCopy(profile.goal);
+    const goalLine = goalsLine(profile.goals);
     const access = settings.access;
     const pro = isPro(access);
     const freeMinutes = remainingMinutes(progress, (k) => canOpenLesson(k, access));
@@ -268,7 +268,7 @@ export function OnboardingPage() {
           <div>
             <div className="footnote">Your plan</div>
             <h1 ref={heading} tabIndex={-1} className="display onb-title">
-              {goal ? `To ${goal.plan}` : 'Your path'}
+              {goalLine ?? 'Your path'}
             </h1>
           </div>
           <div className="plan-stats">
@@ -335,12 +335,21 @@ export function OnboardingPage() {
   const screens: Record<Exclude<Step, 'intro' | 'plan'>, { title: string; sub?: string; body: JSX.Element; ready: boolean }> = {
     goal: {
       title: 'What do you want from poker?',
-      sub: 'Your goal decides which lessons come first.',
-      ready: !!profile.goal,
+      sub: 'Pick as many as you like. Your goals decide which lessons come first.',
+      ready: profile.goals.length > 0,
       body: (
-        <div className="onb-choices" role="radiogroup" onKeyDown={onRadioKeys} aria-labelledby="onb-title">
+        <div className="onb-choices" role="group" aria-labelledby="onb-title">
           {GOALS.map((g) => (
-            <Choice key={g.id} selected={profile.goal === g.id} label={g.label} note={g.note} onClick={() => setProfile({ goal: g.id })} />
+            <Choice
+              key={g.id}
+              multi
+              selected={profile.goals.includes(g.id)}
+              label={g.label}
+              note={g.note}
+              onClick={() =>
+                setProfile({ goals: profile.goals.includes(g.id) ? profile.goals.filter((x) => x !== g.id) : [...profile.goals, g.id] })
+              }
+            />
           ))}
         </div>
       ),
@@ -430,7 +439,7 @@ export function OnboardingPage() {
     if (step === 'game') update({ ...settings, game: PRESETS[game].settings });
     track('onboarding_step_answered', {
       step,
-      value: step === 'goal' ? profile.goal : step === 'game' ? game : step === 'daily' ? profile.dailyMinutes : step === 'when' ? profile.cue : profile.focus.length,
+      value: step === 'goal' ? profile.goals.join(',') : step === 'game' ? game : step === 'daily' ? profile.dailyMinutes : step === 'when' ? profile.cue : profile.focus.length,
     });
     forward();
   };

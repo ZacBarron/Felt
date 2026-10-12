@@ -43,6 +43,9 @@ export type Focus = 'preflop' | 'postflop' | 'sizing' | 'reads' | 'math' | 'ment
 /** What the player told us during onboarding. Drives their plan and copy. */
 export interface Profile {
   onboarded: boolean;
+  /** Everything the player wants from poker, in the order they picked. */
+  goals: Goal[];
+  /** Older saves kept a single goal; read through `goals` instead. */
   goal?: Goal;
   experience?: Experience;
   focus: Focus[];
@@ -93,7 +96,7 @@ const DEFAULTS: AppSettings = {
   game: DEFAULT_SETTINGS,
   study: { newPerDay: 15, untimed: false, shortcuts: true },
   ui: { haptics: true, appearance: 'system', palette: 'card-room' },
-  profile: { onboarded: false, focus: [], dailyMinutes: 10 },
+  profile: { onboarded: false, goals: [], focus: [], dailyMinutes: 10 },
   access: { pro: false },
 };
 const KEY = 'felt.settings.v1';
@@ -107,7 +110,12 @@ function load(): AppSettings {
       game: { ...DEFAULTS.game, ...saved.game },
       study: { ...DEFAULTS.study, ...saved.study },
       ui: { ...DEFAULTS.ui, ...saved.ui },
-      profile: { ...DEFAULTS.profile, ...saved.profile },
+      profile: {
+        ...DEFAULTS.profile,
+        ...saved.profile,
+        // Saves from before players could pick several goals.
+        goals: saved.profile?.goals ?? (saved.profile?.goal ? [saved.profile.goal] : []),
+      },
       access: { ...DEFAULTS.access, ...saved.access },
     };
   } catch {

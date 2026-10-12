@@ -57,3 +57,19 @@ describe('Felt Pro access', () => {
     expect(annualSavings()).toBe(Math.floor((1 - y / (m * 12)) * 100));
   });
 });
+
+describe('several goals', () => {
+  it('brings forward every chosen goal, in the order picked, without duplicates', async () => {
+    const { pathPrefs, goalsLine } = await import('../src/state/goals');
+    const prefs = pathPrefs({ onboarded: true, goals: ['tournaments', 'win-live'], focus: ['preflop'], dailyMinutes: 10 });
+    expect(prefs.focus).toEqual(['preflop/rfi', 'tournaments/mtt-basics', 'preflop/live-preflop', 'exploit/adjustments']);
+    expect(goalsLine(['win-live', 'move-up'])).toBe('To win more at live cash and move up in stakes');
+    expect(goalsLine(['win-live', 'move-up', 'master-gto'])).toBe('Built for your 3 goals');
+  });
+
+  it('reads saves from before goals were a list', async () => {
+    const { pathPrefs } = await import('../src/state/goals');
+    const old = { onboarded: true, goal: 'master-gto', focus: [], dailyMinutes: 10 } as unknown as Parameters<typeof pathPrefs>[0];
+    expect(pathPrefs(old).focus).toEqual(['foundations/theory', 'foundations/ranges']);
+  });
+});

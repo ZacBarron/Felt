@@ -162,7 +162,7 @@ export function DashboardPage() {
             )}
           </ProgressRing>
           <div className="grow">
-            <div className="footnote">{cueCopy(settings.profile.cue)?.label ?? goalCopy(settings.profile.goal)?.label ?? 'Today'}</div>
+            <div className="footnote">{cueCopy(settings.profile.cue)?.label ?? goalCopy(settings.profile.goals[0])?.label ?? 'Today'}</div>
             <div id="today-plan" style={{ fontWeight: 650 }}>
               {tasksDone === tasks.length ? 'Done for today' : "Today's plan"}
             </div>
