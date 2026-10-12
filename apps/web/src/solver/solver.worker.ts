@@ -1,8 +1,9 @@
 /// <reference lib="webworker" />
-import { cardsToString, isTerminal, parseCards, parseRange, PostflopSolver, rangeToCombos, type SolverAction } from '@felt/core';
+import { type Card, cardsToString, isTerminal, parseCards, parseComboRange, PostflopSolver, rangeToCombos, type SolverAction } from '@felt/core';
 import type { FromWorker, NodeView, RangeInput, ToWorker } from './protocol';
 
-const toRange = (r: RangeInput) => (typeof r === 'string' ? parseRange(r) : new Map(r));
+/** Text may name exact combos as well as hand classes; chart ranges arrive as class weights. */
+const toCombos = (r: RangeInput, board: Card[]) => (typeof r === 'string' ? parseComboRange(r, board) : rangeToCombos(new Map(r), board));
 
 let solver: PostflopSolver | undefined;
 let stopped = false;
@@ -51,7 +52,7 @@ self.onmessage = (e: MessageEvent<ToWorker>) => {
       board,
       pot: spot.pot,
       effectiveStack: spot.stack,
-      ranges: [rangeToCombos(toRange(spot.ranges[0]), board), rangeToCombos(toRange(spot.ranges[1]), board)],
+      ranges: [toCombos(spot.ranges[0], board), toCombos(spot.ranges[1], board)],
       sizes: spot.sizes,
     });
     const started = performance.now();

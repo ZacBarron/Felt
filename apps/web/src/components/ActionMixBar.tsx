@@ -27,7 +27,7 @@ export function ActionMixBar({ actions, reveal = true, onChoose, chosen }: Props
               title={`${a.label} ${Math.round(a.frequency * 100)}%`}
               style={{
                 width: `${a.frequency * 100}%`,
-                background: actionColor(a.id),
+                backgroundColor: actionColor(a.id),
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',

@@ -31,6 +31,8 @@ export interface ChartSpec {
   basis: 'gto' | 'exploit';
   /** Where the numbers come from. Starter charts are approximations. */
   source: 'starter-approx' | 'solver-import' | 'custom';
+  /** What the chart assumes that a player might not, such as the open size. Shown with the chart. */
+  note?: string;
   actions: ChartActionSpec[];
 }
 

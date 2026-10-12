@@ -8,7 +8,7 @@ export function MixBar({ mix, labels }: { mix: HandMix; labels: Record<string, s
     <div className="stack" style={{ gap: '0.35rem' }}>
       <div style={{ display: 'flex', height: 12, borderRadius: 999, overflow: 'hidden', gap: 2 }} aria-hidden="true">
         {actions.map((a) => (
-          <div key={a} className="mix-seg" data-act={a} style={{ width: `${mix[a] * 100}%`, background: actionColor(a), opacity: a === 'fold' ? 0.6 : 1 }} />
+          <div key={a} className="mix-seg" data-act={a} style={{ width: `${mix[a] * 100}%`, backgroundColor: actionColor(a), opacity: a === 'fold' ? 0.6 : 1 }} />
         ))}
       </div>
       <div className="row" style={{ gap: '0.9rem', fontSize: '0.85rem' }}>

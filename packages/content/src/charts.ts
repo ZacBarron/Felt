@@ -15,7 +15,7 @@ import type { ChartSpec } from '@felt/core';
 const RFI = {
   'UTG-9': '66+, 55:0.5, A9s+, A5s:0.5, KTs+, QTs+, JTs, T9s:0.5, AJo+, KQo',
   'UTG+1-9': '55+, A8s+, A5s, KTs+, QTs+, JTs, T9s, 98s:0.5, AJo+, KQo, KJo:0.25',
-  'UTG+2-9': '44+, 44:0.5, A7s+, A4s-A5s, K9s+, QTs+, JTs, T9s, 98s:0.5, 87s:0.5, AJo+, ATo:0.5, KQo, KJo:0.5, QJo:0.5',
+  'UTG+2-9': '55+, 44:0.5, A7s+, A4s-A5s, K9s+, QTs+, JTs, T9s, 98s:0.5, 87s:0.5, AJo+, ATo:0.5, KQo, KJo:0.5, QJo:0.5',
   LJ: '33+, 22:0.5, A2s+, K9s+, Q9s+, J9s+, T9s, 98s:0.5, 87s:0.5, 76s:0.5, 65s:0.5, AJo+, ATo:0.5, KQo, KJo:0.5',
   HJ: '22+, A2s+, K7s+, Q9s+, J9s+, T8s+, 98s, 87s, 76s, 65s, 54s:0.5, ATo+, KJo+, QJo, KTo:0.5',
   CO: '22+, A2s+, K5s+, Q8s+, J8s+, T8s+, 97s+, 87s, 86s:0.5, 76s, 75s:0.5, 65s, 54s, A8o+, KTo+, QTo+, JTo',
@@ -44,6 +44,9 @@ function rfi(tableSize: number, hero: string, range: string): ChartSpec {
     spot: 'rfi',
     basis: 'gto',
     source: 'starter-approx',
+    note: sb
+      ? 'Assumes a 3bb open with no limpers. Live, most players open bigger; the bigger the open, the tighter the range.'
+      : 'Assumes a 2.5bb open with no limpers, as online. Live opens are usually 4 to 5bb plus 1bb per limper, and often get several callers, so tighten the earliest seats a little.',
     actions: [{ id: 'raise', label: sb ? 'Raise 3bb' : 'Raise 2.5bb', range }],
   };
 }
@@ -89,11 +92,13 @@ export const STARTER_CHARTS: ChartSpec[] = [
     spot: 'vs-limp',
     basis: 'exploit',
     source: 'starter-approx',
+    note: 'An exploit for a typical live limper who calls raises too often and plays poorly after the flop. Against a tough limper, isolate tighter.',
     actions: [
       {
         id: 'raise',
         label: 'Iso raise 5bb',
-        range: '22+:0.5, 77+, A2s+, K8s+, Q9s+, J9s+, T9s, 98s:0.5, ATo+, KJo+, QJo, A9o:0.5',
+        // Against a weak limper, isolate wider than a standard open with hands that play well heads up in position.
+        range: '77+, 22-66:0.5, A2s+, K8s+, Q9s+, J9s+, T9s, 98s:0.5, A9o+, A8o:0.5, KTo+, QTo+, JTo:0.5',
       },
       {
         id: 'call',

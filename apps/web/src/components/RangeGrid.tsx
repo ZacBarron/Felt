@@ -109,7 +109,7 @@ export function RangeGrid({ mixes, selected, onSelect, onPaint, marked }: Props)
                     className="seg"
                     data-act={a}
                     aria-hidden="true"
-                    style={{ width: `${mix[a] * 100}%`, background: actionColor(a), opacity: a === 'fold' ? 0.22 : 0.95 }}
+                    style={{ width: `${mix[a] * 100}%`, backgroundColor: actionColor(a), opacity: a === 'fold' ? 0.22 : 0.95 }}
                   />
                 ))}
                 <span className="label" aria-hidden="true">

@@ -22,7 +22,7 @@ Ordered for the main game (live 1/3 cash, 9-handed, on a phone) and so the core 
 - [x] Local persistence with IndexedDB (Dexie): cards and review logs
 - [x] Quick recall drill: seat strip, real cards, timed, full mix and chart shown after
 - [x] Range painting drill: drag to paint (touch friendly), scored per combo, misses outlined
-- [x] Deck built from each chart's edge hands, then a full chart paint card
+- [x] Deck built from each chart's borderline hands, then a full chart paint card
 - [x] Daily review queue with FSRS and a new card limit; missed cards return in the same session
 - [x] Today page: due, new, streak, accuracy, recall speed
 - [x] Free practice mode that does not touch the schedule
@@ -42,26 +42,27 @@ Ordered for the main game (live 1/3 cash, 9-handed, on a phone) and so the core 
 
 See [MONETIZATION.md](MONETIZATION.md).
 
-- [x] Onboarding: goal, game, experience, focus, daily goal, placement, a personal plan and a hold to commit pledge
-- [x] Placement test that walks the core path and marks known lessons as skipped
+- [x] Onboarding: goal, game, focus, daily study time, study cue, placement, a personal plan with free and Pro dates, and a hold to start pledge with a calendar reminder
+- [x] Placement test that walks the core path and marks known lessons as tested out, with a per topic undo
 - [x] Test out of any module; a miss expands into the full lesson
 - [x] Path ordering: in progress, then placement module, then focus areas
-- [x] Daily goal ring and next lesson on Today
+- [x] Today leads with the next lesson in the plan and a three task plan (lesson, review, daily challenge)
 - [x] Felt Pro paywall with plan cards, trial timeline and honest fine print; free tier is the first module of every track
 - [x] Developer switch for Pro, onboarding replay and progress reset
 - [x] Saves: bookmark any lesson screen or solver hand; a Saved page with notes; every save becomes a review card (quizzes graded, other screens as self graded flashcards, solver hands graded against the solver's mix), plus a saved only review session
 - [x] Felt Rating: Glicko rating overall and per area from every graded answer, provisional until settled, tiers, history (see ENGAGEMENT.md)
 - [x] Win rate model: rake and tips per player from the rake rules, skill edge from rating against the table, 95% range, Bayesian blend with entered results
-- [x] Daily challenge: five decisions, the same for everyone, rated, shareable spoiler free grid
-- [x] Quests on Today and streaks with earned freezes
+- [x] Daily challenge: five decisions, the same for everyone, harder as it goes, saved after every answer, rated, a decision list that adds misses to review, and a shareable spoiler free grid
+- [x] Streaks with freezes: one to start, one earned every seven days in a row
 - [x] Research brief with verified sources (docs/research/sources.md)
-- [x] Tiers every 150 points (eleven tiers) with progress to the next
+- [x] Tiers every 150 points (nine tiers, Newcomer to Elite, none while provisional) with progress to the next
 - [x] Imports: hand histories (PokerStars format, GGPoker header, tracker exports) and live session CSVs; stats by seat, opening leaks against the charts, results feeding the win rate
 - [x] Practice at your level (about 80% expected success, weaker areas first, interleaved); study cue at onboarding
 - [ ] Connect a store (App Store, Play, web checkout) to `purchase()`
 - [ ] Verify GGPoker parsing against a real GG export; add Winamax and iPoker formats
-- [ ] Server: item calibration, real pool ratings per stake, leagues with real players, reminders, global daily stats
-- [ ] Reminder notifications and streak freeze
+- [x] Calendar reminders (.ics) for the study time and the trial end; local event log with export
+- [x] Copy, accessibility (WCAG 2.2 AA pass) and visual review from simulated expert panels
+- [ ] Server: item calibration, real pool ratings per stake, leagues with real players, push reminders, global daily stats
 
 ## Phase 2: Live game essentials
 

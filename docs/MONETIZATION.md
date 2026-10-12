@@ -40,7 +40,8 @@ Skipped lessons show as "Skipped" and count as complete. The plan and Today both
 - **Next lesson** on Today and Learn follows the player's path: the lesson in progress, then the placement module, then focus areas, then curriculum order.
 - **Streaks** from review days (already in place).
 - **Saves** turn curiosity into memory: anything bookmarked joins the review deck, ahead of the new card limit, so the things a player cared about come back on schedule.
-- Next: reminder notifications at a chosen time, streak freeze, weekly summary.
+- Shipped: streak freezes (one to start, one earned every seven days), calendar reminders for the study time and the trial end, and a local event log.
+- Next: push reminders at a chosen time and a weekly summary.
 
 ## Felt Pro
 
@@ -60,10 +61,10 @@ Set in `PLANS` in `state/access.ts`. Current placeholders: yearly $79.99 with a 
 ### Paywall layout
 
 1. Close button, always visible.
-2. Felt hero with a headline that uses the player's goal or the reason they arrived ("Unlock the lessons you need").
-3. Five concrete benefits, each something the app does today, plus what is shipping next.
-4. Two plan cards, yearly preselected with its saving.
-5. Trial timeline with real dates: today, a reminder two days before the end, the charge date and amount.
+2. Felt hero with a headline that names why the player arrived ("Add every lesson to your plan", "This lesson is part of Felt Pro", "Solve your own spots").
+3. Two plan cards, yearly preselected with its saving, so the price is on screen before any benefit.
+4. Only what Pro adds (more lessons, solving your own spots, what is added later), then a line listing what stays free.
+5. Trial timeline with real dates: today, two days before the end (with a calendar reminder offered once the trial starts), the charge date and amount. The bottom bar repeats the price and charge date next to the button, and declining sits in the same bar.
 6. Fine print: price, renewal, how to cancel, restore purchases, terms, privacy.
 7. One primary button in the thumb zone.
 

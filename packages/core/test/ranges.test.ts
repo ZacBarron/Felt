@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   ALL_HAND_CLASSES,
+  parseComboRange,
   gridHandClass,
   handClassOf,
   parseCards,
@@ -55,5 +56,27 @@ describe('parseRange', () => {
   it('rejects bad input', () => {
     expect(() => parseRange('AXs')).toThrow();
     expect(() => parseRange('AKs:2')).toThrow();
+  });
+});
+
+describe('parseComboRange', () => {
+  it('mixes hand classes with exact combos and drops dead cards', () => {
+    const board = parseCards('Kc8h5h2s2d');
+    const combos = parseComboRange('KJ, QhJh, JhTh:0.5', board);
+    // KJ has 16 combos, minus the 4 that use the Kc.
+    expect(combos.filter((c) => c.weight === 1).length).toBe(13);
+    expect(combos.find((c) => c.weight === 0.5)?.cards.sort()).toEqual(parseCards('JhTh').sort());
+    expect(parseComboRange('Kc8h', board)).toEqual([]);
+  });
+
+  it('lets a later token override an earlier one', () => {
+    const combos = parseComboRange('QJs, QhJh:0.25');
+    expect(combos).toHaveLength(4);
+    expect(combos.filter((c) => c.weight === 0.25)).toHaveLength(1);
+  });
+
+  it('rejects bad combos', () => {
+    expect(() => parseComboRange('AhAh')).toThrow();
+    expect(() => parseComboRange('QhJh:3')).toThrow();
   });
 });

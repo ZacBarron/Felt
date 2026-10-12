@@ -3673,7 +3673,7 @@ h2[tabindex='-1']:focus {
 .range-cell .seg[data-act='jam'],
 .mix-seg[data-act^='raise'],
 .mix-seg[data-act$='bet'] {
-  background-image: repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.28) 0 2px, transparent 2px 5px);
+  background-image: repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0 2px, transparent 2px 5px);
 }
 
 .daily-grid span {

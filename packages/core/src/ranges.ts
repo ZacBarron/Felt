@@ -1,4 +1,4 @@
-import { type Card, RANKS, type Rank, makeCard, SUITS } from './cards';
+import { type Card, parseCard, RANKS, type Rank, makeCard, SUITS } from './cards';
 
 /**
  * Hand classes and range notation.
@@ -139,6 +139,40 @@ export function rangeComboCount(range: Range): number {
 /** Share of all 1326 starting combos covered by a range. */
 export function rangePercent(range: Range): number {
   return rangeComboCount(range) / 1326;
+}
+
+const EXACT_COMBO = /^[2-9TJQKA][cdhs][2-9TJQKA][cdhs]$/i;
+
+/**
+ * Parses range text that may also name exact combos, e.g. "KJ, 88, QhJh,
+ * JhTh:0.5", into concrete combos. Exact combos let a postflop range hold
+ * only the draws that would really have called, which hand classes cannot.
+ * Later tokens overwrite earlier ones, as in parseRange.
+ */
+export function parseComboRange(text: string, dead: readonly Card[] = []): WeightedCombo[] {
+  const blocked = new Set(dead);
+  const weights = new Map<string, WeightedCombo>();
+  const put = (a: Card, b: Card, weight: number) => {
+    const cards: [Card, Card] = a > b ? [a, b] : [b, a];
+    weights.set(`${cards[0]}-${cards[1]}`, { cards, weight });
+  };
+  for (const raw of text.split(',')) {
+    const token = raw.trim();
+    if (!token) continue;
+    const [handPart, freqPart] = token.split(':');
+    const freq = freqPart === undefined ? 1 : Number(freqPart);
+    if (!Number.isFinite(freq) || freq < 0 || freq > 1) throw new Error(`Invalid frequency in "${token}"`);
+    const body = handPart.trim();
+    if (EXACT_COMBO.test(body)) {
+      const a = parseCard(body.slice(0, 2));
+      const b = parseCard(body.slice(2));
+      if (a === b) throw new Error(`Duplicate card in "${token}"`);
+      put(a, b, freq);
+      continue;
+    }
+    for (const hand of expandToken(body)) for (const [a, b] of handClassCombos(hand)) put(a, b, freq);
+  }
+  return [...weights.values()].filter((c) => c.weight > 0 && !blocked.has(c.cards[0]) && !blocked.has(c.cards[1]));
 }
 
 /** Expands a range into concrete combos, dropping any that collide with dead cards. */

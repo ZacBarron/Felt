@@ -1,4 +1,4 @@
-import { actionRange, type HandMix, parseCards, parseRange, type PlayerSizes, type StreetSizes } from '@felt/core';
+import { actionRange, type HandMix, parseCards, parseComboRange, type PlayerSizes, type StreetSizes } from '@felt/core';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { actionColor } from '../components/actionColors';
@@ -34,19 +34,19 @@ const PRESETS: Preset[] = [
   {
     id: 'river-barrels',
     label: 'River after two barrels',
-    note: 'BTN bet flop and turn, BB called twice',
+    note: 'BTN opened and bet flop and turn; BB called twice. 100bb stacks, so 85bb are left behind. Missed draws are only the heart combos that had a flush draw.',
     board: 'Kc8h5h2s2d',
     pot: 30,
-    stack: 70,
-    rangeText: ['KJ, KT, K9s, 98s, 88, 55, 87s, 86s, 65s, A5s, 54s, QJs, JTs, T9s', 'AK, KQ, 88, 55, 22, A8s, QJs, JTs, T9s, 76s, 64s, A7s, 43s'],
+    stack: 85,
+    rangeText: ['KJ, KT, K9s, 98s, 88, 55, 87s, 86s, 65s, A5s, 54s, QhJh, JhTh, Th9h', 'AK, KQ, 88, 55, 22, A8s, QhJh, JhTh, Th9h, 76s, 64s, Ah7h, 43s'],
     ranges() {
       return this.rangeText;
     },
   },
   {
     id: 'river-preflop',
-    label: 'River, preflop ranges',
-    note: 'BTN open vs BB call, checked to the river',
+    label: 'Toy: preflop ranges on the river',
+    note: 'BTN open vs BB call, checked to the river. A teaching toy: real ranges that check twice would hold far fewer strong hands.',
     board: 'Ks7d2c4h9s',
     pot: 5.5,
     stack: 97.5,
@@ -171,7 +171,7 @@ export function SolverPage() {
   const rangeError = useMemo(() => {
     if (!custom) return undefined;
     try {
-      rangeText.forEach((r) => parseRange(r));
+      rangeText.forEach((r) => parseComboRange(r));
       return undefined;
     } catch (e) {
       return e instanceof Error ? e.message : 'Invalid range';
@@ -234,7 +234,7 @@ export function SolverPage() {
 
   return (
     <div className="stack" style={{ gap: '1.4rem' }}>
-      <PageHeader title="Solver" back={{ to: '/more', label: 'More' }} subtitle="An exact equilibrium for the ranges and sizes you choose" />
+      <PageHeader title="Solver" back={{ to: '/more', label: 'More' }} subtitle="A near equilibrium for the ranges and sizes you choose, with its exploitability shown" />
 
       <section>
         <h2 className="section-title">Spot</h2>
@@ -248,7 +248,7 @@ export function SolverPage() {
             {!pro && <LockIcon size={12} />} Custom
           </button>
         </div>
-        <div className="section-footer">{custom ? 'Type any ranges, board and stacks.' : preset.note}</div>
+        <div className="section-footer">{custom ? 'Type any ranges, board and stacks. Ranges take hand classes like KJ or 98s and exact combos like QhJh.' : preset.note}</div>
       </section>
 
       <div className="card stack solver-setup" style={{ gap: '0.9rem' }}>
@@ -438,8 +438,8 @@ export function SolverPage() {
       )}
 
       <p className="footnote">
-        Felt Solver runs discounted CFR on your device, combo by combo, with exact card removal. It is exact for the game you define; the
-        ranges and sizes you choose are the assumptions.
+        Felt Solver runs discounted CFR on your device, combo by combo, with exact card removal. It stops once exploitability is a small share of
+        the pot, so the answer is a near equilibrium for the game you define; the ranges and sizes you choose are the assumptions.
       </p>
 
       <BottomBar>
