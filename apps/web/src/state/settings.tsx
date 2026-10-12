@@ -1,6 +1,7 @@
 import { DEFAULT_SETTINGS, type GameSettings, type TableAssumptions } from '@felt/core';
-import { createContext, type ReactNode, useContext, useEffect, useState } from 'react';
+import { createContext, type ReactNode, useContext, useEffect, useRef, useState } from 'react';
 import { setHapticsEnabled } from '../haptics';
+import { markDirty } from './sync';
 
 export interface StudySettings {
   /** New review cards introduced per day. */
@@ -66,6 +67,8 @@ export interface Access {
   /** ISO date a trial ends, when on a trial. */
   trialEndsAt?: string;
   plan?: string;
+  /** Paid through this date, as reported by the Felt server. */
+  until?: string;
 }
 
 /** Results the player entered, used to calibrate the win rate estimate. */
@@ -139,6 +142,9 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     else root.dataset.palette = settings.ui.palette;
   }, [settings.ui.palette]);
 
+  // What syncs: everything but access, which the server reports itself.
+  const synced = JSON.stringify({ ...settings, access: undefined });
+  const lastSynced = useRef(synced);
   useEffect(() => {
     setHapticsEnabled(settings.ui.haptics);
     try {
@@ -146,7 +152,12 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     } catch {
       // Private mode or blocked storage: settings still work for this visit.
     }
-  }, [settings]);
+    // Settings travel with sync too. Access changes come from the server, so they are not local edits.
+    if (synced !== lastSynced.current) {
+      lastSynced.current = synced;
+      markDirty();
+    }
+  }, [settings, synced]);
   return <SettingsContext.Provider value={{ settings, update: setSettings }}>{children}</SettingsContext.Provider>;
 }
 

@@ -3750,3 +3750,21 @@ input[type='number'] {
 .felt-strip.answered {
   padding: 0.6rem 0;
 }
+
+/* League table */
+.league-table {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.league-rank {
+  flex: none;
+  width: 1.8rem;
+  color: var(--label-2);
+  font-weight: 650;
+}
+
+.league-you {
+  background: color-mix(in srgb, var(--tint) 10%, var(--surface));
+}

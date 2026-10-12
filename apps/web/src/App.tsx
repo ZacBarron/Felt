@@ -21,6 +21,11 @@ import { SavedPage } from './pages/SavedPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { SolverPage } from './pages/SolverPage';
 import { YouPage } from './pages/YouPage';
+import { AccountPage } from './pages/AccountPage';
+import { LeaguePage } from './pages/LeaguePage';
+import { LegalPage } from './pages/LegalPage';
+import { accessFromServer } from './state/access';
+import { useSession } from './state/api';
 import { chartsForGame } from './state/charts';
 import { buildQueue } from './state/review';
 import { useSettings } from './state/settings';
@@ -40,12 +45,27 @@ function useReviewCount() {
 }
 
 /** Pages a player can reach before finishing onboarding. */
-const FIRST_RUN = ['/welcome', '/placement', '/pro'];
+const FIRST_RUN = ['/welcome', '/placement', '/pro', '/account', '/terms', '/privacy'];
+
+/** Keeps Felt Pro in step with the account: the server's word wins over this device's. */
+function useServerAccess() {
+  const session = useSession();
+  const { settings, update } = useSettings();
+  const serverAccess = session?.user.access;
+  useEffect(() => {
+    if (!serverAccess) return;
+    const next = accessFromServer(serverAccess, settings.access);
+    if (JSON.stringify(next) !== JSON.stringify(settings.access)) update({ ...settings, access: next });
+    // Only when the server's answer changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [JSON.stringify(serverAccess)]);
+}
 
 export function App() {
   const location = useLocation();
   const { settings } = useSettings();
   const reviewCount = useReviewCount();
+  useServerAccess();
   // Lesson pages live under /learn, so match on the first path segment.
   const section = '/' + (location.pathname.split('/')[1] ?? '');
   const tabIndex = TABS.findIndex((t) => t.to === section);
@@ -120,6 +140,10 @@ export function App() {
             <Route path="/daily" element={<DailyPage />} />
             <Route path="/import" element={<ImportPage />} />
             <Route path="/practice" element={<PracticePage />} />
+            <Route path="/account" element={<AccountPage />} />
+            <Route path="/league" element={<LeaguePage />} />
+            <Route path="/terms" element={<LegalPage doc="terms" />} />
+            <Route path="/privacy" element={<LegalPage doc="privacy" />} />
           </Routes>
         </div>
       </main>

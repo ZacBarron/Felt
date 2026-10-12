@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { haptic, hapticsSupported } from '../haptics';
 import { isPro, restorePurchases } from '../state/access';
 import { db } from '../state/db';
+import { useSession } from '../state/api';
 import { exportBackup, importBackup, requestPersistentStorage } from '../state/backup';
 import { exportEvents } from '../state/events';
 import { cueCopy } from '../state/goals';
@@ -22,6 +23,7 @@ const same = (a: GameSettings, b: GameSettings) => JSON.stringify(a) === JSON.st
 
 export function SettingsPage() {
   const { settings, update } = useSettings();
+  const session = useSession();
   const g = settings.game;
   const setGame = (patch: Partial<GameSettings>) => update({ ...settings, game: { ...g, ...patch } });
   const fit = chartsForGame(g);
@@ -62,15 +64,27 @@ export function SettingsPage() {
   };
   const restore = async () => {
     const result = await restorePurchases(settings);
-    if (result.ok) {
+    if (result.ok === false && result.needsAccount) {
+      navigate('/account?next=/settings');
+      return;
+    }
+    if (result.ok === true) {
       update({ ...settings, access: result.access });
       setRestoreMessage('Purchases restored.');
-    } else setRestoreMessage(result.reason);
+    } else if (result.ok === false) setRestoreMessage(result.reason);
   };
 
   return (
     <div className="stack" style={{ gap: '1.6rem' }}>
       <PageHeader title="Settings" back={{ to: '/more', label: 'More' }} />
+
+      <Link to="/account" className="list-row card">
+        <span className="grow">
+          <span style={{ display: 'block', fontWeight: 600 }}>{session ? session.user.email : 'Account'}</span>
+          <span className="footnote">{session ? 'Sync, reminders, leagues and Felt Pro' : 'Sign in to keep progress on every device'}</span>
+        </span>
+        <ChevronRightIcon size={16} className="chev" />
+      </Link>
 
       <section>
         <h2 className="section-title">Game</h2>

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { haptic } from '../haptics';
 import { annualSavings, formatPrice, isLessonFree, isPro, PLANS, type PlanOption, purchase, restorePurchases } from '../state/access';
+import { refreshMe } from '../state/api';
 import { track } from '../state/events';
 import { LESSON_ENTRIES } from '../state/lessons';
 import { trialReminder } from '../state/reminders';
@@ -62,6 +63,24 @@ export function ProPage() {
     track('paywall_viewed', { from });
   }, [from]);
 
+  // Back from Stripe Checkout: the webhook may land a moment after the redirect, so check a few times.
+  const checkout = params.get('checkout');
+  useEffect(() => {
+    if (checkout === 'cancel') setMessage('Checkout cancelled. You were not charged.');
+    if (checkout !== 'success') return;
+    track('checkout_returned');
+    let tries = 0;
+    const check = async () => {
+      const user = await refreshMe().catch(() => null);
+      if (user?.access.pro || ++tries >= 5) {
+        if (!user?.access.pro) setMessage('Payment received. Felt Pro will switch on within a minute. If it has not, reopen this page.');
+        return;
+      }
+      setTimeout(() => void check(), 2000);
+    };
+    void check();
+  }, [checkout]);
+
   if (isPro(settings.access)) {
     const trialEnds = settings.access.trialEndsAt;
     return (
@@ -91,10 +110,16 @@ export function ProPage() {
     setBusy(true);
     setMessage(undefined);
     const result = await purchase(plan, settings);
+    track('purchase_result', { plan: plan.id, ok: String(result.ok) });
+    // Leaving for Stripe Checkout: keep the button busy until the page goes.
+    if (result.ok === 'redirect') return;
     setBusy(false);
-    track('purchase_result', { plan: plan.id, ok: result.ok });
     if (!result.ok) {
       haptic('warning');
+      if (result.needsAccount) {
+        navigate(`/account?next=${encodeURIComponent(`/pro?from=${from}`)}`);
+        return;
+      }
       setMessage(result.reason);
       return;
     }
@@ -104,8 +129,11 @@ export function ProPage() {
 
   const restore = async () => {
     const result = await restorePurchases(settings);
-    if (result.ok) update({ ...settings, access: result.access });
-    else setMessage(result.reason);
+    if (result.ok === true) update({ ...settings, access: result.access });
+    else if (result.ok === false) {
+      if (result.needsAccount) navigate(`/account?next=${encodeURIComponent('/pro')}`);
+      else setMessage(result.reason);
+    }
   };
 
   return (
@@ -217,13 +245,13 @@ export function ProPage() {
           Restore purchases
         </button>
         {' · '}
-        <a href="/terms" className="link-btn">
+        <Link to="/terms" className="link-btn">
           Terms
-        </a>
+        </Link>
         {' · '}
-        <a href="/privacy" className="link-btn">
+        <Link to="/privacy" className="link-btn">
           Privacy
-        </a>
+        </Link>
       </p>
 
       <BottomBar>

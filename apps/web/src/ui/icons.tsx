@@ -158,6 +158,26 @@ export function ImportIcon(p: IconProps) {
   );
 }
 
+/** Account: a head and shoulders. */
+export function AccountIcon(p: IconProps) {
+  return (
+    <Svg {...p}>
+      <circle cx="12" cy="8.5" r="3.75" {...fillProps(p.filled)} />
+      <path d="M4.75 19.5c1.2-3.3 4-5 7.25-5s6.05 1.7 7.25 5" />
+    </Svg>
+  );
+}
+
+/** League: a three step podium. */
+export function LeagueIcon(p: IconProps) {
+  return (
+    <Svg {...p}>
+      <path d="M9 19.5V9.5h6v10" {...fillProps(p.filled)} />
+      <path d="M3.5 19.5v-6H9M15 13.5h5.5v6M2.5 19.5h19" />
+    </Svg>
+  );
+}
+
 export function StatsIcon(p: IconProps) {
   return (
     <Svg {...p}>

@@ -1,4 +1,5 @@
 import { CURRICULUM } from '@felt/content';
+import { api, currentSession, refreshMe, serverFeatures, type ServerAccess } from './api';
 import type { Access, AppSettings } from './settings';
 
 /**
@@ -43,10 +44,24 @@ export function annualSavings(): number {
  */
 export const FREE_MODULES: ReadonlySet<string> = new Set(CURRICULUM.map((t) => `${t.id}/${t.modules[0].id}`));
 
-export function isPro(access: Access): boolean {
+export function isPro(access: Access, now = new Date()): boolean {
   if (access.devMode && access.devPro !== undefined) return access.devPro;
-  if (access.trialEndsAt && new Date(access.trialEndsAt) > new Date()) return true;
+  // A server entitlement has an end date and lapses on its own, even offline.
+  if (access.until !== undefined) return new Date(access.until) > now;
+  if (access.trialEndsAt && new Date(access.trialEndsAt) > now) return true;
   return access.pro;
+}
+
+/** Access as the Felt server reports it, keeping this device's developer switches. */
+export function accessFromServer(server: ServerAccess, local: Access): Access {
+  return {
+    devMode: local.devMode,
+    devPro: local.devPro,
+    pro: server.pro,
+    plan: server.plan ?? undefined,
+    until: server.until ?? new Date(0).toISOString(),
+    trialEndsAt: server.trialing && server.until ? server.until : undefined,
+  };
 }
 
 export function isLessonFree(key: string): boolean {
@@ -65,10 +80,29 @@ export function canUse(feature: ProFeature, access: Access): boolean {
   return isPro(access) || feature === 'paint-drills';
 }
 
-export type PurchaseResult = { ok: true; access: Access } | { ok: false; reason: string };
+export type PurchaseResult =
+  | { ok: true; access: Access }
+  | { ok: false; reason: string; needsAccount?: boolean }
+  /** Sent to Stripe Checkout; the page is about to leave. */
+  | { ok: 'redirect' };
 
-/** Starts a purchase. Without a store connected, only developer mode can complete one. */
+/**
+ * Starts a purchase. With the Felt server and Stripe set up, this opens
+ * Stripe Checkout for the signed in player. Otherwise only developer mode
+ * can complete one, locally.
+ */
 export async function purchase(plan: PlanOption, settings: AppSettings): Promise<PurchaseResult> {
+  const features = await serverFeatures();
+  if (features?.billing && !(settings.access.devMode && settings.access.devPro !== undefined)) {
+    if (!currentSession()) return { ok: false, reason: 'Sign in first, so Felt Pro is tied to your account on every device.', needsAccount: true };
+    try {
+      const { url } = await api<{ url: string }>('/billing/checkout', { body: { plan: plan.id } });
+      location.assign(url);
+      return { ok: 'redirect' };
+    } catch (e) {
+      return { ok: false, reason: e instanceof Error ? e.message : 'Checkout could not start.' };
+    }
+  }
   if (!settings.access.devMode && !import.meta.env.DEV) {
     return { ok: false, reason: 'Purchases are not open yet. Your progress is saved, and everything free stays free.' };
   }
@@ -77,6 +111,28 @@ export async function purchase(plan: PlanOption, settings: AppSettings): Promise
 }
 
 export async function restorePurchases(settings: AppSettings): Promise<PurchaseResult> {
+  const features = await serverFeatures();
+  if (features?.billing) {
+    if (!currentSession()) return { ok: false, reason: 'Sign in with the email you subscribed with.', needsAccount: true };
+    try {
+      const user = await refreshMe();
+      if (user?.access.pro) return { ok: true, access: accessFromServer(user.access, settings.access) };
+      return { ok: false, reason: 'No active subscription on this account.' };
+    } catch (e) {
+      return { ok: false, reason: e instanceof Error ? e.message : 'Could not check your subscription.' };
+    }
+  }
   if (settings.access.pro) return { ok: true, access: settings.access };
   return { ok: false, reason: 'No purchases found for this device.' };
+}
+
+/** Opens Stripe's page for changing or cancelling a subscription. */
+export async function manageSubscription(): Promise<string | undefined> {
+  try {
+    const { url } = await api<{ url: string }>('/billing/portal', { body: {} });
+    location.assign(url);
+    return undefined;
+  } catch (e) {
+    return e instanceof Error ? e.message : 'Could not open subscription settings.';
+  }
 }

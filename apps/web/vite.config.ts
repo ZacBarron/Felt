@@ -16,12 +16,19 @@ export default defineConfig({
   },
   // The solver runs in a module worker so it can import @felt/core.
   worker: { format: 'es' },
+  // During development the Felt server runs on 8787 (pnpm dev:server).
+  server: { proxy: { '/api': 'http://localhost:8787' } },
   plugins: [
     react(),
     // Installable on a phone and fully usable offline at the table.
     VitePWA({
       disable: artifact,
       registerType: 'autoUpdate',
+      // Our own service worker (src/sw.ts): offline caching plus study reminder notifications.
+      strategies: 'injectManifest',
+      srcDir: 'src',
+      filename: 'sw.ts',
+      injectManifest: { globPatterns: ['**/*.{js,css,html,png,svg,woff2}'] },
       includeAssets: ['favicon.png', 'apple-touch-icon.png'],
       manifest: {
         name: 'Felt',
@@ -37,10 +44,6 @@ export default defineConfig({
           { src: 'icon-512.png', sizes: '512x512', type: 'image/png' },
           { src: 'icon-maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
         ],
-      },
-      workbox: {
-        globPatterns: ['**/*.{js,css,html,png,svg,woff2}'],
-        navigateFallback: '/index.html',
       },
     }),
   ],

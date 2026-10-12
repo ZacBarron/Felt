@@ -25,7 +25,7 @@ import { db } from '../state/db';
 import { DOMAIN_LABELS, ratingSnapshot, streakNow } from '../state/rating';
 import { useSettings } from '../state/settings';
 import { signed } from '../ui/format';
-import { ChevronRightIcon, TargetIcon } from '../ui/icons';
+import { ChevronRightIcon, TargetIcon, LeagueIcon } from '../ui/icons';
 import { PageHeader } from '../ui/PageHeader';
 import { useCountUp } from '../ui/useCountUp';
 
@@ -200,6 +200,17 @@ export function YouPage() {
           </button>
         )}
       </section>
+
+      <Link to="/league" className="card placement-card">
+        <span className="placement-icon">
+          <LeagueIcon size={22} />
+        </span>
+        <span className="grow">
+          <span style={{ display: 'block', fontWeight: 650 }}>Weekly league</span>
+          <span className="footnote">Real players near your rating, ranked by rating gained this week.</span>
+        </span>
+        <ChevronRightIcon size={16} className="chev" />
+      </Link>
 
       <Link to="/practice" className="card placement-card">
         <span className="placement-icon">

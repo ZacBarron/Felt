@@ -1,5 +1,5 @@
 import { existsSync, readFileSync } from 'node:fs';
-import { join, resolve } from 'node:path';
+import { join, relative, resolve } from 'node:path';
 import { serve } from '@hono/node-server';
 import { serveStatic } from '@hono/node-server/serve-static';
 import { createApp } from './app.ts';
@@ -29,7 +29,8 @@ if (webDir && existsSync(join(webDir, 'index.html'))) {
       c.header('Cache-Control', 'no-cache');
     else if (path.startsWith('/assets/')) c.header('Cache-Control', 'public, max-age=31536000, immutable');
   });
-  app.use('*', serveStatic({ root: webDir }));
+  // serveStatic resolves its root against the working directory.
+  app.use('*', serveStatic({ root: relative(process.cwd(), webDir) || '.' }));
   // Client side routes such as /learn load the app.
   app.get('*', (c) => (c.req.path.startsWith('/api/') ? c.json({ error: 'Not found.' }, 404) : c.html(index)));
 }

@@ -1,6 +1,7 @@
 import { DIFFICULTY, type RatingEvent, type RatingSnapshot, replayRatings, type SkillDomain, streakWithFreezes } from '@felt/core';
 import { db, type StoredAnswer } from './db';
 import { entryFor } from './lessons';
+import { calibratedDifficulty } from './calibration';
 
 /**
  * Records graded answers and turns them into the Felt Rating. Only objective
@@ -55,7 +56,7 @@ export async function ratingSnapshot(): Promise<RatingSnapshot> {
     at: a.at.getTime(),
     itemId: a.itemId,
     domain: a.domain,
-    difficulty: a.difficulty,
+    difficulty: calibratedDifficulty(a.itemId, a.difficulty),
     score: a.score,
   }));
   return replayRatings(events);

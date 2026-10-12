@@ -17,6 +17,7 @@ import { chartChoices, type Decision, DecisionItem } from '../drills/DecisionIte
 import { haptic } from '../haptics';
 import { getChart } from '../state/charts';
 import { db } from '../state/db';
+import { api, currentSession, serverFeatures } from '../state/api';
 import { track } from '../state/events';
 import { LESSON_ENTRIES, lessonPath, quizSteps } from '../state/lessons';
 import { ratingSnapshot, streakNow } from '../state/rating';
@@ -75,6 +76,41 @@ export function shareText(number: number, scores: number[], rating: SkillRating)
   return `Felt Daily #${number} · ${right}/${scores.length}\n${shareGrid(scores)}\nFelt Rating ${shown} (${tierLabel(rating)})`;
 }
 
+interface Crowd {
+  players: number;
+  distribution: number[];
+  items: number[];
+  percentile?: number;
+  signedOut: boolean;
+}
+
+/** How everyone did today, from the Felt server when there is one. Signed in results count once. */
+function useDailyCrowd(number: number, scores: number[]): Crowd | undefined {
+  const [crowd, setCrowd] = useState<Crowd>();
+  const right = scores.filter((s) => s >= 1).length;
+  useEffect(() => {
+    let live = true;
+    void (async () => {
+      const features = await serverFeatures();
+      if (!features?.accounts) return;
+      try {
+        const signedIn = !!currentSession();
+        const padded = [...scores, 0, 0, 0, 0, 0].slice(0, 5);
+        const stats = signedIn
+          ? await api<Omit<Crowd, 'signedOut'>>(`/daily/${number}`, { body: { scores: padded } })
+          : await api<Omit<Crowd, 'signedOut'>>(`/daily/${number}?right=${right}`);
+        if (live) setCrowd({ ...stats, signedOut: !signedIn });
+      } catch {
+        // Offline: the result stands on its own.
+      }
+    })();
+    return () => {
+      live = false;
+    };
+  }, [number, right, scores.join(",")]);
+  return crowd;
+}
+
 function describe(d: Decision) {
   if (d.kind === 'chart') return { title: d.hand, note: getChart(d.chartId)?.spec.title ?? '' };
   const entry = LESSON_ENTRIES.find((e) => e.key === d.key);
@@ -90,6 +126,7 @@ function Result({ number, items, scores, before, after }: { number: number; item
   const snapshot = useLiveQuery(() => ratingSnapshot(), []);
   const right = scores.filter((s) => s >= 1).length;
   const delta = Math.round(after - before);
+  const crowd = useDailyCrowd(number, scores);
   const missedHands = items.flatMap((d, i) => (d.kind === 'chart' && scores[i] < 1 ? [{ chartId: d.chartId, hand: d.hand }] : []));
   const share = async () => {
     const text = shareText(number, scores, (await ratingSnapshot()).overall);
@@ -126,6 +163,18 @@ function Result({ number, items, scores, before, after }: { number: number; item
             </span>
           ))}
         </div>
+        {crowd && crowd.players > 0 && (
+          <p className="footnote num" style={{ margin: 0 }}>
+            {crowd.players === 1 ? 'You are the first to finish today.' : `${crowd.players.toLocaleString()} players today.`}
+            {crowd.percentile !== undefined && crowd.players > 1 && ` You did better than ${Math.round(crowd.percentile * 100)}% of them.`}
+            {crowd.signedOut && (
+              <>
+                {' '}
+                <Link to="/account?next=/daily">Sign in to add your result.</Link>
+              </>
+            )}
+          </p>
+        )}
         <div className="row" style={{ justifyContent: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
           <span className="pill num">
             Rating {provisional ? '~' : ''}
@@ -149,7 +198,10 @@ function Result({ number, items, scores, before, after }: { number: number; item
               <>
                 <span className="grow">
                   <span style={{ display: 'block', fontWeight: 600 }}>{title}</span>
-                  <span className="footnote">{note}</span>
+                  <span className="footnote">
+                    {note}
+                    {crowd && crowd.players > 1 && `. ${Math.round((crowd.items[i] ?? 0) * 100)}% of players got it right`}
+                  </span>
                 </span>
                 <span className={`pill ${s >= 1 ? 'pill-good' : s > 0 ? 'pill-warn' : 'pill-bad'}`}>{verdict(s)}</span>
               </>

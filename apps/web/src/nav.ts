@@ -1,4 +1,6 @@
 import {
+  AccountIcon,
+  LeagueIcon,
   BookmarkIcon,
   DrillsIcon,
   ExploitsIcon,
@@ -53,7 +55,9 @@ export const NAV_SECTIONS: { section: string; items: NavItem[] }[] = [
     items: [
       { to: '/log', label: 'Log', icon: LogIcon, color: 'var(--base-500)' },
       { to: '/you', label: 'You', icon: StatsIcon, color: 'var(--base-500)' },
+      { to: '/league', label: 'League', icon: LeagueIcon, color: 'var(--base-500)' },
       { to: '/import', label: 'Import', icon: ImportIcon, color: 'var(--base-500)' },
+      { to: '/account', label: 'Account', icon: AccountIcon, color: 'var(--base-500)' },
       { to: '/settings', label: 'Settings', icon: SettingsIcon, color: 'var(--base-500)' },
     ],
   },
