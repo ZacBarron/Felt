@@ -6,22 +6,24 @@ const day = (n: number) => new Date(2026, 5, n, 20);
 describe('streaks with freezes', () => {
   it('counts consecutive days and does not break on a today with no study yet', () => {
     const s = streakWithFreezes([day(1), day(2), day(3)], day(4));
-    expect(s).toMatchObject({ streak: 3, activeToday: false, bank: 0 });
+    expect(s).toMatchObject({ streak: 3, activeToday: false, bank: 1 });
   });
 
-  it('earns a freeze every seven days and spends it on a missed day', () => {
+  it('starts with one freeze, earns one every seven days, and spends them on missed days', () => {
     const active = [1, 2, 3, 4, 5, 6, 7, 9, 10].map(day);
     const s = streakWithFreezes(active, day(10));
     expect(s.streak).toBe(9);
     expect(s.frozen).toEqual(['2026-6-8']);
-    expect(s.bank).toBe(0);
+    expect(s.bank).toBe(1);
     expect(s.activeToday).toBe(true);
+    // The starting freeze covers one early miss.
+    expect(streakWithFreezes([1, 2, 3, 5, 6].map(day), day(6)).streak).toBe(5);
   });
 
   it('resets when a day is missed with no freeze banked, but keeps the best', () => {
-    const s = streakWithFreezes([1, 2, 3, 5, 6].map(day), day(6));
-    expect(s.streak).toBe(2);
-    expect(s.best).toBe(3);
+    const s = streakWithFreezes([1, 2, 3, 5, 6, 8].map(day), day(8));
+    expect(s.streak).toBe(1);
+    expect(s.best).toBe(5);
   });
 
   it('caps the bank', () => {

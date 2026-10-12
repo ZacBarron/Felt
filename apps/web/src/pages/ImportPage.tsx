@@ -1,10 +1,11 @@
-import { createScheduler, heroStats, openDeviations, openRates, RECALL_TARGET_MS, resultsAreNoise, resultsHalfWidth, sessionTotals } from '@felt/core';
+import { heroStats, openDeviations, openRates, resultsAreNoise, resultsHalfWidth, sessionTotals } from '@felt/core';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { haptic } from '../haptics';
 import { db } from '../state/db';
 import { asHeroHand, chartIdForSeat, chartOpenFreq, chartOpenRate, clearImports, type HandImportSummary, importHandText, importSessionCsv } from '../state/imports';
+import { addHandsToReview } from '../state/review';
 import { useSettings } from '../state/settings';
 import { PageHeader } from '../ui/PageHeader';
 import { plural, signed } from '../ui/format';
@@ -64,18 +65,12 @@ export function ImportPage() {
   };
 
   const drillLeaks = async () => {
-    const scheduler = createScheduler();
-    const now = new Date();
-    for (const l of leaks.slice(0, 50)) {
-      const chartId = chartIdForSeat(l.seat);
-      if (!chartId) continue;
-      const id = `recall:${chartId}:${l.hand}`;
-      if (await db.cards.get(id)) {
-        await db.cards.update(id, { due: now });
-        continue;
-      }
-      await db.cards.put({ id, chartId, mode: 'quick', hand: l.hand, targetMs: RECALL_TARGET_MS, fsrs: scheduler.newCard(now), due: now, createdAt: now });
-    }
+    await addHandsToReview(
+      leaks.slice(0, 50).flatMap((l) => {
+        const chartId = chartIdForSeat(l.seat);
+        return chartId ? [{ chartId, hand: l.hand }] : [];
+      }),
+    );
     setDrilled(true);
     haptic('success');
   };

@@ -9,6 +9,7 @@ import {
   dayKey,
   deckForCharts,
   type DrillOutcome,
+  RECALL_TARGET_MS,
   selectQueue,
   studyStreak,
 } from '@felt/core';
@@ -25,6 +26,18 @@ const scheduler = createScheduler();
 
 /** Cards due again within this window come back later in the same session. */
 export const RELEARN_WINDOW_MS = 15 * 60 * 1000;
+
+/**
+ * Puts chart hands at the front of the review queue: new recall cards for
+ * hands not yet in the deck, and existing cards made due now.
+ */
+export async function addHandsToReview(items: readonly { chartId: string; hand: string }[], now = new Date()) {
+  for (const { chartId, hand } of items) {
+    const id = `recall:${chartId}:${hand}`;
+    if (await db.cards.get(id)) await db.cards.update(id, { due: now });
+    else await db.cards.put({ id, chartId, mode: 'quick', hand, targetMs: RECALL_TARGET_MS, fsrs: scheduler.newCard(now), due: now, createdAt: now });
+  }
+}
 
 export interface QueueItem {
   id: string;

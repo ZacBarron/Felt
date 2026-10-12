@@ -85,7 +85,7 @@ export function SavedPage() {
 
   return (
     <div className="stack" style={{ gap: '1.4rem' }}>
-      <PageHeader title="Saved" subtitle={items.length ? `${items.length} saved, ${due} ready to review` : undefined} />
+      <PageHeader title="Saved" back={{ to: '/more', label: 'More' }} subtitle={items.length ? `${items.length} saved, ${due} ready to review` : undefined} />
 
       {items.length === 0 ? (
         <div className="card stack" style={{ alignItems: 'center', textAlign: 'center', padding: '2.2rem 1.25rem', gap: '0.8rem' }}>

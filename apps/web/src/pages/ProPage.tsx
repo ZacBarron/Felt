@@ -1,23 +1,24 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { haptic } from '../haptics';
-import { annualSavings, formatPrice, isPro, PLANS, type PlanOption, purchase, restorePurchases } from '../state/access';
-import { goalCopy } from '../state/goals';
+import { annualSavings, formatPrice, isLessonFree, isPro, PLANS, type PlanOption, purchase, restorePurchases } from '../state/access';
+import { track } from '../state/events';
 import { LESSON_ENTRIES } from '../state/lessons';
+import { trialReminder } from '../state/reminders';
 import { useSettings } from '../state/settings';
 import { BrandMark, HeroPattern } from '../ui/Brand';
 import { BottomBar } from '../ui/BottomBar';
-import { BellIcon, CheckIcon, CloseIcon, LearnIcon, LockIcon, ReviewIcon, SkipIcon, SolverIcon, StatsIcon } from '../ui/icons';
+import { BellIcon, CheckIcon, CloseIcon, LearnIcon, LockIcon, SolverIcon, StatsIcon } from '../ui/icons';
 import { useBodyClass } from '../ui/useBodyClass';
 
-const LESSON_COUNT = LESSON_ENTRIES.filter((e) => e.content).length;
+const WRITTEN = LESSON_ENTRIES.filter((e) => e.content);
+const PRO_LESSONS = WRITTEN.filter((e) => !isLessonFree(e.key)).length;
 
+/** Only what Pro adds. Test outs, review, drills, the daily challenge and imports are free for everyone. */
 const BENEFITS = [
-  { icon: LearnIcon, title: `All ${LESSON_COUNT} lessons`, note: 'Math, preflop, postflop, river play, exploits and tournaments' },
-  { icon: SolverIcon, title: 'Felt Solver', note: 'Solve your own river and turn spots, combo by combo' },
-  { icon: SkipIcon, title: 'Skip what you know', note: 'Test out of any module and go straight to your gaps' },
-  { icon: ReviewIcon, title: 'Every chart in spaced review', note: 'Drills built from the edges of each range' },
-  { icon: StatsIcon, title: 'New lessons and tools as they ship', note: 'Session tracking and hand review are next' },
+  { icon: LearnIcon, title: `${PRO_LESSONS} more lessons`, note: `Every one of the ${WRITTEN.length}, from postflop and river play to exploits and tournaments` },
+  { icon: SolverIcon, title: 'Solve your own spots', note: 'Any board, ranges, pot and stack in Felt Solver' },
+  { icon: StatsIcon, title: 'Everything added later', note: 'New lessons and tools come with the subscription' },
 ];
 
 function perMonth(plan: PlanOption) {
@@ -28,37 +29,53 @@ function dateIn(days: number) {
   return new Date(Date.now() + days * 86_400_000).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
 }
 
+const HEADLINES: Record<string, string> = {
+  onboarding: 'Add every lesson to your plan',
+  lesson: 'This lesson is part of Felt Pro',
+  check: 'Unlock the lessons you need',
+  solver: 'Solve your own spots',
+};
+
 /**
- * The Felt Pro paywall. Honest by design: the price, the trial length and
- * the day you will be charged are all on screen before you tap, and closing
- * is always one tap away.
+ * The Felt Pro paywall. Honest by design: the plans and price come first,
+ * the charge date sits next to the button, declining is as easy as buying,
+ * and the benefits list only what Pro adds.
  */
 export function ProPage() {
   useBodyClass('focus-mode');
   const navigate = useNavigate();
   const [params] = useSearchParams();
-  const from = params.get('from');
+  const from = params.get('from') ?? 'direct';
   const { settings, update } = useSettings();
   const [planId, setPlanId] = useState<PlanOption['id']>('annual');
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string>();
   const plan = PLANS.find((p) => p.id === planId)!;
-  const goal = goalCopy(settings.profile.goal);
-  const close = () => (from === 'onboarding' ? navigate('/', { replace: true }) : navigate(-1));
+  const close = () => {
+    track('paywall_dismissed', { from });
+    if (from === 'onboarding') navigate('/', { replace: true });
+    else navigate(-1);
+  };
+
+  useEffect(() => {
+    track('paywall_viewed', { from });
+  }, [from]);
 
   if (isPro(settings.access)) {
+    const trialEnds = settings.access.trialEndsAt;
     return (
       <div className="stack focus-column lesson-done">
         <div className="hero pro-hero reveal">
           <HeroPattern />
           <BrandMark size={52} />
           <h1 className="display pro-title">You have Felt Pro</h1>
-          <p className="pro-sub">
-            {settings.access.trialEndsAt
-              ? `Your free trial runs until ${new Date(settings.access.trialEndsAt).toLocaleDateString()}.`
-              : 'Every lesson and tool is unlocked.'}
-          </p>
+          <p className="pro-sub">{trialEnds ? `Your free trial runs until ${new Date(trialEnds).toLocaleDateString()}.` : 'Every lesson and tool is unlocked.'}</p>
         </div>
+        {trialEnds && (
+          <button className="btn btn-tinted btn-block" onClick={() => trialReminder(trialEnds)}>
+            <BellIcon size={18} /> Add a reminder 2 days before the trial ends
+          </button>
+        )}
         <BottomBar>
           <Link to="/learn" className="btn btn-primary btn-lg btn-block">
             Keep learning
@@ -69,10 +86,12 @@ export function ProPage() {
   }
 
   const buy = async () => {
+    track('paywall_cta_tapped', { from, plan: plan.id });
     setBusy(true);
     setMessage(undefined);
     const result = await purchase(plan, settings);
     setBusy(false);
+    track('purchase_result', { plan: plan.id, ok: result.ok });
     if (!result.ok) {
       haptic('warning');
       setMessage(result.reason);
@@ -80,7 +99,6 @@ export function ProPage() {
     }
     haptic('success');
     update({ ...settings, access: result.access });
-    navigate(from === 'onboarding' ? '/' : -1 as unknown as string, { replace: from === 'onboarding' });
   };
 
   const restore = async () => {
@@ -99,30 +117,9 @@ export function ProPage() {
 
       <div className="hero pro-hero reveal">
         <HeroPattern />
-        <BrandMark size={52} />
+        <BrandMark size={44} />
         <div className="hero-label">Felt Pro</div>
-        <h1 className="display pro-title">
-          {from === 'check'
-            ? 'Unlock the lessons you need'
-            : goal && from === 'onboarding'
-              ? `Your plan to ${goal.plan} is ready`
-              : 'Train every spot, every street'}
-        </h1>
-        <p className="pro-sub">Built on exact math and solver checked strategy, in short sessions that fit your day.</p>
-      </div>
-
-      <div className="list pro-benefits">
-        {BENEFITS.map(({ icon: Icon, title, note }, i) => (
-          <div key={title} className="list-row reveal" style={{ animationDelay: `${80 + i * 50}ms` }}>
-            <span className="pro-benefit-icon">
-              <Icon size={20} />
-            </span>
-            <span className="grow">
-              <span style={{ display: 'block', fontWeight: 600 }}>{title}</span>
-              <span className="footnote">{note}</span>
-            </span>
-          </div>
-        ))}
+        <h1 className="display pro-title">{HEADLINES[from] ?? 'Train every spot, every street'}</h1>
       </div>
 
       <div className="plan-options" role="radiogroup" aria-label="Choose a plan">
@@ -136,7 +133,9 @@ export function ProPage() {
             onClick={() => setPlanId(p.id)}
           >
             {p.id === 'annual' && <span className="plan-badge">Save {annualSavings()}%</span>}
-            <span className="plan-radio">{p.id === planId && <CheckIcon size={14} />}</span>
+            <span className="plan-radio" aria-hidden="true">
+              {p.id === planId && <CheckIcon size={14} />}
+            </span>
             <span className="grow">
               <span className="plan-label">{p.label}</span>
               <span className="footnote">
@@ -152,12 +151,29 @@ export function ProPage() {
         ))}
       </div>
 
+      <div className="list pro-benefits">
+        {BENEFITS.map(({ icon: Icon, title, note }) => (
+          <div key={title} className="list-row">
+            <span className="pro-benefit-icon" aria-hidden="true">
+              <Icon size={20} />
+            </span>
+            <span className="grow">
+              <span style={{ display: 'block', fontWeight: 600 }}>{title}</span>
+              <span className="footnote">{note}</span>
+            </span>
+          </div>
+        ))}
+      </div>
+      <p className="footnote pro-free-note">
+        Always free: the daily challenge, review and drills, placement and test outs, saves, imports, and the first topic of every track.
+      </p>
+
       {plan.trialDays > 0 && (
         <section>
-          <h2 className="section-title">How your trial works</h2>
+          <h2 className="section-title">How the trial works</h2>
           <div className="trial-timeline card">
             <div className="trial-step">
-              <span className="trial-dot">
+              <span className="trial-dot" aria-hidden="true">
                 <LockIcon size={14} />
               </span>
               <div>
@@ -166,42 +182,35 @@ export function ProPage() {
               </div>
             </div>
             <div className="trial-step">
-              <span className="trial-dot">
+              <span className="trial-dot" aria-hidden="true">
                 <BellIcon size={14} />
               </span>
               <div>
                 <strong>{dateIn(plan.trialDays - 2)}</strong>
-                <div className="footnote">We remind you that your trial is ending.</div>
+                <div className="footnote">Two days left. After you start, you can add a calendar reminder for this day.</div>
               </div>
             </div>
             <div className="trial-step">
-              <span className="trial-dot">
+              <span className="trial-dot" aria-hidden="true">
                 <CheckIcon size={14} />
               </span>
               <div>
                 <strong>{dateIn(plan.trialDays)}</strong>
-                <div className="footnote">
-                  You are charged {formatPrice(plan.price)}. Cancel before then and you pay nothing.
-                </div>
+                <div className="footnote">You are charged {formatPrice(plan.price)}. Cancel before then and you pay nothing.</div>
               </div>
             </div>
           </div>
         </section>
       )}
 
-      {message && <div className="explain bad reveal">{message}</div>}
-
-      {from === 'onboarding' && (
-        <button className="btn btn-plain btn-block pro-later" onClick={close}>
-          Continue with the free plan
-        </button>
+      {message && (
+        <div className="explain bad reveal" role="alert">
+          {message}
+        </div>
       )}
 
       <p className="footnote pro-fine">
-        {plan.trialDays > 0
-          ? `Free for ${plan.trialDays} days, then ${formatPrice(plan.price)} a year. `
-          : `${formatPrice(plan.price)} a month. `}
-        Renews automatically until you cancel. Cancel anytime in your account settings.
+        Renews automatically until you cancel. Cancel any time in the store you subscribed through.
         <br />
         <button className="link-btn" onClick={restore}>
           Restore purchases
@@ -217,8 +226,16 @@ export function ProPage() {
       </p>
 
       <BottomBar>
+        <div className="pro-cta-price footnote">
+          {plan.trialDays > 0
+            ? `${plan.trialDays} days free, then ${formatPrice(plan.price)} a year (${formatPrice(perMonth(plan))}/mo). Charged ${dateIn(plan.trialDays)}.`
+            : `${formatPrice(plan.price)} a month. Cancel any time.`}
+        </div>
         <button className="btn btn-primary btn-lg btn-block" onClick={buy} disabled={busy} data-haptic="off">
           {busy ? 'One moment' : plan.trialDays > 0 ? `Start ${plan.trialDays} day free trial` : `Subscribe for ${formatPrice(plan.price)} a month`}
+        </button>
+        <button className="btn btn-plain btn-block pro-later" onClick={close}>
+          {from === 'onboarding' ? 'Continue with the free plan' : 'Not now'}
         </button>
       </BottomBar>
     </div>

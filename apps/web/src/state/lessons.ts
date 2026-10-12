@@ -103,7 +103,8 @@ export function recommendedLessons(
     .filter((e) => progress.get(e.key)?.status === 'started')
     .sort((a, b) => progress.get(b.key)!.updatedAt.getTime() - progress.get(a.key)!.updatedAt.getTime());
   const placed = open.filter((e) => moduleOf(e.key) === prefs.placedAt);
-  const focus = open.filter((e) => prefs.focus?.includes(moduleOf(e.key)));
+  // Focus modules in the order given: the player's own picks first, then their goal's.
+  const focus = (prefs.focus ?? []).flatMap((m) => open.filter((e) => moduleOf(e.key) === m));
   const seen = new Set<string>();
   return [...started, ...placed, ...focus, ...open].filter((e) => !seen.has(e.key) && seen.add(e.key));
 }
@@ -119,7 +120,7 @@ export function pickNextLesson(
 
 /**
  * Minutes studied today: review time as measured, plus each lesson finished
- * today at its listed length. Lessons skipped by a test out count a minute each.
+ * today at its listed length. Lessons tested out of do not count: no time was spent.
  */
 export async function studyMinutesToday(now = new Date()): Promise<number> {
   const start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -127,7 +128,7 @@ export async function studyMinutesToday(now = new Date()): Promise<number> {
   const lessons = await db.lessons.where('updatedAt').aboveOrEqual(start).toArray();
   const reviewMinutes = reviews.reduce((m, r) => m + r.responseMs, 0) / 60_000;
   const lessonMinutes = lessons.reduce(
-    (m, l) => m + (l.status === 'done' ? (entryFor(l.key)?.content?.minutes ?? 0) : l.status === 'tested' ? 1 : 0),
+    (m, l) => m + (l.status === 'done' ? (entryFor(l.key)?.content?.minutes ?? 0) : 0),
     0,
   );
   return reviewMinutes + lessonMinutes;

@@ -25,20 +25,15 @@ export const FOCUS: { id: Focus; label: string; module: string }[] = [
   { id: 'mental', label: 'Tilt and mindset', module: 'mindset/mental' },
 ];
 
-export const DAILY_OPTIONS: { minutes: number; label: string }[] = [
-  { minutes: 5, label: 'Casual' },
-  { minutes: 10, label: 'Regular' },
-  { minutes: 15, label: 'Serious' },
-  { minutes: 20, label: 'Intense' },
-];
+export const DAILY_OPTIONS: { minutes: number }[] = [{ minutes: 5 }, { minutes: 10 }, { minutes: 15 }, { minutes: 20 }];
 
 /** Study cues for an if-then plan: "When I ..., I will study". */
-export const CUES: { id: string; label: string; phrase: string }[] = [
-  { id: 'coffee', label: 'With my morning coffee', phrase: 'have my morning coffee' },
-  { id: 'commute', label: 'On my commute', phrase: 'start my commute' },
-  { id: 'lunch', label: 'On my lunch break', phrase: 'take my lunch break' },
-  { id: 'before-play', label: 'Before I play', phrase: 'sit down to play' },
-  { id: 'evening', label: 'In the evening', phrase: 'wind down in the evening' },
+export const CUES: { id: string; label: string; phrase: string; time: [number, number] }[] = [
+  { id: 'coffee', label: 'With my morning coffee', phrase: 'have my morning coffee', time: [8, 0] },
+  { id: 'commute', label: 'On my commute', phrase: 'start my commute', time: [8, 30] },
+  { id: 'lunch', label: 'On my lunch break', phrase: 'take my lunch break', time: [12, 30] },
+  { id: 'before-play', label: 'Before I play', phrase: 'sit down to play', time: [18, 0] },
+  { id: 'evening', label: 'In the evening', phrase: 'wind down in the evening', time: [21, 0] },
 ];
 
 export const cueCopy = (id?: string) => CUES.find((c) => c.id === id);
@@ -47,10 +42,19 @@ export function goalCopy(goal?: Goal) {
   return GOALS.find((g) => g.id === goal);
 }
 
-/** Path preferences from a profile, for ordering lessons. */
+/** Modules each goal brings forward in the path. */
+export const GOAL_MODULES: Record<Goal, string[]> = {
+  'win-live': ['preflop/live-preflop', 'exploit/adjustments'],
+  'move-up': ['preflop/3bet-pots', 'postflop/river'],
+  'go-pro': ['postflop/later-streets', 'exploit/profiling'],
+  'master-gto': ['foundations/theory', 'foundations/ranges'],
+  tournaments: ['tournaments/mtt-basics'],
+};
+
+/** Path preferences from a profile: focus areas first, then the modules the goal needs. */
 export function pathPrefs(profile: Profile) {
   return {
     placedAt: profile.placedAt && profile.placedAt !== 'all' ? profile.placedAt : undefined,
-    focus: FOCUS.filter((f) => profile.focus.includes(f.id)).map((f) => f.module),
+    focus: [...FOCUS.filter((f) => profile.focus.includes(f.id)).map((f) => f.module), ...(profile.goal ? GOAL_MODULES[profile.goal] : [])],
   };
 }

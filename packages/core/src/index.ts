@@ -15,3 +15,4 @@ export * from './winrate';
 export * from './habits';
 export * from './handhistory';
 export * from './sessions';
+export * from './calendar';

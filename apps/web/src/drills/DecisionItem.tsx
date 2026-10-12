@@ -1,6 +1,7 @@
 import { type Chart, chartItemDifficulty, type DrillOutcome } from '@felt/core';
 import { useState } from 'react';
 import { StepView } from '../lesson/StepView';
+import { isLessonFree } from '../state/access';
 import { getChart } from '../state/charts';
 import type { StoredAnswer } from '../state/db';
 import { LESSON_ENTRIES } from '../state/lessons';
@@ -57,6 +58,7 @@ export function DecisionItem({ decision, source, last, onScore, onNext }: Props)
       <div className="lesson-stage from-right">
         <div className="footnote" style={{ marginBottom: '0.4rem' }}>
           {entry.trackTitle}, {entry.title}
+          {!isLessonFree(entry.key) && <span className="pill pro-pill">Pro lesson</span>}
         </div>
         <StepView
           step={step}

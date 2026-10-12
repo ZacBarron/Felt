@@ -97,12 +97,22 @@ export interface StoredSession {
   importedAt: Date;
 }
 
-/** A finished daily challenge. */
+/** A product event, kept on this device for measuring what works. Nothing is uploaded. */
+export interface StoredEvent {
+  id?: number;
+  at: Date;
+  name: string;
+  props?: Record<string, string | number | boolean | undefined>;
+}
+
+/** A daily challenge, saved after every answer so it cannot be restarted. */
 export interface StoredDaily {
   /** Challenge number. */
   number: number;
   at: Date;
   scores: number[];
+  /** False while answers are still coming in. */
+  finished?: boolean;
   ratingBefore: number;
   ratingAfter: number;
 }
@@ -138,6 +148,7 @@ export const db = new Dexie('felt') as Dexie & {
   daily: EntityTable<StoredDaily, 'number'>;
   hands: EntityTable<StoredHand, 'id'>;
   sessions: EntityTable<StoredSession, 'id'>;
+  events: EntityTable<StoredEvent, 'id'>;
 };
 
 db.version(1).stores({
@@ -161,4 +172,8 @@ db.version(4).stores({
 db.version(5).stores({
   hands: 'id, at, game, position',
   sessions: '++id, date, importedAt',
+});
+
+db.version(6).stores({
+  events: '++id, at, name',
 });

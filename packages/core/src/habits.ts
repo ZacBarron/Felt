@@ -21,9 +21,11 @@ export interface StreakRules {
   /** One freeze is earned for every this many active days in a row. */
   earnEvery: number;
   maxBank: number;
+  /** Freezes a new player starts with, so one early miss does not end a young habit. */
+  startBank: number;
 }
 
-export const STREAK_RULES: StreakRules = { earnEvery: 7, maxBank: 2 };
+export const STREAK_RULES: StreakRules = { earnEvery: 7, maxBank: 2, startBank: 1 };
 
 /**
  * Replays study days from the first one to today. A missed day spends a
@@ -33,13 +35,13 @@ export const STREAK_RULES: StreakRules = { earnEvery: 7, maxBank: 2 };
 export function streakWithFreezes(activeDays: readonly Date[], now: Date, rules: StreakRules = STREAK_RULES): StreakState {
   const days = new Set(activeDays.map(dayKey));
   const activeToday = days.has(dayKey(now));
-  if (days.size === 0) return { streak: 0, frozen: [], bank: 0, activeToday, best: 0 };
+  if (days.size === 0) return { streak: 0, frozen: [], bank: rules.startBank, activeToday, best: 0 };
   const first = new Date(Math.min(...activeDays.map((d) => d.getTime())));
   const cursor = new Date(first.getFullYear(), first.getMonth(), first.getDate());
   const end = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   let streak = 0;
   let run = 0;
-  let bank = 0;
+  let bank = rules.startBank;
   let best = 0;
   let frozen: string[] = [];
   while (cursor <= end) {

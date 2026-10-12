@@ -6,15 +6,15 @@ import { MasteryGrid } from '../components/MasteryGrid';
 import { PlayingCard } from '../components/PlayingCard';
 import { canOpenLesson } from '../state/access';
 import { chartsForGame, getChart } from '../state/charts';
-import type { StoredLesson } from '../state/db';
+import { db, type StoredLesson } from '../state/db';
 import { cueCopy, goalCopy, pathPrefs } from '../state/goals';
-import { lessonPath, lessonProgress, pickNextLesson, studyMinutesToday } from '../state/lessons';
+import { lessonPath, lessonProgress, pickNextLesson } from '../state/lessons';
 import { ratingSnapshot, streakNow } from '../state/rating';
-import { db } from '../state/db';
 import { buildQueue, masteryForCharts, todayStats } from '../state/review';
 import { useSettings } from '../state/settings';
 import { HeroPattern } from '../ui/Brand';
-import { CheckIcon, ChevronRightIcon, FlameIcon } from '../ui/icons';
+import { plural } from '../ui/format';
+import { CheckIcon, ChevronRightIcon, FlameIcon, ReviewIcon } from '../ui/icons';
 import { PageHeader } from '../ui/PageHeader';
 import { ProgressRing } from '../ui/ProgressRing';
 import { useCountUp } from '../ui/useCountUp';
@@ -38,16 +38,13 @@ export function DashboardPage() {
     return [...q.due, ...q.fresh][0] ?? null;
   }, deps);
   const mastery = useLiveQuery(() => masteryForCharts(charts), deps);
-  const studied = useLiveQuery(() => studyMinutesToday(), [], 0);
   const progress = useLiveQuery(lessonProgress, [], new Map<string, StoredLesson>());
   const nextLesson = pickNextLesson(progress, (key) => canOpenLesson(key, settings.access), pathPrefs(settings.profile));
-  const goal = settings.profile.dailyMinutes;
   const dailyDone = useLiveQuery(() => db.daily.get(challengeNumber(new Date())), []);
   const streak = useLiveQuery(() => streakNow(), []);
   const rating = useLiveQuery(async () => currentRating((await ratingSnapshot()).overall), []);
 
   const remaining = stats ? stats.dueNow + stats.newAvailable : 0;
-  const total = stats ? stats.reviewedToday + remaining : 0;
   const shownRemaining = Math.round(useCountUp(remaining));
   const minutes = Math.max(1, Math.round((remaining * 6) / 60));
   const date = new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' });
@@ -55,12 +52,26 @@ export function DashboardPage() {
   const nextChart = next ? getChart(next.chartId) : undefined;
   const heroRange = focus ? new Set(actionRange(focus.chart, focus.chart.spec.actions[0].id).keys()) : undefined;
   const idea = ideaForDay(new Date());
-  const quests = [
-    { done: !!dailyDone, label: 'Daily challenge', to: '/daily', detail: dailyDone ? `${dailyDone.scores.filter((x) => x >= 1).length}/5` : '5 decisions' },
-    { done: studied >= goal, label: `Study ${goal} minutes`, to: nextLesson ? lessonPath(nextLesson.key) : '/learn', detail: `${Math.floor(studied)} of ${goal}` },
-    { done: !!stats && remaining === 0 && stats.reviewedToday > 0, label: 'Clear your review', to: '/review', detail: stats ? `${remaining} left` : '' },
-  ];
-  const questsDone = quests.filter((q) => q.done).length;
+  const lessonToday = [...progress.values()].some((l) => l.status === 'done' && l.updatedAt >= new Date(new Date().setHours(0, 0, 0, 0)));
+  const reviewDone = !!stats && remaining === 0;
+  const tasks = [
+    nextLesson && {
+      done: lessonToday,
+      label: lessonToday ? 'Lesson done' : `Lesson: ${nextLesson.title}`,
+      to: lessonPath(nextLesson.key),
+      detail: lessonToday ? '' : `${nextLesson.content?.minutes ?? 5} min`,
+    },
+    {
+      done: reviewDone,
+      label: 'Review',
+      to: reviewDone ? '/practice' : '/review',
+      detail: !stats ? '' : reviewDone ? (stats.reviewedToday ? 'Cleared' : 'Nothing due') : plural(remaining, 'card'),
+    },
+    { done: !!dailyDone?.finished || (!!dailyDone && dailyDone.finished === undefined), label: 'Daily challenge', to: '/daily', detail: !dailyDone ? '5 decisions' : dailyDone.finished === false ? `${dailyDone.scores.length} of 5 done` : `${dailyDone.scores.filter((x) => x >= 1).length}/5 right` },
+  ].filter(Boolean) as { done: boolean; label: string; to: string; detail: string }[];
+  const tasksDone = tasks.filter((t) => t.done).length;
+  const touchedCharts = mastery?.filter((m) => m.solid + m.learning > 0) ?? [];
+  const nowLearning = touchedCharts.find((m) => m.solid < m.total) ?? touchedCharts[0];
 
   return (
     <div className="stack" style={{ gap: '1.6rem' }}>
@@ -74,86 +85,119 @@ export function DashboardPage() {
         }
       />
 
-      <section className="hero">
-        <HeroPattern mixes={heroRange} />
-        <div className="hero-body">
-          <div className="hero-copy">
-            <div className="hero-label">Daily review</div>
-            {stats && remaining === 0 ? (
-              <div className="display" style={{ fontSize: '2.5rem', lineHeight: 1.02, marginTop: 6 }}>
-                All caught up
+      {nextLesson?.content && !lessonToday ? (
+        <Link to={lessonPath(nextLesson.key)} className="hero learn-hero">
+          <HeroPattern mixes={heroRange} />
+          <div className="learn-hero-body">
+            <div style={{ minWidth: 0 }}>
+              <div className="hero-label">{progress.get(nextLesson.key)?.status === 'started' ? 'Continue your plan' : 'Next in your plan'}</div>
+              <div className="display learn-hero-title">{nextLesson.title}</div>
+              <div className="hero-sub">
+                {nextLesson.moduleTitle}, {nextLesson.content.minutes} min
               </div>
-            ) : (
-              <>
-                <div className="display num" style={{ fontSize: '4.5rem', lineHeight: 0.95, marginTop: 4 }}>
-                  {stats ? shownRemaining : ''}
+            </div>
+          </div>
+          <span className="btn btn-lg btn-block btn-hero">{progress.get(nextLesson.key)?.status === 'started' ? 'Continue lesson' : 'Start lesson'}</span>
+        </Link>
+      ) : (
+        <section className="hero">
+          <HeroPattern mixes={heroRange} />
+          <div className="hero-body">
+            <div className="hero-copy">
+              <div className="hero-label">Review</div>
+              {stats && remaining === 0 ? (
+                <div className="display" style={{ fontSize: '2.5rem', lineHeight: 1.02, marginTop: 6 }}>
+                  All caught up
                 </div>
-                <div className="hero-sub">
-                  {remaining === 1 ? 'card' : 'cards'}, about {minutes} min
+              ) : (
+                <>
+                  <div className="display num" style={{ fontSize: '4.5rem', lineHeight: 0.95, marginTop: 4 }}>
+                    {stats ? shownRemaining : ''}
+                  </div>
+                  <div className="hero-sub">
+                    {remaining === 1 ? 'card' : 'cards'}, about {minutes} min
+                  </div>
+                </>
+              )}
+            </div>
+            {next && nextChart && remaining > 0 && (
+              <div className="up-next" aria-hidden="true">
+                <div className="fan">
+                  {next.mode === 'quick' && next.hand ? (
+                    previewCombo(next.id, next.hand).map((c, i) => <PlayingCard key={c} card={c} size="md" deal delayMs={200 + i * 90} />)
+                  ) : (
+                    <>
+                      <PlayingCard size="md" deal delayMs={200} />
+                      <PlayingCard size="md" deal delayMs={290} />
+                    </>
+                  )}
                 </div>
-              </>
-            )}
-            {total > 0 && (
-              <div className="hero-progress" aria-label={`${stats?.reviewedToday} of ${total} done`}>
-                <span style={{ width: `${((stats?.reviewedToday ?? 0) / total) * 100}%` }} />
+                <div className="hero-sub" style={{ textAlign: 'center' }}>
+                  Up next: {nextChart.spec.hero}
+                </div>
               </div>
             )}
           </div>
-
-          {next && nextChart && remaining > 0 && (
-            <div className="up-next">
-              <div className="fan">
-                {next.mode === 'quick' && next.hand ? (
-                  previewCombo(next.id, next.hand).map((c, i) => <PlayingCard key={c} card={c} size="md" deal delayMs={200 + i * 90} />)
-                ) : (
-                  <>
-                    <PlayingCard size="md" deal delayMs={200} />
-                    <PlayingCard size="md" deal delayMs={290} />
-                  </>
-                )}
-              </div>
-              <div className="hero-sub" style={{ textAlign: 'center' }}>
-                Up next: {nextChart.spec.hero}
-              </div>
-            </div>
+          {remaining > 0 ? (
+            <Link to="/review" className="btn btn-lg btn-block btn-hero">
+              Start review
+            </Link>
+          ) : (
+            <Link to="/practice" className="btn btn-lg btn-block btn-hero-ghost">
+              Practice at your level
+            </Link>
           )}
-        </div>
-        {remaining > 0 ? (
-          <Link to="/review" className="btn btn-lg btn-block btn-hero">
-            Start review
-          </Link>
-        ) : (
-          <Link to="/drills" className="btn btn-lg btn-block btn-hero-ghost">
-            Free practice
-          </Link>
-        )}
-      </section>
+        </section>
+      )}
 
-      <section className="card quests reveal">
+      <section className="card quests reveal" aria-labelledby="today-plan">
         <div className="quests-head">
-          <ProgressRing value={questsDone / quests.length} size={52} stroke={6}>
-            {questsDone === quests.length ? <CheckIcon size={20} style={{ color: 'var(--tint)' }} /> : <span className="num goal-num">{questsDone}/3</span>}
+          <ProgressRing value={tasksDone / tasks.length} size={52} stroke={6} label={`${tasksDone} of ${tasks.length} done`}>
+            {tasksDone === tasks.length ? (
+              <CheckIcon size={20} style={{ color: 'var(--tint)' }} />
+            ) : (
+              <span className="num goal-num">
+                {tasksDone}/{tasks.length}
+              </span>
+            )}
           </ProgressRing>
           <div className="grow">
             <div className="footnote">{cueCopy(settings.profile.cue)?.label ?? goalCopy(settings.profile.goal)?.label ?? 'Today'}</div>
-            <div style={{ fontWeight: 650 }}>{questsDone === quests.length ? 'Perfect day' : "Today's quests"}</div>
+            <div id="today-plan" style={{ fontWeight: 650 }}>
+              {tasksDone === tasks.length ? 'Done for today' : "Today's plan"}
+            </div>
           </div>
           {!!streak?.streak && (
-            <span className="pill pill-tint">
+            <span className="pill pill-tint" aria-label={`${streak.streak} day streak`}>
               <FlameIcon size={12} /> {streak.streak}
-              {streak.bank > 0 && ` · ${streak.bank} freeze${streak.bank > 1 ? 's' : ''}`}
             </span>
           )}
         </div>
-        {quests.map((q) => (
-          <Link key={q.label} to={q.to} className={`quest${q.done ? ' done' : ''}`}>
-            <span className="quest-check">{q.done && <CheckIcon size={13} />}</span>
-            <span className="grow">{q.label}</span>
-            <span className="footnote num">{q.detail}</span>
+        {tasks.map((t) => (
+          <Link key={t.label} to={t.to} className={`quest${t.done ? ' done' : ''}`}>
+            <span className="quest-check" aria-hidden="true">
+              {t.done && <CheckIcon size={13} />}
+            </span>
+            <span className="sr-only">{t.done ? 'Done: ' : 'To do: '}</span>
+            <span className="grow">{t.label}</span>
+            <span className="footnote num">{t.detail}</span>
             <ChevronRightIcon size={14} className="chev" />
           </Link>
         ))}
       </section>
+
+      {nextLesson && !lessonToday && remaining > 0 && (
+        <Link to="/review" className="card placement-card">
+          <span className="placement-icon" aria-hidden="true">
+            <ReviewIcon size={22} />
+          </span>
+          <span className="grow">
+            <span style={{ display: 'block', fontWeight: 650 }}>Review, {plural(remaining, 'card')}</span>
+            <span className="footnote">About {minutes} min. Spaced so you keep what you learn.</span>
+          </span>
+          <ChevronRightIcon size={16} className="chev" />
+        </Link>
+      )}
 
       {stats && stats.reviewedToday > 0 && (
         <section className="reveal">
@@ -161,22 +205,22 @@ export function DashboardPage() {
           <div className="stat-grid three">
             <Stat label="Reviewed" value={stats.reviewedToday} />
             <Stat label="Accuracy" value={Math.round((stats.accuracyToday ?? 0) * 100)} suffix="%" />
-            <Stat label="Recall" value={stats.avgSecondsToday ?? 0} suffix="s" decimals={1} />
+            <Stat label="Avg time" value={stats.avgSecondsToday ?? 0} suffix="s" decimals={1} />
           </div>
         </section>
       )}
 
-      {focus && (
+      {nowLearning && (
         <section>
           <div className="section-title">Now learning</div>
           <Link to="/ranges" className="card focus-card">
-            <MasteryGrid chart={focus.chart} hands={focus.hands} />
+            <MasteryGrid chart={nowLearning.chart} hands={nowLearning.hands} />
             <div className="focus-copy">
               <div className="display" style={{ fontSize: '1.9rem', lineHeight: 1.05 }}>
-                {focus.chart.spec.title}
+                {nowLearning.chart.spec.title}
               </div>
               <div className="footnote" style={{ marginTop: 4 }}>
-                {focus.solid} of {focus.total} edge hands solid
+                {nowLearning.solid} of {nowLearning.total} borderline hands solid
               </div>
               <div className="legend">
                 <span>
@@ -199,11 +243,7 @@ export function DashboardPage() {
           <span className="section-title" style={{ padding: 0 }}>
             Last 7 days
           </span>
-          {!!streak?.streak && (
-            <span className="footnote row" style={{ gap: 4, color: 'var(--tint)', fontWeight: 600 }}>
-              <FlameIcon size={14} /> {streak.streak} day streak{streak.best > streak.streak ? `, best ${streak.best}` : ''}
-            </span>
-          )}
+          {!!streak?.best && streak.best > streak.streak && <span className="footnote num">Best streak {streak.best}</span>}
         </div>
         <div className="card">
           <div className="week">
@@ -220,10 +260,8 @@ export function DashboardPage() {
         {streak && (
           <div className="section-footer">
             {streak.bank > 0
-              ? `You have ${streak.bank} streak ${streak.bank === 1 ? 'freeze' : 'freezes'}. Miss a day and your streak is safe.`
-              : streak.streak > 0
-                ? 'Study seven days in a row to earn a streak freeze. One missed day will not undo a habit.'
-                : 'Any study counts: a lesson, a review card or the daily challenge.'}
+              ? `You have ${streak.bank} streak ${streak.bank === 1 ? 'freeze' : 'freezes'}: each covers one missed day. Seven days in a row earns another.`
+              : 'Study seven days in a row to earn a streak freeze. A freeze covers one missed day.'}
           </div>
         )}
       </section>
@@ -239,18 +277,18 @@ export function DashboardPage() {
         </article>
       </section>
 
-      {mastery && mastery.length > 1 && (
+      {touchedCharts.length > 0 && (
         <section>
           <div className="row between" style={{ padding: '0 1rem 0.4rem' }}>
             <span className="section-title" style={{ padding: 0 }}>
               Your charts
             </span>
             <Link to="/ranges" className="footnote" style={{ color: 'var(--tint)', textDecoration: 'none', fontWeight: 600 }}>
-              All {mastery.length}
+              All {mastery?.length}
             </Link>
           </div>
           <div className="list">
-            {mastery.slice(0, 5).map((m) => {
+            {touchedCharts.slice(0, 5).map((m) => {
               const pct = m.total ? m.solid / m.total : 0;
               const touched = m.total ? (m.solid + m.learning) / m.total : 0;
               return (

@@ -1,10 +1,12 @@
 import { type GameSettings, MAX_TABLE_SIZE, MIN_TABLE_SIZE, positionsFor, PRESETS, stakesLabel } from '@felt/core';
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { haptic, hapticsSupported } from '../haptics';
-import { isPro } from '../state/access';
+import { isPro, restorePurchases } from '../state/access';
 import { db } from '../state/db';
-import { goalCopy } from '../state/goals';
+import { exportEvents } from '../state/events';
+import { cueCopy, goalCopy } from '../state/goals';
+import { studyReminder, trialReminder } from '../state/reminders';
 import { chartsForGame } from '../state/charts';
 import { type Appearance, useSettings } from '../state/settings';
 import { BrandFooter } from '../ui/Brand';
@@ -27,13 +29,21 @@ export function SettingsPage() {
   const access = settings.access;
   const devVisible = access.devMode || import.meta.env.DEV;
   const setAccess = (patch: Partial<typeof access>) => update({ ...settings, access: { ...access, ...patch } });
+  const [restoreMessage, setRestoreMessage] = useState<string>();
+  const restore = async () => {
+    const result = await restorePurchases(settings);
+    if (result.ok) {
+      update({ ...settings, access: result.access });
+      setRestoreMessage('Purchases restored.');
+    } else setRestoreMessage(result.reason);
+  };
 
   return (
     <div className="stack" style={{ gap: '1.6rem' }}>
-      <PageHeader title="Settings" />
+      <PageHeader title="Settings" back={{ to: '/more', label: 'More' }} />
 
       <section>
-        <div className="section-title">Game</div>
+        <h2 className="section-title">Game</h2>
         <div className="list">
           {Object.entries(PRESETS).map(([id, p]) => {
             const active = same(p.settings, g);
@@ -54,7 +64,7 @@ export function SettingsPage() {
       </section>
 
       <section>
-        <div className="section-title">Table</div>
+        <h2 className="section-title">Table</h2>
         <div className="list">
           <Row label="Format">
             <Segmented
@@ -91,7 +101,7 @@ export function SettingsPage() {
       </section>
 
       <section>
-        <div className="section-title">Stakes</div>
+        <h2 className="section-title">Stakes</h2>
         <div className="list">
           <Row label="Show amounts in">
             <Segmented
@@ -118,7 +128,7 @@ export function SettingsPage() {
       </section>
 
       <section>
-        <div className="section-title">Rake</div>
+        <h2 className="section-title">Rake</h2>
         <div className="list">
           <NumberRow
             label="Percent"
@@ -139,15 +149,42 @@ export function SettingsPage() {
       </section>
 
       <section>
-        <div className="section-title">Your plan</div>
+        <h2 className="section-title">Subscription</h2>
         <div className="list">
-          <Link to="/pro" className="list-row">
+          <Link to="/pro?from=settings" className="list-row">
             <span className="grow">
               <span style={{ display: 'block' }}>Felt Pro</span>
-              <span className="footnote">{isPro(access) ? (access.trialEndsAt ? 'Free trial active' : 'Active') : 'Free plan'}</span>
+              <span className="footnote">
+                {!isPro(access)
+                  ? 'Free plan'
+                  : access.trialEndsAt
+                    ? `Free trial until ${new Date(access.trialEndsAt).toLocaleDateString()}`
+                    : 'Active'}
+              </span>
             </span>
             <ChevronRightIcon size={16} className="chev" />
           </Link>
+          {isPro(access) && access.trialEndsAt && (
+            <button className="list-row" onClick={() => trialReminder(access.trialEndsAt!)}>
+              <span className="grow" style={{ color: 'var(--tint)' }}>
+                Remind me 2 days before the trial ends
+              </span>
+            </button>
+          )}
+          <button className="list-row" onClick={() => void restore()}>
+            <span className="grow" style={{ color: 'var(--tint)' }}>
+              Restore purchases
+            </span>
+          </button>
+        </div>
+        <div className="section-footer">
+          {restoreMessage ?? 'Cancel or change your plan in the store you subscribed through. Your progress stays either way.'}
+        </div>
+      </section>
+
+      <section>
+        <h2 className="section-title">Your plan</h2>
+        <div className="list">
           <Row label="Daily goal" hint={goalCopy(settings.profile.goal)?.label}>
             <Stepper
               label="minutes a day"
@@ -159,6 +196,12 @@ export function SettingsPage() {
               onChange={(dailyMinutes) => update({ ...settings, profile: { ...settings.profile, dailyMinutes } })}
             />
           </Row>
+          <button className="list-row" onClick={() => studyReminder(settings.profile.cue, settings.profile.dailyMinutes)}>
+            <span className="grow">
+              <span style={{ display: 'block', color: 'var(--tint)' }}>Add a daily study reminder</span>
+              <span className="footnote">{cueCopy(settings.profile.cue) ? `${cueCopy(settings.profile.cue)!.label}, in your calendar app` : 'Opens in your calendar app'}</span>
+            </span>
+          </button>
           <Link to="/placement" className="list-row">
             <span className="grow">Retake the placement test</span>
             <ChevronRightIcon size={16} className="chev" />
@@ -167,7 +210,7 @@ export function SettingsPage() {
       </section>
 
       <section>
-        <div className="section-title">Study</div>
+        <h2 className="section-title">Study</h2>
         <div className="list">
           <Row label="New cards per day" hint="About 6 seconds each">
             <Stepper
@@ -183,7 +226,7 @@ export function SettingsPage() {
       </section>
 
       <section>
-        <div className="section-title">Theme</div>
+        <h2 className="section-title">Theme</h2>
         <div className="list">
           <ThemePicker value={settings.ui.palette} onChange={(palette) => update({ ...settings, ui: { ...settings.ui, palette } })} />
         </div>
@@ -191,7 +234,7 @@ export function SettingsPage() {
       </section>
 
       <section>
-        <div className="section-title">Display and feel</div>
+        <h2 className="section-title">Display and feel</h2>
         <div className="list">
           <Row label="Appearance">
             <Segmented<Appearance>
@@ -221,7 +264,7 @@ export function SettingsPage() {
 
       {devVisible && (
         <section>
-          <div className="section-title">Developer</div>
+          <h2 className="section-title">Developer</h2>
           <div className="list">
             <Row label="Developer mode" hint="Purchases complete locally without a store">
               <Toggle label="Developer mode" checked={!!access.devMode} onChange={(devMode) => setAccess({ devMode })} />
@@ -247,6 +290,22 @@ export function SettingsPage() {
             >
               <span className="grow" style={{ color: 'var(--tint)' }}>
                 Replay onboarding
+              </span>
+            </button>
+            <button
+              className="list-row"
+              onClick={async () => {
+                const json = await exportEvents();
+                const url = URL.createObjectURL(new Blob([json], { type: 'application/json' }));
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'felt-events.json';
+                a.click();
+                setTimeout(() => URL.revokeObjectURL(url), 1000);
+              }}
+            >
+              <span className="grow" style={{ color: 'var(--tint)' }}>
+                Export event log
               </span>
             </button>
             <button

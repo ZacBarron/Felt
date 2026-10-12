@@ -3,6 +3,7 @@ import {
   boundaryHands,
   challengeNumber,
   chartItemDifficulty,
+  DIFFICULTY,
   dailyPicks,
   shareGrid,
   isProvisional,
@@ -10,41 +11,54 @@ import {
   tierLabel,
 } from '@felt/core';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { chartChoices, type Decision, DecisionItem } from '../drills/DecisionItem';
 import { haptic } from '../haptics';
 import { getChart } from '../state/charts';
 import { db } from '../state/db';
-import { LESSON_ENTRIES, quizSteps } from '../state/lessons';
+import { track } from '../state/events';
+import { LESSON_ENTRIES, lessonPath, quizSteps } from '../state/lessons';
 import { ratingSnapshot, streakNow } from '../state/rating';
+import { addHandsToReview } from '../state/review';
 import { BottomBar } from '../ui/BottomBar';
-import { CloseIcon, FlameIcon } from '../ui/icons';
+import { plural, signed } from '../ui/format';
+import { ChevronRightIcon, CloseIcon, FlameIcon } from '../ui/icons';
 import { ProgressRing } from '../ui/ProgressRing';
 import { useBodyClass } from '../ui/useBodyClass';
 
-type DailyItem = Decision;
+type ChartDecision = Extract<Decision, { kind: 'chart' }> & { difficulty: number };
 
-/** Every edge hand of every 9 handed chart, and every lesson quiz: the same pool for everyone. */
+/** Every rated edge hand of every 9 handed chart, and every lesson quiz: the same pool for everyone. */
 function dailyPool() {
-  // Rated chart decisions: equilibrium charts only, and only hands where some answer is wrong.
-  const charts: DailyItem[] = STARTER_CHARTS.filter((s) => s.tableSize === 9 && s.basis === 'gto').flatMap((spec) => {
+  // Equilibrium charts only, and only hands where some answer is wrong.
+  const charts: ChartDecision[] = STARTER_CHARTS.filter((s) => s.tableSize === 9 && s.basis === 'gto').flatMap((spec) => {
     const chart = getChart(spec.id);
     if (!chart) return [];
-    return boundaryHands(chart)
-      .filter((hand) => chartItemDifficulty(chart.mixes.get(hand) ?? { fold: 1 }, chartChoices(chart)) !== undefined)
-      .map((hand) => ({ kind: 'chart' as const, chartId: spec.id, hand }));
+    return boundaryHands(chart).flatMap((hand) => {
+      const difficulty = chartItemDifficulty(chart.mixes.get(hand) ?? { fold: 1 }, chartChoices(chart));
+      return difficulty === undefined ? [] : [{ kind: 'chart' as const, chartId: spec.id, hand, difficulty }];
+    });
   });
-  const quizzes: DailyItem[] = LESSON_ENTRIES.flatMap((e) => quizSteps(e).map((step) => ({ kind: 'quiz' as const, key: e.key, step })));
+  const quizzes: Decision[] = LESSON_ENTRIES.flatMap((e) => quizSteps(e).map((step) => ({ kind: 'quiz' as const, key: e.key, step })));
   return { charts, quizzes };
 }
 
-/** Three chart decisions and two lesson questions, interleaved. */
-export function dailyItems(date = new Date()): DailyItem[] {
+/**
+ * Three range decisions that get harder (a mixed hand, a near pure edge,
+ * then a paint level hand), with two lesson questions between them.
+ */
+export function dailyItems(date = new Date()): Decision[] {
   const { charts, quizzes } = dailyPool();
-  const c = dailyPicks(charts, date, 3, 1);
+  const bands = [
+    charts.filter((c) => c.difficulty < DIFFICULTY.chartEdge),
+    charts.filter((c) => c.difficulty === DIFFICULTY.chartEdge),
+    charts.filter((c) => c.difficulty > DIFFICULTY.chartEdge),
+  ];
+  const c = bands.map((band, i) => dailyPicks(band.length ? band : charts, date, 1, 10 + i)[0]);
   const q = dailyPicks(quizzes, date, 2, 2);
-  return [c[0], q[0], c[1], q[1], c[2]];
+  const strip = ({ kind, chartId, hand }: ChartDecision): Decision => ({ kind, chartId, hand });
+  return [strip(c[0]), q[0], strip(c[1]), q[1], strip(c[2])];
 }
 
 function timeToTomorrow(now = new Date()) {
@@ -59,11 +73,22 @@ export function shareText(number: number, scores: number[], rating: SkillRating)
   return `Felt Daily #${number} · ${right}/${scores.length}\n${shareGrid(scores)}\nFelt Rating ${shown} (${tierLabel(rating)})`;
 }
 
-function Result({ number, scores, before, after }: { number: number; scores: number[]; before: number; after: number }) {
+function describe(d: Decision) {
+  if (d.kind === 'chart') return { title: d.hand, note: getChart(d.chartId)?.spec.title ?? '' };
+  const entry = LESSON_ENTRIES.find((e) => e.key === d.key);
+  return { title: entry?.title ?? 'Lesson question', note: entry?.trackTitle ?? '' };
+}
+
+const verdict = (s: number) => (s >= 1 ? 'Right' : s > 0 ? 'Partly right' : 'Missed');
+
+function Result({ number, items, scores, before, after }: { number: number; items: Decision[]; scores: number[]; before: number; after: number }) {
   const [copied, setCopied] = useState(false);
+  const [added, setAdded] = useState(false);
   const streak = useLiveQuery(() => streakNow(), []);
+  const snapshot = useLiveQuery(() => ratingSnapshot(), []);
   const right = scores.filter((s) => s >= 1).length;
   const delta = Math.round(after - before);
+  const missedHands = items.flatMap((d, i) => (d.kind === 'chart' && scores[i] < 1 ? [{ chartId: d.chartId, hand: d.hand }] : []));
   const share = async () => {
     const text = shareText(number, scores, (await ratingSnapshot()).overall);
     try {
@@ -77,34 +102,74 @@ function Result({ number, scores, before, after }: { number: number; scores: num
       // The share sheet was dismissed.
     }
   };
+  const addMissed = async () => {
+    await addHandsToReview(missedHands);
+    setAdded(true);
+    haptic('success');
+  };
+  const provisional = snapshot ? isProvisional(snapshot.overall) : true;
   return (
     <div className="stack focus-column lesson-done">
       <div className="card stack reveal daily-result" style={{ alignItems: 'center', textAlign: 'center', gap: '0.9rem' }}>
         <div className="footnote">Felt Daily #{number}</div>
-        <ProgressRing value={right / scores.length} size={116} stroke={11}>
-          <span className="display num" style={{ fontSize: '2.2rem' }}>
+        <ProgressRing value={right / scores.length} size={116} stroke={11} label={`${right} of ${scores.length} right`}>
+          <span className="display num" style={{ fontSize: '2.2rem' }} aria-hidden="true">
             {right}/{scores.length}
           </span>
         </ProgressRing>
-        <div className="daily-grid" aria-label="Your answers">
+        <div className="daily-grid" aria-hidden="true">
           {scores.map((s, i) => (
             <span key={i} className={s >= 1 ? 'good' : s > 0 ? 'mix' : 'bad'} style={{ animationDelay: `${i * 90}ms` }} />
           ))}
         </div>
-        <div className="row" style={{ justifyContent: 'center', gap: '0.5rem' }}>
+        <div className="row" style={{ justifyContent: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
           <span className="pill num">
-            Rating {Math.round(after)} {delta >= 0 ? `+${delta}` : delta}
+            Rating {provisional ? '~' : ''}
+            {Math.round(after)} ({signed(delta)})
           </span>
           {!!streak?.streak && (
             <span className="pill pill-tint">
-              <FlameIcon size={12} /> {streak.streak} day streak
+              <FlameIcon size={12} /> {plural(streak.streak, 'day')}
             </span>
           )}
         </div>
-        <p className="footnote" style={{ margin: 0 }}>
-          Everyone gets the same five decisions today. Next challenge in {timeToTomorrow()}.
-        </p>
       </div>
+
+      <section>
+        <h2 className="section-title">Your decisions</h2>
+        <div className="list">
+          {items.map((d, i) => {
+            const { title, note } = describe(d);
+            const s = scores[i] ?? 0;
+            const row = (
+              <>
+                <span className="grow">
+                  <span style={{ display: 'block', fontWeight: 600 }}>{title}</span>
+                  <span className="footnote">{note}</span>
+                </span>
+                <span className={`pill ${s >= 1 ? 'pill-good' : s > 0 ? 'pill-warn' : 'pill-bad'}`}>{verdict(s)}</span>
+              </>
+            );
+            return d.kind === 'quiz' && s < 1 ? (
+              <Link key={i} to={lessonPath(d.key)} className="list-row">
+                {row}
+                <ChevronRightIcon size={14} className="chev" />
+              </Link>
+            ) : (
+              <div key={i} className="list-row">
+                {row}
+              </div>
+            );
+          })}
+        </div>
+        {missedHands.length > 0 && (
+          <button className="btn btn-tinted btn-block" style={{ marginTop: '0.75rem' }} disabled={added} onClick={() => void addMissed()} data-haptic="off">
+            {added ? 'Added to your review' : `Add ${missedHands.length === 1 ? 'the missed hand' : `${missedHands.length} missed hands`} to your review`}
+          </button>
+        )}
+        <div className="section-footer">Everyone gets the same five decisions today. The next challenge is in {timeToTomorrow()}.</div>
+      </section>
+
       <BottomBar>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
           <Link to="/" className="btn btn-lg glass">
@@ -126,8 +191,8 @@ export function DailyPage() {
   const items = useMemo(() => dailyItems(), []);
   const played = useLiveQuery(() => db.daily.get(number), [number], null);
   const [started, setStarted] = useState(false);
-  const [index, setIndex] = useState(0);
-  const [, setScores] = useState<number[]>([]);
+  const [index, setIndex] = useState<number>();
+  const scores = useRef<number[]>([]);
   const [before, setBefore] = useState<number>();
 
   useEffect(() => {
@@ -135,9 +200,26 @@ export function DailyPage() {
   }, []);
 
   if (played === null || before === undefined) return null;
-  if (played) return <Result number={number} scores={played.scores} before={played.ratingBefore} after={played.ratingAfter} />;
+  // Older saves have no `finished` flag and were only written at the end.
+  if (played && played.finished !== false)
+    return <Result number={number} items={items} scores={played.scores} before={played.ratingBefore} after={played.ratingAfter} />;
+
+  const resumeAt = played?.scores.length ?? 0;
+  const startBefore = played?.ratingBefore ?? before;
+
+  /** Saves after every answer, so leaving halfway keeps your place. */
+  const save = async (finished: boolean) => {
+    const after = (await ratingSnapshot()).overall.rating;
+    await db.daily.put({ number, at: new Date(), scores: [...scores.current], finished, ratingBefore: startBefore, ratingAfter: after });
+  };
 
   if (!started) {
+    const begin = () => {
+      scores.current = [...(played?.scores ?? [])];
+      setIndex(resumeAt);
+      setStarted(true);
+      if (!resumeAt) track('daily_started', { number });
+    };
     return (
       <div className="stack focus-column">
         <div className="focus-top">
@@ -148,54 +230,55 @@ export function DailyPage() {
         <div className="hero daily-hero reveal">
           <div className="hero-label">Felt Daily #{number}</div>
           <h1 className="display pro-title">Five decisions. Same for everyone.</h1>
-          <p className="pro-sub">Three range decisions and two questions from the lessons. Rated, timed for the range decisions, and shareable when you finish.</p>
+          <p className="pro-sub">
+            Three range decisions that get harder, and two questions from the lessons. Every answer counts toward your Felt Rating.
+          </p>
         </div>
         <BottomBar>
-          <button className="btn btn-primary btn-lg btn-block" onClick={() => setStarted(true)}>
-            Start
+          <button className="btn btn-primary btn-lg btn-block" onClick={begin}>
+            {resumeAt ? `Resume, ${resumeAt} of ${items.length} done` : 'Start'}
           </button>
         </BottomBar>
       </div>
     );
   }
 
-  const finish = async (all: number[]) => {
-    const after = (await ratingSnapshot()).overall.rating;
-    await db.daily.put({ number, at: new Date(), scores: all, ratingBefore: before, ratingAfter: after });
-    haptic(all.every((s) => s >= 1) ? 'success' : 'heavy');
-  };
-
-  const item = items[index];
-  const progress = (
-    <div className="focus-top">
-      <button className="icon-btn glass" aria-label="Close" onClick={() => navigate('/')}>
-        <CloseIcon size={18} />
-      </button>
-      <div className="check-bar">
-        <span style={{ width: `${(index / items.length) * 100}%` }} />
-      </div>
-      <span className="footnote num">
-        {index + 1} of {items.length}
-      </span>
-    </div>
-  );
+  const at = index ?? 0;
+  const item = items[at];
+  const last = at + 1 >= items.length;
 
   return (
     <div className="stack focus-column">
-      {progress}
+      <div className="focus-top">
+        <button className="icon-btn glass" aria-label="Close. Your place is saved." onClick={() => navigate('/')}>
+          <CloseIcon size={18} />
+        </button>
+        <div className="check-bar" role="progressbar" aria-valuemin={0} aria-valuemax={items.length} aria-valuenow={at} aria-label="Challenge progress">
+          <span style={{ width: `${(at / items.length) * 100}%` }} />
+        </div>
+        <span className="footnote num">
+          {at + 1} of {items.length}
+        </span>
+      </div>
       <DecisionItem
-        key={index}
+        key={at}
         decision={item}
         source="daily"
-        last={index + 1 >= items.length}
-        onScore={(score) => setScores((s) => [...s, score])}
-        onNext={() => {
+        last={last}
+        onScore={(score) => {
+          scores.current[at] = score;
+          void save(false);
+        }}
+        onNext={async () => {
           window.scrollTo({ top: 0 });
-          setScores((s) => {
-            if (index + 1 >= items.length) void finish(s);
-            return s;
-          });
-          if (index + 1 < items.length) setIndex(index + 1);
+          if (!last) {
+            setIndex(at + 1);
+            return;
+          }
+          await save(true);
+          const all = scores.current;
+          track('daily_finished', { number, right: all.filter((x) => x >= 1).length });
+          haptic(all.every((x) => x >= 1) ? 'success' : 'heavy');
         }}
       />
     </div>

@@ -76,6 +76,12 @@
   --teal: #2a9db0;
   --gray: #8e8a82;
 
+  /* Status colors for small text. The system greens and oranges are for
+     fills and icons; on paper they fall below 4.5:1, so text uses these. */
+  --green-text: #1d7a3e;
+  --red-text: #c2302a;
+  --orange-text: #a85700;
+
   /* Solver action colors. Fold stays neutral. */
   --act-raise: var(--red);
   --act-3bet: var(--purple);
@@ -142,6 +148,9 @@
     --indigo: #7d7af0;
     --teal: #4cc7d9;
     --gray: #8f8b83;
+    --green-text: #3ccf72;
+    --red-text: #ff6b60;
+    --orange-text: #ffa64a;
     --glass-bg: rgba(26, 33, 30, 0.6);
     --glass-edge: rgba(255, 255, 255, 0.16);
     --glass-sheen: rgba(255, 255, 255, 0.06);
@@ -173,6 +182,9 @@
   --pink: #ff5c80;
   --indigo: #7d7af0;
   --teal: #4cc7d9;
+  --green-text: #3ccf72;
+  --red-text: #ff6b60;
+  --orange-text: #ffa64a;
   --gray: #8f8b83;
   --glass-bg: rgba(26, 33, 30, 0.6);
   --glass-edge: rgba(255, 255, 255, 0.16);
@@ -940,12 +952,26 @@ label {
 
 .pill-warn {
   background: color-mix(in srgb, var(--orange) 16%, transparent);
-  color: var(--orange);
+  color: var(--orange-text);
 }
 
 .pill-good {
   background: color-mix(in srgb, var(--green) 16%, transparent);
-  color: var(--green);
+  color: var(--green-text);
+}
+
+.pill-bad {
+  background: color-mix(in srgb, var(--red) 14%, transparent);
+  color: var(--red-text);
+}
+
+.pro-pill {
+  margin-left: 0.4rem;
+  padding: 0.05rem 0.45rem;
+  font-size: 0.68rem;
+  background: color-mix(in srgb, var(--tint) 14%, transparent);
+  color: var(--tint);
+  vertical-align: 1px;
 }
 
 /* Stats */
@@ -3421,4 +3447,113 @@ label.list-row {
   height: 100%;
   border-radius: inherit;
   background: var(--on-felt-accent, var(--accent));
+}
+
+/* Shared helpers added with the polish pass ----------------------------- */
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.green-text {
+  color: var(--green-text);
+}
+
+.red-text {
+  color: var(--red-text);
+}
+
+.orange-text {
+  color: var(--orange-text);
+}
+
+/* Back link above a large title, and its twin in the compact nav bar. */
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.1rem;
+  margin: -2.25rem 0 1.1rem -0.35rem;
+  min-height: 44px;
+  padding-right: 0.5rem;
+  color: var(--tint);
+  font-size: 1rem;
+  text-decoration: none;
+}
+
+.nav-back {
+  position: absolute;
+  left: 0.5rem;
+  bottom: 0;
+  height: 52px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.1rem;
+  padding: 0 0.5rem;
+  color: var(--tint);
+  font-weight: 400;
+  text-decoration: none;
+}
+
+.nav-bar.show .nav-back {
+  pointer-events: auto;
+}
+
+.hold-alt {
+  margin-top: 0.25rem;
+  color: var(--label-2);
+  font-size: 0.95rem;
+}
+
+.pro-free-note {
+  margin: -0.4rem 0 0;
+  padding: 0 0.25rem;
+  text-align: center;
+  line-height: 1.5;
+}
+
+.pro-cta-price {
+  text-align: center;
+  margin-bottom: 0.55rem;
+  color: var(--label-2);
+}
+
+.onb-facts {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.6rem;
+}
+
+.onb-facts li {
+  display: flex;
+  gap: 0.6rem;
+  align-items: flex-start;
+  color: var(--label-2);
+  font-size: 0.95rem;
+}
+
+.onb-facts li svg {
+  flex: none;
+  margin-top: 2px;
+  color: var(--tint);
+}
+
+/* Import: list rows with right aligned number columns. */
+.stat-row {
+  gap: 0.75rem;
+}
+
+.stat-col {
+  flex: none;
+  min-width: 3.6rem;
+  text-align: right;
 }

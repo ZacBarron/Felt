@@ -234,7 +234,7 @@ export function SolverPage() {
 
   return (
     <div className="stack" style={{ gap: '1.4rem' }}>
-      <PageHeader title="Solver" subtitle="An exact equilibrium for the ranges and sizes you choose" />
+      <PageHeader title="Solver" back={{ to: '/more', label: 'More' }} subtitle="An exact equilibrium for the ranges and sizes you choose" />
 
       <section>
         <h2 className="section-title">Spot</h2>

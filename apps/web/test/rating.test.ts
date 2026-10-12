@@ -3,7 +3,10 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { dailyItems, shareText } from '../src/pages/DailyPage';
 import { db } from '../src/state/db';
 import { domainForLesson, ratingSnapshot, recordLessonQuiz, recordRated, streakNow } from '../src/state/rating';
-import { buildQueue, recordAnswer } from '../src/state/review';
+import { chartItemDifficulty } from '@felt/core';
+import { chartChoices } from '../src/drills/DecisionItem';
+import { getChart } from '../src/state/charts';
+import { addHandsToReview, buildQueue, recordAnswer } from '../src/state/review';
 import { saveLessonStep } from '../src/state/saved';
 
 beforeEach(async () => {
@@ -52,6 +55,27 @@ describe('daily challenge', () => {
     const a = dailyItems(new Date(2026, 9, 12, 7));
     expect(dailyItems(new Date(2026, 9, 12, 23))).toEqual(a);
     expect(a.map((i) => i.kind)).toEqual(['chart', 'quiz', 'chart', 'quiz', 'chart']);
+  });
+
+  it('orders the range decisions from easier to harder, every one rated', () => {
+    for (let d = 1; d <= 20; d++) {
+      const levels = dailyItems(new Date(2026, 9, d)).flatMap((i) => {
+        if (i.kind !== 'chart') return [];
+        const chart = getChart(i.chartId)!;
+        return [chartItemDifficulty(chart.mixes.get(i.hand) ?? { fold: 1 }, chartChoices(chart))];
+      });
+      expect(levels.every((x) => x !== undefined)).toBe(true);
+      expect([...levels].sort((x, y) => x! - y!)).toEqual(levels);
+    }
+  });
+
+  it('adds missed hands to the front of review without duplicates', async () => {
+    const now = new Date(2026, 9, 12, 9);
+    await addHandsToReview([{ chartId: 'rfi-9-btn', hand: 'K9o' }], now);
+    await addHandsToReview([{ chartId: 'rfi-9-btn', hand: 'K9o' }], new Date(now.getTime() + 1000));
+    const cards = await db.cards.toArray();
+    expect(cards).toHaveLength(1);
+    expect(cards[0].due.getTime()).toBe(now.getTime() + 1000);
   });
 
   it('shares a spoiler free result', () => {
