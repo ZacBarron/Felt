@@ -27,6 +27,7 @@ Ordered for the main game (live 1/3 cash, 9 handed, on a phone) and so the core 
 - [x] Today page: due, new, streak, accuracy, recall speed
 - [x] Free practice mode that does not touch the schedule
 - [x] Phone layout with a bottom tab bar; installable PWA that works offline
+- [x] UI pass: icons, press states on every control, haptics (Android vibration, iOS switch tick), thumb zone answer buttons, focus mode for review, animated verdicts and score rings, settings with segmented controls, steppers and toggles, keyboard shortcuts on laptops
 - [ ] Lessons for 9 handed opens and BB defense, each linked to its drill cards
 - [ ] Chart editor: enter or paste any chart (range notation) as a `custom` source
 

@@ -1,17 +1,23 @@
 import { DEFAULT_SETTINGS, type GameSettings } from '@felt/core';
 import { createContext, type ReactNode, useContext, useEffect, useState } from 'react';
+import { setHapticsEnabled } from '../haptics';
 
 export interface StudySettings {
   /** New review cards introduced per day. */
   newPerDay: number;
 }
 
+export interface UiSettings {
+  haptics: boolean;
+}
+
 export interface AppSettings {
   game: GameSettings;
   study: StudySettings;
+  ui: UiSettings;
 }
 
-const DEFAULTS: AppSettings = { game: DEFAULT_SETTINGS, study: { newPerDay: 15 } };
+const DEFAULTS: AppSettings = { game: DEFAULT_SETTINGS, study: { newPerDay: 15 }, ui: { haptics: true } };
 const KEY = 'felt.settings.v1';
 
 function load(): AppSettings {
@@ -19,7 +25,11 @@ function load(): AppSettings {
     const raw = localStorage.getItem(KEY);
     if (!raw) return DEFAULTS;
     const saved = JSON.parse(raw) as Partial<AppSettings>;
-    return { game: { ...DEFAULTS.game, ...saved.game }, study: { ...DEFAULTS.study, ...saved.study } };
+    return {
+      game: { ...DEFAULTS.game, ...saved.game },
+      study: { ...DEFAULTS.study, ...saved.study },
+      ui: { ...DEFAULTS.ui, ...saved.ui },
+    };
   } catch {
     return DEFAULTS;
   }
@@ -30,6 +40,7 @@ const SettingsContext = createContext<{ settings: AppSettings; update: (next: Ap
 export function SettingsProvider({ children }: { children: ReactNode }) {
   const [settings, setSettings] = useState<AppSettings>(load);
   useEffect(() => {
+    setHapticsEnabled(settings.ui.haptics);
     try {
       localStorage.setItem(KEY, JSON.stringify(settings));
     } catch {

@@ -18,3 +18,11 @@ Personal poker training app. Read docs/CONCEPT.md and docs/ROADMAP.md before sta
 - Every chart or node carries a `source`. Approximate data must be labelled as such in the UI.
 - Amounts are in big blinds unless a field says otherwise.
 - Writing style for UI copy and docs: plain language, no em dashes.
+
+## UI conventions (apps/web)
+
+- Phone first. Primary actions go in `<BottomBar>` (thumb zone, above the tab bar). Inputs stay at 16px so iOS does not zoom.
+- Every `button` and link gets a press state from `styles.css` and a light haptic from the global listener in `haptics.ts`. Set `data-haptic="select"` for choices, or `data-haptic="off"` when the handler plays its own feedback (`haptic('success' | 'warning' | 'error')`).
+- Never leave a transform on an ancestor of fixed elements: page and reveal animations use `backwards` fill, not `both`.
+- Use the shared primitives in `src/ui/` (Segmented, Chips, Toggle, Stepper, ProgressRing, BottomBar) before writing new controls.
+- Respect `prefers-reduced-motion` (handled globally in `styles.css`).

@@ -17,7 +17,9 @@ import {
   rangeToCombos,
   type StrategyNode,
 } from '@felt/core';
+import { RotateCcw } from 'lucide-react';
 import { useMemo, useState } from 'react';
+import { haptic } from '../haptics';
 import { ActionMixBar } from '../components/ActionMixBar';
 import { PokerTable, type Seat } from '../components/PokerTable';
 import { getChart } from '../state/charts';
@@ -84,6 +86,7 @@ export function LabPage() {
   return (
     <div className="stack">
       <div>
+        <div className="eyebrow">Single raised pot · flop</div>
         <h1>Spot Lab</h1>
         <p className="muted">
           BTN opens 2.5bb, BB calls, BB checks the flop. See the spot, your equity against BB's actual calling range, the pot
@@ -146,7 +149,10 @@ export function LabPage() {
           <h2>Facing a bet</h2>
           <label>
             Villain bets {fmt(bet)} into {fmt(pot)} ({Math.round((bet / pot) * 100)}% pot)
-            <input type="range" min={1} max={15} step={0.5} value={bet} onChange={(e) => setBet(Number(e.target.value))} />
+            <input type="range" min={1} max={15} step={0.5} value={bet} onChange={(e) => {
+                haptic('select');
+                setBet(Number(e.target.value));
+              }} />
           </label>
           <table className="kv">
             <tbody>
@@ -180,14 +186,25 @@ export function LabPage() {
           <h2>Your decision: BB checked to you</h2>
           <p className="muted">Pick an action, then see the GTO mix and the EV of each option. Numbers here are illustrative.</p>
         </div>
-        <ActionMixBar actions={DEMO_NODE.actions} reveal={!!chosen} onChoose={setChosen} chosen={chosen} />
+        <ActionMixBar
+          actions={DEMO_NODE.actions}
+          reveal={!!chosen}
+          chosen={chosen}
+          onChoose={(id) => {
+            const g = gradeDecision(DEMO_NODE, id).grade;
+            haptic(g === 'best' || g === 'correct' ? 'success' : g === 'inaccuracy' ? 'warning' : 'error');
+            setChosen(id);
+          }}
+        />
         {graded && (
           <div className="row">
             <strong className={`grade-${graded.grade}`}>{graded.grade.toUpperCase()}</strong>
             <span className="muted">
               EV loss {graded.evLoss.toFixed(2)}bb ({(graded.evLossPctPot * 100).toFixed(1)}% of pot). Best: {graded.best.label}.
             </span>
-            <button onClick={() => setChosen(undefined)}>Try again</button>
+            <button className="btn btn-ghost" onClick={() => setChosen(undefined)}>
+              <RotateCcw size={16} /> Try again
+            </button>
           </div>
         )}
       </div>

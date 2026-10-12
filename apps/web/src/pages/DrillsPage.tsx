@@ -1,8 +1,11 @@
-import { boundaryHands, chartFormatLabel, PAINT_TARGET_MS, RECALL_TARGET_MS, ALL_HAND_CLASSES } from '@felt/core';
+import { ALL_HAND_CLASSES, boundaryHands, chartFormatLabel, PAINT_TARGET_MS, RECALL_TARGET_MS } from '@felt/core';
+import { Flame } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { DrillRunner } from '../drills/DrillRunner';
 import { chartsForGame } from '../state/charts';
 import { useSettings } from '../state/settings';
+import { Chips } from '../ui/Chips';
+import { Segmented } from '../ui/Segmented';
 
 /** Free practice on any chart. Does not touch the review schedule. */
 export function DrillsPage() {
@@ -11,7 +14,7 @@ export function DrillsPage() {
   const [chartId, setChartId] = useState(charts[0]?.spec.id);
   const [mode, setMode] = useState<'quick' | 'paint'>('quick');
   const [round, setRound] = useState(0);
-  const [score, setScore] = useState({ right: 0, total: 0 });
+  const [score, setScore] = useState({ right: 0, total: 0, streak: 0, best: 0 });
   const chart = charts.find((c) => c.spec.id === chartId) ?? charts[0];
 
   // Mostly edge hands, sometimes any hand, so the obvious ones stay honest too.
@@ -25,29 +28,46 @@ export function DrillsPage() {
 
   return (
     <div className="stack">
-      <div>
-        <h1>Drills</h1>
-        <p className="muted">Free practice. Does not change your review schedule.</p>
-      </div>
-      <div className="row">
-        <select value={chart.spec.id} onChange={(e) => setChartId(e.target.value)}>
-          {charts.map((c) => (
-            <option key={c.spec.id} value={c.spec.id}>
-              {c.spec.title}
-            </option>
-          ))}
-        </select>
-        <select value={mode} onChange={(e) => setMode(e.target.value as 'quick' | 'paint')}>
-          <option value="quick">Quick recall</option>
-          <option value="paint">Paint the chart</option>
-        </select>
-        <span className="pill">{chartFormatLabel(chart.spec)}</span>
+      <div className="page-head">
+        <div>
+          <h1>Drills</h1>
+          <p className="muted">Free practice. Your review schedule is not affected.</p>
+        </div>
         {mode === 'quick' && score.total > 0 && (
-          <span className="muted">
-            {score.right}/{score.total} correct
-          </span>
+          <div className="row" style={{ gap: '0.5rem' }}>
+            <span className="pill num">
+              {score.right}/{score.total}
+            </span>
+            <span className={`pill num ${score.streak >= 5 ? 'pill-warn' : ''}`}>
+              <Flame size={13} /> {score.streak} (best {score.best})
+            </span>
+          </div>
         )}
       </div>
+
+      <Chips
+        value={chart.spec.id}
+        onChange={(id) => {
+          setChartId(id);
+          setScore({ right: 0, total: 0, streak: 0, best: 0 });
+        }}
+        ariaLabel="Chart"
+        options={charts.map((c) => ({ value: c.spec.id, label: c.spec.title }))}
+      />
+
+      <div className="row between">
+        <Segmented
+          value={mode}
+          onChange={setMode}
+          ariaLabel="Drill type"
+          options={[
+            { value: 'quick', label: 'Quick recall' },
+            { value: 'paint', label: 'Paint chart' },
+          ]}
+        />
+        <span className="pill">{chartFormatLabel(chart.spec)}</span>
+      </div>
+
       <DrillRunner
         key={`${chart.spec.id}:${mode}:${round}`}
         item={{
@@ -58,8 +78,17 @@ export function DrillsPage() {
           targetMs: mode === 'paint' ? PAINT_TARGET_MS : RECALL_TARGET_MS,
           isNew: false,
         }}
-        onAnswer={(o) => setScore((s) => ({ right: s.right + (o.accuracy === 1 ? 1 : 0), total: s.total + 1 }))}
-        onNext={() => setRound((r) => r + 1)}
+        onAnswer={(o) =>
+          setScore((s) => {
+            const right = o.accuracy === 1;
+            const streak = right ? s.streak + 1 : 0;
+            return { right: s.right + (right ? 1 : 0), total: s.total + 1, streak, best: Math.max(s.best, streak) };
+          })
+        }
+        onNext={() => {
+          setRound((r) => r + 1);
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }}
       />
     </div>
   );

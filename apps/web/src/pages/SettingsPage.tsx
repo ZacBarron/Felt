@@ -1,189 +1,217 @@
 import { type GameSettings, MAX_TABLE_SIZE, MIN_TABLE_SIZE, positionsFor, PRESETS, stakesLabel } from '@felt/core';
+import { Check, Vibrate } from 'lucide-react';
+import { haptic, hapticsSupported } from '../haptics';
 import { chartsForGame } from '../state/charts';
 import { useSettings } from '../state/settings';
+import { Segmented } from '../ui/Segmented';
+import { Stepper } from '../ui/Stepper';
+import { Toggle } from '../ui/Toggle';
+
+const same = (a: GameSettings, b: GameSettings) => JSON.stringify(a) === JSON.stringify(b);
 
 export function SettingsPage() {
   const { settings, update } = useSettings();
   const g = settings.game;
   const setGame = (patch: Partial<GameSettings>) => update({ ...settings, game: { ...g, ...patch } });
   const fit = chartsForGame(g);
-  const num = (v: string) => (v === '' ? 0 : Number(v));
+  const seats = positionsFor(g.tableSize);
 
   return (
-    <div className="stack">
+    <div className="stack" style={{ gap: '1.1rem' }}>
       <div>
         <h1>Settings</h1>
-        <p className="muted">
-          Your game drives which charts you drill and how amounts are shown. Current: {stakesLabel(g.stakes)} {g.venue}{' '}
-          {g.format}, {g.tableSize}-handed.
+        <p className="muted" style={{ margin: 0 }}>
+          {stakesLabel(g.stakes)} {g.venue} {g.format === 'mtt' ? 'tournament' : 'cash'}, {g.tableSize}-handed. Charts, drills and
+          amounts follow this.
         </p>
       </div>
 
-      <div className="card stack">
-        <h2>Presets</h2>
-        <div className="row">
-          {Object.entries(PRESETS).map(([id, p]) => (
-            <button key={id} onClick={() => update({ ...settings, game: p.settings })}>
-              {p.label}
-            </button>
-          ))}
+      <section className="stack" style={{ gap: '0.6rem' }}>
+        <div className="eyebrow">Presets</div>
+        <div className="tiles">
+          {Object.entries(PRESETS).map(([id, p]) => {
+            const active = same(p.settings, g);
+            return (
+              <button
+                key={id}
+                className={`card ${active ? 'card-accent' : ''}`}
+                style={{ textAlign: 'left', display: 'block', minHeight: 0, padding: '0.85rem 1rem' }}
+                onClick={() => update({ ...settings, game: p.settings })}
+                aria-pressed={active}
+              >
+                <div className="row between" style={{ flexWrap: 'nowrap' }}>
+                  <strong style={{ fontSize: '0.92rem' }}>{p.label}</strong>
+                  {active && <Check size={18} color="var(--accent)" strokeWidth={3} />}
+                </div>
+                <div className="muted" style={{ fontSize: '0.8rem', fontWeight: 500 }}>
+                  {stakesLabel(p.settings.stakes)} · {p.settings.stackBb}bb
+                </div>
+              </button>
+            );
+          })}
         </div>
-      </div>
+      </section>
 
-      <div className="card stack">
-        <h2>Game</h2>
-        <div className="grid-3" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))' }}>
-          <label>
-            Format
-            <select value={g.format} onChange={(e) => setGame({ format: e.target.value as GameSettings['format'] })}>
-              <option value="cash">Cash</option>
-              <option value="mtt">Tournament</option>
-            </select>
-          </label>
-          <label>
-            Venue
-            <select value={g.venue} onChange={(e) => setGame({ venue: e.target.value as GameSettings['venue'] })}>
-              <option value="live">Live</option>
-              <option value="online">Online</option>
-            </select>
-          </label>
-          <label>
-            Players
-            <select value={g.tableSize} onChange={(e) => setGame({ tableSize: Number(e.target.value) })}>
-              {Array.from({ length: MAX_TABLE_SIZE - MIN_TABLE_SIZE + 1 }, (_, i) => i + MIN_TABLE_SIZE).map((n) => (
-                <option key={n} value={n}>
-                  {n}-handed
-                </option>
-              ))}
-            </select>
-          </label>
-          <label>
-            Typical stack (bb)
-            <input type="number" inputMode="decimal" value={g.stackBb} onChange={(e) => setGame({ stackBb: num(e.target.value) })} />
-          </label>
-        </div>
-        <div className="muted" style={{ fontSize: '0.85rem' }}>
-          Seats: {positionsFor(g.tableSize).join(', ')}
-        </div>
-        {!fit.exact && (
-          <div className="pill" style={{ alignSelf: 'flex-start' }}>
-            No {g.tableSize}-handed {g.format} charts yet; drilling {fit.tableSize}-handed charts instead
+      <section className="card">
+        <div className="eyebrow">Game</div>
+        <div className="list">
+          <div className="list-row">
+            <span className="label">Format</span>
+            <Segmented
+              value={g.format}
+              onChange={(format) => setGame({ format })}
+              options={[
+                { value: 'cash', label: 'Cash' },
+                { value: 'mtt', label: 'Tournament' },
+              ]}
+            />
           </div>
-        )}
-      </div>
+          <div className="list-row">
+            <span className="label">Venue</span>
+            <Segmented
+              value={g.venue}
+              onChange={(venue) => setGame({ venue })}
+              options={[
+                { value: 'live', label: 'Live' },
+                { value: 'online', label: 'Online' },
+              ]}
+            />
+          </div>
+          <div className="list-row" style={{ flexWrap: 'wrap' }}>
+            <div>
+              <div className="label">Players</div>
+              <div className="hint">{seats.join(' · ')}</div>
+            </div>
+            <Stepper
+              label="players"
+              value={g.tableSize}
+              min={MIN_TABLE_SIZE}
+              max={MAX_TABLE_SIZE}
+              onChange={(tableSize) => setGame({ tableSize })}
+            />
+          </div>
+          {!fit.exact && (
+            <div className="pill pill-warn" style={{ alignSelf: 'flex-start', margin: '0.25rem 0 0.5rem', whiteSpace: 'normal' }}>
+              No {g.tableSize}-handed {g.format} charts yet. Drilling {fit.tableSize}-handed charts instead.
+            </div>
+          )}
+          <div className="list-row">
+            <div>
+              <div className="label">Typical stack</div>
+              <div className="hint">In big blinds</div>
+            </div>
+            <Stepper label="big blinds" value={g.stackBb} min={10} max={500} step={10} onChange={(stackBb) => setGame({ stackBb })} />
+          </div>
+        </div>
+      </section>
 
-      <div className="card stack">
-        <h2>Stakes</h2>
-        <div className="grid-3" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(110px, 1fr))' }}>
-          <label>
-            Small blind
-            <input
-              type="number"
-              inputMode="decimal"
-              value={g.stakes.sb}
-              onChange={(e) => setGame({ stakes: { ...g.stakes, sb: num(e.target.value) } })}
-            />
-          </label>
-          <label>
-            Big blind
-            <input
-              type="number"
-              inputMode="decimal"
-              value={g.stakes.bb}
-              onChange={(e) => setGame({ stakes: { ...g.stakes, bb: Math.max(0.01, num(e.target.value)) } })}
-            />
-          </label>
-          <label>
-            Straddle
-            <input
-              type="number"
-              inputMode="decimal"
-              value={g.stakes.straddle ?? ''}
-              placeholder="none"
-              onChange={(e) => setGame({ stakes: { ...g.stakes, straddle: num(e.target.value) || undefined } })}
-            />
-          </label>
-          <label>
-            Ante
-            <input
-              type="number"
-              inputMode="decimal"
-              value={g.stakes.ante ?? ''}
-              placeholder="none"
-              onChange={(e) => setGame({ stakes: { ...g.stakes, ante: num(e.target.value) || undefined } })}
-            />
-          </label>
+      <section className="card stack" style={{ gap: '0.8rem' }}>
+        <div className="row between">
+          <div className="eyebrow">Stakes</div>
+          <Segmented
+            value={g.units}
+            onChange={(units) => setGame({ units })}
+            ariaLabel="Show amounts in"
+            options={[
+              { value: 'money', label: g.stakes.currency === 'USD' ? '$' : g.stakes.currency },
+              { value: 'bb', label: 'bb' },
+            ]}
+          />
+        </div>
+        <div className="tiles" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 96px), 1fr))', gap: '0.6rem' }}>
+          <NumberField label="Small blind" value={g.stakes.sb} onChange={(v) => setGame({ stakes: { ...g.stakes, sb: v } })} />
+          <NumberField label="Big blind" value={g.stakes.bb} onChange={(v) => setGame({ stakes: { ...g.stakes, bb: Math.max(0.01, v) } })} />
+          <NumberField
+            label="Straddle"
+            value={g.stakes.straddle}
+            onChange={(v) => setGame({ stakes: { ...g.stakes, straddle: v || undefined } })}
+          />
+          <NumberField label="Ante" value={g.stakes.ante} onChange={(v) => setGame({ stakes: { ...g.stakes, ante: v || undefined } })} />
           <label>
             Currency
             <input value={g.stakes.currency} onChange={(e) => setGame({ stakes: { ...g.stakes, currency: e.target.value } })} />
           </label>
-          <label>
-            Show amounts in
-            <select value={g.units} onChange={(e) => setGame({ units: e.target.value as GameSettings['units'] })}>
-              <option value="money">Money</option>
-              <option value="bb">Big blinds</option>
-            </select>
-          </label>
         </div>
-      </div>
+      </section>
 
-      <div className="card stack">
-        <h2>Rake</h2>
-        <div className="grid-3" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(110px, 1fr))' }}>
-          <label>
-            Percent
-            <input
-              type="number"
-              inputMode="decimal"
-              value={Math.round(g.rake.percent * 1000) / 10}
-              onChange={(e) => setGame({ rake: { ...g.rake, percent: num(e.target.value) / 100 } })}
-            />
-          </label>
-          <label>
-            Cap
-            <input
-              type="number"
-              inputMode="decimal"
-              value={g.rake.cap}
-              onChange={(e) => setGame({ rake: { ...g.rake, cap: num(e.target.value) } })}
-            />
-          </label>
-          <label>
-            Extra drop
-            <input
-              type="number"
-              inputMode="decimal"
-              value={g.rake.dropExtra}
-              onChange={(e) => setGame({ rake: { ...g.rake, dropExtra: num(e.target.value) } })}
-            />
-          </label>
-          <label>
-            No flop, no drop
-            <select
-              value={g.rake.noFlopNoDrop ? 'yes' : 'no'}
-              onChange={(e) => setGame({ rake: { ...g.rake, noFlopNoDrop: e.target.value === 'yes' } })}
-            >
-              <option value="yes">Yes</option>
-              <option value="no">No</option>
-            </select>
-          </label>
-        </div>
-      </div>
-
-      <div className="card stack">
-        <h2>Study</h2>
-        <label style={{ maxWidth: 220 }}>
-          New review cards per day
-          <input
-            type="number"
-            inputMode="numeric"
-            min={0}
-            max={100}
-            value={settings.study.newPerDay}
-            onChange={(e) => update({ ...settings, study: { ...settings.study, newPerDay: Math.max(0, num(e.target.value)) } })}
+      <section className="card stack" style={{ gap: '0.8rem' }}>
+        <div className="eyebrow">Rake</div>
+        <div className="tiles" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 96px), 1fr))', gap: '0.6rem' }}>
+          <NumberField
+            label="Percent"
+            value={Math.round(g.rake.percent * 1000) / 10}
+            onChange={(v) => setGame({ rake: { ...g.rake, percent: v / 100 } })}
           />
-        </label>
-      </div>
+          <NumberField label="Cap" value={g.rake.cap} onChange={(v) => setGame({ rake: { ...g.rake, cap: v } })} />
+          <NumberField label="Extra drop" value={g.rake.dropExtra} onChange={(v) => setGame({ rake: { ...g.rake, dropExtra: v } })} />
+        </div>
+        <div className="list-row" style={{ borderBottom: 'none', paddingBottom: 0 }}>
+          <div>
+            <div className="label">No flop, no drop</div>
+            <div className="hint">No rake when the hand ends preflop</div>
+          </div>
+          <Toggle
+            label="No flop, no drop"
+            checked={g.rake.noFlopNoDrop}
+            onChange={(noFlopNoDrop) => setGame({ rake: { ...g.rake, noFlopNoDrop } })}
+          />
+        </div>
+      </section>
+
+      <section className="card">
+        <div className="eyebrow">Study and feel</div>
+        <div className="list">
+          <div className="list-row">
+            <div>
+              <div className="label">New cards per day</div>
+              <div className="hint">About 6 seconds each</div>
+            </div>
+            <Stepper
+              label="new cards"
+              value={settings.study.newPerDay}
+              min={0}
+              max={100}
+              step={5}
+              onChange={(newPerDay) => update({ ...settings, study: { ...settings.study, newPerDay } })}
+            />
+          </div>
+          <div className="list-row">
+            <div>
+              <div className="label">Haptics</div>
+              <div className="hint">
+                {hapticsSupported() ? 'Taps, answers and painting' : 'Not supported by this browser'}
+              </div>
+            </div>
+            <div className="row" style={{ gap: 8, flexWrap: 'nowrap' }}>
+              <button
+                className="btn btn-ghost icon-btn"
+                aria-label="Test haptics"
+                data-haptic="off"
+                disabled={!settings.ui.haptics}
+                onClick={() => haptic('success')}
+              >
+                <Vibrate size={18} />
+              </button>
+              <Toggle label="Haptics" checked={settings.ui.haptics} onChange={(haptics) => update({ ...settings, ui: { ...settings.ui, haptics } })} />
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
+  );
+}
+
+function NumberField({ label, value, onChange }: { label: string; value: number | undefined; onChange: (v: number) => void }) {
+  return (
+    <label>
+      {label}
+      <input
+        type="number"
+        inputMode="decimal"
+        value={value ?? ''}
+        placeholder="none"
+        onChange={(e) => onChange(e.target.value === '' ? 0 : Number(e.target.value))}
+      />
+    </label>
   );
 }

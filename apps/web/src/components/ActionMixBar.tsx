@@ -18,7 +18,7 @@ export function ActionMixBar({ actions, reveal = true, onChoose, chosen }: Props
   return (
     <div className="stack" style={{ gap: '0.6rem' }}>
       {reveal && (
-        <div style={{ display: 'flex', height: 26, borderRadius: 6, overflow: 'hidden' }}>
+        <div className="reveal" style={{ display: 'flex', height: 28, borderRadius: 8, overflow: 'hidden' }}>
           {actions.map((a) => (
             <div
               key={a.id}
@@ -30,7 +30,7 @@ export function ActionMixBar({ actions, reveal = true, onChoose, chosen }: Props
                 alignItems: 'center',
                 justifyContent: 'center',
                 fontSize: 12,
-                fontWeight: 700,
+                fontWeight: 800,
                 color: '#fff',
                 whiteSpace: 'nowrap',
                 overflow: 'hidden',
@@ -41,32 +41,34 @@ export function ActionMixBar({ actions, reveal = true, onChoose, chosen }: Props
           ))}
         </div>
       )}
-      <div className="stack" style={{ gap: '0.35rem' }}>
+      <div className="stack" style={{ gap: '0.45rem' }}>
         {actions.map((a) => (
           <button
             key={a.id}
             onClick={() => onChoose?.(a.id)}
-            disabled={!onChoose}
+            disabled={!onChoose || reveal}
+            data-haptic="off"
             style={{
               display: 'grid',
-              gridTemplateColumns: '14px 1fr auto auto',
-              gap: '0.6rem',
+              gridTemplateColumns: '12px 1fr auto auto',
+              gap: '0.7rem',
               alignItems: 'center',
               textAlign: 'left',
+              justifyContent: 'stretch',
+              minHeight: 50,
               borderColor: chosen === a.id ? 'var(--text)' : undefined,
-              cursor: onChoose ? 'pointer' : 'default',
+              borderWidth: chosen === a.id ? 2 : 1,
+              opacity: reveal && chosen !== a.id ? 0.85 : 1,
             }}
           >
             <span style={{ width: 12, height: 12, borderRadius: 3, background: actionColor(a.id) }} />
             <span>{a.label}</span>
             {reveal ? (
               <>
-                <span className="muted" style={{ fontVariantNumeric: 'tabular-nums' }}>
-                  {Math.round(a.frequency * 100)}%
-                </span>
-                <span style={{ fontVariantNumeric: 'tabular-nums', fontWeight: 600, minWidth: 92, textAlign: 'right' }}>
+                <span className="muted num">{Math.round(a.frequency * 100)}%</span>
+                <span className="num" style={{ fontWeight: 700, minWidth: 96, textAlign: 'right' }}>
                   {a.ev.toFixed(2)}bb
-                  {a.ev < bestEv && <span className="muted"> ({(a.ev - bestEv).toFixed(2)})</span>}
+                  {a.ev < bestEv && <span className="muted" style={{ fontWeight: 500 }}> {(a.ev - bestEv).toFixed(2)}</span>}
                 </span>
               </>
             ) : (

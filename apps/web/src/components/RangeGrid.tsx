@@ -41,77 +41,29 @@ export function RangeGrid({ mixes, selected, onSelect, onPaint, marked }: Props)
     : {};
 
   return (
-    <div
-      role="grid"
-      {...paintHandlers}
-      style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(13, 1fr)',
-        gap: 2,
-        width: '100%',
-        maxWidth: 620,
-        aspectRatio: '1',
-        userSelect: 'none',
-        touchAction: onPaint ? 'none' : undefined,
-      }}
-    >
+    <div role="grid" className={`range-grid${onPaint ? ' painting' : ''}`} {...paintHandlers}>
       {Array.from({ length: 169 }, (_, i) => {
         const hand = gridHandClass(Math.floor(i / 13), i % 13);
         const mix = mixes.get(hand) ?? { fold: 1 };
         const segments = sortActions(Object.keys(mix));
         const playsAtAll = segments.some((a) => a !== 'fold');
-        const isMarked = marked?.has(hand);
+        const classes = ['range-cell', selected === hand && 'selected', marked?.has(hand) && 'marked', playsAtAll && 'plays']
+          .filter(Boolean)
+          .join(' ');
         return (
           <button
             key={hand}
             role="gridcell"
+            className={classes}
             data-hand={hand}
+            data-haptic={onPaint ? 'off' : 'select'}
             title={describeMix(hand, mix)}
             onClick={onPaint ? undefined : () => onSelect?.(hand)}
-            style={{
-              position: 'relative',
-              padding: 0,
-              border: isMarked
-                ? '2px solid #ffd60a'
-                : selected === hand
-                  ? '2px solid var(--text)'
-                  : '1px solid transparent',
-              borderRadius: 3,
-              overflow: 'hidden',
-              display: 'flex',
-              background: '#0e1713',
-              minWidth: 0,
-              cursor: onPaint ? 'crosshair' : 'pointer',
-            }}
           >
             {segments.map((a) => (
-              <span
-                key={a}
-                style={{
-                  width: `${mix[a] * 100}%`,
-                  background: actionColor(a),
-                  opacity: a === 'fold' ? 0.25 : 0.9,
-                  pointerEvents: 'none',
-                }}
-              />
+              <span key={a} className="seg" style={{ width: `${mix[a] * 100}%`, background: actionColor(a), opacity: a === 'fold' ? 0.22 : 0.95 }} />
             ))}
-            <span
-              style={{
-                position: 'absolute',
-                inset: 0,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: 'clamp(7px, 2.2vw, 12px)',
-                fontWeight: 600,
-                letterSpacing: '-0.02em',
-                color: playsAtAll ? '#fff' : 'var(--muted)',
-                textShadow: '0 1px 2px rgba(0,0,0,.6)',
-                pointerEvents: 'none',
-              }}
-            >
-              {hand}
-            </span>
+            <span className="label">{hand}</span>
           </button>
         );
       })}

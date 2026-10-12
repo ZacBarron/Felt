@@ -8,27 +8,33 @@ export function SeatStrip({ spec }: { spec: ChartSpec }) {
   const seats = positionsFor(spec.tableSize);
   const heroIndex = seats.indexOf(spec.hero);
   return (
-    <div className="row" style={{ gap: 4, flexWrap: 'wrap' }}>
+    <div style={{ display: 'grid', gridTemplateColumns: `repeat(${seats.length}, 1fr)`, gap: 3 }}>
       {seats.map((seat, i) => {
         const hero = i === heroIndex;
         const folded = spec.spot === 'rfi' && i < heroIndex;
         return (
-          <span
-            key={seat}
-            style={{
-              fontSize: 12,
-              fontWeight: hero ? 800 : 500,
-              padding: '3px 7px',
-              borderRadius: 6,
-              border: '1px solid var(--border)',
-              background: hero ? 'var(--accent)' : 'var(--surface-2)',
-              color: hero ? '#06120c' : 'var(--text)',
-              opacity: folded ? 0.4 : 1,
-              textDecoration: folded ? 'line-through' : undefined,
-            }}
-          >
-            {seat}
-          </span>
+          <div key={seat} style={{ textAlign: 'center' }}>
+            <div
+              style={{
+                height: 6,
+                borderRadius: 3,
+                marginBottom: 4,
+                background: hero ? 'var(--accent)' : folded ? 'var(--surface-3)' : 'var(--border-strong)',
+                boxShadow: hero ? '0 0 10px rgba(61,220,151,.6)' : undefined,
+              }}
+            />
+            <div
+              style={{
+                fontSize: seats.length > 6 ? 9.5 : 11,
+                fontWeight: hero ? 800 : 600,
+                color: hero ? 'var(--accent)' : folded ? 'var(--faint)' : 'var(--muted)',
+                whiteSpace: 'nowrap',
+                letterSpacing: '-0.02em',
+              }}
+            >
+              {seat}
+            </div>
+          </div>
         );
       })}
     </div>
