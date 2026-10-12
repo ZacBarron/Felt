@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
+  type CardSeed,
+  selectExtra,
   boundaryHands,
   buildChart,
   type ChartSpec,
@@ -129,5 +131,22 @@ describe('charts with a limited reach', () => {
       ['72o', 'call'],
     ]);
     expect(scorePainting(chart, painted).accuracy).toBe(1);
+  });
+});
+
+describe('extra practice', () => {
+  const seed = (id: string): CardSeed => ({ id, kind: 'range-recall', mode: 'quick', chartId: 'c', hand: id, targetMs: 3000 });
+  const card = (id: string, inDays: number) => ({ id, due: new Date(Date.UTC(2026, 9, 12) + inDays * 86_400_000) });
+
+  it('mixes soonest due known cards with new ones, two to one', () => {
+    const known = [card('k3', 3), card('k1', 1), card('k2', 2), card('k4', 4)];
+    const seeds = ['k1', 'n1', 'n2'].map(seed);
+    expect(selectExtra(known, seeds, { n: 6 }).map((c) => c.id)).toEqual(['k1', 'k2', 'n1', 'k3', 'k4', 'n2']);
+  });
+
+  it('skips cards just answered and never runs dry while anything is left', () => {
+    const known = [card('k1', 1), card('k2', 2)];
+    const out = selectExtra(known, [seed('n1')], { n: 10, exclude: new Set(['k1']) });
+    expect(out.map((c) => c.id)).toEqual(['k2', 'n1']);
   });
 });

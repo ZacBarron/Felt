@@ -154,6 +154,33 @@ export function selectQueue<T extends ScheduledCard>(
   return { due, fresh };
 }
 
+/**
+ * Extra practice after the due cards: an endless supply so a session never
+ * hits a dead end. Known cards come soonest due first (they are the closest
+ * to being forgotten), with unseen cards mixed in, two known to one new.
+ * Cards answered moments ago are skipped, since recall from the screen
+ * teaches nothing.
+ */
+export function selectExtra<T extends ScheduledCard>(
+  known: readonly T[],
+  seeds: readonly CardSeed[],
+  { n, exclude = new Set<string>() }: { n: number; exclude?: ReadonlySet<string> },
+): (T | CardSeed)[] {
+  const knownIds = new Set(known.map((c) => c.id));
+  const soon = known.filter((c) => !exclude.has(c.id)).sort((a, b) => a.due.getTime() - b.due.getTime());
+  const unseen = seeds.filter((s) => !knownIds.has(s.id) && !exclude.has(s.id));
+  const out: (T | CardSeed)[] = [];
+  let k = 0;
+  let u = 0;
+  while (out.length < n && (k < soon.length || u < unseen.length)) {
+    // Two known cards for every new one; fall back to whichever pile has cards left.
+    const wantNew = out.length % 3 === 2;
+    if ((wantNew && u < unseen.length) || k >= soon.length) out.push(unseen[u++]);
+    else out.push(soon[k++]);
+  }
+  return out;
+}
+
 export function dayKey(date: Date): string {
   return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
 }

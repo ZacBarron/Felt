@@ -10,6 +10,7 @@ import {
   deckForCharts,
   type DrillOutcome,
   RECALL_TARGET_MS,
+  selectExtra,
   selectQueue,
   studyStreak,
 } from '@felt/core';
@@ -64,6 +65,16 @@ const toItem = (c: Omit<StoredCard, 'fsrs' | 'due' | 'createdAt'>, isNew: boolea
   targetMs: c.targetMs,
   isNew,
 });
+
+/**
+ * Extra practice beyond today's due cards: soonest due and new cards mixed,
+ * skipping anything answered this session. Review never runs dry.
+ */
+export async function buildExtra(charts: readonly Chart[], n: number, exclude: ReadonlySet<string>): Promise<QueueItem[]> {
+  const chartIds = new Set(charts.map((c) => c.spec.id));
+  const known = (await db.cards.toArray()).filter((c) => chartIds.has(c.chartId));
+  return selectExtra(known, deckForCharts(charts), { n, exclude }).map((c) => toItem(c, !('fsrs' in c)));
+}
 
 /** Today's queue for the charts that match the current game settings. */
 export async function buildQueue(charts: readonly Chart[], newPerDay: number, now = new Date()) {
