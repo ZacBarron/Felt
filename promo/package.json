@@ -1,0 +1,29 @@
+{
+  "name": "felt-promo",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Felt promo video, built with Remotion",
+  "scripts": {
+    "studio": "remotion studio",
+    "render": "remotion render FeltPromoVertical out/felt-promo-vertical.mp4 && remotion render FeltPromoLandscape out/felt-promo-landscape.mp4",
+    "render:vertical": "remotion render FeltPromoVertical out/felt-promo-vertical.mp4",
+    "render:landscape": "remotion render FeltPromoLandscape out/felt-promo-landscape.mp4",
+    "stills": "remotion still FeltPromoVertical out/still-1-mark.png --frame=76 && remotion still FeltPromoVertical out/still-2-chart.png --frame=198 && remotion still FeltPromoVertical out/still-3-drill.png --frame=322 && remotion still FeltPromoVertical out/still-4-rating.png --frame=442 && remotion still FeltPromoVertical out/still-5-phone.png --frame=526 && remotion still FeltPromoVertical out/still-6-end.png --frame=592",
+    "audio": "python3 scripts/make_audio.py",
+    "typecheck": "tsc --noEmit",
+    "stills:landscape": "remotion still FeltPromoLandscape out/landscape-1-mark.png --frame=76 && remotion still FeltPromoLandscape out/landscape-2-chart.png --frame=198 && remotion still FeltPromoLandscape out/landscape-3-drill.png --frame=322 && remotion still FeltPromoLandscape out/landscape-4-rating.png --frame=442 && remotion still FeltPromoLandscape out/landscape-5-phone.png --frame=526 && remotion still FeltPromoLandscape out/landscape-6-end.png --frame=592",
+    "prerender": "python3 scripts/make_audio.py",
+    "prestudio": "python3 scripts/make_audio.py"
+  },
+  "dependencies": {
+    "@fontsource/inter": "5.3.0",
+    "@remotion/cli": "4.0.535",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "remotion": "4.0.535"
+  },
+  "devDependencies": {
+    "@types/react": "18.3.12",
+    "typescript": "5.9.3"
+  }
+}
