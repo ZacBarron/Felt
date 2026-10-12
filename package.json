@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "pnpm --filter @felt/web dev",
     "build": "pnpm --filter @felt/web build",
+    "preview": "pnpm --filter @felt/web preview",
     "test": "pnpm -r test",
     "typecheck": "pnpm -r typecheck",
     "check": "pnpm typecheck && pnpm test"

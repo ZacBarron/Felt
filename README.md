@@ -25,7 +25,7 @@ Working now: the poker engine, game settings and presets, starter 9 handed and 6
 
 ### Install on your phone
 
-Deploy the built app (`pnpm build` outputs `apps/web/dist`) to any static host, open it in Safari or Chrome, and choose "Add to Home Screen". It works offline and your study data stays on the device.
+Deploy the built app (`pnpm build` outputs `apps/web/dist`) to any static host; Vercel and Netlify configs are included. Open it in Safari or Chrome and choose "Add to Home Screen". It works offline and your study data stays on the device, with a backup file in Settings. See [docs/DEPLOY.md](docs/DEPLOY.md) for testing, deploying and what a server would add.
 
 ## Getting started
 

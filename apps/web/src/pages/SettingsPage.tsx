@@ -1,9 +1,10 @@
 import { type GameSettings, MAX_TABLE_SIZE, MIN_TABLE_SIZE, positionsFor, PRESETS, stakesLabel } from '@felt/core';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { haptic, hapticsSupported } from '../haptics';
 import { isPro, restorePurchases } from '../state/access';
 import { db } from '../state/db';
+import { exportBackup, importBackup, requestPersistentStorage } from '../state/backup';
 import { exportEvents } from '../state/events';
 import { cueCopy } from '../state/goals';
 import { studyReminder, trialReminder } from '../state/reminders';
@@ -30,6 +31,35 @@ export function SettingsPage() {
   const devVisible = access.devMode || import.meta.env.DEV;
   const setAccess = (patch: Partial<typeof access>) => update({ ...settings, access: { ...access, ...patch } });
   const [restoreMessage, setRestoreMessage] = useState<string>();
+  const [dataMessage, setDataMessage] = useState<string>();
+  const [persisted, setPersisted] = useState<boolean>();
+  useEffect(() => {
+    void requestPersistentStorage().then(setPersisted);
+  }, []);
+  const saveBackup = async () => {
+    const json = await exportBackup();
+    const url = URL.createObjectURL(new Blob([json], { type: 'application/json' }));
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `felt-backup-${new Date().toISOString().slice(0, 10)}.json`;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    setDataMessage('Backup saved. Keep the file somewhere safe, such as iCloud Drive or Google Drive.');
+    haptic('success');
+  };
+  const restoreBackup = async (file?: File) => {
+    if (!file) return;
+    if (!window.confirm('Replace everything on this device with this backup?')) return;
+    try {
+      const result = await importBackup(await file.text());
+      setDataMessage(`Restored ${result.rows.toLocaleString()} records. Reloading.`);
+      haptic('success');
+      setTimeout(() => location.reload(), 900);
+    } catch (e) {
+      setDataMessage(e instanceof Error ? e.message : 'That file could not be read.');
+      haptic('error');
+    }
+  };
   const restore = async () => {
     const result = await restorePurchases(settings);
     if (result.ok) {
@@ -236,6 +266,39 @@ export function SettingsPage() {
               onChange={(newPerDay) => update({ ...settings, study: { ...settings.study, newPerDay } })}
             />
           </Row>
+        </div>
+      </section>
+
+      <section>
+        <h2 className="section-title">Your data</h2>
+        <div className="list">
+          <div className="list-row">
+            <span className="grow">
+              <span style={{ display: 'block' }}>Stored on this device</span>
+              <span className="footnote">
+                {persisted === undefined
+                  ? 'Checking'
+                  : persisted
+                    ? 'Protected: the browser will not clear it to save space.'
+                    : 'Not protected yet. Add Felt to your home screen, or save a backup.'}
+              </span>
+            </span>
+          </div>
+          <button className="list-row" onClick={() => void saveBackup()}>
+            <span className="grow" style={{ color: 'var(--tint)' }}>
+              Save a backup
+            </span>
+          </button>
+          <label className="list-row" style={{ cursor: 'pointer', fontSize: 'inherit', fontWeight: 'inherit' }}>
+            <span className="grow" style={{ color: 'var(--tint)' }}>
+              Restore from a backup
+            </span>
+            <input type="file" accept="application/json,.json" className="sr-only" onChange={(e) => void restoreBackup(e.target.files?.[0])} />
+          </label>
+        </div>
+        <div className="section-footer" role="status">
+          {dataMessage ??
+            'Your study, ratings and imported hands live only in this browser. A backup file moves them to a new phone or brings them back after clearing the browser.'}
         </div>
       </section>
 

@@ -15,6 +15,7 @@ import { BottomBar } from '../ui/BottomBar';
 import { BellIcon, CheckIcon, ChevronLeftIcon, ClockIcon, LockIcon, SkipIcon, TargetIcon } from '../ui/icons';
 import { useBodyClass } from '../ui/useBodyClass';
 import { onRadioKeys } from '../ui/radioKeys';
+import { requestPersistentStorage } from '../state/backup';
 
 /**
  * First run. Short, personal and honest: every question changes the plan,
@@ -166,6 +167,8 @@ export function OnboardingPage() {
   const commit = () => {
     update({ ...settings, profile: { ...profile, onboarded: true, committedAt: new Date().toISOString() } });
     track('plan_committed', { goal: profile.goal, game, daily: profile.dailyMinutes, cue: profile.cue, focus: profile.focus.length });
+    // The plan is worth keeping: ask the browser not to clear Felt's data.
+    void requestPersistentStorage();
     setTimeout(() => navigate(isPro(settings.access) ? '/' : '/pro?from=onboarding', { replace: true }), 450);
   };
 
