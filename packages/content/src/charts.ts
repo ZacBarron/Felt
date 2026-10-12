@@ -4,32 +4,77 @@ import type { ChartSpec } from '@felt/core';
  * Starter preflop charts, 100bb cash.
  *
  * These are hand-written approximations of commonly published solver
- * outputs, good enough to start drilling structure. They are not solver
- * exact. Replace or extend them with solver output (see docs/SOLVER_DATA.md).
+ * outputs (2.5bb opens, typical online rake). The mixes are graded to match
+ * the shape of published solutions: hands at the bottom of a range open part
+ * of the time, at frequencies that fall off hand by hand. The exact numbers
+ * are still approximations, not solver output. Replace or extend them with
+ * solver output (see docs/SOLVER_DATA.md).
  *
  * Late position seats face the same players behind them at 6 and 9-handed,
  * so LJ through SB share ranges across table sizes; 9-handed adds the
  * tighter UTG, UTG+1 and UTG+2 seats in front.
+ *
+ * Within a family, a weaker kicker never opens more often than a stronger
+ * one, and a later seat never opens a hand less often than an earlier seat
+ * (both checked in the content tests). Two patterns that solutions share look
+ * like exceptions. Small suited aces (A5s down to A2s) can open more often
+ * than A6s to A8s, and A5o can open before A6o and A7o: they make wheels and
+ * keep the ace blocker. Connected hands can open more often than gapped hands
+ * with a higher card (65s before 75s, T9s before J9s), since they make more
+ * straights.
  */
 
 const RFI = {
-  'UTG-9': '66+, 55:0.5, A9s+, A5s:0.5, KTs+, QTs+, JTs, T9s:0.5, AJo+, KQo',
-  'UTG+1-9': '55+, A8s+, A5s, KTs+, QTs+, JTs, T9s, 98s:0.5, AJo+, KQo, KJo:0.25',
-  'UTG+2-9': '55+, 44:0.5, A7s+, A4s-A5s, K9s+, QTs+, JTs, T9s, 98s:0.5, 87s:0.5, AJo+, ATo:0.5, KQo, KJo:0.5, QJo:0.5',
-  LJ: '33+, 22:0.5, A2s+, K9s+, Q9s+, J9s+, T9s, 98s:0.5, 87s:0.5, 76s:0.5, 65s:0.5, AJo+, ATo:0.5, KQo, KJo:0.5',
-  HJ: '22+, A2s+, K7s+, Q9s+, J9s+, T8s+, 98s, 87s, 76s, 65s, 54s:0.5, ATo+, KJo+, QJo, KTo:0.5',
-  CO: '22+, A2s+, K5s+, Q8s+, J8s+, T8s+, 97s+, 87s, 86s:0.5, 76s, 75s:0.5, 65s, 54s, A8o+, KTo+, QTo+, JTo',
-  BTN: '22+, A2s+, K2s+, Q4s+, J6s+, T6s+, 96s+, 85s+, 75s+, 64s+, 54s, 53s:0.5, A2o+, K8o+, Q9o+, J9o+, T9o, 98o:0.5',
-  SB: '22+, A2s+, K2s+, Q4s+, J6s+, T6s+, 96s+, 85s+, 75s+, 64s+, 54s, A2o+, K8o+, Q9o+, J9o+, T9o',
+  'UTG-9':
+    'AA-77, 66:0.85, 55:0.5, 44:0.2, 33:0.05, ATs+, A9s:0.85, A8s:0.5, A7s:0.25, A6s:0.15, A5s:0.6, A4s:0.35, ' +
+    'A3s:0.15, A2s:0.05, KJs+, KTs:0.9, K9s:0.3, K8s:0.05, QJs, QTs:0.85, Q9s:0.1, JTs:0.85, J9s:0.05, T9s:0.5, ' +
+    '98s:0.15, 87s:0.05, AQo+, AJo:0.75, ATo:0.1, KQo:0.7',
+  'UTG+1-9':
+    'AA-66, 55:0.6, 44:0.3, 33:0.1, ATs+, A9s:0.95, A8s:0.65, A7s:0.35, A6s:0.2, A5s:0.85, A4s:0.5, A3s:0.2, ' +
+    'A2s:0.1, KJs+, KTs:0.95, K9s:0.45, K8s:0.1, QJs, QTs:0.95, Q9s:0.2, JTs:0.95, J9s:0.15, T9s:0.65, 98s:0.25, ' +
+    '87s:0.1, 76s:0.05, AQo+, AJo:0.9, ATo:0.2, KQo:0.85, KJo:0.1',
+  'UTG+2-9':
+    'AA-66, 55:0.85, 44:0.5, 33:0.3, 22:0.15, A9s+, A8s:0.85, A7s:0.55, A6s:0.4, A5s, A4s:0.75, A3s:0.45, A2s:0.3, ' +
+    'KTs+, K9s:0.7, K8s:0.3, K7s:0.1, K6s:0.05, QTs+, Q9s:0.45, Q8s:0.05, JTs, J9s:0.4, T9s:0.85, T8s:0.15, ' +
+    '98s:0.5, 87s:0.3, 76s:0.2, 65s:0.15, 54s:0.05, AJo+, ATo:0.45, KQo, KJo:0.35, KTo:0.05, QJo:0.15',
+  LJ:
+    'AA-44, 33:0.7, 22:0.4, A8s+, A7s:0.9, A6s:0.85, A3s-A5s, A2s:0.8, K9s+, K8s:0.55, K7s:0.3, K6s:0.25, K5s:0.2, ' +
+    'K4s:0.05, Q9s+, Q8s:0.2, JTs, J9s:0.85, J8s:0.1, T9s:0.95, T8s:0.45, 98s:0.65, 97s:0.05, 87s:0.45, 76s:0.3, ' +
+    '65s:0.25, 54s:0.1, AJo+, ATo:0.55, KQo, KJo:0.4, KTo:0.1, QJo:0.2, QTo:0.05, JTo:0.05',
+  HJ:
+    'AA-33, 22:0.85, A2s+, K8s+, K7s:0.85, K6s:0.55, K5s:0.45, K4s:0.25, K3s:0.15, K2s:0.1, Q9s+, Q8s:0.7, ' +
+    'Q7s:0.15, Q6s:0.05, JTs, J9s, J8s:0.45, T9s, T8s:0.85, T7s:0.1, 98s:0.95, 97s:0.3, 87s:0.75, 86s:0.1, ' +
+    '76s:0.6, 65s:0.5, 54s:0.3, ATo+, A9o:0.2, A8o:0.05, A5o:0.05, KQo, KJo:0.9, KTo:0.4, QJo:0.65, QTo:0.15, ' +
+    'JTo:0.15',
+  CO:
+    '22+, A2s+, K5s+, K4s:0.85, K3s:0.7, K2s:0.55, Q9s+, Q8s:0.9, Q7s:0.45, Q6s:0.25, Q5s:0.1, J9s+, J8s:0.85, ' +
+    'J7s:0.35, J6s:0.05, T9s, T8s:0.95, T7s:0.5, T6s:0.05, 98s, 97s:0.8, 96s:0.15, 87s, 86s:0.5, 76s:0.95, ' +
+    '75s:0.3, 65s:0.85, 64s:0.1, 54s:0.65, 53s:0.05, ATo+, A9o:0.85, A8o:0.55, A7o:0.15, A6o:0.05, A5o:0.3, ' +
+    'A4o:0.1, KJo+, KTo:0.85, K9o:0.2, QJo, QTo:0.75, Q9o:0.05, JTo:0.7, J9o:0.05, T9o:0.05',
+  BTN:
+    '22+, A2s+, K2s+, Q5s+, Q4s:0.85, Q3s:0.55, Q2s:0.4, J7s+, J6s:0.85, J5s:0.5, J4s:0.25, J3s:0.1, J2s:0.05, ' +
+    'T7s+, T6s:0.8, T5s:0.25, T4s:0.1, 97s+, 96s:0.8, 95s:0.15, 86s+, 85s:0.7, 84s:0.1, 76s, 75s:0.85, 74s:0.2, ' +
+    '65s, 64s:0.65, 63s:0.1, 54s, 53s:0.45, 43s:0.15, A4o+, A3o:0.8, A2o:0.6, K9o+, K8o:0.75, K7o:0.4, K6o:0.2, ' +
+    'K5o:0.1, QTo+, Q9o:0.85, Q8o:0.2, JTo, J9o:0.8, J8o:0.1, T9o:0.8, T8o:0.15, 98o:0.3, 87o:0.05',
+  // Raise or fold only, to 3bb. The limps of a full solution are left out.
+  SB:
+    '22+, A2s+, K2s+, Q4s+, Q3s:0.6, Q2s:0.35, J6s+, J5s:0.6, J4s:0.3, J3s:0.1, T6s+, T5s:0.4, T4s:0.1, 96s+, ' +
+    '95s:0.25, 85s+, 84s:0.2, 75s+, 74s:0.25, 64s+, 63s:0.1, 54s, 53s:0.35, 43s:0.1, A5o+, A4o:0.9, A3o:0.75, ' +
+    'A2o:0.6, K9o+, K8o:0.7, K7o:0.35, K6o:0.1, K5o:0.05, QTo+, Q9o:0.7, Q8o:0.15, JTo, J9o:0.65, J8o:0.1, ' +
+    'T9o:0.55, T8o:0.1, 98o:0.15',
 };
 
 const BB_VS_BTN = {
   threeBet:
-    'QQ+, JJ:0.5, TT:0.3, AK, AQs, AQo:0.5, AJs:0.5, ATs:0.3, A2s-A5s:0.6, KQs:0.4, KTs-KJs:0.5, K9s:0.5, K5s-K8s:0.4, ' +
-    'Q9s:0.5, Q8s:0.4, J9s:0.5, J8s:0.4, T8s:0.4, 97s:0.4, 86s:0.4, 75s:0.4, 64s:0.4, 53s:0.4, ' +
-    'KJo:0.4, QJo:0.4, A8o-A9o:0.4, A4o-A5o:0.3, K9o:0.3, Q9o:0.3, J9o:0.3, T9o:0.3',
+    'QQ+, JJ:0.55, TT:0.3, 99:0.1, AK, AQs, AQo:0.55, AJs:0.5, ATs:0.3, A9s:0.1, A5s:0.7, A4s:0.6, A3s:0.5, A2s:0.45, ' +
+    'KQs:0.4, KJs:0.5, KTs:0.5, K9s:0.5, K8s:0.45, K7s:0.4, K6s:0.35, K5s:0.35, K4s:0.15, Q9s:0.5, Q8s:0.4, Q7s:0.15, ' +
+    'J9s:0.5, J8s:0.4, T8s:0.4, 97s:0.4, 86s:0.4, 75s:0.35, 64s:0.35, 53s:0.3, ' +
+    'KJo:0.4, QJo:0.35, A9o:0.45, A8o:0.35, A7o:0.15, A5o:0.35, A4o:0.25, K9o:0.3, Q9o:0.25, J9o:0.3, T9o:0.3',
   call:
-    '22-JJ, A2s+, A2o+, K2s+, K5o+, Q2s+, Q8o+, J4s+, J8o+, T5s+, T8o+, 95s+, 97o+, 84s+, 87o, 74s+, 76o, 63s+, 65o, 52s+, 54o:0.5, 42s+',
+    '22-JJ, A2s+, A2o+, K2s+, K6o+, K5o:0.8, K4o:0.4, K3o:0.2, K2o:0.1, Q3s+, Q2s:0.9, Q9o+, Q8o:0.85, Q7o:0.4, Q6o:0.1, ' +
+    'J5s+, J4s:0.8, J3s:0.5, J2s:0.3, J9o+, J8o:0.8, J7o:0.3, T6s+, T5s:0.8, T4s:0.5, T3s:0.25, T2s:0.15, T9o, T8o:0.75, T7o:0.25, ' +
+    '96s+, 95s:0.8, 94s:0.4, 93s:0.15, 98o, 97o:0.7, 96o:0.1, 85s+, 84s:0.75, 83s:0.25, 87o:0.8, 86o:0.15, ' +
+    '75s+, 74s:0.85, 73s:0.2, 76o:0.7, 75o:0.05, 64s+, 63s:0.85, 65o:0.6, 53s+, 52s:0.7, 54o:0.35, 42s+, 32s:0.5',
 };
 
 /**
@@ -40,35 +85,48 @@ const BB_VS_BTN = {
 const DEFENSE = {
   bbVsCo: {
     threeBet:
-      'QQ+, JJ:0.6, TT:0.3, AK, AQs, AJs:0.7, ATs:0.5, A2s-A5s:0.7, KQs:0.7, KJs:0.6, KTs:0.5, K9s:0.4, QTs:0.4, Q9s:0.5, J9s:0.5, ' +
-      'T8s:0.5, 97s:0.5, 86s:0.5, 75s:0.4, 76s:0.4, 65s:0.4, 54s:0.4, AQo:0.8, AJo:0.5, KQo:0.5, KJo:0.3',
+      'QQ+, JJ:0.6, TT:0.3, 99:0.1, AK, AQs, AJs:0.7, ATs:0.5, A9s:0.15, A5s:0.75, A4s:0.7, A3s:0.6, A2s:0.5, ' +
+      'KQs:0.7, KJs:0.6, KTs:0.5, K9s:0.4, K8s:0.2, QTs:0.4, Q9s:0.5, J9s:0.5, T8s:0.5, 97s:0.5, 86s:0.5, ' +
+      '75s:0.4, 76s:0.4, 65s:0.4, 54s:0.4, AQo:0.8, AJo:0.5, ATo:0.15, KQo:0.5, KJo:0.3, QJo:0.1',
     call:
-      '22-JJ, A2s+, K2s+, Q5s+, J6s+, T6s+, 96s+, 85s+, 74s+, 64s+, 53s+, 43s, A7o+, A5o:0.5, K9o+, Q9o+, J9o+, T8o+, 98o:0.5',
+      '22-JJ, A2s+, K2s+, Q5s+, Q4s:0.6, Q3s:0.35, Q2s:0.2, J6s+, J5s:0.4, J4s:0.15, T6s+, T5s:0.3, 96s+, 95s:0.25, ' +
+      '85s+, 84s:0.15, 74s:0.8, 75s+, 64s:0.85, 65s, 53s:0.75, 54s, 43s:0.6, ' +
+      'A8o+, A7o:0.8, A6o:0.3, A5o:0.55, A4o:0.3, A3o:0.1, K9o+, K8o:0.4, K7o:0.1, Q9o+, Q8o:0.25, J9o:0.9, J8o:0.2, ' +
+      'T9o:0.9, T8o:0.6, 98o:0.4, 97o:0.1, 87o:0.2',
   },
   bbVsUtg: {
-    threeBet: 'QQ+, AK, AQs:0.4, A5s:0.6, A4s:0.5, KQs:0.3, 76s:0.2, 65s:0.2',
-    call: '22-JJ, A2s-AQs, K9s+, Q9s+, J9s+, T8s+, 97s+, 86s+, 75s+, 64s+, 53s+, AQo, AJo, ATo:0.4, KQo, KJo:0.4, QJo:0.3',
+    threeBet: 'KK+, QQ:0.8, AKs, AKo:0.85, AQs:0.4, A5s:0.55, A4s:0.45, A3s:0.15, KQs:0.3, 76s:0.15, 65s:0.15, 54s:0.1',
+    call:
+      '22-QQ, A2s+, AKo, K9s+, K8s:0.5, K7s:0.3, K6s:0.2, K5s:0.15, Q9s+, Q8s:0.35, J9s+, J8s:0.3, T8s+, T7s:0.15, ' +
+      '97s+, 96s:0.1, 86s+, 85s:0.1, 75s+, 64s:0.75, 65s, 53s:0.5, 54s, 43s:0.1, ' +
+      'AQo, AJo, ATo:0.35, A9o:0.05, KQo, KJo:0.3, KTo:0.1, QJo:0.25, QTo:0.05, JTo:0.1',
   },
   sbVsBtn:
-    'TT+, 99:0.7, 88:0.5, 77:0.4, A2s+, K8s+, K6s-K7s:0.3, Q9s+, Q8s:0.4, J9s+, T9s, T8s:0.4, 98s, 87s:0.5, 76s:0.4, 65s:0.3, ' +
-    'ATo+, A9o:0.3, KJo+, KTo:0.3, QJo:0.4',
+    'TT+, 99:0.7, 88:0.5, 77:0.4, 66:0.2, 55:0.1, 44:0.05, A2s+, K8s+, K7s:0.35, K6s:0.3, K5s:0.2, K4s:0.05, ' +
+    'Q9s+, Q8s:0.4, Q7s:0.1, J9s+, J8s:0.25, T9s, T8s:0.4, 98s:0.9, 97s:0.2, 87s:0.45, 86s:0.05, 76s:0.35, 65s:0.3, 54s:0.15, ' +
+    'AJo+, ATo:0.8, A9o:0.25, A8o:0.1, A5o:0.1, KQo, KJo:0.65, KTo:0.25, K9o:0.05, QJo:0.25, QTo:0.1, JTo:0.1',
   btnVsCo: {
     threeBet:
-      'QQ+, JJ:0.6, TT:0.3, AK, AQs, AJs:0.6, ATs:0.4, A2s-A5s:0.7, KQs:0.6, KJs:0.5, KTs:0.4, K9s:0.5, Q9s:0.5, J9s:0.4, T8s:0.5, ' +
-      '97s:0.5, 86s:0.4, 76s:0.4, 65s:0.4, AQo:0.8, AJo:0.5, KQo:0.5',
-    call: '22-JJ, A2s+, KTs+, K9s, QTs+, Q9s, J9s+, T8s+, 97s+, 87s, 76s, 65s, AJo, ATo:0.5, KQo, KJo:0.4',
+      'QQ+, JJ:0.6, TT:0.3, AK, AQs, AJs:0.6, ATs:0.4, A5s:0.75, A4s:0.7, A3s:0.6, A2s:0.5, KQs:0.6, KJs:0.5, KTs:0.4, ' +
+      'K9s:0.5, K8s:0.2, Q9s:0.5, J9s:0.4, T8s:0.5, 97s:0.5, 86s:0.4, 76s:0.4, 65s:0.4, 54s:0.2, ' +
+      'AQo:0.8, AJo:0.5, ATo:0.1, KQo:0.5, KJo:0.1',
+    call:
+      '55-JJ, 44:0.9, 33:0.7, 22:0.5, A2s+, KTs+, K9s, K8s:0.25, QTs+, Q9s, Q8s:0.15, J9s+, J8s:0.2, T8s+, 97s+, 87s, 86s:0.5, ' +
+      '76s, 75s:0.15, 65s, 54s:0.4, AJo, ATo:0.4, KQo, KJo:0.35, KTo:0.05, QJo:0.15, JTo:0.1',
   },
 };
 
 /** Opener facing a 3bet: 4bet about 24bb in position, 22bb out of position; call; or fold. */
 const VS_THREEBET = {
   btnVsBb: {
-    fourBet: 'KK+, QQ:0.6, JJ:0.2, AKs, AKo:0.8, AQs:0.3, A5s:0.5, A4s:0.5, A3s:0.3, A2s:0.2, K9s:0.3, K8s:0.3, Q9s:0.2',
-    call: 'QQ, 22-JJ, A2s+, K9s+, K8s:0.4, Q9s+, J9s+, T8s+, 97s+, 86s+, 75s+, 65s, 54s, AJo+, ATo:0.5, KQo, KJo:0.5',
+    fourBet: 'KK+, QQ:0.6, JJ:0.2, AKs, AKo:0.8, AQs:0.3, A5s:0.55, A4s:0.45, A3s:0.3, A2s:0.2, K9s:0.3, K8s:0.25, Q9s:0.2',
+    call:
+      '55-QQ, 44:0.85, 33:0.7, 22:0.6, A2s+, K9s+, K8s:0.4, K7s:0.1, Q9s+, Q8s:0.2, J9s+, J8s:0.15, T8s+, 97s+, 86s+, 75s+, 65s, 54s, ' +
+      'AJo+, ATo:0.5, A9o:0.05, KQo, KJo:0.45, KTo:0.1, QJo:0.35, JTo:0.2',
   },
   utgVsIp: {
-    fourBet: 'KK+, QQ:0.5, AKs, AKo:0.6, A5s:0.3',
-    call: 'QQ, JJ, TT, 99:0.6, 88:0.3, AKo, AQs, AJs, ATs:0.5, KQs, KJs:0.5, QJs:0.4, JTs:0.3, AQo:0.3',
+    fourBet: 'KK+, QQ:0.5, AKs, AKo:0.6, A5s:0.3, A4s:0.15',
+    call: 'QQ, JJ, TT, 99:0.65, 88:0.35, 77:0.15, AKo, AQs, AJs, ATs:0.5, A5s:0.25, KQs, KJs:0.5, QJs:0.4, JTs:0.3, T9s:0.1, AQo:0.35, KQo:0.1',
   },
 };
 

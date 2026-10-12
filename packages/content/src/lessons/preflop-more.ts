@@ -486,7 +486,7 @@ export const PREFLOP_MORE_LESSONS: LessonContent[] = [
         title: 'Early opens fold less',
         body: [
           'A UTG range is already strong. In Felt’s 9-handed starter charts, QQ+ and AK make up **22%** of the UTG range.',
-          'They make up **15%** of the 6-max UTG range. They are only **6%** of the button range.',
+          'They make up **14%** of the 6-max UTG range. They are only **6%** of the button range.',
           'Most of a button range is hands that were fine to open but cannot stand a 3bet.',
           'So early openers continue with a larger share of their range. Button openers fold a larger share.',
         ],

@@ -578,7 +578,7 @@ export const FOUNDATIONS_LESSONS: LessonContent[] = [
         title: 'K72 rainbow, BTN vs BB',
         board: 'Ks7d2c',
         caption:
-          'BB 3bets KK and AK before the flop. So its calling range has few of the best top pairs. **20%** of BTN hands have 80% equity or more against BB. Only **10%** of BB hands do. BTN has both advantages and bets small with most of its range.',
+          'BB 3bets KK and AK before the flop. So its calling range has few of the best top pairs. **21%** of BTN hands have 80% equity or more against BB. Only **10%** of BB hands do. BTN has both advantages and bets small with most of its range.',
         evidence: 'solver',
       },
       {
@@ -586,7 +586,7 @@ export const FOUNDATIONS_LESSONS: LessonContent[] = [
         title: '765 two tone, BTN vs BB',
         board: '7h6h5c',
         caption:
-          'BB defends many more low connected hands. **9.6%** of its range already has two pair or better, against **5.0%** of BTN’s. BTN keeps the overpairs, but its equity edge is gone. BTN checks far more here.',
+          'BB defends many more low connected hands. **8.6%** of its range already has two pair or better, against **4.7%** of BTN’s. BTN keeps the overpairs, but its equity edge is gone. BTN checks far more here.',
         evidence: 'solver',
       },
       {
@@ -594,8 +594,8 @@ export const FOUNDATIONS_LESSONS: LessonContent[] = [
         title: 'The numbers behind both boards',
         columns: ['Flop', 'BTN equity', 'Strong hands', 'Two pair+'],
         rows: [
-          ['K♠7♦2♣', '54%', '20 vs 10%', '2.5 vs 2.9%'],
-          ['7♥6♥5♣', '48%', '4 vs 6%', '5.0 vs 9.6%'],
+          ['K♠7♦2♣', '54%', '21 vs 10%', '3.1 vs 3.1%'],
+          ['7♥6♥5♣', '49%', '3 vs 6%', '4.7 vs 8.6%'],
         ],
         note: 'BTN first, then BB. Strong hands means the share of a range with 80% or more equity against the other range. This is our estimate by Monte Carlo from Felt’s starter charts. Those charts are approximate. BTN opens 2.5bb and BB calls.',
         evidence: 'math',
@@ -613,7 +613,7 @@ export const FOUNDATIONS_LESSONS: LessonContent[] = [
         choices: ['BTN', 'BB', 'Neither'],
         answer: 0,
         explain:
-          'BB 3bets KK and AK before the flop, so BTN holds more of the strongest hands. 20% of BTN’s range has 80% or more equity, against 10% of BB’s. BB has slightly more two pair, but far fewer strong top pairs.',
+          'BB 3bets KK and AK before the flop, so BTN holds more of the strongest hands. 21% of BTN’s range has 80% or more equity, against 10% of BB’s. Both hold about 3.1% two pair or better. BB has far fewer strong top pairs.',
       },
       {
         kind: 'takeaway',

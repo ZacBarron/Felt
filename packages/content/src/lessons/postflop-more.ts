@@ -27,7 +27,7 @@ export const POSTFLOP_MORE_LESSONS: LessonContent[] = [
         kind: 'text',
         title: 'What each range holds',
         body: [
-          'In Felt’s charts, BTN opens every ace and most big cards. It folds its weakest offsuit hands.',
+          'In Felt’s charts, BTN opens every suited ace and most offsuit aces. It also opens most big cards and folds its weakest offsuit hands.',
           'BB 3bets AA to QQ and AK. It calls with many small connected hands, suited and offsuit.',
           'So BTN usually has more top pairs and overpairs on high boards. BB has more low and middle cards. Those make two pair and straights on low connected boards.',
         ],
@@ -38,11 +38,11 @@ export const POSTFLOP_MORE_LESSONS: LessonContent[] = [
         title: 'Equity and strong hands, BTN vs BB',
         columns: ['Flop', 'BTN equity', 'BTN strong', 'BB strong'],
         rows: [
-          ['A♠8♦3♣', '56.6%', '5.5%', '3.7%'],
-          ['Q♥J♦T♣', '57.7%', '16.0%', '10.0%'],
-          ['8♠8♦3♣', '53.3%', '7.1%', '11.0%'],
-          ['9♥8♥6♣', '51.5%', '5.4%', '5.2%'],
-          ['7♥6♥5♣', '48.1%', '5.0%', '9.6%'],
+          ['A♠8♦3♣', '56.3%', '5.2%', '3.9%'],
+          ['Q♥J♦T♣', '57.1%', '15.5%', '10.0%'],
+          ['8♠8♦3♣', '53.5%', '7.1%', '10.2%'],
+          ['9♥8♥6♣', '51.7%', '4.9%', '6.1%'],
+          ['7♥6♥5♣', '48.9%', '4.7%', '8.6%'],
         ],
         note:
           'Computed exactly with Felt’s core over every turn and river. BTN uses its opening chart. BB uses its calling chart, with 3bets removed. These starter charts are approximations. Strong means two pair or better. On 8♠8♦3♣ every pocket pair makes two pair, so there it means trips or better. Equity here is raw equity, before position.',
@@ -53,11 +53,11 @@ export const POSTFLOP_MORE_LESSONS: LessonContent[] = [
         title: 'Top pair or better',
         columns: ['Flop', 'BTN', 'BB'],
         rows: [
-          ['A♠8♦3♣', '30.1%', '19.2%'],
-          ['Q♥J♦T♣', '28.8%', '19.6%'],
-          ['9♥8♥6♣', '23.8%', '16.8%'],
-          ['7♥6♥5♣', '18.8%', '23.8%'],
-          ['8♠8♦3♣ (overpair or trips)', '14.1%', '13.4%'],
+          ['A♠8♦3♣', '28.9%', '18.8%'],
+          ['Q♥J♦T♣', '29.0%', '20.0%'],
+          ['9♥8♥6♣', '22.3%', '17.1%'],
+          ['7♥6♥5♣', '19.4%', '22.8%'],
+          ['8♠8♦3♣ (overpair or trips)', '14.0%', '12.4%'],
         ],
         note: 'Same ranges and method. This counts top pair and overpairs. It also counts two pair or better.',
         evidence: 'math',
@@ -67,8 +67,8 @@ export const POSTFLOP_MORE_LESSONS: LessonContent[] = [
         title: 'Reading the numbers',
         body: [
           'A♠8♦3♣ and Q♥J♦T♣ favor BTN on every count. On Q♥J♦T♣, BTN has more straights. That is largely because BB 3bets AK instead of calling.',
-          'On 8♠8♦3♣ the counts split. BTN has more equity and more overpairs, **6.9%** to **2.4%**. But BB holds more trips or better, **11.0%** to **7.1%**. It defends more hands with an eight.',
-          '9♥8♥6♣ is close to even. On 7♥6♥5♣, BB leads on every count.',
+          'On 8♠8♦3♣ the counts split. BTN has more equity and more overpairs, **6.9%** to **2.2%**. But BB holds more trips or better, **10.2%** to **7.1%**. It defends more hands with an eight.',
+          '9♥8♥6♣ is close to even. BTN has a little more equity, and BB has a few more strong hands. On 7♥6♥5♣, BB leads on every count.',
         ],
         evidence: 'math',
       },
@@ -88,7 +88,7 @@ export const POSTFLOP_MORE_LESSONS: LessonContent[] = [
         choices: ['BTN, because it has more equity', 'BB, because it defends more eights', 'Both hold about the same'],
         answer: 1,
         explain:
-          'BB holds 11.0% trips or better against BTN’s 7.1%. That is true even though BTN has more equity and more overpairs. Range advantage and nut advantage can point different ways.',
+          'BB holds 10.2% trips or better against BTN’s 7.1%. That is true even though BTN has more equity and more overpairs. Range advantage and nut advantage can point different ways.',
       },
       {
         kind: 'quiz',
@@ -96,7 +96,7 @@ export const POSTFLOP_MORE_LESSONS: LessonContent[] = [
         choices: ['7♥6♥5♣', '8♠8♦3♣', 'Q♥J♦T♣', 'A♠8♦3♣'],
         answer: 0,
         explain:
-          'On 7♥6♥5♣, BTN has 48.1% equity. So BB has 51.9%. Low connected cards hit BB’s small connected hands and pairs. On 8♠8♦3♣, BB has more trips. But BTN still has 53.3% equity.',
+          'On 7♥6♥5♣, BTN has 48.9% equity. So BB has 51.1%. Low connected cards hit BB’s small connected hands and pairs. On 8♠8♦3♣, BB has more trips. But BTN still has 53.5% equity.',
       },
       {
         kind: 'takeaway',

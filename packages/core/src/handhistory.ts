@@ -525,9 +525,9 @@ export interface OpenDeviation {
 
 /**
  * Compares first in decisions with the opening charts, hand by hand. Only
- * near pure deviations count, because each hand comes up rarely: a raise
- * with a hand the chart opens 5% of the time or less, or a fold with one it
- * opens 95% or more. Limps are flagged, except from the small blind, where
+ * pure deviations count: a raise with a hand the chart never opens, or a fold
+ * with one it always opens. Any action the chart takes at all, even 5% of the
+ * time, is part of the mix. Limps are flagged, except from the small blind, where
  * limping is a valid strategy.
  */
 export function openDeviations(hands: readonly HeroHand[], raiseFreq: (seat: string, hand: HandClass) => number | undefined): OpenDeviation[] {
@@ -538,7 +538,7 @@ export function openDeviations(hands: readonly HeroHand[], raiseFreq: (seat: str
     const f = raiseFreq(seat, h.hand);
     if (f === undefined) continue;
     const kind =
-      h.openAction === 'limp' ? (seat === 'SB' ? undefined : 'limp') : h.openAction === 'raise' && f <= 0.05 ? 'too loose' : h.openAction === 'fold' && f >= 0.95 ? 'too tight' : undefined;
+      h.openAction === 'limp' ? (seat === 'SB' ? undefined : 'limp') : h.openAction === 'raise' && f < 0.01 ? 'too loose' : h.openAction === 'fold' && f > 0.99 ? 'too tight' : undefined;
     if (!kind) continue;
     const key = `${seat}:${h.hand}:${kind}`;
     const existing = found.get(key);

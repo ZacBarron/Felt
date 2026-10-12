@@ -1,4 +1,4 @@
-import { actionFrequencies, actionRange, buildChart, positionsFor, rangePercent } from '@felt/core';
+import { actionFrequencies, actionRange, buildChart, comboCount, positionsFor, rangePercent } from '@felt/core';
 import { describe, expect, it } from 'vitest';
 import { CURRICULUM, PLAYER_TYPES, STARTER_CHARTS, TELLS } from '../src';
 
@@ -47,6 +47,51 @@ describe('starter charts', () => {
       expect(folds / reached.length).toBeGreaterThan(0.3);
       // The nuts never fold.
       expect(c.mixes.get('AA')!.fold).toBeUndefined();
+    }
+  });
+
+  it('match the open rates and range shares quoted in lessons', () => {
+    const pct = (id: string, action: string, digits = 1) => Number(((actionFrequencies(chart(id))[action] ?? 0) * 100).toFixed(digits));
+    expect(['utg', 'utgp1', 'utgp2', 'lj'].map((p) => pct(`9max-100-rfi-${p}`, 'raise'))).toEqual([11.7, 12.9, 15.3, 17.9]);
+    expect(['co', 'btn', 'sb'].map((p) => pct(`9max-100-rfi-${p}`, 'raise', 0))).toEqual([28, 43, 42]);
+    expect([pct('9max-100-bb-vs-btn', '3bet', 0), pct('9max-100-bb-vs-btn', 'call', 0)]).toEqual([10, 47]);
+    expect([pct('9max-100-btn-vs-co', '3bet', 0), pct('9max-100-btn-vs-co', 'call', 0)]).toEqual([8, 11]);
+    expect(pct('9max-100-sb-vs-btn', '3bet', 0)).toBe(17);
+    // QQ+ and AK as a share of an opening range.
+    const premiumShare = (id: string) => {
+      const range = actionRange(chart(id), 'raise');
+      let all = 0;
+      let premium = 0;
+      for (const [hand, f] of range) {
+        all += f * comboCount(hand);
+        if (['AA', 'KK', 'QQ', 'AKs', 'AKo'].includes(hand)) premium += f * comboCount(hand);
+      }
+      return Math.round((premium / all) * 100);
+    };
+    expect(['9max-100-rfi-utg', '6max-100-rfi-utg', '9max-100-rfi-btn'].map(premiumShare)).toEqual([22, 14, 6]);
+  });
+
+  it('keep opening ranges in a sensible order, hand by hand', () => {
+    const ranks = '23456789TJQKA';
+    const seats = ['utg', 'utgp1', 'utgp2', 'lj', 'hj', 'co', 'btn'].map((p) => chart(`9max-100-rfi-${p}`));
+    const raise = (c: ReturnType<typeof chart>, hand: string) => c.mixes.get(hand)?.raise ?? 0;
+    // A later seat never opens a hand less often than an earlier one.
+    for (let i = 1; i < seats.length; i++) for (const hand of seats[i].mixes.keys()) expect(raise(seats[i], hand), hand).toBeGreaterThanOrEqual(raise(seats[i - 1], hand));
+    for (const c of [...seats, chart('9max-100-rfi-sb')]) {
+      for (let r = 1; r < 13; r++) expect(raise(c, ranks[r] + ranks[r]), c.spec.id).toBeGreaterThanOrEqual(raise(c, ranks[r - 1] + ranks[r - 1]));
+      // A weaker kicker never opens more often, except that A5s to A2s (and A5o) may beat A6 to A8: wheels and blockers.
+      for (const suit of ['s', 'o']) {
+        for (let hi = 2; hi < 13; hi++) {
+          for (let lo = 1; lo < hi; lo++) {
+            const better = ranks[hi] + ranks[lo] + suit;
+            const worse = ranks[hi] + ranks[lo - 1] + suit;
+            if (ranks[hi] === 'A' && lo === 4) continue;
+            expect(raise(c, worse), `${c.spec.id} ${worse} vs ${better}`).toBeLessThanOrEqual(raise(c, better));
+          }
+        }
+      }
+      // Suited never opens less often than offsuit.
+      for (const [hand, mix] of c.mixes) if (hand.endsWith('o')) expect(mix.raise ?? 0, hand).toBeLessThanOrEqual(raise(c, hand.slice(0, 2) + 's'));
     }
   });
 
@@ -201,9 +246,33 @@ describe('lessons', () => {
     expect(primaryAction(mix('9max-100-rfi-utg', 'KJo'))).toBe('fold');
     expect(primaryAction(mix('9max-100-rfi-lj', 'A3s'))).toBe('raise');
     expect(primaryAction(mix('9max-100-rfi-btn', 'K5s'))).toBe('raise');
-    expect(primaryAction(mix('9max-100-rfi-co', 'Q7s'))).toBe('fold');
-    expect(primaryAction(mix('9max-100-rfi-sb', 'Q4s'))).toBe('raise');
-    expect(primaryAction(mix('9max-100-rfi-sb', 'K7o'))).toBe('fold');
+    expect(mix('9max-100-rfi-co', 'Q7s').raise).toBeCloseTo(0.45);
+    expect(mix('9max-100-rfi-co', 'Q9s')).toEqual({ raise: 1 });
+    expect(mix('9max-100-rfi-co', 'Q4s')).toEqual({ fold: 1 });
+    expect(mix('9max-100-rfi-sb', 'Q4s')).toEqual({ raise: 1 });
+    expect(mix('9max-100-rfi-sb', 'Q3s').raise).toBeCloseTo(0.6);
+    expect(mix('9max-100-rfi-sb', 'Q2s').raise).toBeCloseTo(0.35);
+    expect(mix('9max-100-rfi-sb', 'K7o').raise).toBeCloseTo(0.35);
+    expect(mix('9max-100-rfi-sb', 'K9o')).toEqual({ raise: 1 });
+    // Early position lesson captions and quiz explanations.
+    expect(mix('9max-100-rfi-utg', '77')).toEqual({ raise: 1 });
+    expect(mix('9max-100-rfi-utg', '55').raise).toBeCloseTo(0.5);
+    expect(mix('9max-100-rfi-utg', 'T9s').raise).toBeCloseTo(0.5);
+    expect(mix('9max-100-rfi-utg', 'A5s').raise).toBeCloseTo(0.6);
+    expect(mix('9max-100-rfi-utg', 'KQo').raise).toBeCloseTo(0.7);
+    expect(mix('9max-100-rfi-utgp1', 'KJo').raise).toBeCloseTo(0.1);
+    expect(mix('9max-100-rfi-lj', 'A2s').raise).toBeCloseTo(0.8);
+    expect(mix('9max-100-rfi-lj', '44')).toEqual({ raise: 1 });
+    expect(mix('9max-100-rfi-btn', 'K2s')).toEqual({ raise: 1 });
+    expect(mix('9max-100-rfi-btn', 'A4o')).toEqual({ raise: 1 });
+    expect(mix('9max-100-rfi-btn', 'K5o').raise).toBeCloseTo(0.1);
+    expect(mix('9max-100-rfi-btn', 'K4o')).toEqual({ fold: 1 });
+    expect(mix('9max-100-bb-vs-btn', 'J5s')).toEqual({ call: 1 });
+    expect(mix('9max-100-bb-vs-btn', 'A4s')['3bet']).toBeCloseTo(0.6);
+    expect(mix('9max-100-bb-vs-btn', 'A5s')['3bet']).toBeGreaterThan(0.6);
+    expect(mix('9max-100-bb-vs-btn', 'A3s')['3bet']).toBeLessThan(0.6);
+    expect(mix('9max-100-bb-vs-btn', '42s')).toEqual({ call: 1 });
+    for (const hand of ['T6o', '93o', '64o']) expect(mix('9max-100-bb-vs-btn', hand)).toEqual({ fold: 1 });
     expect(primaryAction(mix('9max-100-bb-vs-btn', 'J6s'))).toBe('call');
     expect(scoreRecall(mix('9max-100-bb-vs-btn', 'A4s'), '3bet')).toBe(1);
     expect(scoreRecall(mix('9max-100-bb-vs-btn', 'A4s'), 'call')).toBe(1);

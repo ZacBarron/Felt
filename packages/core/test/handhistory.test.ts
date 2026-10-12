@@ -158,10 +158,10 @@ describe('hero stats and leaks', () => {
 
   it('compares only deep cash hands, by players left behind, and only near pure deviations', () => {
     // The cash hand is a 6-handed CO open: three players behind, so the 9-handed CO chart.
-    const cashOnly = (seat: string, hand: string) => (seat === 'CO' && hand === 'KQs' ? 0.04 : undefined);
-    expect(openDeviations(views, cashOnly)).toEqual([{ seat: 'CO', hand: 'KQs', chartRaise: 0.04, heroAction: 'raise', kind: 'too loose', count: 1 }]);
-    // A 10% open is a mix, not a leak.
-    expect(openDeviations(views, () => 0.1)).toEqual([]);
+    const cashOnly = (seat: string, hand: string) => (seat === 'CO' && hand === 'KQs' ? 0 : undefined);
+    expect(openDeviations(views, cashOnly)).toEqual([{ seat: 'CO', hand: 'KQs', chartRaise: 0, heroAction: 'raise', kind: 'too loose', count: 1 }]);
+    // Even a 5% open is a mix, not a leak.
+    expect(openDeviations(views, () => 0.05)).toEqual([]);
     // The tournament hand (AJo, UTG+1) is never compared with cash charts.
     expect(openDeviations(views, (seat) => (seat === 'UTG+1' ? 0 : undefined))).toEqual([]);
     expect(openRates(views)).toEqual([{ seat: 'CO', chances: 1, opens: 1, rate: 1, low: 1, high: 1 }]);

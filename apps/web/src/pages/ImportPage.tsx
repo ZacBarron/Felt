@@ -306,7 +306,7 @@ export function ImportPage() {
           )}
           <div className="section-footer">
             We compare against Felt's approximate starter charts, which assume a 2.5bb open. We only list clear differences. That means opening a hand
-            the chart opens 5% of the time or less, or folding one it opens 95% of the time or more. Small blind limps are a fine strategy, so we leave
+            the chart never opens, or folding one it always opens. Anything the chart does some of the time counts as part of the mix. Small blind limps are a fine strategy, so we leave
             them out.
           </div>
         </section>
