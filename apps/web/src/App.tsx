@@ -1,25 +1,14 @@
 import { NavLink, Route, Routes } from 'react-router-dom';
+import { NAV_SECTIONS, TABS } from './nav';
 import { DashboardPage } from './pages/DashboardPage';
+import { DrillsPage } from './pages/DrillsPage';
 import { LabPage } from './pages/LabPage';
 import { LearnPage } from './pages/LearnPage';
+import { MorePage } from './pages/MorePage';
 import { PlannedPage } from './pages/PlannedPage';
 import { RangesPage } from './pages/RangesPage';
-
-const NAV = [
-  { section: 'Train' },
-  { to: '/', label: 'Today' },
-  { to: '/learn', label: 'Learn' },
-  { to: '/review', label: 'Review' },
-  { to: '/drills', label: 'Drills' },
-  { to: '/scenarios', label: 'Scenarios' },
-  { section: 'Study' },
-  { to: '/ranges', label: 'Ranges' },
-  { to: '/lab', label: 'Spot Lab' },
-  { to: '/exploit', label: 'Exploits' },
-  { section: 'Play' },
-  { to: '/log', label: 'Log' },
-  { to: '/stats', label: 'Stats' },
-] as const;
+import { ReviewPage } from './pages/ReviewPage';
+import { SettingsPage } from './pages/SettingsPage';
 
 export function App() {
   return (
@@ -28,32 +17,40 @@ export function App() {
         <div className="brand">
           F<span>e</span>lt
         </div>
-        {NAV.map((item) =>
-          'section' in item ? (
-            <div key={item.section} className="section">
-              {item.section}
-            </div>
-          ) : (
-            <NavLink key={item.to} to={item.to} end={item.to === '/'}>
-              {item.label}
-            </NavLink>
-          ),
-        )}
+        {NAV_SECTIONS.map(({ section, items }) => (
+          <div key={section} className="nav-group">
+            <div className="section">{section}</div>
+            {items.map((item) => (
+              <NavLink key={item.to} to={item.to} end={item.to === '/'}>
+                {item.label}
+              </NavLink>
+            ))}
+          </div>
+        ))}
       </nav>
       <main>
         <Routes>
           <Route path="/" element={<DashboardPage />} />
+          <Route path="/review" element={<ReviewPage />} />
+          <Route path="/drills" element={<DrillsPage />} />
           <Route path="/learn" element={<LearnPage />} />
           <Route path="/ranges" element={<RangesPage />} />
           <Route path="/lab" element={<LabPage />} />
-          <Route path="/review" element={<PlannedPage feature="review" />} />
-          <Route path="/drills" element={<PlannedPage feature="drills" />} />
+          <Route path="/settings" element={<SettingsPage />} />
+          <Route path="/more" element={<MorePage />} />
           <Route path="/scenarios" element={<PlannedPage feature="scenarios" />} />
           <Route path="/exploit" element={<PlannedPage feature="exploit" />} />
           <Route path="/log" element={<PlannedPage feature="log" />} />
           <Route path="/stats" element={<PlannedPage feature="stats" />} />
         </Routes>
       </main>
+      <nav className="tabbar">
+        {TABS.map((t) => (
+          <NavLink key={t.to} to={t.to} end={t.to === '/'}>
+            {t.label}
+          </NavLink>
+        ))}
+      </nav>
     </div>
   );
 }

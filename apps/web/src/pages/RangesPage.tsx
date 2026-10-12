@@ -1,13 +1,17 @@
-import { STARTER_CHARTS } from '@felt/content';
-import { actionFrequencies, buildChart, comboCount, type HandClass } from '@felt/core';
-import { useMemo, useState } from 'react';
+import { actionFrequencies, chartFormatLabel, comboCount, type HandClass } from '@felt/core';
+import { useState } from 'react';
 import { actionColor, sortActions } from '../components/actionColors';
 import { RangeGrid } from '../components/RangeGrid';
+import { chartsForGame } from '../state/charts';
+import { useSettings } from '../state/settings';
 
 export function RangesPage() {
-  const [chartId, setChartId] = useState(STARTER_CHARTS[0].id);
+  const { settings } = useSettings();
+  const fit = chartsForGame(settings.game);
+  const [chartId, setChartId] = useState<string>();
   const [selected, setSelected] = useState<HandClass>('AKs');
-  const chart = useMemo(() => buildChart(STARTER_CHARTS.find((c) => c.id === chartId)!), [chartId]);
+  const chart = fit.charts.find((c) => c.spec.id === chartId) ?? fit.charts[0];
+  if (!chart) return <p className="muted">No charts for this game yet.</p>;
   const totals = actionFrequencies(chart);
   const labels: Record<string, string> = { fold: 'Fold' };
   for (const a of chart.spec.actions) labels[a.id] = a.label;
@@ -24,18 +28,22 @@ export function RangesPage() {
       </div>
 
       <div className="row">
-        <select value={chartId} onChange={(e) => setChartId(e.target.value)}>
-          {STARTER_CHARTS.map((c) => (
-            <option key={c.id} value={c.id}>
-              {c.hero} {c.versus ? `vs ${c.versus}` : ''}: {c.title}
+        <select value={chart.spec.id} onChange={(e) => setChartId(e.target.value)}>
+          {fit.charts.map((c) => (
+            <option key={c.spec.id} value={c.spec.id}>
+              {c.spec.title}
             </option>
           ))}
         </select>
-        <span className="pill">{chart.spec.format}</span>
+        <span className="pill">{chartFormatLabel(chart.spec)}</span>
+        {chart.spec.basis === 'exploit' && <span className="pill">exploit, not GTO</span>}
         {chart.spec.source === 'starter-approx' && <span className="pill">starter approximation</span>}
+        {!fit.exact && <span className="pill">no {settings.game.tableSize}-handed charts yet</span>}
       </div>
 
-      <div className="grid-2" style={{ gridTemplateColumns: 'minmax(300px, 620px) minmax(240px, 1fr)' }}>
+      {chart.spec.versus && <p className="muted" style={{ margin: 0 }}>{chart.spec.versus}</p>}
+
+      <div className="grid-2" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))' }}>
         <RangeGrid mixes={chart.mixes} selected={selected} onSelect={setSelected} />
 
         <div className="stack">

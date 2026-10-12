@@ -1,6 +1,6 @@
 # Roadmap
 
-Ordered so each phase is usable on its own and the core training loop (learn, drill, review) works as early as possible.
+Ordered for the main game (live 1/3 cash, 9 handed, on a phone) and so the core loop (learn, drill, review) works as early as possible.
 
 ## Phase 0: Foundation (done)
 
@@ -10,70 +10,83 @@ Ordered so each phase is usable on its own and the core training loop (learn, dr
 - [x] Pot math: pot odds, MDF, alpha, bluff share, call/bet/bluff EV, outs, SPR
 - [x] Decision grading by EV loss with mixed strategy awareness
 - [x] FSRS scheduler wrapper graded from accuracy and speed
-- [x] Starter 6-max 100bb preflop charts (approximate, labelled)
 - [x] Web shell, Ranges viewer, Spot Lab demo, curriculum map
 - [x] Unit tests and CI
 
-## Phase 1: Range trainer and spaced repetition (the core loop)
+## Phase 1: Range trainer, spaced repetition, settings (mostly done)
 
-- [ ] Local persistence with IndexedDB (Dexie): cards, review logs, settings
-- [ ] Range painting drill: paint the grid, scored per combo, with a diff view of misses
-- [ ] Quick recall drill: "HJ, 100bb, KTo?" with a timer
-- [ ] Daily review queue with FSRS, target times per card type
-- [ ] Today page: reviews due, streak, time studied
-- [ ] Lessons for Preflop RFI and BB defense, each generating drill cards
-- [ ] PWA: installable, works offline
+- [x] Game settings: cash or tournament, live or online, 2 to 10 handed, stakes, straddle, ante, rake, stack depth, money or bb display
+- [x] Presets: live 1/3 and 2/5 full ring, online 6-max, tournament 9 handed
+- [x] Seat names for every table size; charts fall back to the nearest table size that has charts
+- [x] Starter 9 handed charts: every open from UTG to SB, BB vs BTN, BTN vs one limper (exploit)
+- [x] Local persistence with IndexedDB (Dexie): cards and review logs
+- [x] Quick recall drill: seat strip, real cards, timed, full mix and chart shown after
+- [x] Range painting drill: drag to paint (touch friendly), scored per combo, misses outlined
+- [x] Deck built from each chart's edge hands, then a full chart paint card
+- [x] Daily review queue with FSRS and a new card limit; missed cards return in the same session
+- [x] Today page: due, new, streak, accuracy, recall speed
+- [x] Free practice mode that does not touch the schedule
+- [x] Phone layout with a bottom tab bar; installable PWA that works offline
+- [ ] Lessons for 9 handed opens and BB defense, each linked to its drill cards
+- [ ] Chart editor: enter or paste any chart (range notation) as a `custom` source
 
-## Phase 2: Math and visual fluency
+## Phase 2: Live game essentials
+
+- [ ] Session tracker: one tap start and stop, stakes, buy ins, cash out, venue, notes
+- [ ] Fast hand entry on a phone: card picker, seat chips, action shorthand parser, money amounts
+- [ ] Hand replayer on the table component; flag a hand to open it in Spot Lab
+- [ ] Results: profit in money and bb, bb/hour, profit graph, variance bands
+- [ ] Live charts: iso raise and overlimp vs 1 and 2+ limpers from every seat, facing large live open sizes, straddled pots
+- [ ] Live pool exploits track: lessons and drills on limpers, multiway, big river bets
+- [ ] Rake aware preflop: show how the rake setting tightens calling ranges
+
+## Phase 3: Solver data we generate ourselves
+
+See [SOLVER_DATA.md](SOLVER_DATA.md).
+
+- [ ] Normalized node format and import validator
+- [ ] Batch runner for an open source postflop solver on a laptop or cloud machine
+- [ ] First postflop pack: single raised pots BTN vs BB and CO vs BB across a representative flop set
+- [ ] Simplified preflop solver in `@felt/core` to regenerate charts for any table size, stack depth, open size and rake
+- [ ] Data packs downloaded into the app, so the phone never runs a solve
+
+## Phase 4: Math and the Spot Lab builder
 
 - [ ] Math speed drills: pot odds, MDF, alpha, combos, outs
 - [ ] Equity estimation drill (hand vs range) scored by error
-- [ ] Spot Lab: build any spot (positions, stacks, actions), equity in a Web Worker
+- [ ] Spot Lab: build any spot (seats, stacks, actions), equity in a Web Worker
 - [ ] Range vs range equity and equity distribution charts
 - [ ] Foundations track lessons
 
-## Phase 3: Logging and results
-
-- [ ] Session tracker: start/stop, stakes, buy ins, cash out, notes
-- [ ] Fast hand entry: card picker, position chips, action shorthand parser
-- [ ] Hand replayer on the table component
-- [ ] Results stats: bb/100, bb/hour, profit graph, variance bands
-- [ ] Flag hand -> opens in Spot Lab
-
-## Phase 4: Scenarios and challenges
+## Phase 5: Scenarios and challenges
 
 - [ ] Scenario engine: walk a hand tree, grade each decision by EV loss
-- [ ] Curated scenario packs per lesson
+- [ ] Curated scenario packs per lesson; replay your own logged hands as scenarios
 - [ ] Daily challenge, speed rounds, personal bests, module boss fights
 - [ ] Skill stats: EV loss trend, accuracy by position and street, mastery levels
-
-## Phase 5: Solver library
-
-- [ ] Import pipeline for solver exports into a normalized node format (see SOLVER_DATA.md)
-- [ ] Replace starter preflop charts with solver exact charts (multiple stack depths)
-- [ ] Postflop library: common single raised and 3bet pot flops, aggregate reports by texture
-- [ ] Postflop GTO track lessons built on the library
 
 ## Phase 6: Exploitation and tells
 
 - [ ] Player archetypes and leak profiles
 - [ ] Node locked comparisons: GTO vs best response to each archetype
-- [ ] Opponent notes and tags from the logger, with population stats over time
+- [ ] Opponent notes and tags from the logger, with pool stats over time
 - [ ] Tells library with reliability ratings
-- [ ] Exploitation track lessons
 
-## Phase 7: Coach and sync
+## Phase 7: Tournaments, coach and sync
 
-- [ ] AI hand review: explain a logged hand against solver data and your leak history (Claude API)
-- [ ] Voice note hand capture, parsed into the hand format
-- [ ] Online hand history import
+- [ ] Push/fold Nash charts and ICM calculator, computed in `@felt/core`
+- [ ] Tournament track lessons (ICM, bubble, short stack play)
+- [ ] AI hand review grounded in solver data and your leak history (Claude API)
+- [ ] Voice note hand capture; online hand history import
 - [ ] Optional cloud sync and backup
-- [ ] Leak driven study plans: the app picks next week's lessons from your stats
+- [ ] Leak driven study plans
 
-## Open questions
+## Decisions
 
-1. Formats: cash, MTT, or both? Online, live, or both? (MTT adds ICM and push/fold tracks.)
-2. Main stakes and table size (6-max vs full ring changes every chart).
-3. Solver access: do you own PioSolver, GTO+, or a GTO Wizard subscription? This decides the Phase 5 import path.
-4. Device: mostly phone, laptop, or both?
-5. Learning style: confirm or correct the assumptions in CONCEPT.md.
+| Question | Answer |
+| --- | --- |
+| Formats | All, live cash first |
+| Main game | 1/3 NL, 9 handed |
+| Solver | None owned; we generate our own data (Phase 3) |
+| Devices | Both, 80% phone, so phone first |
+| Learning style | Confirmed (see CONCEPT.md) |

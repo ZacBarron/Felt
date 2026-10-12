@@ -25,7 +25,11 @@ describe('buildChart', () => {
     const chart = buildChart({
       id: 't',
       title: 't',
-      format: 't',
+      game: 'cash',
+      tableSize: 6,
+      stackBb: 100,
+      spot: 'vs-open',
+      basis: 'gto',
       hero: 'BB',
       source: 'custom',
       actions: [

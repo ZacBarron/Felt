@@ -14,31 +14,33 @@ export interface Seat {
 }
 
 interface Props {
-  /** Seats clockwise starting from hero, who is drawn at the bottom. */
+  /** Seats clockwise starting from hero, who is drawn at the bottom. Up to 10. */
   seats: Seat[];
   board: Card[];
   pot: number;
+  /** Formats an amount held in big blinds (money or bb, per settings). */
+  format?: (bb: number) => string;
 }
 
-// Seat anchors (percent of the table box) for up to 6 players, hero first.
-const ANCHORS: [number, number][] = [
-  [50, 90],
-  [11, 70],
-  [11, 24],
-  [50, 8],
-  [89, 24],
-  [89, 70],
-];
+/** Seat anchors (percent of the table box) spaced around an ellipse, hero at the bottom, clockwise. */
+function anchors(count: number): [number, number][] {
+  return Array.from({ length: count }, (_, i) => {
+    const angle = Math.PI / 2 + (i * 2 * Math.PI) / count;
+    return [50 + 41 * Math.cos(angle), 50 + 41 * Math.sin(angle)];
+  });
+}
 
 const toward = ([x, y]: [number, number], t: number): [number, number] => [x + (50 - x) * t, y + (50 - y) * t];
 
-export function PokerTable({ seats, board, pot }: Props) {
+export function PokerTable({ seats, board, pot, format = (bb) => `${fmt(bb)}bb` }: Props) {
+  const points = anchors(Math.min(seats.length, 10));
+  const compact = seats.length > 6;
   return (
-    <div style={{ position: 'relative', width: '100%', aspectRatio: '16 / 10', minHeight: 300 }}>
+    <div className="poker-table" style={{ position: 'relative', width: '100%' }}>
       <div
         style={{
           position: 'absolute',
-          inset: '12% 9%',
+          inset: 'var(--felt-inset)',
           borderRadius: '50% / 50%',
           background: 'radial-gradient(ellipse at center, #1b7a51 0%, var(--felt) 55%, var(--felt-edge) 100%)',
           border: '10px solid #3a2a1c',
@@ -52,12 +54,12 @@ export function PokerTable({ seats, board, pot }: Props) {
             <PlayingCard key={c} card={c} />
           ))}
         </div>
-        <div style={{ marginTop: 6, fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>Pot {fmt(pot)}bb</div>
+        <div style={{ marginTop: 6, fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>Pot {format(pot)}</div>
       </div>
 
-      {seats.slice(0, 6).map((seat, i) => {
-        const [x, y] = ANCHORS[i];
-        const [bx, by] = toward(ANCHORS[i], 0.42);
+      {seats.slice(0, 10).map((seat, i) => {
+        const [x, y] = points[i];
+        const [bx, by] = toward(points[i], 0.42);
         return (
           <div key={seat.position}>
             <div
@@ -89,14 +91,14 @@ export function PokerTable({ seats, board, pot }: Props) {
                   color: seat.isHero ? '#06120c' : 'var(--text)',
                   border: '1px solid var(--border)',
                   borderRadius: 8,
-                  padding: '2px 10px',
-                  fontSize: 12,
+                  padding: compact ? '1px 5px' : '2px 10px',
+                  fontSize: compact ? 10 : 12,
                   textAlign: 'center',
-                  minWidth: 70,
+                  minWidth: compact ? 48 : 70,
                 }}
               >
                 <div style={{ fontWeight: 700 }}>{seat.position}</div>
-                <div style={{ fontVariantNumeric: 'tabular-nums' }}>{fmt(seat.stack)}bb</div>
+                <div style={{ fontVariantNumeric: 'tabular-nums' }}>{format(seat.stack)}</div>
               </div>
               {seat.action && <div className="pill">{seat.action}</div>}
             </div>
@@ -115,7 +117,7 @@ export function PokerTable({ seats, board, pot }: Props) {
                 }}
               >
                 <span style={{ width: 12, height: 12, borderRadius: '50%', background: '#f5d90a', border: '2px dashed #8a6d00' }} />
-                {fmt(seat.bet)}
+                {format(seat.bet)}
               </div>
             ) : null}
           </div>

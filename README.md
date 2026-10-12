@@ -17,7 +17,13 @@ Read the full concept in [docs/CONCEPT.md](docs/CONCEPT.md) and the build plan i
 
 ## Status
 
-Phase 0 (foundation) is done: the poker engine, starter charts, curriculum map, and an app shell with a working Ranges viewer and Spot Lab demo. Next up is Phase 1, the range trainer and daily review queue.
+Built for live 1/3 cash, 9 handed, on a phone first, with settings for any stakes, table size (2 to 10), format and rake.
+
+Working now: the poker engine, game settings and presets, starter 9 handed and 6 handed charts, a daily spaced repetition review (quick recall and range painting drills), free practice, a Today page with streak and accuracy, the Ranges viewer, the Spot Lab, and an installable offline phone app. Next up: the live session and hand logger (Phase 2) and generating our own solver data (Phase 3). See the [roadmap](docs/ROADMAP.md).
+
+### Install on your phone
+
+Deploy the built app (`pnpm build` outputs `apps/web/dist`) to any static host, open it in Safari or Chrome, and choose "Add to Home Screen". It works offline and your study data stays on the device.
 
 ## Getting started
 
@@ -34,7 +40,7 @@ pnpm build
 ## Layout
 
 ```
-packages/core      poker engine: cards, evaluator, ranges, equity, pot math, grading, FSRS
+packages/core      poker engine: cards, evaluator, ranges, equity, pot math, grading, FSRS, settings, drills
 packages/content   charts and curriculum data
 apps/web           React app
 docs/              concept, roadmap, architecture, data model, curriculum, solver data
@@ -47,4 +53,4 @@ docs/              concept, roadmap, architecture, data model, curriculum, solve
 - [ARCHITECTURE.md](docs/ARCHITECTURE.md): stack and key design decisions
 - [DATA_MODEL.md](docs/DATA_MODEL.md): stored entities and the hand shorthand
 - [CURRICULUM.md](docs/CURRICULUM.md): how lessons are taught and mastered
-- [SOLVER_DATA.md](docs/SOLVER_DATA.md): where strategy data comes from
+- [SOLVER_DATA.md](docs/SOLVER_DATA.md): where strategy data comes from, and how we generate it without buying a solver

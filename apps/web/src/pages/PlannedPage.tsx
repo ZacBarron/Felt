@@ -1,25 +1,7 @@
 const FEATURES = {
-  review: {
-    title: 'Review',
-    phase: 'Phase 1',
-    points: [
-      'Daily queue scheduled by FSRS, mixing range recall, spot decisions, math and concepts',
-      'Graded automatically from accuracy and speed, no self rating',
-      'Leaks from your logged hands become new cards',
-    ],
-  },
-  drills: {
-    title: 'Drills and challenges',
-    phase: 'Phase 1 to 4',
-    points: [
-      'Range painting: fill the grid for a position, scored cell by cell',
-      'Speed rounds: 60 seconds of pot odds, MDF and combo counting',
-      'Daily challenge, streaks, and a boss fight to finish each module',
-    ],
-  },
   scenarios: {
     title: 'Scenarios',
-    phase: 'Phase 4',
+    phase: 'Phase 5',
     points: [
       'Play full hands street by street against a solver strategy',
       'Every decision graded by EV loss: best, correct, inaccuracy, mistake, blunder',
@@ -37,7 +19,7 @@ const FEATURES = {
   },
   log: {
     title: 'Session and hand log',
-    phase: 'Phase 3',
+    phase: 'Phase 2',
     points: [
       'One tap session start and stop with buy in, cash out and stakes',
       'Hand entry in under 20 seconds: card picker, position chips, action shorthand',
@@ -46,7 +28,7 @@ const FEATURES = {
   },
   stats: {
     title: 'Stats',
-    phase: 'Phase 3',
+    phase: 'Phase 2',
     points: [
       'Results: win rate in bb/100 and per hour, bankroll graph, variance bands',
       'Skill: drill accuracy and speed by topic, EV loss trend, retention',

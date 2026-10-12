@@ -1,4 +1,5 @@
 import { ALL_HAND_CLASSES, comboCount, type HandClass, parseRange } from './ranges';
+import type { GameFormat, Position } from './settings';
 
 /**
  * Preflop charts with mixed strategies.
@@ -18,14 +19,42 @@ export interface ChartActionSpec {
 export interface ChartSpec {
   id: string;
   title: string;
-  /** e.g. "6-max cash, 100bb" */
-  format: string;
-  hero: string;
+  game: GameFormat;
+  tableSize: number;
+  stackBb: number;
+  hero: Position;
   /** Who acted before hero and how, e.g. "BTN opens 2.5bb". Empty for opens. */
   versus?: string;
+  /** Spot family, used to group charts and order the drill deck. */
+  spot: 'rfi' | 'vs-open' | 'vs-3bet' | 'vs-limp' | 'push-fold';
+  /** Equilibrium baseline, or a deliberate exploit of a player pool. */
+  basis: 'gto' | 'exploit';
   /** Where the numbers come from. Starter charts are approximations. */
   source: 'starter-approx' | 'solver-import' | 'custom';
   actions: ChartActionSpec[];
+}
+
+export function chartFormatLabel(spec: ChartSpec): string {
+  const game = spec.game === 'mtt' ? 'tournament' : 'cash';
+  return `${spec.tableSize}-handed ${game}, ${spec.stackBb}bb`;
+}
+
+/** Charts for a table size, falling back to the nearest size that has charts. */
+export function chartsForTable<T extends Pick<ChartSpec, 'tableSize' | 'game'>>(
+  charts: readonly T[],
+  tableSize: number,
+  game: GameFormat,
+): { charts: T[]; tableSize: number; exact: boolean } {
+  const pool = charts.filter((c) => c.game === game).length > 0 ? charts.filter((c) => c.game === game) : [...charts];
+  if (pool.length === 0) return { charts: [], tableSize, exact: false };
+  const sizes = [...new Set(pool.map((c) => c.tableSize))];
+  // Nearest size wins; ties go to the larger table (ranges err tight).
+  const best = sizes.reduce((a, b) => {
+    const da = Math.abs(a - tableSize);
+    const db = Math.abs(b - tableSize);
+    return db < da || (db === da && b > a) ? b : a;
+  });
+  return { charts: pool.filter((c) => c.tableSize === best), tableSize: best, exact: best === tableSize };
 }
 
 /** Frequency of each action (plus "fold") for one hand class. */

@@ -8,10 +8,11 @@
 | Monorepo | pnpm workspaces | Engine is testable and reusable outside the UI |
 | UI | React 18 + Vite | Fast dev loop, simple static deploy |
 | Routing | React Router | |
-| Storage (Phase 1) | IndexedDB via Dexie | Local first, offline at the table |
-| App shell (Phase 1) | PWA | Installable on phone without app stores |
+| Storage | IndexedDB via Dexie | Local first, offline at the table |
+| Settings | localStorage | Small, read on every page |
+| App shell | PWA (vite-plugin-pwa) | Installable on phone without app stores |
 | Scheduling | ts-fsrs | Proven FSRS implementation |
-| Heavy compute (Phase 2) | Web Workers | Equity sims off the main thread |
+| Heavy compute (Phase 4) | Web Workers | Equity sims off the main thread |
 | Tests | Vitest | |
 | Sync (Phase 7) | TBD (Supabase or similar) | Optional; local data stays the source of truth |
 | AI coach (Phase 7) | Claude API | Hand explanations grounded in solver data |
@@ -30,9 +31,13 @@ felt/
       strategy    solver nodes, EV loss grading
       charts      preflop charts with mixed strategies
       srs         FSRS wrapper graded by accuracy and speed
+      settings    game settings, seat names per table size, rake, money formatting
+      drills      edge hands, recall and painting scores, deck and queue selection
     content/    @felt/content  Data: charts, curriculum, later lessons and scenarios
   apps/
-    web/        @felt/web      The React app
+    web/        @felt/web      The React app (phone first)
+      state/      settings, IndexedDB, review queue
+      drills/     quick recall and painting drills
   docs/                        Concept, roadmap, design notes
 ```
 

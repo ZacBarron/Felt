@@ -1,22 +1,45 @@
 # Solver Data
 
-GTO answers are only as good as the data behind them. This doc covers where Felt's strategy data comes from and how it gets in.
+GTO answers are only as good as the data behind them. This doc covers where Felt's strategy data comes from, how we get solver quality data without buying a solver, and how it gets into the app.
 
 ## Current state
 
-The starter preflop charts in `packages/content/src/charts.ts` are hand-written approximations of widely published 6-max 100bb solutions. They are marked `source: 'starter-approx'` and the UI labels them. They are good enough to start drilling structure (which hands open where) but not for fine frequencies.
+The starter charts in `packages/content/src/charts.ts` are hand-written approximations of widely published 100bb solutions for 9 handed and 6 handed cash. They are marked `source: 'starter-approx'` and the UI labels them. They are good enough to learn structure (which hands open from which seat) but not for fine frequencies. The BTN vs limper chart is marked `basis: 'exploit'`, since limped pots have no clean GTO answer.
 
 The Spot Lab decision demo uses illustrative numbers and says so.
 
-## Sources (Phase 5)
+## Can we replicate a solver or download solutions?
 
-| Source | What it gives | Notes |
-| --- | --- | --- |
-| Your own solver (PioSolver, GTO+) | Exact preflop and postflop nodes for the spots you care about | Best option. Export node strategies and EVs to CSV/JSON and import |
-| TexasSolver (open source) | Postflop solves we can run ourselves in batch | Free; useful for building an aggregate flop library. Check its license before bundling outputs |
-| Published charts you have rights to | Preflop ranges | Enter via range notation as `custom` source |
+Yes, in three ways, from most to least useful.
 
-Do not scrape commercial tools such as GTO Wizard; their terms prohibit it. If you have a subscription, use it alongside Felt and enter the spots you study as custom nodes.
+### 1. Run open source solvers ourselves (postflop)
+
+Free, open source postflop solvers exist and produce real equilibrium strategies:
+
+| Solver | Notes |
+| --- | --- |
+| [TexasSolver](https://github.com/bupticybee/TexasSolver) | C++, has a console version we can script for batch runs. AGPL-3.0, free for personal use. |
+| [desktop-postflop](https://github.com/dylan-chong/desktop-postflop) on the b-inary postflop-solver engine | Rust. AGPL-3.0. Upstream development stopped in October 2023, but the engine works. |
+
+Plan: a batch runner (in a `tools/` folder, kept separate from the app) solves a library of spots on a laptop or a rented cloud machine, then converts each solution into Felt's node format. The phone only downloads the finished data; it never runs a solve. First pack: single raised pots BTN vs BB and CO vs BB across a representative set of flops, then 3bet pots.
+
+Licensing note: AGPL obligations apply when you distribute the solver or offer it as a service to others. Running it ourselves to produce data for personal study is fine; we keep the solver out of the app bundle. If Felt is ever shared publicly, review this again.
+
+### 2. Build our own preflop solver (preflop)
+
+Full ring preflop solving is the expensive part. Commercial tools do it with heavy compute because every preflop line needs a postflop model. We can get close with a simplified approach in `@felt/core`:
+
+- Preflop action tree (open, 3bet, 4bet, call, fold, and limps for live games).
+- Postflop value estimated from equity times an equity realization factor by position and range, instead of solving every flop.
+- Counterfactual regret minimization over that tree.
+
+This will not match a full commercial solve exactly, but it lets us regenerate charts for any table size, stack depth, open size, straddle and rake, which a fixed downloaded chart pack never can. We validate it against well known published results before trusting it.
+
+For tournaments, push/fold Nash ranges and ICM are small enough to compute exactly, so we will do those properly ourselves.
+
+### 3. Enter charts you already have access to
+
+Many training sites publish free preflop charts. You can enter any chart for personal study with the chart editor (Phase 1) using range notation, marked as `custom`. We do not copy or bundle commercial chart packs into the repo, and we do not scrape tools such as GTO Wizard, whose terms prohibit it.
 
 ## Normalized format
 
@@ -25,12 +48,15 @@ Every import is converted to the `StrategyNode` shape in `packages/core/src/stra
 ```jsonc
 {
   "id": "srp-btn-bb-Ks7d2c-btn-flop",
-  "format": "6-max cash, 100bb",
+  "game": "cash",
+  "tableSize": 9,
+  "stackBb": 100,
   "line": "btn r2.5 bb c | Ks7d2c x",
   "hero": "BTN",
   "pot": 5.5,
+  "basis": "gto",
   "source": "solver-import",
-  "solver": { "name": "GTO+", "accuracy": "0.3% pot", "rake": "none" },
+  "solver": { "name": "TexasSolver", "accuracy": "0.3% pot", "rake": "none" },
   "strategy": {
     "AhQh": [
       { "id": "check", "frequency": 0.28, "ev": 3.31 },
@@ -42,7 +68,7 @@ Every import is converted to the `StrategyNode` shape in `packages/core/src/stra
 
 ## Import pipeline
 
-1. Export from the solver (CSV or JSON per node).
-2. Run an importer script per solver format that outputs normalized node files.
+1. Solve (batch runner) or export from any solver.
+2. Convert to normalized node files.
 3. Validate: frequencies sum to 1 per hand, EVs present for every action, every combo covered.
-4. Store in `packages/content` (small sets) or as downloadable packs loaded into IndexedDB (large libraries).
+4. Store small sets in `packages/content`; ship large libraries as data packs loaded into IndexedDB.

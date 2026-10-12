@@ -10,18 +10,39 @@ Play close to GTO by default, know exactly why, and deviate on purpose when an o
 2. **Decision quality**: how much EV do you give up per decision (measured in drills and scenarios)?
 3. **Results**: win rate in bb/100 and per hour, tracked against variance so you know what is signal.
 
-## Learner profile (assumed, to confirm)
+## Player profile
 
-These assumptions drive the design. They are easy to change once confirmed.
+| | |
+| --- | --- |
+| Main game | Live cash, 1/3 NL, 9 handed |
+| Also wants | Online, other stakes and table sizes, tournaments |
+| Devices | About 80% phone, 20% laptop |
+| Solver | None owned yet (see [SOLVER_DATA.md](SOLVER_DATA.md) for how we get solver data anyway) |
 
-| Assumption | Design consequence |
+Priority order follows the main game: live full ring cash first, then online and short handed, then tournaments. Every setting (format, venue, table size from 2 to 10, stakes, straddle, ante, rake, stack depth, units) is configurable, and charts and drills follow the settings.
+
+## Learner profile (confirmed)
+
+| Trait | Design consequence |
 | --- | --- |
 | Learns best by doing, not reading | Lessons are short (3 to 7 minutes) and always end in drills |
 | Visual learner | Every concept has a visual: grids, tables, frequency bars, equity charts |
 | Wants to know why, not just what | Every answer shows the reasoning: EV of each option, range shape, blockers |
-| Busy, studies in short blocks | Daily queue that fits 15 to 30 minutes; works on a phone |
+| Busy, studies in short blocks | Daily queue that fits 15 to 30 minutes; phone first |
 | Motivated by measurable progress | Stats on everything, streaks, challenges, clear mastery levels |
-| Plays live and/or online | Logger is fast enough to use between hands; tells module included |
+| Plays live | Logger is fast enough to use between hands; tells module included |
+
+## GTO and the live 1/3 game
+
+GTO is the baseline: it is what you fall back on when you know nothing, and it is what makes you hard to exploit. But a 9 handed 1/3 game is far from equilibrium. Typical pool tendencies:
+
+- Lots of limping and big, inconsistent open sizes (often 4 to 6bb).
+- Multiway pots, where solver heads-up strategies apply only loosely.
+- Calling too much preflop and on the flop, then often giving up to big turn and river bets.
+- Under bluffing big river bets and raises, so big bets are weighted to value.
+- Heavy rake relative to pot size, which punishes thin preflop calls.
+
+So for this game the biggest win rate gains come from exploits layered on a solid GTO base. Felt marks every chart and node as `gto` or `exploit`, teaches both, and will measure your pool's actual tendencies from your logged hands.
 
 ## The training loop
 

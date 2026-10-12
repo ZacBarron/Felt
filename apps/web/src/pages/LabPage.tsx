@@ -1,17 +1,17 @@
-import { STARTER_CHARTS } from '@felt/content';
 import {
   actionRange,
   bluffBreakeven,
-  buildChart,
   type Card,
   callEV,
   CATEGORY_NAMES,
   categoryOf,
   equityVsRange,
   evaluate,
+  formatAmount,
   gradeDecision,
   mdf,
   parseCards,
+  positionsFor,
   potOdds,
   rangePercent,
   rangeToCombos,
@@ -19,7 +19,9 @@ import {
 } from '@felt/core';
 import { useMemo, useState } from 'react';
 import { ActionMixBar } from '../components/ActionMixBar';
-import { PokerTable } from '../components/PokerTable';
+import { PokerTable, type Seat } from '../components/PokerTable';
+import { getChart } from '../state/charts';
+import { useSettings } from '../state/settings';
 
 // Illustrative node for the demo. Real nodes come from solver imports (Phase 5).
 const DEMO_NODE: StrategyNode = {
@@ -32,7 +34,7 @@ const DEMO_NODE: StrategyNode = {
   ],
 };
 
-const BB_CALL = actionRange(buildChart(STARTER_CHARTS.find((c) => c.id === '6max-100-bb-vs-btn')!), 'call');
+const BB_CALL = actionRange(getChart('9max-100-bb-vs-btn')!, 'call');
 
 function tryParse(text: string, count: number[]): Card[] | string {
   try {
@@ -43,7 +45,22 @@ function tryParse(text: string, count: number[]): Card[] | string {
   }
 }
 
+/** Seats clockwise from the BTN (hero): BTN opened, BB called, everyone else folded. */
+function spotSeats(tableSize: number, stackBb: number, hero: Seat['cards']): Seat[] {
+  const order = positionsFor(Math.max(tableSize, 2));
+  const btn = order.indexOf('BTN');
+  const clockwise = [...order.slice(btn), ...order.slice(0, btn)];
+  return clockwise.map((position) => {
+    if (position === 'BTN') return { position, stack: stackBb - 2.5, isHero: true, cards: hero };
+    if (position === 'BB') return { position, stack: stackBb - 2.5, inHand: true, action: 'Check' };
+    return { position, stack: position === 'SB' ? stackBb - 0.5 : stackBb, inHand: false };
+  });
+}
+
 export function LabPage() {
+  const { settings } = useSettings();
+  const game = settings.game;
+  const fmt = (bb: number) => formatAmount(bb, game);
   const [heroText, setHeroText] = useState('AhQh');
   const [boardText, setBoardText] = useState('Ks7d2c');
   const [bet, setBet] = useState(4);
@@ -78,14 +95,8 @@ export function LabPage() {
         <PokerTable
           pot={pot}
           board={typeof board === 'string' ? [] : board}
-          seats={[
-            { position: 'BTN', stack: 97.5, isHero: true, cards: typeof hero === 'string' ? undefined : hero },
-            { position: 'SB', stack: 99.5, inHand: false },
-            { position: 'BB', stack: 97.5, inHand: true, action: 'Check' },
-            { position: 'UTG', stack: 100, inHand: false },
-            { position: 'HJ', stack: 100, inHand: false },
-            { position: 'CO', stack: 100, inHand: false },
-          ]}
+          format={fmt}
+          seats={spotSeats(game.tableSize, game.stackBb, typeof hero === 'string' ? undefined : hero)}
         />
       </div>
 
@@ -134,7 +145,7 @@ export function LabPage() {
         <div className="card stack">
           <h2>Facing a bet</h2>
           <label>
-            Villain bets (pot is {pot}bb): {bet}bb ({Math.round((bet / pot) * 100)}% pot)
+            Villain bets {fmt(bet)} into {fmt(pot)} ({Math.round((bet / pot) * 100)}% pot)
             <input type="range" min={1} max={15} step={0.5} value={bet} onChange={(e) => setBet(Number(e.target.value))} />
           </label>
           <table className="kv">
@@ -155,7 +166,7 @@ export function LabPage() {
                 <tr>
                   <td>EV of calling (showdown, no further bets)</td>
                   <td className={callEV(potFacing, bet, equity.equity) >= 0 ? 'grade-best' : 'grade-blunder'}>
-                    {callEV(potFacing, bet, equity.equity).toFixed(2)}bb
+                    {fmt(callEV(potFacing, bet, equity.equity))}
                   </td>
                 </tr>
               )}
