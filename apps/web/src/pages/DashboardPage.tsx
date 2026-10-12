@@ -1,28 +1,46 @@
-import { stakesLabel } from '@felt/core';
+import { ideaForDay } from '@felt/content';
+import { actionRange, handClassCombos, stakesLabel } from '@felt/core';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { Link } from 'react-router-dom';
-import { chartsForGame } from '../state/charts';
-import { todayStats } from '../state/review';
+import { MasteryGrid } from '../components/MasteryGrid';
+import { PlayingCard } from '../components/PlayingCard';
+import { chartsForGame, getChart } from '../state/charts';
+import { buildQueue, masteryForCharts, todayStats } from '../state/review';
 import { useSettings } from '../state/settings';
 import { HeroPattern } from '../ui/Brand';
-import { CheckIcon, FlameIcon } from '../ui/icons';
+import { CheckIcon, ChevronRightIcon, FlameIcon } from '../ui/icons';
 import { PageHeader } from '../ui/PageHeader';
-import { ProgressRing } from '../ui/ProgressRing';
 import { useCountUp } from '../ui/useCountUp';
+
+/** A stable combo for a hand class, so the preview does not reshuffle on every render. */
+function previewCombo(id: string, hand: string) {
+  const combos = handClassCombos(hand);
+  let h = 0;
+  for (const ch of id) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+  return combos[h % combos.length];
+}
 
 export function DashboardPage() {
   const { settings } = useSettings();
   const g = settings.game;
-  const stats = useLiveQuery(
-    () => todayStats(chartsForGame(g).charts, settings.study.newPerDay),
-    [g.tableSize, g.format, settings.study.newPerDay],
-  );
+  const deps = [g.tableSize, g.format, settings.study.newPerDay];
+  const charts = chartsForGame(g).charts;
+  const stats = useLiveQuery(() => todayStats(charts, settings.study.newPerDay), deps);
+  const next = useLiveQuery(async () => {
+    const q = await buildQueue(charts, settings.study.newPerDay);
+    return [...q.due, ...q.fresh][0] ?? null;
+  }, deps);
+  const mastery = useLiveQuery(() => masteryForCharts(charts), deps);
+
   const remaining = stats ? stats.dueNow + stats.newAvailable : 0;
   const total = stats ? stats.reviewedToday + remaining : 0;
-  const progress = total > 0 ? (stats?.reviewedToday ?? 0) / total : 1;
   const shownRemaining = Math.round(useCountUp(remaining));
-  const date = new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' });
   const minutes = Math.max(1, Math.round((remaining * 6) / 60));
+  const date = new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' });
+  const focus = mastery?.find((m) => m.solid < m.total) ?? mastery?.[0];
+  const nextChart = next ? getChart(next.chartId) : undefined;
+  const heroRange = focus ? new Set(actionRange(focus.chart, focus.chart.spec.actions[0].id).keys()) : undefined;
+  const idea = ideaForDay(new Date());
 
   return (
     <div className="stack" style={{ gap: '1.6rem' }}>
@@ -36,35 +54,49 @@ export function DashboardPage() {
         }
       />
 
-      <section className="hero stack" style={{ gap: '1.25rem' }}>
-        <HeroPattern />
-        <div className="row between" style={{ flexWrap: 'nowrap', alignItems: 'flex-end' }}>
-          <div>
-            <div className="caption" style={{ fontWeight: 600, letterSpacing: '0.02em', textTransform: 'uppercase' }}>
-              Daily review
-            </div>
+      <section className="hero">
+        <HeroPattern mixes={heroRange} />
+        <div className="hero-body">
+          <div className="hero-copy">
+            <div className="hero-label">Daily review</div>
             {stats && remaining === 0 ? (
-              <div className="display" style={{ fontSize: '2.6rem', lineHeight: 1.05, marginTop: 6 }}>
+              <div className="display" style={{ fontSize: '2.5rem', lineHeight: 1.02, marginTop: 6 }}>
                 All caught up
               </div>
             ) : (
-              <div className="row" style={{ gap: '0.5rem', alignItems: 'baseline', flexWrap: 'nowrap' }}>
-                <span className="display num" style={{ fontSize: '4.25rem', lineHeight: 1 }}>
+              <>
+                <div className="display num" style={{ fontSize: '4.5rem', lineHeight: 0.95, marginTop: 4 }}>
                   {stats ? shownRemaining : ''}
-                </span>
-                <span className="footnote">{remaining === 1 ? 'card' : 'cards'}, about {minutes} min</span>
+                </div>
+                <div className="hero-sub">
+                  {remaining === 1 ? 'card' : 'cards'}, about {minutes} min
+                </div>
+              </>
+            )}
+            {total > 0 && (
+              <div className="hero-progress" aria-label={`${stats?.reviewedToday} of ${total} done`}>
+                <span style={{ width: `${((stats?.reviewedToday ?? 0) / total) * 100}%` }} />
               </div>
             )}
           </div>
-          <ProgressRing value={stats ? progress : 0} size={64} stroke={7} color="#fff" track="rgba(255,255,255,.2)">
-            {stats && remaining === 0 ? (
-              <CheckIcon size={24} style={{ color: '#fff' }} />
-            ) : (
-              <span className="num" style={{ fontSize: '0.8rem', fontWeight: 700 }}>
-                {Math.round(progress * 100)}%
-              </span>
-            )}
-          </ProgressRing>
+
+          {next && nextChart && remaining > 0 && (
+            <div className="up-next">
+              <div className="fan">
+                {next.mode === 'quick' && next.hand ? (
+                  previewCombo(next.id, next.hand).map((c, i) => <PlayingCard key={c} card={c} size="md" deal delayMs={200 + i * 90} />)
+                ) : (
+                  <>
+                    <PlayingCard size="md" deal delayMs={200} />
+                    <PlayingCard size="md" deal delayMs={290} />
+                  </>
+                )}
+              </div>
+              <div className="hero-sub" style={{ textAlign: 'center' }}>
+                Up next: {nextChart.spec.hero}
+              </div>
+            </div>
+          )}
         </div>
         {remaining > 0 ? (
           <Link to="/review" className="btn btn-lg btn-block btn-hero">
@@ -77,13 +109,52 @@ export function DashboardPage() {
         )}
       </section>
 
+      {stats && stats.reviewedToday > 0 && (
+        <section className="reveal">
+          <div className="section-title">Today so far</div>
+          <div className="stat-grid three">
+            <Stat label="Reviewed" value={stats.reviewedToday} />
+            <Stat label="Accuracy" value={Math.round((stats.accuracyToday ?? 0) * 100)} suffix="%" />
+            <Stat label="Recall" value={stats.avgSecondsToday ?? 0} suffix="s" decimals={1} />
+          </div>
+        </section>
+      )}
+
+      {focus && (
+        <section>
+          <div className="section-title">Now learning</div>
+          <Link to="/ranges" className="card focus-card">
+            <MasteryGrid chart={focus.chart} hands={focus.hands} />
+            <div className="focus-copy">
+              <div className="display" style={{ fontSize: '1.9rem', lineHeight: 1.05 }}>
+                {focus.chart.spec.title}
+              </div>
+              <div className="footnote" style={{ marginTop: 4 }}>
+                {focus.solid} of {focus.total} edge hands solid
+              </div>
+              <div className="legend">
+                <span>
+                  <i style={{ background: 'var(--tint-fill)' }} /> Solid
+                </span>
+                <span>
+                  <i style={{ background: 'color-mix(in srgb, var(--tint-fill) 42%, transparent)' }} /> Learning
+                </span>
+                <span>
+                  <i style={{ background: 'var(--fill-3)' }} /> New
+                </span>
+              </div>
+            </div>
+          </Link>
+        </section>
+      )}
+
       <section>
         <div className="row between" style={{ padding: '0 1rem 0.4rem' }}>
           <span className="section-title" style={{ padding: 0 }}>
             Last 7 days
           </span>
           {!!stats?.streak && (
-            <span className="footnote row" style={{ gap: 4, color: 'var(--orange)', fontWeight: 600 }}>
+            <span className="footnote row" style={{ gap: 4, color: 'var(--tint)', fontWeight: 600 }}>
               <FlameIcon size={14} /> {stats.streak} day streak
             </span>
           )}
@@ -102,13 +173,45 @@ export function DashboardPage() {
         </div>
       </section>
 
-      {stats && stats.reviewedToday > 0 && (
-        <section className="reveal">
-          <div className="section-title">Today so far</div>
-          <div className="stat-grid three">
-            <Stat label="Reviewed" value={stats.reviewedToday} />
-            <Stat label="Accuracy" value={Math.round((stats.accuracyToday ?? 0) * 100)} suffix="%" />
-            <Stat label="Recall" value={stats.avgSecondsToday ?? 0} suffix="s" decimals={1} />
+      <section>
+        <div className="section-title">Key idea</div>
+        <article className="card idea">
+          <div className="row between">
+            <span className={`pill ${idea.basis === 'exploit' ? 'pill-exploit' : ''}`}>{idea.topic}</span>
+          </div>
+          <h3 className="display">{idea.title}</h3>
+          <p>{idea.body}</p>
+        </article>
+      </section>
+
+      {mastery && mastery.length > 1 && (
+        <section>
+          <div className="row between" style={{ padding: '0 1rem 0.4rem' }}>
+            <span className="section-title" style={{ padding: 0 }}>
+              Your charts
+            </span>
+            <Link to="/ranges" className="footnote" style={{ color: 'var(--tint)', textDecoration: 'none', fontWeight: 600 }}>
+              All {mastery.length}
+            </Link>
+          </div>
+          <div className="list">
+            {mastery.slice(0, 5).map((m) => {
+              const pct = m.total ? m.solid / m.total : 0;
+              const touched = m.total ? (m.solid + m.learning) / m.total : 0;
+              return (
+                <Link key={m.chart.spec.id} to="/ranges" className="list-row">
+                  <span className="grow">
+                    <span style={{ display: 'block' }}>{m.chart.spec.title}</span>
+                    <span className="chart-bar">
+                      <span className="touched" style={{ width: `${touched * 100}%` }} />
+                      <span className="solid" style={{ width: `${pct * 100}%` }} />
+                    </span>
+                  </span>
+                  <span className="detail num">{Math.round(pct * 100)}%</span>
+                  <ChevronRightIcon size={16} className="chev" />
+                </Link>
+              );
+            })}
           </div>
         </section>
       )}

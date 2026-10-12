@@ -57,9 +57,9 @@ function CardFace({ card, size = 'md', deal, delayMs = 0 }: Props) {
         className={deal ? 'deal' : undefined}
         style={{
           ...base,
-          // Brand card back: midnight with a fine cobalt lattice.
+          // Brand card back: spruce felt with a fine brass lattice.
           background:
-            'repeating-linear-gradient(45deg, rgba(91,130,255,.28) 0 1px, transparent 1px 6px), repeating-linear-gradient(-45deg, rgba(91,130,255,.28) 0 1px, transparent 1px 6px), #0b1426',
+            'repeating-linear-gradient(45deg, rgba(233,184,102,.32) 0 1px, transparent 1px 6px), repeating-linear-gradient(-45deg, rgba(233,184,102,.32) 0 1px, transparent 1px 6px), radial-gradient(circle at 30% 20%, #21604f, #0b2421)',
           border: `${size === 'lg' ? 4 : 2}px solid #fff`,
           boxShadow: '0 2px 6px rgba(0,0,0,.3)',
         }}

@@ -9,7 +9,7 @@ interface Props {
 }
 
 /** Circular progress with an animated fill and centered content. */
-export function ProgressRing({ value, size = 96, stroke = 9, color = 'var(--tint)', track = 'var(--fill-2)', children }: Props) {
+export function ProgressRing({ value, size = 96, stroke = 9, color = 'var(--tint-fill)', track = 'var(--fill-2)', children }: Props) {
   const r = (size - stroke) / 2;
   const circ = 2 * Math.PI * r;
   const clamped = Math.max(0, Math.min(1, value));

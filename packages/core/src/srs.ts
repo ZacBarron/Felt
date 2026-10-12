@@ -1,4 +1,4 @@
-import { type Card as FsrsCard, createEmptyCard, fsrs, type Grade, Rating, type ReviewLog } from 'ts-fsrs';
+import { type Card as FsrsCard, createEmptyCard, fsrs, type Grade, Rating, type ReviewLog, State } from 'ts-fsrs';
 
 /**
  * Spaced repetition on top of FSRS (the scheduler modern Anki uses).
@@ -9,6 +9,17 @@ import { type Card as FsrsCard, createEmptyCard, fsrs, type Grade, Rating, type 
  */
 
 export { Rating, State } from 'ts-fsrs';
+
+export type CardStrength = 'new' | 'learning' | 'solid';
+
+/**
+ * How well a card is known: never seen, still being learned, or solid once
+ * FSRS expects to hold it for at least `solidDays` without a review.
+ */
+export function cardStrength(card: Pick<FsrsCard, 'state' | 'stability'> | undefined, solidDays = 7): CardStrength {
+  if (!card) return 'new';
+  return card.state === State.Review && card.stability >= solidDays ? 'solid' : 'learning';
+}
 export type { FsrsCard, ReviewLog };
 
 export interface DrillOutcome {

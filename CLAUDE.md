@@ -21,10 +21,10 @@ Personal poker training app. Read docs/CONCEPT.md and docs/ROADMAP.md before sta
 
 ## UI conventions (apps/web)
 
-- Brand rules (logo, color, type, motion, voice) live in docs/BRAND.md. Display serif is for titles and hero numbers only; the brand gradient appears at most once per screen.
+- Brand rules (logo, color, type, motion, voice) live in docs/BRAND.md. Display serif is for titles and hero numbers only; the felt gradient appears at most once per screen.
 
-- Design language is iOS 26 Liquid Glass: system font, iOS system colors (blue tint, no neon), light and dark from the system or the Appearance setting, inset grouped lists, capsule controls, and the `.glass` material only for things that float (tab bar, sidebar, nav bar, toolbars). Content itself sits on plain grouped surfaces.
-- Colors come from the CSS tokens in `styles.css` (`--tint`, `--green`, `--red`, `--label-2`, `--surface`, ...). Never hard code a color in a component unless it is a playing card or the felt.
+- Design language is iOS 26 Liquid Glass: system font, the Card room palette (spruce felt, brass tint, warm neutrals; no neon), light and dark from the system or the Appearance setting, inset grouped lists, capsule controls, and the `.glass` material only for things that float (tab bar, sidebar, nav bar, toolbars). Content itself sits on plain grouped surfaces.
+- Colors come from the CSS tokens in `styles.css` (`--tint` for text and icons, `--tint-fill` with `--on-tint` for filled buttons, `--green`, `--red`, `--label-2`, `--surface`, ...). Never hard code a color in a component unless it is a playing card or the felt.
 - Icons come from `src/ui/icons.tsx`, drawn for this app on a 24pt grid. Do not add an icon library.
 - Glass rims use box-shadow only. A masked pseudo element rim disables the backdrop blur in Chromium. When screenshotting with Playwright, launch with `--use-angle=swiftshader --enable-unsafe-swiftshader` or blur will not render.
 - Phone first. Primary actions go in `<BottomBar>` (thumb zone, above the tab bar). Inputs stay at 16px so iOS does not zoom.

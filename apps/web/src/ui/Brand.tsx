@@ -1,29 +1,38 @@
+import { gridHandClass as handAt } from '@felt/core';
 import { useId } from 'react';
 import { WORDMARK_PATH, WORDMARK_VIEWBOX } from './wordmark';
 
+/** The cells of the F, on a 6x6 grid: the stem, a long top arm, a shorter middle arm. */
+export function isFCell(r: number, c: number): boolean {
+  return c === 0 || (r === 0 && c <= 4) || (r === 2 && c <= 3);
+}
+
+export const MARK_GRID = 6;
+
 /**
- * The Felt mark: a 4x4 range grid with the pairs diagonal lit. It is the
- * one shape every solver chart shares, reduced to its essentials.
+ * The Felt mark: an F painted into a 6x6 grid, the way a solver paints a
+ * range. Lit cells are brass; the rest of the grid stays faintly visible.
  *
- * - `tile`: the app icon form, glyph on the brand gradient.
- * - `glyph`: the grid alone, for use on top of other surfaces.
+ * - `tile`: the app icon form, brass F on the spruce felt gradient.
+ * - `glyph`: the grid alone in the current color, for use on other surfaces.
  */
 export function BrandMark({ size = 32, variant = 'tile' }: { size?: number; variant?: 'tile' | 'glyph' }) {
   const id = useId();
-  const n = 4;
-  const pad = variant === 'tile' ? 22 : 4;
-  const gap = variant === 'tile' ? 5 : 6;
-  const cell = (100 - 2 * pad - (n - 1) * gap) / n;
+  const n = MARK_GRID;
   const tile = variant === 'tile';
+  const pad = tile ? 17 : 3;
+  const gap = tile ? 3.2 : 4;
+  const cell = (100 - 2 * pad - (n - 1) * gap) / n;
   return (
     <svg width={size} height={size} viewBox="0 0 100 100" aria-hidden="true" style={{ flex: 'none', display: 'block' }}>
       {tile && (
         <>
           <defs>
-            <linearGradient id={id} x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0" stopColor="#4573FF" />
-              <stop offset="1" stopColor="#0A1A4A" />
-            </linearGradient>
+            <radialGradient id={id} cx="0" cy="0" r="1.45" gradientUnits="objectBoundingBox">
+              <stop offset="0" stopColor="#2a7461" />
+              <stop offset="0.45" stopColor="#165244" />
+              <stop offset="1" stopColor="#0b2421" />
+            </radialGradient>
           </defs>
           <rect width="100" height="100" rx="23" fill={`url(#${id})`} />
         </>
@@ -31,7 +40,7 @@ export function BrandMark({ size = 32, variant = 'tile' }: { size?: number; vari
       {Array.from({ length: n * n }, (_, i) => {
         const r = Math.floor(i / n);
         const c = i % n;
-        const lit = r === c;
+        const lit = isFCell(r, c);
         return (
           <rect
             key={i}
@@ -39,9 +48,9 @@ export function BrandMark({ size = 32, variant = 'tile' }: { size?: number; vari
             y={pad + r * (cell + gap)}
             width={cell}
             height={cell}
-            rx={cell * 0.24}
-            fill={tile ? (lit ? '#fff' : 'rgba(255,255,255,.17)') : 'currentColor'}
-            fillOpacity={tile ? 1 : lit ? 1 : 0.18}
+            rx={cell * 0.26}
+            fill={tile ? (lit ? '#e9b866' : 'rgba(255,255,255,.08)') : 'currentColor'}
+            fillOpacity={tile ? 1 : lit ? 1 : 0.14}
           />
         );
       })}
@@ -83,10 +92,11 @@ export function BrandFooter() {
 }
 
 /**
- * Hero texture: a full 13x13 range grid with the pairs diagonal brighter,
- * fading out toward the text. The mark, at chart resolution.
+ * Hero texture: a full 13x13 range grid, fading out toward the text. Given
+ * a set of hands it paints that range in brass, so the hero shows the very
+ * chart you are learning.
  */
-export function HeroPattern() {
+export function HeroPattern({ mixes }: { mixes?: ReadonlySet<string> }) {
   const n = 13;
   const cell = 14;
   const gap = 5;
@@ -103,8 +113,8 @@ export function HeroPattern() {
             width={cell}
             height={cell}
             rx={3.5}
-            fill="#fff"
-            fillOpacity={r === c ? 0.55 : 0.07}
+            fill={mixes?.has(handAt(r, c)) ? '#e9b866' : '#fff'}
+            fillOpacity={mixes ? (mixes.has(handAt(r, c)) ? 0.5 : 0.06) : r === c ? 0.5 : 0.06}
           />
         );
       })}

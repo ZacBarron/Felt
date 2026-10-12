@@ -35,7 +35,7 @@ export function RangesPage() {
       <div className="footnote row" style={{ gap: '0.4rem' }}>
         {chartFormatLabel(chart.spec)}
         {chart.spec.source === 'starter-approx' && <span className="pill">Approximate</span>}
-        {chart.spec.basis === 'exploit' && <span className="pill pill-warn">Exploit</span>}
+        {chart.spec.basis === 'exploit' && <span className="pill pill-exploit">Exploit</span>}
         {!fit.exact && <span className="pill pill-warn">Nearest table size</span>}
       </div>
 

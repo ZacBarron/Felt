@@ -22,40 +22,55 @@
  */
 
 :root {
-  /* Backgrounds and fills (iOS grouped palette) */
-  --bg: #f2f2f7;
-  --surface: #ffffff;
-  --surface-2: #f2f2f7;
-  --fill: rgba(120, 120, 128, 0.12);
-  --fill-2: rgba(120, 120, 128, 0.2);
-  --fill-3: rgba(120, 120, 128, 0.28);
-  --separator: rgba(60, 60, 67, 0.16);
+  /*
+   * Palette: "Card room". 60/30/10.
+   * 60  warm neutrals (paper by day, green black by night) so the content leads.
+   * 30  spruce, the felt of a table at night: cool, low saturation, recedes.
+   * 10  brass, spruce's warm near complement: it advances, so it marks what to do.
+   * Semantic solver colors (raise red, call green, fold gray) stay separate from the brand.
+   */
+  --bg: #f4f1ea;
+  --surface: #fffdf8;
+  --surface-2: #f4f1ea;
+  --fill: rgba(110, 96, 70, 0.1);
+  --fill-2: rgba(110, 96, 70, 0.17);
+  --fill-3: rgba(110, 96, 70, 0.26);
+  --separator: rgba(70, 58, 38, 0.14);
 
   /* Labels */
-  --label: #000000;
-  --label-2: rgba(60, 60, 67, 0.62);
-  --label-3: rgba(60, 60, 67, 0.32);
-  --on-tint: #ffffff;
+  --label: #14201d;
+  --label-2: rgba(40, 46, 42, 0.62);
+  --label-3: rgba(40, 46, 42, 0.32);
 
-  /* Brand: Felt cobalt on midnight ink. The tint is the brand color. */
-  --ink: #0b1426;
-  --cobalt: #2d5bff;
-  --brand-gradient: linear-gradient(135deg, #3f6bff 0%, #1d3fb8 48%, #0a1a4a 100%);
+  /* Brand */
+  --spruce-950: #08181a;
+  --spruce-900: #0b2421;
+  --spruce-700: #134a42;
+  --spruce-500: #21604f;
+  --brass: #e3b261;
+  --brass-deep: #9a6a1e;
+  --ink: var(--spruce-900);
+  --brand-gradient: radial-gradient(120% 140% at 0% 0%, #2a7461 0%, #165244 38%, #0b2421 100%);
   --font-display: 'Instrument Serif', 'New York', ui-serif, Georgia, serif;
 
-  /* System colors */
-  --tint: #2d5bff;
-  --green: #34c759;
-  --red: #ff3b30;
-  --orange: #ff9500;
-  --yellow: #ffcc00;
-  --purple: #af52de;
-  --pink: #ff2d55;
-  --indigo: #5856d6;
-  --teal: #30b0c7;
-  --gray: #8e8e93;
+  /* Tint: brass. Text and icons use the deep shade for contrast on paper;
+     filled buttons use brass with ink text. */
+  --tint: var(--brass-deep);
+  --tint-fill: #d9a24a;
+  --on-tint: var(--spruce-950);
 
-  /* Solver action colors, mapped to system colors. Fold stays neutral. */
+  /* System colors */
+  --green: #2f9e57;
+  --red: #e5483d;
+  --orange: #e8830c;
+  --yellow: #e0b000;
+  --purple: #9d4edd;
+  --pink: #e0355d;
+  --indigo: #5856d6;
+  --teal: #2a9db0;
+  --gray: #8e8a82;
+
+  /* Solver action colors. Fold stays neutral. */
   --act-raise: var(--red);
   --act-3bet: var(--purple);
   --act-call: var(--green);
@@ -69,16 +84,16 @@
   --suit-c: #1e9e4a;
 
   /* Glass */
-  --glass-bg: rgba(255, 255, 255, 0.62);
-  --glass-edge: rgba(255, 255, 255, 0.85);
-  --glass-rim: rgba(0, 0, 0, 0.06);
-  --glass-shadow: 0 10px 34px rgba(0, 0, 0, 0.12), 0 1px 3px rgba(0, 0, 0, 0.06);
-  --glass-blur: blur(22px) saturate(190%);
+  --glass-bg: rgba(255, 253, 248, 0.64);
+  --glass-edge: rgba(255, 255, 255, 0.9);
+  --glass-rim: rgba(60, 45, 20, 0.07);
+  --glass-shadow: 0 10px 34px rgba(40, 30, 10, 0.12), 0 1px 3px rgba(40, 30, 10, 0.06);
+  --glass-blur: blur(22px) saturate(170%);
   --glass-sheen: rgba(255, 255, 255, 0.5);
-  --pressed: rgba(0, 0, 0, 0.06);
+  --pressed: rgba(60, 45, 20, 0.06);
 
-  --felt: #2a6a4f;
-  --felt-dark: #18402f;
+  --felt: #21604f;
+  --felt-dark: #0b2421;
 
   --r-card: 24px;
   --r-control: 14px;
@@ -100,61 +115,65 @@
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
-    --bg: #000000;
-    --surface: #1c1c1e;
-    --surface-2: #2c2c2e;
-    --fill: rgba(118, 118, 128, 0.24);
-    --fill-2: rgba(118, 118, 128, 0.32);
-    --fill-3: rgba(118, 118, 128, 0.42);
-    --separator: rgba(84, 84, 88, 0.55);
-    --label: #ffffff;
-    --label-2: rgba(235, 235, 245, 0.62);
-    --label-3: rgba(235, 235, 245, 0.3);
-    --tint: #5b82ff;
-    --green: #30d158;
-    --red: #ff453a;
-    --orange: #ff9f0a;
-    --yellow: #ffd60a;
-    --purple: #bf5af2;
-    --pink: #ff375f;
-    --indigo: #5e5ce6;
-    --teal: #40c8e0;
-    --glass-bg: rgba(44, 44, 48, 0.58);
-    --glass-edge: rgba(255, 255, 255, 0.2);
-    --glass-sheen: rgba(255, 255, 255, 0.07);
-    --glass-rim: rgba(0, 0, 0, 0.4);
-    --glass-shadow: 0 10px 34px rgba(0, 0, 0, 0.5), 0 1px 3px rgba(0, 0, 0, 0.3);
-    --pressed: rgba(255, 255, 255, 0.08);
+    --bg: #080c0b;
+    --surface: #131917;
+    --surface-2: #1c2421;
+    --fill: rgba(180, 190, 170, 0.12);
+    --fill-2: rgba(180, 190, 170, 0.19);
+    --fill-3: rgba(180, 190, 170, 0.28);
+    --separator: rgba(200, 210, 190, 0.13);
+    --label: #f3efe6;
+    --label-2: rgba(243, 239, 230, 0.6);
+    --label-3: rgba(243, 239, 230, 0.3);
+    --tint: #e9b866;
+    --tint-fill: #e3b261;
+    --green: #3ccf72;
+    --red: #ff5a4e;
+    --orange: #ff9f2e;
+    --yellow: #ffd23f;
+    --purple: #c07af5;
+    --pink: #ff5c80;
+    --indigo: #7d7af0;
+    --teal: #4cc7d9;
+    --gray: #8f8b83;
+    --glass-bg: rgba(26, 33, 30, 0.6);
+    --glass-edge: rgba(255, 255, 255, 0.16);
+    --glass-sheen: rgba(255, 255, 255, 0.06);
+    --glass-rim: rgba(0, 0, 0, 0.45);
+    --glass-shadow: 0 10px 34px rgba(0, 0, 0, 0.55), 0 1px 3px rgba(0, 0, 0, 0.3);
+    --pressed: rgba(255, 255, 255, 0.07);
     color-scheme: dark;
   }
 }
 
 :root[data-theme='dark'] {
-  --bg: #000000;
-  --surface: #1c1c1e;
-  --surface-2: #2c2c2e;
-  --fill: rgba(118, 118, 128, 0.24);
-  --fill-2: rgba(118, 118, 128, 0.32);
-  --fill-3: rgba(118, 118, 128, 0.42);
-  --separator: rgba(84, 84, 88, 0.55);
-  --label: #ffffff;
-  --label-2: rgba(235, 235, 245, 0.62);
-  --label-3: rgba(235, 235, 245, 0.3);
-  --tint: #5b82ff;
-  --green: #30d158;
-  --red: #ff453a;
-  --orange: #ff9f0a;
-  --yellow: #ffd60a;
-  --purple: #bf5af2;
-  --pink: #ff375f;
-  --indigo: #5e5ce6;
-  --teal: #40c8e0;
-  --glass-bg: rgba(44, 44, 48, 0.58);
-  --glass-edge: rgba(255, 255, 255, 0.2);
-  --glass-sheen: rgba(255, 255, 255, 0.07);
-  --glass-rim: rgba(0, 0, 0, 0.4);
-  --glass-shadow: 0 10px 34px rgba(0, 0, 0, 0.5), 0 1px 3px rgba(0, 0, 0, 0.3);
-  --pressed: rgba(255, 255, 255, 0.08);
+  --bg: #080c0b;
+  --surface: #131917;
+  --surface-2: #1c2421;
+  --fill: rgba(180, 190, 170, 0.12);
+  --fill-2: rgba(180, 190, 170, 0.19);
+  --fill-3: rgba(180, 190, 170, 0.28);
+  --separator: rgba(200, 210, 190, 0.13);
+  --label: #f3efe6;
+  --label-2: rgba(243, 239, 230, 0.6);
+  --label-3: rgba(243, 239, 230, 0.3);
+  --tint: #e9b866;
+  --tint-fill: #e3b261;
+  --green: #3ccf72;
+  --red: #ff5a4e;
+  --orange: #ff9f2e;
+  --yellow: #ffd23f;
+  --purple: #c07af5;
+  --pink: #ff5c80;
+  --indigo: #7d7af0;
+  --teal: #4cc7d9;
+  --gray: #8f8b83;
+  --glass-bg: rgba(26, 33, 30, 0.6);
+  --glass-edge: rgba(255, 255, 255, 0.16);
+  --glass-sheen: rgba(255, 255, 255, 0.06);
+  --glass-rim: rgba(0, 0, 0, 0.45);
+  --glass-shadow: 0 10px 34px rgba(0, 0, 0, 0.55), 0 1px 3px rgba(0, 0, 0, 0.3);
+  --pressed: rgba(255, 255, 255, 0.07);
   color-scheme: dark;
 }
 
@@ -654,11 +673,12 @@ button:disabled {
 .btn-primary {
   color: var(--on-tint);
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0) 55%),
-    var(--tint);
+    linear-gradient(180deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0) 55%),
+    var(--tint-fill);
   box-shadow:
-    inset 0 0.5px 0 rgba(255, 255, 255, 0.5),
-    0 6px 18px color-mix(in srgb, var(--tint) 32%, transparent);
+    inset 0 0.5px 0 rgba(255, 255, 255, 0.6),
+    inset 0 -0.5px 0 rgba(90, 55, 0, 0.25),
+    0 6px 18px color-mix(in srgb, var(--tint-fill) 35%, transparent);
 }
 
 .btn-plain {
@@ -888,8 +908,8 @@ label {
 }
 
 .chip[aria-pressed='true'] {
-  background: var(--tint);
-  color: var(--on-tint);
+  background: var(--label);
+  color: var(--bg);
   font-weight: 600;
 }
 
@@ -1016,7 +1036,7 @@ table.kv td:last-child {
   display: block;
   height: 100%;
   border-radius: inherit;
-  background: var(--tint);
+  background: var(--tint-fill);
   transition: width 420ms var(--ease);
 }
 
@@ -1306,6 +1326,7 @@ table.kv td:last-child {
   }
 
   .tab-indicator {
+    /* tinted pill under the active tab */
     position: absolute;
     top: 4px;
     bottom: 4px;
@@ -1419,7 +1440,8 @@ table.kv td:last-child {
   background: var(--brand-gradient);
   border-radius: 28px;
   padding: 1.25rem;
-  box-shadow: 0 18px 40px rgba(29, 63, 184, 0.28);
+  box-shadow: 0 18px 40px rgba(11, 36, 33, 0.3);
+  padding: 1.35rem 1.25rem 1.25rem;
   isolation: isolate;
 }
 
@@ -1450,20 +1472,195 @@ table.kv td:last-child {
   }
 }
 
-.hero .caption,
-.hero .footnote {
+.hero::after {
+  /* Felt nap: fine noise over the gradient, so it reads as cloth, not plastic. */
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  opacity: 0.22;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .55 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+
+.hero-body {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.2rem;
+}
+
+.hero-label {
+  font-size: 0.75rem;
+  font-weight: 650;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--brass);
+}
+
+.hero-sub {
+  font-size: 0.9rem;
   color: rgba(255, 255, 255, 0.72);
 }
 
+.hero-progress {
+  margin-top: 0.9rem;
+  width: 150px;
+  height: 4px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.16);
+  overflow: hidden;
+}
+
+.hero-progress > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--brass);
+  transition: width 600ms var(--ease);
+}
+
+.up-next {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.55rem;
+  flex: none;
+}
+
+/* Two cards held in a loose fan, breathing gently. */
+.fan {
+  display: flex;
+  animation: breathe 5s ease-in-out infinite;
+}
+
+.fan > * {
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
+  border-radius: 7px;
+}
+
+.fan > *:first-child {
+  transform: rotate(-9deg) translate(6px, 2px);
+}
+
+.fan > *:last-child {
+  transform: rotate(7deg) translate(-6px, 0);
+}
+
+@keyframes breathe {
+  50% {
+    transform: translateY(-3px) rotate(1deg);
+  }
+}
+
 .hero .btn-hero {
-  background: #fff;
-  color: var(--ink);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.18);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.35), rgba(255, 255, 255, 0) 55%),
+    var(--brass);
+  color: var(--spruce-950);
+  box-shadow:
+    inset 0 0.5px 0 rgba(255, 255, 255, 0.6),
+    0 10px 24px rgba(0, 0, 0, 0.25);
 }
 
 .hero .btn-hero-ghost {
-  background: rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.14);
   color: #fff;
+}
+
+/* Now learning */
+.focus-card {
+  display: flex !important;
+  align-items: center;
+  gap: 1.1rem;
+}
+
+.focus-copy {
+  min-width: 0;
+}
+
+.mastery-grid {
+  display: grid;
+  grid-template-columns: repeat(13, 1fr);
+  gap: 1.5px;
+  flex: none;
+}
+
+.mastery-grid > span {
+  border-radius: 2px;
+  animation: cell-in 420ms var(--ease) backwards;
+  animation-delay: calc(var(--wave, 0) * 14ms);
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.8rem;
+  margin-top: 0.7rem;
+  font-size: 0.75rem;
+  color: var(--label-2);
+}
+
+.legend i {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border-radius: 2px;
+  margin-right: 5px;
+  vertical-align: -0.5px;
+}
+
+/* Key idea */
+.idea {
+  position: relative;
+  overflow: hidden;
+  border-left: 3px solid var(--tint-fill);
+}
+
+.idea h3 {
+  font-size: 1.75rem;
+  line-height: 1.08;
+  margin: 0.6rem 0 0.4rem;
+  max-width: 22ch;
+}
+
+.idea p {
+  margin: 0;
+  color: var(--label-2);
+  font-size: 0.95rem;
+  line-height: 1.45;
+}
+
+.pill-exploit {
+  background: color-mix(in srgb, var(--purple) 15%, transparent);
+  color: var(--purple);
+}
+
+/* Per chart progress */
+.chart-bar {
+  position: relative;
+  display: block;
+  height: 4px;
+  margin-top: 6px;
+  border-radius: 999px;
+  background: var(--fill);
+  overflow: hidden;
+}
+
+.chart-bar > span {
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-radius: inherit;
+}
+
+.chart-bar .touched {
+  background: color-mix(in srgb, var(--tint-fill) 40%, transparent);
+}
+
+.chart-bar .solid {
+  background: var(--tint-fill);
 }
 
 /* Week strip */
@@ -1496,8 +1693,8 @@ table.kv td:last-child {
 }
 
 .week .dot.done {
-  background: var(--tint);
-  color: #fff;
+  background: var(--tint-fill);
+  color: var(--on-tint);
 }
 
 .week .day.today {

@@ -27,3 +27,12 @@ describe('curriculum', () => {
     expect(new Set(ids).size).toBe(ids.length);
   });
 });
+
+import { IDEAS, ideaForDay } from '../src';
+
+describe('ideas', () => {
+  it('have unique ids and rotate by day', () => {
+    expect(new Set(IDEAS.map((i) => i.id)).size).toBe(IDEAS.length);
+    expect(ideaForDay(new Date(2026, 0, 1)).id).not.toBe(ideaForDay(new Date(2026, 0, 2)).id);
+  });
+});

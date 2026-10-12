@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { actionFrequencies, buildChart, gradeDecision, gradeOutcome, Rating, type StrategyNode } from '../src';
+import { actionFrequencies, buildChart, cardStrength, gradeDecision, gradeOutcome, Rating, State, type StrategyNode } from '../src';
 
 const node: StrategyNode = {
   pot: 10,
@@ -52,5 +52,14 @@ describe('gradeOutcome', () => {
     expect(gradeOutcome({ accuracy: 1, responseMs: 4000, targetMs: 2000 })).toBe(Rating.Good);
     expect(gradeOutcome({ accuracy: 0.8, responseMs: 1000, targetMs: 2000 })).toBe(Rating.Hard);
     expect(gradeOutcome({ accuracy: 0.3, responseMs: 1000, targetMs: 2000 })).toBe(Rating.Again);
+  });
+});
+
+describe('cardStrength', () => {
+  it('separates unseen, learning and solid cards', () => {
+    expect(cardStrength(undefined)).toBe('new');
+    expect(cardStrength({ state: State.Learning, stability: 20 })).toBe('learning');
+    expect(cardStrength({ state: State.Review, stability: 3 })).toBe('learning');
+    expect(cardStrength({ state: State.Review, stability: 9 })).toBe('solid');
   });
 });

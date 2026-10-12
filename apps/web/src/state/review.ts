@@ -1,4 +1,15 @@
-import { type Chart, createScheduler, dayKey, deckForCharts, type DrillOutcome, selectQueue, studyStreak } from '@felt/core';
+import {
+  boundaryHands,
+  cardStrength,
+  type CardStrength,
+  type Chart,
+  createScheduler,
+  dayKey,
+  deckForCharts,
+  type DrillOutcome,
+  selectQueue,
+  studyStreak,
+} from '@felt/core';
 import { db, type StoredCard } from './db';
 
 const scheduler = createScheduler();
@@ -108,4 +119,33 @@ export async function todayStats(charts: readonly Chart[], newPerDay: number, no
     week: lastSevenDays(allDates, now),
     totalCardsStarted: await db.cards.count(),
   };
+}
+
+export interface ChartMastery {
+  chart: Chart;
+  /** Strength of each edge hand's recall card. */
+  hands: Map<string, CardStrength>;
+  total: number;
+  solid: number;
+  learning: number;
+}
+
+/** How far along each chart is, in deck order, from the cards stored so far. */
+export async function masteryForCharts(charts: readonly Chart[]): Promise<ChartMastery[]> {
+  const ids = new Set(charts.map((c) => c.spec.id));
+  const stored = new Map((await db.cards.toArray()).filter((c) => ids.has(c.chartId)).map((c) => [c.id, c]));
+  return charts.map((chart) => {
+    const hands = new Map<string, CardStrength>();
+    for (const hand of boundaryHands(chart)) {
+      hands.set(hand, cardStrength(stored.get(`recall:${chart.spec.id}:${hand}`)?.fsrs));
+    }
+    const values = [...hands.values()];
+    return {
+      chart,
+      hands,
+      total: values.length,
+      solid: values.filter((v) => v === 'solid').length,
+      learning: values.filter((v) => v === 'learning').length,
+    };
+  });
 }

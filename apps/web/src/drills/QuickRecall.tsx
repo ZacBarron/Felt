@@ -90,7 +90,7 @@ export function QuickRecall({ chart, hand, targetMs, onAnswer, onNext }: Props) 
               </span>
             </div>
           </div>
-          {chart.spec.basis === 'exploit' && <span className="pill pill-warn">Exploit</span>}
+          {chart.spec.basis === 'exploit' && <span className="pill pill-exploit">Exploit</span>}
         </div>
         <SeatStrip spec={chart.spec} />
         <div className="row" style={{ justifyContent: 'center', padding: '1.1rem 0 0.6rem', gap: 12 }}>

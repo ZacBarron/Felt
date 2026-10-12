@@ -17,28 +17,36 @@ What Felt is not: a casino, a trading app, a crypto product. No neon, no chips r
 
 ## Logo
 
-**The mark** is a 4x4 range grid with the diagonal lit. Every solver chart in poker shares one shape: the pairs run down the diagonal. The mark reduces that to its essentials, so it reads as a clean grid to anyone and as a range chart to a player.
+**The mark** is an F painted into a 6x6 grid, the way a solver paints a range: a full stem, a long top arm and a shorter middle arm in brass, with the rest of the grid faintly visible. It reads as a letter to anyone and as a range chart to a player.
 
 **The wordmark** is "Felt" drawn from Instrument Serif with tightened tracking, kept as outlines (`apps/web/src/ui/wordmark.ts`) so it never depends on a font loading.
 
 **The lockup** pairs the tile mark with the wordmark, spaced at 0.38 of the mark height.
 
-Files: `docs/brand/felt-lockup.svg`, `felt-wordmark.svg`, `felt-mark.svg`, `felt-app-icon.svg`. In code: `BrandMark`, `Wordmark`, `Lockup` in `apps/web/src/ui/Brand.tsx`.
+Files: `docs/brand/felt-lockup.svg`, `felt-wordmark.svg`, `felt-mark.svg`, `felt-app-icon.svg`, and the overview `felt-brand-board.png`. In code: `BrandMark`, `Wordmark`, `Lockup`, `isFCell` in `apps/web/src/ui/Brand.tsx`.
 
 Usage:
 - Clear space around the mark: one grid cell on every side.
 - Minimum size: 20px for the tile, 14px tall for the wordmark.
-- Do not recolor the lit diagonal, rotate the grid, add effects, or redraw the wordmark in a live font.
+- Do not change which cells are lit, recolor the F, rotate the grid, add effects, or redraw the wordmark in a live font.
 
 ## Color
 
-| Token | Value | Use |
-| --- | --- | --- |
-| Ink | `#0B1426` | Wordmark, dark brand surfaces, splash screen |
-| Cobalt | `#2D5BFF` (dark mode `#5B82FF`) | The tint: buttons, selection, links, progress |
-| Brand gradient | `#3F6BFF` to `#0A1A4A`, 135 degrees | App icon and the one hero surface per screen. Never on controls. |
+The palette is called **Card room**: the felt of a table at night, lit by warm brass. It follows a 60/30/10 split.
 
-Everything else uses iOS system colors so the app feels native: green for correct, red for wrong and raise, orange for warnings and streaks, gray for fold. Playing cards use a four color deck on white faces.
+| Role | Share | Color | Why |
+| --- | --- | --- | --- |
+| Neutrals | 60% | Paper `#F4F1EA` by day, green black `#080C0B` by night | Warm neutrals let the content lead and keep brass from feeling loud |
+| Spruce | 30% | `#0B2421` to `#21604F` | The felt. Cool and low in saturation, so it recedes and gives depth |
+| Brass | 10% | `#E3B261` (fills), `#9A6A1E` (text on paper), `#E9B866` (text at night) | Spruce's warm near complement. Warm hues advance, so brass marks what to do next |
+
+Color theory notes:
+- Spruce (blue green) and brass (orange yellow) sit roughly opposite on the color wheel. Opposites make each other look richer, which is why a little brass carries a lot of weight.
+- The brand colors stay clear of the solver's semantic colors: raise is red, call and correct are green, fold is gray, 3bet is purple. Brass is never red or green, and spruce is far darker and grayer than call green, so a selected chip can never be mistaken for an action.
+- Filled brass buttons use spruce black text, not white, for contrast.
+- The felt gradient appears at most once per screen.
+
+Everything else uses the system palette so the app still feels native. Playing cards use a four color deck on white faces; card backs are spruce with a brass lattice.
 
 ## Type
 
@@ -63,4 +71,4 @@ Motion explains what happened; it never decorates.
 
 ## Materials
 
-Liquid Glass for what floats (tab bar, sidebar, nav bar, toolbars). Content sits on plain grouped surfaces. The brand gradient appears at most once per screen.
+Liquid Glass for what floats (tab bar, sidebar, nav bar, toolbars). Content sits on plain grouped surfaces. The felt hero carries a fine noise so it reads as cloth, not plastic, and shows the range you are learning as a faint brass texture.
