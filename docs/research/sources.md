@@ -26,6 +26,10 @@ Compiled October 2026 to ground Felt's rating, scheduling, motivation and moneti
 
 **Item response theory.** Embretson, S. E., Reise, S. P. (2000). *Item Response Theory for Psychologists.* Lawrence Erlbaum. Rasch (1PL): `P(correct) = 1 / (1 + exp(-(theta - b)))`, the same logistic curve as Elo, which is why learner Elo works as an online Rasch estimate. 2PL adds item discrimination `a`.
 
+**Rating classes.** The US Chess Federation's classes are 200 points wide (Class E 1000 to 1199 up to Expert 2000 to 2199 and National Master from 2200), per the USCF rating distribution pages and the Wikipedia summary of USCF classes (*secondary*).
+
+**Goal gradient.** Kivetz, R., Urminsky, O., Zheng, Y. (2006). "The goal-gradient hypothesis resurrected: Purchase acceleration, illusionary goal progress, and customer retention." *Journal of Marketing Research* 43(1), 39-58. doi:10.1509/jmkr.43.1.39. People accelerate effort as they near a reward (coffee card and online rating programs), and effort tracks perceived distance to the goal (*abstract level*).
+
 **For Felt.** Rate the player (theta) and every drill spot (b) with Elo on the logistic scale, `K(n) = 1.8 / (1 + 0.05 n)`, displayed on a 1500 based scale. Add Glicko style uncertainty that grows with days away. Show "provisional" while uncertainty is high.
 
 ---

@@ -16,7 +16,7 @@ How Felt measures a player's ability, turns it into money at their stake, and ke
 
 **Item difficulties.** Design priors for now (`DIFFICULTY` in `rating.ts`): a clear chart decision 1050, a pure decision on the range edge 1350, a mixed hand 1550, painting a chart 1600, core lesson questions 1300, advanced 1600, solver decisions 1700. With a server, item difficulties should be fitted from everyone's answers, exactly as player ratings are (Pelánek 2016).
 
-**Tiers.** Beginner, Recreational (1000), Club (1200), Regular (1400), Strong regular (1600), Pro (1800), Elite (2000). Players start at 1200.
+**Tiers.** Eleven tiers, one every 150 points: Newcomer, Learner (900), Recreational (1050), Contender (1200), Grinder (1350), Regular (1500), Strong regular (1650), Expert (1800), Pro (1950), Elite (2100), World class (2250). Players start at 1200. Chess classes are 200 points wide (USCF). 150 keeps each step meaningful, since a player one tier up is expected to win about 70% of decisions against the tier below, and puts the next milestone close enough to pull effort forward: people speed up as a goal gets near (Kivetz, Urminsky and Zheng 2006). The You page shows the points to the next tier.
 
 ## 2. What the rating is worth at the table
 
@@ -43,12 +43,23 @@ The goal is a habit built on real competence, not on points. Gamification has sm
 | Win rate | Enter results | The model turns study into money at their stake | Concrete value of skill |
 | Saves | Bookmark anything interesting | It returns in review | Retrieval practice of what the player chose |
 | Placement and test outs | Skip known material | Endowed progress, no repetition | Adaptive practice at the right difficulty (Klinkenberg et al. 2011 target about 75% success) |
+| Practice at your level | Ten decisions picked near 80% expected success, weaker areas first, areas mixed | Always the right difficulty | Klinkenberg et al. 2011; Wilson et al. 2019; interleaving (Rohrer and Taylor 2007) |
+| Study cue | Picks when they will study at onboarding; the pledge reads "When I ..., I will study" | A plan tied to an existing routine | Implementation intentions (Gollwitzer 1999) |
 
 **Commitment at onboarding.** A chosen daily goal and a held pledge are implementation intentions in miniature (Gollwitzer 1999): when, how long and what.
 
 **What Felt avoids.** Fake competitors or leagues without real players, fake scarcity, guilt notifications, and rewards for time spent rather than skill shown.
 
-## 4. Next, needing a server
+## 4. Real results: imports
+
+Code: `packages/core/src/handhistory.ts`, `packages/core/src/sessions.ts`, `apps/web/src/pages/ImportPage.tsx`.
+
+- **Hand histories.** Felt reads the PokerStars text format, which most sites write and which PokerTracker 4 and Holdem Manager 3 export. It also accepts the GGPoker header. Tests use real PokerStars hands and check that every hand conserves chips (nets add up to minus the rake). GGPoker parsing follows the same layout but has not been checked against a real GG export yet.
+- **Tracker databases.** PokerTracker and Holdem Manager keep hands in a database on the player's computer, which a web app cannot open. Players export hands as text and import the files. Nothing leaves the device.
+- **Live sessions.** Any CSV with a date, a session length and a result (or buy in and cash out) imports, with columns found by their headers.
+- **What imports drive.** Win rate by seat, VPIP, PFR, 3bet and went to showdown; first in decisions compared with the opening charts, flagged only outside mixes and drillable in review; and the results that feed the win rate estimate. Under about 1,500 hands Felt says the sample is mostly luck (Potter van Loon et al. 2015).
+
+## 5. Next, needing a server
 
 1. **Item calibration** from all players' answers, and then the pool ratings in the win rate model from real players at each stake.
 2. **Leagues and friends**: weekly groups ranked by rating gained, only with real players. Duolingo reports leagues and streak mechanics among its main retention levers (company sources in the brief).
@@ -56,6 +67,6 @@ The goal is a habit built on real competence, not on points. Gamification has sm
 4. **Global daily challenge stats**: how everyone did on today's five.
 5. **Adaptive difficulty**: pick practice items near a 75 to 85% expected success rate from the rating model (Klinkenberg et al. 2011 in children; Wilson et al. 2019 derive about 85% for model learners).
 
-## 5. Monetization context
+## 6. Monetization context
 
 Duolingo, the reference freemium learning app, reported 58.7M daily active users and 12.7M paid subscribers in Q2 2026, with subscribers 9.2% of monthly actives at the end of 2025 (company sources). Its model is a generous free tier with a habit loop, and paid features that add depth. Felt follows the same shape: the daily challenge, review, placement and the first module of every track are free; depth (every lesson, the solver on any spot) is Pro. See [MONETIZATION.md](MONETIZATION.md).

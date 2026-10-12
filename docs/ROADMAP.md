@@ -55,7 +55,11 @@ See [MONETIZATION.md](MONETIZATION.md).
 - [x] Daily challenge: five decisions, the same for everyone, rated, shareable spoiler free grid
 - [x] Quests on Today and streaks with earned freezes
 - [x] Research brief with verified sources (docs/research/sources.md)
+- [x] Tiers every 150 points (eleven tiers) with progress to the next
+- [x] Imports: hand histories (PokerStars format, GGPoker header, tracker exports) and live session CSVs; stats by seat, opening leaks against the charts, results feeding the win rate
+- [x] Practice at your level (about 80% expected success, weaker areas first, interleaved); study cue at onboarding
 - [ ] Connect a store (App Store, Play, web checkout) to `purchase()`
+- [ ] Verify GGPoker parsing against a real GG export; add Winamax and iPoker formats
 - [ ] Server: item calibration, real pool ratings per stake, leagues with real players, reminders, global daily stats
 - [ ] Reminder notifications and streak freeze
 
