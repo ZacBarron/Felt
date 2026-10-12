@@ -19,6 +19,15 @@ export default defineConfig({
   // During development the Felt server runs on 8787 (pnpm dev:server).
   server: { proxy: { '/api': 'http://localhost:8787' } },
   plugins: [
+    // The hosted test page always shows the phone layout (see scripts/artifact-page.mjs for the frame).
+    artifact && {
+      name: 'felt-phone-layout',
+      enforce: 'pre' as const,
+      transform(code: string, id: string) {
+        if (!id.endsWith('.css')) return undefined;
+        return code.replaceAll('@media (max-width: 760px)', '@media all').replaceAll('@media (min-width: 761px)', '@media not all');
+      },
+    },
     react(),
     // Installable on a phone and fully usable offline at the table.
     VitePWA({
