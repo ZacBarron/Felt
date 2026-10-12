@@ -3,7 +3,13 @@ import { defineConfig } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
 import pkg from './package.json';
 
+// A build for sharing as a hosted test page: relative asset paths, in-memory
+// routes and no service worker. See scripts/artifact-page.mjs.
+const artifact = process.env.FELT_TARGET === 'artifact';
+
 export default defineConfig({
+  base: artifact ? './' : '/',
+  build: { outDir: artifact ? 'dist-artifact' : 'dist' },
   define: {
     __APP_VERSION__: JSON.stringify(pkg.version),
   },
@@ -13,6 +19,7 @@ export default defineConfig({
     react(),
     // Installable on a phone and fully usable offline at the table.
     VitePWA({
+      disable: artifact,
       registerType: 'autoUpdate',
       includeAssets: ['favicon.png', 'apple-touch-icon.png'],
       manifest: {
