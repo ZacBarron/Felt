@@ -1,7 +1,8 @@
 import { ALL_HAND_CLASSES, boundaryHands, PAINT_TARGET_MS, RECALL_TARGET_MS } from '@felt/core';
 import { useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { DrillRunner } from '../drills/DrillRunner';
-import { chartsForGame } from '../state/charts';
+import { chartsForGame, getChart } from '../state/charts';
 import { useSettings } from '../state/settings';
 import { Chips } from '../ui/Chips';
 import { FlameIcon } from '../ui/icons';
@@ -11,9 +12,15 @@ import { Segmented } from '../ui/Segmented';
 /** Free practice on any chart. Does not touch the review schedule. */
 export function DrillsPage() {
   const { settings } = useSettings();
-  const { charts } = chartsForGame(settings.game);
-  const [chartId, setChartId] = useState(charts[0]?.spec.id);
-  const [mode, setMode] = useState<'quick' | 'paint'>('quick');
+  const [params] = useSearchParams();
+  const linked = params.get('chart');
+  const fit = chartsForGame(settings.game).charts;
+  // A lesson may link to a chart for another table size; include it so practice still starts there.
+  const linkedChart = linked && !fit.some((c) => c.spec.id === linked) ? getChart(linked) : undefined;
+  const charts = linkedChart ? [linkedChart, ...fit] : fit;
+  // Lessons link here with ?chart= so practice starts on the chart just taught.
+  const [chartId, setChartId] = useState(params.get('chart') ?? charts[0]?.spec.id);
+  const [mode, setMode] = useState<'quick' | 'paint'>(params.get('mode') === 'paint' ? 'paint' : 'quick');
   const [round, setRound] = useState(0);
   const [score, setScore] = useState({ right: 0, total: 0, streak: 0, best: 0 });
   const chart = charts.find((c) => c.spec.id === chartId) ?? charts[0];

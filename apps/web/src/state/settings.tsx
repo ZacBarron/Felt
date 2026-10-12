@@ -8,10 +8,19 @@ export interface StudySettings {
 }
 
 export type Appearance = 'system' | 'light' | 'dark';
+export type Palette = 'card-room' | 'ink' | 'oxblood' | 'cobalt';
+
+export const PALETTES: { id: Palette; name: string; note: string; felt: [string, string]; accent: string }[] = [
+  { id: 'card-room', name: 'Card room', note: 'Spruce and brass', felt: ['#2a7461', '#0b2421'], accent: '#e3b261' },
+  { id: 'ink', name: 'Ink', note: 'Navy and brass', felt: ['#2f4f8a', '#0b1426'], accent: '#e3b261' },
+  { id: 'oxblood', name: 'Oxblood', note: 'Wine and cream', felt: ['#8a3142', '#2a0e14'], accent: '#ecd9b4' },
+  { id: 'cobalt', name: 'Cobalt', note: 'Blue and ice', felt: ['#4573ff', '#0a1a4a'], accent: '#dfe7ff' },
+];
 
 export interface UiSettings {
   haptics: boolean;
   appearance: Appearance;
+  palette: Palette;
 }
 
 export interface AppSettings {
@@ -20,7 +29,7 @@ export interface AppSettings {
   ui: UiSettings;
 }
 
-const DEFAULTS: AppSettings = { game: DEFAULT_SETTINGS, study: { newPerDay: 15 }, ui: { haptics: true, appearance: 'system' } };
+const DEFAULTS: AppSettings = { game: DEFAULT_SETTINGS, study: { newPerDay: 15 }, ui: { haptics: true, appearance: 'system', palette: 'card-room' } };
 const KEY = 'felt.settings.v1';
 
 function load(): AppSettings {
@@ -58,6 +67,12 @@ const SettingsContext = createContext<{ settings: AppSettings; update: (next: Ap
 export function SettingsProvider({ children }: { children: ReactNode }) {
   const [settings, setSettings] = useState<AppSettings>(load);
   useEffect(() => applyAppearance(settings.ui.appearance), [settings.ui.appearance]);
+
+  useEffect(() => {
+    const root = document.documentElement;
+    if (settings.ui.palette === 'card-room') delete root.dataset.palette;
+    else root.dataset.palette = settings.ui.palette;
+  }, [settings.ui.palette]);
 
   useEffect(() => {
     setHapticsEnabled(settings.ui.haptics);

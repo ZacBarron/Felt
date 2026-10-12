@@ -46,6 +46,19 @@ Color theory notes:
 - Filled brass buttons use spruce black text, not white, for contrast.
 - The felt gradient appears at most once per screen.
 
+### Themes
+
+Card room is the brand: it is what goes on the app icon, the splash screen and every marketing surface. People can pick an alternate theme in Settings for the app itself:
+
+| Theme | Felt | Accent | Note |
+| --- | --- | --- | --- |
+| Card room (default) | Spruce | Brass | The brand |
+| Ink | Navy | Brass | Quieter, more corporate |
+| Oxblood | Wine | Cream | Warm and dramatic; the felt sits near the red used for raise, so it is not the default |
+| Cobalt | Blue | Ice | The earlier blue direction |
+
+Themes only change the felt and accent tokens (`--base-*`, `--felt-*`, `--accent`, `--tint*`). Poker semantic colors never change.
+
 Everything else uses the system palette so the app still feels native. Playing cards use a four color deck on white faces; card backs are spruce with a brass lattice.
 
 ## Type

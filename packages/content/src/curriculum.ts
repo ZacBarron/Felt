@@ -72,8 +72,8 @@ export const CURRICULUM: Track[] = [
         id: 'rfi',
         title: 'Opening ranges (RFI)',
         lessons: [
-          lesson('rfi-ep', 'UTG and HJ opens', ['range-recall', 'spot-action']),
-          lesson('rfi-lp', 'CO and BTN opens', ['range-recall', 'spot-action']),
+          lesson('rfi-ep', 'Early position opens', ['range-recall', 'spot-action']),
+          lesson('rfi-lp', 'Late position opens', ['range-recall', 'spot-action']),
           lesson('rfi-sb', 'SB strategy: raise or limp', ['range-recall', 'spot-action']),
         ],
       },
@@ -175,6 +175,7 @@ export const CURRICULUM: Track[] = [
           lesson('vs-station', 'Beating calling stations', ['spot-action']),
           lesson('vs-nit', 'Beating nits', ['spot-action']),
           lesson('vs-aggro', 'Beating maniacs and LAGs', ['spot-action']),
+          lesson('live-limpers', 'Punishing limpers', ['range-recall', 'spot-action']),
         ],
       },
       {

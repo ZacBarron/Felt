@@ -1,45 +1,102 @@
 import { CURRICULUM } from '@felt/content';
-import { ChevronRightIcon } from '../ui/icons';
+import { useLiveQuery } from 'dexie-react-hooks';
+import { Link } from 'react-router-dom';
+import { LessonCover } from '../lesson/LessonCover';
+import { LESSON_ENTRIES, type LessonEntry, lessonPath, lessonProgress, pickNextLesson } from '../state/lessons';
+import type { StoredLesson } from '../state/db';
+import { CheckIcon } from '../ui/icons';
 import { PageHeader } from '../ui/PageHeader';
 
-const DRILL_LABELS: Record<string, string> = {
-  'range-recall': 'Ranges',
-  'spot-action': 'Spots',
-  frequency: 'Frequencies',
-  math: 'Math',
-  'equity-estimate': 'Equity',
-  concept: 'Concepts',
-};
-
 export function LearnPage() {
+  const progress = useLiveQuery(lessonProgress, [], new Map<string, StoredLesson>());
+  const playable = LESSON_ENTRIES.filter((e) => e.content);
+  const done = playable.filter((e) => progress.get(e.key)?.status === 'done').length;
+  const next = pickNextLesson(progress);
+  const nextState = next ? progress.get(next.key) : undefined;
+
   return (
     <div className="stack" style={{ gap: '1.6rem' }}>
-      <PageHeader title="Learn" subtitle="Short lessons that feed your daily review." />
-      {CURRICULUM.map((track) => (
-        <section key={track.id}>
-          <div className="section-title">{track.title}</div>
-          <div className="list">
-            {track.modules.map((m) => (
-              <details key={m.id}>
-                <summary className="list-row" data-haptic="select">
-                  <span className="grow">{m.title}</span>
-                  <span className="detail">{m.lessons.length}</span>
-                  <ChevronRightIcon size={16} className="chev" />
-                </summary>
-                <div style={{ padding: '0 1rem 0.6rem' }}>
-                  {m.lessons.map((l) => (
-                    <div key={l.id} style={{ padding: '0.45rem 0 0.45rem 0.9rem', borderLeft: '2px solid var(--fill-2)' }}>
-                      <div style={{ fontSize: '0.95rem' }}>{l.title}</div>
-                      <div className="caption">{l.drills.map((d) => DRILL_LABELS[d] ?? d).join(', ')}</div>
-                    </div>
-                  ))}
+      <PageHeader title="Learn" subtitle={`${done} of ${playable.length} lessons complete`} />
+
+      {next?.content && (
+        <Link to={lessonPath(next.key)} className="hero learn-hero">
+          <div className="learn-hero-body">
+            <div style={{ minWidth: 0 }}>
+              <div className="hero-label">{nextState?.status === 'started' ? 'Continue' : 'Up next'}</div>
+              <div className="display learn-hero-title">{next.title}</div>
+              <div className="hero-sub">
+                {next.trackTitle}, {next.content.minutes} min, {next.content.steps.length} steps
+              </div>
+              {nextState?.status === 'started' && (
+                <div className="hero-progress">
+                  <span style={{ width: `${(nextState.step / next.content.steps.length) * 100}%` }} />
                 </div>
-              </details>
-            ))}
+              )}
+            </div>
+            <LessonCover cover={next.content.cover} size="sm" />
           </div>
-          <div className="section-footer">{track.summary}</div>
-        </section>
-      ))}
+          <span className="btn btn-lg btn-block btn-hero">{nextState?.status === 'started' ? 'Continue lesson' : 'Start lesson'}</span>
+        </Link>
+      )}
+
+      {CURRICULUM.map((track) => {
+        const entries = LESSON_ENTRIES.filter((e) => e.trackId === track.id);
+        const written = entries.filter((e) => e.content);
+        const trackDone = written.filter((e) => progress.get(e.key)?.status === 'done').length;
+        return (
+          <section key={track.id}>
+            <div className="row between" style={{ padding: '0 1rem 0.5rem', flexWrap: 'nowrap' }}>
+              <span className="section-title" style={{ padding: 0 }}>
+                {track.title}
+              </span>
+              <span className="footnote num">{written.length ? `${trackDone} of ${written.length}` : 'Soon'}</span>
+            </div>
+            <div className="lesson-rail">
+              {[...written, ...entries.filter((e) => !e.content)].map((e) => (
+                <LessonCard key={e.key} entry={e} state={progress.get(e.key)} />
+              ))}
+            </div>
+            <div className="section-footer">{track.summary}</div>
+          </section>
+        );
+      })}
+    </div>
+  );
+}
+
+function LessonCard({ entry, state }: { entry: LessonEntry; state?: StoredLesson }) {
+  const content = entry.content;
+  const body = (
+    <>
+      {content ? <LessonCover cover={content.cover} /> : <div className="cover cover-md cover-soon" />}
+      <div className="lesson-card-body">
+        <div className="caption">{entry.moduleTitle}</div>
+        <div className="display lesson-card-title">{entry.title}</div>
+        <div className="lesson-card-meta">
+          {!content ? (
+            <span className="pill">Soon</span>
+          ) : state?.status === 'done' ? (
+            <span className="pill pill-good">
+              <CheckIcon size={12} /> Done
+            </span>
+          ) : state?.status === 'started' ? (
+            <span className="pill pill-tint num">
+              {state.step} of {content.steps.length}
+            </span>
+          ) : (
+            <span className="caption">{content.minutes} min</span>
+          )}
+        </div>
+      </div>
+    </>
+  );
+  return content ? (
+    <Link to={lessonPath(entry.key)} className="lesson-card">
+      {body}
+    </Link>
+  ) : (
+    <div className="lesson-card soon" aria-disabled="true">
+      {body}
     </div>
   );
 }

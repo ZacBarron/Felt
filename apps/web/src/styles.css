@@ -43,21 +43,27 @@
   --label-3: rgba(40, 46, 42, 0.32);
 
   /* Brand */
-  --spruce-950: #08181a;
-  --spruce-900: #0b2421;
-  --spruce-700: #134a42;
-  --spruce-500: #21604f;
-  --brass: #e3b261;
-  --brass-deep: #9a6a1e;
-  --ink: var(--spruce-900);
-  --brand-gradient: radial-gradient(120% 140% at 0% 0%, #2a7461 0%, #165244 38%, #0b2421 100%);
+  --base-950: #08181a;
+  --base-900: #0b2421;
+  --base-700: #134a42;
+  --base-500: #21604f;
+  --accent: #e3b261;
+  --accent-deep: #9a6a1e;
+  --ink: var(--base-900);
+  --felt-1: #2a7461;
+  --felt-2: #165244;
+  --felt-3: #0b2421;
+  --brand-gradient: radial-gradient(120% 140% at 0% 0%, var(--felt-1) 0%, var(--felt-2) 38%, var(--felt-3) 100%);
+  /* Text and fills that sit on the felt. */
+  --on-felt-accent: var(--accent);
+  --on-accent: var(--base-950);
   --font-display: 'Instrument Serif', 'New York', ui-serif, Georgia, serif;
 
   /* Tint: brass. Text and icons use the deep shade for contrast on paper;
      filled buttons use brass with ink text. */
-  --tint: var(--brass-deep);
+  --tint: var(--accent-deep);
   --tint-fill: #d9a24a;
-  --on-tint: var(--spruce-950);
+  --on-tint: var(--base-950);
 
   /* System colors */
   --green: #2f9e57;
@@ -92,8 +98,8 @@
   --glass-sheen: rgba(255, 255, 255, 0.5);
   --pressed: rgba(60, 45, 20, 0.06);
 
-  --felt: #21604f;
-  --felt-dark: #0b2421;
+  --felt: var(--base-500);
+  --felt-dark: var(--base-900);
 
   --r-card: 24px;
   --r-control: 14px;
@@ -1497,7 +1503,7 @@ table.kv td:last-child {
   font-weight: 650;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--brass);
+  color: var(--accent);
 }
 
 .hero-sub {
@@ -1518,7 +1524,7 @@ table.kv td:last-child {
   display: block;
   height: 100%;
   border-radius: inherit;
-  background: var(--brass);
+  background: var(--accent);
   transition: width 600ms var(--ease);
 }
 
@@ -1558,8 +1564,8 @@ table.kv td:last-child {
 .hero .btn-hero {
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.35), rgba(255, 255, 255, 0) 55%),
-    var(--brass);
-  color: var(--spruce-950);
+    var(--accent);
+  color: var(--on-accent);
   box-shadow:
     inset 0 0.5px 0 rgba(255, 255, 255, 0.6),
     0 10px 24px rgba(0, 0, 0, 0.25);
@@ -1781,4 +1787,633 @@ table.kv td:last-child {
   bottom: 0.9rem;
   width: 0.5px;
   background: var(--separator);
+}
+
+/* Themes ----------------------------------------------------------------
+ * Card room (spruce and brass) is the brand and the default. The others
+ * swap the felt and accent tokens only; semantic colors never change.
+ * Each theme sets its tint for light, then again for dark.
+ */
+
+:root[data-palette='ink'] {
+  --base-950: #060b16;
+  --base-900: #0b1426;
+  --base-700: #15274a;
+  --base-500: #2a4677;
+  --felt-1: #2f4f8a;
+  --felt-2: #172c55;
+  --felt-3: #0b1426;
+}
+
+:root[data-palette='oxblood'] {
+  --base-950: #160709;
+  --base-900: #2a0e14;
+  --base-700: #4f1a26;
+  --base-500: #7a2b3a;
+  --felt-1: #8a3142;
+  --felt-2: #561b28;
+  --felt-3: #2a0e14;
+  --accent: #ecd9b4;
+  --accent-deep: #8b2635;
+  --tint: #8b2635;
+  --tint-fill: #8b2635;
+  --on-tint: #fbf3e4;
+  --on-accent: #2a0e14;
+}
+
+:root[data-palette='cobalt'] {
+  --base-950: #060d24;
+  --base-900: #0a1a4a;
+  --base-700: #1d3fb8;
+  --base-500: #2d5bff;
+  --felt-1: #4573ff;
+  --felt-2: #1d3fb8;
+  --felt-3: #0a1a4a;
+  --accent: #dfe7ff;
+  --accent-deep: #2d5bff;
+  --tint: #2d5bff;
+  --tint-fill: #2d5bff;
+  --on-tint: #ffffff;
+  --on-accent: #0a1a4a;
+}
+
+:root[data-palette='oxblood'][data-theme='dark'] {
+  --tint: #ecd9b4;
+  --tint-fill: #ecd9b4;
+  --on-tint: #2a0e14;
+}
+
+:root[data-palette='cobalt'][data-theme='dark'] {
+  --tint: #6f91ff;
+  --tint-fill: #5b82ff;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root[data-palette='oxblood']:not([data-theme='light']) {
+    --tint: #ecd9b4;
+    --tint-fill: #ecd9b4;
+    --on-tint: #2a0e14;
+  }
+
+  :root[data-palette='cobalt']:not([data-theme='light']) {
+    --tint: #6f91ff;
+    --tint-fill: #5b82ff;
+  }
+}
+
+/* Theme picker */
+.theme-picker {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.6rem;
+  padding: 0.9rem 1rem 1rem;
+}
+
+.theme-swatch {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.15rem;
+  background: none;
+  padding: 0;
+  min-height: 0;
+  border-radius: 14px;
+  text-align: left;
+}
+
+.theme-swatch .swatch {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1.1;
+  border-radius: 14px;
+  margin-bottom: 0.35rem;
+  box-shadow: inset 0 0 0 0.5px rgba(0, 0, 0, 0.15);
+  transition: box-shadow 200ms var(--ease);
+}
+
+.theme-swatch.active .swatch {
+  box-shadow:
+    0 0 0 2px var(--surface),
+    0 0 0 4px var(--tint);
+}
+
+.swatch-accent {
+  position: absolute;
+  left: 10px;
+  bottom: 10px;
+  width: 38%;
+  height: 8px;
+  border-radius: 999px;
+}
+
+.swatch-name {
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+/* Learn ------------------------------------------------------------------ */
+
+.learn-hero {
+  display: flex !important;
+  flex-direction: column;
+  gap: 1.1rem;
+  text-decoration: none;
+  transition: transform 160ms var(--ease);
+}
+
+.learn-hero:active {
+  transform: scale(0.985);
+}
+
+.learn-hero-body {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.learn-hero-title {
+  font-size: 2.3rem;
+  line-height: 1.02;
+  margin: 0.35rem 0 0.4rem;
+}
+
+.learn-hero .cover {
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: inset 0 0 0 0.5px rgba(255, 255, 255, 0.14);
+}
+
+.learn-hero .cover-figure {
+  color: var(--accent);
+}
+
+.learn-hero .cover-grid span.on {
+  background: var(--accent);
+}
+
+/* Lesson cover art */
+.cover {
+  display: grid;
+  place-items: center;
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--tint-fill) 9%, var(--surface-2));
+  overflow: hidden;
+  flex: none;
+}
+
+.cover-md {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+}
+
+.cover-sm {
+  width: 108px;
+  height: 108px;
+}
+
+.cover-figure {
+  font-size: 3.4rem;
+  line-height: 1;
+  color: var(--tint);
+}
+
+.cover-sm .cover-figure {
+  font-size: 2.6rem;
+}
+
+.cover-grid {
+  display: grid;
+  grid-template-columns: repeat(13, 1fr);
+  gap: 1.5px;
+  width: 64%;
+  aspect-ratio: 1;
+}
+
+.cover-sm .cover-grid {
+  width: 76%;
+}
+
+.cover-grid span {
+  border-radius: 1.5px;
+  background: var(--fill-3);
+}
+
+.cover-grid span.on {
+  background: var(--tint-fill);
+}
+
+.cover-soon {
+  background: repeating-linear-gradient(135deg, var(--fill) 0 6px, transparent 6px 12px);
+}
+
+/* Lesson rail: a swipeable row of lesson cards per track */
+.lesson-rail {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(180px, 210px);
+  gap: 0.75rem;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  margin: 0 -2.25rem;
+  padding: 2px 2.25rem 6px;
+  scroll-padding: 0 2.25rem;
+}
+
+.lesson-rail::-webkit-scrollbar {
+  display: none;
+}
+
+.lesson-card {
+  scroll-snap-align: start;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border-radius: 22px;
+  padding: 0.5rem;
+  color: var(--label);
+  text-decoration: none;
+  transition: transform 160ms var(--spring);
+}
+
+.lesson-card:active {
+  transform: scale(0.97);
+}
+
+.lesson-card.soon {
+  opacity: 0.55;
+}
+
+.lesson-card .cover {
+  border-radius: 16px;
+}
+
+.lesson-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 0.6rem 0.45rem 0.35rem;
+  flex: 1;
+}
+
+.lesson-card-title {
+  font-size: 1.35rem;
+  line-height: 1.08;
+  flex: 1;
+}
+
+.lesson-card-meta {
+  margin-top: 0.4rem;
+}
+
+/* Lesson player */
+.segments {
+  flex: 1;
+  display: flex;
+  gap: 4px;
+}
+
+.segments span {
+  flex: 1;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--fill-2);
+  position: relative;
+  overflow: hidden;
+}
+
+.segments span::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--tint-fill);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 420ms var(--ease);
+}
+
+.segments span.done::after,
+.segments span.current::after {
+  transform: scaleX(1);
+}
+
+.lesson-stage {
+  padding-top: 0.6rem;
+  min-height: 50vh;
+}
+
+.lesson-stage.from-right {
+  animation: from-right 380ms var(--ease) backwards;
+}
+
+.lesson-stage.from-left {
+  animation: from-left 380ms var(--ease) backwards;
+}
+
+@keyframes from-right {
+  from {
+    opacity: 0;
+    transform: translateX(28px);
+  }
+}
+
+@keyframes from-left {
+  from {
+    opacity: 0;
+    transform: translateX(-28px);
+  }
+}
+
+.lesson-step {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.lesson-step.intro {
+  padding-top: 8vh;
+}
+
+.lesson-h1 {
+  font-size: 3rem;
+  line-height: 1;
+  letter-spacing: -0.01em;
+  font-weight: 400;
+}
+
+.lesson-h2 {
+  font-size: 2.05rem;
+  line-height: 1.05;
+  font-weight: 400;
+}
+
+.lesson-lead {
+  font-size: 1.15rem;
+  line-height: 1.5;
+  color: var(--label-2);
+  margin: 0;
+}
+
+.lesson-p {
+  font-size: 1.05rem;
+  line-height: 1.55;
+  margin: 0;
+}
+
+.lesson-p strong,
+.lesson-lead strong {
+  color: var(--label);
+  font-weight: 650;
+}
+
+.formula {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  border-left: 3px solid var(--tint-fill);
+}
+
+.formula-main {
+  font-size: 1.85rem;
+  line-height: 1.15;
+}
+
+.formula-parts {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.92rem;
+}
+
+.formula-parts > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.lesson-table {
+  padding: 0.35rem 1rem;
+}
+
+.lesson-table table {
+  width: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+
+.lesson-table th {
+  text-align: left;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--label-2);
+  padding: 0.6rem 0 0.4rem;
+}
+
+.lesson-table td {
+  padding: 0.6rem 0;
+  border-top: 0.5px solid var(--separator);
+}
+
+.lesson-table tbody tr {
+  animation: rise 360ms var(--ease) backwards;
+}
+
+.lesson-table th:not(:first-child),
+.lesson-table td:not(:first-child) {
+  text-align: right;
+}
+
+.lesson-table td:not(:first-child) {
+  font-weight: 650;
+}
+
+/* The one felt surface on a hand step */
+.lesson-felt {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+  padding: 1.4rem 1rem 1.6rem;
+  border-radius: 26px;
+  background: var(--brand-gradient);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+.callout {
+  padding: 1.2rem;
+  border-radius: var(--r-card);
+  background: var(--surface);
+  border-left: 3px solid var(--tint-fill);
+}
+
+.callout-exploit {
+  border-left-color: var(--purple);
+}
+
+.lesson-question {
+  font-size: 1.4rem;
+  line-height: 1.25;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+}
+
+.choices {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.choice {
+  justify-content: flex-start;
+  gap: 0.8rem;
+  min-height: 58px;
+  padding: 0 1rem 0 0.6rem;
+  border-radius: 18px;
+  background: var(--surface);
+  text-align: left;
+  font-weight: 550;
+}
+
+.choice-key {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  background: var(--fill);
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--label-2);
+  flex: none;
+}
+
+.choice.correct {
+  background: color-mix(in srgb, var(--green) 14%, var(--surface));
+  color: var(--green);
+  box-shadow: inset 0 0 0 2px var(--green);
+  opacity: 1;
+}
+
+.choice.correct .choice-key {
+  background: var(--green);
+  color: #fff;
+}
+
+.choice.wrong {
+  background: color-mix(in srgb, var(--red) 12%, var(--surface));
+  color: var(--red);
+  box-shadow: inset 0 0 0 2px var(--red);
+  animation: shake 420ms var(--ease);
+  opacity: 1;
+}
+
+.choice.wrong .choice-key {
+  background: var(--red);
+  color: #fff;
+}
+
+.choice.faded {
+  opacity: 0.45;
+}
+
+.explain {
+  padding: 1rem 1.1rem;
+  border-radius: 18px;
+  font-size: 0.98rem;
+  line-height: 1.5;
+  background: var(--surface);
+}
+
+.explain.good strong {
+  color: var(--green);
+}
+
+.explain.bad strong {
+  color: var(--red);
+}
+
+.takeaways {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+
+.takeaway {
+  display: flex;
+  gap: 0.8rem;
+  align-items: flex-start;
+  padding: 1rem;
+  border-radius: 18px;
+  background: var(--surface);
+  font-size: 1.02rem;
+  line-height: 1.4;
+  animation: rise 420ms var(--ease) backwards;
+}
+
+.takeaway .tick {
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  flex: none;
+  background: var(--tint-fill);
+  color: var(--on-tint);
+}
+
+@media (max-width: 760px) {
+  .lesson-rail {
+    margin: 0 -1rem;
+    padding: 2px 1rem 6px;
+    scroll-padding: 0 1rem;
+    grid-auto-columns: 62%;
+  }
+
+  .lesson-h1 {
+    font-size: 2.6rem;
+  }
+
+  .theme-picker {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Drill hole cards sit on a strip of felt. */
+.felt-strip {
+  padding: 1.4rem 0;
+  margin: 0.2rem -0.35rem 0;
+  border-radius: 20px;
+  background: var(--brand-gradient);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), inset 0 -12px 30px rgba(0, 0, 0, 0.18);
+}
+
+.intro-cover {
+  margin-top: 2rem;
+  animation-delay: 160ms;
+}
+
+.intro-cover .cover {
+  border-radius: 26px;
+  aspect-ratio: 16 / 10;
+}
+
+.intro-cover .cover-figure {
+  font-size: 5.5rem;
+}
+
+.intro-cover .cover-grid {
+  width: 46%;
+}
+
+.lesson-step.intro {
+  padding-top: 4vh;
+}
+
+.lesson-done {
+  padding-top: calc(1.5rem + env(safe-area-inset-top));
+}
+
+.cover-grid span:not(.on) {
+  background: var(--fill-2);
 }

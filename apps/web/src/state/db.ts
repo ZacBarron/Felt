@@ -24,12 +24,28 @@ export interface StoredReview {
   grade: number;
 }
 
+export interface StoredLesson {
+  /** `${trackId}/${moduleId}/${lessonId}` */
+  key: string;
+  status: 'started' | 'done';
+  /** Furthest step reached, so a lesson resumes where you left it. */
+  step: number;
+  correct: number;
+  answered: number;
+  updatedAt: Date;
+}
+
 export const db = new Dexie('felt') as Dexie & {
   cards: EntityTable<StoredCard, 'id'>;
   reviews: EntityTable<StoredReview, 'id'>;
+  lessons: EntityTable<StoredLesson, 'key'>;
 };
 
 db.version(1).stores({
   cards: 'id, due, chartId, createdAt',
   reviews: '++id, at, cardId, chartId',
+});
+
+db.version(2).stores({
+  lessons: 'key, status, updatedAt',
 });

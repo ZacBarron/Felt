@@ -30,7 +30,10 @@ Ordered for the main game (live 1/3 cash, 9 handed, on a phone) and so the core 
 - [x] Liquid Glass redesign: iOS system colors, light and dark modes, glass tab bar and sidebar, large titles with a collapsing nav bar, inset grouped lists, a custom icon set
 - [x] Brand identity: F mark painted in a 6x6 range grid, serif wordmark, Card room palette (spruce and brass), guidelines in BRAND.md, app icons, Home with a felt hero, up next hand preview, mastery map, key idea and chart progress, motion (card flip, diagonal grid wave, ink painting, liquid tab pill, count ups)
 - [x] UI pass: press states on every control, haptics (Android vibration, iOS switch tick), thumb zone answer buttons, focus mode for review, animated verdicts and score rings, settings with segmented controls, steppers and toggles, keyboard shortcuts on laptops
-- [ ] Lessons for 9 handed opens and BB defense, each linked to its drill cards
+- [x] Lesson player: one idea per screen (text, formulas, tables, charts, hands on felt, callouts, quick checks, takeaways), story style progress, swipe and keyboard navigation, resume where you left off, completion with practice links
+- [x] 11 lessons: pot odds, MDF and alpha, combos and blockers, outs, equity realization, early and late position opens, small blind, big blind defense, live pool tendencies, punishing limpers (quiz answers tested against the charts)
+- [x] Themes: Card room (brand default), Ink, Oxblood, Cobalt
+- [ ] More lessons: the remaining curriculum, starting with postflop textures and c-betting
 - [ ] Chart editor: enter or paste any chart (range notation) as a `custom` source
 
 ## Phase 2: Live game essentials

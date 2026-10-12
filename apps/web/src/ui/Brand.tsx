@@ -16,7 +16,16 @@ export const MARK_GRID = 6;
  * - `tile`: the app icon form, brass F on the spruce felt gradient.
  * - `glyph`: the grid alone in the current color, for use on other surfaces.
  */
-export function BrandMark({ size = 32, variant = 'tile' }: { size?: number; variant?: 'tile' | 'glyph' }) {
+export function BrandMark({
+  size = 32,
+  variant = 'tile',
+  themed = true,
+}: {
+  size?: number;
+  variant?: 'tile' | 'glyph';
+  /** Follow the active theme. Off for places that must show the master brand. */
+  themed?: boolean;
+}) {
   const id = useId();
   const n = MARK_GRID;
   const tile = variant === 'tile';
@@ -29,9 +38,9 @@ export function BrandMark({ size = 32, variant = 'tile' }: { size?: number; vari
         <>
           <defs>
             <radialGradient id={id} cx="0" cy="0" r="1.45" gradientUnits="objectBoundingBox">
-              <stop offset="0" stopColor="#2a7461" />
-              <stop offset="0.45" stopColor="#165244" />
-              <stop offset="1" stopColor="#0b2421" />
+              <stop offset="0" style={{ stopColor: themed ? 'var(--felt-1)' : '#2a7461' }} />
+              <stop offset="0.45" style={{ stopColor: themed ? 'var(--felt-2)' : '#165244' }} />
+              <stop offset="1" style={{ stopColor: themed ? 'var(--felt-3)' : '#0b2421' }} />
             </radialGradient>
           </defs>
           <rect width="100" height="100" rx="23" fill={`url(#${id})`} />
@@ -49,8 +58,10 @@ export function BrandMark({ size = 32, variant = 'tile' }: { size?: number; vari
             width={cell}
             height={cell}
             rx={cell * 0.26}
-            fill={tile ? (lit ? '#e9b866' : 'rgba(255,255,255,.08)') : 'currentColor'}
-            fillOpacity={tile ? 1 : lit ? 1 : 0.14}
+            style={{
+              fill: tile ? (lit ? (themed ? 'var(--accent)' : '#e9b866') : 'rgba(255,255,255,.08)') : 'currentColor',
+              fillOpacity: tile ? 1 : lit ? 1 : 0.14,
+            }}
           />
         );
       })}
@@ -113,8 +124,10 @@ export function HeroPattern({ mixes }: { mixes?: ReadonlySet<string> }) {
             width={cell}
             height={cell}
             rx={3.5}
-            fill={mixes?.has(handAt(r, c)) ? '#e9b866' : '#fff'}
-            fillOpacity={mixes ? (mixes.has(handAt(r, c)) ? 0.5 : 0.06) : r === c ? 0.5 : 0.06}
+            style={{
+              fill: mixes?.has(handAt(r, c)) ? 'var(--accent)' : '#fff',
+              fillOpacity: mixes ? (mixes.has(handAt(r, c)) ? 0.5 : 0.06) : r === c ? 0.5 : 0.06,
+            }}
           />
         );
       })}

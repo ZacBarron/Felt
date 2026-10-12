@@ -58,8 +58,8 @@ const byPath = (to: string) => NAV_ITEMS.find((i) => i.to === to)!;
 /** Bottom tab bar on phones: the daily loop first, everything else under More. */
 export const TABS: NavItem[] = [
   byPath('/'),
+  byPath('/learn'),
   byPath('/review'),
-  byPath('/drills'),
   byPath('/ranges'),
   { to: '/more', label: 'More', icon: MoreIcon, color: 'var(--gray)' },
 ];

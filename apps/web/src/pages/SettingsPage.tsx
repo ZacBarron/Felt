@@ -7,6 +7,7 @@ import { CheckIcon } from '../ui/icons';
 import { PageHeader } from '../ui/PageHeader';
 import { Segmented } from '../ui/Segmented';
 import { Stepper } from '../ui/Stepper';
+import { ThemePicker } from '../ui/ThemePicker';
 import { Toggle } from '../ui/Toggle';
 
 const same = (a: GameSettings, b: GameSettings) => JSON.stringify(a) === JSON.stringify(b);
@@ -141,6 +142,14 @@ export function SettingsPage() {
             />
           </Row>
         </div>
+      </section>
+
+      <section>
+        <div className="section-title">Theme</div>
+        <div className="list">
+          <ThemePicker value={settings.ui.palette} onChange={(palette) => update({ ...settings, ui: { ...settings.ui, palette } })} />
+        </div>
+        <div className="section-footer">Card room is the Felt brand. Themes change the felt and accent only; poker colors stay the same.</div>
       </section>
 
       <section>

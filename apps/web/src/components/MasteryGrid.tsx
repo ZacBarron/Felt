@@ -17,7 +17,7 @@ export function MasteryGrid({ chart, hands, size = 148 }: { chart: Chart; hands:
         const hand = gridHandClass(Math.floor(i / 13), i % 13);
         const strength = hands.get(hand);
         const plays = (chart.mixes.get(hand)?.fold ?? 0) < 1;
-        const bg = strength ? COLORS[strength] : plays ? 'color-mix(in srgb, var(--spruce-500) 38%, transparent)' : 'var(--fill)';
+        const bg = strength ? COLORS[strength] : plays ? 'color-mix(in srgb, var(--base-500) 38%, transparent)' : 'var(--fill)';
         return <span key={hand} style={{ background: bg, '--wave': Math.floor(i / 13) + (i % 13) } as React.CSSProperties} />;
       })}
     </div>

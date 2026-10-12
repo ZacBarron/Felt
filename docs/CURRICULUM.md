@@ -12,6 +12,10 @@ The full lesson map lives in [`packages/content/src/curriculum.ts`](../packages/
 
 Suggested order: Foundations math, then Preflop RFI and BB defense in parallel with Foundations ranges, then Postflop, with Exploitation and Mental game woven in once the GTO baseline is solid.
 
+## Where lessons live
+
+Lesson content is in [`packages/content/src/lessons.ts`](../packages/content/src/lessons.ts), keyed `track/module/lesson` to match the curriculum. Step kinds: `intro`, `text`, `formula`, `table`, `chart`, `hand`, `callout` (tip or exploit), `quiz` and `takeaway`. Tests check that every chart and card reference is real and that every chart quiz answer agrees with the chart.
+
 ## Lesson anatomy
 
 Every lesson follows the same shape so study sessions feel predictable:

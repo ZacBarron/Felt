@@ -6,6 +6,7 @@ import { DashboardPage } from './pages/DashboardPage';
 import { DrillsPage } from './pages/DrillsPage';
 import { LabPage } from './pages/LabPage';
 import { LearnPage } from './pages/LearnPage';
+import { LessonPage } from './pages/LessonPage';
 import { MorePage } from './pages/MorePage';
 import { PlannedPage } from './pages/PlannedPage';
 import { RangesPage } from './pages/RangesPage';
@@ -32,7 +33,9 @@ function useReviewCount() {
 export function App() {
   const location = useLocation();
   const reviewCount = useReviewCount();
-  const tabIndex = TABS.findIndex((t) => t.to === location.pathname);
+  // Lesson pages live under /learn, so match on the first path segment.
+  const section = '/' + (location.pathname.split('/')[1] ?? '');
+  const tabIndex = TABS.findIndex((t) => t.to === section);
   // Pages reached through More keep More selected.
   const activeTab = tabIndex === -1 ? TABS.length - 1 : tabIndex;
   const indicator = useRef<HTMLSpanElement>(null);
@@ -82,6 +85,7 @@ export function App() {
             <Route path="/review" element={<ReviewPage />} />
             <Route path="/drills" element={<DrillsPage />} />
             <Route path="/learn" element={<LearnPage />} />
+            <Route path="/learn/*" element={<LessonPage />} />
             <Route path="/ranges" element={<RangesPage />} />
             <Route path="/lab" element={<LabPage />} />
             <Route path="/settings" element={<SettingsPage />} />

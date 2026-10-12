@@ -93,7 +93,7 @@ export function QuickRecall({ chart, hand, targetMs, onAnswer, onNext }: Props) 
           {chart.spec.basis === 'exploit' && <span className="pill pill-exploit">Exploit</span>}
         </div>
         <SeatStrip spec={chart.spec} />
-        <div className="row" style={{ justifyContent: 'center', padding: '1.1rem 0 0.6rem', gap: 12 }}>
+        <div className="row felt-strip" style={{ justifyContent: 'center', gap: 12 }}>
           {combo.map((c, i) => (
             <PlayingCard key={c} card={c} size="lg" flip delayMs={i * 90} />
           ))}
