@@ -128,23 +128,6 @@ export function LessonPage() {
             </Link>
           )}
         </div>
-        {content.reading && content.reading.length > 0 && (
-          <section>
-            <h2 className="section-title">Go deeper</h2>
-            <div className="list">
-              {content.reading.map((r) => (
-                <div key={r.title} className="list-row reading-row">
-                  <span className="grow">
-                    <span className="reading-title">{r.title}</span>
-                    <span className="footnote">
-                      {r.author}, {r.year}
-                    </span>
-                  </span>
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
         <BottomBar>
           <Link to="/learn" className="btn btn-primary btn-lg btn-block swap-in">
             Back to Learn

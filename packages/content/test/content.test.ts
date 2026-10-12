@@ -74,10 +74,6 @@ describe('lessons', () => {
     for (const lesson of LESSON_CONTENT.values()) expect(JSON.stringify(lesson), lesson.key).not.toContain('\u2014');
   });
 
-  it('list further reading on advanced lessons', () => {
-    for (const lesson of LESSON_CONTENT.values()) if (lesson.level === 'advanced') expect(lesson.reading?.length, lesson.key).toBeGreaterThan(0);
-  });
-
   it('state numbers that agree with the core math', async () => {
     const o = await import('@felt/core');
     const pct = (x: number, digits = 1) => Number((x * 100).toFixed(digits));

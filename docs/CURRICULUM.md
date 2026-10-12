@@ -26,7 +26,7 @@ Accuracy is the product, so lessons do not simplify a claim until it is wrong.
   - `exploit`: an assumption about a player pool, to check against logged hands.
 - **State the limits.** MDF is a river concept; raw equity is not realized equity; raise or fold small blind play is a simplification of a strategy that also limps. Lessons say so.
 - **Compute, do not recall.** Range numbers (for example the share of each range with 80% or more equity on a flop) are computed from Felt's own charts, and the note under the table says how.
-- **Own words.** Lessons teach in Felt's words. Books that cover the same ground in more depth are listed under `reading` and shown on the finish screen. The main references are Matthew Janda's *Applications of No-Limit Hold'em* (2013) and *No-Limit Hold'em for Advanced Players* (2017), with Ed Miller's *The Course* (2015) for live pool exploits.
+- **Self contained.** Lessons teach everything in Felt's own words and never send the player elsewhere to finish learning.
 
 ## Lesson anatomy
 

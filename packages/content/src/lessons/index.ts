@@ -1,13 +1,33 @@
 import { EXPLOIT_LESSONS } from './exploit';
+import { EXPLOIT_MORE_LESSONS } from './exploit-more';
+import { MINDSET_LESSONS } from './mindset';
+import { POSTFLOP_MORE_LESSONS } from './postflop-more';
+import { POSTFLOP_RIVER_LESSONS } from './postflop-river';
+import { PREFLOP_LIVE_LESSONS } from './preflop-live';
+import { PREFLOP_MORE_LESSONS } from './preflop-more';
+import { THEORY_LESSONS } from './theory';
+import { TOURNAMENT_LESSONS } from './tournaments';
 import { FOUNDATIONS_LESSONS } from './foundations';
 import { POSTFLOP_LESSONS } from './postflop';
 import { PREFLOP_LESSONS } from './preflop';
 import type { LessonContent } from './types';
 
-export * from './reading';
 export * from './types';
 
-const ALL: LessonContent[] = [...FOUNDATIONS_LESSONS, ...PREFLOP_LESSONS, ...POSTFLOP_LESSONS, ...EXPLOIT_LESSONS];
+const ALL: LessonContent[] = [
+  ...FOUNDATIONS_LESSONS,
+  ...THEORY_LESSONS,
+  ...PREFLOP_LESSONS,
+  ...PREFLOP_MORE_LESSONS,
+  ...PREFLOP_LIVE_LESSONS,
+  ...POSTFLOP_LESSONS,
+  ...POSTFLOP_MORE_LESSONS,
+  ...POSTFLOP_RIVER_LESSONS,
+  ...EXPLOIT_LESSONS,
+  ...EXPLOIT_MORE_LESSONS,
+  ...MINDSET_LESSONS,
+  ...TOURNAMENT_LESSONS,
+];
 
 export const LESSON_CONTENT: ReadonlyMap<string, LessonContent> = new Map(ALL.map((l) => [l.key, l]));
 

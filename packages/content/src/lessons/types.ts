@@ -13,12 +13,6 @@
 
 export type Evidence = 'math' | 'solver' | 'exploit';
 
-export interface Reading {
-  author: string;
-  title: string;
-  year: number;
-}
-
 export type LessonCover = { kind: 'figure'; text: string } | { kind: 'chart'; chartId: string } | { kind: 'cards'; cards: string };
 
 export type LessonStep =
@@ -41,7 +35,5 @@ export interface LessonContent {
   /** Charts to drill after the lesson. */
   practice?: string[];
   level: 'core' | 'advanced';
-  /** Books that cover the same ground in more depth. */
-  reading?: Reading[];
 }
 

@@ -1,4 +1,3 @@
-import { JANDA_ADVANCED, JANDA_APPLICATIONS } from './reading';
 import type { LessonContent } from './types';
 
 export const POSTFLOP_LESSONS: LessonContent[] = [
@@ -7,7 +6,6 @@ export const POSTFLOP_LESSONS: LessonContent[] = [
     level: 'core',
     minutes: 6,
     cover: { kind: 'cards', cards: 'Ks7d' },
-    reading: [JANDA_ADVANCED],
     steps: [
       {
         kind: 'intro',
@@ -82,7 +80,6 @@ export const POSTFLOP_LESSONS: LessonContent[] = [
     level: 'core',
     minutes: 6,
     cover: { kind: 'cards', cards: 'AsQd' },
-    reading: [JANDA_APPLICATIONS, JANDA_ADVANCED],
     steps: [
       {
         kind: 'intro',
@@ -155,7 +152,6 @@ export const POSTFLOP_LESSONS: LessonContent[] = [
     level: 'advanced',
     minutes: 7,
     cover: { kind: 'figure', text: '⅓ ¾' },
-    reading: [JANDA_APPLICATIONS, JANDA_ADVANCED],
     steps: [
       {
         kind: 'intro',
@@ -234,7 +230,6 @@ export const POSTFLOP_LESSONS: LessonContent[] = [
     level: 'core',
     minutes: 6,
     cover: { kind: 'figure', text: '20%' },
-    reading: [JANDA_APPLICATIONS],
     steps: [
       {
         kind: 'intro',
@@ -305,7 +300,6 @@ export const POSTFLOP_LESSONS: LessonContent[] = [
     level: 'advanced',
     minutes: 6,
     cover: { kind: 'cards', cards: '8h4h' },
-    reading: [JANDA_APPLICATIONS, JANDA_ADVANCED],
     steps: [
       {
         kind: 'intro',
@@ -366,7 +360,6 @@ export const POSTFLOP_LESSONS: LessonContent[] = [
     level: 'advanced',
     minutes: 6,
     cover: { kind: 'cards', cards: 'Ah' },
-    reading: [JANDA_ADVANCED],
     steps: [
       {
         kind: 'intro',
@@ -424,7 +417,6 @@ export const POSTFLOP_LESSONS: LessonContent[] = [
     level: 'advanced',
     minutes: 6,
     cover: { kind: 'cards', cards: '7h6h' },
-    reading: [JANDA_APPLICATIONS],
     steps: [
       {
         kind: 'intro',
@@ -488,7 +480,6 @@ export const POSTFLOP_LESSONS: LessonContent[] = [
     level: 'advanced',
     minutes: 6,
     cover: { kind: 'cards', cards: 'QhQd' },
-    reading: [JANDA_APPLICATIONS],
     steps: [
       {
         kind: 'intro',

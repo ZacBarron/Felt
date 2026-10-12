@@ -2314,11 +2314,6 @@ table.kv td:last-child {
   color: var(--purple);
 }
 
-.reading-row .reading-title {
-  display: block;
-  font-weight: 600;
-  font-style: italic;
-}
 
 .lesson-question {
   font-size: 1.4rem;

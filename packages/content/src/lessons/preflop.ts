@@ -1,11 +1,9 @@
-import { JANDA_ADVANCED, JANDA_APPLICATIONS } from './reading';
 import type { LessonContent } from './types';
 
 export const PREFLOP_LESSONS: LessonContent[] = [
   {
     key: 'preflop/rfi/rfi-ep',
     level: 'core',
-    reading: [JANDA_APPLICATIONS],
     minutes: 5,
     cover: { kind: 'chart', chartId: '9max-100-rfi-utg' },
     practice: ['9max-100-rfi-utg', '9max-100-rfi-utgp1', '9max-100-rfi-utgp2', '9max-100-rfi-lj'],
@@ -190,7 +188,6 @@ export const PREFLOP_LESSONS: LessonContent[] = [
   {
     key: 'preflop/vs-open/bb-defense',
     level: 'core',
-    reading: [JANDA_ADVANCED],
     minutes: 5,
     cover: { kind: 'chart', chartId: '9max-100-bb-vs-btn' },
     practice: ['9max-100-bb-vs-btn'],

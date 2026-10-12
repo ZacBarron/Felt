@@ -61,6 +61,16 @@ export const CURRICULUM: Track[] = [
           lesson('equity-realization', 'Equity realization and position', ['concept']),
         ],
       },
+      {
+        id: 'theory',
+        title: 'Game theory',
+        lessons: [
+          lesson('what-is-gto', 'What GTO means, and what it does not', ['concept']),
+          lesson('solvers', 'How solvers work and how to read them', ['concept']),
+          lesson('simplification', 'Simplified strategies and what they cost', ['concept']),
+          lesson('equity-benchmarks', 'Equity benchmarks worth knowing', ['equity-estimate', 'math']),
+        ],
+      },
     ],
   },
   {
@@ -84,6 +94,8 @@ export const CURRICULUM: Track[] = [
           lesson('bb-defense', 'Big blind defense', ['range-recall', 'frequency']),
           lesson('cold-3bet', '3bet or fold in position', ['range-recall', 'spot-action']),
           lesson('flatting', 'When flatting is allowed', ['concept', 'spot-action']),
+          lesson('sb-vs-open', 'Small blind facing an open', ['concept', 'spot-action']),
+          lesson('squeeze', 'Squeezing', ['concept', 'spot-action']),
         ],
       },
       {
@@ -101,6 +113,15 @@ export const CURRICULUM: Track[] = [
         lessons: [
           lesson('depth', 'How ranges change at 40, 60, 100 and 200bb', ['concept', 'range-recall']),
           lesson('open-sizing', 'Open and 3bet sizing theory', ['concept']),
+        ],
+      },
+      {
+        id: 'live-preflop',
+        title: 'Live preflop',
+        lessons: [
+          lesson('big-opens', 'Facing large live opens', ['concept', 'spot-action']),
+          lesson('straddles', 'Straddled pots', ['concept', 'spot-action']),
+          lesson('limped-pots', 'Overlimping and multiway limped pots', ['concept', 'spot-action']),
         ],
       },
     ],
@@ -147,9 +168,30 @@ export const CURRICULUM: Track[] = [
         ],
       },
       {
+        id: 'river',
+        title: 'River play',
+        lessons: [
+          lesson('thin-value', 'Thin value bets', ['spot-action', 'concept']),
+          lesson('overbets', 'Overbets', ['spot-action', 'concept']),
+          lesson('block-bets', 'Small river bets and block bets', ['spot-action', 'concept']),
+          lesson('river-raises', 'Raising the river', ['spot-action', 'math']),
+        ],
+      },
+      {
+        id: '3bet-postflop',
+        title: '3bet pots postflop',
+        lessons: [
+          lesson('cbet-3bp', 'C-betting in 3bet pots', ['spot-action', 'frequency']),
+          lesson('low-spr', 'Playing low SPR pots', ['spot-action', 'math']),
+        ],
+      },
+      {
         id: 'multiway',
         title: 'Multiway pots',
-        lessons: [lesson('multiway', 'How multiway changes everything', ['concept', 'spot-action'])],
+        lessons: [
+          lesson('multiway', 'How multiway changes everything', ['concept', 'spot-action']),
+          lesson('multiway-cbet', 'Betting and defending multiway', ['spot-action', 'concept']),
+        ],
       },
     ],
   },
@@ -201,6 +243,30 @@ export const CURRICULUM: Track[] = [
           lesson('tilt', 'Recognizing and stopping tilt', ['concept']),
           lesson('variance', 'Variance, downswings and sample size', ['concept', 'math']),
           lesson('bankroll', 'Bankroll management and moving up', ['concept', 'math']),
+        ],
+      },
+      {
+        id: 'study',
+        title: 'Studying well',
+        lessons: [
+          lesson('study-plan', 'A study routine that sticks', ['concept']),
+          lesson('hand-review', 'Reviewing your own hands', ['concept']),
+        ],
+      },
+    ],
+  },
+  {
+    id: 'tournaments',
+    title: 'Tournaments',
+    summary: 'Short stacks, antes and the money that ICM puts on survival.',
+    modules: [
+      {
+        id: 'mtt-basics',
+        title: 'Tournament basics',
+        lessons: [
+          lesson('antes', 'Antes and wider ranges', ['concept', 'math']),
+          lesson('push-fold', 'Push or fold with a short stack', ['range-recall', 'math']),
+          lesson('icm', 'ICM: why chips are not money', ['concept', 'math']),
         ],
       },
     ],

@@ -1,4 +1,3 @@
-import { JANDA_ADVANCED, JANDA_APPLICATIONS } from './reading';
 import type { LessonContent } from './types';
 
 export const FOUNDATIONS_LESSONS: LessonContent[] = [
@@ -82,7 +81,6 @@ export const FOUNDATIONS_LESSONS: LessonContent[] = [
     level: 'core',
     minutes: 6,
     cover: { kind: 'figure', text: 'EV' },
-    reading: [JANDA_APPLICATIONS],
     steps: [
       {
         kind: 'intro',
@@ -277,7 +275,6 @@ export const FOUNDATIONS_LESSONS: LessonContent[] = [
     level: 'core',
     minutes: 6,
     cover: { kind: 'figure', text: '50%' },
-    reading: [JANDA_APPLICATIONS],
     steps: [
       {
         kind: 'intro',
@@ -415,7 +412,6 @@ export const FOUNDATIONS_LESSONS: LessonContent[] = [
     level: 'advanced',
     minutes: 6,
     cover: { kind: 'figure', text: 'SPR' },
-    reading: [JANDA_ADVANCED],
     steps: [
       {
         kind: 'intro',
@@ -477,7 +473,6 @@ export const FOUNDATIONS_LESSONS: LessonContent[] = [
     level: 'advanced',
     minutes: 5,
     cover: { kind: 'figure', text: '≠' },
-    reading: [JANDA_ADVANCED],
     steps: [
       {
         kind: 'intro',
@@ -523,7 +518,6 @@ export const FOUNDATIONS_LESSONS: LessonContent[] = [
     level: 'advanced',
     minutes: 6,
     cover: { kind: 'cards', cards: 'KcKd' },
-    reading: [JANDA_ADVANCED],
     steps: [
       {
         kind: 'intro',
@@ -591,7 +585,6 @@ export const FOUNDATIONS_LESSONS: LessonContent[] = [
     level: 'advanced',
     minutes: 6,
     cover: { kind: 'figure', text: '⟷' },
-    reading: [JANDA_APPLICATIONS],
     steps: [
       {
         kind: 'intro',
