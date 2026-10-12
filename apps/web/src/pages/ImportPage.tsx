@@ -9,8 +9,10 @@ import { addHandsToReview } from '../state/review';
 import { useSettings } from '../state/settings';
 import { PageHeader } from '../ui/PageHeader';
 import { plural, signed } from '../ui/format';
+import { Chips } from '../ui/Chips';
 
 const pct = (x: number) => `${Math.round(x * 100)}%`;
+const moneySymbol = (currency?: string) => ({ USD: '$', EUR: '€', GBP: '£' })[currency ?? ''] ?? (currency ? `${currency} ` : '');
 
 function readFiles(files: FileList | null): Promise<string[]> {
   return Promise.all([...(files ?? [])].map((f) => f.text()));
@@ -25,10 +27,20 @@ export function ImportPage() {
   const [handResult, setHandResult] = useState<HandImportSummary>();
   const [csvResult, setCsvResult] = useState<string>();
   const [drilled, setDrilled] = useState(false);
+  const [stakeFilter, setStakeFilter] = useState('all');
   const hands = useLiveQuery(() => db.hands.toArray(), [], []);
   const sessions = useLiveQuery(() => db.sessions.toArray(), [], []);
 
-  const cash = hands.filter((h) => h.game === 'cash').map(asHeroHand);
+  // Stats mix nothing across stakes unless asked: a filter by big blind size, all by default.
+  const stakeOptions = [...new Set(hands.filter((h) => h.game === 'cash').map((h) => `${h.currency ?? ''}|${h.bb}`))]
+    .map((k) => {
+      const [currency, bb] = k.split('|');
+      const n = Number(bb);
+      return { value: k, label: `${moneySymbol(currency)}${n < 1 ? n.toFixed(2) : n} big blind` };
+    })
+    .sort((a, b) => Number(a.value.split('|')[1]) - Number(b.value.split('|')[1]));
+  const stake = stakeFilter && stakeOptions.some((o) => o.value === stakeFilter) ? stakeFilter : 'all';
+  const cash = hands.filter((h) => h.game === 'cash' && (stake === 'all' || `${h.currency ?? ''}|${h.bb}` === stake)).map(asHeroHand);
   const stats = cash.length ? heroStats(cash) : undefined;
   const leaks = openDeviations(cash, chartOpenFreq);
   const rates = openRates(cash);
@@ -138,6 +150,11 @@ export function ImportPage() {
 
       {stats && (
         <section>
+          {stakeOptions.length > 1 && (
+            <div style={{ marginBottom: '0.9rem' }}>
+              <Chips value={stake} onChange={setStakeFilter} ariaLabel="Stakes" options={[{ value: 'all', label: 'All stakes' }, ...stakeOptions]} />
+            </div>
+          )}
           <h2 className="section-title">Cash results, {plural(stats.hands, 'hand')}</h2>
           <div className="card stack" style={{ padding: '1rem', gap: '0.7rem' }}>
             <div>
@@ -175,6 +192,26 @@ export function ImportPage() {
                 <span className="num">{pct(stats.wtsd)}</span>
                 <span className="footnote">WTSD</span>
               </div>
+              <div>
+                <span className="num">{stats.cbetChances ? pct(stats.cbet) : 'n/a'}</span>
+                <span className="footnote">Flop c-bet</span>
+              </div>
+              <div>
+                <span className="num">{stats.foldTo3betChances ? pct(stats.foldTo3bet) : 'n/a'}</span>
+                <span className="footnote">Fold to 3bet</span>
+              </div>
+              <div>
+                <span className="num">{stats.aggression !== undefined ? stats.aggression.toFixed(1) : 'n/a'}</span>
+                <span className="footnote">Aggression</span>
+              </div>
+              <div>
+                <span className="num">{stats.wtsd > 0 ? pct(stats.wsd) : 'n/a'}</span>
+                <span className="footnote">Won at showdown</span>
+              </div>
+            </div>
+            <div className="footnote">
+              Flop c-bet: bets when you raised last before the flop and it was checked to you ({plural(stats.cbetChances, 'chance')}). Fold to 3bet: after
+              you raised ({plural(stats.foldTo3betChances, 'chance')}). Aggression: bets and raises per call after the flop. Small samples swing a lot.
             </div>
           </div>
           <div className="list" style={{ marginTop: '0.75rem' }}>

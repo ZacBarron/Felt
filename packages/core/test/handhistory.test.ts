@@ -167,3 +167,36 @@ describe('hero stats and leaks', () => {
     expect(openRates(views)).toEqual([{ seat: 'CO', chances: 1, opens: 1, rate: 1, low: 1, high: 1 }]);
   });
 });
+
+describe('postflop and 3bet stats', () => {
+  it('counts a flop continuation bet and postflop aggression', () => {
+    const v = heroView(parseHand(STARS_CASH))!;
+    expect(v.cbetChance).toBe(true);
+    expect(v.cbet).toBe(true);
+    expect(v.postAggressive).toBe(2);
+    expect(v.postCalls).toBe(0);
+    expect(v.foldTo3betChance).toBe(false);
+  });
+
+  it('counts folding to a 3bet, and no c-bet chance after losing the lead', () => {
+    const threeBet = STARS_CASH.replace(
+      'villain_b: folds\nvillain_c: folds\nvillain_d: calls $0.75\n*** FLOP *** [Kh 7c 2s]\nvillain_d: checks\nHero: bets $0.85\nvillain_d: calls $0.85\n*** TURN *** [Kh 7c 2s] [9d]\nvillain_d: checks\nHero: bets $2.40\nvillain_d: folds\nUncalled bet ($2.40) returned to Hero\nHero collected $4.20 from pot',
+      'villain_b: raises $2.50 to $3.75\nvillain_c: folds\nvillain_d: folds\nHero: folds\nUncalled bet ($2.50) returned to villain_b\nvillain_b collected $3.25 from pot',
+    );
+    expect(threeBet).not.toBe(STARS_CASH);
+    const v = heroView(parseHand(threeBet))!;
+    expect(v.foldTo3betChance).toBe(true);
+    expect(v.foldTo3bet).toBe(true);
+    expect(v.cbetChance).toBe(false);
+  });
+
+  it('summarizes c-bet, fold to 3bet and aggression across hands', () => {
+    const v = heroView(parseHand(STARS_CASH))!;
+    const s = heroStats([v, { ...v, cbet: false, postAggressive: 0, postCalls: 2 }, { ...v, foldTo3betChance: true, foldTo3bet: false }]);
+    expect(s.cbetChances).toBe(3);
+    expect(s.cbet).toBeCloseTo(2 / 3);
+    expect(s.foldTo3betChances).toBe(1);
+    expect(s.foldTo3bet).toBe(0);
+    expect(s.aggression).toBeCloseTo(4 / 2);
+  });
+});

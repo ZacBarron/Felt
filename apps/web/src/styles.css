@@ -2542,6 +2542,7 @@ input:focus:not(:focus-visible) {
 /* Drill hole cards sit on a strip of felt. */
 .felt-strip {
   padding: 1.4rem 0;
+  transition: padding 260ms var(--ease);
   margin: 0.2rem -0.35rem 0;
   border-radius: 20px;
   background: var(--brand-gradient);
@@ -3480,7 +3481,7 @@ label.list-row {
 
 .import-stats {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 0.5rem;
   text-align: center;
 }
@@ -3742,4 +3743,8 @@ input[type='number'] {
 
 .range-cell.unreached .seg {
   background-image: none;
+}
+
+.felt-strip.answered {
+  padding: 0.6rem 0;
 }

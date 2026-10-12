@@ -1,5 +1,6 @@
 import type { FsrsCard, SkillDomain } from '@felt/core';
 import Dexie, { type EntityTable } from 'dexie';
+import { heroView, parseHand } from '@felt/core';
 
 /** A review card the learner has started. Unstarted cards exist only as deck seeds. */
 export interface StoredCard {
@@ -83,6 +84,12 @@ export interface StoredHand {
   behind?: number;
   stackBb?: number;
   straddled?: boolean;
+  foldTo3betChance?: boolean;
+  foldTo3bet?: boolean;
+  cbetChance?: boolean;
+  cbet?: boolean;
+  postAggressive?: number;
+  postCalls?: number;
   raw: string;
 }
 
@@ -177,3 +184,28 @@ db.version(5).stores({
 db.version(6).stores({
   events: '++id, at, name',
 });
+
+// Version 7 adds c-bet, fold to 3bet and aggression to stored hands, re-read from each hand's text.
+db.version(7)
+  .stores({})
+  .upgrade((tx) =>
+    tx
+      .table('hands')
+      .toCollection()
+      .modify((h: StoredHand) => {
+        try {
+          const v = heroView(parseHand(h.raw));
+          if (!v) return;
+          Object.assign(h, {
+            foldTo3betChance: v.foldTo3betChance,
+            foldTo3bet: v.foldTo3bet,
+            cbetChance: v.cbetChance,
+            cbet: v.cbet,
+            postAggressive: v.postAggressive,
+            postCalls: v.postCalls,
+          });
+        } catch {
+          // A hand that no longer parses keeps its old stats.
+        }
+      }),
+  );

@@ -334,6 +334,15 @@ export interface HeroHand {
   /** Reached showdown without folding. */
   showdown: boolean;
   wonAtShowdown?: boolean;
+  /** Opened or raised preflop and then faced a reraise. */
+  foldTo3betChance?: boolean;
+  foldTo3bet?: boolean;
+  /** Last raiser preflop, saw the flop, and could bet first on it (no bet in front). */
+  cbetChance?: boolean;
+  cbet?: boolean;
+  /** Hero's bets and raises, and calls, after the flop: the inputs to aggression factor. */
+  postAggressive?: number;
+  postCalls?: number;
 }
 
 /** Seat order from first to act preflop to last. */
@@ -366,6 +375,29 @@ export function heroView(h: ParsedHand): HeroHand | undefined {
     if (a.kind === 'raise' || a.kind === 'bet') raises++;
   }
 
+  // Fold to 3bet: the hero raised, someone raised again, and the hero then acted.
+  let foldTo3betChance = false;
+  let foldTo3bet = false;
+  let heroRaised = false;
+  let reraised = false;
+  for (const a of pre) {
+    if (a.player === h.hero) {
+      if (heroRaised && reraised && !foldTo3betChance) {
+        foldTo3betChance = true;
+        foldTo3bet = a.kind === 'fold';
+      }
+      if (a.kind === 'raise' && !reraised) heroRaised = true;
+    } else if (heroRaised && (a.kind === 'raise' || a.kind === 'bet')) reraised = true;
+  }
+
+  // Continuation bet: the hero made the last preflop raise and the flop was checked to them, or they act first.
+  const lastRaise = [...pre].reverse().find((a) => a.kind === 'raise' || a.kind === 'bet');
+  const flop = h.actions.filter((a) => a.street === 'flop');
+  const myFlopIndex = flop.findIndex((a) => a.player === h.hero);
+  const cbetChance =
+    lastRaise?.player === h.hero && myFlopIndex >= 0 && !flop.slice(0, myFlopIndex).some((a) => a.kind === 'bet' || a.kind === 'raise');
+  const post = h.actions.filter((a) => a.player === h.hero && a.street !== 'preflop');
+
   const myIndex = PREFLOP_ORDER.indexOf(me.position ?? '');
   const behind = myIndex < 0 ? undefined : h.players.filter((p) => PREFLOP_ORDER.indexOf(p.position ?? '') > myIndex).length;
   const showdown = h.showdown && !folded;
@@ -392,6 +424,12 @@ export function heroView(h: ParsedHand): HeroHand | undefined {
     sawFlop: h.board.length >= 3 && (!folded || folded.street !== 'preflop'),
     showdown,
     wonAtShowdown: showdown && (h.collected[h.hero] ?? 0) > 0,
+    foldTo3betChance,
+    foldTo3bet,
+    cbetChance,
+    cbet: cbetChance && flop[myFlopIndex].kind === 'bet',
+    postAggressive: post.filter((a) => a.kind === 'bet' || a.kind === 'raise').length,
+    postCalls: post.filter((a) => a.kind === 'call').length,
   };
 }
 
@@ -408,6 +446,14 @@ export interface HeroStats {
   wtsd: number;
   /** Won money at showdown, of showdowns. */
   wsd: number;
+  /** Flop continuation bets, of chances. */
+  cbet: number;
+  cbetChances: number;
+  /** Folds to a 3bet after raising, of chances. */
+  foldTo3bet: number;
+  foldTo3betChances: number;
+  /** Postflop bets and raises per call. Undefined with no calls. */
+  aggression?: number;
   byPosition: { position: string; hands: number; netBb: number; bbPer100: number; vpip: number }[];
 }
 
@@ -437,6 +483,14 @@ export function heroStats(hands: readonly HeroHand[]): HeroStats {
     threeBet: share(hands.filter((h) => h.threeBet).length, hands.filter((h) => h.threeBetChance).length),
     wtsd: share(sawFlop.filter((h) => h.showdown).length, sawFlop.length),
     wsd: share(showdowns.filter((h) => h.wonAtShowdown).length, showdowns.length),
+    cbet: share(hands.filter((h) => h.cbet).length, hands.filter((h) => h.cbetChance).length),
+    cbetChances: hands.filter((h) => h.cbetChance).length,
+    foldTo3bet: share(hands.filter((h) => h.foldTo3bet).length, hands.filter((h) => h.foldTo3betChance).length),
+    foldTo3betChances: hands.filter((h) => h.foldTo3betChance).length,
+    aggression: (() => {
+      const calls = hands.reduce((n, h) => n + (h.postCalls ?? 0), 0);
+      return calls > 0 ? hands.reduce((n, h) => n + (h.postAggressive ?? 0), 0) / calls : undefined;
+    })(),
     byPosition: [...groups]
       .sort((a, b) => order.indexOf(a[0]) - order.indexOf(b[0]))
       .map(([position, hs]) => {

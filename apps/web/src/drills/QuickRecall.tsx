@@ -101,9 +101,10 @@ export function QuickRecall({ chart, hand, targetMs, onAnswer, onNext }: Props) 
           {chart.spec.basis === 'exploit' && <span className="pill pill-exploit">Exploit</span>}
         </div>
         <SeatStrip spec={chart.spec} />
-        <div className="row felt-strip" style={{ justifyContent: 'center', gap: 12 }}>
+        {/* After an answer the hand shrinks, so the full chart fits above the Next button. */}
+        <div className={`row felt-strip${answer ? ' answered' : ''}`} style={{ justifyContent: 'center', gap: 12 }}>
           {combo.map((c, i) => (
-            <PlayingCard key={c} card={c} size="lg" flip delayMs={i * 90} />
+            <PlayingCard key={c} card={c} size={answer ? 'md' : 'lg'} flip delayMs={i * 90} />
           ))}
         </div>
         {/* Speed bar: drains over the time an answer still counts as "Good". */}

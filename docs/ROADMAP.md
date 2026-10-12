@@ -58,6 +58,9 @@ See [MONETIZATION.md](MONETIZATION.md).
 - [x] Tiers every 150 points (nine tiers, Newcomer to Elite, none while provisional) with progress to the next
 - [x] Imports: hand histories (PokerStars format, GGPoker header, tracker exports) and live session CSVs; stats by seat, opening leaks against the charts, results feeding the win rate
 - [x] Practice at your level (about 80% expected success, weaker areas first, interleaved); study cue at onboarding
+- [x] More preflop charts: BB vs CO and UTG, SB vs BTN, BTN vs CO, BTN and UTG facing a 3bet (with reach, so only opened hands are drilled), BTN vs two limpers
+- [x] Untimed drills and a switch for drill keyboard shortcuts; placement with "Not sure" and resume
+- [x] Import stats: flop c-bet, fold to 3bet, aggression and won at showdown, with a stakes filter
 - [ ] Connect a store (App Store, Play, web checkout) to `purchase()`
 - [ ] Verify GGPoker parsing against a real GG export; add Winamax and iPoker formats
 - [x] Calendar reminders (.ics) for the study time and the trial end; local event log with export
@@ -70,7 +73,7 @@ See [MONETIZATION.md](MONETIZATION.md).
 - [ ] Fast hand entry on a phone: card picker, seat chips, action shorthand parser, money amounts
 - [ ] Hand replayer on the table component; flag a hand to open it in Spot Lab
 - [ ] Results: profit in money and bb, bb/hour, profit graph, variance bands
-- [ ] Live charts: iso raise and overlimp vs 1 and 2+ limpers from every seat, facing large live open sizes, straddled pots
+- [ ] Live charts: iso raise and overlimp from every seat (BTN vs one and two limpers done), facing large live open sizes, straddled pots, 150 to 200bb stacks
 - [ ] Live pool exploits track: lessons and drills on limpers, multiway, big river bets
 - [ ] Rake aware preflop: show how the rake setting tightens calling ranges
 
