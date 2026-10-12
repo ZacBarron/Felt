@@ -5,6 +5,7 @@ import {
   isProvisional,
   nextTier,
   pickAdaptive,
+  tierLabel,
   ratingInterval,
   replayRatings,
   START_RD,
@@ -65,11 +66,13 @@ describe('Glicko rating', () => {
 
   it('names tiers every 150 points and shows the next one', () => {
     expect(tierFor(850)).toBe('Newcomer');
-    expect(tierFor(1200)).toBe('Contender');
-    expect(tierFor(1499)).toBe('Grinder');
-    expect(tierFor(2300)).toBe('World class');
+    expect(tierFor(1200)).toBe('Solid');
+    expect(tierFor(1499)).toBe('Sharp');
+    expect(tierFor(2300)).toBe('Elite');
     expect(nextTier(1460)).toEqual({ name: 'Regular', min: 1500, pointsAway: 40, progress: 110 / 150 });
-    expect(nextTier(2400)).toBeUndefined();
+    expect(nextTier(2000)).toBeUndefined();
+    expect(tierLabel({ rating: 1500, rd: 300, games: 3 })).toBe('Unrated');
+    expect(tierLabel({ rating: 1500, rd: 80, games: 90 })).toBe('Regular');
     // One tier apart is about a 70% expected score.
     expect(expectedScore(1500, 1350, 0)).toBeCloseTo(0.70, 2);
   });

@@ -1,3 +1,5 @@
+import type { HandMix } from './charts';
+import { isMixed, scoreRecall } from './drills';
 /**
  * Felt SkillRating: a Glicko rating for a player, where every graded decision is a
  * game against an item with its own difficulty rating.
@@ -129,21 +131,26 @@ export function isProvisional(r: SkillRating): boolean {
  * each step meaningful (the higher tier is expected to win about 70% of
  * decisions against the one below) while putting the next milestone close
  * enough to pull effort forward (the goal gradient, Kivetz, Urminsky and
- * Zheng 2006).
+ * Zheng 2006). The ladder stops at Elite: Felt's hardest items sit near 1700,
+ * so higher tiers could not be measured honestly. While a rating is
+ * provisional it has no tier (see `tierLabel`).
  */
 export const TIERS: { min: number; name: string }[] = [
   { min: -Infinity, name: 'Newcomer' },
-  { min: 900, name: 'Learner' },
-  { min: 1050, name: 'Recreational' },
-  { min: 1200, name: 'Contender' },
-  { min: 1350, name: 'Grinder' },
+  { min: 900, name: 'Beginner' },
+  { min: 1050, name: 'Developing' },
+  { min: 1200, name: 'Solid' },
+  { min: 1350, name: 'Sharp' },
   { min: 1500, name: 'Regular' },
   { min: 1650, name: 'Strong regular' },
   { min: 1800, name: 'Expert' },
-  { min: 1950, name: 'Pro' },
-  { min: 2100, name: 'Elite' },
-  { min: 2250, name: 'World class' },
+  { min: 1950, name: 'Elite' },
 ];
+
+/** The tier to show: none until the rating has settled. */
+export function tierLabel(r: SkillRating): string {
+  return r.games === 0 || isProvisional(r) ? 'Unrated' : tierFor(r.rating);
+}
 
 export function tierFor(rating: number): string {
   return [...TIERS].reverse().find((t) => rating >= t.min)!.name;
@@ -172,24 +179,27 @@ export function ratingInterval(r: SkillRating): [number, number] {
  * fitted the same way player ratings are).
  */
 export const DIFFICULTY = {
-  /** A chart hand that is a clear raise or fold, away from the range edge. */
-  chartClear: 1050,
   /** A pure action on the range edge. */
   chartEdge: 1350,
-  /** A mixed hand: knowing it mixes, and which way. */
-  chartMixed: 1550,
+  /** A mixed hand where some answers are still wrong: easier, since more than one answer counts. */
+  chartMixed: 1250,
   /** Painting a whole chart. */
   chartPaint: 1600,
   lessonCore: 1300,
   lessonAdvanced: 1600,
-  /** A decision taken from a solved spot. */
-  solverSpot: 1700,
+  /** A decision from a saved solver spot: the player chose it after seeing the answer, so it is not rated as the hardest item. */
+  solverSpot: 1450,
 } as const;
 
-/** Difficulty of a chart recall card from how far the hand is from the range edge and whether it mixes. */
-export function chartItemDifficulty(isMixed: boolean, isEdge: boolean): number {
-  if (isMixed) return DIFFICULTY.chartMixed;
-  return isEdge ? DIFFICULTY.chartEdge : DIFFICULTY.chartClear;
+/**
+ * Difficulty of a chart decision, or undefined when every answer would be
+ * accepted (a hand every action plays often enough): such a question tells
+ * the rating nothing, so it is not rated.
+ */
+export function chartItemDifficulty(mix: HandMix, actions: readonly string[]): number | undefined {
+  const accepted = actions.filter((a) => scoreRecall(mix, a) === 1).length;
+  if (accepted >= actions.length) return undefined;
+  return isMixed(mix) ? DIFFICULTY.chartMixed : DIFFICULTY.chartEdge;
 }
 
 // Adaptive practice ------------------------------------------------------

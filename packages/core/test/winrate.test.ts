@@ -1,18 +1,35 @@
 import { describe, expect, it } from 'vitest';
-import { blendWithResults, defaultAssumptions, estimateWinRate, handsForPrecision, PRESETS, skillEdge, tableCosts } from '../src';
+import { averageRake, blendWithResults, defaultAssumptions, estimateWinRate, handsForPrecision, PRESETS, rakeFor, resultsAreNoise, skillEdge, tableCosts } from '../src';
 
 const live13 = PRESETS['live-1-3'].settings;
 
 describe('table costs', () => {
-  it('turn the rake rules into bb per 100 hands per player', () => {
-    // 1/3, 10% capped at $5 plus a $1 drop, no flop no drop.
+  const rake = live13.rake;
+
+  it('averages rake over skewed pot sizes, so the cap is not charged on every pot', () => {
+    // A $60 average pot always hits the $5 cap; spread out, many pots pay less.
+    expect(rakeFor(60, rake, true)).toBe(6);
+    const avg = averageRake(60, rake, true);
+    expect(avg).toBeLessThan(6);
+    expect(avg).toBeGreaterThan(3.5);
+    // With no spread it is the single pot rake.
+    expect(averageRake(60, rake, true, 1e-9)).toBeCloseTo(6, 6);
+  });
+
+  it('turn the rake rules into bb per 100 hands per player, tips only on flop pots', () => {
     const a = { ...defaultAssumptions(live13), flopShare: 0.8, flopPotBb: 20, tipPerPot: 1 };
     const c = tableCosts(live13, a);
-    // A 20bb ($60) pot pays $5 + $1 = $6 = 2bb; 80% of hands: 1.6bb per hand.
-    expect(c.rakePerHand).toBeCloseTo(1.6, 10);
-    expect(c.rakePer100).toBeCloseTo(160 / 9, 10);
-    // $1 tip per pot is 1/3 bb per hand, shared by nine players.
-    expect(c.tipsPer100).toBeCloseTo(100 / 3 / 9, 10);
+    expect(c.rakePerHand).toBeCloseTo((0.8 * averageRake(60, rake, true)) / 3, 10);
+    expect(c.rakePer100).toBeCloseTo((c.rakePerHand * 100) / 9, 10);
+    // A $1 tip on 80% of pots is 0.267bb per hand, shared by nine players.
+    expect(c.tipsPer100).toBeCloseTo(((0.8 / 3) * 100) / 9, 10);
+  });
+
+  it('uses stake bands for live defaults', () => {
+    const at = (bb: number) => defaultAssumptions({ ...live13, stakes: { ...live13.stakes, bb } });
+    expect(at(3).poolRating).toBe(1200);
+    expect(at(5).poolRating).toBe(1350);
+    expect(at(10).poolRating).toBe(1450);
   });
 });
 
@@ -49,7 +66,10 @@ describe('blending with results', () => {
   });
 
   it('says how many hands results alone need', () => {
-    // Pinning a live win rate to within 5 bb/100 takes about 154,000 hands.
+    // Pinning a win rate to within 5 bb/100 takes about 154,000 hands at sd 100.
     expect(handsForPrecision(5, 100)).toBeCloseTo(153_664, 0);
+    // Results stay noise until the 95% range is within 10 bb/100.
+    expect(resultsAreNoise(20_000, 120)).toBe(true);
+    expect(resultsAreNoise(60_000, 120)).toBe(false);
   });
 });

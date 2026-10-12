@@ -1,4 +1,4 @@
-import { chartItemDifficulty, type DrillOutcome, isMixed } from '@felt/core';
+import { type Chart, chartItemDifficulty, type DrillOutcome } from '@felt/core';
 import { useState } from 'react';
 import { StepView } from '../lesson/StepView';
 import { getChart } from '../state/charts';
@@ -10,6 +10,9 @@ import { QuickRecall } from './QuickRecall';
 
 /** A single rated decision: a range decision from a chart, or a lesson question. */
 export type Decision = { kind: 'chart'; chartId: string; hand: string } | { kind: 'quiz'; key: string; step: number };
+
+/** The answers offered for a chart decision: its actions, then fold. */
+export const chartChoices = (chart: Chart) => [...chart.spec.actions.map((a) => a.id), 'fold'];
 
 export function decisionId(d: Decision) {
   return d.kind === 'chart' ? `chart:${d.chartId}:${d.hand}` : `quiz:${d.key}#${d.step}`;
@@ -37,13 +40,9 @@ export function DecisionItem({ decision, source, last, onScore, onNext }: Props)
         targetMs={3000}
         onAnswer={(o: DrillOutcome) => {
           onScore(o.accuracy);
-          void recordRated({
-            itemId: decisionId(decision),
-            domain: 'preflop',
-            difficulty: chartItemDifficulty(isMixed(chart.mixes.get(decision.hand) ?? { fold: 1 }), true),
-            score: o.accuracy,
-            source,
-          });
+          const difficulty = chartItemDifficulty(chart.mixes.get(decision.hand) ?? { fold: 1 }, chartChoices(chart));
+          if (difficulty !== undefined)
+            void recordRated({ itemId: decisionId(decision), domain: 'preflop', difficulty, score: o.accuracy, source });
         }}
         onNext={onNext}
       />

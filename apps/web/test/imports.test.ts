@@ -24,10 +24,10 @@ describe('imports', () => {
     expect(await db.sessions.count()).toBe(2);
   });
 
-  it('looks up opening frequencies from the 6 and 9 handed charts', () => {
-    expect(chartOpenFreq(9)('UTG', 'AA')).toBe(1);
-    expect(chartOpenFreq(9)('UTG', '72o')).toBe(0);
-    expect(chartOpenFreq(6)('BTN', 'K2s')).toBe(1);
-    expect(chartOpenFreq(9)('BB', 'AA')).toBeUndefined();
+  it('looks up opening frequencies by chart seat', () => {
+    expect(chartOpenFreq('UTG', 'AA')).toBe(1);
+    expect(chartOpenFreq('UTG', '72o')).toBe(0);
+    expect(chartOpenFreq('BTN', 'K2s')).toBe(1);
+    expect(chartOpenFreq('BB', 'AA')).toBeUndefined();
   });
 });

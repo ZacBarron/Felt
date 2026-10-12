@@ -1,7 +1,7 @@
-import { boundaryHands, chartItemDifficulty, isMixed, pickAdaptive, type PracticeItem, type SkillDomain, tierFor } from '@felt/core';
+import { boundaryHands, chartItemDifficulty, pickAdaptive, type PracticeItem, type SkillDomain, type SkillRating, tierLabel } from '@felt/core';
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { type Decision, DecisionItem } from '../drills/DecisionItem';
+import { chartChoices, type Decision, DecisionItem } from '../drills/DecisionItem';
 import { haptic } from '../haptics';
 import { chartsForGame } from '../state/charts';
 import { db } from '../state/db';
@@ -11,6 +11,7 @@ import { useSettings } from '../state/settings';
 import { BottomBar } from '../ui/BottomBar';
 import { CloseIcon } from '../ui/icons';
 import { ProgressRing } from '../ui/ProgressRing';
+import { signed } from '../ui/format';
 import { useBodyClass } from '../ui/useBodyClass';
 
 type Candidate = PracticeItem & { decision: Decision };
@@ -30,7 +31,7 @@ export function PracticePage() {
   const { settings } = useSettings();
   const [items, setItems] = useState<Candidate[]>();
   const [before, setBefore] = useState<number>();
-  const [after, setAfter] = useState<number>();
+  const [after, setAfter] = useState<SkillRating>();
   const [index, setIndex] = useState(0);
   const [scores, setScores] = useState<number[]>([]);
 
@@ -42,14 +43,17 @@ export function PracticePage() {
         db.answers.where('at').above(new Date(Date.now() - RECENT_MS)).toArray(),
       ]);
       const charts = chartsForGame(settings.game).charts;
-      const chartItems: Candidate[] = charts.flatMap((chart) =>
-        boundaryHands(chart).map((hand) => ({
-          id: `chart:${chart.spec.id}:${hand}`,
-          domain: 'preflop' as SkillDomain,
-          difficulty: chartItemDifficulty(isMixed(chart.mixes.get(hand) ?? { fold: 1 }), true),
-          decision: { kind: 'chart' as const, chartId: chart.spec.id, hand },
-        })),
-      );
+      // Rated chart questions only: equilibrium charts, and hands where some answer is wrong.
+      const chartItems: Candidate[] = charts
+        .filter((c) => c.spec.basis === 'gto')
+        .flatMap((chart) =>
+          boundaryHands(chart).flatMap((hand) => {
+            const difficulty = chartItemDifficulty(chart.mixes.get(hand) ?? { fold: 1 }, chartChoices(chart));
+            return difficulty === undefined
+              ? []
+              : [{ id: `chart:${chart.spec.id}:${hand}`, domain: 'preflop' as SkillDomain, difficulty, decision: { kind: 'chart' as const, chartId: chart.spec.id, hand } }];
+          }),
+        );
       // Questions from lessons you have finished or tested out of; if there are few, the core lessons too.
       const learned = LESSON_ENTRIES.filter((e) => e.content && isComplete(progress.get(e.key)));
       const lessons = learned.length >= 5 ? learned : LESSON_ENTRIES.filter((e) => e.content?.level === 'core');
@@ -86,8 +90,7 @@ export function PracticePage() {
           </h1>
           {after !== undefined && (
             <span className="pill num">
-              Rating {Math.round(after)} ({after - before >= 0 ? '+' : ''}
-              {Math.round(after - before)}), {tierFor(after)}
+              Rating {Math.round(after.rating)} ({signed(after.rating - before, 0)}), {tierLabel(after)}
             </span>
           )}
           <p className="footnote" style={{ margin: 0, maxWidth: 360 }}>
@@ -131,7 +134,7 @@ export function PracticePage() {
         onNext={async () => {
           window.scrollTo({ top: 0 });
           if (index + 1 >= items.length) {
-            setAfter((await ratingSnapshot()).overall.rating);
+            setAfter((await ratingSnapshot()).overall);
             haptic('success');
           }
           setIndex(index + 1);

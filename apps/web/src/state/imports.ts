@@ -1,5 +1,5 @@
 import { STARTER_CHARTS } from '@felt/content';
-import { actionRange, buildChart, type HeroHand, heroView, parseHand, parseSessionsCsv, type SessionImport, splitHands } from '@felt/core';
+import { actionFrequencies, actionRange, buildChart, type HeroHand, heroView, parseHand, parseSessionsCsv, type SessionImport, splitHands } from '@felt/core';
 import { db, type StoredHand } from './db';
 
 /**
@@ -51,24 +51,22 @@ export async function clearImports() {
   });
 }
 
-const RFI_CHARTS = STARTER_CHARTS.filter((s) => s.spot === 'rfi').map((spec) => ({ spec, chart: buildChart(spec) }));
+const RFI_CHARTS = STARTER_CHARTS.filter((s) => s.spot === 'rfi' && s.tableSize === 9).map((spec) => ({ spec, chart: buildChart(spec) }));
 
-/**
- * Opening raise frequency from Felt's charts for a seat and hand, using the
- * 6 handed charts for tables of six or fewer and 9 handed charts otherwise.
- */
-export function chartOpenFreq(tableMax: number) {
-  const size = tableMax <= 6 ? 6 : 9;
-  return (position: string, hand: string): number | undefined => {
-    const found = RFI_CHARTS.find((c) => c.spec.tableSize === size && c.spec.hero === position);
-    if (!found) return undefined;
-    return actionRange(found.chart, 'raise').get(hand) ?? 0;
-  };
+/** Opening raise frequency in Felt's 9 handed chart for a seat (UTG through SB) and hand. */
+export function chartOpenFreq(seat: string, hand: string): number | undefined {
+  const found = RFI_CHARTS.find((c) => c.spec.hero === seat);
+  return found ? (actionRange(found.chart, 'raise').get(hand) ?? 0) : undefined;
 }
 
-export function chartIdFor(tableMax: number, position: string): string | undefined {
-  const size = tableMax <= 6 ? 6 : 9;
-  return RFI_CHARTS.find((c) => c.spec.tableSize === size && c.spec.hero === position)?.spec.id;
+/** Share of all hands the 9 handed chart opens from a seat, weighted by combos. */
+export function chartOpenRate(seat: string): number | undefined {
+  const found = RFI_CHARTS.find((c) => c.spec.hero === seat);
+  return found ? (actionFrequencies(found.chart).raise ?? 0) : undefined;
+}
+
+export function chartIdForSeat(seat: string): string | undefined {
+  return RFI_CHARTS.find((c) => c.spec.hero === seat)?.spec.id;
 }
 
 export const asHeroHand = (h: StoredHand): HeroHand => ({ ...h, date: h.at, hand: h.hand });

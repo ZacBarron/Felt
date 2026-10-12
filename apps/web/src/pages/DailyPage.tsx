@@ -2,14 +2,17 @@ import { STARTER_CHARTS } from '@felt/content';
 import {
   boundaryHands,
   challengeNumber,
+  chartItemDifficulty,
   dailyPicks,
   shareGrid,
-  tierFor,
+  isProvisional,
+  type SkillRating,
+  tierLabel,
 } from '@felt/core';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { type Decision, DecisionItem } from '../drills/DecisionItem';
+import { chartChoices, type Decision, DecisionItem } from '../drills/DecisionItem';
 import { haptic } from '../haptics';
 import { getChart } from '../state/charts';
 import { db } from '../state/db';
@@ -24,9 +27,13 @@ type DailyItem = Decision;
 
 /** Every edge hand of every 9 handed chart, and every lesson quiz: the same pool for everyone. */
 function dailyPool() {
-  const charts: DailyItem[] = STARTER_CHARTS.filter((s) => s.tableSize === 9).flatMap((spec) => {
+  // Rated chart decisions: equilibrium charts only, and only hands where some answer is wrong.
+  const charts: DailyItem[] = STARTER_CHARTS.filter((s) => s.tableSize === 9 && s.basis === 'gto').flatMap((spec) => {
     const chart = getChart(spec.id);
-    return chart ? boundaryHands(chart).map((hand) => ({ kind: 'chart' as const, chartId: spec.id, hand })) : [];
+    if (!chart) return [];
+    return boundaryHands(chart)
+      .filter((hand) => chartItemDifficulty(chart.mixes.get(hand) ?? { fold: 1 }, chartChoices(chart)) !== undefined)
+      .map((hand) => ({ kind: 'chart' as const, chartId: spec.id, hand }));
   });
   const quizzes: DailyItem[] = LESSON_ENTRIES.flatMap((e) => quizSteps(e).map((step) => ({ kind: 'quiz' as const, key: e.key, step })));
   return { charts, quizzes };
@@ -46,9 +53,10 @@ function timeToTomorrow(now = new Date()) {
   return `${Math.floor(mins / 60)}h ${mins % 60}m`;
 }
 
-export function shareText(number: number, scores: number[], rating: number) {
+export function shareText(number: number, scores: number[], rating: SkillRating) {
   const right = scores.filter((s) => s >= 1).length;
-  return `Felt Daily #${number} · ${right}/${scores.length}\n${shareGrid(scores)}\nFelt Rating ${Math.round(rating)} (${tierFor(rating)})`;
+  const shown = `${isProvisional(rating) ? '~' : ''}${Math.round(rating.rating)}`;
+  return `Felt Daily #${number} · ${right}/${scores.length}\n${shareGrid(scores)}\nFelt Rating ${shown} (${tierLabel(rating)})`;
 }
 
 function Result({ number, scores, before, after }: { number: number; scores: number[]; before: number; after: number }) {
@@ -57,7 +65,7 @@ function Result({ number, scores, before, after }: { number: number; scores: num
   const right = scores.filter((s) => s >= 1).length;
   const delta = Math.round(after - before);
   const share = async () => {
-    const text = shareText(number, scores, after);
+    const text = shareText(number, scores, (await ratingSnapshot()).overall);
     try {
       if (navigator.share) await navigator.share({ text: `${text}\n${location.origin}/daily` });
       else {

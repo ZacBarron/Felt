@@ -208,6 +208,14 @@ export function ChevronRightIcon(p: IconProps) {
   );
 }
 
+export function ChevronLeftIcon(p: IconProps) {
+  return (
+    <Svg {...p} strokeWidth={2.25}>
+      <path d="m14.5 5.5-6.5 6.5 6.5 6.5" />
+    </Svg>
+  );
+}
+
 export function UndoIcon(p: IconProps) {
   return (
     <Svg {...p}>

@@ -12,13 +12,17 @@ export interface SessionRow {
   /** Profit in money; negative for a loss. */
   profit: number;
   stakes?: string;
+  /** Big blind read from the stakes, for converting profit to big blinds. */
+  bb?: number;
 }
 
 export interface SessionImport {
   sessions: SessionRow[];
   /** Which header each field came from, so the app can show its reading. */
-  columns: { date?: string; hours?: string; profit?: string; buyIn?: string; cashOut?: string; stakes?: string };
+  columns: { date?: string; hours?: string; profit?: string; buyIn?: string; cashOut?: string; stakes?: string; type?: string };
   skipped: number;
+  /** Tournament rows left out, since the win rate model is for cash games. */
+  tournaments: number;
 }
 
 /** Splits one CSV line, honoring quotes. */
@@ -80,9 +84,15 @@ function parseDate(s: string | undefined): Date | undefined {
 const find = (headers: string[], patterns: RegExp[], exclude?: RegExp) =>
   patterns.map((p) => headers.findIndex((h) => p.test(h) && !(exclude && exclude.test(h)))).find((i) => i >= 0) ?? -1;
 
+/** The big blind from a stakes label: "1/3", "$2/$5", "1-2", "5/10/20" (straddle) all work. */
+export function stakesBigBlind(stakes: string | undefined): number | undefined {
+  const m = stakes?.match(/\$?(\d+(?:\.\d+)?)\s*[/-]\s*\$?(\d+(?:\.\d+)?)/);
+  return m ? Number(m[2]) : undefined;
+}
+
 export function parseSessionsCsv(text: string): SessionImport {
   const lines = text.replace(/\r\n?/g, '\n').replace(/^﻿/, '').split('\n').filter((l) => l.trim());
-  if (lines.length < 2) return { sessions: [], columns: {}, skipped: 0 };
+  if (lines.length < 2) return { sessions: [], columns: {}, skipped: 0, tournaments: 0 };
   const delimiter = [',', ';', '\t'].sort((a, b) => lines[0].split(b).length - lines[0].split(a).length)[0];
   const headers = splitCsvLine(lines[0], delimiter).map((h) => h.toLowerCase());
   const col = {
@@ -91,14 +101,20 @@ export function parseSessionsCsv(text: string): SessionImport {
     profit: find(headers, [/^profit/, /^net/, /result/, /won|win/, /p\/?l/], /rate|per hour|\/h|bb/),
     buyIn: find(headers, [/buy.?in/]),
     cashOut: find(headers, [/cash.?out/]),
-    stakes: find(headers, [/stakes?/, /game/, /limit/]),
+    stakes: find(headers, [/stakes?/, /blinds/, /limit/]),
+    type: find(headers, [/type/, /game/, /format/]),
   };
   const name = (i: number) => (i >= 0 ? headers[i] : undefined);
   const minutes = col.hours >= 0 && /min/.test(headers[col.hours]);
   const sessions: SessionRow[] = [];
   let skipped = 0;
+  let tournaments = 0;
   for (const line of lines.slice(1)) {
     const cells = splitCsvLine(line, delimiter);
+    if (/tourn|mtt|sng|sit.?n.?go/i.test(`${cells[col.type] ?? ''} ${cells[col.stakes] ?? ''}`)) {
+      tournaments++;
+      continue;
+    }
     const hours = parseDuration(cells[col.hours], minutes);
     let profit = money(cells[col.profit]);
     if (profit === undefined) {
@@ -110,12 +126,14 @@ export function parseSessionsCsv(text: string): SessionImport {
       skipped++;
       continue;
     }
-    sessions.push({ date: parseDate(cells[col.date]), hours, profit, stakes: col.stakes >= 0 ? cells[col.stakes] || undefined : undefined });
+    const stakes = col.stakes >= 0 ? cells[col.stakes] || undefined : undefined;
+    sessions.push({ date: parseDate(cells[col.date]), hours, profit, stakes, bb: stakesBigBlind(stakes) });
   }
   return {
     sessions,
-    columns: { date: name(col.date), hours: name(col.hours), profit: name(col.profit), buyIn: name(col.buyIn), cashOut: name(col.cashOut), stakes: name(col.stakes) },
+    columns: { date: name(col.date), hours: name(col.hours), profit: name(col.profit), buyIn: name(col.buyIn), cashOut: name(col.cashOut), stakes: name(col.stakes), type: name(col.type) },
     skipped,
+    tournaments,
   };
 }
 

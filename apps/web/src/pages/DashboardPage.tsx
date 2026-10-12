@@ -1,5 +1,5 @@
 import { ideaForDay } from '@felt/content';
-import { actionRange, challengeNumber, currentRating, handClassCombos, isProvisional, stakesLabel, tierFor } from '@felt/core';
+import { actionRange, challengeNumber, currentRating, handClassCombos, isProvisional, stakesLabel, tierLabel } from '@felt/core';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { Link } from 'react-router-dom';
 import { MasteryGrid } from '../components/MasteryGrid';
@@ -69,7 +69,7 @@ export function DashboardPage() {
         kicker={date}
         trailing={
           <Link to="/you" className="pill rating-chip" style={{ textDecoration: 'none', marginBottom: 4 }}>
-            {rating && rating.games > 0 ? `${Math.round(rating.rating)}${isProvisional(rating) ? '?' : ''} · ${tierFor(rating.rating)}` : `${stakesLabel(g.stakes)} ${g.venue}`}
+            {rating && rating.games > 0 ? `${isProvisional(rating) ? '~' : ''}${Math.round(rating.rating)} · ${tierLabel(rating)}` : `${stakesLabel(g.stakes)} ${g.venue}`}
           </Link>
         }
       />

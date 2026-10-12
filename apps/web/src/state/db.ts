@@ -78,6 +78,11 @@ export interface StoredHand {
   openAction?: 'raise' | 'limp' | 'fold';
   sawFlop: boolean;
   showdown: boolean;
+  wonAtShowdown?: boolean;
+  walk?: boolean;
+  behind?: number;
+  stackBb?: number;
+  straddled?: boolean;
   raw: string;
 }
 
@@ -88,6 +93,7 @@ export interface StoredSession {
   hours: number;
   profit: number;
   stakes?: string;
+  bb?: number;
   importedAt: Date;
 }
 

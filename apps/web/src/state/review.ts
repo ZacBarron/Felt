@@ -2,7 +2,6 @@ import {
   boundaryHands,
   chartItemDifficulty,
   DIFFICULTY,
-  isMixed,
   cardStrength,
   type CardStrength,
   type Chart,
@@ -140,7 +139,10 @@ async function rateReview(item: QueueItem, score: number, at: Date) {
   const chart = getChart(item.chartId);
   if (!chart) return;
   const difficulty =
-    item.mode === 'paint' ? DIFFICULTY.chartPaint : chartItemDifficulty(isMixed(chart.mixes.get(item.hand ?? '') ?? { fold: 1 }), true);
+    item.mode === 'paint'
+      ? DIFFICULTY.chartPaint
+      : chartItemDifficulty(chart.mixes.get(item.hand ?? '') ?? { fold: 1 }, [...chart.spec.actions.map((a) => a.id), 'fold']);
+  if (difficulty === undefined || chart.spec.basis !== 'gto') return;
   await recordRated({ itemId: item.id, domain: 'preflop', difficulty, score, source: 'review' }, at);
 }
 

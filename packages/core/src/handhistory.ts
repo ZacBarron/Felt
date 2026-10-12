@@ -42,6 +42,10 @@ export interface ParsedHand {
   invested: Record<string, number>;
   collected: Record<string, number>;
   rake: number;
+  /** The hand reached a showdown. */
+  showdown: boolean;
+  /** Someone posted a straddle: preflop positions and ranges change. */
+  straddled: boolean;
 }
 
 const AMOUNT = String.raw`[$€£]?[\d,]+(?:\.\d+)?`;
@@ -86,6 +90,26 @@ export function assignPositions(seats: readonly number[], button: number): Map<n
   return out;
 }
 
+/**
+ * Seat labels counted back from the big blind, the seat that actually posted
+ * it. This stays right when the small blind is missing or the button seat is
+ * empty, where counting from the button goes wrong.
+ */
+export function positionsFromBlinds(seats: readonly number[], bbSeat: number, hasSmallBlind: boolean): Map<number, string> {
+  const sorted = [...seats].sort((a, b) => a - b);
+  const i = sorted.indexOf(bbSeat);
+  // Preflop action order: the seat after the big blind first, the big blind last.
+  const order = [...sorted.slice(i + 1), ...sorted.slice(0, i + 1)];
+  const n = order.length;
+  const out = new Map<number, string>();
+  if (n < 2) return out;
+  const labels = hasSmallBlind ? positionsFor(Math.min(n, 10)) : positionsFor(Math.min(n + 1, 10)).filter((p) => p !== 'SB');
+  // Long tables beyond the label set keep their order from the back.
+  const offset = labels.length - n;
+  order.forEach((seat, k) => out.set(seat, labels[k + offset] ?? `Seat ${seat}`));
+  return out;
+}
+
 /** Parses one hand. Throws on text that is not a recognizable hand. */
 export function parseHand(text: string): ParsedHand {
   const lines = text.replace(/\r\n?/g, '\n').split('\n').map((l) => l.trim()).filter(Boolean);
@@ -117,6 +141,11 @@ export function parseHand(text: string): ParsedHand {
   let streetIn: Record<string, number> = {};
   let rake = 0;
   let inSummary = false;
+  let showdown = false;
+  let straddled = false;
+  let sbPoster: string | undefined;
+  let bbPoster: string | undefined;
+  let runout = 0;
 
   const add = (name: string, amount: number) => {
     invested[name] = (invested[name] ?? 0) + amount;
@@ -137,11 +166,20 @@ export function parseHand(text: string): ParsedHand {
       players.push({ seat: Number(seat[1]), name: seat[2], stack: num(seat[3]) });
       continue;
     }
-    const streetMark = line.match(/^\*\*\* (FLOP|TURN|RIVER) \*\*\*\s*(.*)$/);
+    if (/^\*\*\* (SHOW DOWN|SHOWDOWN|FIRST SHOW DOWN|SECOND SHOW DOWN)/.test(line)) {
+      showdown = true;
+      continue;
+    }
+    const streetMark = line.match(/^\*\*\* (FIRST |SECOND )?(FLOP|TURN|RIVER) \*\*\*\s*(.*)$/);
     if (streetMark) {
-      street = streetMark[1].toLowerCase() as HandStreet;
+      // Run it twice: keep the first board.
+      if (streetMark[1] === 'SECOND ') {
+        runout = 2;
+        continue;
+      }
+      street = streetMark[2].toLowerCase() as HandStreet;
       streetIn = {};
-      const cards = [...streetMark[2].matchAll(/\[([^\]]+)\]/g)].map((m) => m[1]).join(' ');
+      const cards = [...streetMark[3].matchAll(/\[([^\]]+)\]/g)].map((m) => m[1]).join(' ');
       board = parseCards(cards);
       continue;
     }
@@ -178,6 +216,9 @@ export function parseHand(text: string): ParsedHand {
       const before = streetIn[name] ?? 0;
       let kind: HandAction['kind'];
       let amount = 0;
+      if (verb === 'posts small blind' && !sbPoster) sbPoster = name;
+      if ((verb === 'posts big blind' || verb === 'posts small & big blinds') && !bbPoster) bbPoster = name;
+      if (verb === 'posts straddle') straddled = true;
       if (verb === 'posts the ante') {
         kind = 'ante';
         amount = num(a);
@@ -203,10 +244,19 @@ export function parseHand(text: string): ParsedHand {
     }
   }
 
-  const positions = assignPositions(
-    players.map((p) => p.seat),
-    button,
-  );
+  void runout;
+  const bbSeat = players.find((p) => p.name === bbPoster)?.seat;
+  const positions =
+    bbSeat !== undefined
+      ? positionsFromBlinds(
+          players.map((p) => p.seat),
+          bbSeat,
+          sbPoster !== undefined,
+        )
+      : assignPositions(
+          players.map((p) => p.seat),
+          button,
+        );
   for (const p of players) p.position = positions.get(p.seat);
 
   return {
@@ -227,6 +277,8 @@ export function parseHand(text: string): ParsedHand {
     invested,
     collected,
     rake,
+    showdown,
+    straddled,
   };
 }
 
@@ -258,13 +310,20 @@ export interface HeroHand {
   bb: number;
   position?: string;
   players: number;
+  /** Players left to act after the hero preflop, which decides which opening chart applies. */
+  behind?: number;
+  /** Hero's starting stack in big blinds. */
+  stackBb?: number;
+  straddled?: boolean;
   hand?: HandClass;
   /** Net result in the hand's units, and in big blinds. */
   net: number;
   netBb: number;
+  /** Folded to the hero in the big blind: not counted in VPIP or PFR. */
+  walk?: boolean;
   vpip: boolean;
   pfr: boolean;
-  /** Faced exactly one raise before acting voluntarily. */
+  /** Faced exactly one raise, the first time the hero did. */
   threeBetChance: boolean;
   threeBet: boolean;
   /** Folded to the hero with only blinds in (not in the big blind). */
@@ -272,8 +331,13 @@ export interface HeroHand {
   /** What the hero did when folded to: raise, limp or fold. */
   openAction?: 'raise' | 'limp' | 'fold';
   sawFlop: boolean;
+  /** Reached showdown without folding. */
   showdown: boolean;
+  wonAtShowdown?: boolean;
 }
+
+/** Seat order from first to act preflop to last. */
+export const PREFLOP_ORDER = ['UTG', 'UTG+1', 'UTG+2', 'UTG+3', 'LJ', 'HJ', 'CO', 'BTN', 'SB', 'BB'];
 
 /** Summarizes a hand from the hero's seat. Undefined when there is no hero in the hand. */
 export function heroView(h: ParsedHand): HeroHand | undefined {
@@ -282,13 +346,29 @@ export function heroView(h: ParsedHand): HeroHand | undefined {
   const pre = h.actions.filter((a) => a.street === 'preflop' && a.kind !== 'post' && a.kind !== 'ante');
   const firstMine = pre.findIndex((a) => a.player === h.hero);
   const before = firstMine < 0 ? pre : pre.slice(0, firstMine);
-  const raisesBefore = before.filter((a) => a.kind === 'raise' || a.kind === 'bet').length;
   const voluntaryBefore = before.some((a) => a.kind === 'call' || a.kind === 'raise' || a.kind === 'bet');
   const mine = pre.filter((a) => a.player === h.hero);
   const first = mine[0];
   const net = (h.collected[h.hero] ?? 0) - (h.invested[h.hero] ?? 0);
-  const openChance = !voluntaryBefore && me.position !== 'BB' && !!first;
+  const openChance = !voluntaryBefore && me.position !== 'BB' && !!first && !h.straddled;
   const folded = h.actions.find((a) => a.player === h.hero && a.kind === 'fold');
+  const walk = me.position === 'BB' && mine.length === 0 && pre.every((a) => a.kind === 'fold');
+
+  // 3bet chance: the first time the hero acts facing exactly one raise.
+  let raises = 0;
+  let threeBetChance = false;
+  let threeBet = false;
+  for (const a of pre) {
+    if (a.player === h.hero && raises === 1 && !threeBetChance) {
+      threeBetChance = true;
+      threeBet = a.kind === 'raise';
+    }
+    if (a.kind === 'raise' || a.kind === 'bet') raises++;
+  }
+
+  const myIndex = PREFLOP_ORDER.indexOf(me.position ?? '');
+  const behind = myIndex < 0 ? undefined : h.players.filter((p) => PREFLOP_ORDER.indexOf(p.position ?? '') > myIndex).length;
+  const showdown = h.showdown && !folded;
   return {
     id: h.id,
     date: h.date,
@@ -296,17 +376,22 @@ export function heroView(h: ParsedHand): HeroHand | undefined {
     bb: h.bb,
     position: me.position,
     players: h.players.length,
+    behind,
+    stackBb: me.stack / h.bb,
+    straddled: h.straddled,
     hand: h.heroCards ? handClassOf(h.heroCards[0], h.heroCards[1]) : undefined,
     net,
     netBb: net / h.bb,
+    walk,
     vpip: mine.some((a) => a.kind === 'call' || a.kind === 'raise' || a.kind === 'bet'),
     pfr: mine.some((a) => a.kind === 'raise'),
-    threeBetChance: raisesBefore === 1 && !!first,
-    threeBet: raisesBefore === 1 && first?.kind === 'raise',
+    threeBetChance,
+    threeBet,
     openChance,
     openAction: openChance ? (first.kind === 'raise' ? 'raise' : first.kind === 'call' ? 'limp' : first.kind === 'fold' ? 'fold' : undefined) : undefined,
     sawFlop: h.board.length >= 3 && (!folded || folded.street !== 'preflop'),
-    showdown: h.hero in h.shown,
+    showdown,
+    wonAtShowdown: showdown && (h.collected[h.hero] ?? 0) > 0,
   };
 }
 
@@ -314,10 +399,15 @@ export interface HeroStats {
   hands: number;
   netBb: number;
   bbPer100: number;
+  /** Measured standard deviation of results per 100 hands, when there are enough hands. */
+  sd100?: number;
   vpip: number;
   pfr: number;
   threeBet: number;
-  wentToShowdown: number;
+  /** Went to showdown, of hands that saw a flop. */
+  wtsd: number;
+  /** Won money at showdown, of showdowns. */
+  wsd: number;
   byPosition: { position: string; hands: number; netBb: number; bbPer100: number; vpip: number }[];
 }
 
@@ -326,32 +416,51 @@ const share = (n: number, d: number) => (d > 0 ? n / d : 0);
 export function heroStats(hands: readonly HeroHand[]): HeroStats {
   const n = hands.length;
   const netBb = hands.reduce((s, h) => s + h.netBb, 0);
+  const mean = n ? netBb / n : 0;
+  const sd100 = n > 1 ? Math.sqrt(hands.reduce((s, h) => s + (h.netBb - mean) ** 2, 0) / (n - 1)) * 10 : undefined;
+  const playable = hands.filter((h) => !h.walk);
   const groups = new Map<string, HeroHand[]>();
   for (const h of hands) {
     const key = h.position ?? '?';
     groups.set(key, [...(groups.get(key) ?? []), h]);
   }
-  const order = ['UTG', 'UTG+1', 'UTG+2', 'LJ', 'HJ', 'CO', 'BTN', 'SB', 'BB', '?'];
+  const order = [...PREFLOP_ORDER, '?'];
   const sawFlop = hands.filter((h) => h.sawFlop);
+  const showdowns = hands.filter((h) => h.showdown);
   return {
     hands: n,
     netBb,
     bbPer100: share(netBb * 100, n),
-    vpip: share(hands.filter((h) => h.vpip).length, n),
-    pfr: share(hands.filter((h) => h.pfr).length, n),
+    sd100,
+    vpip: share(playable.filter((h) => h.vpip).length, playable.length),
+    pfr: share(playable.filter((h) => h.pfr).length, playable.length),
     threeBet: share(hands.filter((h) => h.threeBet).length, hands.filter((h) => h.threeBetChance).length),
-    wentToShowdown: share(sawFlop.filter((h) => h.showdown).length, sawFlop.length),
+    wtsd: share(sawFlop.filter((h) => h.showdown).length, sawFlop.length),
+    wsd: share(showdowns.filter((h) => h.wonAtShowdown).length, showdowns.length),
     byPosition: [...groups]
       .sort((a, b) => order.indexOf(a[0]) - order.indexOf(b[0]))
       .map(([position, hs]) => {
         const pnet = hs.reduce((s, h) => s + h.netBb, 0);
-        return { position, hands: hs.length, netBb: pnet, bbPer100: share(pnet * 100, hs.length), vpip: share(hs.filter((h) => h.vpip).length, hs.length) };
+        const p = hs.filter((h) => !h.walk);
+        return { position, hands: hs.length, netBb: pnet, bbPer100: share(pnet * 100, hs.length), vpip: share(p.filter((h) => h.vpip).length, p.length) };
       }),
   };
 }
 
+/** The 9 handed opening seat with this many players left to act behind it. */
+export const SEAT_BY_BEHIND: Record<number, string> = { 8: 'UTG', 7: 'UTG+1', 6: 'UTG+2', 5: 'LJ', 4: 'HJ', 3: 'CO', 2: 'BTN', 1: 'SB' };
+
+/**
+ * Hands that fit the opening charts: cash, at least 60bb deep, no straddle,
+ * six or more players dealt, and folded to the hero.
+ */
+export function chartComparable(h: HeroHand): boolean {
+  return h.game === 'cash' && !h.straddled && (h.stackBb ?? 0) >= 60 && h.players >= 6 && h.openChance && h.behind !== undefined && !!SEAT_BY_BEHIND[h.behind];
+}
+
 export interface OpenDeviation {
-  position: string;
+  /** The chart seat used for comparison (9 handed). */
+  seat: string;
   hand: HandClass;
   /** Raise frequency in the chart for this hand. */
   chartRaise: number;
@@ -361,23 +470,56 @@ export interface OpenDeviation {
 }
 
 /**
- * Compares the hero's first in decisions with opening charts. A raise with a
- * hand the chart opens under 25% of the time is too loose; a fold with a hand
- * it opens over 75% of the time is too tight; any limp is flagged, because
- * the charts are raise or fold. Hands in between are mixes and never flagged.
+ * Compares first in decisions with the opening charts, hand by hand. Only
+ * near pure deviations count, because each hand comes up rarely: a raise
+ * with a hand the chart opens 5% of the time or less, or a fold with one it
+ * opens 95% or more. Limps are flagged, except from the small blind, where
+ * limping is a valid strategy.
  */
-export function openDeviations(hands: readonly HeroHand[], raiseFreq: (position: string, hand: HandClass) => number | undefined): OpenDeviation[] {
+export function openDeviations(hands: readonly HeroHand[], raiseFreq: (seat: string, hand: HandClass) => number | undefined): OpenDeviation[] {
   const found = new Map<string, OpenDeviation>();
   for (const h of hands) {
-    if (!h.openChance || !h.openAction || !h.hand || !h.position) continue;
-    const f = raiseFreq(h.position, h.hand);
+    if (!chartComparable(h) || !h.openAction || !h.hand) continue;
+    const seat = SEAT_BY_BEHIND[h.behind!];
+    const f = raiseFreq(seat, h.hand);
     if (f === undefined) continue;
-    const kind = h.openAction === 'limp' ? 'limp' : h.openAction === 'raise' && f < 0.25 ? 'too loose' : h.openAction === 'fold' && f > 0.75 ? 'too tight' : undefined;
+    const kind =
+      h.openAction === 'limp' ? (seat === 'SB' ? undefined : 'limp') : h.openAction === 'raise' && f <= 0.05 ? 'too loose' : h.openAction === 'fold' && f >= 0.95 ? 'too tight' : undefined;
     if (!kind) continue;
-    const key = `${h.position}:${h.hand}:${kind}`;
+    const key = `${seat}:${h.hand}:${kind}`;
     const existing = found.get(key);
     if (existing) existing.count++;
-    else found.set(key, { position: h.position, hand: h.hand, chartRaise: f, heroAction: h.openAction, kind, count: 1 });
+    else found.set(key, { seat, hand: h.hand, chartRaise: f, heroAction: h.openAction, kind, count: 1 });
   }
   return [...found.values()].sort((a, b) => b.count - a.count);
+}
+
+export interface OpenRate {
+  seat: string;
+  chances: number;
+  opens: number;
+  rate: number;
+  /** 95% range for the true rate from this sample (normal approximation). */
+  low: number;
+  high: number;
+}
+
+/** First in raise rate by chart seat, the number coaches read before single hands. */
+export function openRates(hands: readonly HeroHand[]): OpenRate[] {
+  const by = new Map<string, { chances: number; opens: number }>();
+  for (const h of hands) {
+    if (!chartComparable(h)) continue;
+    const seat = SEAT_BY_BEHIND[h.behind!];
+    const e = by.get(seat) ?? { chances: 0, opens: 0 };
+    e.chances++;
+    if (h.openAction === 'raise') e.opens++;
+    by.set(seat, e);
+  }
+  return [...by]
+    .sort((a, b) => PREFLOP_ORDER.indexOf(a[0]) - PREFLOP_ORDER.indexOf(b[0]))
+    .map(([seat, { chances, opens }]) => {
+      const rate = opens / chances;
+      const half = 1.96 * Math.sqrt((rate * (1 - rate)) / chances);
+      return { seat, chances, opens, rate, low: Math.max(0, rate - half), high: Math.min(1, rate + half) };
+    });
 }
