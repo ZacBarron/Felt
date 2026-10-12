@@ -8,11 +8,40 @@ The starter charts in `packages/content/src/charts.ts` are hand-written approxim
 
 The Spot Lab decision demo uses illustrative numbers and says so.
 
+## Felt Solver (built in)
+
+Felt has its own postflop solver in `packages/core/src/solver.ts`, written from scratch so Felt owns it outright and can sell it. It runs on the phone in a Web Worker (`apps/web/src/solver/`) and in Node for batch jobs.
+
+**What it solves.** Heads up postflop spots from the flop, turn or river: any board, any two weighted ranges, pot, effective stack, and bet and raise sizes per street and per player, with an all in option and a raise cap. Every combo is solved separately with exact card removal. Chance nodes deal every remaining card, so a turn solve is solved through all 44 to 48 rivers, not sampled.
+
+**How.** Discounted counterfactual regret minimization (DCFR with alpha 1.5, beta 0, gamma 2), the variant modern commercial solvers use, with alternating updates. Showdowns are evaluated in linear time per node by sorting hands by strength and subtracting blocked combos card by card.
+
+**How we know it is right.**
+
+- **Measured accuracy.** `exploitability()` computes a best response for each player and reports how much a perfect opponent could still win, as a percent of the pot. This is the same accuracy measure commercial solvers report. The app shows it with every solve.
+- **Analytic check.** A polarized river game (nuts or air against a pure bluff catcher, one pot sized bet) has a known exact answer. The solver reproduces it: bluffs are one third of bets and the defender calls exactly 50%. This is a unit test.
+- **Runout check.** An all in before the river is valued by its exact runout equity (20.5% for a 9 out flush draw on the turn), also a unit test.
+- **Zero sum.** The two players' EVs always add up to the pot, checked in tests.
+
+**Speed (Node on a laptop class CPU).**
+
+| Spot | Size | Time to 0.3% of pot |
+| --- | --- | --- |
+| River, narrowed ranges, 2 sizes plus raises | about 40 nodes | under a second |
+| River, full preflop ranges | about 40 nodes | a few seconds |
+| Turn, full BTN vs BB ranges, 2 to 3 sizes plus raises | 11,000 nodes, 490 vs 316 combos | about 2 minutes (0.25% after 300 iterations) |
+
+Phones are slower, so the app solves rivers instantly, offers turn solves with a progress bar and a stop button, and leaves flop solves to batch jobs.
+
+**What it does not do yet.** Multiway spots, preflop solving, suit isomorphism (which would make two tone and monotone boards several times faster), and flop solving on the phone. Next steps: isomorphism and typed array storage, a WASM build, a Node batch runner that writes solved flop packs in the normalized format below, then the preflop and push/fold solvers.
+
 ## Can we replicate a solver or download solutions?
 
 Yes, in three ways, from most to least useful.
 
-### 1. Run open source solvers ourselves (postflop)
+### 1. Open source solvers (postflop, reference only)
+
+Felt Solver replaces these for the product. They remain useful as an independent cross check of Felt Solver on the same spot.
 
 Free, open source postflop solvers exist and produce real equilibrium strategies:
 
@@ -23,7 +52,7 @@ Free, open source postflop solvers exist and produce real equilibrium strategies
 
 Plan: a batch runner (in a `tools/` folder, kept separate from the app) solves a library of spots on a laptop or a rented cloud machine, then converts each solution into Felt's node format. The phone only downloads the finished data; it never runs a solve. First pack: single raised pots BTN vs BB and CO vs BB across a representative set of flops, then 3bet pots.
 
-Licensing note: AGPL obligations apply when you distribute the solver or offer it as a service to others. Running it ourselves to produce data for personal study is fine; we keep the solver out of the app bundle. If Felt is ever shared publicly, review this again.
+Licensing note: both are AGPL-3.0, which is not compatible with selling Felt as a closed product, and outputs generated with them should not be shipped either without legal review. Felt Solver is our own code and has no such restriction.
 
 ### 2. Build our own preflop solver (preflop)
 

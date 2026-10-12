@@ -229,4 +229,73 @@ export function FlameIcon(p: IconProps) {
   );
 }
 
+export function LockIcon(p: IconProps) {
+  return (
+    <Svg {...p}>
+      <rect x="5.5" y="10.5" width="13" height="9.5" rx="2.5" {...fillProps(p.filled)} />
+      <path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5" />
+    </Svg>
+  );
+}
+
+/** A goal: concentric rings with a center mark. */
+export function TargetIcon(p: IconProps) {
+  return (
+    <Svg {...p}>
+      <circle cx="12" cy="12" r="8.25" />
+      <circle cx="12" cy="12" r="4.5" {...fillProps(p.filled)} />
+      <circle cx="12" cy="12" r="0.9" fill="currentColor" />
+    </Svg>
+  );
+}
+
+export function ClockIcon(p: IconProps) {
+  return (
+    <Svg {...p}>
+      <circle cx="12" cy="12" r="8.25" {...fillProps(p.filled)} />
+      <path d="M12 7.5V12l3 2" />
+    </Svg>
+  );
+}
+
+export function BellIcon(p: IconProps) {
+  return (
+    <Svg {...p}>
+      <path d="M6.5 16.5V11a5.5 5.5 0 0 1 11 0v5.5l1.5 1.5H5z" {...fillProps(p.filled)} />
+      <path d="M10 20.25a2.25 2.25 0 0 0 4 0" />
+    </Svg>
+  );
+}
+
+/** Solver: a game tree, one node splitting into three. */
+export function SolverIcon(p: IconProps) {
+  return (
+    <Svg {...p}>
+      <path d="M12 7v3.5M12 10.5 6 15M12 10.5V15M12 10.5l6 4.5" />
+      <circle cx="12" cy="5" r="2" {...fillProps(p.filled)} />
+      <circle cx="6" cy="17" r="2" />
+      <circle cx="12" cy="17" r="2" />
+      <circle cx="18" cy="17" r="2" />
+    </Svg>
+  );
+}
+
+/** Skipping ahead: two chevrons. */
+export function SkipIcon(p: IconProps) {
+  return (
+    <Svg {...p} strokeWidth={2}>
+      <path d="m6 6.5 5.5 5.5L6 17.5M12.5 6.5 18 12l-5.5 5.5" />
+    </Svg>
+  );
+}
+
+export function TrophyIcon(p: IconProps) {
+  return (
+    <Svg {...p}>
+      <path d="M8 4.5h8v5a4 4 0 0 1-8 0z" {...fillProps(p.filled)} />
+      <path d="M8 6.5H5.5a2.5 2.5 0 0 0 2.75 3.4M16 6.5h2.5a2.5 2.5 0 0 1-2.75 3.4M12 13.5v3M8.5 19.5h7M10 16.5h4l.5 3h-5z" />
+    </Svg>
+  );
+}
+
 export type IconComponent = (p: IconProps) => React.ReactElement;

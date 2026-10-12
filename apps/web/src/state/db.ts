@@ -27,7 +27,8 @@ export interface StoredReview {
 export interface StoredLesson {
   /** `${trackId}/${moduleId}/${lessonId}` */
   key: string;
-  status: 'started' | 'done';
+  /** `tested` means skipped by answering its questions in a test out. */
+  status: 'started' | 'done' | 'tested';
   /** Furthest step reached, so a lesson resumes where you left it. */
   step: number;
   correct: number;

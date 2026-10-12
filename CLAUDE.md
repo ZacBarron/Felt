@@ -18,6 +18,9 @@ Personal poker training app. Read docs/CONCEPT.md and docs/ROADMAP.md before sta
 - Every chart or node carries a `source`. Approximate data must be labelled as such in the UI.
 - Amounts are in big blinds unless a field says otherwise.
 - Writing style for UI copy and docs: plain language, no em dashes.
+- Every lesson has at least two quiz steps (they power placement and test outs). Never reference books or outside material in lessons.
+- Free vs Pro, prices and purchase seams live only in `apps/web/src/state/access.ts` (see docs/MONETIZATION.md).
+- The solver (`core/src/solver.ts`) must keep passing its analytic tests; report exploitability with any solver output.
 
 ## UI conventions (apps/web)
 

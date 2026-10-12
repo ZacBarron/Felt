@@ -23,13 +23,52 @@ export interface UiSettings {
   palette: Palette;
 }
 
+export type Goal = 'win-live' | 'move-up' | 'go-pro' | 'master-gto' | 'tournaments';
+export type Experience = 'new' | 'casual' | 'winning' | 'pro';
+export type Focus = 'preflop' | 'postflop' | 'sizing' | 'reads' | 'math' | 'mental';
+
+/** What the player told us during onboarding. Drives their plan and copy. */
+export interface Profile {
+  onboarded: boolean;
+  goal?: Goal;
+  experience?: Experience;
+  focus: Focus[];
+  /** Daily study target in minutes. */
+  dailyMinutes: number;
+  /** ISO date the player committed to their plan. */
+  committedAt?: string;
+  /** Module placement started at, or 'all' when it cleared everything. */
+  placedAt?: string;
+}
+
+/**
+ * Access to Felt Pro. `pro` is what purchases set; `devPro` is a switch for
+ * the developer to test either side of the paywall.
+ */
+export interface Access {
+  pro: boolean;
+  devPro?: boolean;
+  devMode?: boolean;
+  /** ISO date a trial ends, when on a trial. */
+  trialEndsAt?: string;
+  plan?: string;
+}
+
 export interface AppSettings {
   game: GameSettings;
   study: StudySettings;
   ui: UiSettings;
+  profile: Profile;
+  access: Access;
 }
 
-const DEFAULTS: AppSettings = { game: DEFAULT_SETTINGS, study: { newPerDay: 15 }, ui: { haptics: true, appearance: 'system', palette: 'card-room' } };
+const DEFAULTS: AppSettings = {
+  game: DEFAULT_SETTINGS,
+  study: { newPerDay: 15 },
+  ui: { haptics: true, appearance: 'system', palette: 'card-room' },
+  profile: { onboarded: false, focus: [], dailyMinutes: 10 },
+  access: { pro: false },
+};
 const KEY = 'felt.settings.v1';
 
 function load(): AppSettings {
@@ -41,6 +80,8 @@ function load(): AppSettings {
       game: { ...DEFAULTS.game, ...saved.game },
       study: { ...DEFAULTS.study, ...saved.study },
       ui: { ...DEFAULTS.ui, ...saved.ui },
+      profile: { ...DEFAULTS.profile, ...saved.profile },
+      access: { ...DEFAULTS.access, ...saved.access },
     };
   } catch {
     return DEFAULTS;

@@ -70,6 +70,15 @@ describe('lessons', () => {
     }
   });
 
+  it('cover the whole curriculum, each with at least two questions for test outs', () => {
+    for (const key of curriculumKeys) {
+      const lesson = LESSON_CONTENT.get(key);
+      expect(lesson, key).toBeDefined();
+      expect(lesson!.steps.filter((s) => s.kind === 'quiz').length, key).toBeGreaterThanOrEqual(2);
+      expect(lesson!.steps.at(-1)?.kind, key).toBe('takeaway');
+    }
+  });
+
   it('never use em dashes', () => {
     for (const lesson of LESSON_CONTENT.values()) expect(JSON.stringify(lesson), lesson.key).not.toContain('\u2014');
   });
@@ -160,6 +169,7 @@ describe('lessons', () => {
     expect(primaryAction(mix('9max-100-rfi-btn', 'K5s'))).toBe('raise');
     expect(primaryAction(mix('9max-100-rfi-co', 'Q7s'))).toBe('fold');
     expect(primaryAction(mix('9max-100-rfi-sb', 'Q4s'))).toBe('raise');
+    expect(primaryAction(mix('9max-100-rfi-sb', 'K7o'))).toBe('fold');
     expect(primaryAction(mix('9max-100-bb-vs-btn', 'J6s'))).toBe('call');
     expect(scoreRecall(mix('9max-100-bb-vs-btn', 'A4s'), '3bet')).toBe(1);
     expect(scoreRecall(mix('9max-100-bb-vs-btn', 'A4s'), 'call')).toBe(1);

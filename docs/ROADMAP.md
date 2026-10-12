@@ -35,8 +35,22 @@ Ordered for the main game (live 1/3 cash, 9 handed, on a phone) and so the core 
 - [x] Themes: Card room (brand default), Ink, Oxblood, Cobalt
 - [x] 29 lessons across foundations (EV and indifference, implied odds, SPR and geometric sizing, range vs range, range and nut advantage, range shapes), postflop (textures, c-betting in position, sizing, defending c-bets, check raising, turn cards, bluff selection, bluff catching) and exploitation (node locking, stations, nits, sizing tells)
 - [x] Accuracy pass: every lesson claim labelled exact math, solver pattern (approximate) or pool tendency; every math number recomputed in tests; range numbers computed from Felt's charts
-- [ ] More lessons: c-betting out of position, 3bet pots, probing, barreling, multiway, cold 3betting and flatting, stack depth, tells, mindset
+- [x] Full curriculum: 70 lessons across foundations and game theory, preflop (including live preflop), postflop (river play, 3bet pots, multiway), exploitation, mental game and study, and tournaments; every lesson has at least two quiz questions
 - [ ] Chart editor: enter or paste any chart (range notation) as a `custom` source
+
+## Product: onboarding, placement and Felt Pro (done)
+
+See [MONETIZATION.md](MONETIZATION.md).
+
+- [x] Onboarding: goal, game, experience, focus, daily goal, placement, a personal plan and a hold to commit pledge
+- [x] Placement test that walks the core path and marks known lessons as skipped
+- [x] Test out of any module; a miss expands into the full lesson
+- [x] Path ordering: in progress, then placement module, then focus areas
+- [x] Daily goal ring and next lesson on Today
+- [x] Felt Pro paywall with plan cards, trial timeline and honest fine print; free tier is the first module of every track
+- [x] Developer switch for Pro, onboarding replay and progress reset
+- [ ] Connect a store (App Store, Play, web checkout) to `purchase()`
+- [ ] Reminder notifications and streak freeze
 
 ## Phase 2: Live game essentials
 
@@ -52,8 +66,12 @@ Ordered for the main game (live 1/3 cash, 9 handed, on a phone) and so the core 
 
 See [SOLVER_DATA.md](SOLVER_DATA.md).
 
+- [x] Felt Solver: heads up postflop DCFR solver in `@felt/core`, per combo with exact card removal, measured exploitability, validated against an analytic river game
+- [x] Solver screen: example spots free, custom spots with Pro, runs in a Web Worker, browse the tree with per hand class strategies
+- [ ] Suit isomorphism and a WASM build for faster turn and flop solves
+
 - [ ] Normalized node format and import validator
-- [ ] Batch runner for an open source postflop solver on a laptop or cloud machine
+- [ ] Batch runner for Felt Solver on a laptop or cloud machine
 - [ ] First postflop pack: single raised pots BTN vs BB and CO vs BB across a representative flop set
 - [ ] Simplified preflop solver in `@felt/core` to regenerate charts for any table size, stack depth, open size and rake
 - [ ] Data packs downloaded into the app, so the phone never runs a solve

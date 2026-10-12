@@ -10,6 +10,7 @@ import {
   ReviewIcon,
   ScenariosIcon,
   SettingsIcon,
+  SolverIcon,
   StatsIcon,
   TodayIcon,
 } from './ui/icons';
@@ -37,6 +38,7 @@ export const NAV_SECTIONS: { section: string; items: NavItem[] }[] = [
     section: 'Study',
     items: [
       { to: '/ranges', label: 'Ranges', icon: RangesIcon, color: 'var(--red)' },
+      { to: '/solver', label: 'Solver', icon: SolverIcon, color: 'var(--indigo)' },
       { to: '/lab', label: 'Spot Lab', icon: LabIcon, color: 'var(--green)' },
       { to: '/exploit', label: 'Exploits', icon: ExploitsIcon, color: 'var(--purple)' },
     ],

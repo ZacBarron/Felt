@@ -4,12 +4,17 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { Link } from 'react-router-dom';
 import { MasteryGrid } from '../components/MasteryGrid';
 import { PlayingCard } from '../components/PlayingCard';
+import { canOpenLesson } from '../state/access';
 import { chartsForGame, getChart } from '../state/charts';
+import type { StoredLesson } from '../state/db';
+import { goalCopy, pathPrefs } from '../state/goals';
+import { lessonPath, lessonProgress, pickNextLesson, studyMinutesToday } from '../state/lessons';
 import { buildQueue, masteryForCharts, todayStats } from '../state/review';
 import { useSettings } from '../state/settings';
 import { HeroPattern } from '../ui/Brand';
 import { CheckIcon, ChevronRightIcon, FlameIcon } from '../ui/icons';
 import { PageHeader } from '../ui/PageHeader';
+import { ProgressRing } from '../ui/ProgressRing';
 import { useCountUp } from '../ui/useCountUp';
 
 /** A stable combo for a hand class, so the preview does not reshuffle on every render. */
@@ -31,6 +36,10 @@ export function DashboardPage() {
     return [...q.due, ...q.fresh][0] ?? null;
   }, deps);
   const mastery = useLiveQuery(() => masteryForCharts(charts), deps);
+  const studied = useLiveQuery(() => studyMinutesToday(), [], 0);
+  const progress = useLiveQuery(lessonProgress, [], new Map<string, StoredLesson>());
+  const nextLesson = pickNextLesson(progress, (key) => canOpenLesson(key, settings.access), pathPrefs(settings.profile));
+  const goal = settings.profile.dailyMinutes;
 
   const remaining = stats ? stats.dueNow + stats.newAvailable : 0;
   const total = stats ? stats.reviewedToday + remaining : 0;
@@ -107,6 +116,24 @@ export function DashboardPage() {
             Free practice
           </Link>
         )}
+      </section>
+
+      <section className="card goal-card reveal">
+        <ProgressRing value={studied / goal} size={64} stroke={7}>
+          {studied >= goal ? <CheckIcon size={22} style={{ color: 'var(--tint)' }} /> : <span className="num goal-num">{Math.floor(studied)}</span>}
+        </ProgressRing>
+        <div className="grow" style={{ minWidth: 0 }}>
+          <div className="footnote">{goalCopy(settings.profile.goal)?.label ?? 'Daily goal'}</div>
+          <div style={{ fontWeight: 650 }}>
+            {studied >= goal ? 'Daily goal done' : `${Math.max(1, Math.ceil(goal - studied))} min to your daily goal`}
+          </div>
+          {nextLesson && (
+            <Link to={lessonPath(nextLesson.key)} className="goal-next">
+              Next lesson: {nextLesson.title}
+              <ChevronRightIcon size={14} />
+            </Link>
+          )}
+        </div>
       </section>
 
       {stats && stats.reviewedToday > 0 && (

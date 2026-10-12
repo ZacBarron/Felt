@@ -2,16 +2,21 @@ import { CURRICULUM } from '@felt/content';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { Link } from 'react-router-dom';
 import { LessonCover } from '../lesson/LessonCover';
-import { LESSON_ENTRIES, type LessonEntry, lessonPath, lessonProgress, pickNextLesson } from '../state/lessons';
+import { isComplete, LESSON_ENTRIES, type LessonEntry, lessonPath, lessonProgress, pickNextLesson } from '../state/lessons';
 import type { StoredLesson } from '../state/db';
-import { CheckIcon } from '../ui/icons';
+import { canOpenLesson, FREE_MODULES, isPro } from '../state/access';
+import { pathPrefs } from '../state/goals';
+import { useSettings } from '../state/settings';
+import { CheckIcon, ChevronRightIcon, LockIcon, SkipIcon } from '../ui/icons';
 import { PageHeader } from '../ui/PageHeader';
 
 export function LearnPage() {
   const progress = useLiveQuery(lessonProgress, [], new Map<string, StoredLesson>());
+  const { settings } = useSettings();
+  const pro = isPro(settings.access);
   const playable = LESSON_ENTRIES.filter((e) => e.content);
-  const done = playable.filter((e) => progress.get(e.key)?.status === 'done').length;
-  const next = pickNextLesson(progress);
+  const done = playable.filter((e) => isComplete(progress.get(e.key))).length;
+  const next = pickNextLesson(progress, (key) => canOpenLesson(key, settings.access), pathPrefs(settings.profile));
   const nextState = next ? progress.get(next.key) : undefined;
 
   return (
@@ -39,24 +44,62 @@ export function LearnPage() {
         </Link>
       )}
 
+      {!settings.profile.placedAt && (
+        <Link to="/placement" className="card placement-card reveal">
+          <span className="placement-icon">
+            <SkipIcon size={22} />
+          </span>
+          <span className="grow">
+            <span style={{ display: 'block', fontWeight: 650 }}>Find your level</span>
+            <span className="footnote">A short test that skips every lesson you already know.</span>
+          </span>
+          <ChevronRightIcon size={16} className="chev" />
+        </Link>
+      )}
+
       {CURRICULUM.map((track) => {
-        const entries = LESSON_ENTRIES.filter((e) => e.trackId === track.id);
-        const written = entries.filter((e) => e.content);
-        const trackDone = written.filter((e) => progress.get(e.key)?.status === 'done').length;
+        const entries = LESSON_ENTRIES.filter((e) => e.trackId === track.id && e.content);
+        const trackDone = entries.filter((e) => isComplete(progress.get(e.key))).length;
         return (
-          <section key={track.id}>
-            <div className="row between" style={{ padding: '0 1rem 0.5rem', flexWrap: 'nowrap' }}>
-              <span className="section-title" style={{ padding: 0 }}>
-                {track.title}
+          <section key={track.id} className="track-section">
+            <div className="row between" style={{ padding: '0 1rem 0.2rem', flexWrap: 'nowrap' }}>
+              <h2 className="display track-title">{track.title}</h2>
+              <span className="footnote num">
+                {trackDone} of {entries.length}
               </span>
-              <span className="footnote num">{written.length ? `${trackDone} of ${written.length}` : 'Soon'}</span>
             </div>
-            <div className="lesson-rail">
-              {[...written, ...entries.filter((e) => !e.content)].map((e) => (
-                <LessonCard key={e.key} entry={e} state={progress.get(e.key)} />
-              ))}
+            <div className="section-footer" style={{ paddingTop: 0, paddingBottom: '0.6rem' }}>
+              {track.summary}
             </div>
-            <div className="section-footer">{track.summary}</div>
+            {track.modules.map((m) => {
+              const lessons = entries.filter((e) => e.key.startsWith(`${track.id}/${m.id}/`));
+              const open = lessons.filter((e) => !isComplete(progress.get(e.key)));
+              const free = FREE_MODULES.has(`${track.id}/${m.id}`);
+              return (
+                <div key={m.id} className="module-block">
+                  <div className="module-head">
+                    <span className="module-title">
+                      {m.title}
+                      {!free && !pro && <LockIcon size={13} className="muted" />}
+                    </span>
+                    {open.length > 0 ? (
+                      <Link to={`/check/${track.id}/${m.id}`} className="test-out" data-haptic="select">
+                        <SkipIcon size={14} /> Test out
+                      </Link>
+                    ) : (
+                      <span className="pill pill-good">
+                        <CheckIcon size={12} /> Complete
+                      </span>
+                    )}
+                  </div>
+                  <div className="lesson-rail">
+                    {lessons.map((e) => (
+                      <LessonCard key={e.key} entry={e} state={progress.get(e.key)} locked={!canOpenLesson(e.key, settings.access)} />
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
           </section>
         );
       })}
@@ -64,7 +107,7 @@ export function LearnPage() {
   );
 }
 
-function LessonCard({ entry, state }: { entry: LessonEntry; state?: StoredLesson }) {
+function LessonCard({ entry, state, locked }: { entry: LessonEntry; state?: StoredLesson; locked?: boolean }) {
   const content = entry.content;
   const body = (
     <>
@@ -79,6 +122,14 @@ function LessonCard({ entry, state }: { entry: LessonEntry; state?: StoredLesson
             <span className="pill pill-good">
               <CheckIcon size={12} /> Done
             </span>
+          ) : state?.status === 'tested' ? (
+            <span className="pill pill-good">
+              <SkipIcon size={12} /> Skipped
+            </span>
+          ) : locked ? (
+            <span className="pill">
+              <LockIcon size={12} /> Pro
+            </span>
           ) : state?.status === 'started' ? (
             <span className="pill pill-tint num">
               {state.step} of {content.steps.length}
@@ -86,13 +137,13 @@ function LessonCard({ entry, state }: { entry: LessonEntry; state?: StoredLesson
           ) : (
             <span className="caption">{content.minutes} min</span>
           )}
-          {content?.level === 'advanced' && state?.status !== 'done' && <span className="pill">Advanced</span>}
+          {content?.level === 'advanced' && !isComplete(state) && <span className="pill">Advanced</span>}
         </div>
       </div>
     </>
   );
   return content ? (
-    <Link to={lessonPath(entry.key)} className="lesson-card">
+    <Link to={locked ? '/pro?from=lesson' : lessonPath(entry.key)} className={`lesson-card${locked ? ' locked' : ''}`}>
       {body}
     </Link>
   ) : (

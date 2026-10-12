@@ -28,6 +28,10 @@ Accuracy is the product, so lessons do not simplify a claim until it is wrong.
 - **Compute, do not recall.** Range numbers (for example the share of each range with 80% or more equity on a flop) are computed from Felt's own charts, and the note under the table says how.
 - **Self contained.** Lessons teach everything in Felt's own words and never send the player elsewhere to finish learning.
 
+## Placement and test outs
+
+Players skip what they know by answering questions taken from the lessons. Every lesson needs at least two `quiz` steps for this, and its last quiz should check the lesson's main idea. See [MONETIZATION.md](MONETIZATION.md) for how placement and test outs work.
+
 ## Lesson anatomy
 
 Every lesson follows the same shape so study sessions feel predictable:

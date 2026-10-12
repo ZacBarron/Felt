@@ -5,6 +5,7 @@ const COLORS: Record<string, string> = {
   call: 'var(--act-call)',
   check: 'var(--act-check)',
   fold: 'var(--act-fold)',
+  allin: 'color-mix(in srgb, var(--red), #000 58%)',
 };
 
 /** Bets are shades of red by size so bigger sizings read as more aggressive. */
@@ -21,6 +22,6 @@ export function actionColor(id: string): string {
 
 /** Draw order so aggressive actions sit on the left of every bar, like solver UIs. */
 export function sortActions(ids: string[]): string[] {
-  const rank = (id: string) => (id === 'fold' ? 3 : id === 'call' || id === 'check' ? 2 : 1);
+  const rank = (id: string) => (id === 'fold' ? 4 : id === 'call' || id === 'check' ? 3 : id === 'allin' ? 0 : 1);
   return [...ids].sort((a, b) => rank(a) - rank(b));
 }

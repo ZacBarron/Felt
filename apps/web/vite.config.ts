@@ -7,6 +7,8 @@ export default defineConfig({
   define: {
     __APP_VERSION__: JSON.stringify(pkg.version),
   },
+  // The solver runs in a module worker so it can import @felt/core.
+  worker: { format: 'es' },
   plugins: [
     react(),
     // Installable on a phone and fully usable offline at the table.

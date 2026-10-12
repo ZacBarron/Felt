@@ -180,6 +180,13 @@ export const PREFLOP_LESSONS: LessonContent[] = [
         explain: 'Suited queens open from Q4s in the small blind.',
       },
       {
+        kind: 'quiz',
+        question: 'Folded to you in the small blind with K7o.',
+        choices: ['Raise', 'Fold'],
+        answer: 1,
+        explain: 'Offsuit kings open from K8o in the small blind. K7o folds.',
+      },
+      {
         kind: 'takeaway',
         points: ['Raise or fold about 42%, to about 3bb.', 'Solvers also limp; raise only is the simple, near equal baseline.', 'Limp more against a big blind that never punishes it.'],
       },

@@ -1,17 +1,21 @@
 import { useLiveQuery } from 'dexie-react-hooks';
 import { useEffect, useRef } from 'react';
-import { Link, NavLink, Route, Routes, useLocation } from 'react-router-dom';
+import { Link, Navigate, NavLink, Route, Routes, useLocation } from 'react-router-dom';
 import { NAV_SECTIONS, TABS } from './nav';
+import { CheckPage, PlacementPage } from './pages/CheckPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { DrillsPage } from './pages/DrillsPage';
 import { LabPage } from './pages/LabPage';
 import { LearnPage } from './pages/LearnPage';
 import { LessonPage } from './pages/LessonPage';
 import { MorePage } from './pages/MorePage';
+import { OnboardingPage } from './pages/OnboardingPage';
 import { PlannedPage } from './pages/PlannedPage';
+import { ProPage } from './pages/ProPage';
 import { RangesPage } from './pages/RangesPage';
 import { ReviewPage } from './pages/ReviewPage';
 import { SettingsPage } from './pages/SettingsPage';
+import { SolverPage } from './pages/SolverPage';
 import { chartsForGame } from './state/charts';
 import { buildQueue } from './state/review';
 import { useSettings } from './state/settings';
@@ -30,8 +34,12 @@ function useReviewCount() {
   );
 }
 
+/** Pages a player can reach before finishing onboarding. */
+const FIRST_RUN = ['/welcome', '/placement', '/pro'];
+
 export function App() {
   const location = useLocation();
+  const { settings } = useSettings();
   const reviewCount = useReviewCount();
   // Lesson pages live under /learn, so match on the first path segment.
   const section = '/' + (location.pathname.split('/')[1] ?? '');
@@ -53,6 +61,8 @@ export function App() {
       easing: 'cubic-bezier(0.34, 1.4, 0.64, 1)',
     });
   }, [activeTab]);
+
+  if (!settings.profile.onboarded && !FIRST_RUN.includes(location.pathname)) return <Navigate to="/welcome" replace />;
 
   return (
     <div className="shell">
@@ -89,6 +99,12 @@ export function App() {
             <Route path="/ranges" element={<RangesPage />} />
             <Route path="/lab" element={<LabPage />} />
             <Route path="/settings" element={<SettingsPage />} />
+            <Route path="/welcome" element={<OnboardingPage />} />
+            <Route path="/placement" element={<PlacementPage />} />
+            <Route path="/check/:track/:module" element={<CheckPage />} />
+            <Route path="/check/:track/:module/:lesson" element={<CheckPage />} />
+            <Route path="/pro" element={<ProPage />} />
+            <Route path="/solver" element={<SolverPage />} />
             <Route path="/more" element={<MorePage />} />
             <Route path="/scenarios" element={<PlannedPage feature="scenarios" />} />
             <Route path="/exploit" element={<PlannedPage feature="exploit" />} />

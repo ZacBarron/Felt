@@ -346,6 +346,13 @@ export const POSTFLOP_LESSONS: LessonContent[] = [
         explain: 'J♥T♥ has an open ended straight draw and a flush draw: huge equity and good turns. A2 has almost nothing; K6 is a weak pair that prefers to call.',
       },
       {
+        kind: 'quiz',
+        question: 'Why does the big blind check raise less on K♠7♦2♣ than on 7♥6♥5♣?',
+        choices: ['K72 has more draws to semi bluff with', 'The raiser holds most of the strongest hands on K72', 'Check raises are only for monotone boards'],
+        answer: 1,
+        explain: 'Check raises lean on a nut advantage. On K72 the raiser has the sets of kings and the best top pairs; on 765 the big blind holds more straights, sets and two pair.',
+      },
+      {
         kind: 'takeaway',
         points: [
           'Check raise most where the big blind has the nut advantage.',
@@ -401,6 +408,13 @@ export const POSTFLOP_LESSONS: LessonContent[] = [
         choices: ['BTN', 'BB', 'Neither'],
         answer: 1,
         explain: 'The 5 completes straights for 84, 43 and 98 hands, and BB defends far more of those. BTN should slow down with many hands.',
+      },
+      {
+        kind: 'quiz',
+        question: 'BTN c-bets K♠7♦2♣ and BB calls. Which turn usually helps BTN most?',
+        choices: ['6♣', 'A♥', '5♦'],
+        answer: 1,
+        explain: 'An ace is a high card that BTN holds far more often in strong combinations like AK and AA, which BB 3bets preflop. Low cards help the caller’s range.',
       },
       {
         kind: 'takeaway',
@@ -466,6 +480,13 @@ export const POSTFLOP_LESSONS: LessonContent[] = [
         explain: 'From 55 to 36: 19 fewer, about 35%. Those were folding hands, so 7♣6♣ is the better bluff.',
       },
       {
+        kind: 'quiz',
+        question: 'Your river bluff has no showdown value and holds a card villain needs for many of their calls. That makes it',
+        choices: ['A worse bluff', 'A better bluff', 'No different'],
+        answer: 1,
+        explain: 'Blocking calls makes a fold more likely. The best bluffs block calls and unblock folds.',
+      },
+      {
         kind: 'takeaway',
         points: [
           'Bluff with hands that cannot win at showdown.',
@@ -526,6 +547,13 @@ export const POSTFLOP_LESSONS: LessonContent[] = [
         choices: ['28', '36', '45', '55'],
         answer: 1,
         explain: 'Nine hearts left: 9 × 8 ÷ 2 = 36.',
+      },
+      {
+        kind: 'quiz',
+        question: 'Facing a big river bet with two bluff catchers of equal strength: one blocks villain’s value hands, the other blocks villain’s likely bluffs. Which should call?',
+        choices: ['The one that blocks bluffs', 'The one that blocks value'],
+        answer: 1,
+        explain: 'Removing value combos raises the share of bluffs in villain’s range, so the hand that blocks value calls.',
       },
       {
         kind: 'takeaway',

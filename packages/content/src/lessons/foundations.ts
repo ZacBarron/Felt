@@ -261,6 +261,13 @@ export const FOUNDATIONS_LESSONS: LessonContent[] = [
         explain: '10 ÷ (9/46) = 51.1, minus a final pot of 50 = about 1.1. Nearly priced in on its own.',
       },
       {
+        kind: 'quiz',
+        question: 'Which draw has the best implied odds?',
+        choices: ['The nut flush draw against a player who pays off', 'A low flush draw on a paired board', 'An obvious open ender against a tight player'],
+        answer: 0,
+        explain: 'A disguised or nut draw against someone who pays off wins the most when it hits. Low flushes and obvious draws win less, or lose big when second best.',
+      },
+      {
         kind: 'takeaway',
         points: [
           'Extra needed = call ÷ equity − final pot.',
@@ -459,6 +466,13 @@ export const FOUNDATIONS_LESSONS: LessonContent[] = [
         explain: '(1 + 7)^(1/2) = 2.83; (2.83 − 1) ÷ 2 = 0.91. Bet 9.1, the pot becomes 28.3, then a 91% bet of 25.9 puts in the last 25.9.',
       },
       {
+        kind: 'quiz',
+        question: 'BTN opens 2.5bb, BB 3bets to 11 and BTN calls, 100bb deep. The flop SPR is about',
+        choices: ['1.5', '4', '10', '18'],
+        answer: 1,
+        explain: 'The pot is 22.5 (11 + 11 + 0.5) with 89 behind: 89 ÷ 22.5 ≈ 4.',
+      },
+      {
         kind: 'takeaway',
         points: [
           'SPR = stack ÷ pot. Single raised ≈ 18, 3bet ≈ 4.',
@@ -506,6 +520,13 @@ export const FOUNDATIONS_LESSONS: LessonContent[] = [
         choices: ['Overbet for value', 'Check, and call some bets', 'Bluff with the weakest'],
         answer: 1,
         explain: 'A condensed range gets folds from worse and calls from better when it bets big. Check and bluff catch.',
+      },
+      {
+        kind: 'quiz',
+        question: 'Two ranges both have 50% equity. Range A is half nuts and half air; range B is all medium hands. Which wants to bet big?',
+        choices: ['Range A', 'Range B', 'Neither, the same equity means the same strategy'],
+        answer: 0,
+        explain: 'The polarized range bets big: its nuts want value and its air needs folds. The condensed range prefers to check and call.',
       },
       {
         kind: 'takeaway',
@@ -569,6 +590,13 @@ export const FOUNDATIONS_LESSONS: LessonContent[] = [
         choices: ['Small and frequent', 'Large or overbet, polarized', 'Always check'],
         answer: 1,
         explain: 'Nut advantage against a capped range is exactly when big polarized bets earn the most.',
+      },
+      {
+        kind: 'quiz',
+        question: 'BTN opens, BB calls, the flop is K♠7♦2♣. Who has the nut advantage?',
+        choices: ['BB', 'BTN', 'Neither'],
+        answer: 1,
+        explain: 'BB 3bets KK and AK before the flop, so BTN holds more of the strongest hands: about 20% of its range has 80% or more equity, against 11% of BB’s.',
       },
       {
         kind: 'takeaway',
@@ -678,6 +706,13 @@ export const FOUNDATIONS_LESSONS: LessonContent[] = [
         choices: ['Rake only', 'Out of position, those hands realize too little of that equity', 'MDF says so'],
         answer: 1,
         explain: 'Raw equity overstates what an out of position, poorly playable hand will actually win.',
+      },
+      {
+        kind: 'quiz',
+        question: 'Out of position, which hand keeps more of its equity?',
+        choices: ['T9 offsuit', 'T9 suited'],
+        answer: 1,
+        explain: 'Same raw strength, but the suited hand makes flushes and strong draws, so it can continue on more boards and gets pushed off its equity less.',
       },
       {
         kind: 'takeaway',

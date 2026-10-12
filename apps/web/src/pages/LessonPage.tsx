@@ -1,10 +1,12 @@
 import { useLiveQuery } from 'dexie-react-hooks';
 import { useEffect, useRef, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Link, Navigate, useNavigate, useParams } from 'react-router-dom';
 import { haptic } from '../haptics';
 import { LessonCover } from '../lesson/LessonCover';
 import { StepView } from '../lesson/StepView';
+import { canOpenLesson } from '../state/access';
 import { getChart } from '../state/charts';
+import { useSettings } from '../state/settings';
 import { db } from '../state/db';
 import { entryFor, lessonPath, nextLesson, saveLesson } from '../state/lessons';
 import { BottomBar } from '../ui/BottomBar';
@@ -17,6 +19,7 @@ export function LessonPage() {
   const entry = entryFor(key);
   const content = entry?.content;
   const navigate = useNavigate();
+  const { settings } = useSettings();
   const saved = useLiveQuery(() => db.lessons.get(key), [key], null);
   const [index, setIndex] = useState<number>();
   const [dir, setDir] = useState<1 | -1>(1);
@@ -84,6 +87,8 @@ export function LessonPage() {
       </div>
     );
   }
+
+  if (!canOpenLesson(key, settings.access)) return <Navigate to="/pro?from=lesson" replace />;
 
   if (finished) {
     const quizCount = steps.filter((s) => s.kind === 'quiz').length;

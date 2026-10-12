@@ -8,3 +8,5 @@ export * from './charts';
 export * from './srs';
 export * from './settings';
 export * from './drills';
+export * from './solver';
+export * from './placement';
