@@ -1,5 +1,5 @@
 import { ideaForDay } from '@felt/content';
-import { actionRange, handClassCombos, stakesLabel } from '@felt/core';
+import { actionRange, challengeNumber, currentRating, handClassCombos, isProvisional, stakesLabel, tierFor } from '@felt/core';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { Link } from 'react-router-dom';
 import { MasteryGrid } from '../components/MasteryGrid';
@@ -9,6 +9,8 @@ import { chartsForGame, getChart } from '../state/charts';
 import type { StoredLesson } from '../state/db';
 import { goalCopy, pathPrefs } from '../state/goals';
 import { lessonPath, lessonProgress, pickNextLesson, studyMinutesToday } from '../state/lessons';
+import { ratingSnapshot, streakNow } from '../state/rating';
+import { db } from '../state/db';
 import { buildQueue, masteryForCharts, todayStats } from '../state/review';
 import { useSettings } from '../state/settings';
 import { HeroPattern } from '../ui/Brand';
@@ -40,6 +42,9 @@ export function DashboardPage() {
   const progress = useLiveQuery(lessonProgress, [], new Map<string, StoredLesson>());
   const nextLesson = pickNextLesson(progress, (key) => canOpenLesson(key, settings.access), pathPrefs(settings.profile));
   const goal = settings.profile.dailyMinutes;
+  const dailyDone = useLiveQuery(() => db.daily.get(challengeNumber(new Date())), []);
+  const streak = useLiveQuery(() => streakNow(), []);
+  const rating = useLiveQuery(async () => currentRating((await ratingSnapshot()).overall), []);
 
   const remaining = stats ? stats.dueNow + stats.newAvailable : 0;
   const total = stats ? stats.reviewedToday + remaining : 0;
@@ -50,6 +55,12 @@ export function DashboardPage() {
   const nextChart = next ? getChart(next.chartId) : undefined;
   const heroRange = focus ? new Set(actionRange(focus.chart, focus.chart.spec.actions[0].id).keys()) : undefined;
   const idea = ideaForDay(new Date());
+  const quests = [
+    { done: !!dailyDone, label: 'Daily challenge', to: '/daily', detail: dailyDone ? `${dailyDone.scores.filter((x) => x >= 1).length}/5` : '5 decisions' },
+    { done: studied >= goal, label: `Study ${goal} minutes`, to: nextLesson ? lessonPath(nextLesson.key) : '/learn', detail: `${Math.floor(studied)} of ${goal}` },
+    { done: !!stats && remaining === 0 && stats.reviewedToday > 0, label: 'Clear your review', to: '/review', detail: stats ? `${remaining} left` : '' },
+  ];
+  const questsDone = quests.filter((q) => q.done).length;
 
   return (
     <div className="stack" style={{ gap: '1.6rem' }}>
@@ -57,8 +68,8 @@ export function DashboardPage() {
         title="Today"
         kicker={date}
         trailing={
-          <Link to="/settings" className="pill" style={{ textDecoration: 'none', marginBottom: 4 }}>
-            {stakesLabel(g.stakes)} {g.venue}
+          <Link to="/you" className="pill rating-chip" style={{ textDecoration: 'none', marginBottom: 4 }}>
+            {rating && rating.games > 0 ? `${Math.round(rating.rating)}${isProvisional(rating) ? '?' : ''} · ${tierFor(rating.rating)}` : `${stakesLabel(g.stakes)} ${g.venue}`}
           </Link>
         }
       />
@@ -118,22 +129,30 @@ export function DashboardPage() {
         )}
       </section>
 
-      <section className="card goal-card reveal">
-        <ProgressRing value={studied / goal} size={64} stroke={7}>
-          {studied >= goal ? <CheckIcon size={22} style={{ color: 'var(--tint)' }} /> : <span className="num goal-num">{Math.floor(studied)}</span>}
-        </ProgressRing>
-        <div className="grow" style={{ minWidth: 0 }}>
-          <div className="footnote">{goalCopy(settings.profile.goal)?.label ?? 'Daily goal'}</div>
-          <div style={{ fontWeight: 650 }}>
-            {studied >= goal ? 'Daily goal done' : `${Math.max(1, Math.ceil(goal - studied))} min to your daily goal`}
+      <section className="card quests reveal">
+        <div className="quests-head">
+          <ProgressRing value={questsDone / quests.length} size={52} stroke={6}>
+            {questsDone === quests.length ? <CheckIcon size={20} style={{ color: 'var(--tint)' }} /> : <span className="num goal-num">{questsDone}/3</span>}
+          </ProgressRing>
+          <div className="grow">
+            <div className="footnote">{goalCopy(settings.profile.goal)?.label ?? 'Today'}</div>
+            <div style={{ fontWeight: 650 }}>{questsDone === quests.length ? 'Perfect day' : "Today's quests"}</div>
           </div>
-          {nextLesson && (
-            <Link to={lessonPath(nextLesson.key)} className="goal-next">
-              Next lesson: {nextLesson.title}
-              <ChevronRightIcon size={14} />
-            </Link>
+          {!!streak?.streak && (
+            <span className="pill pill-tint">
+              <FlameIcon size={12} /> {streak.streak}
+              {streak.bank > 0 && ` · ${streak.bank} freeze${streak.bank > 1 ? 's' : ''}`}
+            </span>
           )}
         </div>
+        {quests.map((q) => (
+          <Link key={q.label} to={q.to} className={`quest${q.done ? ' done' : ''}`}>
+            <span className="quest-check">{q.done && <CheckIcon size={13} />}</span>
+            <span className="grow">{q.label}</span>
+            <span className="footnote num">{q.detail}</span>
+            <ChevronRightIcon size={14} className="chev" />
+          </Link>
+        ))}
       </section>
 
       {stats && stats.reviewedToday > 0 && (
@@ -180,9 +199,9 @@ export function DashboardPage() {
           <span className="section-title" style={{ padding: 0 }}>
             Last 7 days
           </span>
-          {!!stats?.streak && (
+          {!!streak?.streak && (
             <span className="footnote row" style={{ gap: 4, color: 'var(--tint)', fontWeight: 600 }}>
-              <FlameIcon size={14} /> {stats.streak} day streak
+              <FlameIcon size={14} /> {streak.streak} day streak{streak.best > streak.streak ? `, best ${streak.best}` : ''}
             </span>
           )}
         </div>

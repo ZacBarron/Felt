@@ -14,6 +14,7 @@ import {
   SolverIcon,
   StatsIcon,
   TodayIcon,
+  TrophyIcon,
 } from './ui/icons';
 
 export interface NavItem {
@@ -30,6 +31,7 @@ export const NAV_SECTIONS: { section: string; items: NavItem[] }[] = [
     items: [
       { to: '/', label: 'Today', icon: TodayIcon, color: 'var(--red)' },
       { to: '/review', label: 'Review', icon: ReviewIcon, color: 'var(--tint)' },
+      { to: '/daily', label: 'Daily challenge', icon: TrophyIcon, color: 'var(--green)' },
       { to: '/drills', label: 'Drills', icon: DrillsIcon, color: 'var(--orange)' },
       { to: '/learn', label: 'Learn', icon: LearnIcon, color: 'var(--orange)' },
       { to: '/scenarios', label: 'Scenarios', icon: ScenariosIcon, color: 'var(--indigo)' },
@@ -49,7 +51,7 @@ export const NAV_SECTIONS: { section: string; items: NavItem[] }[] = [
     section: 'Play',
     items: [
       { to: '/log', label: 'Log', icon: LogIcon, color: 'var(--teal)' },
-      { to: '/stats', label: 'Stats', icon: StatsIcon, color: 'var(--pink)' },
+      { to: '/you', label: 'You', icon: StatsIcon, color: 'var(--pink)' },
       { to: '/settings', label: 'Settings', icon: SettingsIcon, color: 'var(--gray)' },
     ],
   },

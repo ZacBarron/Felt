@@ -50,7 +50,13 @@ See [MONETIZATION.md](MONETIZATION.md).
 - [x] Felt Pro paywall with plan cards, trial timeline and honest fine print; free tier is the first module of every track
 - [x] Developer switch for Pro, onboarding replay and progress reset
 - [x] Saves: bookmark any lesson screen or solver hand; a Saved page with notes; every save becomes a review card (quizzes graded, other screens as self graded flashcards, solver hands graded against the solver's mix), plus a saved only review session
+- [x] Felt Rating: Glicko rating overall and per area from every graded answer, provisional until settled, tiers, history (see ENGAGEMENT.md)
+- [x] Win rate model: rake and tips per player from the rake rules, skill edge from rating against the table, 95% range, Bayesian blend with entered results
+- [x] Daily challenge: five decisions, the same for everyone, rated, shareable spoiler free grid
+- [x] Quests on Today and streaks with earned freezes
+- [x] Research brief with verified sources (docs/research/sources.md)
 - [ ] Connect a store (App Store, Play, web checkout) to `purchase()`
+- [ ] Server: item calibration, real pool ratings per stake, leagues with real players, reminders, global daily stats
 - [ ] Reminder notifications and streak freeze
 
 ## Phase 2: Live game essentials

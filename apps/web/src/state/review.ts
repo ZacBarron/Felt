@@ -1,5 +1,8 @@
 import {
   boundaryHands,
+  chartItemDifficulty,
+  DIFFICULTY,
+  isMixed,
   cardStrength,
   type CardStrength,
   type Chart,
@@ -11,6 +14,9 @@ import {
   studyStreak,
 } from '@felt/core';
 import { db, type StoredCard } from './db';
+import { getChart } from './charts';
+import { entryFor } from './lessons';
+import { recordLessonQuiz, recordRated } from './rating';
 import { SAVED_TARGET_MS, savedCardId } from './saved';
 
 /** chartId used by review cards made from saved items. */
@@ -114,7 +120,28 @@ export async function recordAnswer(item: QueueItem, outcome: DrillOutcome, now =
       grade: log.rating,
     });
   });
+  await rateReview(item, outcome.accuracy, now);
   return card.due;
+}
+
+/** Objective review answers also count toward the Felt Rating. */
+async function rateReview(item: QueueItem, score: number, at: Date) {
+  if (item.mode === 'saved') {
+    const saved = item.savedId ? await db.saved.get(item.savedId) : undefined;
+    if (saved?.kind === 'solver-spot') {
+      await recordRated({ itemId: `solver:${saved.id}`, domain: 'postflop', difficulty: DIFFICULTY.solverSpot, score, source: 'review' }, at);
+    } else if (saved?.lessonKey !== undefined && saved.step !== undefined) {
+      // Only quizzes are graded objectively; self graded flashcards do not move the rating.
+      const isQuiz = entryFor(saved.lessonKey)?.content?.steps[saved.step]?.kind === 'quiz';
+      if (isQuiz) await recordLessonQuiz(saved.lessonKey, saved.step, score >= 1, 'review');
+    }
+    return;
+  }
+  const chart = getChart(item.chartId);
+  if (!chart) return;
+  const difficulty =
+    item.mode === 'paint' ? DIFFICULTY.chartPaint : chartItemDifficulty(isMixed(chart.mixes.get(item.hand ?? '') ?? { fold: 1 }), true);
+  await recordRated({ itemId: item.id, domain: 'preflop', difficulty, score, source: 'review' }, at);
 }
 
 export interface TodayStats {

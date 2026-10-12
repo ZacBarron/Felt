@@ -1,4 +1,4 @@
-import { DEFAULT_SETTINGS, type GameSettings } from '@felt/core';
+import { DEFAULT_SETTINGS, type GameSettings, type TableAssumptions } from '@felt/core';
 import { createContext, type ReactNode, useContext, useEffect, useState } from 'react';
 import { setHapticsEnabled } from '../haptics';
 
@@ -54,12 +54,22 @@ export interface Access {
   plan?: string;
 }
 
+/** Results the player entered, used to calibrate the win rate estimate. */
+export interface Results {
+  hands: number;
+  /** Profit in money at the current stakes. */
+  profit: number;
+}
+
 export interface AppSettings {
   game: GameSettings;
   study: StudySettings;
   ui: UiSettings;
   profile: Profile;
   access: Access;
+  results?: Results;
+  /** The player's own overrides of the win rate model assumptions. */
+  assumptions?: Partial<TableAssumptions>;
 }
 
 const DEFAULTS: AppSettings = {

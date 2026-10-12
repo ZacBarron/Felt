@@ -10,3 +10,6 @@ export * from './settings';
 export * from './drills';
 export * from './solver';
 export * from './placement';
+export * from './rating';
+export * from './winrate';
+export * from './habits';

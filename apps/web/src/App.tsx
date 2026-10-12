@@ -3,6 +3,7 @@ import { useEffect, useRef } from 'react';
 import { Link, Navigate, NavLink, Route, Routes, useLocation } from 'react-router-dom';
 import { NAV_SECTIONS, TABS } from './nav';
 import { CheckPage, PlacementPage } from './pages/CheckPage';
+import { DailyPage } from './pages/DailyPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { DrillsPage } from './pages/DrillsPage';
 import { LabPage } from './pages/LabPage';
@@ -17,6 +18,7 @@ import { ReviewPage } from './pages/ReviewPage';
 import { SavedPage } from './pages/SavedPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { SolverPage } from './pages/SolverPage';
+import { YouPage } from './pages/YouPage';
 import { chartsForGame } from './state/charts';
 import { buildQueue } from './state/review';
 import { useSettings } from './state/settings';
@@ -111,7 +113,9 @@ export function App() {
             <Route path="/scenarios" element={<PlannedPage feature="scenarios" />} />
             <Route path="/exploit" element={<PlannedPage feature="exploit" />} />
             <Route path="/log" element={<PlannedPage feature="log" />} />
-            <Route path="/stats" element={<PlannedPage feature="stats" />} />
+            <Route path="/stats" element={<Navigate to="/you" replace />} />
+            <Route path="/you" element={<YouPage />} />
+            <Route path="/daily" element={<DailyPage />} />
           </Routes>
         </div>
       </main>

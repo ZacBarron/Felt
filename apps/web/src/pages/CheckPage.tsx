@@ -15,6 +15,7 @@ import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { haptic } from '../haptics';
 import { StepView } from '../lesson/StepView';
 import { canOpenLesson } from '../state/access';
+import { recordLessonQuiz } from '../state/rating';
 import { entryFor, LESSON_ENTRIES, lessonPath, markTested, moduleEntries, quizSteps } from '../state/lessons';
 import { useSettings } from '../state/settings';
 import { BottomBar } from '../ui/BottomBar';
@@ -62,7 +63,14 @@ function QuestionScreen({
         <StepView step={quiz} answered={choice} onAnswer={setChoice} />
       </div>
       <BottomBar>
-        <button className="btn btn-primary btn-lg btn-block" disabled={choice === undefined} onClick={() => onDone(choice === quiz.answer)}>
+        <button
+          className="btn btn-primary btn-lg btn-block"
+          disabled={choice === undefined}
+          onClick={() => {
+            void recordLessonQuiz(question.lessonKey, question.step, choice === quiz.answer, 'check');
+            onDone(choice === quiz.answer);
+          }}
+        >
           {choice === undefined ? 'Choose an answer' : 'Continue'}
         </button>
       </BottomBar>

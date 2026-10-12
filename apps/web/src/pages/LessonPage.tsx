@@ -6,6 +6,7 @@ import { LessonCover } from '../lesson/LessonCover';
 import { StepView } from '../lesson/StepView';
 import { canOpenLesson } from '../state/access';
 import { getChart } from '../state/charts';
+import { recordLessonQuiz } from '../state/rating';
 import { lessonStepId, saveLessonStep, unsave } from '../state/saved';
 import { useSettings } from '../state/settings';
 import { db } from '../state/db';
@@ -205,7 +206,10 @@ export function LessonPage() {
             {entry.trackTitle}, {entry.moduleTitle} · {content.minutes} min{content.level === 'advanced' ? ' · Advanced' : ''}
           </div>
         )}
-        {step && <StepView step={step} answered={answers[i]} onAnswer={(choice) => setAnswers((a) => ({ ...a, [i]: choice }))} />}
+        {step && <StepView step={step} answered={answers[i]} onAnswer={(choice) => {
+              setAnswers((a) => ({ ...a, [i]: choice }));
+              if (step.kind === 'quiz') void recordLessonQuiz(key, i, choice === step.answer, 'lesson');
+            }} />}
         {i === 0 && (
           <div className="intro-cover reveal">
             <LessonCover cover={content.cover} />

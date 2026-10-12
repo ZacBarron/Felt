@@ -1,4 +1,4 @@
-import type { FsrsCard } from '@felt/core';
+import type { FsrsCard, SkillDomain } from '@felt/core';
 import Dexie, { type EntityTable } from 'dexie';
 
 /** A review card the learner has started. Unstarted cards exist only as deck seeds. */
@@ -45,6 +45,27 @@ export interface SavedItem {
   spot?: SavedSolverSpot;
 }
 
+/** One graded answer, replayed into the Felt Rating. */
+export interface StoredAnswer {
+  id?: number;
+  at: Date;
+  itemId: string;
+  domain: SkillDomain;
+  difficulty: number;
+  score: number;
+  source: 'review' | 'lesson' | 'check' | 'daily';
+}
+
+/** A finished daily challenge. */
+export interface StoredDaily {
+  /** Challenge number. */
+  number: number;
+  at: Date;
+  scores: number[];
+  ratingBefore: number;
+  ratingAfter: number;
+}
+
 export interface StoredReview {
   id?: number;
   cardId: string;
@@ -72,6 +93,8 @@ export const db = new Dexie('felt') as Dexie & {
   reviews: EntityTable<StoredReview, 'id'>;
   lessons: EntityTable<StoredLesson, 'key'>;
   saved: EntityTable<SavedItem, 'id'>;
+  answers: EntityTable<StoredAnswer, 'id'>;
+  daily: EntityTable<StoredDaily, 'number'>;
 };
 
 db.version(1).stores({
@@ -85,4 +108,9 @@ db.version(2).stores({
 
 db.version(3).stores({
   saved: 'id, kind, createdAt, lessonKey',
+});
+
+db.version(4).stores({
+  answers: '++id, at, itemId, domain',
+  daily: 'number, at',
 });
