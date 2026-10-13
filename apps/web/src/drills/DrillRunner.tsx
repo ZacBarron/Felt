@@ -11,10 +11,12 @@ interface Props {
   item: QueueItem;
   onAnswer: (outcome: DrillOutcome) => void;
   onNext: () => void;
+  /** Skip the chart header inside the drill when the page already shows it. */
+  compact?: boolean;
 }
 
 /** Renders the right drill for a queue item. */
-export function DrillRunner({ item, onAnswer, onNext }: Props) {
+export function DrillRunner({ item, onAnswer, onNext, compact }: Props) {
   if (item.mode === 'saved') return <SavedCard savedId={item.savedId!} targetMs={item.targetMs} onAnswer={onAnswer} onNext={onNext} />;
   if (item.mode === 'quiz') return <LessonQuestionCard lessonKey={item.lessonKey!} step={item.step!} targetMs={item.targetMs} onAnswer={onAnswer} onNext={onNext} />;
   if (item.mode === 'math') return <MathCard factId={item.factId!} targetMs={item.targetMs} onAnswer={onAnswer} onNext={onNext} />;
@@ -30,6 +32,6 @@ export function DrillRunner({ item, onAnswer, onNext }: Props) {
         </BottomBar>
       </>
     );
-  if (item.mode === 'paint') return <PaintDrill chart={chart} targetMs={item.targetMs} onAnswer={onAnswer} onNext={onNext} />;
-  return <QuickRecall chart={chart} hand={item.hand!} targetMs={item.targetMs} onAnswer={onAnswer} onNext={onNext} />;
+  if (item.mode === 'paint') return <PaintDrill chart={chart} targetMs={item.targetMs} onAnswer={onAnswer} onNext={onNext} compact={compact} />;
+  return <QuickRecall chart={chart} hand={item.hand!} targetMs={item.targetMs} onAnswer={onAnswer} onNext={onNext} compact={compact} />;
 }

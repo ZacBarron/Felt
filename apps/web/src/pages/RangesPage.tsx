@@ -10,7 +10,7 @@ import {
   reaches,
   RECALL_TARGET_MS,
 } from '@felt/core';
-import { useMemo, useState } from 'react';
+import { useId, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { actionColor, sortActions } from '../components/actionColors';
 import { ChartPicker } from '../components/ChartPicker';
@@ -19,12 +19,14 @@ import { MixBar } from '../components/MixBar';
 import { RangeGrid } from '../components/RangeGrid';
 import { SeatStrip } from '../components/SeatStrip';
 import { DrillRunner } from '../drills/DrillRunner';
-import { actionLabels } from '../drills/labels';
+import { actionLabels, spotLine } from '../drills/labels';
+import { paintRule } from '../drills/PaintDrill';
 import { chartsForGame, getChart } from '../state/charts';
 import { useSettings } from '../state/settings';
-import { FlameIcon } from '../ui/icons';
+import { FlameIcon, InfoIcon } from '../ui/icons';
 import { PageHeader } from '../ui/PageHeader';
 import { Segmented } from '../ui/Segmented';
+import './ranges.css';
 
 type Mode = 'chart' | 'paint' | 'quick';
 
@@ -62,31 +64,77 @@ export function RangesPage() {
       <PageHeader title="Ranges" trailing={<GameChip onOpen={() => setSheet(true)} />} />
       <GameSheet open={sheet} onClose={() => setSheet(false)} />
 
-      <ChartPicker charts={charts} value={chart} onChange={setChartId} />
+      <div className="ranges-top">
+        <ChartPicker charts={charts} value={chart} onChange={setChartId} />
+        <Segmented<Mode>
+          ariaLabel="Mode"
+          stretch
+          value={mode}
+          onChange={setMode}
+          options={[
+            { value: 'chart', label: 'Chart' },
+            { value: 'paint', label: 'Paint' },
+            { value: 'quick', label: 'Quiz' },
+          ]}
+        />
+        <ChartAbout chart={chart} exact={fit.exact} mode={mode} />
+        <SeatStrip spec={chart.spec} />
+      </div>
 
-      <Segmented<Mode>
-        ariaLabel="Mode"
-        stretch
-        value={mode}
-        onChange={setMode}
-        options={[
-          { value: 'chart', label: 'Chart' },
-          { value: 'paint', label: 'Paint' },
-          { value: 'quick', label: 'Quiz' },
-        ]}
-      />
+      {mode === 'chart' ? <ChartView chart={chart} /> : <Practice key={`${chart.spec.id}:${mode}`} chart={chart} mode={mode} />}
+    </div>
+  );
+}
 
-      {mode === 'chart' ? (
-        <ChartView chart={chart} exact={fit.exact} />
-      ) : (
-        <Practice key={`${chart.spec.id}:${mode}`} chart={chart} mode={mode} />
+/**
+ * One quiet line under the controls: the spot, the honesty labels, and an
+ * info button that opens the chart's assumptions and how practice is graded.
+ */
+function ChartAbout({ chart, exact, mode }: { chart: Chart; exact: boolean; mode: Mode }) {
+  const { settings } = useSettings();
+  const [open, setOpen] = useState(false);
+  const panelId = useId();
+  const approx = chart.spec.source === 'starter-approx';
+  const exploit = chart.spec.basis === 'exploit';
+  const offStack = Math.abs(settings.game.stackBb - chart.spec.stackBb) >= 30;
+  const line = spotLine(chart) || chart.spec.title;
+
+  return (
+    <div className="chart-about">
+      <div className="chart-line">
+        <span className="chart-line-text">{line}</span>
+        {approx && <span className="pill">Approximate</span>}
+        {exploit && <span className="pill pill-exploit">Exploit</span>}
+        {!exact && <span className="pill pill-warn">Nearest table size</span>}
+        {offStack && <span className="pill pill-warn">You play {settings.game.stackBb}bb</span>}
+        <button
+          type="button"
+          className="chart-info-btn"
+          aria-expanded={open}
+          aria-controls={panelId}
+          aria-label="Chart details"
+          onClick={() => setOpen((o) => !o)}
+        >
+          <InfoIcon size={22} filled={open} />
+        </button>
+      </div>
+      {open && (
+        <div id={panelId} className="chart-about-panel reveal">
+          {mode === 'paint' && <p>{paintRule(settings.study.paintMixes !== false)}</p>}
+          <p>
+            <strong>{chart.spec.title}.</strong> Built for {chartFormatLabel(chart.spec)}.
+          </p>
+          {approx && <p>This is a starter chart. Its frequencies are approximate.</p>}
+          {exploit && <p>This is an exploit chart. It targets a common leak, not a balanced opponent.</p>}
+          {chart.spec.note && <p>{chart.spec.note}</p>}
+          {mode !== 'chart' && <p>Practice here does not change your review schedule.</p>}
+        </div>
       )}
     </div>
   );
 }
 
-function ChartView({ chart, exact }: { chart: Chart; exact: boolean }) {
-  const { settings } = useSettings();
+function ChartView({ chart }: { chart: Chart }) {
   const [selected, setSelected] = useState<HandClass>('AKs');
   const totals = actionFrequencies(chart);
   const labels = actionLabels(chart);
@@ -94,21 +142,8 @@ function ChartView({ chart, exact }: { chart: Chart; exact: boolean }) {
 
   return (
     <>
-      <div className="footnote row" style={{ gap: '0.4rem' }}>
-        {chartFormatLabel(chart.spec)}
-        {chart.spec.source === 'starter-approx' && <span className="pill">Approximate</span>}
-        {chart.spec.basis === 'exploit' && <span className="pill pill-exploit">Exploit</span>}
-        {!exact && <span className="pill pill-warn">Nearest table size</span>}
-        {Math.abs(settings.game.stackBb - chart.spec.stackBb) >= 30 && <span className="pill pill-warn">You play {settings.game.stackBb}bb</span>}
-      </div>
-      {chart.spec.note && <div className="footnote">{chart.spec.note}</div>}
-
       <div className="grid-2" style={{ alignItems: 'start' }}>
-        <div className="stack" style={{ gap: '0.75rem' }}>
-          <SeatStrip spec={chart.spec} />
-          {chart.spec.versus && <div className="footnote">{chart.spec.versus}</div>}
-          <RangeGrid key={chart.spec.id} mixes={chart.mixes} reach={chart.reach} selected={selected} onSelect={setSelected} />
-        </div>
+        <RangeGrid key={chart.spec.id} mixes={chart.mixes} reach={chart.reach} selected={selected} onSelect={setSelected} />
 
         <div className="stack" style={{ position: 'sticky', top: '4.5rem' }}>
           <div className="card stack reveal" key={selected} style={{ gap: '0.7rem' }}>
@@ -190,12 +225,12 @@ function Practice({ chart, mode }: { chart: Chart; mode: 'paint' | 'quick' }) {
             return { right: s.right + (right ? 1 : 0), total: s.total + 1, streak, best: Math.max(s.best, streak) };
           })
         }
+        compact
         onNext={() => {
           setRound((r) => r + 1);
           window.scrollTo({ top: 0, behavior: 'smooth' });
         }}
       />
-      <div className="section-footer">Practice here does not change your review schedule.</div>
     </>
   );
 }

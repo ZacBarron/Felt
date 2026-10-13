@@ -247,6 +247,25 @@ export function ChevronLeftIcon(p: IconProps) {
   );
 }
 
+export function ChevronDownIcon(p: IconProps) {
+  return (
+    <Svg {...p} strokeWidth={2.25}>
+      <path d="m5.5 9.5 6.5 6.5 6.5-6.5" />
+    </Svg>
+  );
+}
+
+/** Info: a lowercase i in a circle, for "about this" disclosures. */
+export function InfoIcon(p: IconProps) {
+  return (
+    <Svg {...p}>
+      <circle cx="12" cy="12" r="8.5" {...fillProps(p.filled)} />
+      <path d="M12 11v5.25" />
+      <circle cx="12" cy="7.75" r="0.6" fill="currentColor" strokeWidth={1.2} />
+    </Svg>
+  );
+}
+
 export function UndoIcon(p: IconProps) {
   return (
     <Svg {...p}>

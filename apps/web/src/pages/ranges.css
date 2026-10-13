@@ -1,0 +1,124 @@
+/* Ranges: compact controls above the grid, so the range itself leads. */
+
+.ranges-top {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  /* Lines up with the range grid on wide screens. */
+  max-width: 620px;
+}
+
+/* Chart selector: previous, current chart capsule, next. */
+.chart-nav {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) 44px;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.chart-step {
+  width: 44px;
+  min-width: 44px;
+  padding: 0;
+  color: var(--label);
+  background: var(--fill);
+}
+
+.chart-select {
+  min-width: 0;
+  min-height: 44px;
+  padding: 0 0.9rem 0 1.1rem;
+  gap: 0.45rem;
+  color: var(--label);
+  background: var(--surface);
+  box-shadow: inset 0 0 0 1px var(--separator);
+}
+
+.chart-select-spot {
+  flex: none;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--label-2);
+}
+
+.chart-select-title {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 1rem;
+  font-weight: 650;
+}
+
+.chart-select-chev {
+  flex: none;
+  color: var(--tint);
+}
+
+/* The spot line: what happened before you act, the honesty pills and an info button. */
+.chart-line {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.4rem;
+  min-height: 28px;
+  font-size: 0.85rem;
+  color: var(--label-2);
+}
+
+.chart-line-text {
+  min-width: 0;
+  margin-right: 0.1rem;
+}
+
+/* 44pt target, drawn small. Negative margins keep the line short. */
+.chart-info-btn {
+  width: 44px;
+  min-width: 44px;
+  height: 44px;
+  min-height: 44px;
+  margin: -8px -10px -8px auto;
+  padding: 0;
+  color: var(--label-2);
+  background: transparent;
+}
+
+.chart-info-btn[aria-expanded='true'] {
+  color: var(--tint);
+}
+
+.chart-about-panel {
+  display: grid;
+  gap: 0.45rem;
+  margin-top: 0.5rem;
+  padding: 0.8rem 1rem;
+  border-radius: 16px;
+  background: var(--surface);
+  font-size: 0.85rem;
+  line-height: 1.4;
+  color: var(--label-2);
+}
+
+.chart-about-panel p {
+  margin: 0;
+}
+
+.chart-about-panel strong {
+  color: var(--label);
+  font-weight: 600;
+}
+
+/* Chart sheet: one wrapping group per spot, with full size touch targets. */
+.chart-sheet .section-title {
+  margin: 0;
+  padding: 0 0.25rem 0.5rem;
+}
+
+.chart-sheet .seat-pick {
+  min-height: 44px;
+}
+
+.chart-sheet .section-title .pill {
+  text-transform: none;
+  letter-spacing: 0;
+}

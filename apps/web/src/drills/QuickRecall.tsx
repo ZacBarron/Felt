@@ -17,6 +17,8 @@ interface Props {
   targetMs: number;
   onAnswer: (outcome: DrillOutcome) => void;
   onNext: () => void;
+  /** The page above already names the spot and its seats (Ranges), so skip the header. */
+  compact?: boolean;
 }
 
 /** The clock starts once both cards have flipped face up. */
@@ -29,7 +31,7 @@ const VERDICTS = {
 };
 
 /** "You are UTG+1 with KTo, folded to you. Raise or fold?" Timed, then shows the full mix. */
-export function QuickRecall({ chart, hand, targetMs, onAnswer, onNext }: Props) {
+export function QuickRecall({ chart, hand, targetMs, onAnswer, onNext, compact }: Props) {
   const { settings } = useSettings();
   const untimed = !!settings.study.untimed;
   const shortcuts = settings.study.shortcuts !== false;
@@ -88,19 +90,23 @@ export function QuickRecall({ chart, hand, targetMs, onAnswer, onNext }: Props) 
   return (
     <div className="stack">
       <div className={`card stack ${kind === 'right' ? 'flash-good' : kind ? 'flash-bad' : ''}`} style={{ gap: '0.8rem' }}>
-        <div className="row between">
-          <div>
-            <div className="footnote">{spotLine(chart) || 'Your action'}</div>
-            <div style={{ fontWeight: 700, fontSize: '1.3rem', letterSpacing: '-0.02em' }}>
-              {chart.spec.hero}{' '}
-              <span className="muted" style={{ fontWeight: 500, fontSize: '1rem' }}>
-                {chart.spec.tableSize}-handed, {chart.spec.stackBb}bb
-              </span>
+        {!compact && (
+          <>
+            <div className="row between">
+              <div>
+                <div className="footnote">{spotLine(chart) || 'Your action'}</div>
+                <div style={{ fontWeight: 700, fontSize: '1.3rem', letterSpacing: '-0.02em' }}>
+                  {chart.spec.hero}{' '}
+                  <span className="muted" style={{ fontWeight: 500, fontSize: '1rem' }}>
+                    {chart.spec.tableSize}-handed, {chart.spec.stackBb}bb
+                  </span>
+                </div>
+              </div>
+              {chart.spec.basis === 'exploit' && <span className="pill pill-exploit">Exploit</span>}
             </div>
-          </div>
-          {chart.spec.basis === 'exploit' && <span className="pill pill-exploit">Exploit</span>}
-        </div>
-        <SeatStrip spec={chart.spec} />
+            <SeatStrip spec={chart.spec} />
+          </>
+        )}
         {/* After an answer the hand shrinks, so the full chart fits above the Next button. */}
         <div className={`row felt-strip${answer ? ' answered' : ''}`} style={{ justifyContent: 'center', gap: 12 }}>
           {combo.map((c, i) => (

@@ -20,10 +20,19 @@ interface Props {
   targetMs: number;
   onAnswer: (outcome: DrillOutcome) => void;
   onNext: () => void;
+  /** The page above already names the chart and its seats (Ranges), so skip the header and the rule. */
+  compact?: boolean;
+}
+
+/** How a painted hand is graded, for the drill footnote or an info panel. */
+export function paintRule(mixes: boolean): string {
+  return mixes
+    ? 'Paint how often you take each action. A hand counts as right when your mix is within 20% of the chart.'
+    : 'A mixed hand counts as right if you paint any action it takes 25% of the time or more.';
 }
 
 /** Paint the whole chart from memory, then compare against the answer. */
-export function PaintDrill({ chart, targetMs, onAnswer, onNext }: Props) {
+export function PaintDrill({ chart, targetMs, onAnswer, onNext, compact }: Props) {
   const started = useRef(performance.now());
   const { settings, update } = useSettings();
   const untimed = !!settings.study.untimed;
@@ -67,23 +76,25 @@ export function PaintDrill({ chart, targetMs, onAnswer, onNext }: Props) {
 
   return (
     <div className="stack">
-      <div className="card stack" style={{ gap: '0.8rem' }}>
-        <div>
-          <div className="footnote">Paint from memory</div>
-          <div style={{ fontWeight: 700, fontSize: '1.3rem', letterSpacing: '-0.02em' }}>
-            {chart.spec.title}{' '}
-            <span className="muted" style={{ fontWeight: 500, fontSize: '1rem' }}>
-              {chart.spec.tableSize}-handed, {chart.spec.stackBb}bb
-            </span>
-          </div>
-        </div>
-        <SeatStrip spec={chart.spec} />
-        <div className="footnote">
-          {spotLine(chart) && <span style={{ display: 'block' }}>{spotLine(chart)}</span>}
-          {mixes
-            ? 'Paint how often you take each action. A hand counts as right when your mix is within 20% of the chart.'
-            : 'A mixed hand counts as right if you paint any action it takes 25% of the time or more.'}
-        </div>
+      <div className={compact ? 'stack' : 'card stack'} style={{ gap: '0.8rem' }}>
+        {!compact && (
+          <>
+            <div>
+              <div className="footnote">Paint from memory</div>
+              <div style={{ fontWeight: 700, fontSize: '1.3rem', letterSpacing: '-0.02em' }}>
+                {chart.spec.title}{' '}
+                <span className="muted" style={{ fontWeight: 500, fontSize: '1rem' }}>
+                  {chart.spec.tableSize}-handed, {chart.spec.stackBb}bb
+                </span>
+              </div>
+            </div>
+            <SeatStrip spec={chart.spec} />
+            <div className="footnote">
+              {spotLine(chart) && <span style={{ display: 'block' }}>{spotLine(chart)}</span>}
+              {paintRule(mixes)}
+            </div>
+          </>
+        )}
 
         {result && (
           <div className="row reveal" style={{ gap: '1rem' }}>
