@@ -28,6 +28,7 @@ import { signed } from '../ui/format';
 import { ChevronRightIcon, TargetIcon, LeagueIcon } from '../ui/icons';
 import { AvatarPicker } from '../ui/Avatar';
 import { PageHeader } from '../ui/PageHeader';
+import { Section } from '../ui/Section';
 import { useCountUp } from '../ui/useCountUp';
 
 function Sparkline({ points }: { points: { rating: number; rd: number }[] }) {
@@ -63,16 +64,16 @@ function DomainRow({ label, r }: { label: string; r: SkillRating }) {
       <span className="grow" style={{ minWidth: 0 }}>
         <span className="row between">
           <span style={{ fontWeight: 600 }}>{label}</span>
-          <span className="num">{r.games ? Math.round(r.rating) : 'Not rated'}</span>
+          <span className={`num${r.games ? '' : ' muted'}`}>{r.games ? Math.round(r.rating) : '–'}</span>
         </span>
         <span className="domain-bar">
           <span style={{ width: r.games ? `${pct * 100}%` : 0, opacity: isProvisional(r) ? 0.45 : 1 }} />
         </span>
-        <span className="footnote">
-          {r.games
-            ? `${tierLabel(r)}, ${r.games} ${r.games === 1 ? 'answer' : 'answers'}`
-            : 'Answer questions in this area to get a rating'}
-        </span>
+        {r.games > 0 && (
+          <span className="footnote">
+            {tierLabel(r)}, {r.games} {r.games === 1 ? 'answer' : 'answers'}
+          </span>
+        )}
       </span>
     </div>
   );
@@ -158,7 +159,7 @@ export function YouPage() {
 
   return (
     <div className="stack" style={{ gap: '1.5rem' }}>
-      <PageHeader title="You" subtitle="Your rating and what it is worth at the table" back={{ to: '/more', label: 'More' }} />
+      <PageHeader title="You" back={{ to: '/more', label: 'More' }} />
 
       <section className="you-profile">
         <AvatarPicker name={settings.profile.name} photo={settings.profile.photo} onPhoto={(photo) => update({ ...settings, profile: { ...settings.profile, photo } })} />
@@ -177,14 +178,18 @@ export function YouPage() {
       <section className="hero you-hero">
         <div className="hero-label">Felt Rating</div>
         <div className="row" style={{ alignItems: 'baseline', gap: '0.6rem' }}>
-          <span className="display num you-rating" aria-label={rated ? `${provisional ? 'About ' : ''}${Math.round(overall.rating)}` : 'Not rated yet'}>
-            {rated ? shown : 'Not rated'}
-          </span>
+          {rated ? (
+            <span className="display num you-rating" aria-label={`${provisional ? 'About ' : ''}${Math.round(overall.rating)}`}>
+              {shown}
+            </span>
+          ) : (
+            <span className="you-unrated">Not rated yet</span>
+          )}
           {rated && <span className="pill pill-on-felt">{tierLabel(overall)}</span>}
         </div>
         <div className="hero-sub">
           {!rated
-            ? 'Answer a few questions to get rated. The placement quiz or a daily challenge is the fastest way.'
+            ? 'A daily challenge rates you in five decisions.'
             : provisional
               ? 'Your rating is still settling. You get a tier after a few dozen answers.'
               : `We are 95% sure your rating is between ${Math.round(lo)} and ${Math.round(hi)}.`}
@@ -204,49 +209,46 @@ export function YouPage() {
         )}
         <Sparkline points={snap.history} />
         <div className="row" style={{ gap: '0.5rem', marginTop: '0.4rem' }}>
-          <span className="pill pill-on-felt num">
-            {overall.games} rated {overall.games === 1 ? 'answer' : 'answers'}
-          </span>
+          {overall.games > 0 && (
+            <span className="pill pill-on-felt num">
+              {overall.games} rated {overall.games === 1 ? 'answer' : 'answers'}
+            </span>
+          )}
           {bestRating > 0 && <span className="pill pill-on-felt num">Best ever {Math.round(bestRating)}</span>}
         </div>
-        {rated && (
+        {rated ? (
           <button className="btn btn-lg btn-block btn-hero" onClick={() => void share()} data-haptic="off">
             Share my rating
           </button>
+        ) : (
+          <Link to="/daily" className="btn btn-lg btn-block btn-hero">
+            Play the daily challenge
+          </Link>
         )}
       </section>
 
-      <Link to="/league" className="card placement-card">
-        <span className="placement-icon">
-          <LeagueIcon size={22} />
-        </span>
-        <span className="grow">
-          <span style={{ display: 'block', fontWeight: 650 }}>Weekly league</span>
-          <span className="footnote">Compete with real players near your rating. Whoever gains the most this week ranks highest.</span>
-        </span>
-        <ChevronRightIcon size={16} className="chev" />
-      </Link>
+      <div className="more-tiles">
+        <Link to="/practice" className="more-tile">
+          <span className="more-tile-icon">
+            <TargetIcon size={22} />
+          </span>
+          <span className="more-tile-label">Practice at your level</span>
+        </Link>
+        <Link to="/league" className="more-tile">
+          <span className="more-tile-icon">
+            <LeagueIcon size={22} />
+          </span>
+          <span className="more-tile-label">Weekly league</span>
+        </Link>
+      </div>
 
-      <Link to="/practice" className="card placement-card">
-        <span className="placement-icon">
-          <TargetIcon size={22} />
-        </span>
-        <span className="grow">
-          <span style={{ display: 'block', fontWeight: 650 }}>Practice at your level</span>
-          <span className="footnote">Answer 10 decisions picked for your level. More of them come from your weakest area.</span>
-        </span>
-        <ChevronRightIcon size={16} className="chev" />
-      </Link>
-
-      <section>
-        <h2 className="section-title">By area</h2>
+      <Section title="By area" info="Harder questions count for more. Getting a hard one right moves your rating the most.">
         <div className="list">
           {SKILL_DOMAINS.map((d) => (
             <DomainRow key={d} label={DOMAIN_LABELS[d]} r={currentRating(snap.domains[d])} />
           ))}
         </div>
-        <div className="section-footer">Harder questions count for more. Getting a hard one right moves your rating the most.</div>
-      </section>
+      </Section>
 
       <section>
         <h2 className="section-title">
@@ -388,7 +390,7 @@ export function YouPage() {
           </div>
         )}
         <div className="section-footer">
-          These starting numbers are our best guesses for your game. Change any of them if you know better. Rake is set in <Link to="/settings">Settings</Link>.
+          These starting numbers are our best guesses for your game. Change any of them if you know better. Rake is set in <Link to="/settings/rake">Settings</Link>.
         </div>
       </section>
     </div>

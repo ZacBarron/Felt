@@ -18,6 +18,7 @@ import { HeroPattern } from '../ui/Brand';
 import { plural } from '../ui/format';
 import { CheckIcon, ChevronRightIcon, FlameIcon } from '../ui/icons';
 import { PageHeader } from '../ui/PageHeader';
+import { Section } from '../ui/Section';
 import { ProgressRing } from '../ui/ProgressRing';
 import { useCountUp } from '../ui/useCountUp';
 
@@ -235,13 +236,15 @@ export function DashboardPage() {
         </section>
       )}
 
-      <section>
-        <div className="row between" style={{ padding: '0 1rem 0.4rem' }}>
-          <span className="section-title" style={{ padding: 0 }}>
-            Last 7 days
-          </span>
-          {!!streak?.best && streak.best > streak.streak && <span className="footnote num">Best streak is {plural(streak.best, 'day')}</span>}
-        </div>
+      <Section
+        title="Last 7 days"
+        trailing={!!streak?.best && streak.best > streak.streak ? <span className="footnote num">Best {plural(streak.best, 'day')}</span> : undefined}
+        info={
+          streak && streak.bank > 0
+            ? `You have ${plural(streak.bank, 'streak freeze')}. Each one covers a missed day. Study 7 days in a row to earn another.`
+            : 'Study 7 days in a row to earn a streak freeze. Each one covers a missed day.'
+        }
+      >
         <div className="card">
           <ul className="week" aria-label={`Studied on ${(stats?.week ?? []).filter((d) => d.done).length} of the last 7 days`}>
             {(stats?.week ?? []).map((d, i) => (
@@ -257,14 +260,7 @@ export function DashboardPage() {
             ))}
           </ul>
         </div>
-        {streak && (
-          <div className="section-footer">
-            {streak.bank > 0
-              ? `You have ${plural(streak.bank, 'streak freeze')}. Each one covers a missed day. Study 7 days in a row to earn another.`
-              : 'Study 7 days in a row to earn a streak freeze. Each one covers a missed day.'}
-          </div>
-        )}
-      </section>
+      </Section>
 
       <section>
         <div className="section-title">Key idea</div>

@@ -228,7 +228,6 @@ function ReviewHome({ onStart }: { onStart: (c: SessionConfig) => void }) {
             );
           })}
         </div>
-        <div className="section-footer">Tap a deck to turn it off, change its new cards or study it alone.</div>
       </section>
 
       <section>
@@ -243,7 +242,6 @@ function ReviewHome({ onStart }: { onStart: (c: SessionConfig) => void }) {
             <Toggle label="Timer" checked={!study.untimed} onChange={(on) => setStudy({ untimed: !on })} />
           </div>
         </div>
-        <div className="section-footer">{study.untimed ? 'No timer. Speed does not change when cards come back.' : 'Fast, sure answers come back later than slow ones.'}</div>
       </section>
 
       <section>

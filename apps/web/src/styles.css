@@ -264,6 +264,7 @@ p {
 
 .footnote {
   font-size: 0.8rem;
+  line-height: 1.4;
   color: var(--label-2);
 }
 
@@ -272,20 +273,50 @@ p {
   color: var(--label-2);
 }
 
-/* Section header above a grouped card */
+/*
+ * Type scale (rem is 17px): large title 2.75 serif, title 1.35, section
+ * 1.18, headline 1 semibold, body 1, subhead 0.88, footnote 0.8, caption 0.72.
+ * Hierarchy comes from size and weight first and grey second, so screens
+ * read as a few clear levels instead of many shades of small grey text.
+ */
+
+/* Section header above a grouped card: a prominent header, like iOS. */
 .section-title {
-  font-size: 0.82rem;
-  font-weight: 600;
-  color: var(--label-2);
-  padding: 0 1rem 0.4rem;
-  text-transform: uppercase;
-  letter-spacing: 0.02em;
+  font-size: 1.18rem;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  color: var(--label);
+  padding: 0 1rem 0.5rem;
+  text-wrap: balance;
 }
 
 .section-footer {
   font-size: 0.8rem;
+  line-height: 1.4;
   color: var(--label-2);
-  padding: 0.45rem 1rem 0;
+  padding: 0.5rem 1rem 0;
+  text-wrap: pretty;
+}
+
+/* A row's second line stays secondary: at most two lines. */
+.list-row .grow > .footnote,
+.list-row .grow > span + .footnote {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin-top: 1px;
+}
+
+h1,
+h2,
+h3,
+.display {
+  text-wrap: balance;
+}
+
+p {
+  text-wrap: pretty;
 }
 
 /* Layout ------------------------------------------------------------ */
@@ -370,9 +401,11 @@ main {
 }
 
 .large-title .subtitle {
-  margin-top: 0.3rem;
+  margin-top: 0.35rem;
   color: var(--label-2);
-  font-size: 0.95rem;
+  font-size: 1rem;
+  line-height: 1.35;
+  max-width: 34ch;
 }
 
 .nav-bar {
@@ -2853,6 +2886,7 @@ body.onboarding .shell {
 }
 
 /* Learn */
+a.card.placement-card,
 .placement-card {
   display: flex;
   align-items: center;
@@ -4715,7 +4749,7 @@ button.evidence {
 
 .deck-count {
   flex: none;
-  width: 2.6rem;
+  width: 2.2rem;
   text-align: right;
   font-weight: 650;
   font-variant-numeric: tabular-nums;
@@ -4740,4 +4774,182 @@ button.evidence {
 
 .review-deck .deck-count.zero {
   color: var(--label-3);
+}
+
+/* Section header with an optional info button, and the panel it opens. */
+.section-head {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 36px;
+  padding-right: 0.25rem;
+}
+
+.section-head .section-title {
+  flex: 1;
+  min-width: 0;
+}
+
+.section-head .section-title {
+  padding-bottom: 0.5rem;
+}
+
+.info-btn {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  margin: -0.55rem -0.6rem 0 0;
+  padding: 0;
+  border: none;
+  border-radius: 999px;
+  color: var(--label-2);
+  background: none;
+  cursor: pointer;
+}
+
+.info-btn[aria-expanded='true'] {
+  color: var(--tint);
+}
+
+.section-trailing {
+  margin-top: -0.55rem;
+}
+
+.info-panel {
+  margin: 0 0 0.75rem;
+  padding: 0.8rem 1rem;
+  border-radius: 16px;
+  font-size: 0.88rem;
+  line-height: 1.45;
+  color: var(--label);
+  background: color-mix(in srgb, var(--tint) 8%, var(--surface));
+}
+
+.info-panel p {
+  margin: 0;
+}
+
+.info-panel p + p {
+  margin-top: 0.5rem;
+}
+
+/* Empty states: one picture, one line, one action. */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 2.2rem 1.25rem 1.6rem;
+  text-align: center;
+}
+
+.empty-art {
+  margin-bottom: 0.4rem;
+}
+
+.empty-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 1.9rem;
+  line-height: 1.05;
+}
+
+.empty-body {
+  margin: 0;
+  max-width: 30ch;
+  color: var(--label-2);
+  line-height: 1.45;
+}
+
+/* More: a launcher. You on top, big tiles for training, short rows for the rest. */
+a.card.more-me,
+.more-me {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 0.9rem 1rem;
+  color: var(--label);
+  text-decoration: none;
+}
+
+.more-me-name {
+  display: block;
+  font-size: 1.12rem;
+  font-weight: 650;
+  letter-spacing: -0.015em;
+}
+
+.more-me-sub {
+  display: block;
+  margin-top: 1px;
+  color: var(--label-2);
+  font-size: 0.88rem;
+}
+
+.more-tiles {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.6rem;
+}
+
+@media (min-width: 761px) {
+  .more-tiles {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.more-tile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 1.1rem;
+  min-height: 104px;
+  padding: 0.9rem 0.95rem 0.85rem;
+  border-radius: var(--r-card, 22px);
+  color: var(--label);
+  text-decoration: none;
+  background: var(--surface);
+  box-shadow: 0 1px 2px rgba(40, 30, 10, 0.05);
+  transition: transform 160ms var(--ease);
+}
+
+.more-tile:active {
+  transform: scale(0.97);
+}
+
+.more-tile-icon {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  color: var(--tint);
+  background: color-mix(in srgb, var(--tint) 13%, transparent);
+}
+
+.more-tile-label {
+  font-size: 1rem;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+.more-tile-badge {
+  position: absolute;
+  top: 0.85rem;
+  right: 0.9rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--label-2);
+}
+
+.you-unrated {
+  font-size: 1.6rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  margin: 0.2rem 0 0.1rem;
 }
