@@ -49,12 +49,17 @@ export const MINDSET_LESSONS: LessonContent[] = [
         evidence: 'math',
       },
       {
-        kind: 'text',
-        title: 'A small share does the damage',
-        body: [
-          'In this illustration, one hand in five on tilt cuts the win rate by **60%**. It falls from 10 to 4bb/100. The A game hands are fine. The loss comes from the hands played badly.',
-          'So the fix is not to play better while tilted. It is to play fewer hands while tilted.',
-        ],
+        kind: 'visual',
+        title: 'Illustration: a fifth of hands on tilt',
+        art: {
+          kind: 'bars',
+          bars: [
+            { label: 'A game, 80% of hands', value: 10, tone: 'green' },
+            { label: 'On tilt, 20% of hands', value: -20, tone: 'red' },
+            { label: 'Overall', value: 4 },
+          ],
+        },
+        caption: 'Made up inputs in bb/100. One hand in five on tilt cuts the win rate by **60%**, from 10 to 4bb/100. The A game hands are fine. So the fix is to play fewer hands while tilted.',
         evidence: 'math',
       },
       {
@@ -86,20 +91,6 @@ export const MINDSET_LESSONS: LessonContent[] = [
         answer: 1,
         explain:
           'The warning signs mean the next hands are the expensive ones. Reset first. Come back when your decisions are back to normal. Trying harder while tilted rarely works, because tilt is what drives the fast decisions.',
-      },
-      {
-        kind: 'visual',
-        title: 'Illustration: a fifth of hands on tilt',
-        art: {
-          kind: 'bars',
-          bars: [
-            { label: 'A game, 80% of hands', value: 10, tone: 'green' },
-            { label: 'On tilt, 20% of hands', value: -20, tone: 'red' },
-            { label: 'Overall', value: 4 },
-          ],
-        },
-        caption: 'Made up inputs in bb/100. The A game wins 10 and tilted hands lose 20. Overall the win rate falls to **4bb/100**.',
-        evidence: 'math',
       },
       {
         kind: 'takeaway',
@@ -259,9 +250,21 @@ export const MINDSET_LESSONS: LessonContent[] = [
         kind: 'text',
         title: 'Count in buy ins',
         body: [
-          'Measure your roll in buy ins at your stake, not in dollars. $3,000 is 10 buy ins at $1/$3 with a $300 buy in. It is 30 buy ins at $0.50/$1 with a $100 buy in.',
           'Swings are measured in big blinds, so buy ins put every stake on the same scale. If you buy in deeper than 100bb, count the roll in big blinds for the risk math.',
         ],
+        evidence: 'math',
+      },
+      {
+        kind: 'visual',
+        title: 'The same $3,000 in buy ins',
+        art: {
+          kind: 'bars',
+          bars: [
+            { label: '$1/$3, $300 buy in', value: 10, tone: 'red' },
+            { label: '$0.50/$1, $100 buy in', value: 30, tone: 'green' },
+          ],
+        },
+        caption: 'Measure your roll in buy ins at your stake, not in dollars. $3,000 is 10 buy ins at $1/$3. It is 30 buy ins at $0.50/$1.',
         evidence: 'math',
       },
       {
@@ -294,6 +297,29 @@ export const MINDSET_LESSONS: LessonContent[] = [
         tone: 'tip',
         title: 'A guideline, not a law',
         body: 'A common guideline for live cash is **20 to 40 buy ins** for your stake. Lean toward 40 if your win rate is uncertain. Halving the win rate raises risk as much as halving the roll. The real danger is overestimating your win rate, and a live sample rarely pins it down.',
+      },
+      {
+        kind: 'visual',
+        title: 'More buy ins, less risk',
+        art: {
+          kind: 'curve',
+          points: [
+            [2.5, 60.7],
+            [5, 36.8],
+            [7.5, 22.3],
+            [10, 13.5],
+            [15, 5],
+            [20, 1.8],
+            [25, 0.67],
+            [30, 0.25],
+            [40, 0.03],
+          ],
+          xLabel: 'Buy ins',
+          yLabel: 'Risk of ruin, %',
+          mark: [20, 1.8],
+        },
+        caption: 'Risk of ruin at a true win rate of 10bb/100 and SD 100. It falls fast as the roll grows. 20 buy ins gives **1.8%**. The model assumes you know your true win rate.',
+        evidence: 'math',
       },
       {
         kind: 'text',
@@ -359,12 +385,18 @@ export const MINDSET_LESSONS: LessonContent[] = [
         ],
       },
       {
-        kind: 'text',
+        kind: 'visual',
         title: 'Spaced repetition',
-        body: [
-          'Memory fades over time. A review just before you would forget strengthens it more than a review of something you know cold. Spacing reviews out beats cramming them together.',
-          'Felt schedules every drill card this way. It grades drill answers on accuracy and speed, so you never grade yourself. A range you need 8 seconds to recall is not usable at the table.',
-        ],
+        art: {
+          kind: 'tree',
+          root: 'When you review a card',
+          branches: [
+            { label: 'Just before you would forget', value: 'Strengthens it most', tone: 'green' },
+            { label: 'When you know it cold', value: 'Adds little', tone: 'gray' },
+            { label: 'Many times in one sitting', value: 'Cramming. Spacing beats it', tone: 'red' },
+          ],
+        },
+        caption: 'Felt schedules every drill card this way. It grades drill answers on accuracy and speed, so you never grade yourself. A range you need 8 seconds to recall is not usable at the table.',
       },
       {
         kind: 'table',
@@ -389,13 +421,17 @@ export const MINDSET_LESSONS: LessonContent[] = [
         evidence: 'math',
       },
       {
-        kind: 'text',
+        kind: 'visual',
         title: 'Measure progress',
-        body: [
-          '**Accuracy** is how often you pick an action GTO takes a meaningful share of the time. **EV loss** is how much you give up per decision, as a share of the pot.',
-          'Accuracy shows what you know. EV loss shows what your mistakes cost.',
-          'Watch both trends over weeks, not single sessions. A few blunders can cost more than many small slips.',
-        ],
+        art: {
+          kind: 'tree',
+          root: 'Two numbers to watch',
+          branches: [
+            { label: 'Accuracy', value: 'What you know', tone: 'green' },
+            { label: 'EV loss', value: 'What your mistakes cost', tone: 'red' },
+          ],
+        },
+        caption: '**Accuracy** is how often you pick an action GTO takes a meaningful share of the time. **EV loss** is how much you give up per decision, as a share of the pot. Watch both trends over weeks, not single sessions.',
       },
       {
         kind: 'callout',

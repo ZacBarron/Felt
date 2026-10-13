@@ -55,6 +55,20 @@ export const PREFLOP_RAKE_LESSONS: LessonContent[] = [
           'The button opens to $15 in the $1/$3 game. The small blind folds and you call $12 from the big blind. The pot is $31 and the rake is $4.10. If no more money goes in, you need 12 ÷ 26.90 = **44.6%**. With no rake you would need 12 ÷ 31 = 38.7%.',
       },
       {
+        kind: 'visual',
+        title: 'The same call, with rake',
+        art: {
+          kind: 'bars',
+          unit: '%',
+          bars: [
+            { label: 'No rake', value: 38.7, tone: 'gray' },
+            { label: 'With $4.10 rake', value: 44.6, tone: 'red' },
+          ],
+        },
+        caption: 'You call $12 into a $31 final pot. With no rake you need 12 ÷ 31 = 38.7%. The rake leaves $26.90 to win, so you need **44.6%**.',
+        evidence: 'math',
+      },
+      {
         kind: 'text',
         title: 'Close calls flip first',
         body: [

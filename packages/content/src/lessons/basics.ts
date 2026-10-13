@@ -18,16 +18,19 @@ export const BASICS_LESSONS: LessonContent[] = [
         body: 'Felt teaches No Limit Hold’em. Players bet chips on who holds the best hand. Every chip bet in a hand goes into the middle. That pile is the **pot**, and winning it is the goal.',
       },
       {
-        kind: 'text',
-        title: 'The deck',
-        body: [
-          'A deck has 52 cards. Each card has a rank and a suit.',
-          'There are 13 ranks. They run from 2 up to 10.',
-          'Above 10 come the jack (J) and the queen (Q). Then come the king (K) and the ace (A).',
-          'The ace is the highest rank. Felt writes the 10 as T.',
-          'Each rank comes in 4 suits. Clubs and diamonds are 2 of them. Hearts and spades are the other 2.',
-          'Felt writes a card as its rank and the first letter of its suit. Ks is the king of spades.',
-        ],
+        kind: 'visual',
+        title: 'The ranks',
+        art: { kind: 'cards', cards: '', board: 'TsJhQdKcAs' },
+        caption:
+          'A deck has 52 cards. Each card has a rank and a suit. The 13 ranks run from 2 up to the ace. Here are the top 5. T means 10. J is the jack and Q is the queen. K is the king. The ace (A) is the highest rank.',
+        evidence: 'math',
+      },
+      {
+        kind: 'visual',
+        title: 'The suits',
+        art: { kind: 'cards', cards: '', board: 'KcKdKhKs' },
+        caption:
+          'Each rank comes in 4 suits. Here are the 4 kings. The suits are clubs (c) and diamonds (d). Then come hearts (h) and spades (s). Felt writes a card as rank then suit. Ks is the king of spades.',
         evidence: 'math',
       },
       {
@@ -38,14 +41,18 @@ export const BASICS_LESSONS: LessonContent[] = [
           'You get 2 cards face down. Only you see them. They are your **hole cards**. Up to 5 cards go face up in the middle for everyone to use. They are the **board**.',
       },
       {
-        kind: 'text',
+        kind: 'visual',
         title: 'Two ways to win',
-        body: [
-          'Your **hand** is the best 5 cards you can make. You pick them from your 2 hole cards and the 5 on the board.',
-          'You win if every other player folds. To **fold** is to give up the hand and the chips you bet.',
-          'So you can win without the best hand. You only need the others to give up.',
-          'If 2 or more players stay to the end, they show their cards. This is the **showdown**. The best 5 card hand wins.',
-        ],
+        art: {
+          kind: 'tree',
+          root: 'How you win the pot',
+          branches: [
+            { label: 'Everyone else folds', value: 'You win. Nobody shows cards', tone: 'green' },
+            { label: 'Showdown', value: 'The best 5 card hand wins', tone: 'brass' },
+          ],
+        },
+        caption:
+          'Your **hand** is the best 5 cards from your 2 and the 5 on the board. To **fold** is to give up the hand. So you can win without the best hand. If 2 or more players stay to the end, they show their cards. This is the **showdown**.',
       },
       {
         kind: 'callout',
@@ -56,16 +63,20 @@ export const BASICS_LESSONS: LessonContent[] = [
       {
         kind: 'quiz',
         question: 'How many cards do you get that only you can see?',
+        cards: 'AsKh',
+        board: 'Qd9c4s7h2c',
         choices: ['2', '5', '7'],
         answer: 0,
         explain: 'You get 2 hole cards. The 5 board cards are shared by everyone. You pick your best 5 from all 7 cards.',
       },
       {
         kind: 'quiz',
-        question: 'One player holds the ace and king of spades. Another holds the ace and king of hearts. Neither makes a flush. Who wins?',
-        choices: ['The player with spades', 'The player with hearts', 'Neither. They tie.'],
+        question: 'You hold the ace and king of spades. Another player holds the ace and king of hearts. Who wins on this board?',
+        cards: 'AsKs',
+        board: 'Qd9c4h7d2c',
+        choices: ['You, with spades', 'The player with hearts', 'Neither. You tie.'],
         answer: 2,
-        explain: 'Suits never rank in Hold’em. The two hands have the same ranks, so they are equal. The players split the pot.',
+        explain: 'Neither player makes a flush. Suits never rank in Hold’em. Both best hands are A K Q 9 7, so they tie and split the pot.',
       },
       {
         kind: 'quiz',
@@ -136,13 +147,16 @@ export const BASICS_LESSONS: LessonContent[] = [
         evidence: 'math',
       },
       {
-        kind: 'text',
+        kind: 'visual',
         title: 'Two rules for straights',
-        body: [
-          'The ace can be high or low. A K Q J T is the highest straight.',
-          'The lowest straight is 5 4 3 2 A. Here the ace counts as 1.',
-          'A straight cannot wrap around the ace. Q K A 2 3 is not a straight.',
-        ],
+        art: {
+          kind: 'ladder',
+          rungs: [
+            { name: 'Straight', cards: 'AhKdQcJsTh', tone: 'brass' },
+            { name: 'Straight', cards: '5h4d3c2sAc', tone: 'green' },
+          ],
+        },
+        caption: 'The ace can be high or low. A K Q J T is the highest straight. 5 4 3 2 A is the lowest, with the ace as 1. A straight cannot wrap around the ace. Q K A 2 3 is not a straight.',
         evidence: 'math',
       },
       {
@@ -268,58 +282,88 @@ export const BASICS_LESSONS: LessonContent[] = [
   {
     key: 'basics/rules/hand-flow',
     level: 'core',
-    minutes: 5,
+    minutes: 6,
     cover: { kind: 'streets', active: 'flop' },
     steps: [
       {
         kind: 'intro',
         title: 'A hand in 4 rounds',
-        body: 'Every hand follows the same order. Cards come out in stages. Players bet after each stage.',
+        body: 'Every hand follows the same order. Cards come out in stages. Players bet after each stage. This lesson follows 1 hand from the deal to the showdown.',
       },
       {
-        kind: 'text',
+        kind: 'visual',
         title: 'The button and the blinds',
-        body: [
-          'One seat holds a disc called the **button**. It marks the dealer’s seat for the hand.',
-          'The button moves 1 seat to the left after every hand. So everyone takes a turn.',
-          'The 2 players to the left of the button must bet before seeing cards. These forced bets are the **blinds**.',
-          'First comes the **small blind**. Next comes the **big blind**, which is larger.',
-          'The blinds mean there is always something to win. Without them you could fold every hand for free.',
-        ],
-      },
-      {
-        kind: 'visual',
-        title: 'Who posts the blinds',
         art: { kind: 'table', seats: 9, button: 'BTN', highlight: ['SB', 'BB'], note: 'Play moves to the left' },
-        caption: 'The small blind (SB) sits just left of the button (BTN). The big blind (BB) sits left of the small blind.',
-      },
-      {
-        kind: 'text',
-        title: 'The 4 betting rounds',
-        body: [
-          '**Preflop** comes first. Each player gets 2 hole cards. Betting starts with the player left of the big blind.',
-          'On the **flop** 3 board cards come at once. Then there is another round of betting.',
-          'The **turn** is a 4th board card. Another round of betting follows.',
-          'The **river** is the 5th and last card. Then comes the last round of betting.',
-          'Each round is also called a **street**. From the flop on, betting starts with the first player still in to the left of the button.',
-        ],
-        evidence: 'math',
+        caption:
+          'One seat holds a disc called the **button** (BTN). It moves 1 seat left after every hand. The next 2 seats must bet before seeing cards. These forced bets are the **blinds**. The small blind (SB) is the smaller one. The big blind (BB) is larger.',
       },
       {
         kind: 'visual',
-        title: 'The order of a hand',
-        art: { kind: 'streets', active: 'flop' },
-        caption: 'The flop brings 3 cards. The turn and the river bring 1 each. Showdown happens only if 2 or more players are left.',
+        title: 'The streets',
+        art: { kind: 'streets' },
+        caption:
+          'Every hand runs in this order. Each betting round is called a **street**. There are 4 of them. Showdown comes last, and only if 2 or more players are left.',
       },
       {
-        kind: 'text',
+        kind: 'visual',
+        title: 'Preflop: the deal',
+        art: { kind: 'cards', cards: 'KhQh' },
+        caption:
+          'Each player gets 2 cards face down. These are your **hole cards**. Here you hold the king and queen of hearts. The first round of betting starts left of the big blind. In this hand only you and the big blind stay in.',
+      },
+      {
+        kind: 'visual',
+        title: 'The flop: 3 cards',
+        art: { kind: 'cards', cards: 'KhQh', board: 'Kc8d3s' },
+        caption:
+          'The dealer turns 3 cards face up at once. This is the **flop**. Shared cards like these are the **board**, or **community cards**. Your king pairs the king on the board. The big blind acts first and you act last.',
+      },
+      {
+        kind: 'visual',
+        title: 'The turn: a 4th card',
+        art: { kind: 'cards', cards: 'KhQh', board: 'Kc8d3s5d' },
+        caption: 'One more card comes face up. This is the **turn**. The 5 does not help you. You still have a pair of kings. The big blind acts first again.',
+      },
+      {
+        kind: 'visual',
+        title: 'The river: the 5th card',
+        art: { kind: 'cards', cards: 'KhQh', board: 'Kc8d3s5dQs' },
+        caption: 'The last card is the **river**. The queen pairs your other card. Now you have two pair, kings and queens. The big blind acts first in this last round too.',
+      },
+      {
+        kind: 'visual',
+        title: 'Showdown',
+        art: {
+          kind: 'ladder',
+          rungs: [
+            { name: 'Two pair', cards: 'KhKcQhQs8d', tone: 'green' },
+            { name: 'One pair', cards: 'JsJcKcQs8d', tone: 'gray' },
+          ],
+        },
+        caption:
+          'You both stay in after the river. So you both show your cards. This is the **showdown**. Your opponent shows 2 jacks for one pair. Your two pair ranks higher, so you win the pot.',
+      },
+      {
+        kind: 'visual',
         title: 'How a hand ends',
-        body: [
-          'A round ends when everyone still in has acted and put in the same amount.',
-          'If only 1 player is left, they win the pot right away. No more cards come.',
-          'If 2 or more are left after the river, they show their cards. The best hand wins.',
-          'Then the button moves and a new hand starts.',
-        ],
+        art: {
+          kind: 'tree',
+          root: 'After each betting round',
+          branches: [
+            { label: 'Only 1 player is left', value: 'They win the pot now', tone: 'green' },
+            { label: '2 or more are left', value: 'Next card, or showdown after the river', tone: 'brass' },
+          ],
+        },
+        caption: 'A round ends when everyone still in has acted and put in the same amount. When 1 player is left, no more cards come. Then the button moves and a new hand starts.',
+      },
+      {
+        kind: 'quiz',
+        question: 'Which street is this?',
+        cards: '9s9d',
+        board: 'Ah7c4d2s',
+        choices: ['The flop', 'The turn', 'The river'],
+        answer: 1,
+        explain: 'There are 4 board cards. The flop brings 3 and the turn adds the 4th. The river would make 5.',
       },
       {
         kind: 'quiz',
@@ -327,6 +371,15 @@ export const BASICS_LESSONS: LessonContent[] = [
         choices: ['The river', 'The turn', 'The showdown'],
         answer: 1,
         explain: 'After the flop comes the turn. The river is the 5th card, and it comes after the turn.',
+      },
+      {
+        kind: 'quiz',
+        question: 'You are on the button. Only the big blind is left. Who acts first on the flop?',
+        cards: 'KhQh',
+        board: 'Kc8d3s',
+        choices: ['The big blind', 'You, on the button'],
+        answer: 0,
+        explain: 'From the flop on, the first player still in to the left of the button acts first. Here that is the big blind. The button acts last.',
       },
       {
         kind: 'quiz',
@@ -346,7 +399,8 @@ export const BASICS_LESSONS: LessonContent[] = [
         kind: 'takeaway',
         points: [
           'The button moves left each hand. The 2 seats after it post the blinds.',
-          'Preflop and the flop come first. Then come the turn and the river.',
+          'Preflop you get 2 hole cards. The flop brings 3 board cards.',
+          'The turn and the river bring 1 card each. Then comes the showdown.',
           'A hand ends when 1 player is left or at showdown.',
         ],
       },
@@ -381,23 +435,34 @@ export const BASICS_LESSONS: LessonContent[] = [
         caption: 'With no bet to match you can check or bet. Facing a bet you can fold, call or raise.',
       },
       {
-        kind: 'text',
-        title: 'What each action means',
-        body: [
-          'To **check** is to pass without putting in chips. You stay in the hand.',
-          'To **bet** is to put in chips that others must match to stay in.',
-          'To **call** is to put in just enough to match the bet.',
-          'To **raise** is to match the bet and add more. Now the others must match your new total.',
-          'To **fold** is to give up. You can fold when facing a bet. With no bet to match, checking is free.',
-        ],
+        kind: 'visual',
+        title: 'What each action does',
+        art: {
+          kind: 'tree',
+          root: 'Your action',
+          branches: [
+            { label: 'Check', value: 'Pass and put in no chips', tone: 'gray' },
+            { label: 'Bet', value: 'Put in chips others must match', tone: 'brass' },
+            { label: 'Call', value: 'Match the bet', tone: 'green' },
+            { label: 'Raise', value: 'Match the bet and add more', tone: 'brass' },
+            { label: 'Fold', value: 'Give up the hand', tone: 'red' },
+          ],
+        },
+        caption: 'After a raise the others must match your new total. You can fold when facing a bet. With no bet to match, checking is free.',
+        evidence: 'math',
+      },
+      {
+        kind: 'visual',
+        title: 'Preflop is different',
+        art: { kind: 'table', seats: 9, button: 'BTN', highlight: ['UTG', 'BB'], note: 'UTG acts first preflop' },
+        caption: 'Preflop the big blind counts as a bet. UTG acts first, so it cannot check. It can fold, call the big blind or raise.',
         evidence: 'math',
       },
       {
         kind: 'text',
-        title: 'Preflop is different',
+        title: 'Words for preflop',
         body: [
-          'Preflop the big blind counts as a bet. So the first player to act cannot check.',
-          'They can fold, call the big blind or raise. Calling the big blind with no raise before you is a **limp**.',
+          'Calling the big blind with no raise before you is a **limp**.',
           'If nobody raises, the big blind can check. Their blind already matches the bet.',
           'Raising when everyone before you folded is called **opening**. A raise of a raise is a **3bet**.',
         ],
@@ -408,10 +473,23 @@ export const BASICS_LESSONS: LessonContent[] = [
         title: 'How much you can bet',
         body: [
           'In No Limit you can bet any amount up to all your chips. Betting everything is going **all in**.',
-          'The smallest bet is 1 big blind.',
-          'A raise must add at least as much as the last bet or raise. If someone bets 10, the smallest raise is to 20.',
-          'If they bet 10 and you raise to 30, you added 20. The next raise must go to at least 50.',
+          'The smallest bet is 1 big blind. A raise must add at least as much as the last bet or raise.',
         ],
+        evidence: 'math',
+      },
+      {
+        kind: 'visual',
+        title: 'The smallest raise',
+        art: {
+          kind: 'bars',
+          bars: [
+            { label: 'Someone bets', value: 10, tone: 'gray' },
+            { label: 'Smallest raise, to', value: 20, tone: 'brass' },
+            { label: 'You raise to', value: 30, tone: 'brass' },
+            { label: 'Next smallest raise, to', value: 50, tone: 'red' },
+          ],
+        },
+        caption: 'A bet of 10 makes the smallest raise 20. Say you raise to 30 instead. You added 20, so the next raise must reach at least 50.',
         evidence: 'math',
       },
       {
@@ -468,9 +546,21 @@ export const BASICS_LESSONS: LessonContent[] = [
         body: [
           'One big blind is written **1bb**. It is the size of the big blind in your game.',
           'Games are named by their blinds. In a $1/$2 game the blinds are $1 and $2. So 1bb is $2.',
-          'Your **stack** is all the chips you have on the table. A $200 stack at $1/$2 is 100bb.',
-          'Stacks of 100 big blinds are called **100bb deep**. Felt’s starter charts assume them.',
+          'Your **stack** is all the chips you have on the table. Felt’s starter charts assume stacks of 100bb, called **100bb deep**.',
         ],
+        evidence: 'math',
+      },
+      {
+        kind: 'visual',
+        title: 'Same money, different stacks',
+        art: {
+          kind: 'chips',
+          stacks: [
+            { label: '$200 at $1/$2', bb: 100 },
+            { label: '$200 at $2/$5', bb: 40 },
+          ],
+        },
+        caption: 'Divide your money by the big blind. $200 at $1/$2 is 100bb. The same $200 at $2/$5 is only 40bb.',
         evidence: 'math',
       },
       {
@@ -487,13 +577,18 @@ export const BASICS_LESSONS: LessonContent[] = [
         evidence: 'math',
       },
       {
-        kind: 'text',
+        kind: 'visual',
         title: 'Why big blinds',
-        body: [
-          'A $50 bet is huge at $1/$2. It is tiny at $25/$50.',
-          'In big blinds the size is clear. At $1/$2 a $50 bet is 25bb. At $25/$50 it is only 1bb.',
-          'Stack size in big blinds changes how to play. A plan for 100bb does not fit 20bb.',
-        ],
+        art: {
+          kind: 'bars',
+          unit: 'bb',
+          bars: [
+            { label: '$50 bet at $1/$2', value: 25, tone: 'red' },
+            { label: '$50 bet at $25/$50', value: 1, tone: 'gray' },
+          ],
+        },
+        caption: 'A $50 bet is huge at $1/$2. It is tiny at $25/$50. In big blinds the size is clear. Stack size in big blinds also changes how to play.',
+        evidence: 'math',
       },
       {
         kind: 'visual',
@@ -554,8 +649,7 @@ export const BASICS_LESSONS: LessonContent[] = [
         kind: 'text',
         title: 'Why last is best',
         body: [
-          'When you act last, you see what everyone else did first. That tells you a lot about their hands.',
-          'You also get the final say on how big the pot gets.',
+          'When you act last, you see what everyone else did first. You also get the final say on how big the pot gets.',
           'Acting after your opponent is being **in position**. Acting before them is being **out of position**.',
           'After the flop the button always acts last. That makes it the best seat at the table.',
         ],
@@ -585,13 +679,17 @@ export const BASICS_LESSONS: LessonContent[] = [
         note: 'A 6-max table has 6 seats. It uses UTG plus the last 5 seats here, from HJ to BB.',
       },
       {
-        kind: 'text',
-        title: 'The order of play',
-        body: [
-          'Preflop, UTG acts first and the big blind acts last.',
-          'From the flop on, the small blind acts first if still in. The button acts last.',
-          'So the blinds act last preflop but first on every later street.',
-        ],
+        kind: 'visual',
+        title: 'Preflop order',
+        art: { kind: 'table', seats: 9, button: 'BTN', highlight: ['UTG', 'BB'], note: 'UTG first, BB last' },
+        caption: 'Preflop, UTG acts first. The big blind acts last.',
+        evidence: 'math',
+      },
+      {
+        kind: 'visual',
+        title: 'Order after the flop',
+        art: { kind: 'table', seats: 9, button: 'BTN', highlight: ['SB', 'BTN'], note: 'SB first, BTN last' },
+        caption: 'From the flop on, the small blind acts first if still in. The button acts last. So the blinds act last preflop but first on every later street.',
         evidence: 'math',
       },
       {
@@ -641,12 +739,21 @@ export const BASICS_LESSONS: LessonContent[] = [
         title: 'How hands are written',
         body: [
           'Hands are written high card first. AK is an ace and a king.',
-          'An **s** means both cards share a suit. AKs is ace king **suited**.',
-          'An **o** means the suits differ. AKo is ace king **offsuit**.',
           'Two cards of the same rank are a **pocket pair**. A pair of 7s is written 77.',
-          'That gives 169 different starting hands. There are 13 pairs, 78 suited hands and 78 offsuit hands.',
         ],
         evidence: 'math',
+      },
+      {
+        kind: 'hand',
+        title: 'Suited: AKs',
+        cards: 'AdKd',
+        caption: 'An **s** means both cards share a suit. This is ace king **suited**, written AKs.',
+      },
+      {
+        kind: 'hand',
+        title: 'Offsuit: AKo',
+        cards: 'AcKh',
+        caption: 'An **o** means the suits differ. This is ace king **offsuit**, written AKo. There are 169 starting hands in all. 13 are pairs. 78 are suited and 78 are offsuit.',
       },
       {
         kind: 'table',
@@ -742,12 +849,10 @@ export const BASICS_LESSONS: LessonContent[] = [
         body: 'You never see your opponent’s cards. So do not guess 1 hand. Think of every hand they could hold. That set of hands is their **range**.',
       },
       {
-        kind: 'text',
+        kind: 'visual',
         title: 'Hero and villain',
-        body: [
-          'When players talk through a hand, they call themselves the **hero**. The opponent is the **villain**.',
-          'There is no judgment in the word. Felt’s lessons use both from here on.',
-        ],
+        art: { kind: 'table', seats: 9, button: 'BTN', hero: 'BTN', highlight: ['UTG'], note: 'Villain raises from UTG' },
+        caption: 'When players talk through a hand, they call themselves the **hero**. The opponent is the **villain**. There is no judgment in the word. Felt’s lessons use both from here on.',
       },
       {
         kind: 'text',
@@ -835,13 +940,10 @@ export const BASICS_LESSONS: LessonContent[] = [
         body: 'Poker is full of chances. You will see them as percentages, fractions or odds. They all describe the same thing.',
       },
       {
-        kind: 'text',
+        kind: 'visual',
         title: 'Three ways to say it',
-        body: [
-          'A 1 in 4 chance is the same as 25%. Divide 1 by 4 to get 0.25.',
-          'Players also say **3 to 1 against**. That means 3 misses for every 1 hit.',
-          'So the chances 1 in 4, 25% and 3 to 1 against are all the same.',
-        ],
+        art: { kind: 'ring', value: 0.25, label: '1 in 4', caption: '3 to 1 against' },
+        caption: 'A 1 in 4 chance is the same as 25%. Divide 1 by 4 to get 0.25. Players also say **3 to 1 against**. That means 3 misses for every 1 hit.',
         evidence: 'math',
       },
       {

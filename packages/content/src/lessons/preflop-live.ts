@@ -144,13 +144,17 @@ export const PREFLOP_LIVE_LESSONS: LessonContent[] = [
         evidence: 'math',
       },
       {
-        kind: 'text',
+        kind: 'visual',
         title: 'What the open risks',
-        body: [
-          'A steal that never sees a flop must win the 1.5bb of blinds.',
-          'With a hand that never wins when called, a 2bb open needs folds **57.1%** of the time. A 3bb open needs **66.7%**.',
-          'Real hands win some pots when called, so they need fewer folds. But the bigger the open, the more a weak hand loses each time it is called.',
-        ],
+        art: {
+          kind: 'bars',
+          unit: '%',
+          bars: [
+            { label: '2bb open', value: 57.1, tone: 'green' },
+            { label: '3bb open', value: 66.7, tone: 'brass' },
+          ],
+        },
+        caption: 'A steal that never sees a flop must win the 1.5bb of blinds. A hand that never wins when called needs these fold rates. Real hands win some pots when called, so they need fewer folds.',
         evidence: 'math',
       },
       {
@@ -162,6 +166,26 @@ export const PREFLOP_LIVE_LESSONS: LessonContent[] = [
           'That is why solver strategies for online games often open 2 to 2.5bb. The widest ranges come from the button.',
         ],
         evidence: 'solver',
+      },
+      {
+        kind: 'visual',
+        title: 'Bigger opens, worse prices',
+        art: {
+          kind: 'curve',
+          points: [
+            [2, 22.2],
+            [2.2, 24.5],
+            [2.5, 27.3],
+            [3, 30.8],
+            [3.5, 33.3],
+            [4, 35.3],
+          ],
+          xLabel: 'Open, bb',
+          yLabel: 'BB needs, %',
+          mark: [3, 30.8],
+        },
+        caption: 'The big blind’s price gets worse as the open grows. Against 3bb it needs **30.8%**. But the bigger the open, the more a weak hand loses each time it is called.',
+        evidence: 'math',
       },
       {
         kind: 'text',
@@ -185,14 +209,17 @@ export const PREFLOP_LIVE_LESSONS: LessonContent[] = [
         evidence: 'exploit',
       },
       {
-        kind: 'text',
+        kind: 'visual',
         title: '3bet bigger out of position',
-        body: [
-          'In position, 3bets are often about 3 times the open. A 2.5bb open becomes 7.5bb.',
-          'Out of position, 3bets are about 4 times the open or more. Felt’s big blind chart 3bets a 2.5bb open to 11bb.',
-          'The player out of position realizes less equity, so it charges more. The opener needs **37.8%** to call an 11bb 3bet. Against a 7.5bb 3bet it needs **30.3%**.',
-          'A called big 3bet also leaves a lower SPR (stack to pot ratio). That shrinks the edge that position gives.',
-        ],
+        art: {
+          kind: 'bars',
+          unit: '%',
+          bars: [
+            { label: 'Opener needs vs 7.5bb', value: 30.3, tone: 'green' },
+            { label: 'Opener needs vs 11bb', value: 37.8, tone: 'brass' },
+          ],
+        },
+        caption: 'In position, 3bets are often about 3 times the open. Out of position they are about 4 times or more. Felt’s big blind chart 3bets a 2.5bb open to 11bb. The bigger size charges the opener more and leaves a lower SPR (stack to pot ratio).',
         evidence: 'solver',
       },
       {
@@ -251,12 +278,18 @@ export const PREFLOP_LIVE_LESSONS: LessonContent[] = [
         evidence: 'math',
       },
       {
-        kind: 'text',
+        kind: 'visual',
         title: 'A worse price means fewer defends',
-        body: [
-          'Against 2.5bb the big blind needs 27.3%. Against 8bb it needs 42.4%.',
-          'Many hands clear the first price but fall well short of the second. That is even more true out of position, where you realize less of your equity.',
-        ],
+        art: {
+          kind: 'bars',
+          unit: '%',
+          bars: [
+            { label: 'BB vs 2.5bb', value: 27.3, tone: 'gray' },
+            { label: 'BB vs 5bb', value: 38.1 },
+            { label: 'BB vs 8bb', value: 42.4, tone: 'red' },
+          ],
+        },
+        caption: 'Many hands clear the first price but fall well short of the last. That is even more true out of position, where you realize less of your equity.',
         evidence: 'math',
       },
       {
@@ -338,11 +371,17 @@ export const PREFLOP_LIVE_LESSONS: LessonContent[] = [
         body: 'A straddle is an optional blind of 2bb, usually posted under the gun before the deal. It doubles the stakes of the hand. The stacks stay the same.',
       },
       {
+        kind: 'visual',
+        title: 'The straddle acts last preflop',
+        art: { kind: 'table', seats: 9, button: 'BTN', highlight: ['UTG', 'UTG+1'], note: 'UTG straddles. UTG+1 acts first' },
+        caption: 'With an under the gun straddle, action starts with the player to the straddler’s left. The straddler acts last before the flop, like a big blind.',
+        evidence: 'math',
+      },
+      {
         kind: 'text',
         title: 'The straddle is the new big blind',
         body: [
-          'With an under the gun straddle, action starts with the player to the straddler’s left. Calling costs 2bb and the smallest raise is to 4bb.',
-          'The straddler acts last before the flop, like a big blind.',
+          'Calling costs 2bb and the smallest raise is to 4bb.',
           'After the flop the normal order returns. The straddler acts right after the blinds, so it is out of position against every other player.',
           'Dead money before anyone acts is 3.5bb instead of 1.5bb.',
         ],
@@ -468,21 +507,28 @@ export const PREFLOP_LIVE_LESSONS: LessonContent[] = [
         highlight: ['44', '65s', 'A5s'],
       },
       {
+        kind: 'visual',
+        title: 'Iso raise size in position',
+        art: {
+          kind: 'bars',
+          unit: 'bb',
+          bars: [
+            { label: 'One limper', value: 5, tone: 'brass' },
+            { label: 'Two limpers', value: 7, tone: 'red' },
+          ],
+        },
+        caption: 'In position, raise to about 5bb against one limper. Add about 2bb for each extra limper. Each limper adds money and another player who might call.',
+        evidence: 'exploit',
+      },
+      {
         kind: 'text',
         title: 'Iso raise size',
         body: [
-          'In position, raise to about **5bb against one limper**. Add about 2bb for each extra limper, so about 7bb against two.',
-          'Each limper adds money and another player who might call. Out of position from the blinds, go about 1bb bigger.',
+          'Out of position from the blinds, go about 1bb bigger.',
           'A 5bb iso against one limper risks 5bb to win 2.5bb. A pure steal needs everyone to fold **66.7%** of the time.',
           'Many limpers call, so the iso range is built from hands that do well when called.',
         ],
         evidence: 'exploit',
-      },
-      {
-        kind: 'callout',
-        tone: 'exploit',
-        title: 'The limp reraise',
-        body: 'Some live players limp AA and KK hoping to reraise. When a limper reraises your iso big, their range is usually very strong. Without a read, fold most of your iso range. That includes hands like AQo and TT.',
       },
       {
         kind: 'text',
@@ -490,10 +536,30 @@ export const PREFLOP_LIVE_LESSONS: LessonContent[] = [
         body: [
           'Say 4 players see a limped flop with 100bb stacks. The pot is about 4.5bb and the SPR (stack to pot ratio) is about **22**.',
           'One pair is rarely worth stacks here. Value bet strong hands and play top pair as a medium hand.',
-          'A bluff must get through everyone. If each of 3 players folds 60% of the time, all 3 fold only **21.6%** of the time. That treats each player’s choice as separate.',
           'So bluff less often in multiway pots. When you do, prefer hands that draw to the nuts.',
         ],
         evidence: 'solver',
+      },
+      {
+        kind: 'visual',
+        title: 'A bluff must get through everyone',
+        art: {
+          kind: 'bars',
+          unit: '%',
+          bars: [
+            { label: '1 player', value: 60, tone: 'green' },
+            { label: '2 players', value: 36, tone: 'brass' },
+            { label: '3 players', value: 21.6, tone: 'red' },
+          ],
+        },
+        caption: 'Each player folds 60% of the time. All 3 fold only **21.6%** of the time. This treats each player’s choice as separate.',
+        evidence: 'math',
+      },
+      {
+        kind: 'callout',
+        tone: 'exploit',
+        title: 'The limp reraise',
+        body: 'Some live players limp AA and KK hoping to reraise. When a limper reraises your iso big, their range is usually very strong. Without a read, fold most of your iso range. That includes hands like AQo and TT.',
       },
       {
         kind: 'quiz',

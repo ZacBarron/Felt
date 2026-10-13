@@ -17,9 +17,24 @@ export const POSTFLOP_RIVER_LESSONS: LessonContent[] = [
         title: 'The rule',
         body: [
           'You are in position on the river, and villain checks. If you check, the hand goes to showdown.',
-          'A bet only changes the result against hands that call. You win 1 extra bet from each worse hand that calls. You lose 1 bet to each better hand that calls.',
-          'Ignoring raises, a bet makes money when you beat **more than half** of the calls. Chops cancel out. Worse hands that fold change nothing. A better hand that folds is a bonus.',
+          'Ignoring raises, a bet makes money when you beat **more than half** of the calls.',
         ],
+        evidence: 'math',
+      },
+      {
+        kind: 'visual',
+        title: 'What a bet changes',
+        art: {
+          kind: 'tree',
+          root: 'You bet 1, and villain',
+          branches: [
+            { label: 'Calls with a worse hand', value: '+1 bet', tone: 'green' },
+            { label: 'Calls with a better hand', value: '−1 bet', tone: 'red' },
+            { label: 'Calls and chops', value: 'No change', tone: 'gray' },
+            { label: 'Folds', value: 'No change, or a bonus', tone: 'gray' },
+          ],
+        },
+        caption: 'A bet only changes the result against hands that call. Worse hands that fold change nothing. A better hand that folds is a bonus.',
         evidence: 'math',
       },
       {
@@ -67,14 +82,32 @@ export const POSTFLOP_RIVER_LESSONS: LessonContent[] = [
         evidence: 'math',
       },
       {
-        kind: 'text',
+        kind: 'visual',
+        title: 'Share of calls you beat',
+        art: {
+          kind: 'bars',
+          unit: '%',
+          bars: [
+            { label: 'Regular’s calls', value: 36.4, tone: 'red' },
+            { label: 'Station’s calls', value: 64.6, tone: 'green' },
+          ],
+        },
+        caption: 'A thin value bet must beat more than half of the calls. K♥J♣ beats **36.4%** of the regular’s calls. It beats **64.6%** of the station’s.',
+        evidence: 'math',
+      },
+      {
+        kind: 'visual',
         title: 'How raises change it',
-        body: [
-          'Say villain raises only with better hands, and you fold. Nothing changes, since you lose 1 bet either way.',
-          'Raises hurt in 2 ways. A bluff raise makes you fold the best hand. You lose your bet and a pot you would have won by checking.',
-          'And if you call a value raise, you lose more than 1 bet. The more often villain raises, the further ahead of the calls you need to be.',
-          'The tables above count sets and two pair as calls. If they raise and you fold, the count still holds. If villain also bluff raises, check more medium hands.',
-        ],
+        art: {
+          kind: 'tree',
+          root: 'Villain raises your thin bet',
+          branches: [
+            { label: 'With a better hand, and you fold', value: 'No change. You lose 1 bet either way', tone: 'gray' },
+            { label: 'As a bluff, and you fold', value: 'You lose your bet and the pot', tone: 'red' },
+            { label: 'With a better hand, and you call', value: 'You lose more than 1 bet', tone: 'red' },
+          ],
+        },
+        caption: 'The tables count sets and two pair as calls. If they raise and you fold, the count still holds. The more often villain raises, the further ahead of the calls you need to be. If villain also bluff raises, check more medium hands.',
         evidence: 'math',
       },
       {
@@ -103,20 +136,6 @@ export const POSTFLOP_RIVER_LESSONS: LessonContent[] = [
         choices: ['Only player B', 'Only player A', 'Both of them', 'Neither of them'],
         answer: 0,
         explain: 'You beat 8 of 18 calls from A, so check. You beat 14 of 24 from B, so bet. The hand is the same. The calling range decides.',
-      },
-      {
-        kind: 'visual',
-        title: 'Share of calls you beat',
-        art: {
-          kind: 'bars',
-          unit: '%',
-          bars: [
-            { label: 'Regular’s calls', value: 36.4, tone: 'red' },
-            { label: 'Station’s calls', value: 64.6, tone: 'green' },
-          ],
-        },
-        caption: 'A thin value bet must beat more than half of the calls. K♥J♣ beats **36.4%** of the regular’s calls. It beats **64.6%** of the station’s.',
-        evidence: 'math',
       },
       {
         kind: 'takeaway',
@@ -295,19 +314,24 @@ export const POSTFLOP_RIVER_LESSONS: LessonContent[] = [
         evidence: 'solver',
       },
       {
-        kind: 'text',
+        kind: 'visual',
         title: 'The risk is the raise',
-        body: [
-          'A small bet invites a raise. Say you lead 10 into 40 and villain raises to 40. Their bluff risks 40 to win 50. It needs folds only **44.4%** of the time.',
-          'Say your small bets are all medium hands. Then you fold too often, and villain can raise any two cards.',
-          'You lose your bet and a pot you might have won at showdown. Some strong hands in your small bets keep raises honest.',
-        ],
+        art: {
+          kind: 'bars',
+          bars: [
+            { label: 'Pot', value: 40, tone: 'gray' },
+            { label: 'Your lead', value: 10, tone: 'brass' },
+            { label: 'Villain raises to', value: 40, tone: 'red' },
+          ],
+        },
+        caption: 'Villain’s bluff raise risks 40 to win 50. It needs folds only **44.4%** of the time. If your small bets are all medium hands, you fold too often. Some strong hands in your small bets keep raises honest.',
         evidence: 'math',
       },
       {
-        kind: 'text',
+        kind: 'visual',
         title: 'Facing a small bet',
-        body: ['At a quarter pot, you need only **16.7%** equity to call. MDF is **80.0%**.'],
+        art: { kind: 'ring', value: 0.8, label: 'MDF', caption: 'Facing a quarter pot bet' },
+        caption: 'At a quarter pot, you need only **16.7%** equity to call. MDF (minimum defense frequency) is **80.0%**.',
         evidence: 'math',
       },
       {
@@ -393,24 +417,34 @@ export const POSTFLOP_RIVER_LESSONS: LessonContent[] = [
         evidence: 'math',
       },
       {
-        kind: 'text',
+        kind: 'visual',
         title: 'Size choices',
-        body: [
-          'Smaller raises are cheaper bluffs, but they give villain a better price.',
-          'Against a bet of 50 into 100, a raise to 100 needs **40.0%** folds. Villain then needs only **16.7%** to call.',
-          'A raise to 200 needs **57.1%** folds. Villain then needs **30.0%** to call.',
-          'When the stack behind is small compared with the pot, all in is usually the natural raise.',
-        ],
+        art: {
+          kind: 'bars',
+          unit: '%',
+          bars: [
+            { label: 'Raise to 100: folds needed', value: 40, tone: 'brass' },
+            { label: 'Raise to 100: villain needs', value: 16.7, tone: 'gray' },
+            { label: 'Raise to 200: folds needed', value: 57.1, tone: 'red' },
+            { label: 'Raise to 200: villain needs', value: 30, tone: 'gray' },
+          ],
+        },
+        caption: 'Villain bets 50 into 100. Smaller raises are cheaper bluffs, but they give villain a better price. When the stack behind is small next to the pot, all in is usually the natural raise.',
         evidence: 'math',
       },
       {
-        kind: 'text',
+        kind: 'visual',
         title: 'The value raise threshold',
-        body: [
-          'Compare raising with calling. Bluffs fold to the raise, so you win the same pot as by calling.',
-          'Against hands that call the raise, you win the extra amount from each worse hand. You lose it to each better hand.',
-          'So raise for value only when you beat **more than half of the hands that call a raise**. If villain can reraise, the bar is higher still.',
-        ],
+        art: {
+          kind: 'tree',
+          root: 'You raise instead of calling',
+          branches: [
+            { label: 'Villain was bluffing', value: 'Folds. Same pot as a call', tone: 'gray' },
+            { label: 'A worse value hand calls', value: 'You win the extra', tone: 'green' },
+            { label: 'A better hand calls', value: 'You lose the extra', tone: 'red' },
+          ],
+        },
+        caption: 'So raise for value only when you beat **more than half of the hands that call a raise**. If villain can reraise, the bar is higher still.',
         evidence: 'math',
       },
       {

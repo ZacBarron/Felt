@@ -31,15 +31,6 @@ export const THEORY_LESSONS: LessonContent[] = [
         evidence: 'math',
       },
       {
-        kind: 'text',
-        title: 'Cannot lose, with conditions',
-        body: [
-          'Heads up, the value of the game is zero when you average over both seats. That is before rake. So an equilibrium strategy cannot lose in expectation over both seats.',
-          'In a single spot the value can be negative. The big blind loses money on average even when it plays perfectly. It posts a blind and plays out of position. Unexploitable means you lose no more than the spot is worth.',
-        ],
-        evidence: 'math',
-      },
-      {
         kind: 'table',
         title: 'River, pot 10bb, bet 10bb, two value combos per bluff',
         columns: ['Villain’s bluff catchers', 'Value', 'Bluff', 'Average'],
@@ -52,6 +43,30 @@ export const THEORY_LESSONS: LessonContent[] = [
         evidence: 'math',
       },
       {
+        kind: 'visual',
+        title: 'Every choice earns the same',
+        art: {
+          kind: 'tree',
+          root: 'Balanced river bet',
+          branches: [
+            { label: 'Villain folds all', value: '+10bb', tone: 'brass' },
+            { label: 'Calls all', value: '+10bb', tone: 'brass' },
+            { label: 'Calls half', value: '+10bb', tone: 'brass' },
+          ],
+        },
+        caption: 'Whatever villain’s bluff catchers do, the bettor averages +10bb. That is what unexploitable looks like in one spot.',
+        evidence: 'math',
+      },
+      {
+        kind: 'text',
+        title: 'Cannot lose, with conditions',
+        body: [
+          'Heads up, the value of the game is zero when you average over both seats. That is before rake. So an equilibrium strategy cannot lose in expectation over both seats.',
+          'In a single spot the value can be negative. The big blind loses money on average even when it plays perfectly. It posts a blind and plays out of position. Unexploitable means you lose no more than the spot is worth.',
+        ],
+        evidence: 'math',
+      },
+      {
         kind: 'text',
         title: 'Why it does not maximize profit',
         body: [
@@ -59,6 +74,20 @@ export const THEORY_LESSONS: LessonContent[] = [
           'A best response would bluff every hand against the folder. It would stop bluffing against the caller.',
           'Equilibrium only profits when the opponent picks a strictly worse action. One example is calling with a hand that should always fold. Another is folding a hand that should always continue. Weak players make many of these mistakes. A best response still wins far more from them.',
         ],
+        evidence: 'math',
+      },
+      {
+        kind: 'visual',
+        title: 'Against an opponent who folds too much',
+        art: {
+          kind: 'tree',
+          root: 'Villain folds too often',
+          branches: [
+            { label: 'You play equilibrium', value: 'Same EV as before', tone: 'gray' },
+            { label: 'You play a best response', value: 'Bluff more and win more', tone: 'green' },
+          ],
+        },
+        caption: 'Equilibrium gains nothing from a mistake between indifferent actions. Only a deviation turns that mistake into profit.',
         evidence: 'math',
       },
       {
@@ -159,6 +188,21 @@ export const THEORY_LESSONS: LessonContent[] = [
         example: 'A hand has regret +6 for bet, +2 for check and −3 for fold. Next iteration it bets **75%** and checks **25%**. It never folds.',
       },
       {
+        kind: 'visual',
+        title: 'Regret becomes a mix',
+        art: {
+          kind: 'bars',
+          unit: '%',
+          bars: [
+            { label: 'Bet, regret +6', value: 75, tone: 'red' },
+            { label: 'Check, regret +2', value: 25, tone: 'green' },
+            { label: 'Fold, regret −3', value: 0, tone: 'gray' },
+          ],
+        },
+        caption: 'Only positive regret counts. Bet gets 6 ÷ 8 = **75%** and check gets 2 ÷ 8 = **25%**. Fold gets nothing.',
+        evidence: 'math',
+      },
+      {
         kind: 'text',
         title: 'The average converges',
         body: [
@@ -208,6 +252,20 @@ export const THEORY_LESSONS: LessonContent[] = [
           'So a mix tells you the hand is close to indifferent. The exact split matters for the balance of the range. It matters little for that hand’s own EV.',
           'Tiny mixes can also be leftovers from a solve that has not fully converged. There can also be several equilibria that split frequencies between combos differently.',
         ],
+        evidence: 'math',
+      },
+      {
+        kind: 'visual',
+        title: 'A mix means a close call',
+        art: {
+          kind: 'tree',
+          root: 'A hand that mixes',
+          branches: [
+            { label: 'Bet', value: 'About equal EV', tone: 'red' },
+            { label: 'Check', value: 'About equal EV', tone: 'green' },
+          ],
+        },
+        caption: 'If one action were clearly better, regret would push the hand fully into it. So a mix tells you the hand is close to indifferent.',
         evidence: 'math',
       },
       {
@@ -290,6 +348,20 @@ export const THEORY_LESSONS: LessonContent[] = [
         evidence: 'math',
       },
       {
+        kind: 'visual',
+        title: 'Purifying one hand',
+        art: {
+          kind: 'tree',
+          root: 'A hand that mixes',
+          branches: [
+            { label: 'Always bet', value: 'About equal', tone: 'red' },
+            { label: 'Always check', value: 'About equal', tone: 'green' },
+          ],
+        },
+        caption: 'Both actions are worth about the same for this hand. So either pure choice costs it close to nothing.',
+        evidence: 'math',
+      },
+      {
         kind: 'text',
         title: 'Solve the simple game, do not round the full one',
         body: [
@@ -300,12 +372,17 @@ export const THEORY_LESSONS: LessonContent[] = [
         evidence: 'math',
       },
       {
-        kind: 'text',
+        kind: 'visual',
         title: 'Small errors and big errors',
-        body: [
-          'These comparisons tend to find that a sensible simplification gives up little EV. One well chosen flop size in a single raised pot is a common example.',
-          'Errors in the inputs usually cost much more. Defending the wrong range preflop is one. Folding far too often to c-bets is another. So is bluffing far too much on the river. These errors affect every hand that follows.',
-        ],
+        art: {
+          kind: 'tree',
+          root: 'Where EV leaks',
+          branches: [
+            { label: 'One well chosen flop size', value: 'Small loss', tone: 'green' },
+            { label: 'Wrong preflop ranges', value: 'Large loss in every hand after', tone: 'red' },
+          ],
+        },
+        caption: 'Comparisons with the full solution tend to find that sensible simplifications give up little EV. Input errors cost much more. Folding far too often to c-bets is one. So is bluffing far too much on the river.',
         evidence: 'solver',
       },
       {

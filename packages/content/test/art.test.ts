@@ -25,11 +25,11 @@ const lesson = (key: string): LessonContent => {
   if (!l) throw new Error(`No lesson ${key}`);
   return l;
 };
-const visuals = (key: string) => lesson(key).steps.flatMap((s) => (s.kind === 'visual' ? [s.art] : []));
-const visual = (key: string) => {
-  const v = visuals(key);
-  expect(v, key).toHaveLength(1);
-  return v[0];
+/** The lesson's one visual step, or the one with this title when a lesson has several. */
+const visual = (key: string, title?: string) => {
+  const steps = lesson(key).steps.flatMap((s) => (s.kind === 'visual' && (title === undefined || s.title === title) ? [s] : []));
+  expect(steps, `${key} ${title ?? ''}`).toHaveLength(1);
+  return steps[0].art;
 };
 const cover = (key: string) => lesson(key).cover;
 function pick<K extends LessonArt['kind']>(art: LessonArt, kind: K): Extract<LessonArt, { kind: K }> {
@@ -108,32 +108,20 @@ describe('lesson art', () => {
     }
   });
 
-  it('adds visual steps to existing lessons only right before the takeaway, so quiz indexes never move', () => {
-    // Saved answers and ratings point at quiz steps by index, so these lessons only grew at the end.
-    const grown = [
-      'foundations/math/pot-odds',
-      'foundations/math/ev',
-      'foundations/math/outs',
-      'foundations/math/mdf-alpha',
-      'foundations/math/spr',
-      'foundations/ranges/range-vs-range',
-      'foundations/theory/equity-benchmarks',
-      'preflop/rfi/rfi-ep',
-      'preflop/rfi/rfi-lp',
-      'preflop/vs-open/bb-defense',
-      'preflop/vs-open/sb-vs-open',
-      'preflop/vs-open/squeeze',
-      'postflop/3bet-postflop/low-spr',
-      'postflop/river/thin-value',
-      'exploit/adjustments/vs-aggro',
-      'mindset/mental/tilt',
-      'tournaments/mtt-basics/push-fold',
-      'tournaments/mtt-basics/icm',
-    ];
-    for (const key of grown) {
-      const kinds = lesson(key).steps.map((s) => s.kind);
-      expect(kinds.slice(-2), key).toEqual(['visual', 'takeaway']);
-      expect(kinds.filter((k) => k === 'visual'), key).toHaveLength(1);
+  it('teaches with pictures: no long runs of text, and core lessons show at least 2 pictures', () => {
+    const textOnly = new Set(['intro', 'text', 'callout']);
+    for (const l of LESSON_CONTENT.values()) {
+      let run = 0;
+      let longest = 0;
+      let pictures = 0;
+      for (const s of l.steps) {
+        run = textOnly.has(s.kind) ? run + 1 : 0;
+        longest = Math.max(longest, run);
+        if (['visual', 'hand', 'board', 'chart', 'table'].includes(s.kind)) pictures++;
+        if (s.kind === 'quiz' && (s.cards || s.board || s.choiceCards)) pictures++;
+      }
+      expect(longest, `${l.key}: text steps in a row`).toBeLessThanOrEqual(2);
+      if (l.level === 'core') expect(pictures, `${l.key}: pictures`).toBeGreaterThanOrEqual(2);
     }
   });
 });
@@ -142,7 +130,7 @@ describe('numbers in lesson art agree with the core math', () => {
   it('pot odds, MDF and bluff prices', () => {
     // A half pot bet: the pot before the call holds 1 + 0.5.
     expect(pick(cover('foundations/math/pot-odds'), 'ring').value).toBe(potOdds(1.5, 0.5));
-    for (const [x, y] of pick(visual('foundations/math/pot-odds'), 'curve').points) expect(y).toBeCloseTo(r1(potOdds(1 + x, x) * 100), 5);
+    for (const [x, y] of pick(visual('foundations/math/pot-odds', 'Bigger bets, worse prices'), 'curve').points) expect(y).toBeCloseTo(r1(potOdds(1 + x, x) * 100), 5);
     expect(pick(cover('foundations/math/mdf-alpha'), 'ring').value).toBeCloseTo(mdf(1, 0.5), 12);
     for (const [x, y] of pick(visual('foundations/math/mdf-alpha'), 'curve').points) expect(y).toBeCloseTo(r1(mdf(1, x) * 100), 5);
     expect(pick(cover('postflop/defense/vs-cbet'), 'ring').value).toBeCloseTo(potOdds(1 + 1 / 3, 1 / 3), 12);
@@ -163,7 +151,7 @@ describe('numbers in lesson art agree with the core math', () => {
     const call = pick(cover('foundations/math/ev'), 'tree');
     expect(call.branches.map((b) => b.value)).toEqual(['+150', '−50']);
     expect(0.3 * 150 - 0.7 * 50).toBeCloseTo(callEV(150, 50, 0.3));
-    const bet = pick(visual('foundations/math/ev'), 'tree');
+    const bet = pick(visual('foundations/math/ev', 'A bet, branch by branch'), 'tree');
     expect(bet.branches.map((b) => b.label)).toEqual(['Villain folds, 40%', 'Called and you win, 18%', 'Called and you lose, 42%']);
     expect(0.4 * 100 + 0.6 * 0.3 * 150 - 0.6 * 0.7 * 50).toBeCloseTo(46);
     // A balanced river bet: pot 10, bet 10, two value combos per bluff.
@@ -185,7 +173,7 @@ describe('numbers in lesson art agree with the core math', () => {
   });
 
   it('outs and equity', () => {
-    expect(bars(visual('foundations/math/outs'))).toEqual([ruleOf2And4(15, 2) * 100, ruleOfFourCorrected(15) * 100, r1(outsToEquity(15, 47, 2) * 100)]);
+    expect(bars(visual('foundations/math/outs', '15 outs, flop to river'))).toEqual([ruleOf2And4(15, 2) * 100, ruleOfFourCorrected(15) * 100, r1(outsToEquity(15, 47, 2) * 100)]);
     // The outs cover: 9 hearts left on a two heart flop with no other draw.
     const c = pick(cover('foundations/math/outs'), 'cards');
     const seen = [...parseCards(c.cards), ...parseCards(c.board!)];
@@ -220,7 +208,7 @@ describe('numbers in lesson art agree with the core math', () => {
     const ahead = count('KT, K7s, K6s, K5s, K4s');
     const extra = count('QQ, JJ, TT, A9, Q9s, J9s, T9s');
     expect([behind, ahead, extra, count('KJ')]).toEqual([28, 16, 35, 6]);
-    expect(bars(visual('postflop/river/thin-value'))).toEqual([r1((ahead / (ahead + behind)) * 100), r1(((ahead + extra) / (ahead + extra + behind)) * 100)]);
+    expect(bars(visual('postflop/river/thin-value', 'Share of calls you beat'))).toEqual([r1((ahead / (ahead + behind)) * 100), r1(((ahead + extra) / (ahead + extra + behind)) * 100)]);
     expect(rankOf(parseCards('Kh')[0])).toBe('K');
   });
 
@@ -229,7 +217,7 @@ describe('numbers in lesson art agree with the core math', () => {
     // 100bb, BTN opens 2.5bb and BB calls: 5.5bb pot, 97.5bb behind.
     expect(chips(cover('foundations/math/spr'))).toEqual([2.5 + 2.5 + 0.5, 100 - 2.5]);
     // BB 3bets to 11bb and BTN calls: 22.5bb pot, 89bb behind.
-    expect(chips(visual('foundations/math/spr'))).toEqual([11 + 11 + 0.5, 100 - 11]);
+    expect(chips(visual('foundations/math/spr', 'A 3bet pot is shallow'))).toEqual([11 + 11 + 0.5, 100 - 11]);
     expect(chips(cover('postflop/3bet-postflop/cbet-3bp'))).toEqual([22.5, 89]);
     expect(spr(89, 22.5)).toBeCloseTo(4, 1);
     // The same 3bet pot at 40bb and 200bb.
@@ -262,7 +250,7 @@ describe('numbers in lesson art agree with the core math', () => {
     const fold = 1 - calls / 1225;
     // Equity when called is 30.7%, exact over every board (stated in the lesson).
     const shoveEV = (stack: number) => fold * 2.5 + (1 - fold) * (0.307 * (2.5 + (stack - 0.5) + (stack - 1)) - (stack - 0.5));
-    expect(bars(visual('tournaments/mtt-basics/push-fold'))).toEqual([10, 15, 20].map((s) => Math.round(shoveEV(s) * 100) / 100));
+    expect(bars(visual('tournaments/mtt-basics/push-fold', 'One hand, three stacks'))).toEqual([10, 15, 20].map((s) => Math.round(shoveEV(s) * 100) / 100));
     // Malmuth-Harville for stacks 5,000 / 3,000 / 2,000 paying 50 / 30 / 20.
     const st = [5000, 3000, 2000];
     const pay = [50, 30, 20];
@@ -280,7 +268,7 @@ describe('numbers in lesson art agree with the core math', () => {
       }
     };
     walk([0, 1, 2], 0, 1);
-    expect(bars(visual('tournaments/mtt-basics/icm'))).toEqual([50, r1(money[0]), 20, r1(money[2])]);
+    expect(bars(visual('tournaments/mtt-basics/icm', 'Chips against money'))).toEqual([50, r1(money[0]), 20, r1(money[2])]);
     expect(bars(cover('tournaments/mtt-basics/icm'))).toEqual([50, r1(money[0])]);
   });
 });

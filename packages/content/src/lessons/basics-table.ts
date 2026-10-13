@@ -14,31 +14,32 @@ export const BASICS_TABLE_LESSONS: LessonContent[] = [
         body: 'A live game runs on a few simple rules. They decide what your words and chips mean. Learn them once and you will play with confidence in any room.',
       },
       {
-        kind: 'text',
+        kind: 'visual',
         title: 'Act in turn',
-        body: [
-          'Action moves clockwise, one player at a time. Wait until the player on your right has acted.',
-          'Acting early gives away information. It can also hurt the players before you.',
-          'In many rooms an action out of turn is binding. It stands if nobody before you bets or raises.',
-        ],
+        art: { kind: 'table', seats: 9, button: 'BTN', hero: 'CO', highlight: ['HJ'], note: 'HJ acts, then you' },
+        caption: 'Action moves clockwise, one player at a time. Wait until the player on your right has acted. Acting early gives away information. It can also hurt the players before you.',
       },
       {
         kind: 'text',
         title: 'Your words count',
         body: [
-          'What you say out loud on your turn is binding. Say “call” and you must call.',
+          'In many rooms an action out of turn is binding. It stands if nobody before you bets or raises.',
+          'What you say out loud on your turn is binding too. Say “call” and you must call.',
           'Say “raise” and you must raise. Say the amount too, like “raise to 40”.',
-          'Speaking first is the clearest way to act. The dealer and the table know exactly what you meant.',
         ],
       },
       {
-        kind: 'text',
+        kind: 'visual',
         title: 'No string bets',
-        body: [
-          'A raise without words must go in with one motion. Bringing chips out in 2 trips is a **string bet**.',
-          'If you do that, the dealer usually rules it a call. Your extra chips come back.',
-          'You can avoid this every time. Say “raise” first, then take your time.',
-        ],
+        art: {
+          kind: 'tree',
+          root: 'You want to raise',
+          branches: [
+            { label: 'Say “raise”, then add chips', value: 'A raise', tone: 'brass' },
+            { label: 'Chips out in 2 trips, no words', value: 'Usually ruled a call', tone: 'red' },
+          ],
+        },
+        caption: 'A raise without words must go in with one motion. Bringing chips out in 2 trips is a **string bet**. The dealer usually rules it a call, and your extra chips come back. Say “raise” first, then take your time.',
       },
       {
         kind: 'visual',
@@ -63,13 +64,23 @@ export const BASICS_TABLE_LESSONS: LessonContent[] = [
         ],
       },
       {
-        kind: 'text',
-        title: 'Showdown and tips',
-        body: [
-          'If the river was bet and called, the last player to bet or raise on the river shows first. If everyone checked, the first player left of the button shows first.',
-          'The best hand wins only if you show it. Turn both cards face up and let the dealer read them. Never throw away a hand you think may win.',
-          'In many US rooms, players tip the dealer after winning a pot. Customs differ by room and by country.',
-        ],
+        kind: 'visual',
+        title: 'Who shows first',
+        art: {
+          kind: 'tree',
+          root: 'At showdown',
+          branches: [
+            { label: 'The river was bet and called', value: 'The last player to bet or raise shows first', tone: 'brass' },
+            { label: 'Everyone checked the river', value: 'The first player left of the button shows first', tone: 'gray' },
+          ],
+        },
+        caption: 'The best hand wins only if you show it. Turn both cards face up and let the dealer read them. Never throw away a hand you think may win.',
+      },
+      {
+        kind: 'callout',
+        tone: 'tip',
+        title: 'Tipping',
+        body: 'In many US rooms, players tip the dealer after winning a pot. Customs differ by room and by country.',
       },
       {
         kind: 'callout',

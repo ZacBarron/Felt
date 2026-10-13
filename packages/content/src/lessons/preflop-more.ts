@@ -13,14 +13,18 @@ export const PREFLOP_MORE_LESSONS: LessonContent[] = [
         body: 'Facing an open from the cutoff or earlier, raked strategies mostly 3bet or fold. The small blind does the same. Only the button and the big blind keep a real calling range.',
       },
       {
+        kind: 'visual',
+        title: 'Players still behind you',
+        art: { kind: 'table', seats: 9, button: 'BTN', hero: 'CO', highlight: ['LJ', 'BTN', 'SB', 'BB'], note: 'LJ opens, 3 players behind you' },
+        caption: 'The LJ opens and you are in the cutoff. The button and both blinds still act. If you call, they can squeeze or call cheaply and make the pot multiway.',
+      },
+      {
         kind: 'text',
         title: 'Why calling loses its place',
         body: [
-          'A call leaves players behind you to act. They can squeeze, or call cheaply and make the pot multiway.',
           'Your medium hands do badly in multiway pots. A 3bet usually folds out the players behind.',
           'A call also hands the initiative to the opener. It caps your range, since your best hands would have 3bet.',
           'A 3bet can win the pot right away. A call never can.',
-          'From the HJ or CO facing an early open, calling shrinks to a few hands or disappears.',
         ],
         evidence: 'solver',
       },
@@ -54,9 +58,14 @@ export const PREFLOP_MORE_LESSONS: LessonContent[] = [
           'With no calling range, the hands that would have called must go somewhere. The best of them 3bet, which makes the range linear.',
           'In position you also realize your equity well when called. That helps these medium strong hands.',
           'Against a tight early open, those same hands are dominated by what continues. So the 3bet range becomes premiums plus hands like A5s and A4s.',
-          'The ace makes AA and AK less likely. The hand still has straight and flush equity when called.',
         ],
         evidence: 'solver',
+      },
+      {
+        kind: 'hand',
+        title: 'A blocker 3bet',
+        cards: 'Ad5d',
+        caption: 'The ace makes AA and AK less likely. A5s still has straight and flush equity when called.',
       },
       {
         kind: 'table',
@@ -76,12 +85,16 @@ export const PREFLOP_MORE_LESSONS: LessonContent[] = [
         evidence: 'solver',
       },
       {
-        kind: 'text',
+        kind: 'visual',
         title: 'What the size does to SPR',
-        body: [
-          'A 3bet to 7.5bb that gets called leaves a pot of 16.5bb. With 92.5bb behind, the SPR (stack to pot ratio) is **5.6**.',
-          'Say the small blind 3bets the button to 10bb and gets called. The pot is 21bb with 90bb behind, an SPR of **4.3**.',
-        ],
+        art: {
+          kind: 'bars',
+          bars: [
+            { label: 'In position, 3bet to 7.5bb', value: 5.6, tone: 'green' },
+            { label: 'Small blind, 3bet to 10bb', value: 4.3, tone: 'brass' },
+          ],
+        },
+        caption: 'A called 3bet to 7.5bb leaves 92.5bb behind a 16.5bb pot. That is an SPR (stack to pot ratio) of **5.6**. A small blind 3bet to 10bb against the button leaves 90bb behind 21bb, an SPR of **4.3**.',
         evidence: 'math',
       },
       {
@@ -138,12 +151,17 @@ export const PREFLOP_MORE_LESSONS: LessonContent[] = [
         body: 'Calling an open is a real option in 2 seats, the button and the big blind. Elsewhere it is small or gone. When you do call, choose hands that play well after the flop.',
       },
       {
+        kind: 'visual',
+        title: 'The 2 calling seats',
+        art: { kind: 'table', seats: 9, button: 'BTN', highlight: ['BTN', 'BB'], note: 'Flat from these 2 seats' },
+        caption: 'On the **button** only the blinds act behind you, and you have position on the opener. In the **big blind** you close the action with 1bb already in. Your price is the best at the table.',
+        evidence: 'solver',
+      },
+      {
         kind: 'text',
         title: 'Where calling is allowed',
         body: [
-          '**Button**. Only the blinds act behind you. You have position on the opener for the whole hand.',
           'Felt’s button chart against a cutoff open calls about 11% of hands. It 3bets about 8%.',
-          '**Big blind**. You close the action with 1bb already in. Your price is the best at the table.',
           'In the cutoff and earlier, players behind can squeeze or join. Calling ranges there shrink to a few hands.',
           'In the small blind, the big blind still acts behind you. You are also out of position, so calling is rare.',
         ],
@@ -183,6 +201,13 @@ export const PREFLOP_MORE_LESSONS: LessonContent[] = [
         ],
         example:
           'A pocket pair flops a set or better **11.8%** of the time, about 1 in 8.5. Say you call 2.5bb to win 4bb, with a set as your only plan. You need about **15bb** more on average from later streets when you hit. Sets do not always win, and pairs win some pots without improving. So treat this as a rough check.',
+      },
+      {
+        kind: 'visual',
+        title: 'The flop you are hoping for',
+        art: { kind: 'cards', cards: '6d6c', board: 'Ks6h2d' },
+        caption: 'A pocket pair flops a set or better **11.8%** of the time. That is about 1 in 8.5. Sets win big pots, so the rest of the time you often fold cheaply.',
+        evidence: 'math',
       },
       {
         kind: 'text',
@@ -259,15 +284,27 @@ export const PREFLOP_MORE_LESSONS: LessonContent[] = [
         evidence: 'math',
       },
       {
+        kind: 'visual',
+        title: 'Stuck in the middle',
+        art: { kind: 'table', seats: 9, button: 'BTN', hero: 'SB', highlight: ['BTN', 'BB'], note: 'The big blind acts behind you' },
+        caption: 'The button opened and the big blind still acts behind you. After the flop you act first against both.',
+      },
+      {
         kind: 'text',
         title: 'Why 3bet or fold',
         body: [
           'A call pays a worse price than the big blind gets. It also plays out of position against the opener.',
           'A call invites the big blind in too. The big blind can squeeze, or call cheaply and make the pot multiway.',
           'A 3bet takes the initiative and often wins the pot at once. It usually folds the big blind out too.',
-          'Solver strategies with rake keep at most a small calling range here. Felt’s starter chart against a button open never calls. It 3bets about 17% and folds the rest.',
+          'Solver strategies with rake keep at most a small calling range here.',
         ],
         evidence: 'solver',
+      },
+      {
+        kind: 'chart',
+        chartId: '9max-100-sb-vs-btn',
+        title: 'Small blind against a button open',
+        caption: 'Felt’s starter chart never calls here. It 3bets about 17% and folds the rest. Felt’s starter charts are approximate.',
       },
       {
         kind: 'text',
@@ -315,12 +352,6 @@ export const PREFLOP_MORE_LESSONS: LessonContent[] = [
         ],
         answer: 2,
         explain: 'The problem is what happens after the call. The big blind can squeeze or join, and you act first on every street. Many hands do have 33.3% raw equity, but they realize too little of it.',
-      },
-      {
-        kind: 'visual',
-        title: 'Stuck in the middle',
-        art: { kind: 'table', seats: 9, button: 'BTN', hero: 'SB', highlight: ['BTN', 'BB'], note: 'The big blind acts behind you' },
-        caption: 'The button opened and the big blind still acts behind you. After the flop you act first against both.',
       },
       {
         kind: 'takeaway',
@@ -480,13 +511,16 @@ export const PREFLOP_MORE_LESSONS: LessonContent[] = [
         evidence: 'solver',
       },
       {
-        kind: 'text',
+        kind: 'visual',
         title: 'Lower SPR after a call',
-        body: [
-          'Say the button calls a 3bet to 11bb. The pot is 22.5bb with 89bb behind, an SPR (stack to pot ratio) of **4.0**.',
-          'Say the cutoff calls a 3bet to 7.5bb. The pot is 16.5bb with 92.5bb behind, an SPR of **5.6**.',
-          'At these SPRs a good top pair often gets all in by the river. So hands that make strong top pairs and nut draws gain value.',
-        ],
+        art: {
+          kind: 'chips',
+          stacks: [
+            { label: 'Pot', bb: 22.5 },
+            { label: 'Behind', bb: 89 },
+          ],
+        },
+        caption: 'The button calls a 3bet to 11bb. The pot is 22.5bb with 89bb behind, an SPR (stack to pot ratio) of **4.0**. After a 3bet to 7.5bb it would be **5.6**. At these SPRs a good top pair often gets all in by the river.',
         evidence: 'math',
       },
       {
@@ -503,14 +537,18 @@ export const PREFLOP_MORE_LESSONS: LessonContent[] = [
         evidence: 'solver',
       },
       {
-        kind: 'text',
+        kind: 'visual',
         title: 'Early opens fold less',
-        body: [
-          'A UTG range is already strong. In Felt’s 9-handed starter charts, QQ+ and AK make up **22%** of the UTG range.',
-          'They make up **14%** of the 6-max UTG range. They are only **6%** of the button range.',
-          'Most of a button range is hands that were fine to open but cannot stand a 3bet.',
-          'So early openers continue with a larger share of their range. Button openers fold a larger share.',
-        ],
+        art: {
+          kind: 'bars',
+          unit: '%',
+          bars: [
+            { label: '9-handed UTG', value: 22, tone: 'green' },
+            { label: '6-max UTG', value: 14, tone: 'brass' },
+            { label: '9-handed button', value: 6, tone: 'gray' },
+          ],
+        },
+        caption: 'Each bar is the share of an opening range that is QQ+ or AK, in Felt’s starter charts. Most of a button range was fine to open but cannot stand a 3bet. So early openers continue with a larger share.',
         evidence: 'solver',
       },
       {
@@ -624,12 +662,23 @@ export const PREFLOP_MORE_LESSONS: LessonContent[] = [
           'The button opens 2.5bb and the small blind 3bets to 11bb. The big blind folds, and the button 4bets to 25bb. A pure bluff needs **60.8%** folds. A5s wins some of the rest back with its equity when called.',
       },
       {
+        kind: 'visual',
+        title: 'After a called 4bet',
+        art: {
+          kind: 'chips',
+          stacks: [
+            { label: 'Pot', bb: 51 },
+            { label: 'Behind', bb: 75 },
+          ],
+        },
+        caption: 'Say the small blind calls the 4bet to 25bb. The pot is 51bb with 75bb behind, an SPR (stack to pot ratio) of **1.5**. There is no room for a smaller 5bet, so the 5bet is a shove.',
+        evidence: 'math',
+      },
+      {
         kind: 'text',
         title: 'SPR makes the 5bet all in',
         body: [
-          'Say the small blind calls the 4bet to 25bb. The pot is 51bb with 75bb behind, an SPR (stack to pot ratio) of **1.5**.',
-          'There is no room for a smaller 5bet, so the 5bet is a shove.',
-          'Facing that shove, the button calls 75bb into a pot of 126bb. It needs **37.3%** equity.',
+          'Facing a 5bet shove, the button calls 75bb into a pot of 126bb. It needs **37.3%** equity.',
           'A♠5♠ has only about **29%** against KK+ and AK, so the bluff folds.',
           'Calling a 4bet at this SPR commits you on most flops. Continue with hands that are happy to get the money in, or shove.',
         ],
@@ -696,6 +745,12 @@ export const PREFLOP_MORE_LESSONS: LessonContent[] = [
         evidence: 'solver',
       },
       {
+        kind: 'visual',
+        title: 'The big blind has position',
+        art: { kind: 'table', seats: 9, button: 'BTN', hero: 'BB', highlight: ['SB'], note: 'You act last after the flop' },
+        caption: 'Blind against blind, the small blind acts first on every street after the flop. The big blind acts last.',
+      },
+      {
         kind: 'table',
         title: 'The big blind’s price',
         columns: ['Open', 'BB calls', 'Needs', 'BB is'],
@@ -717,13 +772,17 @@ export const PREFLOP_MORE_LESSONS: LessonContent[] = [
         evidence: 'solver',
       },
       {
-        kind: 'text',
+        kind: 'visual',
         title: 'Limps are part of the real strategy',
-        body: [
-          'With rake, solver strategies limp a large part of the small blind range. Some strong hands limp too.',
-          'Against a limp, the big blind raises often from position. It checks the rest.',
-          'Raise only is a simpler baseline that gives up a little EV. It is a fair start until you can balance a limping range.',
-        ],
+        art: {
+          kind: 'tree',
+          root: 'The small blind limps',
+          branches: [
+            { label: 'Big blind raises', value: 'Often, from position', tone: 'brass' },
+            { label: 'Big blind checks', value: 'The rest', tone: 'gray' },
+          ],
+        },
+        caption: 'With rake, solver strategies limp a large part of the small blind range. Some strong hands limp too. Raise only is a simpler baseline that gives up a little EV.',
         evidence: 'solver',
       },
       {

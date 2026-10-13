@@ -23,6 +23,20 @@ export const FOUNDATIONS_LESSONS: LessonContent[] = [
         example: 'The pot is 100 chips and villain bets 50. You call 50 to make a final pot of 200. You need 50 ÷ 200 = **25%**.',
       },
       {
+        kind: 'visual',
+        title: 'The pot after you call',
+        art: {
+          kind: 'bars',
+          bars: [
+            { label: 'Pot before the bet', value: 100, tone: 'gray' },
+            { label: 'Villain’s bet', value: 50, tone: 'red' },
+            { label: 'Your call', value: 50, tone: 'brass' },
+          ],
+        },
+        caption: 'The final pot is 100 + 50 + 50 = 200 chips. Your call is 50 of them. So you must win **25%** of the time to break even.',
+        evidence: 'math',
+      },
+      {
         kind: 'table',
         title: 'Learn these by heart',
         columns: ['Bet size', 'Equity to call'],
@@ -36,6 +50,31 @@ export const FOUNDATIONS_LESSONS: LessonContent[] = [
           ['2x pot', '40.0%'],
         ],
         note: 'The equity you need rises with bet size. It never reaches 50%.',
+        evidence: 'math',
+      },
+      {
+        kind: 'visual',
+        title: 'Bigger bets, worse prices',
+        art: {
+          kind: 'curve',
+          points: [
+            [0, 0],
+            [0.125, 10],
+            [0.25, 16.7],
+            [0.375, 21.4],
+            [0.5, 25],
+            [0.75, 30],
+            [1, 33.3],
+            [1.25, 35.7],
+            [1.5, 37.5],
+            [1.75, 38.9],
+            [2, 40],
+          ],
+          xLabel: 'Bet size, in pots',
+          yLabel: 'Equity to call, %',
+          mark: [0.5, 25],
+        },
+        caption: 'The price climbs fast for small bets, then flattens out. A half pot bet asks for **25%**. Even twice the pot asks for only 40%.',
         evidence: 'math',
       },
       {
@@ -66,31 +105,6 @@ export const FOUNDATIONS_LESSONS: LessonContent[] = [
         answer: 2,
         explain:
           'A half pot bet needs 25.0%. You have 19.6%, so you are 5.4 points short. The call only works if you win extra on the river when you hit. That extra is implied odds.',
-      },
-      {
-        kind: 'visual',
-        title: 'Bigger bets, worse prices',
-        art: {
-          kind: 'curve',
-          points: [
-            [0, 0],
-            [0.125, 10],
-            [0.25, 16.7],
-            [0.375, 21.4],
-            [0.5, 25],
-            [0.75, 30],
-            [1, 33.3],
-            [1.25, 35.7],
-            [1.5, 37.5],
-            [1.75, 38.9],
-            [2, 40],
-          ],
-          xLabel: 'Bet size, in pots',
-          yLabel: 'Equity to call, %',
-          mark: [0.5, 25],
-        },
-        caption: 'The price climbs fast for small bets, then flattens out. A half pot bet asks for **25%**. Even twice the pot asks for only 40%.',
-        evidence: 'math',
       },
       {
         kind: 'takeaway',
@@ -127,11 +141,40 @@ export const FOUNDATIONS_LESSONS: LessonContent[] = [
         example: 'Villain bets 50 into 100 and you have 30% equity. 0.30 × 200 − 50 = **+10**. The call profits even though you lose most of the time.',
       },
       {
+        kind: 'visual',
+        title: 'A call, branch by branch',
+        art: {
+          kind: 'tree',
+          root: 'Call 50 to win 150',
+          branches: [
+            { label: 'You win, 30%', value: '+150', tone: 'green' },
+            { label: 'You lose, 70%', value: '−50', tone: 'red' },
+          ],
+        },
+        caption: 'When you win, you collect the 100 pot and villain’s 50. When you lose, you lose your 50. 0.3 × 150 − 0.7 × 50 = **+10**.',
+        evidence: 'math',
+      },
+      {
         kind: 'formula',
         title: 'EV of a bet',
         formula: 'EV(bet) = fold% × pot + call% × (equity × (pot + 2 × bet) − bet)',
         example:
           'You bet 50 into 100. Villain folds 40% of the time. When called you have 30% equity. 0.4 × 100 + 0.6 × (0.3 × 200 − 50) = 40 + 6 = **+46**. This ignores raises, which only lower it.',
+      },
+      {
+        kind: 'visual',
+        title: 'A bet, branch by branch',
+        art: {
+          kind: 'tree',
+          root: 'Bet 50 into 100',
+          branches: [
+            { label: 'Villain folds, 40%', value: '+100', tone: 'green' },
+            { label: 'Called and you win, 18%', value: '+150', tone: 'green' },
+            { label: 'Called and you lose, 42%', value: '−50', tone: 'red' },
+          ],
+        },
+        caption: 'Weight each result by its chance and add them up. 0.4 × 100 + 0.18 × 150 − 0.42 × 50 = **+46**.',
+        evidence: 'math',
       },
       {
         kind: 'text',
@@ -171,21 +214,6 @@ export const FOUNDATIONS_LESSONS: LessonContent[] = [
           'You need villain to bluff at least 33.3%. At 20%, calling loses 40 for every 100 you call. So folding every bluff catcher is the best response. Mixing only helps when calling and folding are worth the same.',
       },
       {
-        kind: 'visual',
-        title: 'A bet, branch by branch',
-        art: {
-          kind: 'tree',
-          root: 'Bet 50 into 100',
-          branches: [
-            { label: 'Villain folds, 40%', value: '+100', tone: 'green' },
-            { label: 'Called and you win, 18%', value: '+150', tone: 'green' },
-            { label: 'Called and you lose, 42%', value: '−50', tone: 'red' },
-          ],
-        },
-        caption: 'Weight each result by its chance and add them up. 0.4 × 100 + 0.18 × 150 − 0.42 × 50 = **+46**.',
-        evidence: 'math',
-      },
-      {
         kind: 'takeaway',
         points: [
           'Folding is worth zero. Measure every action against it.',
@@ -211,6 +239,28 @@ export const FOUNDATIONS_LESSONS: LessonContent[] = [
         title: 'The rule of 2 and 4, corrected',
         formula: 'Flop: outs × 4 − (outs − 8) when outs > 8.  Turn: outs × 2',
         example: '15 outs on the flop gives 60 − 7 = 53%. The exact figure is **54.1%**. Without the correction you would say 60%.',
+      },
+      {
+        kind: 'visual',
+        title: 'A 15 out draw',
+        art: { kind: 'cards', cards: 'JhTh', board: '9h8h2c' },
+        caption: 'Any of the 9 hearts left makes a flush. Any queen or 7 makes a straight. 2 of those 8 cards are hearts already counted. So 6 more cards help, for **15 outs**.',
+        evidence: 'math',
+      },
+      {
+        kind: 'visual',
+        title: '15 outs, flop to river',
+        art: {
+          kind: 'bars',
+          unit: '%',
+          bars: [
+            { label: 'Outs × 4', value: 60, tone: 'gray' },
+            { label: 'Corrected rule', value: 53 },
+            { label: 'Exact', value: 54.1, tone: 'green' },
+          ],
+        },
+        caption: 'Plain outs × 4 says 60% and overstates the draw. The corrected rule says 53%. The exact figure is **54.1%**.',
+        evidence: 'math',
       },
       {
         kind: 'table',
@@ -254,21 +304,6 @@ export const FOUNDATIONS_LESSONS: LessonContent[] = [
           'The exact figure is 45.0%. The corrected rule gives 12 × 4 − 4 = 44%, which is close. Plain outs × 4 says 48%, which overstates big draws. 26.1% is the chance with one card to come.',
       },
       {
-        kind: 'visual',
-        title: '15 outs, flop to river',
-        art: {
-          kind: 'bars',
-          unit: '%',
-          bars: [
-            { label: 'Outs × 4', value: 60, tone: 'gray' },
-            { label: 'Corrected rule', value: 53 },
-            { label: 'Exact', value: 54.1, tone: 'green' },
-          ],
-        },
-        caption: 'Plain outs × 4 says 60% and overstates the draw. The corrected rule says 53%. The exact figure is **54.1%**.',
-        evidence: 'math',
-      },
-      {
         kind: 'takeaway',
         points: [
           'On the flop, multiply outs by 4. Above 8 outs, subtract (outs − 8).',
@@ -304,6 +339,26 @@ export const FOUNDATIONS_LESSONS: LessonContent[] = [
           'On the turn the pot is 60 and villain bets 20. You call 20 into a final pot of 100. Your open ender hits on 8 of 46 cards. 20 ÷ (8/46) = 115, and 115 − 100 = **15**. On average you must win 15 more on the river when you hit.',
       },
       {
+        kind: 'hand',
+        title: 'The open ender',
+        cards: '9s8d',
+        board: 'Kd7c6h2s',
+        caption: 'Any 10 or 5 makes your straight. That is 8 outs among 46 unseen cards, or **17.4%**.',
+      },
+      {
+        kind: 'visual',
+        title: 'The pot you need when you hit',
+        art: {
+          kind: 'bars',
+          bars: [
+            { label: 'Final pot', value: 100, tone: 'gray' },
+            { label: 'Needed', value: 115, tone: 'brass' },
+          ],
+        },
+        caption: '20 ÷ (8/46) = 115. The final pot holds only 100. You must win **15** more on the river when you hit.',
+        evidence: 'math',
+      },
+      {
         kind: 'text',
         title: 'What makes implied odds real',
         body: [
@@ -319,6 +374,13 @@ export const FOUNDATIONS_LESSONS: LessonContent[] = [
           'Some hands win small pots and lose big ones. Low flush draws are one example. A weak ace like A5 on an ace high board is another.',
           'When these hands hit, they are sometimes second best and pay off a bigger hand. They need a better price, not a worse one.',
         ],
+      },
+      {
+        kind: 'hand',
+        title: 'A low flush draw',
+        cards: '4h3h',
+        board: 'AhKh8c',
+        caption: 'A heart on the turn gives you a flush. It also gives a bigger flush to anyone holding 2 hearts. Then you pay off a big pot.',
       },
       {
         kind: 'callout',
@@ -376,6 +438,31 @@ export const FOUNDATIONS_LESSONS: LessonContent[] = [
         example: 'Facing 50 into 100, MDF is 100 ÷ 150 = **66.7%**. Continue with at least two thirds of your range. Otherwise any two cards can bluff for profit.',
       },
       {
+        kind: 'visual',
+        title: 'Bigger bets, less defense',
+        art: {
+          kind: 'curve',
+          points: [
+            [0, 100],
+            [0.125, 88.9],
+            [0.25, 80],
+            [0.375, 72.7],
+            [0.5, 66.7],
+            [0.75, 57.1],
+            [1, 50],
+            [1.25, 44.4],
+            [1.5, 40],
+            [1.75, 36.4],
+            [2, 33.3],
+          ],
+          xLabel: 'Bet size, in pots',
+          yLabel: 'MDF, %',
+          mark: [0.5, 66.7],
+        },
+        caption: 'Against half pot, defend at least **66.7%** of your range. Against twice the pot, **33.3%** is enough.',
+        evidence: 'math',
+      },
+      {
         kind: 'table',
         title: 'Alpha, MDF and the balanced bluff share',
         columns: ['Bet size', 'Alpha', 'MDF', 'Bluffs in range'],
@@ -421,31 +508,6 @@ export const FOUNDATIONS_LESSONS: LessonContent[] = [
         explain: 'Alpha = 0.75 ÷ 1.75 = 42.9%. The 57.1% answer is MDF, which is how often the defender must continue.',
       },
       {
-        kind: 'visual',
-        title: 'Bigger bets, less defense',
-        art: {
-          kind: 'curve',
-          points: [
-            [0, 100],
-            [0.125, 88.9],
-            [0.25, 80],
-            [0.375, 72.7],
-            [0.5, 66.7],
-            [0.75, 57.1],
-            [1, 50],
-            [1.25, 44.4],
-            [1.5, 40],
-            [1.75, 36.4],
-            [2, 33.3],
-          ],
-          xLabel: 'Bet size, in pots',
-          yLabel: 'MDF, %',
-          mark: [0.5, 66.7],
-        },
-        caption: 'Against half pot, defend at least **66.7%** of your range. Against twice the pot, **33.3%** is enough.',
-        evidence: 'math',
-      },
-      {
         kind: 'takeaway',
         points: [
           'Alpha = bet ÷ (pot + bet).',
@@ -488,12 +550,10 @@ export const FOUNDATIONS_LESSONS: LessonContent[] = [
         evidence: 'math',
       },
       {
-        kind: 'text',
+        kind: 'visual',
         title: 'Card removal',
-        body: [
-          'Every card you see removes combos. With one ace on the board, AA drops from 6 combos to **3**. AK drops from 16 to **12**.',
-          'Cards in your own hand do the same. They change how often villain can be value betting or bluffing.',
-        ],
+        art: { kind: 'cards', cards: '', board: 'Ad8c4s' },
+        caption: 'Every card you see removes combos. With 1 ace on the board, AA drops from 6 combos to **3**. AK drops from 16 to **12**. Cards in your own hand do the same.',
         evidence: 'math',
       },
       {
@@ -506,6 +566,7 @@ export const FOUNDATIONS_LESSONS: LessonContent[] = [
       {
         kind: 'quiz',
         question: 'The board is K72 with three suits. You hold none of those ranks. How many set combos can villain have?',
+        board: 'Ks7d2c',
         choices: ['6', '9', '12', '18'],
         answer: 1,
         explain: 'Each pocket pair that matches the board has 3 combos left. KK, 77 and 22 give 3 + 3 + 3 = 9. The 18 answer forgets the cards on the board.',
@@ -513,6 +574,8 @@ export const FOUNDATIONS_LESSONS: LessonContent[] = [
       {
         kind: 'quiz',
         question: 'You hold one ace and the board shows one king. How many AK combos can villain have?',
+        cards: 'As9h',
+        board: 'Kd7c2h',
         choices: ['16', '12', '9', '6'],
         answer: 2,
         explain: 'Three aces and three kings are left. 3 × 3 = 9 combos. The 12 answer removes only one of the two cards you can see.',
@@ -549,6 +612,32 @@ export const FOUNDATIONS_LESSONS: LessonContent[] = [
         title: 'Stack to pot ratio',
         formula: 'SPR = effective stack ÷ pot on the flop',
         example: 'BTN opens 2.5bb and BB calls, 100bb deep. 97.5 ÷ 5.5 ≈ **17.7**. If BB 3bets to 11bb and BTN calls, 89 ÷ 22.5 ≈ **4.0**.',
+      },
+      {
+        kind: 'visual',
+        title: 'A single raised pot is deep',
+        art: {
+          kind: 'chips',
+          stacks: [
+            { label: 'Pot', bb: 5.5 },
+            { label: 'Behind', bb: 97.5 },
+          ],
+        },
+        caption: 'BTN opens 2.5bb and BB calls. 97.5bb sits behind a 5.5bb pot. That is an SPR of about **17.7**.',
+        evidence: 'math',
+      },
+      {
+        kind: 'visual',
+        title: 'A 3bet pot is shallow',
+        art: {
+          kind: 'chips',
+          stacks: [
+            { label: 'Pot', bb: 22.5 },
+            { label: 'Behind', bb: 89 },
+          ],
+        },
+        caption: 'After a 3bet to 11bb, 89bb sits behind a 22.5bb pot. That is an SPR of about **4.0**, against 17.7 in a single raised pot.',
+        evidence: 'math',
       },
       {
         kind: 'table',
@@ -594,19 +683,6 @@ export const FOUNDATIONS_LESSONS: LessonContent[] = [
         explain: 'The pot is 11 + 11 + 0.5 = 22.5bb with 89bb behind. 89 ÷ 22.5 ≈ 4. About 18 is the single raised pot number.',
       },
       {
-        kind: 'visual',
-        title: 'A 3bet pot is shallow',
-        art: {
-          kind: 'chips',
-          stacks: [
-            { label: 'Pot', bb: 22.5 },
-            { label: 'Behind', bb: 89 },
-          ],
-        },
-        caption: 'After a 3bet to 11bb, 89bb sits behind a 22.5bb pot. That is an SPR of about **4.0**, against 17.7 in a single raised pot.',
-        evidence: 'math',
-      },
-      {
         kind: 'takeaway',
         points: [
           'SPR = stack ÷ pot. Single raised pots are about 18 and 3bet pots about 4.',
@@ -636,23 +712,40 @@ export const FOUNDATIONS_LESSONS: LessonContent[] = [
         body: 'Two ranges can have the same average equity and need very different strategies. What matters is how that equity is spread.',
       },
       {
-        kind: 'table',
+        kind: 'visual',
         title: 'Same average, different shape',
-        columns: ['Range', 'Equity of its hands', 'Average'],
-        rows: [
-          ['Polarized', 'Half at 90%, half at 10%', '50%'],
-          ['Condensed', 'All near 50%', '50%'],
-        ],
-        note: 'An illustration of shape, not a real board.',
+        art: {
+          kind: 'bars',
+          unit: '%',
+          bars: [
+            { label: 'Polarized, top half', value: 90 },
+            { label: 'Polarized, bottom half', value: 10 },
+            { label: 'Condensed, every hand', value: 50, tone: 'gray' },
+          ],
+        },
+        caption: 'An illustration, not a real board. Both ranges average 50%. The polarized one is strong or weak, and the condensed one sits in the middle.',
         evidence: 'math',
       },
       {
-        kind: 'text',
+        kind: 'visual',
         title: 'What each shape wants',
+        art: {
+          kind: 'tree',
+          root: 'Range shape',
+          branches: [
+            { label: 'Polarized', value: 'Bet big', tone: 'brass' },
+            { label: 'Condensed', value: 'Check and call', tone: 'green' },
+          ],
+        },
+        caption: 'A polarized range’s strong hands want maximum value. Its weak hands can only win by bluffing. A condensed range that bets big folds out worse hands and gets called by better ones.',
+        evidence: 'solver',
+      },
+      {
+        kind: 'text',
+        title: 'Seeing the shape',
         body: [
-          'A polarized range wants to bet big. Its strong hands want maximum value. Its weak hands can only win by bluffing.',
-          'A condensed range wants to check and call. Betting big folds out worse hands and gets called by better ones.',
-          'An equity graph shows the shape. Sort a range’s hands by equity against the other range and plot them. A polarized range is steep at both ends. A condensed range is flat in the middle.',
+          'An equity graph shows the shape. Sort a range’s hands by equity against the other range and plot them.',
+          'A polarized range is steep at both ends. A condensed range is flat in the middle.',
         ],
         evidence: 'solver',
       },
@@ -670,21 +763,6 @@ export const FOUNDATIONS_LESSONS: LessonContent[] = [
         choices: ['Range A', 'Range B', 'Both equally'],
         answer: 0,
         explain: 'The polarized range bets big. Its nuts want value and its air needs folds. The same average equity does not mean the same strategy.',
-      },
-      {
-        kind: 'visual',
-        title: 'Same average, different shape',
-        art: {
-          kind: 'bars',
-          unit: '%',
-          bars: [
-            { label: 'Polarized, top half', value: 90 },
-            { label: 'Polarized, bottom half', value: 10 },
-            { label: 'Condensed, every hand', value: 50, tone: 'gray' },
-          ],
-        },
-        caption: 'An illustration, not a real board. Both ranges average 50%. The polarized one is strong or weak, and the condensed one sits in the middle.',
-        evidence: 'math',
       },
       {
         kind: 'takeaway',
@@ -853,10 +931,17 @@ export const FOUNDATIONS_LESSONS: LessonContent[] = [
         example: 'A factor above 1 means a hand wins more than its raw share. Position and good play do that. A factor below 1 means the hand gets pushed off its equity.',
       },
       {
+        kind: 'visual',
+        title: 'Position',
+        art: { kind: 'table', seats: 6, button: 'BTN', hero: 'BTN', highlight: ['BB'], note: 'You act last' },
+        caption: 'Acting last, you see what villain does first. You can take free cards and control the pot size.',
+        evidence: 'solver',
+      },
+      {
         kind: 'text',
         title: 'What drives it',
         body: [
-          '**Position** matters most. Acting last, you see what villain does first. You can take free cards and control the pot size. In position, hands can realize more than 100% of their raw equity.',
+          '**Position** matters most. In position, hands can realize more than 100% of their raw equity.',
           '**Playability** comes next. Suited and connected hands make strong draws and nut hands. Offsuit and dominated hands get pushed off their equity more often.',
           '**Range strength** matters too. A capped range realizes less because it cannot stand up to pressure.',
         ],

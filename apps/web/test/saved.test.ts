@@ -1,5 +1,6 @@
 import 'fake-indexeddb/auto';
 import { beforeEach, describe, expect, it } from 'vitest';
+import { entryFor } from '../src/state/lessons';
 import { db } from '../src/state/db';
 import { buildQueue, buildSavedDeck, recordAnswer } from '../src/state/review';
 import { lessonStepId, savedCardId, saveLessonStep, saveSolverSpot, unsave } from '../src/state/saved';
@@ -32,7 +33,9 @@ describe('saves in review', () => {
   });
 
   it('use the lesson step title, and the solver hand and board', async () => {
-    const step = await saveLessonStep('foundations/math/pot-odds', 2);
+    const steps = entryFor('foundations/math/pot-odds')!.content!.steps;
+    const index = steps.findIndex((s) => 'title' in s && s.title === 'Learn these by heart');
+    const step = await saveLessonStep('foundations/math/pot-odds', index);
     expect(step.title).toBe('Learn these by heart');
     const s = await saveSolverSpot(spot);
     expect(s.title).toBe('AKo on Kc8h5h2s2d');

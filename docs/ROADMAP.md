@@ -100,6 +100,8 @@ See [SOLVER_DATA.md](SOLVER_DATA.md).
 ## Phase 4: Math and the Spot Lab builder
 
 - [x] Gap lessons: hand reading, semi-bluffs, rake, reshoves, the bubble, final tables, live table basics
+- [x] Picture pass: every lesson has at most 2 text steps in a row, every core lesson at least 2 pictures; hand flow is a street by street walkthrough
+- [x] Mixed answers in hand quizzes (frequencies and splits), graded by mix distance
 - [x] Math facts deck in review: pot odds, MDF, alpha, combos, outs (exact, four choices)
 - [ ] Timed math speed rounds
 - [ ] Equity estimation drill (hand vs range) scored by error

@@ -149,6 +149,21 @@ export const TOURNAMENT_LESSONS: LessonContent[] = [
         evidence: 'math',
       },
       {
+        kind: 'visual',
+        title: 'One hand, three stacks',
+        art: {
+          kind: 'bars',
+          unit: 'bb',
+          bars: [
+            { label: '10bb', value: 0.57, tone: 'green' },
+            { label: '15bb', value: -0.1, tone: 'red' },
+            { label: '20bb', value: -0.77, tone: 'red' },
+          ],
+        },
+        caption: 'The small blind shoves 9♣3♦ into the same assumed calling range. It earns **+0.57bb** at 10bb and loses money deeper.',
+        evidence: 'math',
+      },
+      {
         kind: 'text',
         title: 'Shorter stacks, wider shoves',
         body: [
@@ -181,12 +196,18 @@ export const TOURNAMENT_LESSONS: LessonContent[] = [
         evidence: 'math',
       },
       {
-        kind: 'text',
+        kind: 'visual',
         title: 'The gap: callers need more',
-        body: [
-          'Facing a 10bb shove from the small blind, the big blind calls 9bb into a pot of 12bb. It needs **42.9%** equity. Against a 20bb shove it needs **46.3%**.',
-          'The shover profited with 30.7% equity when called, because folds paid for the rest. The caller gets no fold equity. So calling ranges are tighter than shoving ranges at the same stack.',
-        ],
+        art: {
+          kind: 'bars',
+          unit: '%',
+          bars: [
+            { label: 'BB needs vs a 10bb shove', value: 42.9, tone: 'red' },
+            { label: 'BB needs vs a 20bb shove', value: 46.3, tone: 'red' },
+            { label: '9♣3♦ when called', value: 30.7, tone: 'green' },
+          ],
+        },
+        caption: 'Facing a 10bb shove, the big blind calls 9bb into a pot of 12bb. The shover profited with 30.7% when called, because folds paid for the rest. The caller gets no fold equity. So calling ranges are tighter than shoving ranges.',
         evidence: 'math',
       },
       {
@@ -218,21 +239,6 @@ export const TOURNAMENT_LESSONS: LessonContent[] = [
         answer: 0,
         explain:
           'A shove now risks less to win the same pot. The fold term weighs more, and losing when called costs less. Tightening up feels safe, but in chip EV the ranges widen.',
-      },
-      {
-        kind: 'visual',
-        title: 'One hand, three stacks',
-        art: {
-          kind: 'bars',
-          unit: 'bb',
-          bars: [
-            { label: '10bb', value: 0.57, tone: 'green' },
-            { label: '15bb', value: -0.1, tone: 'red' },
-            { label: '20bb', value: -0.77, tone: 'red' },
-          ],
-        },
-        caption: 'The small blind shoves 9♣3♦ into the same assumed calling range. It earns **+0.57bb** at 10bb and loses money deeper.',
-        evidence: 'math',
       },
       {
         kind: 'takeaway',
@@ -273,13 +279,18 @@ export const TOURNAMENT_LESSONS: LessonContent[] = [
         evidence: 'math',
       },
       {
-        kind: 'text',
+        kind: 'visual',
         title: 'How the model works',
-        body: [
-          'Your chance to finish first equals your share of the chips.',
-          'For second, take each other player’s chance to win. Multiply it by your share of the chips left without them. Add these up. Later places work the same way.',
-          'Your money equity ($EV) is each payout times the chance of that place. It is a model. It ignores skill, position and rising blinds. It also ignores how future hands play.',
-        ],
+        art: {
+          kind: 'tree',
+          root: 'ICM, place by place',
+          branches: [
+            { label: '1st', value: 'Your share of all the chips', tone: 'brass' },
+            { label: '2nd', value: 'Each rival wins, then your share of the rest', tone: 'brass' },
+            { label: '$EV', value: 'Each payout times its chance', tone: 'green' },
+          ],
+        },
+        caption: 'Later places work the same way as 2nd. ICM is a model. It ignores skill and position. It also ignores rising blinds and how future hands play.',
         evidence: 'math',
       },
       {
@@ -313,10 +324,26 @@ export const TOURNAMENT_LESSONS: LessonContent[] = [
         evidence: 'math',
       },
       {
+        kind: 'visual',
+        title: 'Chips against money',
+        art: {
+          kind: 'bars',
+          unit: '%',
+          bars: [
+            { label: 'A, chips', value: 50, tone: 'gray' },
+            { label: 'A, money', value: 38.4 },
+            { label: 'C, chips', value: 20, tone: 'gray' },
+            { label: 'C, money', value: 28.9 },
+          ],
+        },
+        caption: 'The chip leader holds half the chips but **38.4%** of the money. The short stack holds 20% of the chips but **28.9%** of the money.',
+        evidence: 'math',
+      },
+      {
         kind: 'text',
         title: 'What the table shows',
         body: [
-          'The chip leader holds half the chips but only 38.4% of the money. The short stack holds 20.0% of the chips but 28.9% of the money. Third place pays $20 even with zero chips left.',
+          'Third place pays $20 even with zero chips left. That is why the short stack’s money share beats its chip share.',
           'Per chip, A’s stack is worth about half as much money as C’s. That is $0.0077 against $0.0144.',
         ],
         evidence: 'math',
@@ -373,22 +400,6 @@ export const TOURNAMENT_LESSONS: LessonContent[] = [
         answer: 0,
         explain:
           'With payouts spread over places, doubling up never doubles your prize. In the model, only the payout structure makes chips and money differ. Rising blinds and stack pressure matter at the table, but they are not in the model.',
-      },
-      {
-        kind: 'visual',
-        title: 'Chips against money',
-        art: {
-          kind: 'bars',
-          unit: '%',
-          bars: [
-            { label: 'A, chips', value: 50, tone: 'gray' },
-            { label: 'A, money', value: 38.4 },
-            { label: 'C, chips', value: 20, tone: 'gray' },
-            { label: 'C, money', value: 28.9 },
-          ],
-        },
-        caption: 'The chip leader holds half the chips but **38.4%** of the money. The short stack holds 20% of the chips but **28.9%** of the money.',
-        evidence: 'math',
       },
       {
         kind: 'takeaway',

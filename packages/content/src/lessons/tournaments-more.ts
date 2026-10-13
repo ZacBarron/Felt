@@ -279,13 +279,23 @@ export const TOURNAMENT_MORE_LESSONS: LessonContent[] = [
         evidence: 'math',
       },
       {
-        kind: 'text',
+        kind: 'visual',
         title: 'Heads up, chips are money again',
-        body: [
-          'With 2 players left, $EV is second place plus your chip share of the gap. It is a straight line in chips.',
-          'With 60% of the chips and payouts of $400 and $250, you have 250 + 0.6 × 150 = **$340**.',
-          'So there is no risk premium heads up. Chip EV and ICM agree.',
-        ],
+        art: {
+          kind: 'curve',
+          points: [
+            [0, 250],
+            [20, 280],
+            [40, 310],
+            [60, 340],
+            [80, 370],
+            [100, 400],
+          ],
+          xLabel: 'Your chips, %',
+          yLabel: 'Heads up $EV',
+          mark: [60, 340],
+        },
+        caption: 'Payouts are $400 and $250. With 2 players left, $EV is second place plus your chip share of the gap. 250 + 0.6 × 150 = **$340**. It is a straight line, so there is no risk premium heads up.',
         evidence: 'math',
       },
       {

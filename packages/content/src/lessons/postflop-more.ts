@@ -14,13 +14,17 @@ export const POSTFLOP_MORE_LESSONS: LessonContent[] = [
         body: 'Saying a board favors the raiser is a claim about 2 ranges. You can check it. First ask which range has more equity. Then ask which has more of the hands that win big pots.',
       },
       {
-        kind: 'text',
+        kind: 'visual',
         title: 'Two kinds of advantage',
-        body: [
-          '**Range advantage** means your whole range has more equity than theirs.',
-          '**Nut advantage** means you hold more of the strongest hands, like sets and straights.',
-          'The 2 often point the same way, but not always. Range advantage mostly sets how often you bet. Nut advantage mostly sets how big you can bet.',
-        ],
+        art: {
+          kind: 'tree',
+          root: 'Who has the advantage?',
+          branches: [
+            { label: 'Range advantage', value: 'Sets how often you bet', tone: 'green' },
+            { label: 'Nut advantage', value: 'Sets how big you bet', tone: 'brass' },
+          ],
+        },
+        caption: '**Range advantage** means your whole range has more equity than theirs. **Nut advantage** means you hold more of the strongest hands, like sets and straights. The 2 often point the same way, but not always.',
         evidence: 'solver',
       },
       {
@@ -221,6 +225,12 @@ export const POSTFLOP_MORE_LESSONS: LessonContent[] = [
         body: 'BTN opens and BB calls. BB checks the flop, and BTN checks behind. If BB bets the turn, that bet is a probe. It attacks a range that has just told you something.',
       },
       {
+        kind: 'visual',
+        title: 'Checked flop, then a turn bet',
+        art: { kind: 'streets', active: 'turn' },
+        caption: 'BB checks the flop and BTN checks behind. On the turn BB acts first again. A bet now is a **probe**.',
+      },
+      {
         kind: 'text',
         title: 'The check back is capped',
         body: [
@@ -317,13 +327,17 @@ export const POSTFLOP_MORE_LESSONS: LessonContent[] = [
         body: 'You bet the flop and got called. Every later street asks the same question. Do this card and this hand still want to bet? Good barrels depend on the turn card and your hand’s equity.',
       },
       {
-        kind: 'text',
-        title: 'Which turns to keep betting',
-        body: [
-          'Barrel more on turns that help your range more than theirs.',
-          'Those include overcards you hold more of, like an ace or king on a low board. Blanks that change little are good too.',
-          'Slow down on turns that help the caller. Low connecting cards can complete their straights. Flush cards help them when they hold more of that draw.',
-        ],
+        kind: 'board',
+        title: 'Barrel on turns that help you',
+        board: '8c6d2sAh',
+        caption: 'You bet this flop and got called. The ace is an overcard you hold more of than the caller. Barrel more on turns like this. Blanks that change little are good too.',
+        evidence: 'solver',
+      },
+      {
+        kind: 'board',
+        title: 'Slow down on turns that help them',
+        board: '8c6d2s5h',
+        caption: 'Low connecting cards like this 5 can complete the caller’s straights. Flush cards help them too when they hold more of that draw.',
         evidence: 'solver',
       },
       {
@@ -438,13 +452,18 @@ export const POSTFLOP_MORE_LESSONS: LessonContent[] = [
         evidence: 'math',
       },
       {
-        kind: 'text',
+        kind: 'visual',
         title: 'Bluffs work far less',
-        body: [
-          'A half pot bluff needs everyone to fold **33.3%** of the time.',
-          'Heads up, an opponent who folds 50% makes it profitable.',
-          'Against 3 players who each fold 60%, all 3 fold only **21.6%** of the time. The bluff loses.',
-        ],
+        art: {
+          kind: 'bars',
+          unit: '%',
+          bars: [
+            { label: 'Folds a half pot bluff needs', value: 33.3, tone: 'gray' },
+            { label: '1 player who folds 50%', value: 50, tone: 'green' },
+            { label: '3 players who fold 60% each', value: 21.6, tone: 'red' },
+          ],
+        },
+        caption: 'Heads up, an opponent who folds 50% makes a half pot bluff profitable. Against 3 players who each fold 60%, all 3 fold only **21.6%** of the time. The bluff loses.',
         evidence: 'math',
       },
       {
@@ -474,9 +493,23 @@ export const POSTFLOP_MORE_LESSONS: LessonContent[] = [
         title: 'Defense is shared',
         body: [
           'Against a pot sized bet, the group must continue **50%** of the time together. Each player does not need 50% alone.',
-          'With 2 players defending independently, each needs only **29.3%**. That comes from 1 − (1 − x)² = 0.5. With 3 players, each needs **20.6%**.',
           'Like MDF (minimum defense frequency), this is a river idea and a simplification. But the direction holds. Each player can fold more than heads up.',
         ],
+        evidence: 'math',
+      },
+      {
+        kind: 'visual',
+        title: 'Each player defends less',
+        art: {
+          kind: 'bars',
+          unit: '%',
+          bars: [
+            { label: 'Heads up', value: 50, tone: 'gray' },
+            { label: 'Each of 2 players', value: 29.3, tone: 'brass' },
+            { label: 'Each of 3 players', value: 20.6, tone: 'green' },
+          ],
+        },
+        caption: 'Against a pot sized bet, players defending independently share the 50%. With 2 players each needs **29.3%**, since 1 − (1 − x)² = 0.5. With 3 players each needs **20.6%**.',
         evidence: 'math',
       },
       {
@@ -523,6 +556,12 @@ export const POSTFLOP_MORE_LESSONS: LessonContent[] = [
         body: 'You open and 2 players call. Small bets with your whole range work well heads up. Multiway, that habit mostly stops working. The player in the middle and the check raiser face new problems too.',
       },
       {
+        kind: 'visual',
+        title: 'A three way pot',
+        art: { kind: 'table', seats: 9, button: 'BTN', hero: 'CO', highlight: ['BTN', 'BB'], note: 'Three way pot' },
+        caption: 'You open the cutoff. The button and the big blind call. The big blind acts first after the flop, and the button acts last.',
+      },
+      {
         kind: 'text',
         title: 'Bet less, and bet stronger',
         body: [
@@ -560,13 +599,17 @@ export const POSTFLOP_MORE_LESSONS: LessonContent[] = [
         evidence: 'solver',
       },
       {
-        kind: 'text',
+        kind: 'visual',
         title: 'Share the defense',
-        body: [
-          'Heads up on the river, you defend roughly MDF (minimum defense frequency). Multiway, the defense is shared.',
-          'Against a pot sized bet with 2 defenders acting independently, each needs only **29.3%**. That keeps the bettor from profiting with any bluff.',
-          'This is a simplification. But it is why each multiway defender can fold more than heads up.',
-        ],
+        art: {
+          kind: 'bars',
+          unit: '%',
+          bars: [
+            { label: 'Heads up', value: 50, tone: 'gray' },
+            { label: 'Each of 2 defenders', value: 29.3, tone: 'brass' },
+          ],
+        },
+        caption: 'Against a pot sized river bet, heads up you defend roughly MDF (minimum defense frequency). With 2 defenders acting independently, each needs only **29.3%**. This is a simplification. But it is why each multiway defender can fold more.',
         evidence: 'math',
       },
       {

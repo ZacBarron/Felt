@@ -28,13 +28,11 @@ export const POSTFLOP_LESSONS: LessonContent[] = [
         evidence: 'solver',
       },
       {
-        kind: 'text',
+        kind: 'board',
         title: 'Why high boards favor the raiser',
-        body: [
-          'The preflop raiser has more big cards. Hands like AA and AK sit mostly in its range.',
-          'The big blind calls with more small and connected hands. It 3bets its best high card hands before the flop.',
-          'So on a high disconnected flop, the raiser has more strong pairs. The caller has many hands that missed.',
-        ],
+        board: 'Ks7d2c',
+        caption:
+          'The raiser has more big cards, like AA and AK. The big blind 3bets its best high card hands before the flop. So on K72 the raiser has more strong pairs. The caller has many hands that missed.',
         evidence: 'solver',
       },
       {
@@ -64,6 +62,7 @@ export const POSTFLOP_LESSONS: LessonContent[] = [
       {
         kind: 'quiz',
         question: 'On a dry K72 rainbow flop, which c-bet size does the raiser tend to use?',
+        board: 'Kd7s2h',
         choices: ['About 75% pot', 'About 125% pot', 'About 33% pot'],
         answer: 2,
         explain:
@@ -92,13 +91,11 @@ export const POSTFLOP_LESSONS: LessonContent[] = [
         body: 'In position as the preflop raiser, you are in a comfortable spot. The question is not whether to bet. It is which hands bet and which check back.',
       },
       {
-        kind: 'text',
+        kind: 'board',
         title: 'Range bets on good boards',
-        body: [
-          'Some flops strongly favor you, like K72 or A83 rainbow. There, solvers often bet small with almost every hand.',
-          'The small bet risks little with your weak hands. It denies equity to the big blind’s overcards and backdoor draws.',
-          'It also gets value from weaker pairs that have to call.',
-        ],
+        board: 'Kc7s2d',
+        caption:
+          'Some flops strongly favor you, like K72 rainbow. There, solvers often bet small with almost every hand. The small bet risks little with your weak hands. It denies equity to the big blind’s overcards and backdoor draws. It also gets value from weaker pairs.',
         evidence: 'solver',
       },
       {
@@ -111,6 +108,13 @@ export const POSTFLOP_LESSONS: LessonContent[] = [
         ],
         example:
           'If BB folds more than **25%** to a third pot bet, any two cards profit as a bluff. So BB must continue with **75%** of its range. Much of that range is weak.',
+      },
+      {
+        kind: 'visual',
+        title: 'The big blind must defend 75%',
+        art: { kind: 'ring', value: 0.75, label: 'MDF', caption: 'Facing a third pot bet' },
+        caption: 'A third pot bet needs folds only **25%** of the time to profit as a bluff. So the big blind must continue with **75%** of its range.',
+        evidence: 'math',
       },
       {
         kind: 'text',
@@ -235,6 +239,31 @@ export const POSTFLOP_LESSONS: LessonContent[] = [
           'In a single raised pot at 100bb, the flop pot is 5.5bb with 97.5bb behind. Bets of **116%** pot on each of 3 streets get the stacks in. In a 3bet pot of 22.5bb with 89bb behind, the size is **54%**. So deep polarized lines naturally include overbets.',
       },
       {
+        kind: 'visual',
+        title: 'Lower SPR, smaller bets',
+        art: {
+          kind: 'curve',
+          points: [
+            [0.5, 13],
+            [1, 22.1],
+            [2, 35.5],
+            [3, 45.6],
+            [4, 54],
+            [6, 67.6],
+            [8, 78.6],
+            [10, 87.9],
+            [12, 96.2],
+            [15, 107.1],
+            [20, 122.4],
+          ],
+          xLabel: 'SPR',
+          yLabel: 'Bet each street, % of pot',
+          mark: [4, 54],
+        },
+        caption: 'The geometric size over 3 streets for each SPR (stack to pot ratio). A 3bet pot near SPR 4 bets about **54%**. Above an SPR of 13, the size passes 100% of the pot.',
+        evidence: 'math',
+      },
+      {
         kind: 'callout',
         tone: 'theory',
         title: 'One size or two',
@@ -353,12 +382,11 @@ export const POSTFLOP_LESSONS: LessonContent[] = [
         body: 'The check raise is how the big blind fights back against frequent small c-bets. It builds the pot with strong hands. It also makes semi bluffs pay.',
       },
       {
-        kind: 'text',
+        kind: 'board',
         title: 'Where it lives',
-        body: [
-          'Check raises are most common where the big blind has the nut advantage. That means low and middling connected boards like 765 or 986. There BB holds more of the strongest hands.',
-          'On boards like K72 or A83 rainbow, BB check raises much less. The raiser holds most of the strongest hands there.',
-        ],
+        board: '7c6h5h',
+        caption:
+          'Check raises are most common where the big blind has the nut advantage. Low and middling connected boards like this one are the main example. On boards like K72 or A83 rainbow, BB check raises much less. The raiser holds most of the strongest hands there.',
         evidence: 'solver',
       },
       {

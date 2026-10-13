@@ -14,6 +14,19 @@ export const PREFLOP_LESSONS: LessonContent[] = [
         body: 'From the first seats, 8 players still act behind you. Any of them can wake up with a big hand. You will also often play the pot out of position. So ranges start tight and widen one seat at a time.',
       },
       {
+        kind: 'visual',
+        title: 'Eight players still to act',
+        art: {
+          kind: 'table',
+          seats: 9,
+          button: 'BTN',
+          hero: 'UTG',
+          highlight: ['UTG+1', 'UTG+2', 'LJ', 'HJ', 'CO', 'BTN', 'SB', 'BB'],
+          note: '8 players behind you',
+        },
+        caption: 'From UTG, every other seat acts after you. Any of them can wake up with a big hand.',
+      },
+      {
         kind: 'chart',
         chartId: '9max-100-rfi-utg',
         title: 'UTG opens about 12%',
@@ -54,11 +67,15 @@ export const PREFLOP_LESSONS: LessonContent[] = [
         body: [
           'A hand opens when raising earns more than folding. Folding is worth zero.',
           'Early on, the risk is running into a strong hand behind you. With 8 players left, someone holds a premium far more often than with 2 left.',
-          'Offsuit hands suffer most. AK and KQ dominate KJo, and so does AJ. Pairs from JJ up crush it.',
-          'KJo also rarely makes a hand strong enough to win a big pot.',
           'Suited hands can make flushes, so they realize more of their equity. That is why A9s opens before ATo.',
         ],
         evidence: 'solver',
+      },
+      {
+        kind: 'hand',
+        title: 'Offsuit hands suffer most',
+        cards: 'KsJd',
+        caption: 'AK and KQ dominate KJo, and so does AJ. Pairs from JJ up crush it. KJo also rarely makes a hand strong enough to win a big pot.',
       },
       {
         kind: 'quiz',
@@ -75,19 +92,6 @@ export const PREFLOP_LESSONS: LessonContent[] = [
         choices: ['Mix raise and fold', 'Fold', 'Raise'],
         answer: 2,
         explain: 'The LJ always opens A3s. It can make the nut flush and a wheel. The ace also makes AA and AK less likely behind you. A2s is the weakest suited ace. It still opens 80% of the time.',
-      },
-      {
-        kind: 'visual',
-        title: 'Eight players still to act',
-        art: {
-          kind: 'table',
-          seats: 9,
-          button: 'BTN',
-          hero: 'UTG',
-          highlight: ['UTG+1', 'UTG+2', 'LJ', 'HJ', 'CO', 'BTN', 'SB', 'BB'],
-          note: '8 players behind you',
-        },
-        caption: 'From UTG, every other seat acts after you. Any of them can wake up with a big hand.',
       },
       {
         kind: 'takeaway',
@@ -120,6 +124,12 @@ export const PREFLOP_LESSONS: LessonContent[] = [
         caption: 'Every suited king always opens. So does every offsuit ace down to A4o. Offsuit kings always open from K9o and mix down to K5o.',
       },
       {
+        kind: 'visual',
+        title: 'Only the blinds are left',
+        art: { kind: 'table', seats: 9, button: 'BTN', hero: 'BTN', highlight: ['SB', 'BB'], note: '2 players behind you' },
+        caption: 'On the button, only the blinds act after you. Both play the rest of the hand out of position.',
+      },
+      {
         kind: 'text',
         title: 'Why so wide',
         body: [
@@ -150,12 +160,6 @@ export const PREFLOP_LESSONS: LessonContent[] = [
         explain: 'Suited queens always open from Q9s in the cutoff. Q7s is a close call. It raises 45% of the time and folds the rest. Q4s and below always fold.',
       },
       {
-        kind: 'visual',
-        title: 'Only the blinds are left',
-        art: { kind: 'table', seats: 9, button: 'BTN', hero: 'BTN', highlight: ['SB', 'BB'], note: '2 players behind you' },
-        caption: 'On the button, only the blinds act after you. Both play the rest of the hand out of position.',
-      },
-      {
         kind: 'takeaway',
         points: ['The cutoff opens about 28% and the button about 43%.', 'Suited kings and offsuit aces fill out late position ranges.', 'Steal more when the blinds play badly out of position.'],
       },
@@ -174,6 +178,12 @@ export const PREFLOP_LESSONS: LessonContent[] = [
         body: 'Only the big blind remains, so the small blind can open wide. But you will act first on every street after the flop.',
       },
       {
+        kind: 'visual',
+        title: 'Last to open, first to act',
+        art: { kind: 'table', seats: 9, button: 'BTN', hero: 'SB', highlight: ['BB'], note: 'You act first after the flop' },
+        caption: 'Only the big blind is left behind you. But after the flop you act first on every street.',
+      },
+      {
         kind: 'chart',
         chartId: '9max-100-rfi-sb',
         title: 'Raise only, about 42%',
@@ -186,6 +196,20 @@ export const PREFLOP_LESSONS: LessonContent[] = [
           'Open to about 3bb instead of 2.5bb. Out of position, you want to win more pots before the flop.',
           'A bigger raise also makes the big blind defend a narrower range.',
         ],
+      },
+      {
+        kind: 'visual',
+        title: 'A bigger open, a worse price',
+        art: {
+          kind: 'bars',
+          unit: '%',
+          bars: [
+            { label: 'BB needs against 2.5bb', value: 30, tone: 'gray' },
+            { label: 'BB needs against 3bb', value: 33.3, tone: 'brass' },
+          ],
+        },
+        caption: 'Against 2.5bb the big blind calls 1.5bb to make a 5bb pot. That needs 30%. Against 3bb it calls 2bb to make 6bb, which needs 33.3%.',
+        evidence: 'math',
       },
       {
         kind: 'text',
@@ -254,6 +278,13 @@ export const PREFLOP_LESSONS: LessonContent[] = [
         example: 'On raw equity alone, **27%** breaks even. Most hands have that much against a button range. Out of position you realize less of your equity, so the real bar is higher.',
       },
       {
+        kind: 'visual',
+        title: 'The best price at the table',
+        art: { kind: 'ring', value: 1.5 / 5.5, label: 'Equity to call', caption: 'Big blind against a 2.5bb open' },
+        caption: 'You call 1.5bb to win a pot of 5.5bb. Raw equity of **27.3%** breaks even. Realization pushes the real bar higher.',
+        evidence: 'math',
+      },
+      {
         kind: 'chart',
         chartId: '9max-100-bb-vs-btn',
         title: 'Defend more than half',
@@ -282,6 +313,12 @@ export const PREFLOP_LESSONS: LessonContent[] = [
         evidence: 'solver',
       },
       {
+        kind: 'hand',
+        title: 'Suited keeps its equity',
+        cards: '4c2c',
+        caption: 'The chart calls 42s against a button open. It folds 64o, which has about the same raw equity.',
+      },
+      {
         kind: 'callout',
         tone: 'exploit',
         title: 'Rake changes this',
@@ -302,13 +339,6 @@ export const PREFLOP_LESSONS: LessonContent[] = [
         choices: ['Call every time', 'Call about 60%, 3bet the rest', '3bet about 60%, call the rest', '3bet every time'],
         answer: 2,
         explain: 'A4s 3bets 60% of the time and calls the rest. A5s 3bets a little more and A3s a little less. The ace makes AA and AK less likely, which suits a 3bet. These hands are too good to fold, so they call when they do not 3bet.',
-      },
-      {
-        kind: 'visual',
-        title: 'The best price at the table',
-        art: { kind: 'ring', value: 1.5 / 5.5, label: 'Equity to call', caption: 'Big blind against a 2.5bb open' },
-        caption: 'You call 1.5bb to win a pot of 5.5bb. Raw equity of **27.3%** breaks even. Realization pushes the real bar higher.',
-        evidence: 'math',
       },
       {
         kind: 'takeaway',
