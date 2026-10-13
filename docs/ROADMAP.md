@@ -99,6 +99,7 @@ See [SOLVER_DATA.md](SOLVER_DATA.md).
 
 ## Phase 4: Math and the Spot Lab builder
 
+- [x] Gap lessons: hand reading, semi-bluffs, rake, reshoves, the bubble, final tables, live table basics
 - [x] Math facts deck in review: pot odds, MDF, alpha, combos, outs (exact, four choices)
 - [ ] Timed math speed rounds
 - [ ] Equity estimation drill (hand vs range) scored by error

@@ -47,6 +47,7 @@ export const CURRICULUM: Track[] = [
           lesson('best-five', 'Making your best five', ['concept']),
           lesson('hand-flow', 'How a hand plays out', ['concept']),
           lesson('actions', 'Your options on your turn', ['concept']),
+          lesson('table-rules', 'Live table basics', ['concept']),
         ],
       },
       {
@@ -142,6 +143,7 @@ export const CURRICULUM: Track[] = [
         lessons: [
           lesson('depth', 'How ranges change at 40, 60, 100 and 200bb', ['concept', 'range-recall']),
           lesson('open-sizing', 'Open and 3bet sizing theory', ['concept']),
+          lesson('rake', 'How rake changes preflop play', ['concept', 'math']),
         ],
       },
       {
@@ -184,6 +186,14 @@ export const CURRICULUM: Track[] = [
           lesson('vs-cbet', 'Facing a c-bet', ['spot-action', 'math']),
           lesson('check-raise', 'Check raising', ['spot-action', 'frequency']),
           lesson('probe', 'Probes and delayed c-bets', ['spot-action']),
+        ],
+      },
+      {
+        id: 'hand-reading',
+        title: 'Hand reading',
+        lessons: [
+          lesson('narrowing', 'Hand reading: narrowing ranges street by street', ['concept', 'math']),
+          lesson('semi-bluffs', 'Semi-bluffing with draws', ['spot-action', 'math']),
         ],
       },
       {
@@ -295,7 +305,10 @@ export const CURRICULUM: Track[] = [
         lessons: [
           lesson('antes', 'Antes and wider ranges', ['concept', 'math']),
           lesson('push-fold', 'Push or fold with a short stack', ['range-recall', 'math']),
+          lesson('reshoves', 'Reshoving 12 to 25bb', ['spot-action', 'math']),
           lesson('icm', 'ICM: why chips are not money', ['concept', 'math']),
+          lesson('bubble', 'The bubble and pay jumps', ['concept', 'math']),
+          lesson('final-table', 'Final tables', ['concept', 'math']),
         ],
       },
     ],

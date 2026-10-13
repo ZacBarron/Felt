@@ -240,6 +240,7 @@ const PLACEMENT_ORDER = [
   'postflop/textures',
   'postflop/cbet',
   'postflop/defense',
+  'postflop/hand-reading',
   'postflop/later-streets',
   'postflop/river',
   'exploit/adjustments',

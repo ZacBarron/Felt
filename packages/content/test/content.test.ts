@@ -310,9 +310,9 @@ describe('poker basics', () => {
   const basics = [...LESSON_CONTENT.values()].filter((l) => l.key.startsWith('basics/'));
   const chartIds = new Set(STARTER_CHARTS.map((c) => c.id));
 
-  it('comes first, with 10 lessons', () => {
+  it('comes first, with 11 lessons', () => {
     expect(CURRICULUM[0].id).toBe('basics');
-    expect(basics).toHaveLength(10);
+    expect(basics).toHaveLength(11);
   });
 
   it('shows real, legal cards and seats in every picture and question', async () => {
