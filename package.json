@@ -5,7 +5,10 @@
   "packageManager": "pnpm@10.28.0",
   "scripts": {
     "dev": "pnpm --filter @felt/web dev",
+    "dev:server": "pnpm --filter @felt/server dev",
     "build": "pnpm --filter @felt/web build",
+    "build:server": "pnpm build && pnpm --filter @felt/server build",
+    "start": "WEB_DIR=${WEB_DIR:-apps/web/dist} node --no-warnings apps/server/dist/server.cjs",
     "preview": "pnpm --filter @felt/web preview",
     "test": "pnpm -r test",
     "typecheck": "pnpm -r typecheck",

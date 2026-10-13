@@ -1,0 +1,23 @@
+# Keep the build context small and free of local state.
+.git
+.github
+**/node_modules
+**/dist
+apps/web/dist-artifact
+apps/server/data
+**/coverage
+**/.vite
+**/*.log
+**/*.sqlite
+**/*.sqlite-*
+.env
+**/.env
+**/.env.*
+!**/.env.example
+promo
+docs
+.DS_Store
+Dockerfile
+.dockerignore
+fly.toml
+render.yaml

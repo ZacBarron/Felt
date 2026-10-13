@@ -1,0 +1,39 @@
+# Fly.io config for Felt. See docs/DEPLOY.md.
+# Change the app name to your own. It must be unique on Fly.
+app = "felt-app"
+primary_region = "iad"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  NODE_ENV = "production"
+  PORT = "8787"
+  DATABASE_PATH = "/data/felt.sqlite"
+  # The address players use. Change it when you add your own domain.
+  APP_URL = "https://felt-app.fly.dev"
+
+# One volume holds the SQLite file. Create it once: fly volumes create felt_data --size 1
+[[mounts]]
+  source = "felt_data"
+  destination = "/data"
+
+[http_service]
+  internal_port = 8787
+  force_https = true
+  # Keep one machine running so study reminders go out on time.
+  auto_stop_machines = "off"
+  auto_start_machines = true
+  min_machines_running = 1
+
+  [[http_service.checks]]
+    method = "GET"
+    path = "/api/health"
+    interval = "30s"
+    timeout = "5s"
+    grace_period = "10s"
+
+[[vm]]
+  memory = "512mb"
+  cpu_kind = "shared"
+  cpus = 1

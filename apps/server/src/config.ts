@@ -21,7 +21,9 @@ export interface Config {
   maxSnapshotBytes: number;
 }
 
-export function loadConfig(env: Record<string, string | undefined> = process.env): Config {
+export function loadConfig(raw: Record<string, string | undefined> = process.env): Config {
+  // Host dashboards often save a blank field as an empty string. Blank means unset.
+  const env = Object.fromEntries(Object.entries(raw).filter(([, v]) => v !== undefined && v.trim() !== ''));
   const production = env.NODE_ENV === 'production';
   return {
     port: Number(env.PORT ?? 8787),

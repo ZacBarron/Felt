@@ -1,0 +1,46 @@
+# Render Blueprint for Felt. See docs/DEPLOY.md.
+# Persistent disks need a paid instance type (Starter or above).
+services:
+  - type: web
+    name: felt
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: starter
+    healthCheckPath: /api/health
+    # SQLite lives on one disk, so the service runs one instance.
+    numInstances: 1
+    disk:
+      name: felt-data
+      mountPath: /data
+      sizeGB: 1
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "8787"
+      - key: DATABASE_PATH
+        value: /data/felt.sqlite
+      # The address players use, for example https://felt.onrender.com.
+      - key: APP_URL
+        sync: false
+      # Sign in emails through resend.com.
+      - key: RESEND_API_KEY
+        sync: false
+      - key: EMAIL_FROM
+        sync: false
+      # Study reminders: pnpm --filter @felt/server vapid
+      - key: VAPID_PUBLIC_KEY
+        sync: false
+      - key: VAPID_PRIVATE_KEY
+        sync: false
+      - key: VAPID_SUBJECT
+        sync: false
+      # Felt Pro through Stripe. Optional.
+      - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: STRIPE_WEBHOOK_SECRET
+        sync: false
+      - key: STRIPE_PRICE_ANNUAL
+        sync: false
+      - key: STRIPE_PRICE_MONTHLY
+        sync: false
