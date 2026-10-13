@@ -651,7 +651,7 @@ function TreeArt({ root, branches }: { root: string; branches: { label: string; 
       <div className="tree-branches">
         {branches.map((b, i) => (
           <div key={i} className="tree-slot">
-            <div className="tree-branch" style={{ animationDelay: `${220 + i * 90}ms`, '--tone': toneFill(b.tone) } as CSSProperties}>
+            <div className={`tree-branch${b.value && b.value.length > 10 ? ' stack' : ''}`} style={{ animationDelay: `${220 + i * 90}ms`, '--tone': toneFill(b.tone) } as CSSProperties}>
               <span className="tree-label">{b.label}</span>
               {b.value && <span className={`tree-value tone-${b.tone ?? 'brass'}`}>{b.value}</span>}
             </div>
@@ -670,7 +670,7 @@ function TreeStep({ root, branches }: { root: string; branches: { label: string;
       <ul className="tree-list">
         {branches.map((b, i) => (
           <li key={i} className="tree-item" style={{ animationDelay: `${180 + i * 90}ms`, '--tone': toneFill(b.tone) } as CSSProperties}>
-            <span className="tree-branch">
+            <span className={`tree-branch${b.value && b.value.length > 10 ? ' stack' : ''}`}>
               <span className="tree-label">{b.label}</span>
               {b.value && <span className={`tree-value tone-${b.tone ?? 'brass'}`}>{b.value}</span>}
             </span>
