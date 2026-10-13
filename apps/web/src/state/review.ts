@@ -43,9 +43,12 @@ export async function addHandsToReview(items: readonly { chartId: string; hand: 
 export interface QueueItem {
   id: string;
   chartId: string;
-  mode: 'quick' | 'paint' | 'saved';
+  mode: 'quick' | 'paint' | 'saved' | 'quiz' | 'math';
   hand?: string;
   savedId?: string;
+  lessonKey?: string;
+  step?: number;
+  factId?: string;
   targetMs: number;
   isNew: boolean;
 }
@@ -56,12 +59,15 @@ export function startOfToday(now = new Date()): Date {
   return d;
 }
 
-const toItem = (c: Omit<StoredCard, 'fsrs' | 'due' | 'createdAt'>, isNew: boolean): QueueItem => ({
+export const toItem = (c: Omit<StoredCard, 'fsrs' | 'due' | 'createdAt'>, isNew: boolean): QueueItem => ({
   id: c.id,
   chartId: c.chartId,
   mode: c.mode,
   hand: c.hand,
   savedId: c.savedId,
+  lessonKey: c.lessonKey,
+  step: c.step,
+  factId: c.factId,
   targetMs: c.targetMs,
   isNew,
 });
@@ -103,7 +109,7 @@ export async function buildSavedDeck(): Promise<QueueItem[]> {
 }
 
 /** Saved items: cards that are due, and saves that have no card yet. */
-async function savedQueue(now: Date) {
+export async function savedQueue(now: Date) {
   const items = await db.saved.toArray();
   const cards = new Map((await db.cards.where('chartId').equals(SAVED_CHART).toArray()).map((c) => [c.id, c]));
   const due: QueueItem[] = [];
@@ -129,6 +135,9 @@ export async function recordAnswer(item: QueueItem, outcome: DrillOutcome, now =
       mode: item.mode,
       hand: item.hand,
       savedId: item.savedId,
+      lessonKey: item.lessonKey,
+      step: item.step,
+      factId: item.factId,
       targetMs: item.targetMs,
       fsrs: card,
       due: card.due,
@@ -149,6 +158,14 @@ export async function recordAnswer(item: QueueItem, outcome: DrillOutcome, now =
 
 /** Objective review answers also count toward the Felt Rating. */
 async function rateReview(item: QueueItem, score: number, at: Date) {
+  if (item.mode === 'quiz') {
+    if (item.lessonKey !== undefined && item.step !== undefined) await recordLessonQuiz(item.lessonKey, item.step, score >= 1, 'review');
+    return;
+  }
+  if (item.mode === 'math') {
+    await recordRated({ itemId: item.id, domain: 'math', difficulty: DIFFICULTY.mathFact, score, source: 'review' }, at);
+    return;
+  }
   if (item.mode === 'saved') {
     const saved = item.savedId ? await db.saved.get(item.savedId) : undefined;
     if (saved?.kind === 'solver-spot') {

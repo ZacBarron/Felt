@@ -10,6 +10,7 @@ import { db, type StoredLesson } from '../state/db';
 import { cueCopy, goalCopy, pathPrefs } from '../state/goals';
 import { lessonPath, lessonProgress, pickNextLesson } from '../state/lessons';
 import { ratingSnapshot, streakNow } from '../state/rating';
+import { reviewTotal } from '../state/decks';
 import { buildQueue, masteryForCharts, todayStats } from '../state/review';
 import { useSettings } from '../state/settings';
 import { Avatar } from '../ui/Avatar';
@@ -45,7 +46,8 @@ export function DashboardPage() {
   const streak = useLiveQuery(() => streakNow(), []);
   const rating = useLiveQuery(async () => currentRating((await ratingSnapshot()).overall), []);
 
-  const remaining = stats ? stats.dueNow + stats.newAvailable : 0;
+  const total = useLiveQuery(() => reviewTotal(charts, settings.study), [...deps, JSON.stringify(settings.study)]);
+  const remaining = total ?? (stats ? stats.dueNow + stats.newAvailable : 0);
   const shownRemaining = Math.round(useCountUp(remaining));
   const minutes = Math.max(1, Math.round((remaining * 6) / 60));
   const date = new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' });

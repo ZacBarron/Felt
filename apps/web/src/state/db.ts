@@ -6,10 +6,15 @@ import { heroView, parseHand } from '@felt/core';
 export interface StoredCard {
   id: string;
   chartId: string;
-  mode: 'quick' | 'paint' | 'saved';
+  mode: 'quick' | 'paint' | 'saved' | 'quiz' | 'math';
   hand?: string;
   /** For saved cards: the SavedItem this card reviews. */
   savedId?: string;
+  /** For lesson question cards: the lesson and its quiz step. */
+  lessonKey?: string;
+  step?: number;
+  /** For math cards: the fact id from the core math deck. */
+  factId?: string;
   targetMs: number;
   fsrs: FsrsCard;
   /** Mirrors fsrs.due so it can be indexed. */

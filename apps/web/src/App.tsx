@@ -29,7 +29,7 @@ import { LegalPage } from './pages/LegalPage';
 import { accessFromServer } from './state/access';
 import { useSession } from './state/api';
 import { chartsForGame } from './state/charts';
-import { buildQueue } from './state/review';
+import { reviewTotal } from './state/decks';
 import { useSettings } from './state/settings';
 import { Lockup } from './ui/Brand';
 
@@ -38,10 +38,9 @@ function useReviewCount() {
   const g = settings.game;
   return useLiveQuery(
     async () => {
-      const q = await buildQueue(chartsForGame(g).charts, settings.study.newPerDay);
-      return q.due.length + q.fresh.length;
+      return reviewTotal(chartsForGame(g).charts, settings.study);
     },
-    [g.tableSize, g.format, settings.study.newPerDay],
+    [g.tableSize, g.format, JSON.stringify(settings.study)],
     0,
   );
 }

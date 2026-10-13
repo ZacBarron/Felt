@@ -191,6 +191,8 @@ export const DIFFICULTY = {
   solverSpot: 1450,
   /** A river decision in a scenario, graded by Felt Solver for the hero's exact hand. */
   scenarioRiver: 1500,
+  /** A math fact from the review deck, like the price of a half pot bet. */
+  mathFact: 1250,
 } as const;
 
 /**

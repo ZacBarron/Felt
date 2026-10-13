@@ -3,6 +3,7 @@ import { getChart } from '../state/charts';
 import { BottomBar } from '../ui/BottomBar';
 import type { QueueItem } from '../state/review';
 import { PaintDrill } from './PaintDrill';
+import { LessonQuestionCard, MathCard } from './QuestionCard';
 import { QuickRecall } from './QuickRecall';
 import { SavedCard } from './SavedCard';
 
@@ -15,6 +16,8 @@ interface Props {
 /** Renders the right drill for a queue item. */
 export function DrillRunner({ item, onAnswer, onNext }: Props) {
   if (item.mode === 'saved') return <SavedCard savedId={item.savedId!} targetMs={item.targetMs} onAnswer={onAnswer} onNext={onNext} />;
+  if (item.mode === 'quiz') return <LessonQuestionCard lessonKey={item.lessonKey!} step={item.step!} targetMs={item.targetMs} onAnswer={onAnswer} onNext={onNext} />;
+  if (item.mode === 'math') return <MathCard factId={item.factId!} targetMs={item.targetMs} onAnswer={onAnswer} onNext={onNext} />;
   const chart = getChart(item.chartId);
   if (!chart)
     return (

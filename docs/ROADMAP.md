@@ -65,6 +65,7 @@ See [MONETIZATION.md](MONETIZATION.md).
 - [x] Avatar with rating on Today; milestone moments for tiers and streaks; game sheet from Ranges
 - [x] Poker basics track for complete beginners (rules, rankings, how a hand plays, position, starting hands, ranges, odds), skippable by placement
 - [x] Lesson illustrations drawn in the brand style for covers and visual steps
+- [x] Review overview like Anki: decks (preflop charts, lesson questions, math facts, saved) with new, learning and due counts, per deck limits, session size, timer, and custom study (extra, ahead, weakest, missed today)
 - [x] Import stats: flop c-bet, fold to 3bet, aggression and won at showdown, with a stakes filter
 - [ ] Connect a store (App Store, Play, web checkout) to `purchase()`
 - [ ] Verify GGPoker parsing against a real GG export; add Winamax and iPoker formats
@@ -98,7 +99,8 @@ See [SOLVER_DATA.md](SOLVER_DATA.md).
 
 ## Phase 4: Math and the Spot Lab builder
 
-- [ ] Math speed drills: pot odds, MDF, alpha, combos, outs
+- [x] Math facts deck in review: pot odds, MDF, alpha, combos, outs (exact, four choices)
+- [ ] Timed math speed rounds
 - [ ] Equity estimation drill (hand vs range) scored by error
 - [ ] Spot Lab: build any spot (seats, stacks, actions), equity in a Web Worker
 - [ ] Range vs range equity and equity distribution charts

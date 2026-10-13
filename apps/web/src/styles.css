@@ -4690,3 +4690,54 @@ button.evidence {
 .rating-change.down .pill {
   color: var(--label-2);
 }
+
+/* Review overview: decks with Anki style counts ------------------------------ */
+
+.review-deck-head {
+  min-height: 0;
+  padding-top: 0.55rem;
+  padding-bottom: 0.2rem;
+  font-size: 0.72rem;
+  font-weight: 650;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--label-2);
+}
+
+.review-deck {
+  text-align: left;
+}
+
+.review-deck .deck-title {
+  display: block;
+  font-weight: 600;
+}
+
+.deck-count {
+  flex: none;
+  width: 2.6rem;
+  text-align: right;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+}
+
+.review-deck .deck-count.new {
+  color: var(--tint);
+}
+
+.review-deck .deck-count.learn {
+  color: var(--orange);
+}
+
+.review-deck .deck-count.due {
+  color: var(--green-text);
+}
+
+.review-deck.off .deck-title,
+.review-deck.off .deck-count {
+  color: var(--label-3);
+}
+
+.review-deck .deck-count.zero {
+  color: var(--label-3);
+}

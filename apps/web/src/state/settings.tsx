@@ -12,6 +12,10 @@ export interface StudySettings {
   shortcuts?: boolean;
   /** Paint charts with frequencies (75%, 50%, splits) rather than one action per hand. On unless turned off. */
   paintMixes?: boolean;
+  /** Review decks: which are on and how many new cards each adds a day. `newPerDay` above is the charts deck. */
+  decks?: Partial<Record<'charts' | 'lessons' | 'math' | 'saved', { on?: boolean; newPerDay?: number }>>;
+  /** Cards per review session; 0 means everything due. */
+  sessionLimit?: number;
 }
 
 /**
