@@ -59,12 +59,12 @@ function QuestionScreen({
         <button className="icon-btn glass" aria-label={closeLabel} onClick={onClose}>
           <CloseIcon size={18} />
         </button>
-        <div className="check-bar" role="progressbar" aria-label="Quiz progress" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(progress * 100)}>
+        <div className="check-bar lesson-progress" role="progressbar" aria-label="Quiz progress" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(progress * 100)}>
           <span style={{ width: `${Math.max(4, progress * 100)}%` }} />
         </div>
       </div>
       <div key={`${question.lessonKey}:${question.step}`} className="lesson-stage from-right">
-        <div className="footnote" style={{ marginBottom: '0.4rem' }}>
+        <div className="lesson-kicker check-source">
           {entry?.moduleTitle}, {entry?.title}
         </div>
         <StepView step={quiz} answered={choice} onAnswer={setChoice} />
@@ -117,7 +117,7 @@ function Results({ title, result, back }: { title: string; result: CheckResult; 
           </span>
         </ProgressRing>
         <div>
-          <div className="footnote">{title}</div>
+          <div className="done-kicker">{title}</div>
           <h1 className="display" style={{ fontSize: '2.2rem', fontWeight: 400, lineHeight: 1.05 }}>
             {toLearn.length === 0 ? 'You know this' : `${plural(toLearn.length, 'lesson')} to learn`}
           </h1>
@@ -135,8 +135,8 @@ function Results({ title, result, back }: { title: string; result: CheckResult; 
             {toLearn.map((e) => (
               <Link key={e.key} to={lessonPath(e.key)} className="list-row">
                 <span className="grow">
-                  <span style={{ display: 'block', fontWeight: 600 }}>{e.title}</span>
-                  <span className="footnote">
+                  <span className="row-title">{e.title}</span>
+                  <span className="row-sub">
                     {e.moduleTitle}, {e.content?.minutes} min
                   </span>
                 </span>
@@ -162,7 +162,7 @@ function Results({ title, result, back }: { title: string; result: CheckResult; 
       <BottomBar>
         {first ? (
           <button className="btn btn-primary btn-lg btn-block swap-in" onClick={() => navigate(locked ? `/pro?from=check` : lessonPath(first.key))}>
-            {locked ? `Unlock ${toLearn.length === 1 ? 'this lesson' : `these ${toLearn.length} lessons`}` : `Start ${first.title}`}
+            {locked ? `Unlock ${toLearn.length === 1 ? 'this lesson' : `these ${toLearn.length} lessons`}` : toLearn.length === 1 ? 'Start this lesson' : 'Start the first lesson'}
           </button>
         ) : (
           <Link to={back} className="btn btn-primary btn-lg btn-block swap-in">
@@ -301,7 +301,7 @@ export function PlacementPage() {
             </span>
           </ProgressRing>
           <div>
-            <div className="footnote">Your starting point</div>
+            <div className="done-kicker">Your starting point</div>
             <h1 className="display" style={{ fontSize: '2.2rem', fontWeight: 400, lineHeight: 1.05 }}>
               {placedTitle ? `Start at ${placedTitle}` : 'You know the core lessons'}
             </h1>
@@ -319,8 +319,8 @@ export function PlacementPage() {
               {byModule.map((m) => (
                 <div key={m.id} className="list-row">
                   <span className="grow">
-                    <span style={{ display: 'block' }}>{m.title}</span>
-                    <span className="footnote">{kept.has(m.id) ? 'Stays in your plan' : plural(m.count, 'lesson')}</span>
+                    <span className="row-title">{m.title}</span>
+                    <span className="row-sub">{kept.has(m.id) ? 'Stays in your plan' : plural(m.count, 'lesson')}</span>
                   </span>
                   <Toggle
                     label={`Skip ${m.title}`}

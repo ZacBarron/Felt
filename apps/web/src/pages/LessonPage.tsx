@@ -130,7 +130,7 @@ export function LessonPage() {
             <CheckIcon size={44} style={{ color: 'var(--tint)' }} />
           </ProgressRing>
           <div>
-            <div className="footnote">{entry.moduleTitle}</div>
+            <div className="done-kicker">{entry.moduleTitle}</div>
             <h1 className="display" style={{ fontSize: '2.4rem', fontWeight: 400, lineHeight: 1.05 }}>
               {entry.title}
             </h1>
@@ -145,8 +145,8 @@ export function LessonPage() {
           {practice && (
             <Link to={`/ranges?chart=${practice}&mode=quick`} className="list-row">
               <span className="grow">
-                <span style={{ display: 'block', fontWeight: 600 }}>Practice this chart</span>
-                <span className="footnote">Drill {getChart(practice)?.spec.title} one hand at a time</span>
+                <span className="row-title">Practice this chart</span>
+                <span className="row-sub">Drill {getChart(practice)?.spec.title} one hand at a time</span>
               </span>
               <ChevronRightIcon size={16} className="chev" />
             </Link>
@@ -154,8 +154,8 @@ export function LessonPage() {
           {following && (
             <Link to={lessonPath(following.key)} className="list-row" onClick={() => setFinished(false)}>
               <span className="grow">
-                <span style={{ display: 'block', fontWeight: 600 }}>Next lesson</span>
-                <span className="footnote">{following.title}</span>
+                <span className="row-title">Next lesson</span>
+                <span className="row-sub">{following.title}</span>
               </span>
               <ChevronRightIcon size={16} className="chev" />
             </Link>
@@ -212,8 +212,8 @@ export function LessonPage() {
         }}
       >
         {i === 0 && (
-          <div className="footnote" style={{ marginBottom: '0.4rem' }}>
-            {entry.moduleTitle}, {content.minutes} min{content.level === 'advanced' && <span className="pill" style={{ marginLeft: 6 }}>Advanced</span>}
+          <div className="lesson-kicker">
+            {entry.moduleTitle}, {content.minutes} min{content.level === 'advanced' && <span className="pill">Advanced</span>}
           </div>
         )}
         {step && <StepView step={step} answered={answers[i]} onAnswer={(choice) => {
@@ -222,7 +222,7 @@ export function LessonPage() {
             }} />}
         {i === 0 && (
           <div className="intro-cover reveal">
-            <LessonCover cover={content.cover} />
+            <LessonCover cover={content.cover} size="intro" />
           </div>
         )}
       </div>

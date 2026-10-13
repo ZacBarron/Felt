@@ -9,6 +9,7 @@ import { getChart } from '../state/charts';
 import { CheckIcon, CloseIcon } from '../ui/icons';
 import { LessonArt } from './LessonArt';
 import { Rich } from './rich';
+import './lesson.css';
 
 interface Props {
   step: LessonStep;
@@ -70,11 +71,14 @@ export function StepView({ step, onAnswer, answered }: Props) {
       return (
         <div className="lesson-step">
           <StepTitle title={step.title} evidence={step.evidence} />
-          {step.body.map((p, i) => (
-            <p key={i} className="lesson-p">
-              <Rich text={p} />
-            </p>
-          ))}
+          {/* Three or more paragraphs open with a lead, so a long step has a way in. */}
+          <div className={`lesson-prose${step.body.length >= 3 ? ' has-lead' : ''}`}>
+            {step.body.map((p, i) => (
+              <p key={i} className="lesson-p">
+                <Rich text={p} />
+              </p>
+            ))}
+          </div>
         </div>
       );
     case 'formula':
@@ -87,8 +91,8 @@ export function StepView({ step, onAnswer, answered }: Props) {
               <div className="formula-parts">
                 {step.parts.map(([k, v]) => (
                   <div key={k}>
-                    <span>{k}</span>
-                    <span className="muted">{v}</span>
+                    <span className="formula-key">{k}</span>
+                    <span className="formula-val">{v}</span>
                   </div>
                 ))}
               </div>
@@ -128,7 +132,7 @@ export function StepView({ step, onAnswer, answered }: Props) {
               </tbody>
             </table>
           </div>
-          {step.note && <p className="footnote">{step.note}</p>}
+          {step.note && <p className="lesson-note">{step.note}</p>}
         </div>
       );
     }
@@ -193,10 +197,8 @@ export function StepView({ step, onAnswer, answered }: Props) {
         <div className="lesson-step">
           <div className={`callout callout-${step.tone}`}>
             <span className={`pill pill-${step.tone === 'tip' ? 'tint' : step.tone}`}>{CALLOUT_LABEL[step.tone]}</span>
-            <h2 className="display lesson-h2" style={{ marginTop: '0.6rem' }}>
-              {step.title}
-            </h2>
-            <p className="lesson-p" style={{ margin: 0 }}>
+            <h2 className="display lesson-h2 callout-title">{step.title}</h2>
+            <p className="lesson-p">
               <Rich text={step.body} />
             </p>
           </div>
@@ -292,9 +294,7 @@ function Quiz({
 
   return (
     <div className="lesson-step">
-      <div className="pill pill-tint" style={{ alignSelf: 'flex-start' }}>
-        Question
-      </div>
+      <div className="lesson-kicker quiz-kicker">Question</div>
       {(step.cards || step.board) && <QuizCards cards={step.cards} board={step.board} />}
       <h2 className="lesson-question">{step.question}</h2>
       <div className="choices">
@@ -313,10 +313,8 @@ function Quiz({
                   ))}
                 </span>
               )}
-              <span className={onlyCards ? 'sr-only' : undefined} style={onlyCards ? undefined : { flex: 1 }}>
-                {c}
-              </span>
-              {onlyCards && <span style={{ flex: 1 }} />}
+              <span className={onlyCards ? 'sr-only' : 'choice-text'}>{c}</span>
+              {onlyCards && <span className="choice-text" />}
               {done && i === step.answer && <CheckIcon size={18} aria-hidden="true" />}
               {done && i === chosen && !right && <CloseIcon size={16} aria-hidden="true" />}
               {done && <span className="sr-only">{i === step.answer ? ', correct answer' : i === chosen ? ', your answer' : ''}</span>}
@@ -329,7 +327,15 @@ function Quiz({
       </div>
       {done && (
         <div className={`explain reveal ${right ? 'good' : 'bad'}`}>
-          <strong>{right ? 'Correct.' : 'Not quite.'}</strong> <Rich text={step.explain} />
+          <strong className="explain-verdict">
+            <span className="explain-icon" aria-hidden="true">
+              {right ? <CheckIcon size={14} /> : <CloseIcon size={12} />}
+            </span>
+            {right ? 'Correct.' : 'Not quite.'}
+          </strong>{' '}
+          <span className="explain-body">
+            <Rich text={step.explain} />
+          </span>
         </div>
       )}
     </div>

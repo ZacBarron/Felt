@@ -47,15 +47,15 @@ function ArtBody({ art, size }: { art: Art; size: ArtSize }) {
     case 'bars':
       return <BarsArt bars={art.bars} unit={art.unit} />;
     case 'table':
-      return <TableArt {...art} />;
+      return <TableArt {...art} step={size === 'step'} />;
     case 'streets':
-      return <StreetsArt active={art.active} cover={size !== 'step'} />;
+      return size === 'step' ? <StreetsStep active={art.active} /> : <StreetsArt active={art.active} cover />;
     case 'ladder':
       return <LadderArt rungs={art.rungs} step={size === 'step'} />;
     case 'chips':
       return <ChipsArt stacks={art.stacks} />;
     case 'tree':
-      return <TreeArt root={art.root} branches={art.branches} />;
+      return size === 'step' ? <TreeStep root={art.root} branches={art.branches} /> : <TreeArt root={art.root} branches={art.branches} />;
     case 'curve':
       return <CurveArt {...art} cover={size !== 'step'} />;
   }
@@ -423,59 +423,66 @@ function BarsArt({ bars, unit }: { bars: { label: string; value: number; tone?: 
 
 /* Table ------------------------------------------------------------------- */
 
-const TW = 360;
-const TH = 224;
-const TCX = TW / 2;
-const TCY = TH / 2;
+/**
+ * Two drawings of the same table. The cover is wide and small; at step size the
+ * table is taller and the seat names are set large enough to read at a glance.
+ */
+const TABLE_GEO = {
+  cover: { w: 360, h: 224, rail: [124, 68], felt: [118, 62], line: [94, 44], seat: [148, 92], puck: [100, 52], you: 48, pill: 20, font: 7, minW: 38, pad: 14, chip: 8.5 },
+  step: { w: 360, h: 300, rail: [122, 92], felt: [116, 86], line: [92, 64], seat: [146, 124], puck: [96, 70], you: 50, pill: 28, font: 9.4, minW: 48, pad: 20, chip: 11 },
+} as const;
 
-function TableArt({ seats, button, hero, highlight, note }: { seats: number; button?: string; hero?: string; highlight?: string[]; note?: string }) {
+function TableArt({ seats, button, hero, highlight, note, step = false }: { seats: number; button?: string; hero?: string; highlight?: string[]; note?: string; step?: boolean }) {
+  const g = TABLE_GEO[step ? 'step' : 'cover'];
+  const cx = g.w / 2;
+  const cy = g.h / 2;
   // Action order runs clockwise: UTG ... BTN, SB, BB.
   const names = safePositions(seats);
   const n = names.length;
   if (n === 0) return null;
   const anchor = Math.max(0, names.indexOf(hero ?? button ?? names[n - 1]));
   // Hero sits at the bottom; on screen, increasing angles run clockwise.
-  const at = (i: number, rx: number, ry: number): [number, number] => {
+  const at = (i: number, [rx, ry]: readonly number[]): [number, number] => {
     const a = Math.PI / 2 + ((i - anchor) * 2 * Math.PI) / n;
-    return [TCX + rx * Math.cos(a), TCY + ry * Math.sin(a)];
+    return [cx + rx * Math.cos(a), cy + ry * Math.sin(a)];
   };
   const lit = new Set(highlight ?? []);
   const dimOthers = lit.size > 0;
   const btn = button ? names.indexOf(button) : -1;
   // The puck sits just past the button seat, or before it when you hold the button, so it never covers the "You" label.
-  const chip = btn >= 0 ? at(btn + (button === hero ? -0.5 : 0.32), 100, 52) : undefined;
-  const heroAt = hero && names.includes(hero) ? at(names.indexOf(hero), 148, 92) : undefined;
+  const chip = btn >= 0 ? at(btn + (button === hero ? -0.5 : 0.32), g.puck) : undefined;
+  const heroAt = hero && names.includes(hero) ? at(names.indexOf(hero), g.seat) : undefined;
   return (
-    <svg className="art-table-svg" viewBox={`0 0 ${TW} ${TH}`} aria-hidden="true">
-      <ellipse className="table-rail" cx={TCX} cy={TCY} rx="124" ry="68" />
-      <ellipse className="table-felt" cx={TCX} cy={TCY} rx="118" ry="62" />
-      <ellipse className="table-line" cx={TCX} cy={TCY} rx="94" ry="44" />
+    <svg className={`art-table-svg${step ? ' table-step' : ''}`} viewBox={`0 0 ${g.w} ${g.h}`} aria-hidden="true">
+      <ellipse className="table-rail" cx={cx} cy={cy} rx={g.rail[0]} ry={g.rail[1]} />
+      <ellipse className="table-felt" cx={cx} cy={cy} rx={g.felt[0]} ry={g.felt[1]} />
+      <ellipse className="table-line" cx={cx} cy={cy} rx={g.line[0]} ry={g.line[1]} />
       {note && (
-        <text className="table-note" x={TCX} y={hero ? TCY - 4 : TCY} textAnchor="middle" dominantBaseline="middle">
+        <text className="table-note" x={cx} y={hero ? cy - 4 : cy} textAnchor="middle" dominantBaseline="middle">
           {note}
         </text>
       )}
       {heroAt && (
-        <text className="table-you" x={heroAt[0]} y={TCY + 48} textAnchor="middle">
+        <text className="table-you" x={heroAt[0]} y={cy + g.you} textAnchor="middle">
           You
         </text>
       )}
       {chip && (
         <g className="table-dealer" style={{ animationDelay: `${120 + n * 55}ms` }}>
-          <circle cx={chip[0]} cy={chip[1]} r="8.5" />
+          <circle cx={chip[0]} cy={chip[1]} r={g.chip} />
           <text x={chip[0]} y={chip[1] + 0.5} textAnchor="middle" dominantBaseline="middle">
             D
           </text>
         </g>
       )}
       {names.map((name, i) => {
-        const [x, y] = at(i, 148, 92);
+        const [x, y] = at(i, g.seat);
         const isHero = name === hero;
         const state = isHero ? 'hero' : lit.has(name) ? 'lit' : dimOthers ? 'dim' : 'plain';
-        const w = Math.max(38, name.length * 7 + 14);
+        const w = Math.max(g.minW, name.length * g.font + g.pad);
         return (
           <g key={name} className={`table-seat seat-${state}`} style={{ animationDelay: `${80 + i * 55}ms` }}>
-            <rect x={x - w / 2} y={y - 10} width={w} height="20" rx="10" />
+            <rect x={x - w / 2} y={y - g.pill / 2} width={w} height={g.pill} rx={g.pill / 2} />
             <text className="seat-text" x={x} y={y + 0.5} textAnchor="middle" dominantBaseline="middle">
               {name}
             </text>
@@ -527,6 +534,29 @@ function StreetsArt({ active, cover }: { active?: (typeof STREETS)[number]['id']
       </svg>
       {a >= 0 && <div className="art-streets-now">{STREETS[a].name}</div>}
     </>
+  );
+}
+
+/** At step size the streets run down the screen, so every name is set at reading size. */
+function StreetsStep({ active }: { active?: (typeof STREETS)[number]['id'] }) {
+  const a = STREETS.findIndex((s) => s.id === active);
+  return (
+    <ol className="art-streets-list">
+      {STREETS.map((s, i) => {
+        const state = a < 0 ? 'plain' : i < a ? 'past' : i === a ? 'now' : 'next';
+        return (
+          <li key={s.id} className={`street street-${state}`} style={{ animationDelay: `${100 + i * 90}ms` }}>
+            <span className="street-node" />
+            <span className="street-label">{s.name}</span>
+            <span className="street-cards">
+              {Array.from({ length: s.cards }, (_, k) => (
+                <i key={k} className={s.id === 'preflop' ? 'mini-back' : 'mini-face'} />
+              ))}
+            </span>
+          </li>
+        );
+      })}
+    </ol>
   );
 }
 
@@ -632,11 +662,33 @@ function TreeArt({ root, branches }: { root: string; branches: { label: string; 
   );
 }
 
+/** At step size the tree reads top down: the decision, then each outcome on its own full width row. */
+function TreeStep({ root, branches }: { root: string; branches: { label: string; value?: string; tone?: ArtTone }[] }) {
+  return (
+    <div className="art-tree-v">
+      <div className="tree-root">{root}</div>
+      <ul className="tree-list">
+        {branches.map((b, i) => (
+          <li key={i} className="tree-item" style={{ animationDelay: `${180 + i * 90}ms`, '--tone': toneFill(b.tone) } as CSSProperties}>
+            <span className="tree-branch">
+              <span className="tree-label">{b.label}</span>
+              {b.value && <span className={`tree-value tone-${b.tone ?? 'brass'}`}>{b.value}</span>}
+            </span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
 /* Curve ------------------------------------------------------------------- */
 
 const CW = 320;
 const CH = 200;
-const PAD_STEP = { l: 38, r: 14, t: 26, b: 38 };
+// At step size the drawing is narrower than the panel, so its ticks and axis names render at reading size.
+const STEP_W = 296;
+const STEP_H = 216;
+const PAD_STEP = { l: 42, r: 14, t: 30, b: 52 };
 // Covers hide the axis text, so the plot can use the whole box.
 const PAD_COVER = { l: 16, r: 16, t: 34, b: 18 };
 
@@ -656,6 +708,8 @@ function ticks(lo: number, hi: number, step: number): number[] {
 
 function CurveArt({ points, xLabel, yLabel, mark, cover }: { points: [number, number][]; xLabel: string; yLabel: string; mark?: [number, number]; cover: boolean }) {
   const PAD = cover ? PAD_COVER : PAD_STEP;
+  const cw = cover ? CW : STEP_W;
+  const ch = cover ? CH : STEP_H;
   const pts = [...points].sort((a, b) => a[0] - b[0]);
   if (pts.length < 2) return null;
   const xl = axisLabel(xLabel);
@@ -667,51 +721,52 @@ function CurveArt({ points, xLabel, yLabel, mark, cover }: { points: [number, nu
   const ystep = niceStep(Math.max(...ys, 0) - Math.min(...ys, 0));
   const y0 = Math.floor(Math.min(0, ...ys) / ystep) * ystep;
   const y1 = Math.ceil(Math.max(0, ...ys) / ystep) * ystep || ystep;
-  const sx = (x: number) => PAD.l + ((x - x0) / (x1 - x0 || 1)) * (CW - PAD.l - PAD.r);
-  const sy = (y: number) => CH - PAD.b - ((y - y0) / (y1 - y0)) * (CH - PAD.t - PAD.b);
+  const sx = (x: number) => PAD.l + ((x - x0) / (x1 - x0 || 1)) * (cw - PAD.l - PAD.r);
+  const sy = (y: number) => ch - PAD.b - ((y - y0) / (y1 - y0)) * (ch - PAD.t - PAD.b);
   const line = pts.map(([x, y], i) => `${i ? 'L' : 'M'}${sx(x).toFixed(2)} ${sy(y).toFixed(2)}`).join(' ');
   const base = sy(Math.max(y0, Math.min(0, y1)));
   const area = `${line} L${sx(x1).toFixed(2)} ${base} L${sx(x0).toFixed(2)} ${base} Z`;
   const fx = (v: number) => formatNumber(v) + (xl.pct ? '%' : '');
   const fy = (v: number) => formatNumber(v) + (yl.pct ? '%' : '');
-  const xt = ticks(x0, x1, niceStep(x1 - x0)).filter((v) => !mark || Math.abs(sx(v) - sx(mark[0])) > 16);
+  const xt = ticks(x0, x1, niceStep(x1 - x0)).filter((v) => !mark || Math.abs(sx(v) - sx(mark[0])) > (cover ? 16 : 26));
   const yt = ticks(y0, y1, ystep);
   const mx = mark ? sx(mark[0]) : 0;
   const my = mark ? sy(mark[1]) : 0;
-  const labelLeft = mark ? mx > CW - PAD.r - 60 : false;
+  const labelLeft = mark ? mx > cw - PAD.r - 70 : false;
   // Set the label on the side of the dot the line leaves free: below a rising line, above a falling one.
   const after = mark ? pts.find(([x]) => x > mark[0]) : undefined;
   const before = mark ? [...pts].reverse().find(([x]) => x < mark[0]) : undefined;
   const rising = mark ? ((after?.[1] ?? mark[1]) - (before?.[1] ?? mark[1])) * (labelLeft ? -1 : 1) > 0 : false;
-  const labelY = rising ? my + 26 : my - 10;
+  const labelY = rising ? my + 30 : my - 12;
+  const tickY = ch - PAD.b + (cover ? 14 : 20);
   return (
-    <svg className="art-curve-svg" viewBox={`0 0 ${CW} ${CH}`} aria-hidden="true">
+    <svg className="art-curve-svg" viewBox={`0 0 ${cw} ${ch}`} aria-hidden="true">
       {yt.map((v) => (
         <g key={`y${v}`}>
-          <line className={v === 0 ? 'curve-zero' : 'curve-grid'} x1={PAD.l} x2={CW - PAD.r} y1={sy(v)} y2={sy(v)} />
-          <text className="curve-tick" x={PAD.l - 6} y={sy(v)} textAnchor="end" dominantBaseline="middle">
+          <line className={v === 0 ? 'curve-zero' : 'curve-grid'} x1={PAD.l} x2={cw - PAD.r} y1={sy(v)} y2={sy(v)} />
+          <text className="curve-tick" x={PAD.l - 7} y={sy(v)} textAnchor="end" dominantBaseline="middle">
             {fy(v)}
           </text>
         </g>
       ))}
       {xt.map((v) => (
-        <text key={`x${v}`} className="curve-tick" x={sx(v)} y={CH - PAD.b + 14} textAnchor="middle">
+        <text key={`x${v}`} className="curve-tick" x={sx(v)} y={tickY} textAnchor="middle">
           {fx(v)}
         </text>
       ))}
-      <text className="curve-axis" x={PAD.l - 6} y={12}>
+      <text className="curve-axis" x={PAD.l - 8} y={14}>
         {yl.title}
       </text>
-      <text className="curve-axis" x={(PAD.l + CW - PAD.r) / 2} y={CH - 6} textAnchor="middle">
+      <text className="curve-axis" x={(PAD.l + cw - PAD.r) / 2} y={ch - (cover ? 6 : 4)} textAnchor="middle">
         {xl.title}
       </text>
       <path className="curve-area" d={area} />
       <path className="curve-line" d={line} pathLength="1" />
       {mark && (
         <g className="curve-mark">
-          <line className="curve-guide" x1={mx} x2={mx} y1={my} y2={CH - PAD.b} />
+          <line className="curve-guide" x1={mx} x2={mx} y1={my} y2={ch - PAD.b} />
           <line className="curve-guide" x1={PAD.l} x2={mx} y1={my} y2={my} />
-          <text className="curve-tick curve-tick-mark" x={mx} y={CH - PAD.b + 14} textAnchor="middle">
+          <text className="curve-tick curve-tick-mark" x={mx} y={tickY} textAnchor="middle">
             {fx(mark[0])}
           </text>
           <circle className="curve-dot" cx={mx} cy={my} r="5" />

@@ -193,7 +193,7 @@
   flex-wrap: wrap;
   gap: 0.35rem 1rem;
   margin-top: 0.85rem;
-  font-size: 0.86rem;
+  font-size: 0.9rem;
   color: var(--art-muted);
 }
 
@@ -217,7 +217,7 @@
 
 .art-note {
   margin-top: 0.4rem;
-  font-size: 0.78rem;
+  font-size: 0.82rem;
   color: var(--art-muted);
 }
 
@@ -347,13 +347,13 @@
 }
 
 .art-ring-label {
-  font-size: 1.05rem;
-  font-weight: 650;
+  font-size: 1.06rem;
+  font-weight: 600;
   line-height: 1.2;
 }
 
 .art-ring-caption {
-  font-size: 0.9rem;
+  font-size: 0.94rem;
   line-height: 1.25;
   color: var(--art-muted);
 }
@@ -424,7 +424,7 @@
 
 .art-bars-plot {
   position: relative;
-  height: 156px;
+  height: 168px;
   margin-top: 1.6rem;
 }
 
@@ -467,7 +467,7 @@
   left: -4px;
   right: -4px;
   text-align: center;
-  font-size: 0.95rem;
+  font-size: 1rem;
   font-weight: 700;
   line-height: 1.1;
   font-variant-numeric: tabular-nums;
@@ -483,9 +483,9 @@
 }
 
 .art-bar-label {
-  margin-top: 0.5rem;
-  font-size: 0.82rem;
-  line-height: 1.2;
+  margin-top: 0.55rem;
+  font-size: 0.9rem;
+  line-height: 1.25;
   text-align: center;
   color: var(--art-muted);
   overflow-wrap: break-word;
@@ -631,6 +631,37 @@
   font-size: 10.5px;
   font-weight: 650;
   letter-spacing: -0.02em;
+}
+
+/* At step size the table is 360 units in a panel about as wide, so names render near 15px. */
+.table-step .seat-text {
+  font-size: 15.5px;
+  letter-spacing: -0.01em;
+}
+
+.table-step .table-note {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.table-step .table-you {
+  font-size: 12.5px;
+}
+
+.table-step .table-dealer text {
+  font-size: 12px;
+}
+
+.table-step .table-seat rect {
+  stroke-width: 1.2;
+}
+
+.table-step .seat-lit rect {
+  stroke-width: 2.5;
+}
+
+.art-step.art-k-table {
+  padding: 0.75rem 0.6rem 0.85rem;
 }
 
 .seat-hero rect {
@@ -832,7 +863,7 @@
 
 .rung-name {
   font-weight: 600;
-  font-size: 0.95rem;
+  font-size: 1rem;
   line-height: 1.2;
 }
 
@@ -880,20 +911,20 @@
 
 .art-stack-svg {
   display: block;
-  width: min(100%, 84px);
+  width: min(100%, 92px);
   height: auto;
   overflow: visible;
 }
 
 .chip-value {
   fill: var(--art-ink);
-  font-size: 12px;
+  font-size: 12.5px;
   font-weight: 750;
   font-variant-numeric: tabular-nums;
 }
 
 .art-stack-label {
-  font-size: 0.82rem;
+  font-size: 0.94rem;
   line-height: 1.2;
   text-align: center;
   color: var(--art-muted);
@@ -1131,6 +1162,24 @@
   font-size: 24px;
 }
 
+/* At step size the drawing is 296 wide in a wider panel, so 14 units render at about 15px. */
+.art-step .curve-tick {
+  font-size: 14px;
+}
+
+.art-step .curve-axis {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.art-step .curve-mark-label {
+  font-size: 28px;
+}
+
+.art-step .curve-line {
+  stroke-width: 3.2;
+}
+
 .cover .art-k-curve :is(.curve-tick, .curve-axis, .curve-grid) {
   display: none;
 }
@@ -1172,6 +1221,219 @@
 
 :is(.art-anim, .intro-cover .art) .curve-mark {
   animation: art-fade 420ms var(--ease) 950ms backwards;
+}
+
+/* Streets at step size ---------------------------------------------------- */
+
+.art-streets-list {
+  list-style: none;
+  margin: 0;
+  padding: 0.15rem 0.25rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.art-streets-list .street {
+  position: relative;
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.85rem;
+  min-height: 46px;
+}
+
+/* The rail between dots: brass up to the street you are on. */
+.art-streets-list .street::before {
+  content: '';
+  position: absolute;
+  left: 10px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--art-track-strong);
+}
+
+.art-streets-list .street:first-child::before {
+  top: 50%;
+}
+
+.art-streets-list .street:last-child::before {
+  bottom: 50%;
+}
+
+.art-streets-list .street-past::before,
+.art-streets-list .street-now::before {
+  background: var(--art-accent);
+}
+
+.art-streets-list .street-now::before {
+  bottom: 50%;
+}
+
+.art-streets-list .street-now:first-child::before {
+  display: none;
+}
+
+.street-node {
+  position: relative;
+  z-index: 1;
+  justify-self: center;
+  width: 14px;
+  height: 14px;
+  border-radius: 999px;
+  background: var(--art-solid);
+  box-shadow: inset 0 0 0 2.5px var(--art-track-strong);
+}
+
+.street-past .street-node,
+.street-now .street-node {
+  background: var(--art-accent);
+  box-shadow: none;
+}
+
+.street-now .street-node {
+  width: 20px;
+  height: 20px;
+  box-shadow: 0 0 0 5px color-mix(in srgb, var(--art-accent) 26%, transparent);
+}
+
+.street-label {
+  font-size: 1.02rem;
+  font-weight: 500;
+  color: var(--art-muted);
+}
+
+.street-past .street-label,
+.street-plain .street-label {
+  color: var(--art-ink);
+}
+
+.street-now .street-label {
+  font-weight: 650;
+  color: var(--art-accent-text);
+}
+
+.street-cards {
+  display: flex;
+  gap: 4px;
+}
+
+.street-cards i {
+  display: block;
+  width: 17px;
+  height: 24px;
+  border-radius: 4px;
+}
+
+.street-cards .mini-face {
+  background: #fff;
+  box-shadow:
+    inset 0 0 0 1px rgba(0, 0, 0, 0.24),
+    0 1px 2px rgba(0, 0, 0, 0.12);
+}
+
+.street-cards .mini-back {
+  background: var(--art-felt);
+  box-shadow: inset 0 0 0 1.5px var(--accent);
+}
+
+.street-next .street-cards i {
+  opacity: 0.45;
+}
+
+:is(.art-anim, .intro-cover .art) .art-streets-list .street {
+  animation: art-rise 420ms var(--ease) backwards;
+}
+
+/* Tree at step size -------------------------------------------------------- */
+
+.art-tree-v {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 0.1rem 0.15rem;
+}
+
+.art-tree-v .tree-root {
+  align-self: flex-start;
+  max-width: 100%;
+  padding: 0.6rem 1rem;
+  border-radius: 14px;
+  font-size: 1.02rem;
+  font-weight: 650;
+  line-height: 1.25;
+  text-align: left;
+}
+
+.tree-list {
+  list-style: none;
+  margin: 0 0 0 1.25rem;
+  padding: 0;
+  align-self: stretch;
+}
+
+/* Elbow connectors: a rail down from the decision, an arm into the middle of each outcome. */
+.tree-item {
+  position: relative;
+  padding: 0.5rem 0 0 1.4rem;
+}
+
+.tree-item:not(:last-child)::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  border-left: 2px solid var(--art-track-strong);
+}
+
+.tree-item .tree-branch::before {
+  content: '';
+  position: absolute;
+  left: -1.4rem;
+  top: 50%;
+  width: 1.4rem;
+  border-top: 2px solid var(--art-track-strong);
+}
+
+.tree-item:last-child .tree-branch::before {
+  top: -0.5rem;
+  bottom: 50%;
+  width: 1.4rem;
+  border-top: none;
+  border-left: 2px solid var(--art-track-strong);
+  border-bottom: 2px solid var(--art-track-strong);
+  border-bottom-left-radius: 12px;
+  margin-bottom: -1px;
+}
+
+.art-tree-v .tree-branch {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.9rem;
+  min-height: 3.1rem;
+  padding: 0.6rem 0.95rem;
+  border-radius: 14px;
+  background: var(--art-seat);
+  box-shadow: inset 3px 0 0 var(--tone);
+  font-size: 1rem;
+  line-height: 1.3;
+}
+
+.art-tree-v .tree-value {
+  font-size: 1.06rem;
+  font-weight: 700;
+  text-align: right;
+}
+
+:is(.art-anim, .intro-cover .art) .art-tree-v .tree-root {
+  animation: art-pop 420ms var(--spring) backwards;
+}
+
+:is(.art-anim, .intro-cover .art) .tree-item {
+  animation: art-rise 420ms var(--ease) backwards;
 }
 
 /* Quizzes ----------------------------------------------------------------- */

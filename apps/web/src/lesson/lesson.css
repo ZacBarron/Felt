@@ -1,0 +1,432 @@
+/*
+ * Lesson reading (StepView, LessonPage, CheckPage).
+ *
+ * This file loads before styles.css, so every rule is scoped one class
+ * deeper than the base rule it refines.
+ *
+ * Scale (rem is 17px), from DESIGN_REVIEW.md:
+ *   step title   serif 1.9rem, intro title serif 2.6rem
+ *   lead         1.12rem regular, label
+ *   body         1.05rem regular, line height 1.52, label
+ *   question     1.25rem semibold
+ *   choice       1rem medium
+ *   subhead      0.88rem, label-2 (table notes, formula parts, kickers)
+ *   caption      0.76rem semibold (evidence tags, table headers)
+ * Two weights carry the text: regular for reading, semibold for what to
+ * look at. Blocks sit 1.25rem apart; paragraphs inside a block 0.85em.
+ */
+
+.lesson-stage {
+  --lesson-block: 1.25rem;
+  --lesson-measure: 34em;
+}
+
+.lesson-stage .lesson-step {
+  gap: var(--lesson-block);
+}
+
+/* Kicker: where you are, calm and small. Sits right above the title it belongs to. */
+.lesson-kicker {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.88rem;
+  font-weight: 500;
+  line-height: 1.3;
+  color: var(--label-2);
+}
+
+.lesson-stage > .lesson-kicker:first-child {
+  margin-top: 4vh;
+  margin-bottom: 0.55rem;
+}
+
+.lesson-stage > .lesson-kicker + .lesson-step.intro {
+  padding-top: 0;
+}
+
+/* The check page names the lesson a question comes from, so the "Question" label would repeat it. */
+.lesson-stage > .check-source:first-child {
+  margin-top: 0.35rem;
+}
+
+.lesson-stage > .check-source + .lesson-step .quiz-kicker {
+  display: none;
+}
+
+/* Titles ------------------------------------------------------------------ */
+
+.lesson-step .lesson-h1 {
+  font-size: 2.6rem;
+  line-height: 1.04;
+  text-wrap: balance;
+}
+
+.lesson-step .lesson-h2 {
+  font-size: 1.9rem;
+  line-height: 1.08;
+  letter-spacing: -0.005em;
+  text-wrap: balance;
+}
+
+.lesson-step .lesson-title-row {
+  gap: 0.35rem;
+}
+
+/* The evidence label stays visible (it is an honesty label) but reads as a caption. */
+.lesson-step .evidence {
+  font-size: 0.76rem;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+
+.lesson-step button.evidence {
+  min-height: 28px;
+  margin: -2px 0;
+  text-decoration-color: color-mix(in srgb, currentColor 45%, transparent);
+}
+
+.lesson-step .evidence-note {
+  font-size: 0.88rem;
+  line-height: 1.45;
+  max-width: 36ch;
+}
+
+/* Reading text ------------------------------------------------------------ */
+
+.lesson-step .lesson-lead {
+  font-size: 1.12rem;
+  line-height: 1.5;
+  max-width: var(--lesson-measure);
+  text-wrap: pretty;
+}
+
+.lesson-step .lesson-p {
+  font-size: 1.05rem;
+  line-height: 1.52;
+  max-width: var(--lesson-measure);
+  color: var(--label);
+  text-wrap: pretty;
+}
+
+.lesson-step :is(.lesson-p, .lesson-lead) strong {
+  font-weight: 600;
+}
+
+.lesson-prose {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85em;
+  font-size: 1.05rem;
+}
+
+/* A long step opens with its first paragraph as a lead, then the body follows with a little more air. */
+.lesson-prose.has-lead > .lesson-p:first-child {
+  font-size: 1.2rem;
+  line-height: 1.42;
+  letter-spacing: -0.008em;
+  padding-bottom: 0.3em;
+}
+
+/* Secondary text that still belongs to the lesson: notes under a table, formula parts. */
+.lesson-step .lesson-note {
+  margin: -0.35rem 0 0;
+  font-size: 0.88rem;
+  line-height: 1.45;
+  color: var(--label-2);
+  max-width: var(--lesson-measure);
+  text-wrap: pretty;
+}
+
+/* Formula ----------------------------------------------------------------- */
+
+.lesson-step .formula {
+  gap: 0.85rem;
+  padding: 1.1rem 1.15rem;
+}
+
+.lesson-step .formula-main {
+  font-size: 1.8rem;
+  line-height: 1.15;
+  text-wrap: balance;
+}
+
+/* Parts line up as two columns: the term, then what it means. */
+.lesson-step .formula-parts {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  column-gap: 0;
+  font-size: 0.94rem;
+  line-height: 1.35;
+}
+
+.lesson-step .formula-parts > div {
+  display: contents;
+}
+
+.formula-key,
+.formula-val {
+  padding: 0.5rem 0;
+  border-top: 0.5px solid var(--separator);
+}
+
+.formula-key {
+  padding-right: 1rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.formula-val {
+  color: var(--label-2);
+  text-align: right;
+  text-wrap: pretty;
+}
+
+.formula-parts > div:last-child > * {
+  padding-bottom: 0;
+}
+
+/* Table ------------------------------------------------------------------- */
+
+.lesson-step .lesson-table {
+  padding: 0.25rem 1rem 0.35rem;
+}
+
+/* A quiet header: sentence case caption, so the numbers lead. */
+.lesson-step .lesson-table th {
+  font-size: 0.76rem;
+  font-weight: 600;
+  line-height: 1.25;
+  text-transform: none;
+  letter-spacing: 0;
+  color: var(--label-2);
+  padding: 0.75rem 0 0.5rem;
+  vertical-align: bottom;
+}
+
+.lesson-step .lesson-table td {
+  font-size: 1rem;
+  line-height: 1.3;
+  padding: 0.68rem 0;
+  vertical-align: baseline;
+}
+
+.lesson-step .lesson-table td:first-child {
+  font-weight: 500;
+}
+
+/* Numbers sit right aligned on tabular figures. */
+.lesson-step .lesson-table td:not(:first-child) {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.lesson-step .lesson-table td.text-col {
+  font-size: 0.94rem;
+  line-height: 1.35;
+  white-space: normal;
+  color: var(--label);
+}
+
+/* Callout ----------------------------------------------------------------- */
+
+.lesson-step .callout {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.55rem;
+  padding: 1.15rem 1.2rem 1.25rem;
+}
+
+.lesson-step .callout-title {
+  font-size: 1.6rem;
+  margin-top: 0.1rem;
+}
+
+/* Takeaways --------------------------------------------------------------- */
+
+.lesson-step .takeaways {
+  gap: 0.6rem;
+}
+
+.lesson-step .takeaway {
+  gap: 0.75rem;
+  padding: 0.95rem 1rem;
+  font-size: 1.05rem;
+  line-height: 1.45;
+}
+
+.lesson-step .takeaway .tick {
+  margin-top: 0.05rem;
+}
+
+/* Quiz -------------------------------------------------------------------- */
+
+.quiz-kicker {
+  color: var(--tint);
+  font-weight: 600;
+}
+
+.lesson-step .lesson-question {
+  font-size: 1.25rem;
+  line-height: 1.32;
+  font-weight: 600;
+  letter-spacing: -0.012em;
+  text-wrap: pretty;
+  max-width: var(--lesson-measure);
+}
+
+.lesson-step .quiz-felt + .lesson-question {
+  margin-top: 0.1rem;
+}
+
+.lesson-step .choices {
+  gap: 0.55rem;
+}
+
+.lesson-step .choices .choice {
+  gap: 0.75rem;
+  min-height: 56px;
+  padding: 0.7rem 1rem 0.7rem 0.6rem;
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1.35;
+  color: var(--label);
+}
+
+.choice-text {
+  flex: 1;
+  min-width: 0;
+  text-wrap: pretty;
+}
+
+.lesson-step .choices .choice-key {
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  font-size: 0.82rem;
+}
+
+.lesson-step .choices .choice.correct {
+  color: var(--green-text);
+  font-weight: 600;
+}
+
+.lesson-step .choices .choice.wrong {
+  color: var(--red-text);
+}
+
+.lesson-step .choices .choice.faded {
+  opacity: 0.5;
+}
+
+/* Feedback: the verdict on its own line, then the reason at body size. */
+.lesson-step .explain {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding: 1rem 1.1rem 1.1rem;
+  font-size: 1rem;
+  line-height: 1.5;
+  box-shadow: inset 3px 0 0 var(--explain-tone, var(--separator));
+}
+
+.lesson-step .explain.good {
+  --explain-tone: var(--green);
+}
+
+.lesson-step .explain.bad {
+  --explain-tone: var(--red);
+}
+
+.lesson-step .explain .explain-verdict {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 1rem;
+  font-weight: 650;
+}
+
+.lesson-step .explain.good .explain-verdict {
+  color: var(--green-text);
+}
+
+.lesson-step .explain.bad .explain-verdict {
+  color: var(--red-text);
+}
+
+.explain-icon {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  color: #fff;
+  background: var(--explain-tone);
+  flex: none;
+}
+
+.explain-body {
+  text-wrap: pretty;
+  max-width: var(--lesson-measure);
+}
+
+.explain-body strong {
+  font-weight: 600;
+}
+
+/* Progress ---------------------------------------------------------------- */
+
+/* One calm bar with hairline step gaps, instead of a row of bright dashes. */
+.focus-top .segments {
+  gap: 2px;
+  height: 5px;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.focus-top .segments span {
+  height: 5px;
+  border-radius: 0;
+}
+
+.focus-top .check-bar.lesson-progress {
+  height: 5px;
+}
+
+/* Intro cover ------------------------------------------------------------- */
+
+/* Drawings with words are drawn at reading size on the intro, on the same tinted box as a cover. */
+.intro-art {
+  padding: 1.1rem 1rem 1rem;
+  border-radius: 26px;
+  background: color-mix(in srgb, var(--tint-fill) 9%, var(--surface-2));
+}
+
+.intro-art > .art {
+  background: none;
+  padding: 0;
+  border-radius: 0;
+}
+
+/* Results ----------------------------------------------------------------- */
+
+.lesson-done .done-kicker {
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--label-2);
+  margin-bottom: 0.25rem;
+}
+
+.lesson-done .list-row .row-title {
+  display: block;
+  font-weight: 600;
+}
+
+.lesson-done .list-row .row-sub {
+  display: block;
+  font-size: 0.88rem;
+  color: var(--label-2);
+  margin-top: 1px;
+}
