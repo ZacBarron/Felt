@@ -110,7 +110,7 @@ export function GameSheet({ open, onClose }: { open: boolean; onClose: () => voi
             ))}
           </div>
           <div className="section-footer">
-            Stakes, rake and venue are in <Link to="/settings">Settings</Link>.
+            Stakes, rake and venue are in <Link to="/settings/game">Settings</Link>.
           </div>
         </section>
       </div>

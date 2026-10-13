@@ -1,0 +1,96 @@
+/* Settings: a short root list of rows, each opening a calm sub page. */
+
+/* Values on the right stay on one line and give way to the title. */
+.settings .list-row .detail {
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: 58%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  /* Tabular figures widen the hyphen in 9-handed. */
+  font-variant-numeric: normal;
+}
+
+.settings .list-row .grow {
+  min-width: 4.5rem;
+}
+
+.settings-account {
+  display: block;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Felt Pro's tile is brass, so its glyph is ink. */
+.settings-pro .icon-tile {
+  color: var(--on-tint);
+}
+
+.settings-pro-glyph {
+  display: grid;
+  place-items: center;
+  color: var(--on-tint);
+}
+
+/* Number and text fields sit on the right like a value. The base input size keeps iOS from zooming. */
+.settings-input {
+  width: 110px;
+  text-align: right;
+  background: transparent;
+  padding: 0;
+  color: var(--label-2);
+}
+
+/* The theme swatches sit in the same card as the Appearance row. */
+.settings-theme {
+  position: relative;
+}
+
+.settings-theme::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 1rem;
+  right: 0;
+  height: 0.5px;
+  background: var(--separator);
+}
+
+/* A consequence the player should see: drills fall back to other charts. */
+.settings-warn {
+  color: var(--orange-text);
+}
+
+/* Status lines only take space when they have something to say. */
+.section-footer:has(> .settings-status:empty) {
+  padding: 0;
+}
+
+.settings-input.short {
+  width: 4.5rem;
+}
+
+/* The global 14px `.swatch` chip shares this class name, so the theme
+   swatches restate their own size here. */
+.settings-theme .theme-swatch .swatch {
+  display: block;
+  width: 100%;
+  height: 64px;
+}
+
+.settings-theme .theme-swatch .swatch > .swatch-accent {
+  height: 8px;
+}
+
+/* A file picker row reads like the button rows around it. */
+.settings-action {
+  font-weight: 600;
+}
+
+/* A unit sits close to its number. */
+.settings-input.short + .muted {
+  margin-left: -0.45rem;
+}

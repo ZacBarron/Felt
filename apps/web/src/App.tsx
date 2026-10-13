@@ -126,6 +126,7 @@ export function App() {
             <Route path="/ranges" element={<RangesPage />} />
             <Route path="/lab" element={<LabPage />} />
             <Route path="/settings" element={<SettingsPage />} />
+            <Route path="/settings/:section" element={<SettingsPage />} />
             <Route path="/welcome" element={<OnboardingPage />} />
             <Route path="/placement" element={<PlacementPage />} />
             <Route path="/check/:track/:module" element={<CheckPage />} />

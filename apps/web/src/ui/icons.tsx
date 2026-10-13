@@ -365,4 +365,55 @@ export function BookmarkIcon(p: IconProps) {
   );
 }
 
-export type IconComponent = (p: IconProps) => React.ReactElement;
+/** Game: a poker chip with four edge spots. */
+export function ChipIcon(p: IconProps) {
+  return (
+    <Svg {...p}>
+      <circle cx="12" cy="12" r="8.25" />
+      <circle cx="12" cy="12" r="3.75" {...fillProps(p.filled)} />
+      <path d="M12 3.75v2.5M12 17.75v2.5M3.75 12h2.5M17.75 12h2.5" />
+    </Svg>
+  );
+}
+
+/** Rake: a percent sign. */
+export function PercentIcon(p: IconProps) {
+  return (
+    <Svg {...p}>
+      <path d="M18 6 6 18" />
+      <circle cx="7.75" cy="7.75" r="2.25" {...fillProps(p.filled)} />
+      <circle cx="16.25" cy="16.25" r="2.25" {...fillProps(p.filled)} />
+    </Svg>
+  );
+}
+
+/** Appearance: a circle half light, half dark. */
+export function AppearanceIcon(p: IconProps) {
+  return (
+    <Svg {...p}>
+      <circle cx="12" cy="12" r="8.25" />
+      <path d="M12 3.75a8.25 8.25 0 0 0 0 16.5Z" fill="currentColor" />
+    </Svg>
+  );
+}
+
+/** Data: a storage cylinder. */
+export function DataIcon(p: IconProps) {
+  return (
+    <Svg {...p}>
+      <ellipse cx="12" cy="6.5" rx="7" ry="2.75" {...fillProps(p.filled)} />
+      <path d="M5 6.5v11c0 1.5 3.15 2.75 7 2.75s7-1.25 7-2.75v-11M5 12c0 1.5 3.15 2.75 7 2.75S19 13.5 19 12" />
+    </Svg>
+  );
+}
+
+/** Developer: angle brackets around a slash. */
+export function CodeIcon(p: IconProps) {
+  return (
+    <Svg {...p}>
+      <path d="M8.5 7.5 4 12l4.5 4.5M15.5 7.5 20 12l-4.5 4.5M13.25 5.5l-2.5 13" />
+    </Svg>
+  );
+}
+
+export type IconComponent =(p: IconProps) => React.ReactElement;
