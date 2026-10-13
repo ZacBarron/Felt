@@ -7,13 +7,13 @@ import { canOpenLesson, isPro } from '../state/access';
 import { plural } from '../ui/format';
 import type { StoredLesson } from '../state/db';
 import { track } from '../state/events';
-import { CUES, cueCopy, DAILY_OPTIONS, FOCUS, GOALS, goalsLine, pathPrefs } from '../state/goals';
+import { CUES, cueCopy, DAILY_OPTIONS, EXPERIENCE, FOCUS, GOALS, goalsLine, pathPrefs } from '../state/goals';
 import { isComplete, LESSON_ENTRIES, lessonProgress, recommendedLessons } from '../state/lessons';
 import { studyReminder } from '../state/reminders';
 import { type Focus, type Profile, useSettings } from '../state/settings';
 import { BrandMark, HeroPattern, TAGLINE, Wordmark } from '../ui/Brand';
 import { BottomBar } from '../ui/BottomBar';
-import { BellIcon, CheckIcon, ChevronLeftIcon, ClockIcon, LockIcon, SkipIcon } from '../ui/icons';
+import { BellIcon, CheckIcon, ChevronLeftIcon, ClockIcon, LockIcon } from '../ui/icons';
 import { useBodyClass } from '../ui/useBodyClass';
 import { onRadioKeys } from '../ui/radioKeys';
 import { requestPersistentStorage } from '../state/backup';
@@ -268,7 +268,7 @@ export function OnboardingPage() {
             Building your plan
           </h1>
           <div className="list">
-            {['Ordering lessons by your goals', 'Applying your placement test', 'Setting your daily time'].map((t, i) => (
+            {['Ordering lessons by your goals', 'Applying your placement quiz', 'Setting your daily time'].map((t, i) => (
               <div key={t} className="list-row reveal" style={{ animationDelay: `${i * 380}ms` }}>
                 <CheckIcon size={16} style={{ color: 'var(--green-text)' }} />
                 <span className="grow">{t}</span>
@@ -297,7 +297,7 @@ export function OnboardingPage() {
               </span>
               {tested > 0 && (
                 <span className="plan-chip">
-                  <SkipIcon size={14} /> {plural(tested, 'lesson')} tested out
+                  <CheckIcon size={14} /> {plural(tested, 'lesson')} passed
                 </span>
               )}
             </div>
@@ -444,16 +444,15 @@ export function OnboardingPage() {
       ),
     },
     level: {
-      title: 'Find where to start',
-      sub: 'Take a short test to skip what you already know. Miss a question and that lesson stays in your plan.',
-      ready: true,
+      title: 'How well do you know poker?',
+      sub: profile.experience && profile.experience !== 'new' ? 'A short quiz finds where to start. Skip what you already know.' : 'We start you at the right lesson.',
+      ready: !!profile.experience,
       body: (
-        <ul className="onb-facts">
-          <li>Up to 3 questions per topic</li>
-          <li>Takes about 5 minutes</li>
-          <li>Stops when the questions get too hard</li>
-          <li>You can retake it any time from Settings</li>
-        </ul>
+        <div className="onb-choices" role="radiogroup" onKeyDown={onRadioKeys} aria-labelledby="onb-title">
+          {EXPERIENCE.map((x) => (
+            <Choice key={x.id} selected={profile.experience === x.id} label={x.label} note={x.note} onClick={() => setProfile({ experience: x.id })} />
+          ))}
+        </div>
       ),
     },
   };
@@ -463,7 +462,7 @@ export function OnboardingPage() {
     if (step === 'game') update({ ...settings, game: PRESETS[game].settings });
     track('onboarding_step_answered', {
       step,
-      value: step === 'goal' ? profile.goals.join(',') : step === 'game' ? game : step === 'daily' ? profile.dailyMinutes : step === 'when' ? profile.cue : profile.focus.length,
+      value: step === 'goal' ? profile.goals.join(',') : step === 'game' ? game : step === 'daily' ? profile.dailyMinutes : step === 'when' ? profile.cue : step === 'level' ? profile.experience : profile.focus.length,
     });
     forward();
   };
@@ -480,19 +479,19 @@ export function OnboardingPage() {
         {screen.body}
       </div>
       <BottomBar>
-        {step === 'level' ? (
+        {step === 'level' && profile.experience && profile.experience !== 'new' ? (
           <>
             <button
               className="btn btn-primary btn-lg btn-block"
               onClick={() => {
-                track('placement_started', { from: 'onboarding' });
+                track('placement_started', { from: 'onboarding', experience: profile.experience });
                 navigate('/placement?from=onboarding');
               }}
             >
-              Take the placement test
+              Find where to start
             </button>
             <button className="btn btn-plain btn-block" onClick={() => go('plan')}>
-              Start from the first lesson
+              Start from the basics
             </button>
           </>
         ) : (

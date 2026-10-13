@@ -396,7 +396,7 @@ export function SolverPage() {
                       <BookmarkIcon size={12} filled /> Saved
                     </span>
                   ) : (
-                    <button className="test-out" data-haptic="off" onClick={() => void saveSpot()}>
+                    <button className="tint-capsule" data-haptic="off" onClick={() => void saveSpot()}>
                       <BookmarkIcon size={14} /> Save
                     </button>
                   )}

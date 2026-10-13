@@ -5,7 +5,13 @@ export const TOURNAMENT_LESSONS: LessonContent[] = [
     key: 'tournaments/mtt-basics/antes',
     level: 'core',
     minutes: 5,
-    cover: { kind: 'figure', text: '2.5' },
+    cover: {
+      kind: 'chips',
+      stacks: [
+        { label: 'No ante', bb: 1.5 },
+        { label: 'BB ante', bb: 2.5 },
+      ],
+    },
     steps: [
       {
         kind: 'intro',
@@ -100,7 +106,7 @@ export const TOURNAMENT_LESSONS: LessonContent[] = [
     key: 'tournaments/mtt-basics/push-fold',
     level: 'core',
     minutes: 7,
-    cover: { kind: 'figure', text: '10bb' },
+    cover: { kind: 'table', seats: 9, button: 'BTN', hero: 'SB', highlight: ['BB'], note: 'All in or fold' },
     steps: [
       {
         kind: 'intro',
@@ -214,6 +220,21 @@ export const TOURNAMENT_LESSONS: LessonContent[] = [
           'A shove now risks less to win the same pot. The fold term weighs more, and losing when called costs less. Tightening up feels safe, but in chip EV the ranges widen.',
       },
       {
+        kind: 'visual',
+        title: 'One hand, three stacks',
+        art: {
+          kind: 'bars',
+          unit: 'bb',
+          bars: [
+            { label: '10bb', value: 0.57, tone: 'green' },
+            { label: '15bb', value: -0.1, tone: 'red' },
+            { label: '20bb', value: -0.77, tone: 'red' },
+          ],
+        },
+        caption: 'The small blind shoves 9♣3♦ into the same assumed calling range. It earns **+0.57bb** at 10bb and loses money deeper.',
+        evidence: 'math',
+      },
+      {
         kind: 'takeaway',
         points: [
           'EV of a shove = F × pot + (1 − F) × (eq × final pot − risk).',
@@ -228,7 +249,14 @@ export const TOURNAMENT_LESSONS: LessonContent[] = [
     key: 'tournaments/mtt-basics/icm',
     level: 'advanced',
     minutes: 8,
-    cover: { kind: 'figure', text: '$EV' },
+    cover: {
+      kind: 'bars',
+      unit: '%',
+      bars: [
+        { label: 'Chips', value: 50, tone: 'gray' },
+        { label: 'Money', value: 38.4 },
+      ],
+    },
     steps: [
       {
         kind: 'intro',
@@ -345,6 +373,22 @@ export const TOURNAMENT_LESSONS: LessonContent[] = [
         answer: 0,
         explain:
           'With payouts spread over places, doubling up never doubles your prize. In the model, only the payout structure makes chips and money differ. Rising blinds and stack pressure matter at the table, but they are not in the model.',
+      },
+      {
+        kind: 'visual',
+        title: 'Chips against money',
+        art: {
+          kind: 'bars',
+          unit: '%',
+          bars: [
+            { label: 'A, chips', value: 50, tone: 'gray' },
+            { label: 'A, money', value: 38.4 },
+            { label: 'C, chips', value: 20, tone: 'gray' },
+            { label: 'C, money', value: 28.9 },
+          ],
+        },
+        caption: 'The chip leader holds half the chips but **38.4%** of the money. The short stack holds 20% of the chips but **28.9%** of the money.',
+        evidence: 'math',
       },
       {
         kind: 'takeaway',

@@ -104,6 +104,7 @@ export const PREFLOP_MORE_LESSONS: LessonContent[] = [
       {
         kind: 'quiz',
         question: 'UTG opens and you are on the button. Which hand is the typical polarized 3bet bluff?',
+        choiceCards: ['As5s', 'AdJc', 'KdJc'],
         choices: ['A♠5♠', 'A♦J♣', 'K♦J♣'],
         answer: 0,
         explain: 'A5s makes AA and AK less likely and can make straights and flushes. AJo also holds an ace, but AK and AQ dominate it. When called, it makes too many second best hands.',
@@ -202,6 +203,7 @@ export const PREFLOP_MORE_LESSONS: LessonContent[] = [
       {
         kind: 'quiz',
         question: 'The LJ opens 2.5bb. On the button, which hand is the clearest flat?',
+        choiceCards: ['KsTd', '6s6h', 'Qc9d'],
         choices: ['K♠T♦', '6♠6♥', 'Q♣9♦'],
         answer: 1,
         explain: 'A small pair flops a set or better 11.8% of the time and plays well in position. KTo looks playable, but AK and KQ dominate it. Q9o is dominated too and usually folds.',
@@ -238,7 +240,7 @@ export const PREFLOP_MORE_LESSONS: LessonContent[] = [
     key: 'preflop/vs-open/sb-vs-open',
     level: 'core',
     minutes: 5,
-    cover: { kind: 'figure', text: '33%' },
+    cover: { kind: 'ring', value: 1 / 3, label: 'Equity to call', caption: 'Small blind against a 2.5bb open' },
     steps: [
       {
         kind: 'intro',
@@ -315,6 +317,12 @@ export const PREFLOP_MORE_LESSONS: LessonContent[] = [
         explain: 'The problem is what happens after the call. The big blind can squeeze or join, and you act first on every street. Many hands do have 33.3% raw equity, but they realize too little of it.',
       },
       {
+        kind: 'visual',
+        title: 'Stuck in the middle',
+        art: { kind: 'table', seats: 9, button: 'BTN', hero: 'SB', highlight: ['BTN', 'BB'], note: 'The big blind acts behind you' },
+        caption: 'The button opened and the big blind still acts behind you. After the flop you act first against both.',
+      },
+      {
         kind: 'takeaway',
         points: [
           'The small blind facing an open mostly 3bets or folds.',
@@ -328,7 +336,14 @@ export const PREFLOP_MORE_LESSONS: LessonContent[] = [
     key: 'preflop/vs-open/squeeze',
     level: 'advanced',
     minutes: 7,
-    cover: { kind: 'figure', text: '6.5' },
+    cover: {
+      kind: 'chips',
+      stacks: [
+        { label: 'Open', bb: 2.5 },
+        { label: 'Call', bb: 2.5 },
+        { label: 'Blinds', bb: 1.5 },
+      ],
+    },
     steps: [
       {
         kind: 'intro',
@@ -416,6 +431,12 @@ export const PREFLOP_MORE_LESSONS: LessonContent[] = [
         explain: 'Risking 12bb to win 6.5bb needs 64.9% folds. Risking 10bb to win 4bb needs 71.4%. A capped caller does fold often, but that changes how often you win. It does not change the folds you need.',
       },
       {
+        kind: 'visual',
+        title: 'Dead money and a capped caller',
+        art: { kind: 'table', seats: 9, button: 'BTN', hero: 'BB', highlight: ['CO', 'BTN'], note: '6.5bb in the pot' },
+        caption: 'The cutoff opened and the button called. In the big blind you face **6.5bb** of dead money. The caller’s range is capped.',
+      },
+      {
         kind: 'takeaway',
         points: [
           'An open plus a call means more dead money and a capped caller.',
@@ -429,7 +450,7 @@ export const PREFLOP_MORE_LESSONS: LessonContent[] = [
     key: 'preflop/3bet-pots/vs-3bet',
     level: 'core',
     minutes: 7,
-    cover: { kind: 'figure', text: '38%' },
+    cover: { kind: 'ring', value: 8.5 / 22.5, label: 'Equity to call', caption: 'Against a 3bet to 11bb' },
     steps: [
       {
         kind: 'intro',
@@ -515,6 +536,7 @@ export const PREFLOP_MORE_LESSONS: LessonContent[] = [
       {
         kind: 'quiz',
         question: 'You open K♣9♦ on the button and the big blind 3bets to 11bb. What does Felt’s chart do?',
+        cards: 'Kc9d',
         choices: ['Call', '4bet', 'Fold'],
         answer: 2,
         explain: 'Felt’s chart always folds K9o here. AK and KQ dominate it, and it has no blocker value worth a 4bet. Calling is tempting in position, but K9o makes too many second best hands.',
@@ -533,7 +555,13 @@ export const PREFLOP_MORE_LESSONS: LessonContent[] = [
     key: 'preflop/3bet-pots/4bet',
     level: 'advanced',
     minutes: 8,
-    cover: { kind: 'figure', text: '27' },
+    cover: {
+      kind: 'bars',
+      bars: [
+        { label: '7♠6♠', value: 34, tone: 'gray' },
+        { label: 'A♠5♠', value: 27 },
+      ],
+    },
     steps: [
       {
         kind: 'intro',
@@ -610,6 +638,7 @@ export const PREFLOP_MORE_LESSONS: LessonContent[] = [
       {
         kind: 'quiz',
         question: 'You hold A♠5♠. How many combos of QQ+ and AK can villain hold?',
+        cards: 'As5s',
         choices: ['21', '24', '27', '34'],
         answer: 2,
         explain: 'AA drops from 6 combos to 3. AK drops from 16 to 12. KK and QQ stay at 6 each, so 3 + 6 + 6 + 12 = 27. 34 is the count before your cards come out.',

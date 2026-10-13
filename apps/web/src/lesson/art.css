@@ -1,0 +1,1189 @@
+/*
+ * Lesson art (LessonArt.tsx): covers and visual steps.
+ *
+ * Colors come from the theme tokens through a small set of art variables, so
+ * the same drawing works on paper, at night and on the felt of the learn hero.
+ * Hard coded colors appear only for playing card faces, the dealer puck (a
+ * physical object like a card) and the felt itself.
+ *
+ * Covers are size containers, so their art scales with the box through
+ * container units. Motion runs only on lesson screens (`.art-anim` and the
+ * lesson intro cover), always with `backwards` fill so no transform lingers.
+ */
+
+.art {
+  --art-ink: var(--label);
+  --art-muted: var(--label-2);
+  --art-faint: var(--label-3);
+  --art-track: var(--fill-2);
+  --art-track-strong: var(--fill-3);
+  --art-line: var(--separator);
+  --art-seat: var(--fill-2);
+  --art-accent: var(--tint-fill);
+  --art-accent-text: var(--tint);
+  --art-spruce: var(--base-500);
+  --art-solid: var(--surface);
+  --art-felt: var(--felt-2);
+  --art-rail: var(--felt-3);
+  color: var(--art-ink);
+}
+
+/* On the felt of the learn hero the art turns light. */
+.learn-hero .art {
+  --art-ink: #fff;
+  --art-muted: rgba(255, 255, 255, 0.78);
+  --art-faint: rgba(255, 255, 255, 0.4);
+  --art-track: rgba(255, 255, 255, 0.16);
+  --art-track-strong: rgba(255, 255, 255, 0.28);
+  --art-line: rgba(255, 255, 255, 0.22);
+  --art-seat: rgba(255, 255, 255, 0.18);
+  --art-accent: var(--accent);
+  --art-accent-text: var(--accent);
+  --art-spruce: var(--felt-1);
+  --art-solid: var(--felt-2);
+}
+
+.tone-brass {
+  color: var(--art-accent-text);
+}
+.tone-green {
+  color: var(--green-text);
+}
+.tone-red {
+  color: var(--red-text);
+}
+.tone-gray {
+  color: var(--art-muted);
+}
+.tone-purple {
+  color: var(--purple);
+}
+
+.learn-hero .art :is(.tone-green, .tone-red, .tone-gray, .tone-purple) {
+  color: var(--art-ink);
+}
+
+/* Covers ------------------------------------------------------------------ */
+
+.cover {
+  container-type: size;
+}
+
+.cover > .art {
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 7cqmin;
+  min-width: 0;
+}
+
+.cover > .art-k-figure,
+.cover > .art-k-chart {
+  padding: 0;
+}
+
+.cover > .art-k-cards {
+  padding: 4cqmin;
+}
+
+/* A full width visual step sits on a plain grouped surface. */
+.art-panel {
+  background: var(--surface);
+  border-radius: var(--r-card);
+  padding: 1.1rem 1rem 1rem;
+  overflow: hidden;
+}
+
+/* Shared motion ------------------------------------------------------------ */
+
+@keyframes art-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes art-fade-late {
+  0%,
+  55% {
+    opacity: 0;
+  }
+}
+
+@keyframes art-rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
+@keyframes art-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+}
+
+@keyframes art-grow {
+  from {
+    transform: scaleY(0);
+  }
+}
+
+@keyframes art-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+}
+
+@keyframes art-ring-fill {
+  from {
+    stroke-dashoffset: var(--circ);
+  }
+}
+
+@keyframes art-chip {
+  from {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+}
+
+/* Figure ------------------------------------------------------------------ */
+
+.art-figure {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  text-align: center;
+}
+
+.art-figure-caption {
+  max-width: 88%;
+  font-size: max(10px, 8cqh);
+  font-weight: 600;
+  line-height: 1.15;
+  color: var(--art-muted);
+}
+
+.art-step .art-figure {
+  padding: 1rem 0 0.6rem;
+}
+
+.art-step .art-figure-num {
+  font-size: 5.5rem;
+  color: var(--art-accent-text);
+}
+
+.art-step .art-figure-caption {
+  font-size: 1rem;
+}
+
+/* Chart ------------------------------------------------------------------- */
+
+.art-chart .range-grid {
+  max-width: none;
+}
+
+.art-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 1rem;
+  margin-top: 0.85rem;
+  font-size: 0.86rem;
+  color: var(--art-muted);
+}
+
+.art-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.art-legend i {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+}
+
+.art-legend b {
+  color: var(--art-ink);
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+}
+
+.art-note {
+  margin-top: 0.4rem;
+  font-size: 0.78rem;
+  color: var(--art-muted);
+}
+
+/* Cards ------------------------------------------------------------------- */
+
+.art-cards {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.art-board {
+  display: flex;
+  gap: 4px;
+  padding: 5px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--art-felt) 16%, transparent);
+}
+
+.learn-hero .art-board {
+  background: rgba(0, 0, 0, 0.18);
+}
+
+.board-only .art-board {
+  gap: 5px;
+  padding: 7px;
+}
+
+.art-row {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+}
+
+.art-fan {
+  display: flex;
+}
+
+.art-fan > *:first-child:not(:last-child) {
+  transform: rotate(-9deg) translate(6px, 2px);
+}
+
+.art-fan > *:last-child:not(:first-child) {
+  transform: rotate(7deg) translate(-6px, 0);
+}
+
+.cover-sm .art-cards.with-board,
+.cover-sm .art-cards.board-only {
+  zoom: 0.6;
+}
+
+.cover-md .art-cards.with-board {
+  zoom: 0.9;
+}
+
+.cover-md .art-cards.with-board:has(.art-board > :nth-child(5)) {
+  zoom: 0.8;
+}
+
+.intro-cover .art-cards {
+  zoom: 1.3;
+}
+
+.intro-cover .art-cards.with-board {
+  zoom: 1.2;
+}
+
+.intro-cover .art-cards.with-board:has(.art-board > :nth-child(5)) {
+  zoom: 1.1;
+}
+
+.art-felt {
+  align-items: center;
+}
+
+.art-felt .art-hole {
+  gap: 10px;
+}
+
+/* Ring -------------------------------------------------------------------- */
+
+.art-ring {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.7rem;
+  text-align: center;
+}
+
+.art-ring-svg {
+  width: 172px;
+  height: auto;
+  overflow: visible;
+}
+
+.ring-track,
+.ring-arc {
+  fill: none;
+  stroke-width: 11;
+}
+
+.ring-track {
+  stroke: var(--art-track);
+}
+
+.ring-arc {
+  stroke: var(--art-accent);
+  stroke-linecap: round;
+}
+
+.ring-num {
+  fill: var(--art-ink);
+  font-size: 36px;
+  font-variant-numeric: tabular-nums;
+}
+
+.ring-pct {
+  font-size: 20px;
+  fill: var(--art-muted);
+}
+
+.art-ring-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.art-ring-label {
+  font-size: 1.05rem;
+  font-weight: 650;
+  line-height: 1.2;
+}
+
+.art-ring-caption {
+  font-size: 0.9rem;
+  line-height: 1.25;
+  color: var(--art-muted);
+}
+
+.cover .art-ring {
+  gap: 3cqh;
+}
+
+.cover .art-ring-svg {
+  width: auto;
+  height: 62cqh;
+}
+
+.cover .art-ring-label {
+  font-size: max(9px, 8.5cqh);
+}
+
+.cover .art-ring-caption {
+  display: none;
+}
+
+/* Wide covers, like the lesson intro, set the words beside the ring. */
+@container (min-aspect-ratio: 3 / 2) {
+  .cover .art-ring {
+    flex-direction: row;
+    gap: 7cqw;
+    text-align: left;
+  }
+
+  .cover .art-ring-svg {
+    height: 78cqh;
+  }
+
+  .cover .art-ring-label {
+    font-size: 9.5cqh;
+    max-width: 38cqw;
+  }
+
+  .cover .art-ring-caption {
+    display: block;
+    font-size: 8cqh;
+    max-width: 38cqw;
+  }
+}
+
+:is(.art-anim, .intro-cover .art) .ring-arc {
+  animation: art-ring-fill 1000ms var(--ease) 120ms backwards;
+}
+
+:is(.art-anim, .intro-cover .art) .art-ring-text {
+  animation: art-fade 500ms var(--ease) 300ms backwards;
+}
+
+/* Bars -------------------------------------------------------------------- */
+
+.art-bars {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.art-bars-plot,
+.art-bars-labels {
+  display: grid;
+  grid-template-columns: repeat(var(--n), minmax(0, 1fr));
+  column-gap: 10px;
+}
+
+.art-bars-plot {
+  position: relative;
+  height: 156px;
+  margin-top: 1.6rem;
+}
+
+.art-bars.signed .art-bars-plot {
+  margin-bottom: 1.6rem;
+}
+
+.art-zero {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--art-track-strong);
+}
+
+.art-bar-col {
+  position: relative;
+  height: 100%;
+}
+
+.art-bar {
+  position: absolute;
+  left: 50%;
+  width: min(64%, 56px);
+  translate: -50% 0;
+  border-radius: 8px 8px 3px 3px;
+}
+
+.art-bar.up {
+  transform-origin: bottom;
+}
+
+.art-bar.down {
+  transform-origin: top;
+  border-radius: 3px 3px 8px 8px;
+}
+
+.art-bar-value {
+  position: absolute;
+  left: -4px;
+  right: -4px;
+  text-align: center;
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.art-bar-value.up {
+  margin-bottom: 5px;
+}
+
+.art-bar-value.down {
+  margin-top: 5px;
+}
+
+.art-bar-label {
+  margin-top: 0.5rem;
+  font-size: 0.82rem;
+  line-height: 1.2;
+  text-align: center;
+  color: var(--art-muted);
+  overflow-wrap: break-word;
+  hyphens: auto;
+}
+
+.cover .art-bars {
+  width: 94cqw;
+}
+
+.cover .art-bars-labels {
+  column-gap: 1cqw;
+}
+
+.cover .art-bars-plot {
+  height: 50cqh;
+  margin-top: 11cqh;
+  column-gap: 4cqw;
+}
+
+.cover .art-bars.signed .art-bars-plot {
+  height: 42cqh;
+  margin-bottom: 11cqh;
+}
+
+.cover .art-bar {
+  border-radius: 1.6cqh 1.6cqh 0.6cqh 0.6cqh;
+}
+
+.cover .art-bar.down {
+  border-radius: 0.6cqh 0.6cqh 1.6cqh 1.6cqh;
+}
+
+.cover .art-bar-value {
+  font-size: max(8px, 9cqh);
+  letter-spacing: -0.02em;
+}
+
+/* The small hero cover keeps the bars and drops the unit from crowded values. */
+@container (max-width: 140px) {
+  .cover .art-bar-value {
+    font-size: 7.5cqh;
+  }
+
+  .cover .art-bars-plot {
+    column-gap: 3cqw;
+  }
+}
+
+.cover .art-bar-value.up {
+  margin-bottom: 1.5cqh;
+}
+
+.cover .art-bar-value.down {
+  margin-top: 1.5cqh;
+}
+
+.cover .art-bar-label {
+  margin-top: 2cqh;
+  font-size: max(7.5px, 7cqh);
+  line-height: 1.1;
+  overflow-wrap: normal;
+  hyphens: manual;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+:is(.art-anim, .intro-cover .art) .art-bar {
+  animation: art-grow 700ms var(--ease) backwards;
+}
+
+:is(.art-anim, .intro-cover .art) .art-bar-value {
+  animation: art-fade-late 900ms var(--ease) backwards;
+}
+
+/* Table ------------------------------------------------------------------- */
+
+.art-table-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.cover .art-table-svg {
+  width: auto;
+  height: 86cqh;
+  max-width: 100%;
+}
+
+.table-rail {
+  fill: var(--art-rail);
+}
+
+.table-felt {
+  fill: var(--art-felt);
+}
+
+.table-line {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.14);
+  stroke-width: 1.2;
+}
+
+.table-note {
+  fill: rgba(255, 255, 255, 0.94);
+  font-size: 13.5px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+.table-you {
+  fill: var(--accent);
+  font-size: 9.5px;
+  font-weight: 750;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* The dealer puck is a physical object, white like a card face. */
+.table-dealer circle {
+  fill: #fff;
+  stroke: rgba(0, 0, 0, 0.2);
+  stroke-width: 1;
+}
+
+.table-dealer text {
+  fill: #1c1c1e;
+  font-size: 9.5px;
+  font-weight: 800;
+}
+
+.table-seat rect {
+  fill: var(--art-seat);
+  stroke: var(--art-line);
+  stroke-width: 1;
+}
+
+.seat-text {
+  fill: var(--art-ink);
+  font-size: 10.5px;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+}
+
+.seat-hero rect {
+  fill: var(--art-accent);
+  stroke: none;
+}
+
+.seat-hero .seat-text {
+  fill: var(--on-tint);
+  font-weight: 750;
+}
+
+.seat-lit rect {
+  stroke: var(--art-accent);
+  stroke-width: 2;
+}
+
+.seat-dim {
+  opacity: 0.42;
+}
+
+.cover .art-k-table :is(.seat-text, .table-note, .table-you) {
+  display: none;
+}
+
+.cover .art-k-table .table-seat rect {
+  stroke-width: 2;
+}
+
+@container (min-width: 300px) {
+  .cover .art-k-table :is(.seat-text, .table-note, .table-you) {
+    display: inline;
+  }
+}
+
+:is(.art-anim, .intro-cover .art) :is(.table-seat, .table-dealer) {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: art-pop 420ms var(--spring) backwards;
+}
+
+:is(.art-anim, .intro-cover .art) :is(.table-note, .table-you) {
+  animation: art-fade 500ms var(--ease) 500ms backwards;
+}
+
+/* Streets ----------------------------------------------------------------- */
+
+.art-k-streets {
+  flex-direction: column;
+}
+
+.art-streets-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.street-track,
+.street-done {
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+
+.street-track {
+  stroke: var(--art-track-strong);
+}
+
+.street-done {
+  stroke: var(--art-accent);
+}
+
+.street-dot {
+  fill: var(--art-solid);
+  stroke: var(--art-track-strong);
+  stroke-width: 2.5;
+}
+
+:is(.street-past, .street-now) .street-dot {
+  fill: var(--art-accent);
+  stroke: var(--art-accent);
+}
+
+.street-halo {
+  fill: color-mix(in srgb, var(--art-accent) 28%, transparent);
+}
+
+/* Card faces stay white, card backs are the felt with a brass edge. */
+.mini-face {
+  fill: #fff;
+  stroke: rgba(0, 0, 0, 0.2);
+  stroke-width: 0.8;
+}
+
+.mini-back {
+  fill: var(--art-felt);
+  stroke: var(--accent);
+  stroke-width: 1;
+}
+
+.street-next :is(.mini-face, .mini-back) {
+  opacity: 0.3;
+}
+
+.street-name {
+  fill: var(--art-muted);
+  font-size: 11.5px;
+  font-weight: 600;
+}
+
+.street-now .street-name {
+  fill: var(--art-accent-text);
+  font-weight: 750;
+}
+
+.art-streets-now {
+  display: none;
+}
+
+.cover .art-streets-svg {
+  width: 100cqw;
+}
+
+@container (min-width: 300px) {
+  .cover .art-streets-svg {
+    width: 86cqw;
+  }
+}
+
+.cover .street-name {
+  display: none;
+}
+
+.cover .art-streets-now {
+  display: block;
+  margin-top: 3cqh;
+  font-size: max(10px, 10cqh);
+  font-weight: 700;
+  color: var(--art-accent-text);
+}
+
+@container (min-width: 300px) {
+  .cover .street-name {
+    display: inline;
+  }
+
+  .cover .art-streets-now {
+    display: none;
+  }
+}
+
+:is(.art-anim, .intro-cover .art) .street-done {
+  stroke-dasharray: 1;
+  animation: art-draw 900ms var(--ease) 200ms backwards;
+}
+
+:is(.art-anim, .intro-cover .art) .street {
+  animation: art-fade 420ms var(--ease) backwards;
+}
+
+/* Ladder ------------------------------------------------------------------ */
+
+.art-ladder {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.art-ladder li {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 0;
+  border-bottom: 0.5px solid var(--art-line);
+}
+
+.art-ladder li:last-child {
+  border-bottom: none;
+}
+
+.rung-n {
+  width: 24px;
+  height: 24px;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  font-size: 0.75rem;
+  font-weight: 750;
+  background: var(--art-track);
+  color: var(--art-muted);
+}
+
+.rung-n.filled {
+  color: var(--on-tint);
+}
+
+.rung-name {
+  font-weight: 600;
+  font-size: 0.95rem;
+  line-height: 1.2;
+}
+
+.rung-cards {
+  display: flex;
+  gap: 3px;
+}
+
+:is(.art-anim, .intro-cover .art) .art-ladder li {
+  animation: art-rise 420ms var(--ease) backwards;
+}
+
+.art-stairs {
+  display: flex;
+  flex-direction: column;
+  gap: 2.4cqh;
+  width: 74cqw;
+}
+
+.art-stairs span {
+  display: block;
+  height: 5.6cqh;
+  border-radius: 999px;
+}
+
+/* Chips ------------------------------------------------------------------- */
+
+.art-chips {
+  display: grid;
+  grid-template-columns: repeat(var(--n), minmax(0, 1fr));
+  gap: 14px;
+  align-items: end;
+  width: 100%;
+  max-width: 420px;
+  margin: 0 auto;
+}
+
+.art-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+
+.art-stack-svg {
+  display: block;
+  width: min(100%, 84px);
+  height: auto;
+  overflow: visible;
+}
+
+.chip-value {
+  fill: var(--art-ink);
+  font-size: 12px;
+  font-weight: 750;
+  font-variant-numeric: tabular-nums;
+}
+
+.art-stack-label {
+  font-size: 0.82rem;
+  line-height: 1.2;
+  text-align: center;
+  color: var(--art-muted);
+}
+
+.chip-shadow {
+  fill: var(--art-track);
+}
+
+.chip-side {
+  fill: color-mix(in srgb, var(--chip), #000 30%);
+}
+
+.chip-top {
+  fill: var(--chip);
+}
+
+.chip-edge {
+  fill: none;
+  stroke: color-mix(in srgb, var(--chip), #fff 60%);
+  stroke-width: 2.6;
+  stroke-dasharray: 4.4 3.8;
+}
+
+.cover .art-chips {
+  width: 84cqw;
+  gap: 4cqw;
+}
+
+.cover .art-stack {
+  gap: 1cqh;
+}
+
+.cover .art-stack-svg {
+  width: auto;
+  height: 66cqh;
+  max-width: 100%;
+}
+
+.cover .art-stack-label {
+  font-size: max(7.5px, 7.5cqh);
+  line-height: 1.1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+:is(.art-anim, .intro-cover .art) .chip {
+  animation: art-chip 320ms var(--ease) backwards;
+}
+
+:is(.art-anim, .intro-cover .art) .chip-value {
+  animation: art-fade-late 1100ms var(--ease) backwards;
+}
+
+/* Tree -------------------------------------------------------------------- */
+
+.art-tree {
+  display: grid;
+  grid-template-columns: minmax(0, 0.85fr) 30px minmax(0, 1.6fr);
+  align-items: stretch;
+  width: 100%;
+}
+
+.tree-root {
+  align-self: center;
+  padding: 0.7rem 0.75rem;
+  border-radius: 14px;
+  background: var(--art-accent);
+  color: var(--on-tint);
+  font-size: 0.92rem;
+  font-weight: 700;
+  line-height: 1.2;
+  text-align: center;
+}
+
+.tree-linkbox {
+  position: relative;
+}
+
+.tree-links {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.tree-links path {
+  fill: none;
+  stroke: var(--art-track-strong);
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+}
+
+.tree-branches {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Equal rows with equal padding keep each branch centered on its link. */
+.tree-slot {
+  flex: 1;
+  display: flex;
+  padding: 4px 0;
+}
+
+.tree-branch {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  padding: 0.6rem 0.75rem;
+  border-radius: 12px;
+  background: var(--art-seat);
+  box-shadow: inset 3px 0 0 var(--tone);
+  font-size: 0.9rem;
+  line-height: 1.2;
+}
+
+.tree-value {
+  font-weight: 750;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.cover .art-tree {
+  grid-template-columns: minmax(0, 0.8fr) 6cqw minmax(0, 1.55fr);
+  width: 92cqw;
+}
+
+.cover .tree-root {
+  padding: 2.5cqh 2cqw;
+  border-radius: 3cqh;
+  font-size: max(7.5px, 7.5cqh);
+}
+
+.cover .tree-slot {
+  padding: 1cqh 0;
+}
+
+.cover .tree-branch {
+  padding: 1.6cqh 2.4cqw;
+  border-radius: 2.4cqh;
+  gap: 1.5cqw;
+  font-size: max(7px, 7cqh);
+  line-height: 1.1;
+  box-shadow: inset 2px 0 0 var(--tone);
+}
+
+:is(.art-anim, .intro-cover .art) .tree-root {
+  animation: art-pop 420ms var(--spring) backwards;
+}
+
+/* A dash draw would fight the non scaling stroke, so the links fade in. */
+:is(.art-anim, .intro-cover .art) .tree-links path {
+  animation: art-fade 520ms var(--ease) backwards;
+}
+
+:is(.art-anim, .intro-cover .art) .tree-branch {
+  animation: art-rise 420ms var(--ease) backwards;
+}
+
+/* Curve ------------------------------------------------------------------- */
+
+.art-curve-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.cover .art-curve-svg {
+  width: auto;
+  height: 86cqh;
+  max-width: 100%;
+}
+
+.curve-grid {
+  stroke: var(--art-line);
+  stroke-width: 1;
+}
+
+.curve-zero {
+  stroke: var(--art-track-strong);
+  stroke-width: 1.3;
+}
+
+.curve-tick {
+  fill: var(--art-muted);
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+}
+
+.curve-tick-mark {
+  fill: var(--art-accent-text);
+  font-weight: 750;
+}
+
+.curve-axis {
+  fill: var(--art-muted);
+  font-size: 10.5px;
+  font-weight: 650;
+}
+
+.curve-area {
+  fill: color-mix(in srgb, var(--art-accent) 16%, transparent);
+}
+
+.curve-line {
+  fill: none;
+  stroke: var(--art-accent);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.curve-guide {
+  stroke: var(--art-accent);
+  stroke-width: 1.2;
+  stroke-dasharray: 3 3;
+  opacity: 0.75;
+}
+
+.curve-dot {
+  fill: var(--art-accent);
+  stroke: var(--art-solid);
+  stroke-width: 2.5;
+}
+
+.curve-mark-label {
+  fill: var(--art-accent-text);
+  font-size: 24px;
+}
+
+.cover .art-k-curve :is(.curve-tick, .curve-axis, .curve-grid) {
+  display: none;
+}
+
+.cover .curve-line {
+  stroke-width: 5;
+}
+
+.cover .curve-dot {
+  r: 8px;
+}
+
+.cover .curve-mark-label {
+  font-size: 40px;
+}
+
+@container (min-width: 300px) {
+  .cover .curve-line {
+    stroke-width: 3.5;
+  }
+
+  .cover .curve-dot {
+    r: 6px;
+  }
+
+  .cover .curve-mark-label {
+    font-size: 28px;
+  }
+}
+
+:is(.art-anim, .intro-cover .art) .curve-line {
+  stroke-dasharray: 1;
+  animation: art-draw 1000ms var(--ease) 100ms backwards;
+}
+
+:is(.art-anim, .intro-cover .art) .curve-area {
+  animation: art-fade 700ms var(--ease) 500ms backwards;
+}
+
+:is(.art-anim, .intro-cover .art) .curve-mark {
+  animation: art-fade 420ms var(--ease) 950ms backwards;
+}
+
+/* Quizzes ----------------------------------------------------------------- */
+
+.quiz-felt {
+  padding: 1rem;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.choice-cards {
+  display: inline-flex;
+  gap: 3px;
+  flex: none;
+}

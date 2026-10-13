@@ -8,7 +8,7 @@ import type { StoredLesson } from '../state/db';
 import { canOpenLesson, FREE_MODULES, isPro } from '../state/access';
 import { pathPrefs } from '../state/goals';
 import { useSettings } from '../state/settings';
-import { CheckIcon, ChevronRightIcon, LockIcon, SkipIcon } from '../ui/icons';
+import { CheckIcon, ChevronRightIcon, LockIcon, TargetIcon } from '../ui/icons';
 import { PageHeader } from '../ui/PageHeader';
 import { loadPlacement } from '../state/placementProgress';
 
@@ -49,13 +49,13 @@ export function LearnPage() {
 
       {!settings.profile.placedAt && (
         <Link to="/placement" className="card placement-card reveal">
-          <span className="placement-icon">
-            <SkipIcon size={22} />
+          <span className="placement-icon" aria-hidden="true">
+            <TargetIcon size={22} />
           </span>
           <span className="grow">
-            <span style={{ display: 'block', fontWeight: 650 }}>{placementSaved ? 'Continue the placement test' : 'Find where to start'}</span>
+            <span style={{ display: 'block', fontWeight: 650 }}>{placementSaved ? 'Continue the placement quiz' : 'Find where to start'}</span>
             <span className="footnote">
-              {placementSaved ? 'Pick up where you stopped.' : 'A short test. Lessons you prove you know are marked tested out.'}
+              {placementSaved ? 'Pick up where you stopped.' : 'A short quiz. Skip the lessons you already know.'}
             </span>
           </span>
           <ChevronRightIcon size={16} className="chev" />
@@ -88,8 +88,9 @@ export function LearnPage() {
                       {!free && !pro && <LockIcon size={13} className="muted" />}
                     </span>
                     {open.length > 0 ? (
-                      <Link to={`/check/${track.id}/${m.id}`} className="test-out" data-haptic="select" aria-label={`Test out of ${m.title}`}>
-                        <SkipIcon size={14} /> Test out
+                      <Link to={`/check/${track.id}/${m.id}`} className="skip-link" data-haptic="select" aria-label={`Skip ahead in ${m.title} with a quick quiz`}>
+                        Skip ahead
+                        <ChevronRightIcon size={13} />
                       </Link>
                     ) : (
                       <span className="pill pill-good">
@@ -129,7 +130,7 @@ function LessonCard({ entry, state, locked }: { entry: LessonEntry; state?: Stor
             </span>
           ) : state?.status === 'tested' ? (
             <span className="pill pill-good">
-              <SkipIcon size={12} /> Tested out
+              <CheckIcon size={12} /> Passed
             </span>
           ) : locked ? (
             <span className="pill">

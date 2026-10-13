@@ -1,3 +1,4 @@
+import { BASICS_LESSONS } from './basics';
 import { EXPLOIT_LESSONS } from './exploit';
 import { EXPLOIT_MORE_LESSONS } from './exploit-more';
 import { MINDSET_LESSONS } from './mindset';
@@ -15,6 +16,7 @@ import type { LessonContent } from './types';
 export * from './types';
 
 const ALL: LessonContent[] = [
+  ...BASICS_LESSONS,
   ...FOUNDATIONS_LESSONS,
   ...THEORY_LESSONS,
   ...PREFLOP_LESSONS,

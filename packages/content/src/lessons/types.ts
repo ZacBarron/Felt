@@ -13,7 +13,37 @@
 
 export type Evidence = 'math' | 'solver' | 'exploit';
 
-export type LessonCover = { kind: 'figure'; text: string } | { kind: 'chart'; chartId: string } | { kind: 'cards'; cards: string };
+export type ArtTone = 'brass' | 'green' | 'red' | 'gray' | 'purple';
+
+/**
+ * Illustrations for lesson covers and `visual` steps, drawn by the app in the
+ * brand style. Every number in one must be exact or come from a chart.
+ */
+export type LessonArt =
+  /** A key number, set large. Use only when no picture says it better. */
+  | { kind: 'figure'; text: string; caption?: string }
+  /** A chart's 13x13 grid. */
+  | { kind: 'chart'; chartId: string }
+  /** Hole cards, optionally with a board on the felt. */
+  | { kind: 'cards'; cards: string; board?: string }
+  /** A share of a whole, like 25% to call: `value` from 0 to 1. */
+  | { kind: 'ring'; value: number; label: string; caption?: string }
+  /** Amounts side by side, like pot vs bet, in big blinds or percent. */
+  | { kind: 'bars'; bars: { label: string; value: number; tone?: ArtTone }[]; unit?: 'bb' | '%' }
+  /** A table seen from above: seats by name, the button, a hero seat and highlights. */
+  | { kind: 'table'; seats: number; button?: string; hero?: string; highlight?: string[]; note?: string }
+  /** The order of a hand: preflop, flop, turn, river, showdown, with one active. */
+  | { kind: 'streets'; active?: 'preflop' | 'flop' | 'turn' | 'river' | 'showdown' }
+  /** Hand rankings from best to worst, each with example cards. */
+  | { kind: 'ladder'; rungs: { name: string; cards: string; tone?: ArtTone }[] }
+  /** Chip stacks with labels, like stack sizes in big blinds. */
+  | { kind: 'chips'; stacks: { label: string; bb: number }[] }
+  /** One decision branching into outcomes, like the parts of an EV sum. */
+  | { kind: 'tree'; root: string; branches: { label: string; value?: string; tone?: ArtTone }[] }
+  /** A simple line, like required equity as the bet grows. Points are [x, y]. */
+  | { kind: 'curve'; points: [number, number][]; xLabel: string; yLabel: string; mark?: [number, number] };
+
+export type LessonCover = LessonArt;
 
 export type LessonStep =
   | { kind: 'intro'; title: string; body: string }
@@ -24,7 +54,19 @@ export type LessonStep =
   | { kind: 'hand'; title: string; cards: string; board?: string; caption: string }
   | { kind: 'board'; title: string; board: string; caption: string; evidence?: Evidence }
   | { kind: 'callout'; tone: 'tip' | 'exploit' | 'theory'; title: string; body: string }
-  | { kind: 'quiz'; question: string; choices: string[]; answer: number; explain: string }
+  | { kind: 'visual'; title: string; art: LessonArt; caption: string; evidence?: Evidence }
+  | {
+      kind: 'quiz';
+      question: string;
+      choices: string[];
+      answer: number;
+      explain: string;
+      /** Cards to show above the question, like your hand. */
+      cards?: string;
+      board?: string;
+      /** Cards for each choice, shown as card faces, in the same order as `choices`. */
+      choiceCards?: string[];
+    }
   | { kind: 'takeaway'; points: string[] };
 
 export interface LessonContent {

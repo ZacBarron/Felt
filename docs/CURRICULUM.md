@@ -4,17 +4,18 @@ The full lesson map lives in [`packages/content/src/curriculum.ts`](../packages/
 
 ## Tracks
 
-1. **Foundations**: poker math and range thinking. Prerequisite for everything.
+0. **Poker basics**: the rules and a first strategy, for anyone who has never played. Free. The test is whether someone who knows nothing can follow it. The placement quiz skips it for players who already know the game.
+1. **Foundations**: poker math and range thinking. Prerequisite for everything after it.
 2. **Preflop GTO**: opening, defending, 3bet and 4bet pots, blind vs blind, stack depth.
 3. **Postflop GTO**: textures, c-betting, defending, check raising, turn and river play, multiway.
 4. **Exploitation**: profiling, node locking, adjustments by archetype, tells.
 5. **Mental game and bankroll**: tilt, variance, bankroll, study habits.
 
-Suggested order: Foundations math, then Preflop RFI and BB defense in parallel with Foundations ranges, then Postflop, with Exploitation and Mental game woven in once the GTO baseline is solid.
+Suggested order: Poker basics for new players, then Foundations math, then Preflop RFI and BB defense in parallel with Foundations ranges, then Postflop, with Exploitation and Mental game woven in once the GTO baseline is solid.
 
 ## Where lessons live
 
-Lesson content is in [`packages/content/src/lessons/`](../packages/content/src/lessons/), one file per track, keyed `track/module/lesson` to match the curriculum. Step kinds: `intro`, `text`, `formula`, `table`, `chart`, `hand`, `board`, `callout` (tip, exploit or theory), `quiz` and `takeaway`. Each lesson is `core` or `advanced`.
+Lesson content is in [`packages/content/src/lessons/`](../packages/content/src/lessons/), one file per track, keyed `track/module/lesson` to match the curriculum. Step kinds: `intro`, `text`, `formula`, `table`, `chart`, `hand`, `board`, `visual` (a drawn illustration: ring, bars, table, streets, ladder, chips, tree, curve, cards or chart), `callout` (tip, exploit or theory), `quiz` (with optional cards, board and card faces per choice) and `takeaway`. Covers use the same illustrations. Each lesson is `core` or `advanced`.
 
 ## Accuracy policy
 

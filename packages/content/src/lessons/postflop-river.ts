@@ -5,7 +5,7 @@ export const POSTFLOP_RIVER_LESSONS: LessonContent[] = [
     key: 'postflop/river/thin-value',
     level: 'core',
     minutes: 7,
-    cover: { kind: 'cards', cards: 'KhJc' },
+    cover: { kind: 'cards', cards: 'KhJc', board: 'Ks9d8c3h2s' },
     steps: [
       {
         kind: 'intro',
@@ -105,6 +105,20 @@ export const POSTFLOP_RIVER_LESSONS: LessonContent[] = [
         explain: 'You beat 8 of 18 calls from A, so check. You beat 14 of 24 from B, so bet. The hand is the same. The calling range decides.',
       },
       {
+        kind: 'visual',
+        title: 'Share of calls you beat',
+        art: {
+          kind: 'bars',
+          unit: '%',
+          bars: [
+            { label: 'Regular’s calls', value: 36.4, tone: 'red' },
+            { label: 'Station’s calls', value: 64.6, tone: 'green' },
+          ],
+        },
+        caption: 'A thin value bet must beat more than half of the calls. K♥J♣ beats **36.4%** of the regular’s calls. It beats **64.6%** of the station’s.',
+        evidence: 'math',
+      },
+      {
         kind: 'takeaway',
         points: [
           'Bet when you beat more than half of the hands that call.',
@@ -118,7 +132,13 @@ export const POSTFLOP_RIVER_LESSONS: LessonContent[] = [
     key: 'postflop/river/overbets',
     level: 'advanced',
     minutes: 7,
-    cover: { kind: 'figure', text: '2x' },
+    cover: {
+      kind: 'bars',
+      bars: [
+        { label: 'Pot', value: 100, tone: 'gray' },
+        { label: 'Overbet', value: 200, tone: 'red' },
+      ],
+    },
     steps: [
       {
         kind: 'intro',
@@ -230,7 +250,13 @@ export const POSTFLOP_RIVER_LESSONS: LessonContent[] = [
     key: 'postflop/river/block-bets',
     level: 'advanced',
     minutes: 6,
-    cover: { kind: 'figure', text: '¼' },
+    cover: {
+      kind: 'bars',
+      bars: [
+        { label: 'Pot', value: 40, tone: 'gray' },
+        { label: 'Block bet', value: 10, tone: 'red' },
+      ],
+    },
     steps: [
       {
         kind: 'intro',
@@ -328,7 +354,14 @@ export const POSTFLOP_RIVER_LESSONS: LessonContent[] = [
     key: 'postflop/river/river-raises',
     level: 'advanced',
     minutes: 6,
-    cover: { kind: 'figure', text: '3x' },
+    cover: {
+      kind: 'bars',
+      bars: [
+        { label: 'Pot', value: 100, tone: 'gray' },
+        { label: 'Bet', value: 50, tone: 'red' },
+        { label: 'Raise to', value: 150, tone: 'purple' },
+      ],
+    },
     steps: [
       {
         kind: 'intro',
@@ -433,7 +466,13 @@ export const POSTFLOP_RIVER_LESSONS: LessonContent[] = [
     key: 'postflop/3bet-postflop/cbet-3bp',
     level: 'core',
     minutes: 6,
-    cover: { kind: 'figure', text: 'SPR 4' },
+    cover: {
+      kind: 'chips',
+      stacks: [
+        { label: 'Pot', bb: 22.5 },
+        { label: 'Behind', bb: 89 },
+      ],
+    },
     steps: [
       {
         kind: 'intro',
@@ -502,6 +541,7 @@ export const POSTFLOP_RIVER_LESSONS: LessonContent[] = [
       {
         kind: 'quiz',
         question: 'BB 3bet and BTN called. Which flop does BB c-bet most often?',
+        choiceCards: ['9s8s6d', '7h6h5c', 'AsKd7c'],
         choices: ['9♠ 8♠ 6♦', '7♥ 6♥ 5♣', 'A♠ K♦ 7♣'],
         answer: 2,
         explain:
@@ -521,7 +561,7 @@ export const POSTFLOP_RIVER_LESSONS: LessonContent[] = [
     key: 'postflop/3bet-postflop/low-spr',
     level: 'core',
     minutes: 7,
-    cover: { kind: 'cards', cards: 'QhQd' },
+    cover: { kind: 'cards', cards: 'QhQd', board: 'Js7d3c' },
     steps: [
       {
         kind: 'intro',
@@ -620,6 +660,29 @@ export const POSTFLOP_RIVER_LESSONS: LessonContent[] = [
         answer: 0,
         explain:
           'At SPR 2, only 2 pots are left behind. Villain’s calling and shoving ranges include many worse hands. Deeper, a big pot more often comes from hands that beat one pair.',
+      },
+      {
+        kind: 'visual',
+        title: 'Lower SPR, cheaper calls',
+        art: {
+          kind: 'curve',
+          points: [
+            [0.5, 25],
+            [1, 33.3],
+            [1.5, 37.5],
+            [2, 40],
+            [3, 42.9],
+            [4, 44.4],
+            [6, 46.2],
+            [8, 47.1],
+            [10, 47.6],
+          ],
+          xLabel: 'SPR',
+          yLabel: 'Equity to call a shove, %',
+          mark: [4, 44.4],
+        },
+        caption: 'Facing a shove of SPR times the pot, you need SPR ÷ (1 + 2 × SPR). That is **33.3%** at SPR 1 and **44.4%** at SPR 4.',
+        evidence: 'math',
       },
       {
         kind: 'takeaway',

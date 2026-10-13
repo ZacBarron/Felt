@@ -5,7 +5,7 @@ export const POSTFLOP_LESSONS: LessonContent[] = [
     key: 'postflop/textures/texture-classes',
     level: 'core',
     minutes: 6,
-    cover: { kind: 'cards', cards: 'Ks7d' },
+    cover: { kind: 'cards', cards: '', board: '7h6h5c' },
     steps: [
       {
         kind: 'intro',
@@ -55,6 +55,7 @@ export const POSTFLOP_LESSONS: LessonContent[] = [
       {
         kind: 'quiz',
         question: 'BTN opens and BB calls. Which flop is worst for BTN?',
+        choiceCards: ['KhKd4c', '6s5s4d', 'As8d3c'],
         choices: ['K♥ K♦ 4♣', '6♠ 5♠ 4♦', 'A♠ 8♦ 3♣'],
         answer: 1,
         explain:
@@ -138,6 +139,7 @@ export const POSTFLOP_LESSONS: LessonContent[] = [
       {
         kind: 'quiz',
         question: 'BTN vs BB, flop A♠ 8♦ 3♣. What is the usual BTN strategy?',
+        board: 'As8d3c',
         choices: ['Check most of the range', 'Bet big with most of the range', 'Bet big with strong hands only', 'Bet small with most of the range'],
         answer: 3,
         explain:
@@ -165,7 +167,25 @@ export const POSTFLOP_LESSONS: LessonContent[] = [
     key: 'postflop/cbet/sizing',
     level: 'advanced',
     minutes: 7,
-    cover: { kind: 'figure', text: '⅓ ¾' },
+    cover: {
+      kind: 'curve',
+      points: [
+        [0.5, 13],
+        [1, 22.1],
+        [2, 35.5],
+        [3, 45.6],
+        [4, 54],
+        [6, 67.6],
+        [8, 78.6],
+        [10, 87.9],
+        [12, 96.2],
+        [15, 107.1],
+        [20, 122.4],
+      ],
+      xLabel: 'SPR',
+      yLabel: 'Bet each street, % of pot',
+      mark: [4, 54],
+    },
     steps: [
       {
         kind: 'intro',
@@ -251,7 +271,7 @@ export const POSTFLOP_LESSONS: LessonContent[] = [
     key: 'postflop/defense/vs-cbet',
     level: 'core',
     minutes: 6,
-    cover: { kind: 'figure', text: '20%' },
+    cover: { kind: 'ring', value: 0.2, label: 'Equity to call', caption: 'Third pot c-bet' },
     steps: [
       {
         kind: 'intro',
@@ -304,6 +324,8 @@ export const POSTFLOP_LESSONS: LessonContent[] = [
       {
         kind: 'quiz',
         question: 'BB on T♠ 6♦ 2♥ faces a third pot bet. Which hand is the clearest fold?',
+        board: 'Ts6d2h',
+        choiceCards: ['Qc8d', 'QhJh', '6c5c'],
         choices: ['Q♣ 8♦', 'Q♥ J♥', '6♣ 5♣'],
         answer: 0,
         explain:
@@ -323,7 +345,7 @@ export const POSTFLOP_LESSONS: LessonContent[] = [
     key: 'postflop/defense/check-raise',
     level: 'advanced',
     minutes: 6,
-    cover: { kind: 'cards', cards: '8h4h' },
+    cover: { kind: 'cards', cards: '8h4h', board: '7h6c2h' },
     steps: [
       {
         kind: 'intro',
@@ -366,6 +388,8 @@ export const POSTFLOP_LESSONS: LessonContent[] = [
       {
         kind: 'quiz',
         question: 'BB on 9♥ 8♥ 6♣ faces a small c-bet. Which hand is the best check raise semi bluff?',
+        board: '9h8h6c',
+        choiceCards: ['Ah2c', 'Kd6s', 'JhTh'],
         choices: ['A♥ 2♣', 'K♦ 6♠', 'J♥ T♥'],
         answer: 2,
         explain:
@@ -394,7 +418,7 @@ export const POSTFLOP_LESSONS: LessonContent[] = [
     key: 'postflop/later-streets/turn-cards',
     level: 'advanced',
     minutes: 6,
-    cover: { kind: 'cards', cards: 'Ah' },
+    cover: { kind: 'streets', active: 'turn' },
     steps: [
       {
         kind: 'intro',
@@ -436,6 +460,7 @@ export const POSTFLOP_LESSONS: LessonContent[] = [
       {
         kind: 'quiz',
         question: 'BTN bets 7♥ 6♥ 2♣ and BB calls. The turn is the 5♦. Who does it help more?',
+        board: '7h6h2c5d',
         choices: ['BTN', 'BB', 'Both about equally'],
         answer: 1,
         explain: 'The 5 makes straights for hands like 84s and 43s. BTN opens neither, but BB defends both. So BTN should slow down with many hands.',
@@ -443,6 +468,8 @@ export const POSTFLOP_LESSONS: LessonContent[] = [
       {
         kind: 'quiz',
         question: 'BTN c-bets K♠7♦2♣ and BB calls. Which turn usually helps BTN most?',
+        board: 'Ks7d2c',
+        choiceCards: ['Ah', '6c', '5d'],
         choices: ['A♥', '6♣', '5♦'],
         answer: 0,
         explain: 'BTN holds AK and AA far more often, since BB 3bets them before the flop. Low cards like the 6 or 5 help BB’s connected hands more.',
@@ -461,7 +488,7 @@ export const POSTFLOP_LESSONS: LessonContent[] = [
     key: 'postflop/later-streets/bluff-selection',
     level: 'advanced',
     minutes: 6,
-    cover: { kind: 'cards', cards: '7h6h' },
+    cover: { kind: 'cards', cards: '7h6h', board: 'Kc8h5h2s2d' },
     steps: [
       {
         kind: 'intro',
@@ -506,6 +533,8 @@ export const POSTFLOP_LESSONS: LessonContent[] = [
       {
         kind: 'quiz',
         question: 'With 7♥6♥ in your hand, by how much do villain’s two heart combos shrink?',
+        cards: '7h6h',
+        board: 'Kc8h5h2s2d',
         choices: ['About 10%', 'About 20%', 'About 35%', 'About 50%'],
         answer: 2,
         explain: 'They fall from 55 to 36, so 19 combos are gone. That is 19 ÷ 55, or about 35%. Those were folding hands, so 7♣6♣ is the better bluff.',
@@ -531,7 +560,7 @@ export const POSTFLOP_LESSONS: LessonContent[] = [
     key: 'postflop/later-streets/bluff-catching',
     level: 'advanced',
     minutes: 6,
-    cover: { kind: 'cards', cards: 'QhQd' },
+    cover: { kind: 'cards', cards: 'QhQd', board: 'AhKh7c4h2s' },
     steps: [
       {
         kind: 'intro',
@@ -575,6 +604,8 @@ export const POSTFLOP_LESSONS: LessonContent[] = [
       {
         kind: 'quiz',
         question: 'With Q♥Q♦, how many flush combos can villain have?',
+        cards: 'QhQd',
+        board: 'AhKh7c4h2s',
         choices: ['21', '28', '36', '45'],
         answer: 2,
         explain: 'Nine hearts are left, so 9 × 8 ÷ 2 = 36. You get 45 only when you hold no heart.',

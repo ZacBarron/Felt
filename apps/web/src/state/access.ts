@@ -39,10 +39,13 @@ export function annualSavings(): number {
 }
 
 /**
- * Free modules: the first module of every track, so a new player can try
- * each part of the app. Everything else needs Pro.
+ * Free modules: the whole basics track, so anyone can learn the game, and the
+ * first module of every other track, so a new player can try each part of
+ * the app. Everything else needs Pro.
  */
-export const FREE_MODULES: ReadonlySet<string> = new Set(CURRICULUM.map((t) => `${t.id}/${t.modules[0].id}`));
+export const FREE_MODULES: ReadonlySet<string> = new Set(
+  CURRICULUM.flatMap((t) => (t.id === 'basics' ? t.modules.map((m) => `${t.id}/${m.id}`) : [`${t.id}/${t.modules[0].id}`])),
+);
 
 export function isPro(access: Access, now = new Date()): boolean {
   if (access.devMode && access.devPro !== undefined) return access.devPro;

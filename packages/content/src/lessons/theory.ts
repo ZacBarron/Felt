@@ -5,7 +5,15 @@ export const THEORY_LESSONS: LessonContent[] = [
     key: 'foundations/theory/what-is-gto',
     level: 'core',
     minutes: 6,
-    cover: { kind: 'figure', text: 'Nash' },
+    cover: {
+      kind: 'tree',
+      root: 'Balanced river bet',
+      branches: [
+        { label: 'Villain folds all', value: '+10bb' },
+        { label: 'Calls all', value: '+10bb' },
+        { label: 'Calls half', value: '+10bb' },
+      ],
+    },
     steps: [
       {
         kind: 'intro',
@@ -116,7 +124,15 @@ export const THEORY_LESSONS: LessonContent[] = [
     key: 'foundations/theory/solvers',
     level: 'advanced',
     minutes: 8,
-    cover: { kind: 'figure', text: 'CFR' },
+    cover: {
+      kind: 'bars',
+      unit: '%',
+      bars: [
+        { label: 'Bet', value: 75, tone: 'red' },
+        { label: 'Check', value: 25, tone: 'green' },
+        { label: 'Fold', value: 0, tone: 'gray' },
+      ],
+    },
     steps: [
       {
         kind: 'intro',
@@ -238,7 +254,14 @@ export const THEORY_LESSONS: LessonContent[] = [
     key: 'foundations/theory/simplification',
     level: 'advanced',
     minutes: 7,
-    cover: { kind: 'figure', text: '≈' },
+    cover: {
+      kind: 'tree',
+      root: 'A hand that mixes',
+      branches: [
+        { label: 'Bet', value: 'About equal', tone: 'red' },
+        { label: 'Check', value: 'About equal', tone: 'green' },
+      ],
+    },
     steps: [
       {
         kind: 'intro',
@@ -347,7 +370,7 @@ export const THEORY_LESSONS: LessonContent[] = [
     key: 'foundations/theory/equity-benchmarks',
     level: 'core',
     minutes: 6,
-    cover: { kind: 'figure', text: '81%' },
+    cover: { kind: 'ring', value: 0.8126, label: 'AA vs KK', caption: 'All in before the flop' },
     steps: [
       {
         kind: 'intro',
@@ -441,6 +464,8 @@ export const THEORY_LESSONS: LessonContent[] = [
       {
         kind: 'quiz',
         question: 'The flop is J♥T♥4♣. 9♥8♥ gets all in against A♠A♦. Who is the favorite?',
+        cards: '9h8h',
+        board: 'JhTh4c',
         choices: ['9♥8♥, with about 55%', 'A♠A♦, with about 65%', 'A♠A♦, with about 80%'],
         answer: 0,
         explain:
@@ -449,9 +474,28 @@ export const THEORY_LESSONS: LessonContent[] = [
       {
         kind: 'quiz',
         question: 'You hold K♠Q♦ on K♥7♥2♣ and get all in against T♥9♥. What is your equity closest to?',
+        cards: 'KsQd',
+        board: 'Kh7h2c',
         choices: ['40%', '60%', '70%', '80%'],
         answer: 1,
         explain: 'The flush draw has 39.5%, so top pair holds 60.5%. The 40% answer is the draw’s share, not yours. You are a favorite, but far from safe.',
+      },
+      {
+        kind: 'visual',
+        title: 'Five matchups to know',
+        art: {
+          kind: 'bars',
+          unit: '%',
+          bars: [
+            { label: 'A♠A♥ vs K♦K♣', value: 81.3 },
+            { label: 'A♠K♦ vs A♥Q♣', value: 74 },
+            { label: '8♠8♥ vs A♦K♣', value: 55.6 },
+            { label: 'A♠K♦ vs 2♣2♥', value: 47 },
+            { label: 'A♠K♦ vs Q♥Q♣', value: 42.8 },
+          ],
+        },
+        caption: 'Each bar is the first hand’s exact equity before the flop. A pair against two overcards is close to a flip. Domination is not.',
+        evidence: 'math',
       },
       {
         kind: 'takeaway',

@@ -14,7 +14,7 @@ Felt sounds like a good coach sitting next to you: calm, direct and warm. The fu
 
 ## Logo
 
-**The mark** is an F painted into a 6x6 grid, the way a solver paints a range: a full stem, a long top arm and a shorter middle arm in brass, with the rest of the grid faintly visible. It reads as a letter to anyone and as a range chart to a player.
+**The mark** is an F painted into a 6x6 grid, the way a solver paints a range: a full stem, a long top arm, a shorter middle arm and one extra cell in the top left corner in brass, with the rest of the grid faintly visible. The corner cell is where a range chart keeps its strongest hands, so the F reads a little more like a real chart. It reads as a letter to anyone and as a range chart to a player.
 
 **The wordmark** is "Felt" drawn from Instrument Serif with tightened tracking, kept as outlines (`apps/web/src/ui/wordmark.ts`) so it never depends on a font loading.
 

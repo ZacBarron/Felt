@@ -5,7 +5,11 @@ export const MINDSET_LESSONS: LessonContent[] = [
     key: 'mindset/mental/tilt',
     level: 'core',
     minutes: 6,
-    cover: { kind: 'figure', text: '−6' },
+    cover: {
+      kind: 'tree',
+      root: 'Tilt',
+      branches: [{ label: 'Losing' }, { label: 'Injustice' }, { label: 'Entitlement' }, { label: 'Revenge' }],
+    },
     steps: [
       {
         kind: 'intro',
@@ -84,6 +88,20 @@ export const MINDSET_LESSONS: LessonContent[] = [
           'The warning signs mean the next hands are the expensive ones. Reset first. Come back when your decisions are back to normal. Trying harder while tilted rarely works, because tilt is what drives the fast decisions.',
       },
       {
+        kind: 'visual',
+        title: 'Illustration: a fifth of hands on tilt',
+        art: {
+          kind: 'bars',
+          bars: [
+            { label: 'A game, 80% of hands', value: 10, tone: 'green' },
+            { label: 'On tilt, 20% of hands', value: -20, tone: 'red' },
+            { label: 'Overall', value: 4 },
+          ],
+        },
+        caption: 'Made up inputs in bb/100. The A game wins 10 and tilted hands lose 20. Overall the win rate falls to **4bb/100**.',
+        evidence: 'math',
+      },
+      {
         kind: 'takeaway',
         points: [
           'Name the type of tilt you feel.',
@@ -98,7 +116,22 @@ export const MINDSET_LESSONS: LessonContent[] = [
     key: 'mindset/mental/variance',
     level: 'core',
     minutes: 7,
-    cover: { kind: 'figure', text: '1.96' },
+    cover: {
+      kind: 'curve',
+      points: [
+        [2.5, 39.2],
+        [5, 27.7],
+        [10, 19.6],
+        [20, 13.9],
+        [30, 11.3],
+        [50, 8.8],
+        [75, 7.2],
+        [100, 6.2],
+      ],
+      xLabel: 'Hands played, thousands',
+      yLabel: 'Range either side, bb/100',
+      mark: [10, 19.6],
+    },
     steps: [
       {
         kind: 'intro',
@@ -199,7 +232,23 @@ export const MINDSET_LESSONS: LessonContent[] = [
     key: 'mindset/mental/bankroll',
     level: 'core',
     minutes: 7,
-    cover: { kind: 'figure', text: '1.8%' },
+    cover: {
+      kind: 'curve',
+      points: [
+        [2.5, 60.7],
+        [5, 36.8],
+        [7.5, 22.3],
+        [10, 13.5],
+        [15, 5],
+        [20, 1.8],
+        [25, 0.67],
+        [30, 0.25],
+        [40, 0.03],
+      ],
+      xLabel: 'Buy ins',
+      yLabel: 'Risk of ruin, %',
+      mark: [20, 1.8],
+    },
     steps: [
       {
         kind: 'intro',
@@ -293,7 +342,7 @@ export const MINDSET_LESSONS: LessonContent[] = [
     key: 'mindset/study/study-plan',
     level: 'core',
     minutes: 5,
-    cover: { kind: 'figure', text: '15m' },
+    cover: { kind: 'figure', text: '15', caption: 'minutes a day' },
     practice: ['9max-100-rfi-utg', '9max-100-rfi-btn'],
     steps: [
       {
@@ -385,7 +434,7 @@ export const MINDSET_LESSONS: LessonContent[] = [
     key: 'mindset/study/hand-review',
     level: 'core',
     minutes: 6,
-    cover: { kind: 'figure', text: '30%' },
+    cover: { kind: 'ring', value: 0.3, label: 'Bluffs needed', caption: 'To call 75 into 100' },
     steps: [
       {
         kind: 'intro',

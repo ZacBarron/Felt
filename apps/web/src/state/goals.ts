@@ -10,10 +10,10 @@ export const GOALS: { id: Goal; label: string; note: string; plan: string }[] = 
 ];
 
 export const EXPERIENCE: { id: Experience; label: string; note: string }[] = [
-  { id: 'new', label: 'New to the game', note: 'I know the rules and not much more' },
-  { id: 'casual', label: 'Casual player', note: 'I play for fun and roughly break even' },
-  { id: 'winning', label: 'Winning player', note: 'I beat my game and want a bigger edge' },
-  { id: 'pro', label: 'Professional', note: 'Poker is my job, or close to it' },
+  { id: 'new', label: 'New to poker', note: 'Start with the rules. No experience needed.' },
+  { id: 'casual', label: 'I know the rules', note: 'I play for fun now and then' },
+  { id: 'winning', label: 'I play regularly', note: 'I want a bigger edge in my games' },
+  { id: 'pro', label: 'Poker is my job', note: 'Or close to it' },
 ];
 
 export const FOCUS: { id: Focus; label: string; module: string }[] = [

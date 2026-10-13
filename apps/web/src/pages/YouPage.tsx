@@ -184,7 +184,7 @@ export function YouPage() {
         </div>
         <div className="hero-sub">
           {!rated
-            ? 'Answer a few questions to get rated. The placement test or a daily challenge is the fastest way.'
+            ? 'Answer a few questions to get rated. The placement quiz or a daily challenge is the fastest way.'
             : provisional
               ? 'Your rating is still settling. You get a tier after a few dozen answers.'
               : `We are 95% sure your rating is between ${Math.round(lo)} and ${Math.round(hi)}.`}

@@ -63,6 +63,8 @@ See [MONETIZATION.md](MONETIZATION.md).
 - [x] Ranges and Drills in one place: view, paint (with 100/75/50/25% and split brushes, graded by mix distance) or quiz any chart
 - [x] Charts with graded edges in 5% steps, like published solutions
 - [x] Avatar with rating on Today; milestone moments for tiers and streaks; game sheet from Ranges
+- [x] Poker basics track for complete beginners (rules, rankings, how a hand plays, position, starting hands, ranges, odds), skippable by placement
+- [x] Lesson illustrations drawn in the brand style for covers and visual steps
 - [x] Import stats: flop c-bet, fold to 3bet, aggression and won at showdown, with a stakes filter
 - [ ] Connect a store (App Store, Play, web checkout) to `purchase()`
 - [ ] Verify GGPoker parsing against a real GG export; add Winamax and iPoker formats

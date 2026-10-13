@@ -2,9 +2,13 @@ import { gridHandClass as handAt } from '@felt/core';
 import { type CSSProperties, useId } from 'react';
 import { WORDMARK_PATH, WORDMARK_VIEWBOX } from './wordmark';
 
-/** The cells of the F, on a 6x6 grid: the stem, a long top arm, a shorter middle arm. */
+/**
+ * The cells of the F, on a 6x6 grid: the stem, a long top arm, a shorter
+ * middle arm, and one extra cell in the top left corner, where a range chart
+ * keeps its strongest hands.
+ */
 export function isFCell(r: number, c: number): boolean {
-  return c === 0 || (r === 0 && c <= 4) || (r === 2 && c <= 3);
+  return c === 0 || (r === 0 && c <= 4) || (r === 1 && c === 1) || (r === 2 && c <= 3);
 }
 
 export const MARK_GRID = 6;

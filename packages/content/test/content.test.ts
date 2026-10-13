@@ -305,3 +305,152 @@ describe('exploits', () => {
     expect(text).not.toMatch(/;/);
   });
 });
+
+describe('poker basics', () => {
+  const basics = [...LESSON_CONTENT.values()].filter((l) => l.key.startsWith('basics/'));
+  const chartIds = new Set(STARTER_CHARTS.map((c) => c.id));
+
+  it('comes first, with 10 lessons', () => {
+    expect(CURRICULUM[0].id).toBe('basics');
+    expect(basics).toHaveLength(10);
+  });
+
+  it('shows real, legal cards and seats in every picture and question', async () => {
+    const { categoryOf, evaluate, HandCategory } = await import('@felt/core');
+    const seatsOk = (art: { seats: number; button?: string; hero?: string; highlight?: string[] }) => {
+      const seats = positionsFor(art.seats);
+      for (const s of [art.button, art.hero, ...(art.highlight ?? [])]) if (s) expect(seats, s).toContain(s);
+    };
+    const handOk = (cards: string, board = '') => {
+      const all = parseCards(cards + board);
+      expect(new Set(all).size).toBe(all.length);
+      if (board) expect([3, 4, 5]).toContain(parseCards(board).length);
+    };
+    const NAMES: Record<string, number> = {
+      'Royal flush': HandCategory.StraightFlush,
+      'Straight flush': HandCategory.StraightFlush,
+      'Four of a kind': HandCategory.Quads,
+      'Full house': HandCategory.FullHouse,
+      Flush: HandCategory.Flush,
+      Straight: HandCategory.Straight,
+      'Three of a kind': HandCategory.Trips,
+      'Two pair': HandCategory.TwoPair,
+      'One pair': HandCategory.Pair,
+      'High card': HandCategory.HighCard,
+    };
+    for (const lesson of basics) {
+      const arts = [lesson.cover, ...lesson.steps.flatMap((s) => (s.kind === 'visual' ? [s.art] : []))];
+      for (const art of arts) {
+        if (art.kind === 'cards') handOk(art.cards, art.board);
+        if (art.kind === 'table') seatsOk(art);
+        if (art.kind === 'chart') expect(chartIds.has(art.chartId)).toBe(true);
+        if (art.kind === 'ring') expect(art.value).toBeGreaterThanOrEqual(0);
+        if (art.kind === 'ladder') {
+          const scores = art.rungs.map((r) => evaluate(parseCards(r.cards)));
+          art.rungs.forEach((r, i) => expect(categoryOf(scores[i]), r.name).toBe(NAMES[r.name]));
+          for (let i = 1; i < scores.length; i++) expect(scores[i]).toBeLessThan(scores[i - 1]);
+        }
+      }
+      for (const step of lesson.steps) {
+        if (step.kind !== 'quiz') continue;
+        if (step.cards) handOk(step.cards, step.board);
+        if (step.choiceCards) {
+          expect(step.choiceCards).toHaveLength(step.choices.length);
+          for (const c of step.choiceCards) handOk(c);
+        }
+      }
+    }
+  });
+
+  it('ranks the hands in its questions the way the evaluator does', async () => {
+    const { categoryOf, evaluate, HandCategory } = await import('@felt/core');
+    const score = (cards: string) => evaluate(parseCards(cards));
+    // Which ranks highest: flush over straight, trips and two pair.
+    const options = ['8c7d6s5h4c', 'QsQdQc9h3d', 'Kh9h7h4h2h', 'AsAdKcKh7s'].map(score);
+    expect(options.indexOf(Math.max(...options))).toBe(2);
+    expect(categoryOf(score('Kh9h7h4h2h'))).toBe(HandCategory.Flush);
+    // The wheel is a straight. Q K A 2 3 is not.
+    expect(categoryOf(score('Ah2c3d4s5h'))).toBe(HandCategory.Straight);
+    expect(categoryOf(score('QhKcAd2s3h'))).toBe(HandCategory.HighCard);
+    expect(score('Ah2c3d4s5h')).toBeGreaterThan(score('7c7d7hKs2d'));
+    // Full house beats a flush.
+    expect(score('KcKdKh4s4d')).toBeGreaterThan(score('AdJd8d6d3d'));
+    // Best five examples.
+    expect(categoryOf(score('KhQhAh9h4h2cTs'))).toBe(HandCategory.Flush);
+    expect(score('As7cAdKs9h8c2d')).toBe(score('AsAdKs9h8c'));
+    expect(score('Ks2dTc9d8s7h6c')).toBe(score('Tc9d8s7h6c'));
+    // Kicker: AK beats AQ on As9d6c4h2s.
+    expect(score('AhKdAs9d6c4h2s')).toBeGreaterThan(score('AdQcAs9d6c4h2s'));
+    expect(score('AhKdAs9d6c4h2s')).toBe(score('AhAsKd9d6c'));
+    // Playing the board splits.
+    expect(score('As2dTc9d8s7h6c')).toBe(score('Kh4cTc9d8s7h6c'));
+    // Ac7c on Kc9c7d7s2c: a flush, over three 7s.
+    expect(categoryOf(score('Ac7cKc9c7d7s2c'))).toBe(HandCategory.Flush);
+    // Same ranks in different suits tie.
+    expect(score('AsKsQd9c4s7h2c')).toBe(score('AhKhQd9c4s7h2c'));
+  });
+
+  it('states counts and chances that are exact', async () => {
+    const { ALL_HAND_CLASSES, categoryOf, evaluate, outsToEquity, potOdds } = await import('@felt/core');
+    const pct = (x: number, digits = 1) => Number((x * 100).toFixed(digits));
+    const choose = (n: number, k: number): number => (k === 0 ? 1 : (choose(n - 1, k - 1) * n) / k);
+    // 169 hands: 13 pairs, 78 suited, 78 offsuit. 1,326 combos.
+    expect(ALL_HAND_CLASSES).toHaveLength(169);
+    expect(ALL_HAND_CLASSES.filter((h) => h.length === 2)).toHaveLength(13);
+    expect(ALL_HAND_CLASSES.filter((h) => h.endsWith('s'))).toHaveLength(78);
+    expect(ALL_HAND_CLASSES.filter((h) => h.endsWith('o'))).toHaveLength(78);
+    const combos = (keep: (h: string) => boolean) => ALL_HAND_CLASSES.filter(keep).reduce((n, h) => n + comboCount(h), 0);
+    expect(combos(() => true)).toBe(choose(52, 2));
+    expect(choose(52, 2)).toBe(1326);
+    expect([comboCount('AA'), comboCount('AKs'), comboCount('AKo')]).toEqual([6, 4, 12]);
+    expect(1326 / 6).toBe(221);
+    expect([pct(6 / 1326, 2), pct(4 / 1326, 2), pct(12 / 1326, 2)]).toEqual([0.45, 0.3, 0.9]);
+    const pairs = combos((h) => h.length === 2);
+    expect(pairs).toBe(78);
+    expect(pct(pairs / 1326, 2)).toBe(5.88);
+    expect(1326 / pairs).toBe(17);
+    expect(pairs / 1326).toBeCloseTo(3 / 51);
+    const suited = combos((h) => h.endsWith('s'));
+    expect(suited).toBe(312);
+    expect(pct(suited / 1326)).toBe(23.5);
+    // Rarer five card hands rank higher, over all 2,598,960 hands.
+    const counts = new Array<number>(9).fill(0);
+    const c = [0, 0, 0, 0, 0];
+    for (c[0] = 0; c[0] < 52; c[0]++)
+      for (c[1] = c[0] + 1; c[1] < 52; c[1]++)
+        for (c[2] = c[1] + 1; c[2] < 52; c[2]++)
+          for (c[3] = c[2] + 1; c[3] < 52; c[3]++) for (c[4] = c[3] + 1; c[4] < 52; c[4]++) counts[categoryOf(evaluate(c))]++;
+    expect(counts.reduce((a, b) => a + b, 0)).toBe(2598960);
+    for (let i = 1; i < counts.length; i++) expect(counts[i]).toBeLessThan(counts[i - 1]);
+    // 4 royal flushes are rarer than the 36 other straight flushes.
+    expect(counts[8]).toBe(40);
+    // A pocket pair flops a set or better 11.8%.
+    expect(pct(1 - choose(48, 3) / choose(50, 3))).toBe(11.8);
+    // Two suited cards make a flush in their suit by the river 6.4%.
+    const flush = [3, 4, 5].reduce((n, k) => n + choose(11, k) * choose(39, 5 - k), 0) / choose(50, 5);
+    expect(pct(flush)).toBe(6.4);
+    // Flush draw on the turn: 9 of 46 unseen.
+    expect(52 - 2 - 4).toBe(46);
+    expect(pct(outsToEquity(9, 46, 1))).toBe(19.6);
+    // Prices: 5 into 10 needs 25%, 10 into 10 needs 33.3%.
+    expect(pct(potOdds(15, 5))).toBe(25);
+    expect(pct(potOdds(20, 10))).toBe(33.3);
+    // Odds against to percent.
+    for (const [against, p] of [[1, 50], [2, 33.3], [3, 25], [4, 20]]) expect(pct(1 / (against + 1))).toBe(p);
+    // Big blinds.
+    expect([200 / 2, 300 / 2, 50 / 5, 50 / 2, 50 / 50]).toEqual([100, 150, 10, 25, 1]);
+  });
+
+  it('quotes the starter charts correctly', () => {
+    const chart = (id: string) => buildChart(STARTER_CHARTS.find((c) => c.id === id)!);
+    const open = (id: string) => Math.round((actionFrequencies(chart(id)).raise ?? 0) * 100);
+    expect([open('9max-100-rfi-utg'), open('9max-100-rfi-btn')]).toEqual([12, 43]);
+    const utg = chart('9max-100-rfi-utg');
+    const btn = chart('9max-100-rfi-btn');
+    for (const hand of ['AA', 'KK', 'QQ', 'JJ', 'TT', '99', '88', '77', 'AKo', 'AKs', 'KQs']) expect(utg.mixes.get(hand), hand).toEqual({ raise: 1 });
+    expect(utg.mixes.get('72o')).toEqual({ fold: 1 });
+    expect(utg.mixes.get('KTo')).toEqual({ fold: 1 });
+    expect(btn.mixes.get('KTo')).toEqual({ raise: 1 });
+    expect(btn.mixes.get('72s')).toEqual({ fold: 1 });
+  });
+});

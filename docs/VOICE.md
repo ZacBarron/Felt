@@ -47,6 +47,7 @@ Say what the player gets or does, in their words. Put the useful part first.
 
 - **Yes:** Skip lessons you already know.
 - **No:** Our placement system marks lessons as tested out.
+- **Yes:** Skip ahead. **No:** Test out.
 
 ### 5. Buttons say what happens
 
@@ -121,8 +122,9 @@ Use one name for each thing, everywhere.
 | topic | A group of lessons in a track | module |
 | track | The top group, like Preflop | course |
 | question | A quiz item | check, quiz item |
-| placement test | The one time test to find where to start | level test |
-| tested out | Proven by a test, so skipped | skipped, marked as known |
+| placement quiz | The quiz that finds where to start | placement test, level test |
+| skip ahead | Pass a short quiz to skip lessons you know | test out |
+| passed | A lesson skipped by passing its quiz | tested out, marked as known |
 | review | The daily spaced repetition queue | deck, flashcards |
 | card | One item in review | flashcard |
 | drill | Practice on one chart, not scheduled | free practice |

@@ -5,7 +5,7 @@ export const POSTFLOP_MORE_LESSONS: LessonContent[] = [
     key: 'postflop/textures/who-it-favors',
     level: 'advanced',
     minutes: 7,
-    cover: { kind: 'figure', text: '58%' },
+    cover: { kind: 'cards', cards: '', board: '8s8d3c' },
     practice: ['9max-100-rfi-btn', '9max-100-bb-vs-btn'],
     steps: [
       {
@@ -85,6 +85,7 @@ export const POSTFLOP_MORE_LESSONS: LessonContent[] = [
       {
         kind: 'quiz',
         question: 'With Felt’s charts, BTN opens and BB calls. On 8♠8♦3♣, who holds more trips or better?',
+        board: '8s8d3c',
         choices: ['BTN, because it has more equity', 'BB, because it defends more eights', 'Both hold about the same'],
         answer: 1,
         explain:
@@ -93,6 +94,7 @@ export const POSTFLOP_MORE_LESSONS: LessonContent[] = [
       {
         kind: 'quiz',
         question: 'On which flop does the BB calling range have more raw equity than the BTN opening range?',
+        choiceCards: ['7h6h5c', '8s8d3c', 'QhJdTc', 'As8d3c'],
         choices: ['7♥6♥5♣', '8♠8♦3♣', 'Q♥J♦T♣', 'A♠8♦3♣'],
         answer: 0,
         explain:
@@ -114,7 +116,7 @@ export const POSTFLOP_MORE_LESSONS: LessonContent[] = [
     key: 'postflop/cbet/cbet-oop',
     level: 'advanced',
     minutes: 6,
-    cover: { kind: 'figure', text: 'OOP' },
+    cover: { kind: 'table', seats: 9, button: 'BTN', hero: 'CO', highlight: ['BTN'], note: 'You act first after the flop' },
     practice: ['9max-100-rfi-co'],
     steps: [
       {
@@ -210,7 +212,7 @@ export const POSTFLOP_MORE_LESSONS: LessonContent[] = [
     key: 'postflop/defense/probe',
     level: 'advanced',
     minutes: 6,
-    cover: { kind: 'cards', cards: '8h' },
+    cover: { kind: 'cards', cards: '', board: 'Qs7d3c8h' },
     practice: ['9max-100-bb-vs-btn'],
     steps: [
       {
@@ -285,6 +287,8 @@ export const POSTFLOP_MORE_LESSONS: LessonContent[] = [
       {
         kind: 'quiz',
         question: 'On Q♠7♦3♣ 8♥ after a flop check back, which BB hand most clearly wants to probe for value?',
+        board: 'Qs7d3c8h',
+        choiceCards: ['4s3s', '8c7c', 'Ad5c'],
         choices: ['4♠3♠, bottom pair', '8♣7♣, two pair', 'A♦5♣, ace high'],
         answer: 1,
         explain:
@@ -305,7 +309,7 @@ export const POSTFLOP_MORE_LESSONS: LessonContent[] = [
     key: 'postflop/later-streets/barreling',
     level: 'core',
     minutes: 7,
-    cover: { kind: 'figure', text: '184%' },
+    cover: { kind: 'cards', cards: 'JhTh', board: 'Kh7d2c4h' },
     steps: [
       {
         kind: 'intro',
@@ -373,6 +377,8 @@ export const POSTFLOP_MORE_LESSONS: LessonContent[] = [
       {
         kind: 'quiz',
         question: 'On K♥7♦2♣ 4♥, BTN bet the flop and got called. Which hand is the best turn bluff?',
+        board: 'Kh7d2c4h',
+        choiceCards: ['JhTh', 'QcJc', '8c8s'],
         choices: ['J♥T♥', 'Q♣J♣', '8♣8♠'],
         answer: 0,
         explain:
@@ -402,7 +408,16 @@ export const POSTFLOP_MORE_LESSONS: LessonContent[] = [
     key: 'postflop/multiway/multiway',
     level: 'core',
     minutes: 6,
-    cover: { kind: 'figure', text: '13%' },
+    cover: {
+      kind: 'bars',
+      unit: '%',
+      bars: [
+        { label: 'Heads up', value: 60 },
+        { label: '3 way', value: 36 },
+        { label: '4 way', value: 21.6 },
+        { label: '5 way', value: 13 },
+      ],
+    },
     steps: [
       {
         kind: 'intro',
@@ -500,7 +515,7 @@ export const POSTFLOP_MORE_LESSONS: LessonContent[] = [
     key: 'postflop/multiway/multiway-cbet',
     level: 'advanced',
     minutes: 6,
-    cover: { kind: 'figure', text: '3way' },
+    cover: { kind: 'table', seats: 9, button: 'BTN', hero: 'CO', highlight: ['BTN', 'BB'], note: 'Three way pot' },
     steps: [
       {
         kind: 'intro',

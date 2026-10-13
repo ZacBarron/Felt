@@ -63,6 +63,7 @@ export const PREFLOP_LESSONS: LessonContent[] = [
       {
         kind: 'quiz',
         question: '9-handed at 100bb, it folds to you UTG with KJo. What does the chart do?',
+        cards: 'KhJc',
         choices: ['Raise', 'Fold', 'Mix raise and fold'],
         answer: 1,
         explain: 'UTG opens KQo 70% of the time but never opens KJo. Offsuit kings are dominated too often. A mix is tempting since UTG+1 opens KJo 10% of the time. At UTG it always folds.',
@@ -70,9 +71,23 @@ export const PREFLOP_LESSONS: LessonContent[] = [
       {
         kind: 'quiz',
         question: 'Folded to you in the LJ with A3s. What does the chart do?',
+        cards: 'Ac3c',
         choices: ['Mix raise and fold', 'Fold', 'Raise'],
         answer: 2,
         explain: 'The LJ always opens A3s. It can make the nut flush and a wheel. The ace also makes AA and AK less likely behind you. A2s is the weakest suited ace. It still opens 80% of the time.',
+      },
+      {
+        kind: 'visual',
+        title: 'Eight players still to act',
+        art: {
+          kind: 'table',
+          seats: 9,
+          button: 'BTN',
+          hero: 'UTG',
+          highlight: ['UTG+1', 'UTG+2', 'LJ', 'HJ', 'CO', 'BTN', 'SB', 'BB'],
+          note: '8 players behind you',
+        },
+        caption: 'From UTG, every other seat acts after you. Any of them can wake up with a big hand.',
       },
       {
         kind: 'takeaway',
@@ -121,6 +136,7 @@ export const PREFLOP_LESSONS: LessonContent[] = [
       {
         kind: 'quiz',
         question: 'Folded to you on the button with K5s. What does the chart do?',
+        cards: 'Kd5d',
         choices: ['Fold', 'Raise', 'Mix raise and fold'],
         answer: 1,
         explain: 'The button always opens every suited king, down to K2s. So K5s is a pure raise. The mixes start lower, with hands like Q3s and K7o.',
@@ -128,9 +144,16 @@ export const PREFLOP_LESSONS: LessonContent[] = [
       {
         kind: 'quiz',
         question: 'Folded to you in the cutoff with Q7s. What does the chart do?',
+        cards: 'Qs7s',
         choices: ['Raise', 'Mix raise and fold', 'Fold'],
         answer: 1,
         explain: 'Suited queens always open from Q9s in the cutoff. Q7s is a close call. It raises 45% of the time and folds the rest. Q4s and below always fold.',
+      },
+      {
+        kind: 'visual',
+        title: 'Only the blinds are left',
+        art: { kind: 'table', seats: 9, button: 'BTN', hero: 'BTN', highlight: ['SB', 'BB'], note: '2 players behind you' },
+        caption: 'On the button, only the blinds act after you. Both play the rest of the hand out of position.',
       },
       {
         kind: 'takeaway',
@@ -184,6 +207,7 @@ export const PREFLOP_LESSONS: LessonContent[] = [
       {
         kind: 'quiz',
         question: 'Folded to you in the small blind with Q4s. What does the raise only chart do?',
+        cards: 'Qh4h',
         choices: ['Raise', 'Fold', 'Mix raise and fold'],
         answer: 0,
         explain: 'Suited queens always open down to Q4s in the small blind. Q3s and Q2s are mixes. They raise 60% and 35% of the time.',
@@ -191,6 +215,7 @@ export const PREFLOP_LESSONS: LessonContent[] = [
       {
         kind: 'quiz',
         question: 'Folded to you in the small blind with K7o. What does the raise only chart do?',
+        cards: 'Ks7c',
         choices: ['Mix raise and fold', 'Fold', 'Raise'],
         answer: 0,
         explain: 'Offsuit kings always open from K9o in the small blind. K7o is a mix. It raises 35% of the time and folds the rest. Every suited king always raises.',
@@ -265,6 +290,7 @@ export const PREFLOP_LESSONS: LessonContent[] = [
       {
         kind: 'quiz',
         question: 'Big blind against a 2.5bb button open with J6s. What does the chart do?',
+        cards: 'Jc6c',
         choices: ['Call', '3bet', 'Fold'],
         answer: 0,
         explain: 'Suited jacks always call down to J5s. Lower ones mix calls and folds. Only J9s and J8s mix in some 3bets. J6s is a pure call.',
@@ -272,9 +298,17 @@ export const PREFLOP_LESSONS: LessonContent[] = [
       {
         kind: 'quiz',
         question: 'Big blind against a 2.5bb button open with A4s. What does the chart do?',
+        cards: 'Ad4d',
         choices: ['Call every time', 'Call about 60%, 3bet the rest', '3bet about 60%, call the rest', '3bet every time'],
         answer: 2,
         explain: 'A4s 3bets 60% of the time and calls the rest. A5s 3bets a little more and A3s a little less. The ace makes AA and AK less likely, which suits a 3bet. These hands are too good to fold, so they call when they do not 3bet.',
+      },
+      {
+        kind: 'visual',
+        title: 'The best price at the table',
+        art: { kind: 'ring', value: 1.5 / 5.5, label: 'Equity to call', caption: 'Big blind against a 2.5bb open' },
+        caption: 'You call 1.5bb to win a pot of 5.5bb. Raw equity of **27.3%** breaks even. Realization pushes the real bar higher.',
+        evidence: 'math',
       },
       {
         kind: 'takeaway',

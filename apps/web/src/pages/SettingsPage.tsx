@@ -250,7 +250,7 @@ export function SettingsPage() {
             </span>
           </button>
           <Link to="/placement" className="list-row">
-            <span className="grow">Retake the placement test</span>
+            <span className="grow">Retake the placement quiz</span>
             <ChevronRightIcon size={16} className="chev" />
           </Link>
         </div>

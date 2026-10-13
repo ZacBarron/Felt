@@ -7,6 +7,7 @@ import { SeatStrip } from '../components/SeatStrip';
 import { haptic } from '../haptics';
 import { getChart } from '../state/charts';
 import { CheckIcon, CloseIcon } from '../ui/icons';
+import { LessonArt } from './LessonArt';
 import { Rich } from './rich';
 
 interface Props {
@@ -201,6 +202,16 @@ export function StepView({ step, onAnswer, answered }: Props) {
           </div>
         </div>
       );
+    case 'visual':
+      return (
+        <div className="lesson-step">
+          <StepTitle title={step.title} evidence={step.evidence} />
+          <LessonArt art={step.art} size="step" />
+          <p className="lesson-p">
+            <Rich text={step.caption} />
+          </p>
+        </div>
+      );
     case 'quiz':
       return <Quiz step={step} onAnswer={onAnswer} initial={answered} />;
     case 'takeaway':
@@ -222,6 +233,41 @@ export function StepView({ step, onAnswer, answered }: Props) {
         </div>
       );
   }
+}
+
+/** Text made only of cards, like "Q♣ 8♦" or "K♥ K♦ 4♣". */
+const CARDS_ONLY = /^(\s*[2-9TJQKA][♠♥♦♣]\uFE0E?)+\s*$/u;
+
+function safeCards(text: string) {
+  try {
+    return parseCards(text);
+  } catch {
+    return [];
+  }
+}
+
+/** The hand and board a question is about, on the felt above it. */
+function QuizCards({ cards, board }: { cards?: string; board?: string }) {
+  const hole = cards ? safeCards(cards) : [];
+  const shared = board ? safeCards(board) : [];
+  return (
+    <div className="lesson-felt quiz-felt">
+      {shared.length > 0 && (
+        <div className="row" style={{ justifyContent: 'center', gap: 5 }} aria-label="Board" role="group">
+          {shared.map((c, i) => (
+            <PlayingCard key={c} card={c} size="md" deal delayMs={60 + i * 70} />
+          ))}
+        </div>
+      )}
+      {hole.length > 0 && (
+        <div className="row" style={{ justifyContent: 'center', gap: 8 }} aria-label="Your hand" role="group">
+          {hole.map((c, i) => (
+            <PlayingCard key={c} card={c} size={shared.length ? 'md' : 'lg'} flip delayMs={(shared.length ? 120 + shared.length * 70 : 0) + i * 90} />
+          ))}
+        </div>
+      )}
+    </div>
+  );
 }
 
 function Quiz({
@@ -249,14 +295,28 @@ function Quiz({
       <div className="pill pill-tint" style={{ alignSelf: 'flex-start' }}>
         Question
       </div>
+      {(step.cards || step.board) && <QuizCards cards={step.cards} board={step.board} />}
       <h2 className="lesson-question">{step.question}</h2>
       <div className="choices">
         {step.choices.map((c, i) => {
           const state = !done ? '' : i === step.answer ? ' correct' : i === chosen ? ' wrong' : ' faded';
+          const faces = step.choiceCards?.[i] ? safeCards(step.choiceCards[i]) : [];
+          // When the card faces say it all ("Q♣ 8♦"), the text stays for screen readers only.
+          const onlyCards = faces.length > 0 && CARDS_ONLY.test(c);
           return (
             <button key={c} className={`choice${state}`} data-haptic="off" onClick={() => choose(i)} disabled={done && i !== chosen && i !== step.answer}>
               <span className="choice-key">{String.fromCharCode(65 + i)}</span>
-              <span style={{ flex: 1 }}>{c}</span>
+              {faces.length > 0 && (
+                <span className="choice-cards" aria-hidden="true">
+                  {faces.map((card) => (
+                    <PlayingCard key={card} card={card} size="sm" />
+                  ))}
+                </span>
+              )}
+              <span className={onlyCards ? 'sr-only' : undefined} style={onlyCards ? undefined : { flex: 1 }}>
+                {c}
+              </span>
+              {onlyCards && <span style={{ flex: 1 }} />}
               {done && i === step.answer && <CheckIcon size={18} aria-hidden="true" />}
               {done && i === chosen && !right && <CloseIcon size={16} aria-hidden="true" />}
               {done && <span className="sr-only">{i === step.answer ? ', correct answer' : i === chosen ? ', your answer' : ''}</span>}

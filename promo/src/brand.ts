@@ -36,7 +36,7 @@ export const SANS = 'Inter, -apple-system, "SF Pro Text", "Helvetica Neue", Aria
 
 /** The cells of the F, on a 6x6 grid: the stem, a long top arm, a shorter middle arm. */
 export function isFCell(r: number, c: number): boolean {
-  return c === 0 || (r === 0 && c <= 4) || (r === 2 && c <= 3);
+  return c === 0 || (r === 0 && c <= 4) || (r === 1 && c === 1) || (r === 2 && c <= 3);
 }
 
 export const MARK_GRID = 6;

@@ -5,7 +5,7 @@ export const FOUNDATIONS_LESSONS: LessonContent[] = [
     key: 'foundations/math/pot-odds',
     level: 'core',
     minutes: 5,
-    cover: { kind: 'figure', text: '25%' },
+    cover: { kind: 'ring', value: 0.25, label: 'Equity to call', caption: 'Half pot bet' },
     steps: [
       {
         kind: 'intro',
@@ -68,6 +68,31 @@ export const FOUNDATIONS_LESSONS: LessonContent[] = [
           'A half pot bet needs 25.0%. You have 19.6%, so you are 5.4 points short. The call only works if you win extra on the river when you hit. That extra is implied odds.',
       },
       {
+        kind: 'visual',
+        title: 'Bigger bets, worse prices',
+        art: {
+          kind: 'curve',
+          points: [
+            [0, 0],
+            [0.125, 10],
+            [0.25, 16.7],
+            [0.375, 21.4],
+            [0.5, 25],
+            [0.75, 30],
+            [1, 33.3],
+            [1.25, 35.7],
+            [1.5, 37.5],
+            [1.75, 38.9],
+            [2, 40],
+          ],
+          xLabel: 'Bet size, in pots',
+          yLabel: 'Equity to call, %',
+          mark: [0.5, 25],
+        },
+        caption: 'The price climbs fast for small bets, then flattens out. A half pot bet asks for **25%**. Even twice the pot asks for only 40%.',
+        evidence: 'math',
+      },
+      {
         kind: 'takeaway',
         points: [
           'Equity needed = call ÷ final pot.',
@@ -81,7 +106,14 @@ export const FOUNDATIONS_LESSONS: LessonContent[] = [
     key: 'foundations/math/ev',
     level: 'core',
     minutes: 6,
-    cover: { kind: 'figure', text: 'EV' },
+    cover: {
+      kind: 'tree',
+      root: 'Call 50 to win 150',
+      branches: [
+        { label: 'Win, 30%', value: '+150', tone: 'green' },
+        { label: 'Lose, 70%', value: '−50', tone: 'red' },
+      ],
+    },
     steps: [
       {
         kind: 'intro',
@@ -139,6 +171,21 @@ export const FOUNDATIONS_LESSONS: LessonContent[] = [
           'You need villain to bluff at least 33.3%. At 20%, calling loses 40 for every 100 you call. So folding every bluff catcher is the best response. Mixing only helps when calling and folding are worth the same.',
       },
       {
+        kind: 'visual',
+        title: 'A bet, branch by branch',
+        art: {
+          kind: 'tree',
+          root: 'Bet 50 into 100',
+          branches: [
+            { label: 'Villain folds, 40%', value: '+100', tone: 'green' },
+            { label: 'Called and you win, 18%', value: '+150', tone: 'green' },
+            { label: 'Called and you lose, 42%', value: '−50', tone: 'red' },
+          ],
+        },
+        caption: 'Weight each result by its chance and add them up. 0.4 × 100 + 0.18 × 150 − 0.42 × 50 = **+46**.',
+        evidence: 'math',
+      },
+      {
         kind: 'takeaway',
         points: [
           'Folding is worth zero. Measure every action against it.',
@@ -152,7 +199,7 @@ export const FOUNDATIONS_LESSONS: LessonContent[] = [
     key: 'foundations/math/outs',
     level: 'core',
     minutes: 5,
-    cover: { kind: 'figure', text: '×4' },
+    cover: { kind: 'cards', cards: '9h8h', board: 'Kh7h2c' },
     steps: [
       {
         kind: 'intro',
@@ -207,6 +254,21 @@ export const FOUNDATIONS_LESSONS: LessonContent[] = [
           'The exact figure is 45.0%. The corrected rule gives 12 × 4 − 4 = 44%, which is close. Plain outs × 4 says 48%, which overstates big draws. 26.1% is the chance with one card to come.',
       },
       {
+        kind: 'visual',
+        title: '15 outs, flop to river',
+        art: {
+          kind: 'bars',
+          unit: '%',
+          bars: [
+            { label: 'Outs × 4', value: 60, tone: 'gray' },
+            { label: 'Corrected rule', value: 53 },
+            { label: 'Exact', value: 54.1, tone: 'green' },
+          ],
+        },
+        caption: 'Plain outs × 4 says 60% and overstates the draw. The corrected rule says 53%. The exact figure is **54.1%**.',
+        evidence: 'math',
+      },
+      {
         kind: 'takeaway',
         points: [
           'On the flop, multiply outs by 4. Above 8 outs, subtract (outs − 8).',
@@ -221,7 +283,13 @@ export const FOUNDATIONS_LESSONS: LessonContent[] = [
     key: 'foundations/math/implied-odds',
     level: 'core',
     minutes: 5,
-    cover: { kind: 'figure', text: '+15' },
+    cover: {
+      kind: 'bars',
+      bars: [
+        { label: 'Final pot', value: 100, tone: 'gray' },
+        { label: 'Needed', value: 115 },
+      ],
+    },
     steps: [
       {
         kind: 'intro',
@@ -288,7 +356,7 @@ export const FOUNDATIONS_LESSONS: LessonContent[] = [
     key: 'foundations/math/mdf-alpha',
     level: 'core',
     minutes: 6,
-    cover: { kind: 'figure', text: '50%' },
+    cover: { kind: 'ring', value: 2 / 3, label: 'Defend at least', caption: 'Facing a half pot bet' },
     steps: [
       {
         kind: 'intro',
@@ -353,6 +421,31 @@ export const FOUNDATIONS_LESSONS: LessonContent[] = [
         explain: 'Alpha = 0.75 ÷ 1.75 = 42.9%. The 57.1% answer is MDF, which is how often the defender must continue.',
       },
       {
+        kind: 'visual',
+        title: 'Bigger bets, less defense',
+        art: {
+          kind: 'curve',
+          points: [
+            [0, 100],
+            [0.125, 88.9],
+            [0.25, 80],
+            [0.375, 72.7],
+            [0.5, 66.7],
+            [0.75, 57.1],
+            [1, 50],
+            [1.25, 44.4],
+            [1.5, 40],
+            [1.75, 36.4],
+            [2, 33.3],
+          ],
+          xLabel: 'Bet size, in pots',
+          yLabel: 'MDF, %',
+          mark: [0.5, 66.7],
+        },
+        caption: 'Against half pot, defend at least **66.7%** of your range. Against twice the pot, **33.3%** is enough.',
+        evidence: 'math',
+      },
+      {
         kind: 'takeaway',
         points: [
           'Alpha = bet ÷ (pot + bet).',
@@ -367,7 +460,14 @@ export const FOUNDATIONS_LESSONS: LessonContent[] = [
     key: 'foundations/math/combos',
     level: 'core',
     minutes: 5,
-    cover: { kind: 'cards', cards: 'AsKs' },
+    cover: {
+      kind: 'bars',
+      bars: [
+        { label: 'Pair', value: 6 },
+        { label: 'Suited', value: 4 },
+        { label: 'Offsuit', value: 12 },
+      ],
+    },
     steps: [
       {
         kind: 'intro',
@@ -431,7 +531,13 @@ export const FOUNDATIONS_LESSONS: LessonContent[] = [
     key: 'foundations/math/spr',
     level: 'advanced',
     minutes: 6,
-    cover: { kind: 'figure', text: 'SPR' },
+    cover: {
+      kind: 'chips',
+      stacks: [
+        { label: 'Pot', bb: 5.5 },
+        { label: 'Behind', bb: 97.5 },
+      ],
+    },
     steps: [
       {
         kind: 'intro',
@@ -488,6 +594,19 @@ export const FOUNDATIONS_LESSONS: LessonContent[] = [
         explain: 'The pot is 11 + 11 + 0.5 = 22.5bb with 89bb behind. 89 ÷ 22.5 ≈ 4. About 18 is the single raised pot number.',
       },
       {
+        kind: 'visual',
+        title: 'A 3bet pot is shallow',
+        art: {
+          kind: 'chips',
+          stacks: [
+            { label: 'Pot', bb: 22.5 },
+            { label: 'Behind', bb: 89 },
+          ],
+        },
+        caption: 'After a 3bet to 11bb, 89bb sits behind a 22.5bb pot. That is an SPR of about **4.0**, against 17.7 in a single raised pot.',
+        evidence: 'math',
+      },
+      {
         kind: 'takeaway',
         points: [
           'SPR = stack ÷ pot. Single raised pots are about 18 and 3bet pots about 4.',
@@ -501,7 +620,15 @@ export const FOUNDATIONS_LESSONS: LessonContent[] = [
     key: 'foundations/ranges/range-vs-range',
     level: 'advanced',
     minutes: 5,
-    cover: { kind: 'figure', text: '≠' },
+    cover: {
+      kind: 'bars',
+      unit: '%',
+      bars: [
+        { label: 'Polar, top', value: 90 },
+        { label: 'Polar, bottom', value: 10 },
+        { label: 'Condensed', value: 50, tone: 'gray' },
+      ],
+    },
     steps: [
       {
         kind: 'intro',
@@ -545,6 +672,21 @@ export const FOUNDATIONS_LESSONS: LessonContent[] = [
         explain: 'The polarized range bets big. Its nuts want value and its air needs folds. The same average equity does not mean the same strategy.',
       },
       {
+        kind: 'visual',
+        title: 'Same average, different shape',
+        art: {
+          kind: 'bars',
+          unit: '%',
+          bars: [
+            { label: 'Polarized, top half', value: 90 },
+            { label: 'Polarized, bottom half', value: 10 },
+            { label: 'Condensed, every hand', value: 50, tone: 'gray' },
+          ],
+        },
+        caption: 'An illustration, not a real board. Both ranges average 50%. The polarized one is strong or weak, and the condensed one sits in the middle.',
+        evidence: 'math',
+      },
+      {
         kind: 'takeaway',
         points: ['Look at the shape of a range, not just its average.', 'Polarized ranges bet big.', 'Condensed ranges check and catch bluffs.'],
       },
@@ -554,7 +696,7 @@ export const FOUNDATIONS_LESSONS: LessonContent[] = [
     key: 'foundations/ranges/advantages',
     level: 'advanced',
     minutes: 6,
-    cover: { kind: 'cards', cards: 'KcKd' },
+    cover: { kind: 'cards', cards: 'KcKd', board: 'Ks7d2c' },
     steps: [
       {
         kind: 'intro',
@@ -629,7 +771,15 @@ export const FOUNDATIONS_LESSONS: LessonContent[] = [
     key: 'foundations/ranges/range-shapes',
     level: 'advanced',
     minutes: 6,
-    cover: { kind: 'figure', text: '⟷' },
+    cover: {
+      kind: 'tree',
+      root: 'Range shape',
+      branches: [
+        { label: 'Linear', value: 'Value bets', tone: 'red' },
+        { label: 'Polarized', value: 'Bets big', tone: 'red' },
+        { label: 'Condensed', value: 'Checks', tone: 'green' },
+      ],
+    },
     steps: [
       {
         kind: 'intro',
@@ -689,7 +839,7 @@ export const FOUNDATIONS_LESSONS: LessonContent[] = [
     key: 'foundations/ranges/equity-realization',
     level: 'core',
     minutes: 5,
-    cover: { kind: 'figure', text: 'IP' },
+    cover: { kind: 'table', seats: 6, button: 'BTN', hero: 'BTN', highlight: ['BB'], note: 'You act last' },
     steps: [
       {
         kind: 'intro',
@@ -734,6 +884,7 @@ export const FOUNDATIONS_LESSONS: LessonContent[] = [
       {
         kind: 'quiz',
         question: 'Out of position, which hand keeps the most of its equity?',
+        choiceCards: ['Ts9d', 'Kc4h', 'Ts9s'],
         choices: ['T9 offsuit', 'K4 offsuit', 'T9 suited'],
         answer: 2,
         explain:

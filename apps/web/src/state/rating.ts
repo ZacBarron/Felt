@@ -21,6 +21,7 @@ export const DOMAIN_LABELS: Record<SkillDomain, string> = {
 export function domainForLesson(key: string): SkillDomain {
   const [track, module] = key.split('/');
   if (track === 'foundations') return module === 'math' ? 'math' : 'theory';
+  if (track === 'basics') return key.endsWith('/odds') || key.endsWith('/big-blinds') ? 'math' : 'theory';
   if (track === 'preflop' || track === 'postflop' || track === 'exploit') return track;
   if (track === 'tournaments') return 'math';
   return 'theory';

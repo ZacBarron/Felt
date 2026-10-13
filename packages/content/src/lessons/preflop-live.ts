@@ -5,7 +5,14 @@ export const PREFLOP_LIVE_LESSONS: LessonContent[] = [
     key: 'preflop/stack-depth/depth',
     level: 'advanced',
     minutes: 7,
-    cover: { kind: 'figure', text: '200bb' },
+    cover: {
+      kind: 'chips',
+      stacks: [
+        { label: 'Pot', bb: 22.5 },
+        { label: 'At 40bb', bb: 29 },
+        { label: 'At 200bb', bb: 189 },
+      ],
+    },
     steps: [
       {
         kind: 'intro',
@@ -83,6 +90,7 @@ export const PREFLOP_LIVE_LESSONS: LessonContent[] = [
       {
         kind: 'quiz',
         question: 'Which hand gains the most value going from 100bb to 200bb deep?',
+        choiceCards: ['KdJc', 'AsQd', '7h6h'],
         choices: ['K♦J♣', 'A♠Q♦', '7♥6♥'],
         answer: 2,
         explain: 'Deep stacks pay off hands that make straights and flushes. KJo and AQo win mostly with one pair. One pair is worth less when the pot can grow to 200bb.',
@@ -101,7 +109,20 @@ export const PREFLOP_LIVE_LESSONS: LessonContent[] = [
     key: 'preflop/stack-depth/open-sizing',
     level: 'core',
     minutes: 6,
-    cover: { kind: 'figure', text: '2.5' },
+    cover: {
+      kind: 'curve',
+      points: [
+        [2, 22.2],
+        [2.2, 24.5],
+        [2.5, 27.3],
+        [3, 30.8],
+        [3.5, 33.3],
+        [4, 35.3],
+      ],
+      xLabel: 'Open, bb',
+      yLabel: 'BB needs, %',
+      mark: [2.5, 27.3],
+    },
     steps: [
       {
         kind: 'intro',
@@ -202,7 +223,15 @@ export const PREFLOP_LIVE_LESSONS: LessonContent[] = [
     key: 'preflop/live-preflop/big-opens',
     level: 'core',
     minutes: 6,
-    cover: { kind: 'figure', text: '8bb' },
+    cover: {
+      kind: 'bars',
+      unit: '%',
+      bars: [
+        { label: '2.5bb', value: 27.3, tone: 'gray' },
+        { label: '5bb', value: 38.1 },
+        { label: '8bb', value: 42.4 },
+      ],
+    },
     steps: [
       {
         kind: 'intro',
@@ -282,6 +311,7 @@ export const PREFLOP_LIVE_LESSONS: LessonContent[] = [
       {
         kind: 'quiz',
         question: '100bb deep on the button with 5♠5♥. A tight player who folds one pair to pressure opens to 8bb. What is your default?',
+        cards: '5s5h',
         choices: ['Call to set mine', 'Fold', '3bet as a bluff'],
         answer: 1,
         explain: 'You need about 51bb extra when you hit, from 92bb behind. This player will not pay that often. A 24bb 3bet bluff needs folds 71.6% of the time, and 55 plays badly when called.',
@@ -300,7 +330,7 @@ export const PREFLOP_LIVE_LESSONS: LessonContent[] = [
     key: 'preflop/live-preflop/straddles',
     level: 'core',
     minutes: 6,
-    cover: { kind: 'figure', text: '50' },
+    cover: { kind: 'figure', text: '50', caption: 'straddles deep at 100bb' },
     steps: [
       {
         kind: 'intro',
@@ -468,6 +498,7 @@ export const PREFLOP_LIVE_LESSONS: LessonContent[] = [
       {
         kind: 'quiz',
         question: 'One early player limps and you hold 6♠5♠ on the button. What does the starter chart do?',
+        cards: '6s5s',
         choices: ['Iso raise', 'Overlimp', 'Fold'],
         answer: 1,
         explain: '65s wins big pots with straights and flushes and loses little when it misses. The chart iso raises only the top suited connectors, like T9s. A cheap multiway flop suits 65s better than a raised pot.',
@@ -475,6 +506,7 @@ export const PREFLOP_LIVE_LESSONS: LessonContent[] = [
       {
         kind: 'quiz',
         question: 'Two players limp and you are on the button with AQo. What size does the starter chart iso raise to?',
+        cards: 'AhQc',
         choices: ['4bb', '5bb', '7bb', '10bb'],
         answer: 2,
         explain: 'Start at about 5bb for one limper and add about 2bb for the second, which makes 7bb. 5bb is the size against one limper. Smaller lets both limpers call at a great price.',

@@ -34,6 +34,35 @@ const lesson = (id: string, title: string, drills: DrillKind[]): Lesson => ({ id
 
 export const CURRICULUM: Track[] = [
   {
+    id: 'basics',
+    title: 'Poker basics',
+    summary: 'The rules and a first strategy, for anyone who has never played.',
+    modules: [
+      {
+        id: 'rules',
+        title: 'How a hand works',
+        lessons: [
+          lesson('goal', 'The goal and the cards', ['concept']),
+          lesson('rankings', 'Hand rankings', ['concept']),
+          lesson('best-five', 'Making your best five', ['concept']),
+          lesson('hand-flow', 'How a hand plays out', ['concept']),
+          lesson('actions', 'Your options on your turn', ['concept']),
+        ],
+      },
+      {
+        id: 'first-strategy',
+        title: 'Your first strategy',
+        lessons: [
+          lesson('big-blinds', 'Big blinds and stacks', ['concept', 'math']),
+          lesson('position', 'Position and seat names', ['concept']),
+          lesson('starting-hands', 'Starting hands', ['concept']),
+          lesson('ranges', 'What a range is', ['concept']),
+          lesson('odds', 'Odds in plain words', ['math']),
+        ],
+      },
+    ],
+  },
+  {
     id: 'foundations',
     title: 'Foundations',
     summary: 'The math and range thinking every later decision rests on.',

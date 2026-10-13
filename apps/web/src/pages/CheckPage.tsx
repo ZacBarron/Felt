@@ -21,7 +21,7 @@ import { recordLessonQuiz } from '../state/rating';
 import { entryFor, LESSON_ENTRIES, lessonPath, markTested, moduleEntries, quizSteps } from '../state/lessons';
 import { useSettings } from '../state/settings';
 import { BottomBar } from '../ui/BottomBar';
-import { CloseIcon, LockIcon, SkipIcon } from '../ui/icons';
+import { CheckIcon, CloseIcon, LockIcon } from '../ui/icons';
 import { plural } from '../ui/format';
 import { ProgressRing } from '../ui/ProgressRing';
 import { Toggle } from '../ui/Toggle';
@@ -41,7 +41,7 @@ function QuestionScreen({
   progress,
   onClose,
   onDone,
-  closeLabel = 'Stop the test',
+  closeLabel = 'Stop the quiz',
 }: {
   question: CheckQuestion;
   progress: number;
@@ -59,7 +59,7 @@ function QuestionScreen({
         <button className="icon-btn glass" aria-label={closeLabel} onClick={onClose}>
           <CloseIcon size={18} />
         </button>
-        <div className="check-bar" role="progressbar" aria-label="Test progress" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(progress * 100)}>
+        <div className="check-bar" role="progressbar" aria-label="Quiz progress" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(progress * 100)}>
           <span style={{ width: `${Math.max(4, progress * 100)}%` }} />
         </div>
       </div>
@@ -100,7 +100,7 @@ function minutesOf(keys: readonly string[]) {
   return keys.reduce((m, k) => m + (entryFor(k)?.content?.minutes ?? 0), 0);
 }
 
-/** What the test found: lessons tested out and lessons to learn, with the next step. */
+/** What the quiz found: lessons passed and lessons to learn, with the next step. */
 function Results({ title, result, back }: { title: string; result: CheckResult; back: string }) {
   const { settings } = useSettings();
   const navigate = useNavigate();
@@ -124,7 +124,7 @@ function Results({ title, result, back }: { title: string; result: CheckResult; 
         </div>
         {result.passed.length > 0 && (
           <div className="pill pill-good num">
-            {plural(result.passed.length, 'lesson')} tested out, {saved} min saved
+            {plural(result.passed.length, 'lesson')} passed, {saved} min saved
           </div>
         )}
       </div>
@@ -148,11 +148,11 @@ function Results({ title, result, back }: { title: string; result: CheckResult; 
       )}
       {result.passed.length > 0 && (
         <section>
-          <h2 className="section-title">Tested out</h2>
+          <h2 className="section-title">Passed</h2>
           <div className="list">
             {result.passed.map((k) => (
               <div key={k} className="list-row">
-                <SkipIcon size={17} style={{ color: 'var(--green)' }} />
+                <CheckIcon size={17} style={{ color: 'var(--green)' }} />
                 <span className="grow">{entryFor(k)?.title}</span>
               </div>
             ))}
@@ -174,7 +174,7 @@ function Results({ title, result, back }: { title: string; result: CheckResult; 
   );
 }
 
-/** Test out of one lesson (all its questions) or a whole module (two per lesson). */
+/** Skip ahead past one lesson (all its questions) or a whole module (two per lesson) by passing a quiz. */
 export function CheckPage() {
   useBodyClass('focus-mode');
   const { track = '', module = '', lesson } = useParams();
@@ -193,7 +193,7 @@ export function CheckPage() {
   if (!moduleDef || questions.length === 0) {
     return (
       <div className="stack focus-column" style={{ paddingTop: '3rem' }}>
-        <p className="muted">There is nothing to test here yet.</p>
+        <p className="muted">There is no quiz here yet.</p>
         <Link to="/learn" className="btn">
           Back to Learn
         </Link>
@@ -227,10 +227,12 @@ export function CheckPage() {
 }
 
 /**
- * The order placement walks the curriculum: the core path a winning cash
- * player needs, from math and preflop to river play and exploits.
+ * The order placement walks the curriculum: the rules first, then the core
+ * path a winning cash player needs, from math and preflop to river play.
  */
 const PLACEMENT_ORDER = [
+  'basics/rules',
+  'basics/first-strategy',
   'foundations/math',
   'preflop/rfi',
   'preflop/vs-open',
@@ -305,13 +307,13 @@ export function PlacementPage() {
           </div>
           <p className="muted" style={{ margin: 0 }}>
             {skipped.length > 0
-              ? `You tested out of ${plural(skipped.length, 'lesson')} and saved about ${minutesOf(skipped)} minutes. You can still open any of them.`
+              ? `You passed ${plural(skipped.length, 'lesson')} and saved about ${minutesOf(skipped)} minutes. You can still open any of them.`
               : 'Start with the first lesson. Everything stays in your plan.'}
           </p>
         </div>
         {byModule.length > 0 && (
           <section>
-            <h2 className="section-title">Tested out</h2>
+            <h2 className="section-title">Passed</h2>
             <div className="list">
               {byModule.map((m) => (
                 <div key={m.id} className="list-row">
@@ -362,7 +364,7 @@ export function PlacementPage() {
       question={q}
       progress={answered / (answered + remainingMax)}
       onClose={exit}
-      closeLabel="Stop the test. Your place is saved."
+      closeLabel="Stop the quiz. Your place is saved."
       onDone={(correct) => {
         window.scrollTo({ top: 0 });
         setTally((t) => ({ right: t.right + (correct ? 1 : 0), asked: t.asked + 1 }));

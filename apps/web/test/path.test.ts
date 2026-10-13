@@ -2,7 +2,7 @@ import 'fake-indexeddb/auto';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { annualSavings, canOpenLesson, isLessonFree, isPro, PLANS } from '../src/state/access';
 import { db } from '../src/state/db';
-import { isComplete, lessonProgress, markTested, recommendedLessons, saveLesson } from '../src/state/lessons';
+import { isComplete, LESSON_ENTRIES, lessonProgress, markTested, recommendedLessons, saveLesson } from '../src/state/lessons';
 
 beforeEach(async () => {
   await db.lessons.clear();
@@ -21,6 +21,8 @@ describe('the path', () => {
   });
 
   it('skips tested lessons, and reading a tested lesson upgrades it to done', async () => {
+    // Basics come first in the path; pass them so the next lesson is in Foundations.
+    await markTested(LESSON_ENTRIES.filter((e) => e.key.startsWith('basics/')).map((e) => e.key));
     await markTested(['foundations/math/pot-odds']);
     let progress = await lessonProgress();
     expect(isComplete(progress.get('foundations/math/pot-odds'))).toBe(true);

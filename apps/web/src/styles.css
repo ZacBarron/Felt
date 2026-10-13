@@ -2868,9 +2868,23 @@ body.onboarding .shell {
   place-items: center;
   width: 44px;
   height: 44px;
-  border-radius: 14px;
-  background: color-mix(in srgb, var(--tint) 14%, transparent);
+  border-radius: 12px;
+  background: var(--base-500);
+  color: #fff;
+}
+
+/* Quiet text action beside a module title: skip ahead with a quick quiz. */
+.skip-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.15rem;
+  min-height: 44px;
+  padding: 0 0.1rem 0 0.6rem;
   color: var(--tint);
+  font-size: 0.88rem;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
 }
 
 .track-title {
@@ -2903,7 +2917,7 @@ body.onboarding .shell {
   font-size: 0.95rem;
 }
 
-.test-out {
+.tint-capsule {
   display: inline-flex;
   align-items: center;
   gap: 0.3rem;
