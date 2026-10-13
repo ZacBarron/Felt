@@ -16,8 +16,13 @@ import { BookmarkIcon, CheckIcon, ChevronRightIcon, CloseIcon } from '../ui/icon
 import { ProgressRing } from '../ui/ProgressRing';
 import { useBodyClass } from '../ui/useBodyClass';
 
+/** Keyed by lesson, so moving to the next lesson starts it fresh. */
 export function LessonPage() {
   const key = useParams()['*'] ?? '';
+  return <Lesson key={key} lessonKey={key} />;
+}
+
+function Lesson({ lessonKey: key }: { lessonKey: string }) {
   const entry = entryFor(key);
   const content = entry?.content;
   const navigate = useNavigate();
@@ -151,20 +156,26 @@ export function LessonPage() {
               <ChevronRightIcon size={16} className="chev" />
             </Link>
           )}
-          {following && (
-            <Link to={lessonPath(following.key)} className="list-row" onClick={() => setFinished(false)}>
-              <span className="grow">
-                <span className="row-title">Next lesson</span>
-                <span className="row-sub">{following.title}</span>
-              </span>
-              <ChevronRightIcon size={16} className="chev" />
-            </Link>
-          )}
         </div>
         <BottomBar>
-          <Link to="/learn" className="btn btn-primary btn-lg btn-block swap-in">
-            Back to Learn
-          </Link>
+          {following && canOpenLesson(following.key, settings.access) ? (
+            <>
+              <Link to={lessonPath(following.key)} className="btn btn-primary btn-lg btn-block swap-in next-lesson-btn">
+                <span className="next-lesson-label">
+                  <span>Next lesson</span>
+                  <span className="next-lesson-title">{following.title}</span>
+                </span>
+                <ChevronRightIcon size={18} />
+              </Link>
+              <Link to="/learn" className="btn btn-plain btn-block">
+                Back to Learn
+              </Link>
+            </>
+          ) : (
+            <Link to="/learn" className="btn btn-primary btn-lg btn-block swap-in">
+              Back to Learn
+            </Link>
+          )}
         </BottomBar>
       </div>
     );

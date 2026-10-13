@@ -7,7 +7,9 @@ import {
   type ChartSpec,
   deckForCharts,
   primaryAction,
+  mixAnswerOptions,
   mixBrushes,
+  scoreMixAnswer,
   mixDistance,
   scoreMixPainting,
   scorePainting,
@@ -105,6 +107,37 @@ describe('mix painting', () => {
     const brushes = mixBrushes(defend, { threeBet: '3bet', call: 'Call' });
     expect(brushes.at(-1)).toEqual({ id: 'threeBet+call', label: '3bet or Call', mix: { threeBet: 0.5, call: 0.5 } });
     expect(brushes).toHaveLength(9);
+  });
+});
+
+describe('mix answers', () => {
+  it('offers frequencies for a one action chart', () => {
+    expect(mixAnswerOptions(chart, { raise: 'Raise', fold: 'Fold' }).map((o) => o.label)).toEqual(['Raise', 'Fold', 'Raise 75%', 'Raise 50%', 'Raise 25%']);
+  });
+
+  it('offers splits only for pairs the chart mixes', () => {
+    const defend = buildChart({
+      ...spec,
+      spot: 'vs-open',
+      actions: [
+        { id: 'threeBet', label: '3bet', range: 'QQ+, AKs:0.5' },
+        { id: 'call', label: 'Call', range: 'JJ, TT, AKs, 99:0.5' },
+      ],
+    });
+    const ids = mixAnswerOptions(defend).map((o) => o.id);
+    // AKs mixes 3bet and call; 99 mixes call and fold; nothing mixes 3bet and fold.
+    expect(ids).toEqual(['threeBet', 'call', 'fold', 'threeBet+call', 'call+fold']);
+  });
+
+  it('grades right, close and wrong by distance', () => {
+    expect(scoreMixAnswer({ raise: 0.6 }, { raise: 0.5 })).toMatchObject({ verdict: 'right', accuracy: 1 });
+    // The main action of a 60/40 hand alone is 0.4 away: close.
+    expect(scoreMixAnswer({ raise: 0.6 }, { raise: 1 })).toMatchObject({ verdict: 'close', accuracy: 0.5 });
+    expect(scoreMixAnswer({ raise: 1 }, { fold: 1 })).toMatchObject({ verdict: 'wrong', accuracy: 0 });
+    // Raising half the time with a hand that always folds is wrong, not close.
+    expect(scoreMixAnswer({ fold: 1 }, { raise: 0.5 })).toMatchObject({ verdict: 'wrong' });
+    // Raising a quarter of the time with a pure fold is a quarter off: close, not right.
+    expect(scoreMixAnswer({ fold: 1 }, { raise: 0.25 })).toMatchObject({ verdict: 'close' });
   });
 });
 

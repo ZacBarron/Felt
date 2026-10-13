@@ -84,6 +84,7 @@ When a newcomer might not know a poker abbreviation, spell it out the first time
 
 - Praise what the player did, not the player. "Right. That hand folds 90% of the time."
 - Mistakes are information. "Not quite" with the reason, never "Wrong!".
+- Hand verdicts: "Correct" when your mix is within 20% of the chart, "Close" within 40% (about one step), "Not quite" otherwise. Single action answers still say "Part of the mix" when mixes are off.
 - No guilt, no countdowns, no fake urgency, no "Don't break your streak!".
 - Reminders say what is waiting. "Your review is ready." Not "We miss you."
 

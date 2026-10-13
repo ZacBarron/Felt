@@ -1,9 +1,9 @@
 import { type DrillOutcome, mathFact } from '@felt/core';
 import type { LessonStep } from '@felt/content';
 import { useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
 import { StepView } from '../lesson/StepView';
-import { entryFor, lessonPath } from '../state/lessons';
+import { LessonSheet } from '../lesson/LessonSheet';
+import { entryFor } from '../state/lessons';
 import { untimedMs, useSettings } from '../state/settings';
 import { BottomBar } from '../ui/BottomBar';
 import { LearnIcon, StatsIcon } from '../ui/icons';
@@ -17,7 +17,15 @@ interface Props {
 const fmt = (v: number, unit: '%' | 'combos') => (unit === '%' ? `${v}%` : String(v));
 
 /** One graded question with a source line on top. Shared by lesson questions and math facts. */
-function Question({ step, source, targetMs, onAnswer, onNext }: Props & { step: Extract<LessonStep, { kind: 'quiz' }>; source: React.ReactNode }) {
+function Question({
+  step,
+  source,
+  lessonKey,
+  targetMs,
+  onAnswer,
+  onNext,
+}: Props & { step: Extract<LessonStep, { kind: 'quiz' }>; source: React.ReactNode; lessonKey?: string }) {
+  const [reading, setReading] = useState(false);
   const started = useRef(performance.now());
   const untimed = !!useSettings().settings.study.untimed;
   const [done, setDone] = useState(false);
@@ -31,6 +39,13 @@ function Question({ step, source, targetMs, onAnswer, onNext }: Props & { step: 
           onAnswer({ accuracy: choice === step.answer ? 1 : 0, responseMs: untimed ? untimedMs(targetMs) : performance.now() - started.current, targetMs });
         }}
       />
+      {/* The lesson opens over the session after an answer, so it never gives the answer away or ends the session. */}
+      {done && lessonKey && (
+        <button className="btn btn-plain btn-block" onClick={() => setReading(true)}>
+          Read the lesson again
+        </button>
+      )}
+      {reading && lessonKey && <LessonSheet lessonKey={lessonKey} onClose={() => setReading(false)} />}
       <BottomBar>
         <button className="btn btn-primary btn-lg btn-block" disabled={!done} onClick={onNext} autoFocus={done}>
           {done ? 'Next card' : 'Choose an answer'}
@@ -59,13 +74,11 @@ export function LessonQuestionCard({ lessonKey, step: index, ...props }: Props &
     <Question
       {...props}
       step={step}
+      lessonKey={lessonKey}
       source={
         <>
           <LearnIcon size={16} />
           <span className="footnote grow">{entry.title}</span>
-          <Link to={lessonPath(lessonKey)} className="footnote" style={{ color: 'var(--tint)' }}>
-            Open lesson
-          </Link>
         </>
       }
     />

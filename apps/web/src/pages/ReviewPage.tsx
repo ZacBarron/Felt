@@ -27,6 +27,36 @@ function CountUp({ value }: { value: number }) {
 
 const EXTRA_BATCH = 20;
 
+/** A session in progress, kept for this tab so leaving and coming back resumes it. */
+interface SavedSession {
+  config: SessionConfig;
+  queue: QueueItem[];
+  index: number;
+  results: { accuracy: number; ms: number }[];
+  phase: 'due' | 'extra';
+  answered: string[];
+}
+
+const SESSION_KEY = 'felt.reviewSession';
+
+function readSession(): SavedSession | undefined {
+  try {
+    const raw = sessionStorage.getItem(SESSION_KEY);
+    return raw ? (JSON.parse(raw) as SavedSession) : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+function writeSession(s: SavedSession | undefined) {
+  try {
+    if (s) sessionStorage.setItem(SESSION_KEY, JSON.stringify(s));
+    else sessionStorage.removeItem(SESSION_KEY);
+  } catch {
+    /* Storage blocked: the session simply does not resume. */
+  }
+}
+
 /**
  * Review: an overview first, like Anki's deck list, then a session. The
  * overview shows what is due in each deck and lets you pick what to study.
@@ -37,20 +67,46 @@ export function ReviewPage() {
   const initial: SessionConfig | null =
     params.get('deck') === 'saved' ? { kind: 'today', decks: ['saved'] } : params.get('go') ? { kind: 'today' } : null;
   const [session, setSession] = useState<SessionConfig | null>(initial);
+  const [resume, setResume] = useState<SavedSession>();
   const [run, setRun] = useState(0);
-  if (!session) return <ReviewHome onStart={(c) => { setSession(c); setRun((r) => r + 1); }} />;
-  return <ReviewSession key={run} config={session} onHome={() => setSession(null)} />;
+  const saved = readSession();
+  if (!session)
+    return (
+      <ReviewHome
+        resumable={saved}
+        onResume={() => {
+          if (!saved) return;
+          setResume(saved);
+          setSession(saved.config);
+          setRun((r) => r + 1);
+        }}
+        onStart={(c) => {
+          writeSession(undefined);
+          setResume(undefined);
+          setSession(c);
+          setRun((r) => r + 1);
+        }}
+      />
+    );
+  return <ReviewSession key={run} config={session} resume={resume} onHome={() => setSession(null)} />;
 }
 
-function ReviewSession({ config, onHome }: { config: SessionConfig; onHome: () => void }) {
+function ReviewSession({ config, resume, onHome }: { config: SessionConfig; resume?: SavedSession; onHome: () => void }) {
   const { settings } = useSettings();
-  const [queue, setQueue] = useState<QueueItem[]>();
-  const [index, setIndex] = useState(0);
-  const [results, setResults] = useState<{ accuracy: number; ms: number }[]>([]);
+  const [queue, setQueue] = useState<QueueItem[] | undefined>(resume?.queue);
+  const [index, setIndex] = useState(resume?.index ?? 0);
+  const [results, setResults] = useState<{ accuracy: number; ms: number }[]>(resume?.results ?? []);
   // The chosen cards first; then a pause to celebrate; then extra practice that never runs out.
-  const [phase, setPhase] = useState<'due' | 'cleared' | 'extra'>(config.kind === 'extra' ? 'extra' : 'due');
+  const [phase, setPhase] = useState<'due' | 'cleared' | 'extra'>(resume?.phase ?? (config.kind === 'extra' ? 'extra' : 'due'));
   const [nothingDue, setNothingDue] = useState(false);
-  const answered = useRef(new Set<string>());
+  const answered = useRef(new Set<string>(resume?.answered ?? []));
+
+  // Keep the session so leaving the screen never loses your place. A finished session is forgotten.
+  useEffect(() => {
+    if (!queue) return;
+    if (phase === 'cleared' || index >= queue.length) return writeSession(undefined);
+    writeSession({ config, queue, index, results, phase, answered: [...answered.current] });
+  }, [config, queue, index, results, phase]);
   const [exhausted, setExhausted] = useState(false);
   const loadingMore = useRef(false);
   // A new key per attempt so a card shown twice in one session starts fresh.
@@ -77,6 +133,7 @@ function ReviewSession({ config, onHome }: { config: SessionConfig; onHome: () =
   }, [settings.game]);
 
   useEffect(() => {
+    if (resume) return;
     void (async () => {
       const first = await buildSession(charts, settings.study, { ...config, limit: config.kind === 'extra' ? EXTRA_BATCH : limit });
       if (first.length > 0 || config.kind !== 'today') {
@@ -177,7 +234,7 @@ const LIMITS = [
 ];
 
 /** The review overview: decks with their counts, session options and custom study. */
-function ReviewHome({ onStart }: { onStart: (c: SessionConfig) => void }) {
+function ReviewHome({ onStart, onResume, resumable }: { onStart: (c: SessionConfig) => void; onResume: () => void; resumable?: SavedSession }) {
   const { settings, update } = useSettings();
   const { charts } = chartsForGame(settings.game);
   const study = settings.study;
@@ -203,6 +260,21 @@ function ReviewHome({ onStart }: { onStart: (c: SessionConfig) => void }) {
   return (
     <div className="stack" style={{ gap: '1.4rem' }}>
       <PageHeader title="Review" subtitle={counts ? (total ? `${plural(total, 'card')} today, about ${minutes} min` : 'All caught up for today') : ' '} />
+
+      {resumable && (
+        <button className="card resume-card" onClick={onResume}>
+          <span className="grow">
+            <span className="resume-title">Continue your session</span>
+            <span className="footnote num">
+              Card {resumable.index + 1} of {resumable.queue.length}
+            </span>
+          </span>
+          <span className="resume-ring" aria-hidden="true">
+            <ProgressRing value={resumable.index / Math.max(1, resumable.queue.length)} size={40} stroke={5} />
+          </span>
+          <ChevronRightIcon size={16} className="chev" />
+        </button>
+      )}
 
       <section>
         <div className="list review-decks">

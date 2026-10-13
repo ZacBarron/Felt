@@ -1,4 +1,4 @@
-import { type Chart, type DrillOutcome, handClassCombos, scoreRecall } from '@felt/core';
+import { type Chart, type DrillOutcome, handClassCombos, type HandMix, mixAnswerOptions, scoreMixAnswer, scoreRecall } from '@felt/core';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { actionColor } from '../components/actionColors';
 import { MixBar } from '../components/MixBar';
@@ -27,6 +27,7 @@ const FLIP_MS = 560 + 90;
 const VERDICTS = {
   right: { text: 'Correct', color: 'var(--green-text)', Icon: CheckIcon, haptic: 'success' as const },
   mix: { text: 'Part of the mix', color: 'var(--orange-text)', Icon: MinusIcon, haptic: 'warning' as const },
+  close: { text: 'Close', color: 'var(--orange-text)', Icon: MinusIcon, haptic: 'warning' as const },
   wrong: { text: 'Not quite', color: 'var(--red-text)', Icon: CloseIcon, haptic: 'error' as const },
 };
 
@@ -37,7 +38,9 @@ export function QuickRecall({ chart, hand, targetMs, onAnswer, onNext, compact }
   const shortcuts = settings.study.shortcuts !== false;
   const started = useRef(performance.now() + FLIP_MS);
   const revealRef = useRef<HTMLDivElement>(null);
-  const [answer, setAnswer] = useState<{ choice: string; outcome: DrillOutcome }>();
+  const [answer, setAnswer] = useState<{ choice: string; label: string; outcome: DrillOutcome; kind: keyof typeof VERDICTS }>();
+  // Mixed answers are on unless turned off, the same switch as painting mixes.
+  const mixes = settings.study.paintMixes !== false;
   const combo = useMemo(() => {
     const combos = handClassCombos(hand);
     return combos[Math.floor(Math.random() * combos.length)];
@@ -45,18 +48,29 @@ export function QuickRecall({ chart, hand, targetMs, onAnswer, onNext, compact }
   const labels = actionLabels(chart);
   const mix = chart.mixes.get(hand) ?? { fold: 1 };
   const choices = [...chart.spec.actions.map((a) => a.id), 'fold'];
+  const short = useMemo(() => Object.fromEntries(Object.entries(labels).map(([id, l]) => [id, l.replace(/\s+[\d.]+bb$/, '')])), [labels]);
+  const mixedOptions = useMemo(() => (mixes ? mixAnswerOptions(chart, short).filter((o) => !o.pure) : []), [chart, mixes, short]);
 
   const choose = useCallback(
-    (choice: string) => {
+    (choice: string, answerMix?: HandMix, label?: string) => {
       if (answer) return;
       const responseMs = Math.max(0, performance.now() - started.current);
-      const outcome = { accuracy: scoreRecall(mix, choice), responseMs: untimed ? untimedMs(targetMs) : responseMs, targetMs };
-      const kind = outcome.accuracy === 1 ? 'right' : outcome.accuracy > 0 ? 'mix' : 'wrong';
+      let accuracy: number;
+      let kind: keyof typeof VERDICTS;
+      if (mixes) {
+        const scored = scoreMixAnswer(mix, answerMix ?? { [choice]: 1 });
+        accuracy = scored.accuracy;
+        kind = scored.verdict;
+      } else {
+        accuracy = scoreRecall(mix, choice);
+        kind = accuracy === 1 ? 'right' : accuracy > 0 ? 'mix' : 'wrong';
+      }
+      const outcome = { accuracy, responseMs: untimed ? untimedMs(targetMs) : responseMs, targetMs };
       haptic(VERDICTS[kind].haptic);
-      setAnswer({ choice, outcome });
+      setAnswer({ choice, label: label ?? labels[choice], outcome, kind });
       onAnswer(outcome);
     },
-    [answer, mix, targetMs, onAnswer, untimed],
+    [answer, mix, targetMs, onAnswer, untimed, mixes, labels],
   );
 
   // Keyboard on laptops: 1, 2, 3 pick an action; Enter or Space moves on.
@@ -83,7 +97,7 @@ export function QuickRecall({ chart, hand, targetMs, onAnswer, onNext, compact }
       revealRef.current?.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'nearest' });
   }, [answer]);
 
-  const kind = answer ? (answer.outcome.accuracy === 1 ? 'right' : answer.outcome.accuracy > 0 ? 'mix' : 'wrong') : undefined;
+  const kind = answer?.kind;
   const verdict = kind ? VERDICTS[kind] : undefined;
   const fast = answer && answer.outcome.responseMs <= targetMs;
 
@@ -143,7 +157,7 @@ export function QuickRecall({ chart, hand, targetMs, onAnswer, onNext, compact }
           <div className="row between">
             <strong style={{ fontSize: '1.1rem' }}>{hand}</strong>
             <span className="footnote">
-              You chose {labels[answer.choice]}
+              You chose {answer.label}
             </span>
           </div>
           <MixBar mix={mix} labels={labels} />
@@ -153,6 +167,17 @@ export function QuickRecall({ chart, hand, targetMs, onAnswer, onNext, compact }
 
       <BottomBar>
         {!answer ? (
+          <div className="stack" style={{ gap: 8 }}>
+          {mixedOptions.length > 0 && (
+            <div className="mix-answers" role="group" aria-label="Mixed answers">
+              {mixedOptions.map((o) => (
+                <button key={o.id} className="mix-answer" data-haptic="off" onClick={() => choose(o.id, o.mix, o.label)}>
+                  <MixDots mix={o.mix} />
+                  {o.label}
+                </button>
+              ))}
+            </div>
+          )}
           <div style={{ display: 'grid', gridTemplateColumns: `repeat(${choices.length}, minmax(0, 1fr))`, gap: 8 }}>
             {choices.map((c, i) => (
               <button
@@ -168,6 +193,7 @@ export function QuickRecall({ chart, hand, targetMs, onAnswer, onNext, compact }
               </button>
             ))}
           </div>
+          </div>
         ) : (
           <button className="btn btn-primary btn-lg btn-block swap-in" onClick={onNext} autoFocus aria-keyshortcuts="Enter">
             Next hand
@@ -175,5 +201,19 @@ export function QuickRecall({ chart, hand, targetMs, onAnswer, onNext, compact }
         )}
       </BottomBar>
     </div>
+  );
+}
+
+/** A small bar showing the split a mixed answer stands for. */
+function MixDots({ mix }: { mix: HandMix }) {
+  const parts = Object.entries(mix).filter(([a]) => a !== 'fold');
+  const fold = 1 - parts.reduce((t, [, f]) => t + f, 0);
+  return (
+    <span className="mix-answer-bar" aria-hidden="true">
+      {parts.map(([a, f]) => (
+        <span key={a} style={{ width: `${f * 100}%`, background: actionColor(a) }} />
+      ))}
+      {fold > 1e-9 && <span style={{ width: `${fold * 100}%`, background: actionColor('fold'), opacity: 0.35 }} />}
+    </span>
   );
 }

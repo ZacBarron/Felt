@@ -27,7 +27,9 @@ const frame = `
     overflow: hidden;
     background: var(--bg);
   }
-  #root { height: 100%; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
+  /* Phones show no scrollbar while you scroll, so the frame hides the desktop one. */
+  #root { height: 100%; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+  #root::-webkit-scrollbar { display: none; }
   @media (min-width: 520px) and (min-height: 640px) {
     body { display: grid; place-items: center; }
     #phone {

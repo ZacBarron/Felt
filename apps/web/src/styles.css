@@ -4953,3 +4953,105 @@ a.card.more-me,
   line-height: 1.2;
   margin: 0.2rem 0 0.1rem;
 }
+
+/* Mixed answers above the pure action buttons in a hand quiz. */
+.mix-answers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.mix-answer {
+  flex: 1 1 0;
+  min-width: 0;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-height: 48px;
+  padding: 0.35rem 0.4rem;
+  border: none;
+  border-radius: 14px;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 650;
+  color: var(--label);
+  background: var(--surface);
+  box-shadow: inset 0 0 0 1px var(--separator);
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.mix-answer:active {
+  transform: scale(0.96);
+}
+
+.mix-answer-bar {
+  display: flex;
+  width: 70%;
+  height: 5px;
+  border-radius: 999px;
+  overflow: hidden;
+  gap: 1px;
+}
+
+.mix-answer-bar > span {
+  display: block;
+  height: 100%;
+}
+
+/* Next lesson: the main action at the end of a lesson, naming what comes next. */
+.next-lesson-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  text-align: left;
+  padding-left: 1.3rem;
+  padding-right: 1.1rem;
+}
+
+.next-lesson-label {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  line-height: 1.15;
+}
+
+.next-lesson-title {
+  font-size: 0.8rem;
+  font-weight: 500;
+  opacity: 0.8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Resume a review session left part way. */
+.resume-card {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  width: 100%;
+  border: none;
+  text-align: left;
+  font: inherit;
+  color: var(--label);
+  cursor: pointer;
+  box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--tint) 45%, transparent);
+}
+
+.resume-title {
+  display: block;
+  font-weight: 650;
+}
+
+/* Sheets scroll like iOS sheets: no desktop scrollbar. */
+.sheet {
+  scrollbar-width: none;
+}
+
+.sheet::-webkit-scrollbar {
+  display: none;
+}

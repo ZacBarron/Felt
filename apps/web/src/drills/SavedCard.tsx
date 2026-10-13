@@ -1,14 +1,14 @@
 import { type DrillOutcome, type HandMix, parseCards, scoreRecall } from '@felt/core';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
 import { actionColor } from '../components/actionColors';
 import { MixBar } from '../components/MixBar';
 import { PlayingCard } from '../components/PlayingCard';
 import { haptic } from '../haptics';
 import { StepView } from '../lesson/StepView';
 import { db, type SavedItem, type SavedSolverSpot } from '../state/db';
-import { entryFor, lessonPath } from '../state/lessons';
+import { LessonSheet } from '../lesson/LessonSheet';
+import { entryFor } from '../state/lessons';
 import { BottomBar } from '../ui/BottomBar';
 import { BookmarkIcon } from '../ui/icons';
 import { untimedMs, useSettings } from '../state/settings';
@@ -28,16 +28,19 @@ const GRADES = [
   { label: 'Easy', accuracy: 1, speed: 0.5, color: 'var(--green)' },
 ] as const;
 
-function Header({ item }: { item: SavedItem }) {
+/** Source line. Once the answer shows, the lesson can be read in a sheet without leaving the session. */
+function Header({ item, revealed = false }: { item: SavedItem; revealed?: boolean }) {
+  const [reading, setReading] = useState(false);
   return (
     <div className="saved-head">
       <BookmarkIcon size={16} filled />
       <span className="footnote grow">{item.source}</span>
-      {item.lessonKey && (
-        <Link to={`${lessonPath(item.lessonKey)}?step=${item.step}`} className="footnote" style={{ color: 'var(--tint)' }}>
-          Open lesson
-        </Link>
+      {item.lessonKey && revealed && (
+        <button className="link-btn footnote" onClick={() => setReading(true)}>
+          Read the lesson
+        </button>
       )}
+      {reading && item.lessonKey && <LessonSheet lessonKey={item.lessonKey} focusStep={item.step} onClose={() => setReading(false)} />}
     </div>
   );
 }
@@ -51,7 +54,7 @@ function SavedQuiz({ item, targetMs, onAnswer, onNext }: Props & { item: SavedIt
   if (step.kind !== 'quiz') return null;
   return (
     <div className="stack">
-      <Header item={item} />
+      <Header item={item} revealed={done} />
       <StepView
         step={step}
         onAnswer={(choice) => {
@@ -76,7 +79,7 @@ function SavedFlashcard({ item, targetMs, onAnswer, onNext }: Props & { item: Sa
   const [graded, setGraded] = useState(false);
   return (
     <div className="stack">
-      <Header item={item} />
+      <Header item={item} revealed={shown} />
       {!shown ? (
         <div className="card stack saved-prompt">
           <div className="footnote">What do you remember about</div>

@@ -187,6 +187,61 @@ export function mixBrushes(chart: Chart, labels: Record<string, string> = {}): M
   return out;
 }
 
+/** One answer to "what do you do with this hand?": a pure action or a mix. */
+export interface MixAnswer {
+  id: string;
+  label: string;
+  mix: HandMix;
+  pure: boolean;
+}
+
+/**
+ * Answers for a hand quiz. Every pure action plus fold, then mixes: for a
+ * chart with one action, that action at 75, 50 and 25 percent; for charts
+ * with more, an even split for each pair of actions (fold included) that
+ * some hand in the chart really mixes.
+ */
+export function mixAnswerOptions(chart: Chart, labels: Record<string, string> = {}): MixAnswer[] {
+  const name = (a: string) => labels[a] ?? a;
+  const actions = chart.spec.actions.map((a) => a.id).filter((a) => a !== 'fold');
+  const pure: MixAnswer[] = [...actions, 'fold'].map((a) => ({ id: a, label: name(a), mix: { [a]: 1 }, pure: true }));
+  const mixed: MixAnswer[] = [];
+  if (actions.length === 1) {
+    const a = actions[0];
+    for (const f of [0.75, 0.5, 0.25]) mixed.push({ id: `${a}:${f}`, label: `${name(a)} ${f * 100}%`, mix: { [a]: f }, pure: false });
+  } else {
+    const all = [...actions, 'fold'];
+    for (let i = 0; i < all.length; i++) {
+      for (let j = i + 1; j < all.length; j++) {
+        const [a, b] = [all[i], all[j]];
+        const freq = (m: HandMix, x: string) => (x === 'fold' ? 1 - actions.reduce((t, y) => t + (m[y] ?? 0), 0) : (m[x] ?? 0));
+        const used = [...chart.mixes.values()].some((m) => freq(m, a) >= 0.2 && freq(m, b) >= 0.2);
+        if (!used) continue;
+        const mix: HandMix = b === 'fold' ? { [a]: 0.5 } : { [a]: 0.5, [b]: 0.5 };
+        mixed.push({ id: `${a}+${b}`, label: `${name(a)} or ${name(b).toLowerCase()}`, mix, pure: false });
+      }
+    }
+  }
+  return [...pure, ...mixed];
+}
+
+export type MixVerdict = 'right' | 'close' | 'wrong';
+
+export const CLOSE_TOLERANCE = 0.4;
+
+/**
+ * Scores a mix answer by how much of the play differs from the chart.
+ * Within MIX_TOLERANCE is right. Within CLOSE_TOLERANCE (about one 25% step
+ * further) is close and earns half credit, so picking the main action of a
+ * 60/40 hand still counts for something.
+ */
+export function scoreMixAnswer(chartMix: HandMix, answer: HandMix): { accuracy: number; verdict: MixVerdict; distance: number } {
+  const distance = mixDistance(chartMix, answer);
+  if (distance <= MIX_TOLERANCE + 1e-9) return { accuracy: 1, verdict: 'right', distance };
+  if (distance <= CLOSE_TOLERANCE + 1e-9) return { accuracy: 0.5, verdict: 'close', distance };
+  return { accuracy: 0, verdict: 'wrong', distance };
+}
+
 export interface CardSeed {
   id: string;
   kind: 'range-recall';
