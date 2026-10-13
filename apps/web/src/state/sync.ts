@@ -3,6 +3,7 @@ import { Dexie } from 'dexie';
 import { useSyncExternalStore } from 'react';
 import { api, ApiError, currentSession, refreshMe, updateMe } from './api';
 import { exportBackup, importBackup } from './backup';
+import { claudeCloud, cloudGet, CloudConflict, cloudMeta, cloudPut } from './cloud';
 import { setCalibration, calibratedDifficulty } from './calibration';
 import { db } from './db';
 import { activityDates } from './rating';
@@ -68,6 +69,9 @@ export function resetSync() {
   write({ version: undefined, syncedAt: undefined, dirty: false, conflict: undefined, answersSent: undefined, error: undefined });
 }
 
+/** A cloud to sync with: the Felt server account, or the claude.ai artifact store. */
+export const cloudReady = () => !!currentSession() || !!claudeCloud();
+
 // Change tracking --------------------------------------------------------------
 
 let pushTimer: ReturnType<typeof setTimeout> | undefined;
@@ -77,7 +81,7 @@ let applying = false;
 export function markDirty() {
   if (applying) return;
   if (!meta.dirty) write({ dirty: true });
-  if (!currentSession()) return;
+  if (!cloudReady()) return;
   clearTimeout(pushTimer);
   pushTimer = setTimeout(() => void pushNow().catch(() => undefined), 20_000);
 }
@@ -93,7 +97,7 @@ export function startSync() {
     if (Object.keys(parts).some((k) => !k.includes('/events/'))) markDirty();
   });
   document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'hidden' && meta.dirty && currentSession()) void pushNow().catch(() => undefined);
+    if (document.visibilityState === 'hidden' && meta.dirty && cloudReady()) void pushNow().catch(() => undefined);
   });
 }
 
@@ -120,12 +124,33 @@ async function hasLocalProgress() {
   return answers + lessons + reviews > 0;
 }
 
+// The Felt server account wins when both exist: it also carries leagues and Pro.
+const remoteMeta = (timeoutMs?: number): Promise<CloudMeta> => {
+  const c = claudeCloud();
+  if (!currentSession() && c) return cloudMeta(c);
+  return api<CloudMeta>('/sync?meta=1', timeoutMs ? { timeoutMs } : {});
+};
+
+const remoteGet = (): Promise<CloudMeta & { data?: string }> => {
+  const c = claudeCloud();
+  if (!currentSession() && c) return cloudGet(c);
+  return api<CloudMeta & { data?: string }>('/sync', { timeoutMs: 60_000 });
+};
+
 async function upload(baseVersion: number) {
   const data = await exportBackup();
   try {
-    const r = await api<{ version: number; updatedAt: string }>('/sync', { method: 'PUT', body: { baseVersion, data, device: deviceName() }, timeoutMs: 60_000 });
+    const c = claudeCloud();
+    const r =
+      !currentSession() && c
+        ? await cloudPut(c, baseVersion, data, deviceName())
+        : await api<{ version: number; updatedAt: string }>('/sync', { method: 'PUT', body: { baseVersion, data, device: deviceName() }, timeoutMs: 60_000 });
     write({ version: r.version, syncedAt: r.updatedAt, dirty: false, conflict: undefined, error: undefined });
   } catch (e) {
+    if (e instanceof CloudConflict) {
+      write({ conflict: e.cloud, error: undefined });
+      return;
+    }
     if (e instanceof ApiError && e.status === 409) {
       const cloud = await api<CloudMeta>('/sync?meta=1');
       write({ conflict: cloud, error: undefined });
@@ -137,7 +162,7 @@ async function upload(baseVersion: number) {
 }
 
 async function download(): Promise<boolean> {
-  const cloud = await api<CloudMeta & { data?: string }>('/sync', { timeoutMs: 60_000 });
+  const cloud = await remoteGet();
   if (!cloud.data) return false;
   applying = true;
   try {
@@ -151,7 +176,7 @@ async function download(): Promise<boolean> {
 
 /** Sends this device's data now. */
 export async function pushNow() {
-  if (!currentSession()) return;
+  if (!cloudReady()) return;
   if (meta.conflict) return;
   if (meta.version === undefined) return firstSync();
   await upload(meta.version);
@@ -164,7 +189,7 @@ export async function pushNow() {
  * chooses.
  */
 export async function firstSync(): Promise<'pushed' | 'pulled' | 'choose'> {
-  const cloud = await api<CloudMeta>('/sync?meta=1');
+  const cloud = await remoteMeta();
   if (cloud.version === 0) {
     await upload(0);
     await afterSync();
@@ -183,8 +208,8 @@ export async function firstSync(): Promise<'pushed' | 'pulled' | 'choose'> {
  * this device has no unsynced changes. Returns true if data was replaced.
  */
 export async function pullIfNewer(): Promise<boolean> {
-  if (!currentSession() || meta.version === undefined || meta.conflict) return false;
-  const cloud = await api<CloudMeta>('/sync?meta=1', { timeoutMs: 3000 });
+  if (!cloudReady() || meta.version === undefined || meta.conflict) return false;
+  const cloud = await remoteMeta(3000);
   if (cloud.version <= meta.version) return false;
   if (meta.dirty) {
     write({ conflict: cloud });

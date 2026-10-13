@@ -4,6 +4,7 @@ import { Link, Navigate, useNavigate, useParams } from 'react-router-dom';
 import { haptic, hapticsSupported } from '../haptics';
 import { isPro, restorePurchases } from '../state/access';
 import { db } from '../state/db';
+import { useClaudeCloud } from '../state/cloud';
 import { useSession } from '../state/api';
 import { exportBackup, importBackup, requestPersistentStorage } from '../state/backup';
 import { exportEvents } from '../state/events';
@@ -109,6 +110,7 @@ function usePersisted() {
 function SettingsHome() {
   const { settings, update } = useSettings();
   const session = useSession();
+  const { cloud } = useClaudeCloud();
   const taps = useRef(0);
   const access = settings.access;
   const devVisible = access.devMode || import.meta.env.DEV;
@@ -123,8 +125,8 @@ function SettingsHome() {
           to="/account"
           icon={AccountIcon}
           color="var(--base-500)"
-          title={<span className="settings-account">{session ? session.user.email : 'Account'}</span>}
-          subtitle={session ? 'Sync and leagues' : 'Sign in to keep your progress'}
+          title={<span className="settings-account">{session ? session.user.email : cloud ? cloud.name || 'Signed in' : 'Account'}</span>}
+          subtitle={session ? 'Sync and leagues' : cloud ? 'Signed in with Claude. Progress saves to the cloud.' : 'Sign in to keep your progress'}
         />
       </div>
 

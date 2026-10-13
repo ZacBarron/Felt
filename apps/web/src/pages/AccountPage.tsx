@@ -7,6 +7,7 @@ import { track } from '../state/events';
 import { cueCopy } from '../state/goals';
 import { disableReminders, enableReminders, pushBlocker } from '../state/push';
 import { useSettings } from '../state/settings';
+import { useClaudeCloud } from '../state/cloud';
 import { firstSync, keepCopy, pushNow, resetSync, useSyncMeta } from '../state/sync';
 import { BottomBar } from '../ui/BottomBar';
 import { BrandMark } from '../ui/Brand';
@@ -36,6 +37,7 @@ const fromTime = (t: string) => {
 export function AccountPage() {
   const [features, setFeatures] = useState<ServerFeatures | null>();
   const session = useSession();
+  const { cloud } = useClaudeCloud();
 
   useEffect(() => {
     void serverFeatures().then(setFeatures);
@@ -44,7 +46,9 @@ export function AccountPage() {
   return (
     <div className="stack" style={{ gap: '1.6rem' }}>
       <PageHeader title="Account" back={{ to: '/settings', label: 'Settings' }} />
-      {features === undefined ? null : features === null || !features.accounts ? (
+      {!session && cloud ? (
+        <ClaudeAccount name={cloud.name} />
+      ) : features === undefined ? null : features === null || !features.accounts ? (
         <EmptyState
           art={
             <span className="sc-art-tile">
@@ -183,7 +187,6 @@ function SignIn() {
 
 function SignedIn({ user, features }: { user: ServerUser; features: ServerFeatures }) {
   const { settings } = useSettings();
-  const sync = useSyncMeta();
   const navigate = useNavigate();
   const [message, setMessage] = useState<string>();
   const [busy, setBusy] = useState(false);
@@ -232,50 +235,7 @@ function SignedIn({ user, features }: { user: ServerUser; features: ServerFeatur
         </div>
       </Section>
 
-      <Section
-        title="Sync"
-        info={<p>Felt syncs on its own a few seconds after you study and when you leave the app.</p>}
-        footer={message || sync.error ? <span role="status">{message ?? sync.error}</span> : undefined}
-      >
-        {sync.conflict ? (
-          <div className="card stack" style={{ gap: '0.75rem' }}>
-            <strong>Choose which progress to keep</strong>
-            <p className="footnote" style={{ margin: 0 }}>
-              This device and your account have different progress. Felt cannot combine them. Pick one to keep. The other will be replaced.
-            </p>
-            <button
-              className="btn btn-tinted btn-block"
-              disabled={busy}
-              onClick={() => void run(() => keepCopy('device'), 'Done. Your account now matches this device.')}
-            >
-              Keep this device's progress
-            </button>
-            <button className="btn btn-tinted btn-block" disabled={busy} onClick={() => void run(() => keepCopy('cloud'))}>
-              Use my account's progress
-            </button>
-            {(sync.conflict.device || sync.conflict.updatedAt) && (
-              <span className="footnote">
-                Your account was last saved{sync.conflict.device ? ` on ${sync.conflict.device}` : ''}
-                {sync.conflict.updatedAt ? ` ${ago(sync.conflict.updatedAt)}` : ''}.
-              </span>
-            )}
-          </div>
-        ) : (
-          <div className="list">
-            <div className="list-row">
-              <span className="grow">
-                <span style={{ display: 'block' }}>{sync.dirty ? 'Changes waiting to sync' : 'Up to date'}</span>
-                <span className="footnote">Last synced {ago(sync.syncedAt)}</span>
-              </span>
-            </div>
-            <button className="list-row" disabled={busy} onClick={() => void run(pushNow, 'Synced.')}>
-              <span className="grow" style={{ color: 'var(--tint)' }}>
-                Sync now
-              </span>
-            </button>
-          </div>
-        )}
-      </Section>
+      <SyncSection busy={busy} run={run} message={message} />
 
       {features.push && (
         <Section
@@ -444,6 +404,92 @@ function SignedIn({ user, features }: { user: ServerUser; features: ServerFeatur
           )}
         </div>
       </Section>
+    </>
+  );
+}
+
+/** Sync status, the conflict choice and a sync now button, for either kind of account. */
+function SyncSection({ busy, run, message }: { busy: boolean; run: (fn: () => Promise<unknown>, done?: string) => Promise<void>; message?: string }) {
+  const sync = useSyncMeta();
+  return (
+  <Section
+    title="Sync"
+    info={<p>Felt syncs on its own a few seconds after you study and when you leave the app.</p>}
+    footer={message || sync.error ? <span role="status">{message ?? sync.error}</span> : undefined}
+  >
+    {sync.conflict ? (
+      <div className="card stack" style={{ gap: '0.75rem' }}>
+        <strong>Choose which progress to keep</strong>
+        <p className="footnote" style={{ margin: 0 }}>
+          This device and your account have different progress. Felt cannot combine them. Pick one to keep. The other will be replaced.
+        </p>
+        <button
+          className="btn btn-tinted btn-block"
+          disabled={busy}
+          onClick={() => void run(() => keepCopy('device'), 'Done. Your account now matches this device.')}
+        >
+          Keep this device's progress
+        </button>
+        <button className="btn btn-tinted btn-block" disabled={busy} onClick={() => void run(() => keepCopy('cloud'))}>
+          Use my account's progress
+        </button>
+        {(sync.conflict.device || sync.conflict.updatedAt) && (
+          <span className="footnote">
+            Your account was last saved{sync.conflict.device ? ` on ${sync.conflict.device}` : ''}
+            {sync.conflict.updatedAt ? ` ${ago(sync.conflict.updatedAt)}` : ''}.
+          </span>
+        )}
+      </div>
+    ) : (
+      <div className="list">
+        <div className="list-row">
+          <span className="grow">
+            <span style={{ display: 'block' }}>{sync.dirty ? 'Changes waiting to sync' : 'Up to date'}</span>
+            <span className="footnote">Last synced {ago(sync.syncedAt)}</span>
+          </span>
+        </div>
+        <button className="list-row" disabled={busy} onClick={() => void run(pushNow, 'Synced.')}>
+          <span className="grow" style={{ color: 'var(--tint)' }}>
+            Sync now
+          </span>
+        </button>
+      </div>
+    )}
+  </Section>
+  );
+}
+
+/** Signed in through claude.ai on a hosted page: progress saves privately to the cloud. */
+function ClaudeAccount({ name }: { name: string }) {
+  const [busy, setBusy] = useState(false);
+  const [message, setMessage] = useState<string>();
+  const run = async (fn: () => Promise<unknown>, done?: string) => {
+    setBusy(true);
+    setMessage(undefined);
+    try {
+      await fn();
+      if (done) setMessage(done);
+    } catch (e) {
+      setMessage(e instanceof Error ? e.message : 'Something went wrong. Try again.');
+    }
+    setBusy(false);
+  };
+  return (
+    <>
+      <Section title="Signed in" info={<p>Your progress saves to a private space that only you can read. Open Felt on any device where you are signed in to Claude and it is there.</p>}>
+        <div className="list">
+          <div className="list-row">
+            <span className="sc-icon-tile" aria-hidden="true">
+              <AccountIcon size={22} />
+            </span>
+            <span className="grow" style={{ minWidth: 0 }}>
+              <span style={{ display: 'block', fontWeight: 600 }}>{name || 'You'}</span>
+              <span className="footnote">Signed in with Claude</span>
+            </span>
+          </div>
+        </div>
+      </Section>
+      <SyncSection busy={busy} run={run} message={message} />
     </>
   );
 }

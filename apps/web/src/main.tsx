@@ -5,7 +5,8 @@ import { App } from './App';
 import { installGlobalHaptics } from './haptics';
 import { currentSession, refreshMe } from './state/api';
 import { SettingsProvider } from './state/settings';
-import { pullIfNewer, pushNow, startSync, syncMeta } from './state/sync';
+import { connectClaudeCloud } from './state/cloud';
+import { firstSync, pullIfNewer, pushNow, startSync, syncMeta } from './state/sync';
 import './styles.css';
 
 installGlobalHaptics();
@@ -19,8 +20,13 @@ const Router = import.meta.env.VITE_ROUTER === 'memory' ? MemoryRouter : Browser
  * than a few seconds; offline, the app starts with what is on this device.
  */
 async function boot() {
+  // On a hosted claude.ai page, the viewer's claude.ai sign in is their Felt account.
+  const claude = connectClaudeCloud();
+  const wait = new Promise((r) => setTimeout(r, 3500));
   if (currentSession()) {
-    await Promise.race([pullIfNewer().catch(() => false), new Promise((r) => setTimeout(r, 3500))]);
+    await Promise.race([pullIfNewer().catch(() => false), wait]);
+  } else {
+    await Promise.race([claude.then((c) => (c && syncMeta().version !== undefined ? pullIfNewer().catch(() => false) : false)), wait]);
   }
   ReactDOM.createRoot(document.getElementById('root')!).render(
     <React.StrictMode>
@@ -36,6 +42,13 @@ async function boot() {
     void refreshMe().catch(() => undefined);
     if (syncMeta().dirty) void pushNow().catch(() => undefined);
   }
+  void claude.then(async (c) => {
+    if (!c || currentSession()) return;
+    if (syncMeta().version === undefined) {
+      // First visit on this device: an empty device takes the cloud copy, an empty cloud takes this one.
+      if ((await firstSync().catch(() => undefined)) === 'pulled') location.reload();
+    } else if (syncMeta().dirty) void pushNow().catch(() => undefined);
+  });
 }
 
 void boot();
