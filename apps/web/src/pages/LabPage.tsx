@@ -25,6 +25,8 @@ import { getChart } from '../state/charts';
 import { useSettings } from '../state/settings';
 import { UndoIcon } from '../ui/icons';
 import { PageHeader } from '../ui/PageHeader';
+import { Section } from '../ui/Section';
+import './screens.css';
 
 // Illustrative node for the demo. Real nodes come from solver imports (Phase 5).
 const DEMO_NODE: StrategyNode = {
@@ -84,13 +86,12 @@ export function LabPage() {
   const madeHand = valid && board.length >= 3 ? CATEGORY_NAMES[categoryOf(evaluate([...hero, ...board]))] : undefined;
   const graded = chosen ? gradeDecision(DEMO_NODE, chosen) : undefined;
 
+  const needed = potOdds(potFacing, bet);
+  const callValue = equity ? callEV(potFacing, bet, equity.equity) : undefined;
+
   return (
     <div className="stack">
-      <PageHeader
-        title="Spot Lab"
-        kicker="Single raised pot, flop"
-        subtitle="BTN opens, and BB calls and checks. Work out your equity and the best play."
-      />
+      <PageHeader title="Spot Lab" kicker="Single raised pot, flop" subtitle="BTN opens. BB calls and checks." />
 
       <div className="card" style={{ padding: '0.5rem' }}>
         <PokerTable
@@ -102,110 +103,126 @@ export function LabPage() {
       </div>
 
       <div className="grid-2">
-        <div className="card stack">
-          <h2>Equity vs range</h2>
-          <div className="row">
-            <label>
-              Your hand
-              <input value={heroText} onChange={(e) => setHeroText(e.target.value)} size={8} />
-            </label>
-            <label>
-              Board
-              <input value={boardText} onChange={(e) => setBoardText(e.target.value)} size={14} />
-            </label>
+        <Section
+          title="Equity vs range"
+          info={<p>Your hand against the BB calling range from the 9-handed chart, run to the river many times. Edit the cards to try other spots.</p>}
+        >
+          <div className="card stack">
+            <div className="sc-lab-inputs">
+              <label>
+                Your hand
+                <input value={heroText} onChange={(e) => setHeroText(e.target.value)} spellCheck={false} autoCapitalize="none" />
+              </label>
+              <label>
+                Board
+                <input value={boardText} onChange={(e) => setBoardText(e.target.value)} spellCheck={false} autoCapitalize="none" />
+              </label>
+            </div>
+            {!valid && <p className="grade-blunder">{typeof hero === 'string' ? hero : typeof board === 'string' ? board : 'The same card appears twice.'}</p>}
+            {equity && (
+              <>
+                <div className="row between" style={{ alignItems: 'flex-end' }}>
+                  <span>
+                    <span className="sc-hero-num num">{(equity.equity * 100).toFixed(1)}%</span>
+                    <span className="sc-result-label">Your equity</span>
+                  </span>
+                  {madeHand && <span className="pill">{madeHand}</span>}
+                </div>
+                <table className="kv">
+                  <tbody>
+                    <tr>
+                      <td>BB calling range</td>
+                      <td>{(rangePercent(BB_CALL) * 100).toFixed(1)}% of hands</td>
+                    </tr>
+                    <tr>
+                      <td>Win, tie, lose</td>
+                      <td>
+                        {(equity.win * 100).toFixed(0)} / {(equity.tie * 100).toFixed(0)} / {(equity.lose * 100).toFixed(0)}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </>
+            )}
           </div>
-          {!valid && <p className="grade-blunder">{typeof hero === 'string' ? hero : typeof board === 'string' ? board : 'The same card appears twice.'}</p>}
-          {equity && (
+        </Section>
+
+        <Section title="Facing a bet">
+          <div className="card stack">
+            <div className="row between" style={{ alignItems: 'flex-end' }}>
+              <span>
+                <span className="sc-hero-num num">{(needed * 100).toFixed(1)}%</span>
+                <span className="sc-result-label">Equity needed to call</span>
+              </span>
+              {callValue !== undefined && (
+                <span style={{ textAlign: 'right' }}>
+                  <span className={`sc-stat-value num ${callValue >= 0 ? 'green-text' : 'red-text'}`}>{fmt(callValue)}</span>
+                  <span className="sc-result-label">Call if no one bets again</span>
+                </span>
+              )}
+            </div>
+            <label>
+              Villain bets {fmt(bet)} into {fmt(pot)} ({Math.round((bet / pot) * 100)}% pot)
+              <input
+                type="range"
+                min={1}
+                max={15}
+                step={0.5}
+                value={bet}
+                onChange={(e) => {
+                  haptic('select');
+                  setBet(Number(e.target.value));
+                }}
+              />
+            </label>
             <table className="kv">
               <tbody>
                 <tr>
-                  <td>BB calling range vs a BTN open</td>
-                  <td>{(rangePercent(BB_CALL) * 100).toFixed(1)}% of hands</td>
-                </tr>
-                {madeHand && (
-                  <tr>
-                    <td>Your hand</td>
-                    <td>{madeHand}</td>
-                  </tr>
-                )}
-                <tr>
-                  <td>Equity</td>
-                  <td>{(equity.equity * 100).toFixed(1)}%</td>
+                  <td>Minimum defense (MDF)</td>
+                  <td>{(mdf(pot, bet) * 100).toFixed(1)}%</td>
                 </tr>
                 <tr>
-                  <td>Win, tie, lose</td>
-                  <td>
-                    {(equity.win * 100).toFixed(0)} / {(equity.tie * 100).toFixed(0)} / {(equity.lose * 100).toFixed(0)}
-                  </td>
+                  <td>Folds your bluff needs</td>
+                  <td>{(bluffBreakeven(pot, bet) * 100).toFixed(1)}%</td>
                 </tr>
               </tbody>
             </table>
+          </div>
+        </Section>
+      </div>
+
+      <Section
+        title="Your decision"
+        trailing={<span className="pill pill-warn">Example numbers</span>}
+        info={
+          <p>BB checked to you. Pick an action. Then see the solver's mix and what each option is worth. These numbers are examples, not real solver output.</p>
+        }
+      >
+        <div className="card stack">
+          <ActionMixBar
+            actions={DEMO_NODE.actions}
+            reveal={!!chosen}
+            chosen={chosen}
+            onChoose={(id) => {
+              const g = gradeDecision(DEMO_NODE, id).grade;
+              haptic(g === 'best' || g === 'correct' ? 'success' : g === 'inaccuracy' ? 'warning' : 'error');
+              setChosen(id);
+            }}
+          />
+          {graded && (
+            <div className="row">
+              <strong className={`grade-${graded.grade}`}>{graded.grade[0].toUpperCase() + graded.grade.slice(1)}</strong>
+              <span className="muted">
+                You lose {graded.evLoss.toFixed(2)}bb against the best play of {graded.best.label}. That is {(graded.evLossPctPot * 100).toFixed(1)}% of the
+                pot.
+              </span>
+              <button className="btn btn-plain" onClick={() => setChosen(undefined)}>
+                <UndoIcon size={18} /> Try again
+              </button>
+            </div>
           )}
         </div>
-
-        <div className="card stack">
-          <h2>Facing a bet</h2>
-          <label>
-            Villain bets {fmt(bet)} into {fmt(pot)} ({Math.round((bet / pot) * 100)}% pot)
-            <input type="range" min={1} max={15} step={0.5} value={bet} onChange={(e) => {
-                haptic('select');
-                setBet(Number(e.target.value));
-              }} />
-          </label>
-          <table className="kv">
-            <tbody>
-              <tr>
-                <td>Equity needed to call</td>
-                <td>{(potOdds(potFacing, bet) * 100).toFixed(1)}%</td>
-              </tr>
-              <tr>
-                <td>Minimum defense (MDF)</td>
-                <td>{(mdf(pot, bet) * 100).toFixed(1)}%</td>
-              </tr>
-              <tr>
-                <td>Folds your bluff needs</td>
-                <td>{(bluffBreakeven(pot, bet) * 100).toFixed(1)}%</td>
-              </tr>
-              {equity && (
-                <tr>
-                  <td>Value of calling if no one bets again</td>
-                  <td className={callEV(potFacing, bet, equity.equity) >= 0 ? 'grade-best' : 'grade-blunder'}>
-                    {fmt(callEV(potFacing, bet, equity.equity))}
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <div className="card stack">
-        <div>
-          <h2>Your decision: BB checked to you</h2>
-          <p className="muted">Pick an action. Then see the solver's mix and what each option is worth. These numbers are examples, not real solver output.</p>
-        </div>
-        <ActionMixBar
-          actions={DEMO_NODE.actions}
-          reveal={!!chosen}
-          chosen={chosen}
-          onChoose={(id) => {
-            const g = gradeDecision(DEMO_NODE, id).grade;
-            haptic(g === 'best' || g === 'correct' ? 'success' : g === 'inaccuracy' ? 'warning' : 'error');
-            setChosen(id);
-          }}
-        />
-        {graded && (
-          <div className="row">
-            <strong className={`grade-${graded.grade}`}>{graded.grade[0].toUpperCase() + graded.grade.slice(1)}</strong>
-            <span className="muted">
-              You lose {graded.evLoss.toFixed(2)}bb, or {(graded.evLossPctPot * 100).toFixed(1)}% of the pot, against the best play of {graded.best.label}.
-            </span>
-            <button className="btn btn-plain" onClick={() => setChosen(undefined)}>
-              <UndoIcon size={18} /> Try again
-            </button>
-          </div>
-        )}
-      </div>
+      </Section>
     </div>
   );
 }

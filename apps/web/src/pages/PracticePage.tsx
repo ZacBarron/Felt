@@ -39,7 +39,10 @@ export function PracticePage() {
       const [snap, progress, recent] = await Promise.all([
         ratingSnapshot(),
         lessonProgress(),
-        db.answers.where('at').above(new Date(Date.now() - RECENT_MS)).toArray(),
+        db.answers
+          .where('at')
+          .above(new Date(Date.now() - RECENT_MS))
+          .toArray(),
       ]);
       const charts = chartsForGame(settings.game).charts;
       // Rated chart questions only: equilibrium charts, and hands where some answer is wrong.
@@ -50,7 +53,14 @@ export function PracticePage() {
             const difficulty = chartItemDifficulty(chart.mixes.get(hand) ?? { fold: 1 }, chartChoices(chart));
             return difficulty === undefined
               ? []
-              : [{ id: `chart:${chart.spec.id}:${hand}`, domain: 'preflop' as SkillDomain, difficulty, decision: { kind: 'chart' as const, chartId: chart.spec.id, hand } }];
+              : [
+                  {
+                    id: `chart:${chart.spec.id}:${hand}`,
+                    domain: 'preflop' as SkillDomain,
+                    difficulty,
+                    decision: { kind: 'chart' as const, chartId: chart.spec.id, hand },
+                  },
+                ];
           }),
         );
       // Questions from lessons you have finished or tested out of; if there are few, the core lessons too.
@@ -89,14 +99,27 @@ export function PracticePage() {
           </h1>
           {after !== undefined && (
             <span className="pill num">
-              Felt Rating {Math.round(after.rating)}, {Math.round(after.rating - before) === 0 ? 'no change' : after.rating > before ? `up ${Math.round(after.rating - before)}` : `down ${Math.round(before - after.rating)}`}
+              Felt Rating {Math.round(after.rating)},{' '}
+              {Math.round(after.rating - before) === 0
+                ? 'no change'
+                : after.rating > before
+                  ? `up ${Math.round(after.rating - before)}`
+                  : `down ${Math.round(before - after.rating)}`}
             </span>
           )}
-          <p className="footnote" style={{ margin: 0, maxWidth: 360 }}>
-            {items.length === 0
-              ? 'You have answered everything available in the last 12 hours. Finish a lesson to add new questions.'
-              : `Practiced ${domains.map((d) => DOMAIN_LABELS[d].toLowerCase()).join(', ')}. Sessions aim for about 80% right: hard enough to learn from, easy enough to keep going.`}
-          </p>
+          {items.length === 0 ? (
+            <p className="footnote" style={{ margin: 0, maxWidth: 360 }}>
+              You answered everything from the last 12 hours. Finish a lesson to add questions.
+            </p>
+          ) : (
+            <div className="row" style={{ justifyContent: 'center', gap: '0.4rem', flexWrap: 'wrap' }} aria-label="Areas you practiced">
+              {domains.map((d) => (
+                <span key={d} className="pill pill-tint">
+                  {DOMAIN_LABELS[d]}
+                </span>
+              ))}
+            </div>
+          )}
         </div>
         <BottomBar>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
@@ -119,7 +142,15 @@ export function PracticePage() {
         <button className="icon-btn glass" aria-label="End practice" onClick={() => navigate('/you')}>
           <CloseIcon size={18} />
         </button>
-        <div className="check-bar" role="progressbar" aria-label="Practice" aria-valuemin={0} aria-valuemax={items.length} aria-valuenow={index} aria-valuetext={`Decision ${index + 1} of ${items.length}`}>
+        <div
+          className="check-bar"
+          role="progressbar"
+          aria-label="Practice"
+          aria-valuemin={0}
+          aria-valuemax={items.length}
+          aria-valuenow={index}
+          aria-valuetext={`Decision ${index + 1} of ${items.length}`}
+        >
           <span style={{ width: `${(index / items.length) * 100}%` }} />
         </div>
         <span className="pill">{DOMAIN_LABELS[item.domain]}</span>

@@ -10,6 +10,8 @@ import { savedCardId, setNote, unsave } from '../state/saved';
 import { BottomBar } from '../ui/BottomBar';
 import { BookmarkIcon, LearnIcon, SolverIcon } from '../ui/icons';
 import { PageHeader } from '../ui/PageHeader';
+import { EmptyState } from '../ui/Section';
+import './screens.css';
 
 type Filter = 'all' | 'lesson-step' | 'solver-spot';
 
@@ -89,20 +91,20 @@ export function SavedPage() {
       <PageHeader title="Saved" back={{ to: '/more', label: 'More' }} subtitle={items.length ? `${items.length} saved, ${due} ready to review` : undefined} />
 
       {items.length === 0 ? (
-        <div className="card stack" style={{ alignItems: 'center', textAlign: 'center', padding: '2.2rem 1.25rem', gap: '0.8rem' }}>
-          <span className="saved-row-icon" style={{ width: 56, height: 56, borderRadius: 16 }}>
-            <BookmarkIcon size={26} />
-          </span>
-          <h2 className="display" style={{ fontSize: '1.8rem', fontWeight: 400 }}>
-            Keep what matters
-          </h2>
-          <p className="muted" style={{ margin: 0, maxWidth: 340 }}>
-            Tap the bookmark on any lesson screen to save it. You can also save hands in the solver. Everything you save comes back in your daily review.
-          </p>
-          <Link to="/learn" className="btn btn-primary">
-            Go to Learn
-          </Link>
-        </div>
+        <EmptyState
+          art={
+            <span className="sc-art-tile">
+              <BookmarkIcon size={34} />
+            </span>
+          }
+          title="Keep what matters"
+          body="Tap the bookmark on a lesson or solver hand. It comes back in your review."
+          action={
+            <Link to="/learn" className="btn btn-primary" style={{ marginTop: '0.4rem' }}>
+              Go to Learn
+            </Link>
+          }
+        />
       ) : (
         <>
           <div className="chips" role="group" aria-label="Filter">

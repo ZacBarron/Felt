@@ -1,15 +1,5 @@
 import { STARTER_CHARTS } from '@felt/content';
-import {
-  boundaryHands,
-  challengeNumber,
-  chartItemDifficulty,
-  DIFFICULTY,
-  dailyPicks,
-  shareGrid,
-  isProvisional,
-  type SkillRating,
-  tierLabel,
-} from '@felt/core';
+import { boundaryHands, challengeNumber, chartItemDifficulty, DIFFICULTY, dailyPicks, shareGrid, isProvisional, type SkillRating, tierLabel } from '@felt/core';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
@@ -24,9 +14,10 @@ import { ratingSnapshot, streakNow } from '../state/rating';
 import { addHandsToReview } from '../state/review';
 import { BottomBar } from '../ui/BottomBar';
 import { plural } from '../ui/format';
-import { CheckIcon, ChevronRightIcon, CloseIcon, FlameIcon, MinusIcon } from '../ui/icons';
+import { CheckIcon, ChevronRightIcon, CloseIcon, FlameIcon, LearnIcon, MinusIcon, RangesIcon } from '../ui/icons';
 import { ProgressRing } from '../ui/ProgressRing';
 import { useBodyClass } from '../ui/useBodyClass';
+import './screens.css';
 
 type ChartDecision = Extract<Decision, { kind: 'chart' }> & { difficulty: number };
 
@@ -108,7 +99,7 @@ function useDailyCrowd(number: number, scores: number[]): Crowd | undefined {
     return () => {
       live = false;
     };
-  }, [number, right, scores.join(",")]);
+  }, [number, right, scores.join(',')]);
   return crowd;
 }
 
@@ -287,8 +278,20 @@ export function DailyPage() {
         <div className="hero daily-hero reveal">
           <div className="hero-label">Daily challenge #{number}</div>
           <h1 className="display pro-title">Five decisions. Same for everyone.</h1>
-          <p className="pro-sub">
-            You get three range decisions that get harder and two lesson questions. Each answer counts toward your Felt Rating.
+          <ol className="sc-steps" role="img" aria-label="Three range decisions that get harder, with two lesson questions between them">
+            {items.map((d, i) => {
+              const level = items.slice(0, i + 1).filter((x) => x.kind === 'chart').length;
+              return (
+                <li key={i} className={`sc-step ${d.kind === 'chart' ? 'range' : 'lesson'}`} aria-hidden="true">
+                  <span className="sc-step-dot">{d.kind === 'chart' ? <RangesIcon size={22} /> : <LearnIcon size={22} />}</span>
+                  {d.kind === 'chart' ? 'Range' : 'Lesson'}
+                  <span className="sc-step-pips">{d.kind === 'chart' && [1, 2, 3].map((n) => <i key={n} className={n <= level ? 'on' : undefined} />)}</span>
+                </li>
+              );
+            })}
+          </ol>
+          <p className="pro-sub" style={{ margin: 0 }}>
+            Each answer counts toward your Felt Rating.
           </p>
         </div>
         <BottomBar>

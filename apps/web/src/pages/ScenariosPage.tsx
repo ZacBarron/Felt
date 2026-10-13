@@ -17,6 +17,8 @@ import { gradeChoice, type RiverResult, solveRiver } from '../state/scenarioSolv
 import { BottomBar } from '../ui/BottomBar';
 import { ChevronRightIcon, CloseIcon } from '../ui/icons';
 import { PageHeader } from '../ui/PageHeader';
+import { Section } from '../ui/Section';
+import './screens.css';
 import { useBodyClass } from '../ui/useBodyClass';
 
 const GRADE_TEXT = { best: 'Best play', good: 'Good play', inaccuracy: 'Inaccuracy', mistake: 'Mistake', blunder: 'Blunder' } as const;
@@ -60,39 +62,65 @@ export function ScenariosPage() {
   return <ScenarioList />;
 }
 
+function HoleCards({ cards, size }: { cards: string; size: 'sm' | 'md' }) {
+  return (
+    <span className={size === 'md' ? 'sc-next-cards' : 'sc-row-cards'} aria-hidden="true">
+      {(cards.match(/.{2}/g) ?? []).map((c) => (
+        <PlayingCard key={c} card={parseCards(c)[0]} size={size} />
+      ))}
+    </span>
+  );
+}
+
 function ScenarioList() {
   const results = useLiveQuery(() => db.scenarios.toArray(), [], []);
   const byId = new Map(results.map((r) => [r.id, r]));
   const next = SCENARIOS.find((s) => !byId.has(s.id)) ?? SCENARIOS[0];
   return (
     <div className="stack" style={{ gap: '1.4rem' }}>
-      <PageHeader title="Scenarios" subtitle="Play real hands street by street. Felt Solver grades your river decision." back={{ to: '/more', label: 'More' }} />
+      <PageHeader title="Scenarios" subtitle="Graded by Felt Solver" back={{ to: '/more', label: 'More' }} />
       {SCENARIOS.length === 0 ? (
         <p className="muted">Scenarios are on their way.</p>
       ) : (
         <>
           {next && (
-            <Link to={`/scenarios/${next.id}`} className="card placement-card">
-              <span className="grow">
-                <span className="footnote">{byId.size === 0 ? 'Start here' : 'Up next'}</span>
-                <span style={{ display: 'block', fontWeight: 650 }}>{next.title}</span>
-                <span className="footnote">{next.summary}</span>
+            <Link to={`/scenarios/${next.id}`} className="sc-next" aria-label={`${byId.size === 0 ? 'Start here' : 'Up next'}: ${next.title}. ${next.summary}`}>
+              <HoleCards cards={next.hero.cards} size="md" />
+              <span className="grow" style={{ minWidth: 0 }}>
+                <span className="sc-next-kicker">{byId.size === 0 ? 'Start here' : 'Up next'}</span>
+                <span className="sc-next-title">{next.title}</span>
+                <span className="sc-next-meta">
+                  {next.hero.seat} vs {next.villain.seat}, 100bb
+                </span>
               </span>
-              <ChevronRightIcon size={16} className="chev" />
+              <span className="sc-next-go" aria-hidden="true">
+                <ChevronRightIcon size={18} />
+              </span>
             </Link>
           )}
-          <section>
-            <h2 className="section-title">All scenarios</h2>
-            <div className="list">
+          <Section
+            title="All scenarios"
+            info={
+              <p>
+                Play each hand street by street. Felt Solver solves the river on your device for the ranges in the hand. The grade is exact for those ranges.
+              </p>
+            }
+          >
+            <div className="list" style={{ '--sep-inset': '5.4rem' } as React.CSSProperties}>
               {SCENARIOS.map((s) => {
                 const r = byId.get(s.id);
                 return (
                   <Link key={s.id} to={`/scenarios/${s.id}`} className="list-row">
+                    <HoleCards cards={s.hero.cards} size="sm" />
                     <span className="grow">
                       <span style={{ display: 'block', fontWeight: 600 }}>{s.title}</span>
                       <span className="footnote">
                         {s.hero.seat} vs {s.villain.seat}
-                        {s.level === 'advanced' && <span className="pill" style={{ marginLeft: 6 }}>Advanced</span>}
+                        {s.level === 'advanced' && (
+                          <span className="pill" style={{ marginLeft: 6 }}>
+                            Advanced
+                          </span>
+                        )}
                       </span>
                     </span>
                     {r && <span className={`pill grade-pill grade-${r.grade}`}>{GRADE_TEXT[r.grade]}</span>}
@@ -101,8 +129,7 @@ function ScenarioList() {
                 );
               })}
             </div>
-            <div className="section-footer">Each river is solved on your device for the ranges in the hand. The grade is exact for those ranges.</div>
-          </section>
+          </Section>
         </>
       )}
     </div>
@@ -216,7 +243,12 @@ function ScenarioPlayer({ scenario }: { scenario: ScenarioSpec }) {
             {!preflopChoice && chart ? (
               <div style={{ display: 'grid', gridTemplateColumns: `repeat(${chartChoices(chart).length}, minmax(0, 1fr))`, gap: 8 }}>
                 {chartChoices(chart).map((c) => (
-                  <button key={c} className="btn btn-lg btn-action" style={{ '--c': actionColor(c) } as React.CSSProperties} onClick={() => setPreflopChoice(c)}>
+                  <button
+                    key={c}
+                    className="btn btn-lg btn-action"
+                    style={{ '--c': actionColor(c) } as React.CSSProperties}
+                    onClick={() => setPreflopChoice(c)}
+                  >
                     {labels[c] ?? c}
                   </button>
                 ))}
@@ -236,7 +268,11 @@ function ScenarioPlayer({ scenario }: { scenario: ScenarioSpec }) {
             <div className="footnote">{stage.index === 0 ? 'Flop' : 'Turn'}</div>
             <Board cards={scenario.streets[stage.index].board} />
             <p style={{ margin: 0 }}>{scenario.streets[stage.index].narrative}</p>
-            {scenario.streets[stage.index].note && <p className="footnote" style={{ margin: 0 }}>{scenario.streets[stage.index].note}</p>}
+            {scenario.streets[stage.index].note && (
+              <p className="footnote" style={{ margin: 0 }}>
+                {scenario.streets[stage.index].note}
+              </p>
+            )}
           </div>
           <BottomBar>
             <button className="btn btn-primary btn-lg btn-block" onClick={next}>
@@ -267,7 +303,9 @@ function ScenarioPlayer({ scenario }: { scenario: ScenarioSpec }) {
                 : scenario.river.line.map((id, i) => lineText(id, (i % 2 === 0) === (scenario.river.hero === 1) ? villain : 'You')).join(' ')}{' '}
               What do you do?
             </p>
-            {graded && river && <RiverResultView hand={river.hand} chosen={choice!} graded={graded} explain={scenario.river.explain} exploitability={river.exploitability} />}
+            {graded && river && (
+              <RiverResultView hand={river.hand} chosen={choice!} graded={graded} explain={scenario.river.explain} exploitability={river.exploitability} />
+            )}
             {riverError && (
               <div className="explain bad" role="alert">
                 {riverError}
@@ -282,7 +320,12 @@ function ScenarioPlayer({ scenario }: { scenario: ScenarioSpec }) {
             ) : choice === undefined && river ? (
               <div className="stack" style={{ gap: 8 }}>
                 {river.hand.actions.map((a, i) => (
-                  <button key={a.id} className="btn btn-lg btn-block btn-action" style={{ '--c': actionColor(a.id) } as React.CSSProperties} onClick={() => chooseRiver(i)}>
+                  <button
+                    key={a.id}
+                    className="btn btn-lg btn-block btn-action"
+                    style={{ '--c': actionColor(a.id) } as React.CSSProperties}
+                    onClick={() => chooseRiver(i)}
+                  >
                     {actionText(a.id, a.label)}
                   </button>
                 ))}
@@ -323,7 +366,7 @@ function RiverResultView({
       <p className="footnote" style={{ margin: 0 }}>
         {graded.grade === 'best'
           ? 'You picked the action with the highest EV for your hand.'
-          : `You gave up ${graded.lossBb.toFixed(2)}bb, or ${(graded.lossPct * 100).toFixed(1)}% of the pot, against ${actionText(hand.actions[graded.best].id, hand.actions[graded.best].label).toLowerCase()}.`}
+          : `You gave up ${graded.lossBb.toFixed(2)}bb against ${actionText(hand.actions[graded.best].id, hand.actions[graded.best].label).toLowerCase()}. That is ${(graded.lossPct * 100).toFixed(1)}% of the pot.`}
       </p>
       <div className="list scenario-actions">
         {order.map((i) => (
@@ -347,7 +390,8 @@ function RiverResultView({
       </div>
       <p style={{ margin: 0 }}>{explain}</p>
       <p className="footnote" style={{ margin: 0 }}>
-        Solved by Felt Solver to {exploitability.toFixed(2)}% of the pot. EV here is what your hand wins from this point on average, for the ranges in this hand.
+        Solved by Felt Solver to {exploitability.toFixed(2)}% of the pot. EV here is what your hand wins from this point on average, for the ranges in this
+        hand.
       </p>
     </div>
   );

@@ -1,0 +1,565 @@
+/*
+ * Screen polish for the tool pages (Exploits, Log, Import, Scenarios, League,
+ * Account, Saved, Solver, Spot Lab, Practice, Daily, Legal). Show, do not
+ * tell: numbers, meters and tiles lead, explanations sit behind info.
+ * Colors come from the tokens in styles.css only.
+ */
+
+/* Shared ------------------------------------------------------------------ */
+
+/* A big tinted tile behind an app icon: the picture on empty states and import cards. */
+.sc-art-tile {
+  display: grid;
+  place-items: center;
+  width: 72px;
+  height: 72px;
+  border-radius: 22px;
+  color: var(--tint);
+  background: color-mix(in srgb, var(--tint) 13%, var(--surface));
+}
+
+.sc-icon-tile {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 13px;
+  color: var(--tint);
+  background: color-mix(in srgb, var(--tint) 13%, transparent);
+}
+
+/* A row of numbers that lead a card: value on top, label under it. */
+.sc-stats {
+  display: grid;
+  grid-template-columns: repeat(var(--cols, 3), minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.sc-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  padding: 0.7rem 0.75rem;
+  border-radius: 16px;
+  background: var(--surface);
+}
+
+.sc-stats.on-card .sc-stat {
+  background: var(--fill);
+}
+
+.sc-stat-value {
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.15;
+}
+
+.sc-stat-value.none {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--label-2);
+  line-height: 1.6;
+}
+
+.sc-stat-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--label-2);
+}
+
+/* A result number that leads a calculator. */
+.sc-result {
+  display: flex;
+  align-items: flex-end;
+  gap: 1rem;
+  padding: 1rem 1.1rem;
+  margin-bottom: 0.6rem;
+}
+
+.sc-result-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.sc-hero-num {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 2.6rem;
+  line-height: 1;
+  letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums;
+}
+
+.sc-result-label {
+  display: block;
+  margin-top: 0.3rem;
+  font-size: 0.8rem;
+  color: var(--label-2);
+}
+
+.sc-result-side {
+  flex: none;
+  text-align: right;
+}
+
+.sc-result-side .sc-stat-value {
+  font-size: 1.2rem;
+}
+
+/* Exploits: player types --------------------------------------------------- */
+
+.sc-types {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.6rem;
+}
+
+@media (min-width: 761px) {
+  .sc-types {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.sc-type {
+  border-radius: var(--r-card);
+  background: var(--surface);
+}
+
+.sc-type[open] {
+  grid-column: 1 / -1;
+}
+
+/* Tiles are not list rows: no hairline between them. */
+.sc-types > details::before {
+  content: none;
+}
+
+.sc-type > summary {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  min-height: 112px;
+  padding: 0.9rem 0.95rem 0.95rem;
+  cursor: pointer;
+  border-radius: var(--r-card);
+  transition: transform 160ms var(--ease);
+}
+
+.sc-type > summary:active {
+  transform: scale(0.97);
+}
+
+.sc-type-name {
+  flex: 1;
+  font-size: 1rem;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  line-height: 1.25;
+  text-wrap: balance;
+}
+
+.sc-type[open] .sc-type-name {
+  font-size: 1.18rem;
+  font-weight: 700;
+}
+
+.sc-meters {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.sc-meter {
+  display: grid;
+  grid-template-columns: 2.4rem 1fr;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.68rem;
+  font-weight: 650;
+  letter-spacing: 0.02em;
+  color: var(--label-2);
+}
+
+.sc-type[open] .sc-meter {
+  grid-template-columns: 2.4rem 1fr 5.4rem;
+  font-size: 0.75rem;
+}
+
+.sc-meter-track {
+  position: relative;
+  height: 8px;
+  border-radius: 99px;
+  background: var(--fill-2);
+  overflow: hidden;
+}
+
+.sc-meter-fill {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  border-radius: 99px;
+  background: var(--tint-fill);
+}
+
+.sc-meter-num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  color: var(--label);
+}
+
+.sc-type-body {
+  display: grid;
+  gap: 0.9rem;
+  padding: 0 0.95rem 1rem;
+}
+
+.sc-type-lead {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.4;
+}
+
+.sc-type-body h3 {
+  margin: 0 0 0.3rem;
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.sc-type-body ul {
+  margin: 0;
+  padding-left: 1.1rem;
+  display: grid;
+  gap: 0.3rem;
+  line-height: 1.4;
+}
+
+/* Exploits: tells ------------------------------------------------------------ */
+
+.sc-tell > summary {
+  cursor: pointer;
+}
+
+.sc-rel {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex: none;
+  font-size: 0.75rem;
+  font-weight: 650;
+}
+
+.sc-rel-bars {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+.sc-rel-bars i {
+  display: block;
+  width: 5px;
+  border-radius: 2px;
+  background: var(--fill-3);
+}
+
+.sc-rel-bars i:nth-child(1) {
+  height: 7px;
+}
+.sc-rel-bars i:nth-child(2) {
+  height: 11px;
+}
+.sc-rel-bars i:nth-child(3) {
+  height: 15px;
+}
+
+.sc-rel.strong {
+  color: var(--green-text);
+}
+.sc-rel.moderate {
+  color: var(--tint);
+}
+.sc-rel.weak {
+  color: var(--orange-text);
+}
+
+.sc-rel.strong .sc-rel-bars i,
+.sc-rel.moderate .sc-rel-bars i:nth-child(-n + 2),
+.sc-rel.weak .sc-rel-bars i:nth-child(1) {
+  background: currentColor;
+}
+
+.sc-tell-body {
+  display: grid;
+  gap: 0.6rem;
+  padding: 0 1rem 1rem;
+  line-height: 1.4;
+}
+
+.sc-tell-body p {
+  margin: 0;
+}
+
+.sc-tell-label {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--label-2);
+  margin-bottom: 1px;
+}
+
+/* Import ------------------------------------------------------------------- */
+
+.sc-import {
+  display: grid;
+  gap: 0.9rem;
+  padding: 1rem;
+}
+
+.sc-import-head {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.sc-import-title {
+  display: block;
+  font-size: 1rem;
+  font-weight: 650;
+}
+
+/* Scenarios ------------------------------------------------------------------ */
+
+.sc-next {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.1rem 1.15rem;
+  border-radius: var(--r-card);
+  color: #fff;
+  text-decoration: none;
+  background: var(--brand-gradient);
+  box-shadow: 0 14px 30px rgba(11, 36, 33, 0.22);
+  overflow: hidden;
+  transition: transform 160ms var(--ease);
+}
+
+.sc-next:active {
+  transform: scale(0.98);
+}
+
+.sc-next-cards {
+  display: flex;
+  gap: 5px;
+  flex: none;
+}
+
+.sc-next-kicker {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--on-felt-accent);
+}
+
+.sc-next-title {
+  display: block;
+  margin: 0.15rem 0 0.25rem;
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  line-height: 1.05;
+  text-wrap: balance;
+}
+
+.sc-next-meta {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.sc-next-go {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  color: var(--on-tint);
+  background: var(--accent);
+}
+
+.sc-row-cards {
+  display: flex;
+  gap: 3px;
+  flex: none;
+}
+
+/* League ----------------------------------------------------------------------- */
+
+.sc-podium .league-rank {
+  font-weight: 700;
+}
+
+/* Account --------------------------------------------------------------------- */
+
+.sc-perks {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.sc-perk {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.4rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--label);
+  background: var(--surface);
+}
+
+.sc-perk svg {
+  color: var(--tint);
+}
+
+/* Daily: five step dots on the felt ---------------------------------------- */
+
+.sc-steps {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.4rem;
+  margin: 0.6rem 0 0.2rem;
+}
+
+.sc-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.68rem;
+  font-weight: 650;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.sc-step-dot {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 15px;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.12);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.16);
+}
+
+.sc-step.range .sc-step-dot {
+  color: var(--on-tint);
+  background: var(--accent);
+  box-shadow: none;
+}
+
+.sc-step-pips {
+  display: flex;
+  gap: 2px;
+  height: 4px;
+}
+
+.sc-step-pips i {
+  width: 6px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.sc-step-pips i.on {
+  background: var(--accent);
+}
+
+/* Solver ---------------------------------------------------------------------- */
+
+.sc-solver-note {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem 0.5rem;
+  padding: 0.55rem 1rem 0;
+  font-size: 0.88rem;
+  color: var(--label-2);
+}
+
+/* Spot Lab -------------------------------------------------------------------- */
+
+.sc-lab-inputs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6rem;
+}
+
+.sc-lab-inputs label {
+  display: grid;
+  gap: 0.3rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--label-2);
+}
+
+.sc-lab-inputs input {
+  width: 100%;
+  min-width: 0;
+}
+
+/* Legal ----------------------------------------------------------------------- */
+
+.sc-legal h2 {
+  margin: 0;
+  font-size: 1.18rem;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+}
+
+.sc-legal p {
+  margin: 0;
+  line-height: 1.55;
+  max-width: 65ch;
+}
+
+/* A stat with no data yet reads as words, set smaller than a number. */
+.import-stats .num.sc-none {
+  font-size: 0.8rem;
+  line-height: 1.55;
+  color: var(--label-2);
+}
+
+.sc-legal ul {
+  margin: 0;
+  padding-left: 1.2rem;
+  display: grid;
+  gap: 0.3rem;
+  line-height: 1.5;
+  max-width: 65ch;
+}
+
+/* League: the top three places wear a brass disc. */
+.league-rank.sc-top {
+  display: inline-grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  color: var(--on-tint);
+  background: var(--tint-fill);
+  font-size: 0.88rem;
+}
+
+.league-table .league-rank {
+  display: inline-grid;
+  place-items: center;
+  width: 28px;
+}

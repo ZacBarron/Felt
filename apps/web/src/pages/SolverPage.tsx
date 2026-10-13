@@ -13,6 +13,8 @@ import type { FromWorker, NodeView, RangeInput, SpotInput } from '../solver/prot
 import { BottomBar } from '../ui/BottomBar';
 import { BookmarkIcon, LockIcon, SolverIcon } from '../ui/icons';
 import { PageHeader } from '../ui/PageHeader';
+import { Section } from '../ui/Section';
+import './screens.css';
 
 const chartRange = (id: string, action: string): [string, number][] => {
   const chart = getChart(id);
@@ -22,6 +24,11 @@ const chartRange = (id: string, action: string): [string, number][] => {
 interface Preset {
   id: string;
   label: string;
+  /** One line under the spot chips. */
+  short: string;
+  /** Shown visibly when the spot is simplified, so the answer is not read as exact for real play. */
+  caveat?: string;
+  /** The full story, behind info. */
   note: string;
   board: string;
   pot: number;
@@ -34,6 +41,7 @@ const PRESETS: Preset[] = [
   {
     id: 'river-barrels',
     label: 'River after two barrels',
+    short: 'BTN bet flop and turn. BB called both times.',
     note: 'BTN opened and bet the flop and turn. BB called both times. Stacks started at 100bb, so 85bb are left. The only missed draws are hearts that had a flush draw.',
     board: 'Kc8h5h2s2d',
     pot: 30,
@@ -46,6 +54,8 @@ const PRESETS: Preset[] = [
   {
     id: 'river-preflop',
     label: 'Simplified river spot',
+    short: 'BTN opens and BB calls. It checks to the river.',
+    caveat: 'Simplified ranges',
     note: 'BTN opens and BB calls. It checks to the river. This is a simplified example, since real ranges that check twice hold far fewer strong hands.',
     board: 'Ks7d2c4h9s',
     pot: 5.5,
@@ -56,6 +66,7 @@ const PRESETS: Preset[] = [
   {
     id: 'turn-preflop',
     label: 'Turn spot with preflop ranges',
+    short: 'Solves every river card. It takes a few minutes.',
     note: 'This solves every river card, so it takes a few minutes.',
     board: 'Ks7d2c4h',
     pot: 5.5,
@@ -147,7 +158,8 @@ export function SolverPage() {
   const results = useRef<HTMLDivElement>(null);
   const solvedAt = solver.solved?.seconds;
   useEffect(() => {
-    if (solvedAt !== undefined) results.current?.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
+    if (solvedAt !== undefined)
+      results.current?.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
   }, [solvedAt]);
 
   const choosePreset = (p: Preset) => {
@@ -234,10 +246,20 @@ export function SolverPage() {
 
   return (
     <div className="stack" style={{ gap: '1.4rem' }}>
-      <PageHeader title="Solver" back={{ to: '/more', label: 'More' }} subtitle="See how to play a spot against a perfect opponent" />
+      <PageHeader title="Solver" back={{ to: '/more', label: 'More' }} />
 
-      <section>
-        <h2 className="section-title">Spot</h2>
+      <Section
+        title="Spot"
+        info={
+          <>
+            <p>{custom ? 'Enter your own spot. Ranges can use hands like KJ or 98s, or exact cards like QhJh.' : preset.note}</p>
+            <p style={{ marginTop: '0.5rem' }}>
+              Felt Solver runs on your device and checks every card combination. It stops when a perfect opponent could gain only a tiny share of the pot. The
+              answer is only as good as the ranges and bet sizes you give it.
+            </p>
+          </>
+        }
+      >
         <div className="chips" role="group" aria-label="Spot">
           {PRESETS.map((p) => (
             <button key={p.id} className="chip" aria-pressed={p.id === presetId && !custom} data-haptic="select" onClick={() => choosePreset(p)}>
@@ -248,8 +270,11 @@ export function SolverPage() {
             {!pro && <LockIcon size={12} />} Custom
           </button>
         </div>
-        <div className="section-footer">{custom ? 'Enter your own spot. Ranges can use hands like KJ or 98s, or exact cards like QhJh.' : preset.note}</div>
-      </section>
+        <div className="sc-solver-note">
+          <span>{custom ? 'Your own board, ranges and sizes.' : preset.short}</span>
+          {!custom && preset.caveat && <span className="pill pill-warn">{preset.caveat}</span>}
+        </div>
+      </Section>
 
       <div className="card stack solver-setup" style={{ gap: '0.9rem' }}>
         <label className="solver-field">
@@ -326,12 +351,17 @@ export function SolverPage() {
 
       {(solver.running || solver.solved) && (
         <div className="card solver-status" ref={results} style={{ scrollMarginTop: 70 }}>
-          <div className="row between">
-            <span className="footnote">{solver.running ? 'Solving' : 'Solved'}</span>
-            <span className={`pill ${solver.solved && solver.solved.exploitability <= 0.5 ? 'pill-good' : 'pill-tint'} num`}>
-              {(solver.solved ?? solver.progress)?.exploitability !== undefined
-                ? `Exploitability ${Math.min(99.99, (solver.solved ?? solver.progress)!.exploitability).toFixed(2)}%`
-                : 'Starting…'}
+          <div className="row between" style={{ alignItems: 'flex-end' }}>
+            <span>
+              <span className="sc-hero-num num">
+                {(solver.solved ?? solver.progress)?.exploitability !== undefined
+                  ? `${Math.min(99.99, (solver.solved ?? solver.progress)!.exploitability).toFixed(2)}%`
+                  : '…'}
+              </span>
+              <span className="sc-result-label">Exploitability, share of the pot</span>
+            </span>
+            <span className={`pill ${solver.solved && solver.solved.exploitability <= 0.5 ? 'pill-good' : 'pill-tint'}`}>
+              {solver.solved ? `Solved in ${solver.solved.seconds.toFixed(1)}s` : 'Solving'}
             </span>
           </div>
           <div className="check-bar" style={{ marginTop: 10 }} aria-hidden="true">
@@ -341,10 +371,22 @@ export function SolverPage() {
               }}
             />
           </div>
+          {solver.solved && (
+            <div className="sc-stats on-card" style={{ '--cols': 2, marginTop: 12 } as React.CSSProperties}>
+              <div className="sc-stat">
+                <span className="sc-stat-value num">{solver.solved.ev[0].toFixed(2)}bb</span>
+                <span className="sc-stat-label">EV out of position</span>
+              </div>
+              <div className="sc-stat">
+                <span className="sc-stat-value num">{solver.solved.ev[1].toFixed(2)}bb</span>
+                <span className="sc-stat-label">EV in position</span>
+              </div>
+            </div>
+          )}
           <div className="footnote" style={{ marginTop: 8 }}>
             {solver.solved
-              ? `Solved in ${solver.solved.seconds.toFixed(1)} seconds. A perfect opponent could win at most ${solver.solved.exploitability.toFixed(2)}% of the pot against this strategy. Expected value is ${solver.solved.ev[0].toFixed(2)}bb out of position and ${solver.solved.ev[1].toFixed(2)}bb in position.`
-              : `Still solving. Exploitability is how much a perfect opponent could still win. It drops as the solver improves.`}
+              ? `A perfect opponent could win at most ${solver.solved.exploitability.toFixed(2)}% of the pot against this strategy.`
+              : 'This is how much a perfect opponent could still win. It drops as the solver improves.'}
           </div>
         </div>
       )}
@@ -387,8 +429,7 @@ export function SolverPage() {
                     <strong>{selectedClass[0]}</strong>
                     <span className="footnote">
                       {' '}
-                      {selectedClass[1].toFixed(1)} combos:{' '}
-                      {view.actions.map((a, i) => `${a.label} ${Math.round(selectedClass[2][i] * 100)}%`).join(', ')}
+                      {selectedClass[1].toFixed(1)} combos: {view.actions.map((a, i) => `${a.label} ${Math.round(selectedClass[2][i] * 100)}%`).join(', ')}
                     </span>
                   </div>
                   {savedHand === `${selectedClass[0]}@${path.join('.')}` ? (
@@ -436,11 +477,6 @@ export function SolverPage() {
           )}
         </section>
       )}
-
-      <p className="footnote">
-        Felt Solver runs on your device and checks every card combination. It stops when a perfect opponent could gain only a tiny share of the pot.
-        The answer is only as good as the ranges and bet sizes you give it.
-      </p>
 
       <BottomBar>
         {solver.running ? (

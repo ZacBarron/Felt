@@ -4,10 +4,13 @@ import { type ReactNode, useEffect, useState } from 'react';
 import { db, type LoggedHand, type StoredSession } from '../state/db';
 import { useSettings } from '../state/settings';
 import { BottomBar } from '../ui/BottomBar';
+import { LogIcon } from '../ui/icons';
 import { PageHeader } from '../ui/PageHeader';
+import { EmptyState, Section } from '../ui/Section';
 import { Segmented } from '../ui/Segmented';
 import { Toggle } from '../ui/Toggle';
 import { signed } from '../ui/format';
+import './screens.css';
 
 const LIVE_KEY = 'felt.liveSession';
 
@@ -51,7 +54,7 @@ export function LogPage() {
   const [tab, setTab] = useState<Tab>('sessions');
   return (
     <div className="stack" style={{ gap: '1.3rem' }}>
-      <PageHeader title="Log" subtitle="Track sessions and note hands to study" back={{ to: '/more', label: 'More' }} />
+      <PageHeader title="Log" back={{ to: '/more', label: 'More' }} />
       <Segmented<Tab>
         ariaLabel="Section"
         stretch
@@ -107,7 +110,10 @@ function Sessions() {
     });
     // Hands logged during the session belong to it.
     const end = new Date(s.start.getTime() + s.hours * 3600000);
-    await db.logged.where('at').between(s.start, end, true, true).modify({ sessionId: id as number });
+    await db.logged
+      .where('at')
+      .between(s.start, end, true, true)
+      .modify({ sessionId: id as number });
   };
 
   const totals = sessions.reduce(
@@ -140,7 +146,15 @@ function Sessions() {
           live={live}
           onCancel={() => setEnding(false)}
           onSave={async (cashOut, note) => {
-            await save({ start: new Date(live.start), hours: (Date.now() - live.start) / 3600000, stakes: live.stakes, buyIn: live.buyIn, cashOut, venue: live.venue, note });
+            await save({
+              start: new Date(live.start),
+              hours: (Date.now() - live.start) / 3600000,
+              stakes: live.stakes,
+              buyIn: live.buyIn,
+              cashOut,
+              venue: live.venue,
+              note,
+            });
             writeLive(undefined);
             setLive(undefined);
             setEnding(false);
@@ -162,18 +176,27 @@ function Sessions() {
       )}
 
       {sessions.length > 0 && (
-        <section>
-          <h2 className="section-title">Recent sessions</h2>
+        <Section title="Recent sessions" footer="These feed your win rate on the You tab.">
+          <div className="sc-stats" style={{ marginBottom: '0.6rem' }}>
+            <div className="sc-stat">
+              <span className="sc-stat-value num">{Math.round(totals.hours)}</span>
+              <span className="sc-stat-label">Hours</span>
+            </div>
+            <div className="sc-stat">
+              <span className={`sc-stat-value num ${totals.bb >= 0 ? 'green-text' : 'red-text'}`}>{signed(totals.bb, 0)}</span>
+              <span className="sc-stat-label">Big blinds won</span>
+            </div>
+            <div className="sc-stat">
+              <span className="sc-stat-value num">{totals.hours > 0 ? signed(totals.bb / totals.hours, 1) : '0'}</span>
+              <span className="sc-stat-label">bb an hour</span>
+            </div>
+          </div>
           <div className="list">
             {sessions.map((s) => (
               <SessionRow key={s.id} s={s} bb={s.bb ?? stakes.bb} />
             ))}
           </div>
-          <div className="section-footer num">
-            {Math.round(totals.hours)} hours · {signed(totals.bb, 0)}bb · {totals.hours > 0 ? signed(totals.bb / totals.hours, 1) : '0'}bb an hour. These feed
-            your win rate on the You tab.
-          </div>
-        </section>
+        </Section>
       )}
 
       {!live && !adding && (
@@ -316,7 +339,14 @@ function PastForm({
           className="btn btn-primary btn-lg grow"
           disabled={!ok}
           onClick={() =>
-            void onSave({ start: new Date(`${date}T12:00:00`), hours: h ?? 0, stakes: stakes.trim(), buyIn: num(buyIn) ?? 0, cashOut: num(cashOut) ?? 0, venue: venue.trim() })
+            void onSave({
+              start: new Date(`${date}T12:00:00`),
+              hours: h ?? 0,
+              stakes: stakes.trim(),
+              buyIn: num(buyIn) ?? 0,
+              cashOut: num(cashOut) ?? 0,
+              venue: venue.trim(),
+            })
           }
         >
           Save session
@@ -393,12 +423,15 @@ function Hands() {
   return (
     <>
       {hands.length === 0 ? (
-        <div className="card stack" style={{ gap: '0.4rem' }}>
-          <strong>Note a hand while it is fresh</strong>
-          <p className="footnote" style={{ margin: 0 }}>
-            Write what happened in your own words. Flag the ones you are unsure about. Study them later in the Spot Lab.
-          </p>
-        </div>
+        <EmptyState
+          art={
+            <span className="sc-art-tile">
+              <LogIcon size={34} />
+            </span>
+          }
+          title="Note hands while fresh"
+          body="Flag the ones you are unsure about. Study them later in the Spot Lab."
+        />
       ) : (
         <Segmented
           ariaLabel="Filter"
@@ -534,4 +567,3 @@ function HandForm({ onDone }: { onDone: () => void }) {
     </section>
   );
 }
-
