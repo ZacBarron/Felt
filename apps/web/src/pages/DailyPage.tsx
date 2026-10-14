@@ -123,9 +123,9 @@ function Result({ number, items, scores, before, after }: { number: number; item
   const share = async () => {
     const text = shareText(number, scores, (await ratingSnapshot()).overall);
     try {
-      if (navigator.share) await navigator.share({ text: `${text}\n${location.origin}/daily` });
+      if (navigator.share) await navigator.share({ text: `${text}\n${location.origin}${import.meta.env.BASE_URL}daily` });
       else {
-        await navigator.clipboard.writeText(`${text}\n${location.origin}/daily`);
+        await navigator.clipboard.writeText(`${text}\n${location.origin}${import.meta.env.BASE_URL}daily`);
         setCopied(true);
       }
       haptic('success');

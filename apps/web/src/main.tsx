@@ -31,7 +31,7 @@ async function boot() {
   ReactDOM.createRoot(document.getElementById('root')!).render(
     <React.StrictMode>
       <SettingsProvider>
-        <Router>
+        <Router basename={import.meta.env.VITE_ROUTER === 'memory' ? undefined : import.meta.env.BASE_URL.replace(/\/$/, '')}>
           <App />
         </Router>
       </SettingsProvider>

@@ -27,7 +27,7 @@ export function studyReminder(cueId: string | undefined, minutes: number) {
       daily: true,
       alarmMinutes: 0,
       description: cue ? `When you ${cue.phrase}, open Felt for your plan.` : 'Open Felt for your plan.',
-      url: `${location.origin}/`,
+      url: `${location.origin}${import.meta.env.BASE_URL}`,
     }),
   );
 }

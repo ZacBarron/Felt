@@ -1,0 +1,54 @@
+# Publishes the web app to GitHub Pages at https://zacbarron.github.io/Felt/
+# on every push to the default branch. It is the static app only: progress
+# stays on each device (with backups), and accounts need the Felt server
+# (see docs/DEPLOY.md).
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [claude/fervent-darwin-j3s1km, main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm check
+      - name: Build for /Felt/
+        run: pnpm --filter @felt/web build
+        env:
+          FELT_BASE: /Felt/
+      # Pages has no rewrites: a copy of the app at 404.html serves deep links.
+      - run: cp apps/web/dist/index.html apps/web/dist/404.html && touch apps/web/dist/.nojekyll
+      - uses: actions/configure-pages@v5
+        with:
+          enablement: true
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: apps/web/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

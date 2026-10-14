@@ -14,6 +14,7 @@ import { reviewTotal } from '../state/decks';
 import { buildQueue, masteryForCharts, todayStats } from '../state/review';
 import { useSettings } from '../state/settings';
 import { Avatar } from '../ui/Avatar';
+import { InstallCard } from '../ui/InstallCard';
 import { HeroPattern } from '../ui/Brand';
 import { plural } from '../ui/format';
 import { CheckIcon, ChevronRightIcon, FlameIcon } from '../ui/icons';
@@ -159,6 +160,8 @@ export function DashboardPage() {
           )}
         </section>
       )}
+
+      <InstallCard />
 
       <section className="card quests reveal" aria-labelledby="today-plan">
         <div className="quests-head">

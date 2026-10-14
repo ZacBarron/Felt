@@ -149,8 +149,8 @@ export function YouPage() {
   const share = async () => {
     const text = `My Felt Rating is ${Math.round(overall.rating)}${provisional ? ' and still settling' : `. My tier is ${tierLabel(overall)}`}.${streak?.streak ? ` I'm on a ${streak.streak} day streak.` : ''}`;
     try {
-      if (navigator.share) await navigator.share({ text: `${text}\n${location.origin}` });
-      else await navigator.clipboard.writeText(`${text}\n${location.origin}`);
+      if (navigator.share) await navigator.share({ text: `${text}\n${location.origin}${import.meta.env.BASE_URL}` });
+      else await navigator.clipboard.writeText(`${text}\n${location.origin}${import.meta.env.BASE_URL}`);
       haptic('success');
     } catch {
       // Share dismissed.

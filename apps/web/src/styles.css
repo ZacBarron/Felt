@@ -5055,3 +5055,29 @@ a.card.more-me,
 .sheet::-webkit-scrollbar {
   display: none;
 }
+
+/* Install Felt on the home screen. */
+.install-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+  padding: 0.95rem 0.6rem 0.95rem 1rem;
+}
+
+.install-title {
+  font-weight: 650;
+  margin-bottom: 2px;
+}
+
+.install-btn {
+  margin-top: 0.6rem;
+  min-height: 36px;
+  padding: 0 1rem;
+}
+
+.install-close {
+  flex: none;
+  margin: -0.35rem 0 0;
+  color: var(--label-2);
+  background: transparent;
+}
