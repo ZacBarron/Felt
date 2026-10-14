@@ -6,7 +6,7 @@ import { RangeGrid } from '../components/RangeGrid';
 import { SeatStrip } from '../components/SeatStrip';
 import { haptic } from '../haptics';
 import { getChart } from '../state/charts';
-import { CheckIcon, CloseIcon, InfoIcon } from '../ui/icons';
+import { CheckIcon, CloseIcon, ExploitsIcon, SolverIcon } from '../ui/icons';
 import { LessonArt } from './LessonArt';
 import { Rich } from './rich';
 import './lesson.css';
@@ -21,36 +21,34 @@ interface Props {
   points?: string[];
 }
 
-/** How sure Felt is about a screen, in plain words. Tap for why. */
-const EVIDENCE: Record<Evidence, { label: string; title: string }> = {
-  math: { label: 'Always true', title: 'This is arithmetic. It holds in every game, against every player.' },
-  solver: { label: 'How solvers play', title: 'A pattern from computer solved strategy. Use it as a direction, not an exact number.' },
-  exploit: { label: 'Common in many games', title: 'What many players tend to do. Check it against the players at your table.' },
+/**
+ * How sure Felt is about what a screen says. It sits at the foot of the
+ * screen, after the picture and the words it qualifies, as one plain
+ * sentence: a footnote to the claim, never a label competing with the title.
+ */
+const EVIDENCE: Record<Evidence, { lead: string; text: string; Icon: typeof CheckIcon }> = {
+  math: { lead: 'Exact.', text: 'These numbers follow from the arithmetic. They hold in every game.', Icon: CheckIcon },
+  solver: { lead: 'How solvers play.', text: 'Treat the numbers as a direction, not an exact rule.', Icon: SolverIcon },
+  exploit: { lead: 'Common, not certain.', text: 'Many players do this. Check it against the players at your table.', Icon: ExploitsIcon },
 };
 
-function EvidenceTag({ evidence }: { evidence?: Evidence }) {
+function EvidenceNote({ evidence }: { evidence?: Evidence }) {
   if (!evidence) return null;
-  const e = EVIDENCE[evidence];
-  const [open, setOpen] = useState(false);
-  // The explanation opens on tap, so touch and screen reader users get it too.
+  const { lead, text, Icon } = EVIDENCE[evidence];
   return (
-    <span className="evidence-wrap">
-      <button type="button" className={`evidence evidence-${evidence}`} aria-expanded={open} onClick={() => setOpen((o) => !o)}>
-        {e.label}
-        <InfoIcon size={13} aria-hidden="true" />
-      </button>
-      {open && <span className="evidence-note">{e.title}</span>}
-    </span>
+    <p className={`evidence-line evidence-${evidence}`}>
+      <span className="evidence-icon" aria-hidden="true">
+        <Icon size={13} />
+      </span>
+      <span>
+        <strong>{lead}</strong> {text}
+      </span>
+    </p>
   );
 }
 
-function StepTitle({ title, evidence }: { title: string; evidence?: Evidence }) {
-  return (
-    <div className="lesson-title-row">
-      <h2 className="display lesson-h2">{title}</h2>
-      <EvidenceTag evidence={evidence} />
-    </div>
-  );
+function StepTitle({ title }: { title: string }) {
+  return <h2 className="display lesson-h2">{title}</h2>;
 }
 
 /** Numbers, percentages and short comparisons like "20 vs 11%" stay right aligned. */
@@ -86,7 +84,7 @@ export function StepView({ step, onAnswer, answered, points }: Props) {
     case 'text':
       return (
         <div className="lesson-step">
-          <StepTitle title={step.title} evidence={step.evidence} />
+          <StepTitle title={step.title} />
           {/* Three or more paragraphs open with a lead, so a long step has a way in. */}
           <div className={`lesson-prose${step.body.length >= 3 ? ' has-lead' : ''}`}>
             {step.body.map((p, i) => (
@@ -95,6 +93,7 @@ export function StepView({ step, onAnswer, answered, points }: Props) {
               </p>
             ))}
           </div>
+          <EvidenceNote evidence={step.evidence} />
         </div>
       );
     case 'formula':
@@ -123,7 +122,7 @@ export function StepView({ step, onAnswer, answered, points }: Props) {
       const textCols = step.columns.map((_, j) => j > 0 && step.rows.some((r) => !isNumeric(r[j])));
       return (
         <div className="lesson-step">
-          <StepTitle title={step.title} evidence={step.evidence} />
+          <StepTitle title={step.title} />
           <div className="card lesson-table">
             <table>
               <thead>
@@ -149,6 +148,7 @@ export function StepView({ step, onAnswer, answered, points }: Props) {
             </table>
           </div>
           {step.note && <p className="lesson-note">{step.note}</p>}
+          <EvidenceNote evidence={step.evidence} />
         </div>
       );
     }
@@ -195,7 +195,7 @@ export function StepView({ step, onAnswer, answered, points }: Props) {
     case 'board':
       return (
         <div className="lesson-step">
-          <StepTitle title={step.title} evidence={step.evidence} />
+          <StepTitle title={step.title} />
           <div className="lesson-felt">
             <div className="row" style={{ justifyContent: 'center', gap: 6 }}>
               {parseCards(step.board).map((c, i, all) => (
@@ -206,6 +206,7 @@ export function StepView({ step, onAnswer, answered, points }: Props) {
           <p className="lesson-p">
             <Rich text={step.caption} />
           </p>
+          <EvidenceNote evidence={step.evidence} />
         </div>
       );
     case 'callout':
@@ -223,11 +224,12 @@ export function StepView({ step, onAnswer, answered, points }: Props) {
     case 'visual':
       return (
         <div className="lesson-step">
-          <StepTitle title={step.title} evidence={step.evidence} />
+          <StepTitle title={step.title} />
           <LessonArt art={step.art} size="step" />
           <p className="lesson-p">
             <Rich text={step.caption} />
           </p>
+          <EvidenceNote evidence={step.evidence} />
         </div>
       );
     case 'quiz':
