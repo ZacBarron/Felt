@@ -43,7 +43,6 @@ export const TOURNAMENT_LESSONS: LessonContent[] = [
           ],
         },
         caption: 'So against a 2.2bb open, the big blind still calls **1.2bb**. It just calls into a bigger pot.',
-        evidence: 'math',
       },
       {
         kind: 'formula',
@@ -65,7 +64,7 @@ export const TOURNAMENT_LESSONS: LessonContent[] = [
           ],
         },
         caption:
-          'A 2.2bb steal needs fewer folds with the ante. The big blind needs less equity to call it. Both prices drop because there is more to win for the same risk.',
+          'A steal with no equity needs risk ÷ (pot + risk) in folds. With the ante that is 2.2 ÷ 4.7 = 46.8%. The big blind needs less equity to call too.',
         evidence: 'math',
       },
       {
@@ -89,6 +88,7 @@ export const TOURNAMENT_LESSONS: LessonContent[] = [
         choices: ['1.5bb', '2bb', '2.5bb'],
         answer: 2,
         explain: '0.5 + 1 + 1 = 2.5bb. That is 67% more to win than the 1.5bb pot without an ante. The 1.5bb answer forgets the ante.',
+        point: 0,
       },
       {
         kind: 'quiz',
@@ -96,20 +96,22 @@ export const TOURNAMENT_LESSONS: LessonContent[] = [
         choices: ['1.2bb', '0.2bb', '2.2bb'],
         answer: 0,
         explain: 'The blind is live, so its 1bb already counts. The ante is dead, so it does not. 2.2 − 1 = 1.2bb. The 0.2bb answer wrongly counts the ante toward the call.',
+        point: 1,
       },
       {
         kind: 'quiz',
         question: 'There is a 1bb big blind ante. How often must everyone fold for a 2.2bb steal with no equity to break even?',
         choices: ['59.5%', '46.8%', '88.0%'],
         answer: 1,
-        explain: '2.2 ÷ (2.5 + 2.2) = 46.8%. The 59.5% answer is the price with no ante, 2.2 ÷ 3.7. The 88.0% answer divides by the pot alone and forgets your own risk.',
+        explain: 'Like the bars showed, 2.2 ÷ (2.5 + 2.2) = 46.8%. The 59.5% answer is the price with no ante, 2.2 ÷ 3.7. The 88.0% answer leaves your own risk out of the pot.',
+        point: 2,
       },
       {
         kind: 'takeaway',
         points: [
           'A 1bb big blind ante makes the pot 2.5bb before anyone acts.',
           'The ante is dead. The big blind’s blind is live.',
-          'Cheaper steals and better prices mean wider opens and wider defense.',
+          'A steal needs risk ÷ (pot + risk) in folds. Antes make it cheaper, so ranges widen.',
         ],
       },
     ],
@@ -206,7 +208,6 @@ export const TOURNAMENT_LESSONS: LessonContent[] = [
           'From early position, every player behind might hold a strong hand. So the chance that all of them fold drops fast. From the button or small blind, only one or two players can call.',
           'That is why shoving ranges widen seat by seat toward the button. They are widest in the small blind.',
         ],
-        evidence: 'math',
       },
       {
         kind: 'visual',
@@ -235,7 +236,8 @@ export const TOURNAMENT_LESSONS: LessonContent[] = [
         choices: ['20.8%', '79.2%', '86.4%'],
         answer: 1,
         explain:
-          'You risk 9.5bb to win the 2.5bb pot. 9.5 ÷ (2.5 + 9.5) = 79.2%. The 86.4% answer leaves the ante out of the pot. Real hands have equity when called, so they need fewer folds.',
+          'Set eq to 0 in the shove formula. You risk 9.5bb to win the 2.5bb pot. 9.5 ÷ (2.5 + 9.5) = 79.2%. The 86.4% answer leaves the ante out of the pot.',
+        point: 0,
       },
       {
         kind: 'quiz',
@@ -243,7 +245,8 @@ export const TOURNAMENT_LESSONS: LessonContent[] = [
         choices: ['The small blind shoving', 'Both need the same', 'The big blind calling'],
         answer: 2,
         explain:
-          'The shover also wins when the big blind folds. The caller wins only at showdown, so it needs 42.9% here. The shover can profit with far less, like 30.7% with 9♣3♦.',
+          'Like the gap bars showed, the shover also wins when the big blind folds. The caller wins only at showdown, so it needs 42.9% here. The shover can profit with 30.7%.',
+        point: 2,
       },
       {
         kind: 'quiz',
@@ -251,7 +254,16 @@ export const TOURNAMENT_LESSONS: LessonContent[] = [
         choices: ['They get wider', 'They get tighter', 'They stay the same'],
         answer: 0,
         explain:
-          'A shove now risks less to win the same pot. The fold term weighs more, and losing when called costs less. Tightening up feels safe, but in chip EV the ranges widen.',
+          'A shove now risks less to win the same pot. Like 9♣3♦ showed, the same hand gains as the stack shrinks. In chip EV the ranges widen.',
+        point: 1,
+      },
+      {
+        kind: 'quiz',
+        question: 'You are close to the money in a tournament. How do calling ranges compare with these chip EV numbers?',
+        choices: ['Tighter', 'Wider', 'The same'],
+        answer: 0,
+        explain: 'Near the money, losing chips costs more than winning them gains. So calling ranges tighten further. The ICM lesson covers why.',
+        point: 3,
       },
       {
         kind: 'takeaway',
@@ -289,7 +301,6 @@ export const TOURNAMENT_LESSONS: LessonContent[] = [
           'The winner does not get the whole prize pool. Doubling your stack never doubles your prize money. Once you are in the money, busting still pays the place you reach.',
           'So each extra chip adds less money than the one before. Risking chips in a close spot costs money, even when it gains chips on average.',
         ],
-        evidence: 'math',
       },
       {
         kind: 'visual',
@@ -304,7 +315,6 @@ export const TOURNAMENT_LESSONS: LessonContent[] = [
           ],
         },
         caption: 'Later places work the same way as 2nd. ICM is a model. It ignores skill and position. It also ignores rising blinds and how future hands play.',
-        evidence: 'math',
       },
       {
         kind: 'formula',
@@ -406,7 +416,8 @@ export const TOURNAMENT_LESSONS: LessonContent[] = [
         choices: ['Less than 20%', 'Exactly 20%', 'More than 20%'],
         answer: 1,
         explain:
-          'The model starts by setting the chance to finish first equal to chip share. 2,000 ÷ 10,000 = 20%. The short stack’s extra money comes from the lower places, not from first.',
+          'Like the model showed, the chance to finish first equals chip share. 2,000 ÷ 10,000 = 20%. The short stack’s extra money comes from the lower places, not from first.',
+        point: 1,
       },
       {
         kind: 'quiz',
@@ -414,7 +425,8 @@ export const TOURNAMENT_LESSONS: LessonContent[] = [
         choices: ['About 41%', 'About 50%', 'About 61%'],
         answer: 2,
         explain:
-          'Winning takes B from $32.75 to $41. Losing drops B to $20. Breakeven is 12.75 ÷ 21 = 60.7%. The 50% answer is chip EV, which ignores the payouts.',
+          'Like the table showed, winning takes B from $32.75 to $41. Losing drops B to $20. Breakeven is 12.75 ÷ 21 = 60.7%. The 50% answer is chip EV, which ignores the payouts.',
+        point: 2,
       },
       {
         kind: 'quiz',
@@ -422,7 +434,16 @@ export const TOURNAMENT_LESSONS: LessonContent[] = [
         choices: ['Payouts are spread over several places', 'Blinds rise as the tournament goes on', 'Big stacks can bully smaller stacks'],
         answer: 0,
         explain:
-          'With payouts spread over places, doubling up never doubles your prize. In the model, only the payout structure makes chips and money differ. Rising blinds and stack pressure matter at the table, but they are not in the model.',
+          'With payouts spread over places, doubling up never doubles your prize. In the model, only the payouts make chips and money differ. Rising blinds matter at the table, but they are not in the model.',
+        point: 0,
+      },
+      {
+        kind: 'quiz',
+        question: 'A covers C. Why can A shove wider against C than chip EV suggests?',
+        choices: ['A loss does not knock A out, so C must call tighter', 'ICM gives the big stack extra chips', 'A has more skill than C'],
+        answer: 0,
+        explain: 'Like the bars showed, the covered stack pays the risk premium. A covers C, so A survives a loss. That lets the covering stack apply pressure.',
+        point: 3,
       },
       {
         kind: 'takeaway',

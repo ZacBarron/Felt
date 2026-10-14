@@ -268,6 +268,18 @@ describe('lessons', () => {
     expect(mix('9max-100-rfi-btn', 'K5o').raise).toBeCloseTo(0.1);
     expect(mix('9max-100-rfi-btn', 'K4o')).toEqual({ fold: 1 });
     expect(mix('9max-100-bb-vs-btn', 'J5s')).toEqual({ call: 1 });
+    // Captions and questions added so each chart question is answerable from its lesson.
+    expect(mix('9max-100-rfi-utg', '66').raise).toBeCloseTo(0.85);
+    for (const hand of ['A3s', 'A4s', 'A5s']) expect(mix('9max-100-rfi-lj', hand)).toEqual({ raise: 1 });
+    for (const hand of ['A2s', 'A6s', 'A7s']) expect(mix('9max-100-rfi-lj', hand).raise).toBeGreaterThanOrEqual(0.8);
+    for (const hand of ['Q8s', 'Q7s', 'Q6s', 'Q5s']) expect(mix('9max-100-rfi-co', hand).fold).toBeGreaterThan(0);
+    for (const hand of ['K2s', 'K8s']) expect(mix('9max-100-rfi-sb', hand)).toEqual({ raise: 1 });
+    expect(mix('9max-100-rfi-sb', 'K8o').fold).toBeGreaterThan(0);
+    for (const hand of ['J7s', 'J6s']) expect(mix('9max-100-bb-vs-btn', hand)).toEqual({ call: 1 });
+    expect(mix('9max-100-bb-vs-btn', 'A5s')['3bet']).toBeCloseTo(0.7);
+    expect(mix('9max-100-btn-vs-3bet', 'K9o')).toEqual({ fold: 1 });
+    expect(mix('9max-100-iso-btn-vs-1limp', '65s')).toEqual({ call: 1 });
+    expect(mix('9max-100-iso-btn-vs-2limp', 'AQo')).toEqual({ raise: 1 });
     expect(mix('9max-100-bb-vs-btn', 'A4s')['3bet']).toBeCloseTo(0.6);
     expect(mix('9max-100-bb-vs-btn', 'A5s')['3bet']).toBeGreaterThan(0.6);
     expect(mix('9max-100-bb-vs-btn', 'A3s')['3bet']).toBeLessThan(0.6);

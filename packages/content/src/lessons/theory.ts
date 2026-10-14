@@ -28,11 +28,10 @@ export const THEORY_LESSONS: LessonContent[] = [
           'In a two player zero sum game, each equilibrium strategy guarantees at least the **value of the game**. That holds whatever the opponent does.',
           'That is what unexploitable means. An opponent who knows your strategy exactly still cannot push your result below that value.',
         ],
-        evidence: 'math',
       },
       {
         kind: 'table',
-        title: 'River, pot 10bb, bet 10bb, two value combos per bluff',
+        title: 'A 10bb river bet into 10bb, 2 value combos per bluff',
         columns: ['Villain’s bluff catchers', 'Value', 'Bluff', 'Average'],
         rows: [
           ['Fold all', '+10', '+10', '+10'],
@@ -69,7 +68,6 @@ export const THEORY_LESSONS: LessonContent[] = [
           ],
         },
         caption: 'So an equilibrium strategy cannot lose over both seats. The big blind still loses on average when it plays perfectly. It posts a blind and plays out of position. Unexploitable means you lose no more than the spot is worth.',
-        evidence: 'math',
       },
       {
         kind: 'text',
@@ -79,7 +77,6 @@ export const THEORY_LESSONS: LessonContent[] = [
           'A best response would bluff every hand against the folder. It would stop bluffing against the caller.',
           'Equilibrium only profits when the opponent picks a strictly worse action. One example is calling with a hand that should always fold. Another is folding a hand that should always continue. Weak players make many of these mistakes. A best response still wins far more from them.',
         ],
-        evidence: 'math',
       },
       {
         kind: 'visual',
@@ -93,7 +90,6 @@ export const THEORY_LESSONS: LessonContent[] = [
           ],
         },
         caption: 'Equilibrium gains nothing from a mistake between indifferent actions. Only a deviation turns that mistake into profit.',
-        evidence: 'math',
       },
       {
         kind: 'visual',
@@ -108,7 +104,6 @@ export const THEORY_LESSONS: LessonContent[] = [
           ],
         },
         caption: 'Mixing parts of different equilibria is not an equilibrium. Even when you play one, the other players’ choices can cost you. No collusion is needed. Multiway solver outputs are useful guides, not guarantees.',
-        evidence: 'math',
       },
       {
         kind: 'text',
@@ -117,7 +112,6 @@ export const THEORY_LESSONS: LessonContent[] = [
           'A solver output is the equilibrium of the game you described. That game includes the ranges entering the spot and the bet sizes allowed. It also includes the stack depth and the rake. The number of players matters too.',
           'Change any of these and the answer changes. A solution built on the wrong preflop ranges is a precise answer to the wrong question.',
         ],
-        evidence: 'math',
       },
       {
         kind: 'quiz',
@@ -125,7 +119,8 @@ export const THEORY_LESSONS: LessonContent[] = [
         choices: ['The same', 'Higher', 'Lower'],
         answer: 0,
         explain:
-          'Your bluffs make villain’s bluff catchers indifferent. So their choice to call or fold does not change your EV. Higher is the tempting answer. To profit from the overfolding, you must deviate and bluff more.',
+          'Like the table showed, your bluffs make villain’s bluff catchers indifferent. So calling or folding gives you the same +10. Higher is the tempting answer. To profit from the overfolding, you must bluff more.',
+        point: 1,
       },
       {
         kind: 'quiz',
@@ -136,7 +131,8 @@ export const THEORY_LESSONS: LessonContent[] = [
           'Your EV in the spot is never negative',
         ],
         answer: 1,
-        explain: 'The guarantee is a floor, not a maximum. The floor can be negative, as in the big blind. So never negative goes too far.',
+        explain: 'Like the lesson said, the guarantee is a floor. It is not a maximum. The floor can be negative, as in the big blind. So never negative goes too far.',
+        point: 0,
       },
       {
         kind: 'quiz',
@@ -147,7 +143,16 @@ export const THEORY_LESSONS: LessonContent[] = [
           'Other players’ choices can still cost you',
         ],
         answer: 2,
-        explain: 'The no loss guarantee belongs to two player zero sum games. Multiway, equilibria still exist. They just protect you far less.',
+        explain: 'Like the picture of 3 or more players showed, equilibria still exist but the guarantee is gone. The floor belongs to two player zero sum games.',
+        point: 2,
+      },
+      {
+        kind: 'quiz',
+        question: 'A solver output was built on the wrong preflop ranges. How should you treat it?',
+        choices: ['As a precise answer to the wrong question', 'As right, since solvers are exact', 'As right, if the bet sizes match'],
+        answer: 0,
+        explain: 'Like the inputs step said, a solution answers the game you described. Wrong ranges make it a different game. Matching sizes do not fix that.',
+        point: 3,
       },
       {
         kind: 'takeaway',
@@ -186,7 +191,6 @@ export const THEORY_LESSONS: LessonContent[] = [
           'The solver starts with some strategy for both players, often an even mix. Each iteration it walks the game tree. For every hand at every decision, it works out how each action would have done. It measures this against the opponent’s current strategy.',
           'Then it updates both strategies and repeats. This family of methods is counterfactual regret minimization, or CFR.',
         ],
-        evidence: 'math',
       },
       {
         kind: 'formula',
@@ -225,7 +229,6 @@ export const THEORY_LESSONS: LessonContent[] = [
           ],
         },
         caption: 'In two player zero sum games, the **average** strategy converges to an equilibrium. Modern variants weight later iterations more heavily. That usually converges faster.',
-        evidence: 'math',
       },
       {
         kind: 'text',
@@ -234,7 +237,6 @@ export const THEORY_LESSONS: LessonContent[] = [
           'A solver cannot consider every possible bet size. You give it a short list of bet and raise sizes. It finds the best strategy within that tree.',
           'If a real opponent uses a size the tree leaves out, the solution does not cover it. Fewer sizes solve faster. More sizes describe the game better.',
         ],
-        evidence: 'math',
       },
       {
         kind: 'table',
@@ -247,7 +249,6 @@ export const THEORY_LESSONS: LessonContent[] = [
           ['Zero', 'An exact equilibrium of that tree'],
         ],
         note: 'Solvers stop at a target you set. Exploitability is measured inside the tree, never against sizes it left out.',
-        evidence: 'math',
       },
       {
         kind: 'visual',
@@ -262,7 +263,6 @@ export const THEORY_LESSONS: LessonContent[] = [
           ],
         },
         caption: 'Aggregate reports show patterns you can learn, not single boards. Start from the pattern. Then use the hand detail to see why the exceptions differ.',
-        evidence: 'math',
       },
       {
         kind: 'text',
@@ -272,7 +272,6 @@ export const THEORY_LESSONS: LessonContent[] = [
           'So a mix tells you the hand is close to indifferent. The exact split matters for the balance of the range. It matters little for that hand’s own EV.',
           'Tiny mixes can also be leftovers from a solve that has not fully converged. There can also be several equilibria that split frequencies between combos differently.',
         ],
-        evidence: 'math',
       },
       {
         kind: 'visual',
@@ -286,7 +285,6 @@ export const THEORY_LESSONS: LessonContent[] = [
           ],
         },
         caption: 'If one action were clearly better, regret would push the hand fully into it. So a mix tells you the hand is close to indifferent.',
-        evidence: 'math',
       },
       {
         kind: 'callout',
@@ -299,7 +297,8 @@ export const THEORY_LESSONS: LessonContent[] = [
         question: 'In CFR, which strategy converges to an equilibrium?',
         choices: ['The strategy from the latest iteration', 'The average over all iterations', 'The single iteration with least regret'],
         answer: 1,
-        explain: 'The latest strategy can keep cycling around the equilibrium. The average over iterations is what converges in two player zero sum games.',
+        explain: 'Like the convergence picture showed, the latest strategy can keep cycling. The average over iterations is what converges in two player zero sum games.',
+        point: 1,
       },
       {
         kind: 'quiz',
@@ -307,7 +306,8 @@ export const THEORY_LESSONS: LessonContent[] = [
         choices: ['Call 100%', 'Call 53%, raise 13% and fold 33%', 'Call 80% and raise 20%'],
         answer: 2,
         explain:
-          'Only positive regret counts. Call gets 8 ÷ 10 = 80% and raise gets 2 ÷ 10 = 20%. Fold has negative regret, so it gets nothing. The 53/13/33 split wrongly counts the −5 as a weight.',
+          'Like the regret bars showed, only positive regret counts. Call gets 8 ÷ 10 = 80% and raise gets 2 ÷ 10 = 20%. Fold has negative regret, so it gets nothing. The 53/13/33 split counts the −5 as a weight.',
+        point: 0,
       },
       {
         kind: 'quiz',
@@ -315,14 +315,23 @@ export const THEORY_LESSONS: LessonContent[] = [
         choices: ['Betting and checking have about the same EV', 'Betting is slightly better for that hand', 'The solve has not finished converging'],
         answer: 0,
         explain:
-          'Mixing happens at indifference. The split keeps the range balanced, and the hand earns about the same either way. Betting more often does not mean betting earns more.',
+          'Like the mix picture showed, a hand mixes only near indifference. The split keeps the range balanced. Betting more often does not mean betting earns more.',
+        point: 3,
+      },
+      {
+        kind: 'quiz',
+        question: 'A solution has exploitability near zero. Villain uses a bet size the tree left out. What does that number tell you about this size?',
+        choices: ['Nothing, since it is measured inside the tree', 'The size is covered too', 'The size loses for villain'],
+        answer: 0,
+        explain: 'Like the table note said, exploitability is measured inside the tree. A size the tree left out is not covered at all. You chose which sizes to include.',
+        point: 2,
       },
       {
         kind: 'takeaway',
         points: [
-          'Solvers play themselves and move toward actions with positive regret.',
-          'The average strategy converges. You choose the tree of sizes.',
-          'Exploitability is measured inside the tree.',
+          'Regret matching plays each action in proportion to its positive regret.',
+          'The average strategy converges, not the latest one.',
+          'Exploitability is measured only inside the tree of sizes you chose.',
           'A mix means near indifference, not a precise order for that hand.',
         ],
       },
@@ -365,7 +374,6 @@ export const THEORY_LESSONS: LessonContent[] = [
           'A hand that mixes is close to indifferent. Always taking one action with it costs that hand almost nothing. That holds as long as the opponent keeps playing the same way.',
           'The cost appears when many hands move the same way at once. Then your range’s frequencies shift. An opponent who notices can adjust against them.',
         ],
-        evidence: 'math',
       },
       {
         kind: 'visual',
@@ -379,7 +387,6 @@ export const THEORY_LESSONS: LessonContent[] = [
           ],
         },
         caption: 'Both actions are worth about the same for this hand. So either pure choice costs it close to nothing.',
-        evidence: 'math',
       },
       {
         kind: 'text',
@@ -389,7 +396,6 @@ export const THEORY_LESSONS: LessonContent[] = [
           'The second gives a balanced strategy for the simpler game. It picks again which hands bet when only one size exists. Rounding can leave ranges unbalanced.',
           'To measure a simplification, compare its EV with the full solution on the same ranges.',
         ],
-        evidence: 'math',
       },
       {
         kind: 'visual',
@@ -425,7 +431,8 @@ export const THEORY_LESSONS: LessonContent[] = [
         choices: ['About half its EV', 'Close to nothing', 'About 10% of the pot'],
         answer: 1,
         explain:
-          'Mixing means the two actions are worth about the same for that hand. So picking one costs almost nothing. The 50% mix is not a 50% error. The risk is to your range’s balance, and only if the opponent adapts.',
+          'Like the purifying picture showed, both actions are worth about the same for that hand. So picking one costs almost nothing. The 50% mix is not a 50% error.',
+        point: 0,
       },
       {
         kind: 'quiz',
@@ -437,7 +444,8 @@ export const THEORY_LESSONS: LessonContent[] = [
         ],
         answer: 0,
         explain:
-          'A restricted solve rebalances the range around the options you will use. Rounding moves many hands at once and can unbalance the range. A blanket small bet is costly on boards that favor the caller.',
+          'Like the lesson said, solving the simpler game rebalances the range around the options you will use. Rounding moves many hands at once and can unbalance the range. A blanket small bet is costly on boards like 765.',
+        point: 1,
       },
       {
         kind: 'quiz',
@@ -449,7 +457,16 @@ export const THEORY_LESSONS: LessonContent[] = [
         ],
         answer: 2,
         explain:
-          'A wrong preflop range is an input error. It affects every flop that follows. A missing size or a purified close hand is a small, local loss in most spots.',
+          'Like the picture of small and big errors showed, a wrong preflop range costs in every hand after. A missing size or a purified close hand is a small loss in most spots.',
+        point: 2,
+      },
+      {
+        kind: 'quiz',
+        question: 'Where does a simple rule usually cost you the most?',
+        choices: ['On the river in a deep 3bet pot', 'On the flop in a small single raised pot', 'Every spot costs the same'],
+        answer: 0,
+        explain: 'Like the 765 board step said, rivers are less forgiving and errors scale with the pot. So deep 3bet pots on the river punish shortcuts most.',
+        point: 3,
       },
       {
         kind: 'takeaway',
@@ -457,7 +474,7 @@ export const THEORY_LESSONS: LessonContent[] = [
           'Mixed hands are cheap to purify one at a time.',
           'Simplify by solving the simpler game, not by rounding.',
           'Wrong ranges cost more than missing sizes.',
-          'Polarized spots and rivers punish shortcuts most. So do big pots.',
+          'Rivers and big pots punish shortcuts the most.',
         ],
       },
     ],
@@ -559,7 +576,8 @@ export const THEORY_LESSONS: LessonContent[] = [
         choices: ['A♠A♥ vs K♦K♣', 'A♠K♦ vs Q♥Q♣', 'A♠K♦ vs 2♣2♥', 'A♠K♦ vs A♥Q♣'],
         answer: 2,
         explain:
-          'AK against a small pair is 47.0% to 53.0%. AK against QQ is 42.8%, a bit further from even. AA against KK is 81.3%, and AK against AQ is 74.0%.',
+          'Like the pairs tables showed, AK against a small pair is 47.0% to 53.0%. AK against QQ is 42.8%, a bit further from even. AA against KK is 81.3%. AK against AQ is 74.0%.',
+        point: 0,
       },
       {
         kind: 'quiz',
@@ -569,7 +587,8 @@ export const THEORY_LESSONS: LessonContent[] = [
         choices: ['9♥8♥, with about 55%', 'A♠A♦, with about 65%', 'A♠A♦, with about 80%'],
         answer: 0,
         explain:
-          'The draw has 15 outs with two cards to come. That is 9 hearts plus 6 more straight cards. It holds 55.4%. The overpair feels ahead, but 15 outs twice is a lot.',
+          'Like the flop table showed, 9♥8♥ holds 55.4%. It has 15 outs with two cards to come. The overpair feels ahead, but 15 outs twice is a lot.',
+        point: 3,
       },
       {
         kind: 'quiz',
@@ -578,7 +597,8 @@ export const THEORY_LESSONS: LessonContent[] = [
         board: 'Kh7h2c',
         choices: ['40%', '60%', '70%', '80%'],
         answer: 1,
-        explain: 'The flush draw has 39.5%, so top pair holds 60.5%. The 40% answer is the draw’s share, not yours. You are a favorite, but far from safe.',
+        explain: 'Like the flop table showed, the flush draw has 39.5%. So top pair holds 60.5%. The 40% answer is the draw’s share, not yours.',
+        point: 2,
       },
       {
         kind: 'visual',
@@ -596,6 +616,15 @@ export const THEORY_LESSONS: LessonContent[] = [
         },
         caption: 'Each bar is the first hand’s exact equity before the flop. A pair against two overcards is close to a flip. Domination is not.',
         evidence: 'math',
+      },
+      {
+        kind: 'quiz',
+        question: 'You get all in before the flop with A♠K♦ against A♥Q♣. What is your equity closest to?',
+        cards: 'AsKd',
+        choices: ['50%', '60%', '74%', '90%'],
+        answer: 2,
+        explain: 'Like the bars showed, AK holds 74.0% against AQ. The shared ace helps neither hand. AQ mostly needs a queen, so domination is brutal.',
+        point: 1,
       },
       {
         kind: 'takeaway',

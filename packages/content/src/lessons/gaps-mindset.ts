@@ -99,6 +99,7 @@ export const GAPS_MINDSET_LESSONS: LessonContent[] = [
         choices: ['Leave, since the game will be there next time', 'Play one more hour to get back to even', 'Move up to win it back faster'],
         answer: 0,
         explain: 'The limit only works if you keep it. A soft game will come again. Your play after a big loss is the part that has changed.',
+        point: 0,
       },
       {
         kind: 'quiz',
@@ -106,6 +107,7 @@ export const GAPS_MINDSET_LESSONS: LessonContent[] = [
         choices: ['Losing 3 sessions in a row', 'Using money meant for rent to play', 'A bad night against a lucky player'],
         answer: 1,
         explain: 'Losing streaks happen to every winning player. Playing with money you need for bills is different. It is a sign to stop and talk to someone.',
+        point: 3,
       },
       {
         kind: 'quiz',
@@ -113,6 +115,23 @@ export const GAPS_MINDSET_LESSONS: LessonContent[] = [
         choices: ['Take a break and talk to someone you trust', 'Play bigger to win it back faster', 'Keep it to yourself until you are even'],
         answer: 0,
         explain: 'These are signs that poker has stopped being healthy for you. A break and an honest talk help most. A professional counselor can help too.',
+        point: 3,
+      },
+      {
+        kind: 'quiz',
+        question: 'You are winning but feel tired after 3 hours. Your time limit is 4 hours. What fits your stop rules?',
+        choices: ['Stop now, since tired play costs money', 'Play the last hour, since you are winning', 'Play until you lose a pot'],
+        answer: 0,
+        explain: 'Tired or upset means stop, whatever the score. A time limit is the most you play, not a target. Leave while the game is still fun.',
+        point: 1,
+      },
+      {
+        kind: 'quiz',
+        question: 'You are down 2 buy ins at 1/3. You think about moving to 2/5 to win it back faster. What is this?',
+        choices: ['Chasing a loss', 'A planned move up with a set budget', 'Good bankroll management'],
+        answer: 0,
+        explain: 'Playing bigger to win back a loss is chasing. It raises your risk just when your play is at its worst. A planned move up has a budget set in advance.',
+        point: 2,
       },
       {
         kind: 'takeaway',

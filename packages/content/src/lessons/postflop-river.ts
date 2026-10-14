@@ -128,21 +128,22 @@ export const POSTFLOP_RIVER_LESSONS: LessonContent[] = [
         choices: ['It is exactly break even', 'Check, since you are behind too often', 'Bet, since you beat most of the calls'],
         answer: 2,
         explain:
-          'Leave out the chops. You beat 14 of 26 calls, about 54%. Betting gains 2 bets over those 26 calls. Counting the chops as losses is the usual mistake.',
+          'Like the rule said, leave out the chops. You beat 14 of 26 calls, about 54%. Betting gains 2 bets over those 26 calls. Counting the chops as losses is the usual mistake.',
+        point: 0,
       },
       {
         kind: 'quiz',
         question: 'Two players call with the same 10 better combos. Player A also calls with 8 worse combos, and player B with 14. Neither raises. Who should you bet against?',
         choices: ['Only player B', 'Only player A', 'Both of them', 'Neither of them'],
         answer: 0,
-        explain: 'You beat 8 of 18 calls from A, so check. You beat 14 of 24 from B, so bet. The hand is the same. The calling range decides.',
+        explain: 'Like the regular and the station showed, the calling range decides. You beat 8 of 18 calls from A, so check. You beat 14 of 24 from B, so bet.',
+        point: 1,
       },
       {
         kind: 'takeaway',
         points: [
-          'Bet when you beat more than half of the hands that call.',
-          'Bluff raises make thin bets worse. So do value raises you call.',
-          'Count this opponent’s calling range, not a generic one.',
+          'Bet when you beat more than half of the hands that call. Leave chops out.',
+          'Count this opponent’s calling range. The same hand can bet against a station and check against a regular.',
         ],
       },
     ],
@@ -254,7 +255,8 @@ export const POSTFLOP_RIVER_LESSONS: LessonContent[] = [
         question: 'You bet 1.5 times the pot as a pure bluff. How often must villain fold for it to break even?',
         choices: ['40.0%', '50.0%', '60.0%', '66.7%'],
         answer: 2,
-        explain: 'Alpha is 1.5 ÷ (1 + 1.5), which is 60.0%. The 40.0% figure is the MDF, the share villain must continue with.',
+        explain: 'Like the table showed, alpha is 1.5 ÷ (1 + 1.5) = 60.0%. The 40.0% figure is the MDF, the share villain must continue with.',
+        point: 1,
       },
       {
         kind: 'quiz',
@@ -262,7 +264,8 @@ export const POSTFLOP_RIVER_LESSONS: LessonContent[] = [
         choices: ['Top pair, weak kicker', 'The nut straight', 'Second pair'],
         answer: 1,
         explain:
-          'Overbets are polar. The nuts gets the most from villain’s bluff catchers. Top pair with a weak kicker gains little from worse hands. At a big size it mostly gets called by better.',
+          'Like the polar step said, overbets hold very strong hands and bluffs. The nuts gets the most from villain’s bluff catchers. Top pair with a weak kicker mostly gets called by better.',
+        point: 0,
       },
       {
         kind: 'quiz',
@@ -271,13 +274,13 @@ export const POSTFLOP_RIVER_LESSONS: LessonContent[] = [
         answer: 3,
         explain:
           'Bluff share is 2 ÷ (1 + 2 × 2), which is 40.0%. A bluff catcher then breaks even. It calls 2 to win 3 and wins 40.0% of the time. The 33.3% figure is the MDF, not the bluff share.',
+        point: 1,
       },
       {
         kind: 'takeaway',
         points: [
-          'Overbet with a nut advantage against a capped range.',
-          'Overbet ranges are polar, with nut hands and well chosen bluffs.',
-          'At 2x pot, villain needs 40.0% equity to call. You may bluff with 40.0% of your range.',
+          'Overbet only with a nut advantage against a capped range. Bet nut hands and bluffs, not medium hands.',
+          'A 1.5x pot bluff needs 60% folds. At 2x pot, 40% of your bets can be bluffs.',
         ],
       },
     ],
@@ -377,7 +380,8 @@ export const POSTFLOP_RIVER_LESSONS: LessonContent[] = [
         question: 'Villain bets a quarter of the pot on the river. What equity do you need to call?',
         choices: ['16.7%', '20.0%', '25.0%', '33.3%'],
         answer: 0,
-        explain: 'You call 0.25 to win a final pot of 1.5. That is 0.25 ÷ 1.5, or 16.7%. The 20.0% figure is the folds a quarter pot bluff needs, not your price.',
+        explain: 'Like the table showed, you call 0.25 to win a final pot of 1.5. That is 16.7%. The 20.0% figure is the folds a quarter pot bluff needs, not your price.',
+        point: 2,
       },
       {
         kind: 'quiz',
@@ -386,13 +390,22 @@ export const POSTFLOP_RIVER_LESSONS: LessonContent[] = [
         answer: 2,
         explain:
           'Your small bet range is capped and folds too much to raises. Against a lead of 10 into 40, a raise to 40 needs only 44.4% folds. Just calling lets you reach a cheap showdown, which is what you want.',
+        point: 1,
+      },
+      {
+        kind: 'quiz',
+        question: 'Out of position on the river with a medium hand, why lead 10 into 40?',
+        choices: ['You set a cheap price instead of facing a bigger bet', 'It folds out the better hands', 'It wins more when a better hand calls'],
+        answer: 0,
+        explain: 'Like the block bet step showed, a check can face 30 into 40. That needs 30% to call. Leading 10 lets you choose the price. Worse hands can also call it.',
+        point: 0,
       },
       {
         kind: 'takeaway',
         points: [
-          'Small bets set your price and get thin value from many worse hands.',
-          'Their weakness is the raise. Keep some strong hands in the range.',
-          'Facing a quarter pot bet, you need only 16.7% equity.',
+          'Small bets set your own price and get thin value from many worse hands.',
+          'The raise is a small bet’s weakness. Keep some strong hands in the range.',
+          'Facing a quarter pot bet you need only 16.7% equity.',
         ],
       },
     ],
@@ -489,7 +502,8 @@ export const POSTFLOP_RIVER_LESSONS: LessonContent[] = [
         question: 'The pot is 100. Villain bets 75 and you raise to 225 as a bluff. How often must villain fold?',
         choices: ['37.5%', '42.9%', '50.0%', '56.3%'],
         answer: 3,
-        explain: 'Folds needed are 225 ÷ (100 + 75 + 225). That is 225 ÷ 400, or 56.3%. The 42.9% figure is what villain’s own bet of 75 needed.',
+        explain: 'Like the formula showed, folds needed are 225 ÷ (100 + 75 + 225). That is 225 ÷ 400, or 56.3%. The 42.9% figure is what villain’s own bet of 75 needed.',
+        point: 0,
       },
       {
         kind: 'quiz',
@@ -498,6 +512,7 @@ export const POSTFLOP_RIVER_LESSONS: LessonContent[] = [
         answer: 1,
         explain:
           'Bluffs fold to a raise, but you win the same pot by calling. Against the 12 hands that call, you win the extra 5 times and lose it 7 times. So the raise only adds a loss.',
+        point: 1,
       },
       {
         kind: 'quiz',
@@ -506,13 +521,14 @@ export const POSTFLOP_RIVER_LESSONS: LessonContent[] = [
         answer: 2,
         explain:
           'This rests on a pool assumption. Passive players rarely bluff raise the river, and their value raises beat one pair. Calling to keep them honest loses if they almost never bluff. Fold unless your notes show this player bluff raises.',
+        point: 2,
       },
       {
         kind: 'takeaway',
         points: [
-          'Folds a bluff raise needs = raise ÷ (pot + bet + raise).',
-          'Value raise only when you beat more than half of the hands that call it.',
-          'In most live pools, river raises are mostly value. Fold one pair by default and check your notes.',
+          'A bluff raise needs folds of raise ÷ (pot + bet + raise). Raising 50 to 150 into 100 needs 50%.',
+          'Value raise only when you beat more than half of the hands that call the raise.',
+          'Live river raises are mostly value. Fold one pair by default unless your notes say otherwise.',
         ],
       },
     ],
@@ -600,7 +616,8 @@ export const POSTFLOP_RIVER_LESSONS: LessonContent[] = [
         question: 'The pot is 22.5bb on the flop with 89bb behind. What is the SPR?',
         choices: ['About 2', 'About 4', 'About 9', 'About 18'],
         answer: 1,
-        explain: 'SPR is 89 ÷ 22.5, which is 3.96. About 18 is the SPR of a single raised pot.',
+        explain: 'Like the bars showed, SPR is 89 ÷ 22.5 = 3.96. About 18 is the SPR of a single raised pot.',
+        point: 0,
       },
       {
         kind: 'quiz',
@@ -609,14 +626,14 @@ export const POSTFLOP_RIVER_LESSONS: LessonContent[] = [
         choices: ['9♠ 8♠ 6♦', '7♥ 6♥ 5♣', 'A♠ K♦ 7♣'],
         answer: 2,
         explain:
-          'An ace king high flop favors the 3bettor’s big pairs and AK. Low and middling connected boards hit the caller’s pairs and suited connectors.',
+          'Like the A♠K♦7♣ board showed, high flops favor the 3bettor’s big pairs and AK. Low and middling connected boards hit the caller’s pairs and suited connectors.',
+        point: 1,
       },
       {
         kind: 'takeaway',
         points: [
-          '3bet pots start near SPR 4 to 6 at 100bb.',
-          'On high boards, the 3bettor has the range and nut advantage. Bet often and small.',
-          'The caller’s range is condensed. Low connected boards favor it.',
+          '3bet pots start near SPR 4 to 6 at 100bb. A single raised pot starts near 18.',
+          'On high boards the 3bettor has the range and nut advantage. It c-bets often and small.',
         ],
       },
     ],
@@ -726,13 +743,15 @@ export const POSTFLOP_RIVER_LESSONS: LessonContent[] = [
         choices: ['33.3%', '50.0%', '61.8%', '100.0%'],
         answer: 2,
         explain: 'The size is (√5 − 1) ÷ 2 = 0.618. Each bet grows the pot by 1 + 2 × 0.618 = 2.236. And 2.236² = 5, which is 1 + 2 × SPR.',
+        point: 1,
       },
       {
         kind: 'quiz',
         question: 'Villain shoves 3 times the pot, and you have not bet. What equity do you need to call?',
         choices: ['33.3%', '42.9%', '50.0%', '75.0%'],
         answer: 1,
-        explain: 'You call 3 to win a final pot of 7. That is 3 ÷ 7, or 42.9%. The 75.0% figure is the folds villain’s shove needs as a bluff, not your price.',
+        explain: 'Like the curve showed, you need SPR ÷ (1 + 2 × SPR). You call 3 to win a final pot of 7, or 42.9%. The 75.0% figure is the folds villain’s shove needs as a bluff.',
+        point: 2,
       },
       {
         kind: 'quiz',
@@ -741,12 +760,13 @@ export const POSTFLOP_RIVER_LESSONS: LessonContent[] = [
         answer: 0,
         explain:
           'At SPR 2, only 2 pots are left behind. Villain’s calling and shoving ranges include many worse hands. Deeper, a big pot more often comes from hands that beat one pair.',
+        point: 0,
       },
       {
         kind: 'takeaway',
         points: [
           'Below about SPR 3 to 4, top pair and overpairs usually get the stacks in.',
-          'Geometric sizes shrink as SPR falls. At SPR 4 it is 54.0% over 3 streets.',
+          'Geometric sizes shrink as SPR falls. At SPR 2 over 2 streets it is 61.8% pot.',
           'Calling a shove needs SPR ÷ (1 + 2 × SPR) equity. That is 33.3% at SPR 1 and 44.4% at SPR 4.',
         ],
       },

@@ -479,6 +479,9 @@ describe('bounty tournaments', () => {
   it('values a $50 bounty at 20,000 chips, or 10bb at a 2,000 big blind', () => {
     const chipsPerDollar = 20_000 / 50;
     expect((50 * chipsPerDollar) / 2_000).toBe(10);
+    // The same bounty after the big blind doubles.
+    expect((50 * chipsPerDollar) / 4_000).toBe(5);
+    expect(answer(key, 'A bounty is worth 20,000 chips. That was 10bb at a 2,000 big blind. The big blind rises to 4,000. What is it worth now?')).toBe('5bb');
     expect(text(key)).toContain('Treat this as a model');
   });
 

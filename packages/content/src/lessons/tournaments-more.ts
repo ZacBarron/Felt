@@ -63,7 +63,7 @@ export const TOURNAMENT_MORE_LESSONS: LessonContent[] = [
           ],
         },
         caption:
-          'The button opens many hands it cannot call with, so it folds **82.4%** of the time. The lojack opens tight and calls with over half its opens. So reshove wide against wide openers. Tighten up against tight ones.',
+          'The button opens many hands it cannot call with, so it folds **82.4%** of the time. The lojack opens tight and calls with over half its opens. So reshove wide against wide openers. Your ace helps too. It removes some of the aces they would call with.',
         evidence: 'math',
       },
       {
@@ -87,7 +87,8 @@ export const TOURNAMENT_MORE_LESSONS: LessonContent[] = [
         choices: ['83.7%', '80.2%', '45.8%'],
         answer: 1,
         explain:
-          'You risk 19bb to win 4.7bb. 19 ÷ (4.7 + 19) = 80.2%. The 83.7% answer leaves the ante out of the pot. The 45.8% answer divides by the pot after a call.',
+          'Like the formula showed, you risk 19bb to win 4.7bb. 19 ÷ (4.7 + 19) = 80.2%. The 83.7% answer leaves the ante out of the pot. The 45.8% answer divides by the pot after a call.',
+        point: 1,
       },
       {
         kind: 'quiz',
@@ -95,7 +96,8 @@ export const TOURNAMENT_MORE_LESSONS: LessonContent[] = [
         choices: ['A♠5♦', '7♠6♠', 'Both the same'],
         answer: 0,
         explain:
-          'The A♠ removes some AA, AK and other ace combos from the calls. The button has 82 calling combos instead of 98. Folds rise from 80.4% to 82.4%. 7♠6♠ does better when called, with 32.0% equity against 29.4%.',
+          'The A♠ removes some AA, AK and other ace combos from the calls. The button has 82 calling combos instead of 98. Folds rise from 80.4% to 82.4%. 7♠6♠ does better when called.',
+        point: 3,
       },
       {
         kind: 'quiz',
@@ -104,6 +106,15 @@ export const TOURNAMENT_MORE_LESSONS: LessonContent[] = [
         answer: 2,
         explain:
           'A wide opener holds many hands that must fold. In the example the button folds 82.4% and the lojack 45.7%. Your hand matters too. But fold equity comes from their range.',
+        point: 2,
+      },
+      {
+        kind: 'quiz',
+        question: 'You have 18bb in the big blind and the button opens. How do you usually 3bet?',
+        choices: ['All in', 'To about 5bb', 'With a min raise'],
+        answer: 0,
+        explain: 'Like the chips showed, a 3bet to 5bb uses a big part of a short stack. If the opener shoves back, you are priced in. A shove gets the folds without that problem.',
+        point: 0,
       },
       {
         kind: 'takeaway',
@@ -111,7 +122,7 @@ export const TOURNAMENT_MORE_LESSONS: LessonContent[] = [
           'From 12 to 25bb, a 3bet is often all in.',
           'EV of a reshove = F × pot + (1 − F) × (eq × final pot − risk).',
           'Wide openers fold more. Reshove wider against them.',
-          'Aces block calls. These are chip EV numbers, and ICM tightens them near the money.',
+          'An ace in your hand blocks some of their calls. That adds folds.',
         ],
       },
     ],
@@ -207,7 +218,8 @@ export const TOURNAMENT_MORE_LESSONS: LessonContent[] = [
         question: 'B has 3,000 chips and faces an all in from A, who covers. Folding is worth $29.49. Winning is worth $40.45 and losing is worth $0. What equity does B need?',
         choices: ['50.0%', '72.9%', '61.1%'],
         answer: 1,
-        explain: '29.49 ÷ 40.45 = 72.9%. The 50% answer is chip EV, which ignores the bubble. The 61.1% answer is what D needs to call A.',
+        explain: 'Like the formula showed, 29.49 ÷ 40.45 = 72.9%. The 50% answer is chip EV, which ignores the bubble. The 61.1% answer is what D needs to call A.',
+        point: 1,
       },
       {
         kind: 'quiz',
@@ -215,7 +227,8 @@ export const TOURNAMENT_MORE_LESSONS: LessonContent[] = [
         choices: ['D with 5bb', 'C with 10bb', 'B with 15bb'],
         answer: 2,
         explain:
-          'B needs 72.9%, C needs 70.2% and D needs 61.1%. D has only $13.32 at stake. The medium stacks have more money to lose. They can also wait for D to bust.',
+          'Like the bars showed, B needs 72.9% and C needs 70.2%. D needs only 61.1%. D has only $13.32 at stake. The medium stacks have more to lose and can wait for D to bust.',
+        point: 2,
       },
       {
         kind: 'quiz',
@@ -224,6 +237,15 @@ export const TOURNAMENT_MORE_LESSONS: LessonContent[] = [
         answer: 0,
         explain:
           'Losing costs A 1,000 chips, and A still has 3,000. So the loss costs A little money. The model knows nothing about D’s hands. A still needs more than 50%, so chip EV is not the answer.',
+        point: 3,
+      },
+      {
+        kind: 'quiz',
+        question: 'Four players are left and three are paid. What does busting now pay?',
+        choices: ['Nothing', '$20, like third place', 'Your share of the chips'],
+        answer: 0,
+        explain: 'This is the bubble. Fourth pays nothing, so busting now wins nothing. Outlasting one more player pays at least $20.',
+        point: 0,
       },
       {
         kind: 'takeaway',
@@ -339,14 +361,16 @@ export const TOURNAMENT_MORE_LESSONS: LessonContent[] = [
         choices: ['50.0%', '57.6%', '62.8%'],
         answer: 2,
         explain:
-          'Folding keeps $201.98. Winning is worth $274.15 and busting pays $80. (201.98 − 80) ÷ (274.15 − 80) = 62.8%. The 57.6% answer is what A needs to call B, since A survives a loss.',
+          'Like the bars showed, B needs 62.8%. Folding keeps $201.98, and busting still pays $80 for 5th. The 57.6% answer is what A needs to call B, since A survives a loss.',
+        point: 1,
       },
       {
         kind: 'quiz',
         question: 'Two players are left. Payouts are $400 and $250. You hold 60% of the chips. What is your ICM $EV?',
         choices: ['$340', '$240', '$390'],
         answer: 0,
-        explain: 'You get $250 for sure and 60% of the $150 gap. That is $340. The $240 answer forgets that second place pays. The $390 answer takes 60% of all $650.',
+        explain: 'Like the curve showed, you get $250 for sure and 60% of the $150 gap. That is $340. The $240 answer forgets that second place pays. The $390 answer takes 60% of all $650.',
+        point: 3,
       },
       {
         kind: 'quiz',
@@ -355,6 +379,15 @@ export const TOURNAMENT_MORE_LESSONS: LessonContent[] = [
         answer: 1,
         explain:
           'If the tiny stack busts first, everyone moves up a pay jump. So busting now costs the medium stacks more. In the example, B’s price to call A rises from 62.8% to 64.9%.',
+        point: 2,
+      },
+      {
+        kind: 'quiz',
+        question: 'Five players are left at a final table and one busts. What happens to the other four?',
+        choices: ['Each moves up a pay jump', 'Nothing until heads up', 'Only the chip leader gains'],
+        answer: 0,
+        explain: 'At a final table every place pays more than the one below. So each bust moves everyone left up one place. That makes survival worth money on every hand.',
+        point: 0,
       },
       {
         kind: 'takeaway',

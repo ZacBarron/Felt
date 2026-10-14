@@ -46,7 +46,6 @@ export const GAPS_TOURNAMENT_LESSONS: LessonContent[] = [
           'So you need at least as many chips as they have. That is called **covering** them.',
           'If they cover you, their bounty is not on offer in this hand.',
         ],
-        evidence: 'math',
       },
       {
         kind: 'visual',
@@ -59,7 +58,6 @@ export const GAPS_TOURNAMENT_LESSONS: LessonContent[] = [
           ],
         },
         caption: 'You have 40bb and villain shoves 20bb. If you call and win, villain is out. Their bounty is yours.',
-        evidence: 'math',
       },
       {
         kind: 'formula',
@@ -123,14 +121,16 @@ export const GAPS_TOURNAMENT_LESSONS: LessonContent[] = [
         question: 'You cover a shove. You call 19bb into a final pot of 41.5bb. The bounty is worth 10bb. What equity do you need?',
         choices: ['45.8%', '36.9%', '21.7%'],
         answer: 1,
-        explain: 'Add the bounty to what you win. 19 ÷ (41.5 + 10) = 36.9%. The 21.7% answer takes the bounty off your call instead.',
+        explain: 'Like the formula showed, add the bounty to what you win. 19 ÷ (41.5 + 10) = 36.9%. The 21.7% answer takes the bounty off your call instead.',
+        point: 1,
       },
       {
         kind: 'quiz',
         question: 'You have 15bb. A player with 25bb shoves. Does their bounty lower your price?',
         choices: ['Yes, by the whole bounty', 'No, since you cannot knock them out', 'Only if you win the hand'],
         answer: 1,
-        explain: 'You can win only 15bb from them. They stay in with 10bb. So their bounty is not on offer.',
+        explain: 'You win a bounty only when you cover the player. You can win only 15bb from them, so they stay in with 10bb. Their bounty is not on offer.',
+        point: 0,
       },
       {
         kind: 'quiz',
@@ -138,14 +138,22 @@ export const GAPS_TOURNAMENT_LESSONS: LessonContent[] = [
         choices: ['It adds to what you win, so calls need less equity', 'It makes every call correct', 'Nothing, since bounties are paid later'],
         answer: 0,
         explain: 'Winning the hand also wins the bounty. That lowers the equity you need. You still need enough equity for the lower price.',
+        point: 1,
+      },
+      {
+        kind: 'quiz',
+        question: 'A bounty is worth 20,000 chips. That was 10bb at a 2,000 big blind. The big blind rises to 4,000. What is it worth now?',
+        choices: ['5bb', '10bb', '20bb'],
+        answer: 0,
+        explain: '20,000 ÷ 4,000 = 5bb. A fixed bounty is worth fewer bb as blinds rise. So it changes calls most while blinds are small.',
+        point: 2,
       },
       {
         kind: 'takeaway',
         points: [
           'You win a bounty only when you cover the player.',
           'Add the bounty to the final pot when you price a call.',
-          'A fixed bounty is worth fewer bb as blinds rise.',
-          'Pricing a bounty in chips is a model. Check the event’s rules.',
+          'A bounty priced in chips is a model. It is worth fewer bb as blinds rise.',
         ],
       },
     ],
@@ -197,7 +205,6 @@ export const GAPS_TOURNAMENT_LESSONS: LessonContent[] = [
           'So extra chips add almost nothing. Losing chips can still cost you the seat.',
           'This is ICM at its most extreme.',
         ],
-        evidence: 'math',
       },
       {
         kind: 'table',
@@ -261,6 +268,7 @@ export const GAPS_TOURNAMENT_LESSONS: LessonContent[] = [
         choices: ['One seat worth $1,000', 'Your share of the $4,000 pool', 'More than $1,000 if you finish 1st'],
         answer: 0,
         explain: 'Every seat pays the same. 1st place wins one seat, just like 4th. Chips past a safe stack add almost nothing.',
+        point: 0,
       },
       {
         kind: 'quiz',
@@ -268,7 +276,8 @@ export const GAPS_TOURNAMENT_LESSONS: LessonContent[] = [
         cards: 'AsAd',
         choices: ['Call, since aces are the best hand', 'Fold, since the call needs 95.8% equity', 'Call, since a win locks up a seat'],
         answer: 1,
-        explain: 'Losing costs your whole seat. Winning adds little to a seat you almost have. Aces win about 85% against a random hand. That is far short of 95.8%.',
+        explain: 'Like the hand showed, losing costs your whole seat. Winning adds little to a seat you almost have. Aces win about 85% against a random hand, far short of 95.8%.',
+        point: 1,
       },
       {
         kind: 'quiz',
@@ -276,14 +285,14 @@ export const GAPS_TOURNAMENT_LESSONS: LessonContent[] = [
         choices: ['Whether a play risks your seat', 'Building the biggest stack', 'Winning the most pots'],
         answer: 0,
         explain: 'A seat is the whole prize. Chips matter only as protection for it. So the first question is always what a play risks.',
+        point: 2,
       },
       {
         kind: 'takeaway',
         points: [
-          'In a satellite every seat pays the same.',
-          'Chips past a safe stack are worth almost nothing.',
+          'In a satellite every seat pays the same. Chips past a safe stack add almost nothing.',
           'Calls that risk your seat need huge equity, even with aces.',
-          'ICM values are a model. Blinds and skill are left out.',
+          'Near the end, ask first whether a play risks your seat.',
         ],
       },
     ],

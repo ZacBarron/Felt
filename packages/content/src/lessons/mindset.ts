@@ -80,7 +80,8 @@ export const MINDSET_LESSONS: LessonContent[] = [
         choices: ['+7.2bb/100', '+5.0bb/100', '+4.2bb/100', '−11.0bb/100'],
         answer: 2,
         explain:
-          '0.9 × 8 + 0.1 × (−30) = 7.2 − 3 = +4.2bb/100. One hand in ten on tilt costs almost half the win rate. The +5.0 answer forgets that tilted hands replace A game hands. The inputs are made up, and the shape of the result is the point.',
+          'Like the bars showed, weight each part by its share. 0.9 × 8 + 0.1 × (−30) = 7.2 − 3 = +4.2bb/100. The +5.0 answer forgets that tilted hands replace A game hands.',
+        point: 2,
       },
       {
         kind: 'quiz',
@@ -88,12 +89,29 @@ export const MINDSET_LESSONS: LessonContent[] = [
         choices: ['Keep playing and focus harder', 'Take a reset break before the next hand', 'Move up a stake to win it back faster'],
         answer: 1,
         explain:
-          'The warning signs mean the next hands are the expensive ones. Reset first. Come back when your decisions are back to normal. Trying harder while tilted rarely works, because tilt is what drives the fast decisions.',
+          'Replaying a hand and fast actions are early warning signs. The next hands are the expensive ones. So reset first and come back when your decisions are back to normal.',
+        point: 1,
+      },
+      {
+        kind: 'quiz',
+        question: 'A weaker player keeps winning pots against you. You start bluffing them though they never fold. Which type of tilt fits best?',
+        choices: ['Entitlement', 'Injustice', 'Revenge'],
+        answer: 0,
+        explain: 'Like the tree showed, losing to weaker players triggers entitlement. Its typical leak is bluffing players who never fold. Injustice comes from bad beats. Revenge comes from a player who needled you.',
+        point: 0,
+      },
+      {
+        kind: 'quiz',
+        question: 'When should you set your stop loss?',
+        choices: ['Before the session, while calm', 'Once you are down 2 buy ins', 'When you first feel tilted'],
+        answer: 0,
+        explain: 'A tilted mind always argues for one more orbit. A limit set while calm does the judging for you. Then a reset handles the smaller triggers.',
+        point: 3,
       },
       {
         kind: 'takeaway',
         points: [
-          'Name the type of tilt you feel.',
+          'Name the type of tilt you feel. Each one has a typical leak.',
           'Catch the early signs before they reach your play.',
           'A small share of tilted hands can erase most of a win rate.',
           'Set the stop loss while calm. Reset at the first sign.',
@@ -135,7 +153,6 @@ export const MINDSET_LESSONS: LessonContent[] = [
           '**SD** measures how much your results swing around that average. It uses the same units.',
           'The uncertainty in your measured win rate shrinks with the square root of your hands. That is why it shrinks so slowly.',
         ],
-        evidence: 'math',
       },
       {
         kind: 'formula',
@@ -221,20 +238,38 @@ export const MINDSET_LESSONS: LessonContent[] = [
         choices: ['8 to 12', '0 to 20', '−9.6 to 29.6', '5 to 15'],
         answer: 2,
         explain:
-          '√(10,000 ÷ 100) = 10, and 1.96 × 100 ÷ 10 = 19.6. So the range is 10 ± 19.6, from a loss to a huge win. The 0 to 20 answer forgets the 1.96.',
+          'Like the formula showed, √(10,000 ÷ 100) = 10. Then 1.96 × 100 ÷ 10 = 19.6. So the range is 10 ± 19.6. The 0 to 20 answer forgets the 1.96.',
+        point: 0,
       },
       {
         kind: 'quiz',
         question: 'What does it take to cut the width of your confidence interval in half?',
         choices: ['Four times the hands', 'Twice the hands', 'Three times the hands'],
         answer: 0,
-        explain: 'The width shrinks with 1 ÷ √N. For √N to double, N must grow four times. Twice the hands only narrows it by about 29%.',
+        explain: 'The width shrinks with the square root of your hands. For √N to double, N must grow 4 times. Twice the hands only narrows it by about 29%.',
+        point: 1,
+      },
+      {
+        kind: 'quiz',
+        question: 'True win rate 10bb/100, SD 100 and 100bb buy ins. What is the chance of ever falling 10 buy ins below where you start?',
+        choices: ['About 13.5%', 'Under 1%', 'About 50%'],
+        answer: 0,
+        explain: 'Like the bars showed, a real winner falls 10 buy ins 13.5% of the time. Over a career you start from many points. So drops like this are normal.',
+        point: 2,
+      },
+      {
+        kind: 'quiz',
+        question: 'You had a losing month. What is the best way to judge it?',
+        choices: ['Check your drill accuracy and reviewed hands', 'Assume your play has gotten worse', 'Look only at the money you lost'],
+        answer: 0,
+        explain: 'A month of results is mostly noise. Drill accuracy and reviewed hands are things you can check. A losing month is normal for a winner.',
+        point: 3,
       },
       {
         kind: 'takeaway',
         points: [
           'Interval = win rate ± 1.96 × SD ÷ √(N ÷ 100).',
-          'Tens of thousands of hands still leave a wide range.',
+          'Halving the range takes 4 times the hands. Even 30,000 hands leave a wide range.',
           'Big downswings are normal for winners.',
           'Judge decisions, not results.',
         ],
@@ -274,7 +309,6 @@ export const MINDSET_LESSONS: LessonContent[] = [
         body: [
           'Swings are measured in big blinds, so buy ins put every stake on the same scale. If you buy in deeper than 100bb, count the roll in big blinds for the risk math.',
         ],
-        evidence: 'math',
       },
       {
         kind: 'visual',
@@ -371,7 +405,8 @@ export const MINDSET_LESSONS: LessonContent[] = [
         question: 'SD is 100bb/100 with 100bb buy ins. At a true win rate of 5bb/100, which roll matches the risk of 20 buy ins at 10bb/100?',
         choices: ['20 buy ins', '30 buy ins', '40 buy ins', '80 buy ins'],
         answer: 2,
-        explain: 'Risk depends on win rate × bankroll. 5 × 40 = 10 × 20, so both give exp(−4) = 1.8%. 30 buy ins gives exp(−3), about 5.0%.',
+        explain: 'In the formula, risk depends on win rate × bankroll. 5 × 40 = 10 × 20, so both give exp(−4) = 1.8%. Like the table showed, 30 buy ins at WR 5 gives 5.0%.',
+        point: 1,
       },
       {
         kind: 'quiz',
@@ -379,16 +414,32 @@ export const MINDSET_LESSONS: LessonContent[] = [
         choices: ['Buy in once more at $2/$5', 'Move back down and rebuild', 'Stay at $2/$5 until you are even'],
         answer: 1,
         explain:
-          'The shot budget exists so a normal downswing at the new stake cannot hurt your main roll. Losing it is a short sample, not proof you cannot win there. One more buy in breaks the plan you made while calm. Rebuild and try again later.',
+          'The shot budget exists so a normal downswing at the new stake cannot hurt your main roll. Losing it is a short sample, not proof you cannot win there. One more buy in breaks the plan you made while calm.',
+        point: 3,
+      },
+      {
+        kind: 'quiz',
+        question: 'You have $3,000 set aside only for poker. How many buy ins is that at $1/$3 with $300 buy ins?',
+        choices: ['10', '30', '3'],
+        answer: 0,
+        explain: 'Like the bars showed, $3,000 ÷ $300 = 10 buy ins. The 30 answer is the count at $0.50/$1 with $100 buy ins.',
+        point: 0,
+      },
+      {
+        kind: 'quiz',
+        question: 'You play live cash and your win rate is still uncertain. How big a roll does the guideline suggest?',
+        choices: ['Toward 40 buy ins', 'About 10 buy ins', 'Exactly 20 buy ins'],
+        answer: 0,
+        explain: 'The common guideline is 20 to 40 buy ins. Lean toward 40 when your win rate is uncertain. The formula assumes you know it, and you rarely do.',
+        point: 2,
       },
       {
         kind: 'takeaway',
         points: [
-          'Count the roll in buy ins, or in big blinds for deep games.',
+          'Count only money set aside for poker. Count it in buy ins at your stake.',
           'RoR = exp(−2 × WR × B ÷ SD²). It assumes you know your win rate.',
-          '20 to 40 buy ins is a guideline for live cash, not a law.',
+          '20 to 40 buy ins is a guideline for live cash. Lean toward 40 when unsure.',
           'Take shots with a fixed budget. Move down at your floor.',
-          'Keep life money out of the roll.',
         ],
       },
     ],
@@ -451,7 +502,6 @@ export const MINDSET_LESSONS: LessonContent[] = [
           'A 3bet pot needs a raise and a reraise, so single raised pots come up far more often. Learn them first. In live games, add limped and isolated pots.',
           'River spots come up less often but carry big bets. A bet of the same pot fraction is larger on later streets, because the pot has grown.',
         ],
-        evidence: 'math',
       },
       {
         kind: 'visual',
@@ -478,7 +528,8 @@ export const MINDSET_LESSONS: LessonContent[] = [
         choices: ['Start the next lesson right away', 'Drill it until recall is automatic', 'Play a long session to test it'],
         answer: 1,
         explain:
-          'Drill comes right after the lesson. A lesson read once fades fast. Drilling and spaced review make it usable at the table. Starting the next lesson piles new ideas on ones that have not set yet.',
+          'Like the Felt loop showed, drill comes right after the lesson. A lesson read once fades fast. Starting the next lesson piles new ideas on ones that have not set yet.',
+        point: 1,
       },
       {
         kind: 'quiz',
@@ -486,7 +537,24 @@ export const MINDSET_LESSONS: LessonContent[] = [
         choices: ['Solve one unusual 4bet pot at 40bb', 'Reread lessons you already know', 'Due review cards, then a preflop drill'],
         answer: 2,
         explain:
-          'Due cards come back at the moment review helps most. Preflop decisions come up every hand. Rare spots can wait until the common ones are solid. Rereading feels useful, but recall practice builds memory better.',
+          'Due cards come back just before you would forget. Preflop decisions come up every hand. Rare spots like a 4bet pot at 40bb can wait until the common ones are solid.',
+        point: 2,
+      },
+      {
+        kind: 'quiz',
+        question: 'For most players, which routine builds the most lasting skill?',
+        choices: ['15 focused minutes every day', 'One 2 hour session each weekend', 'Long sessions whenever you feel like it'],
+        answer: 0,
+        explain: 'Consistency beats intensity. Short daily sessions are easy to start, and starting is the hard part. A fixed time makes it a habit.',
+        point: 0,
+      },
+      {
+        kind: 'quiz',
+        question: 'Your drill accuracy dipped in one session. What should you watch?',
+        choices: ['The trend in accuracy and EV loss over weeks', 'That one session', 'Only your results at the table'],
+        answer: 0,
+        explain: 'One session is noisy. Accuracy shows what you know, and EV loss shows what mistakes cost. Watch both trends over weeks.',
+        point: 3,
       },
       {
         kind: 'takeaway',
@@ -576,7 +644,8 @@ export const MINDSET_LESSONS: LessonContent[] = [
         choices: ['The call was a mistake', 'Villain rarely bluffs here', 'Very little on its own'],
         answer: 2,
         explain:
-          'One hand is one sample from villain’s range. The call was right or wrong based on how often that line is a bluff, compared with the price. This one showdown does not settle it.',
+          'One hand is one sample from villain’s range. Like the river bars showed, the call is judged by the bluff share against the price. This one showdown does not settle it.',
+        point: 3,
       },
       {
         kind: 'quiz',
@@ -584,6 +653,23 @@ export const MINDSET_LESSONS: LessonContent[] = [
         choices: ['A big river call you were unsure about', 'A small pot you won with the nuts', 'A standard preflop fold you made quickly'],
         answer: 0,
         explain: 'It is a big pot with real doubt. A mistake there would be expensive, and the doubt points at a gap you can fix. Small pots and easy folds teach little.',
+        point: 0,
+      },
+      {
+        kind: 'quiz',
+        question: 'When should you write down villain’s range in a review?',
+        choices: ['Before you look at the cards they showed', 'After you see their cards', 'Only when you lost the pot'],
+        answer: 0,
+        explain: 'Seeing their cards first anchors you to one hand. So write both ranges street by street first. Then look at what they showed.',
+        point: 1,
+      },
+      {
+        kind: 'quiz',
+        question: 'You think villain bluffs too much. How should your review use that read?',
+        choices: ['Compare with the GTO baseline first, then adjust if you have evidence', 'Start from the read, since reads beat theory', 'Ignore it, since only GTO matters'],
+        answer: 0,
+        explain: 'The baseline shows how far from sound your line was. Then adjust for this player, but only with evidence like logged hands. Write the read down so you can check it.',
+        point: 2,
       },
       {
         kind: 'takeaway',

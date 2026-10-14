@@ -108,6 +108,7 @@ export const PREFLOP_RAKE_LESSONS: LessonContent[] = [
         answer: 2,
         explain:
           'The rake is $3.10 plus $1, so $4.10. You need 12 ÷ (31 − 4.10) = 44.6%. The 38.7% answer ignores the rake. The 48.0% answer uses the full $6, but this pot is too small to reach the cap.',
+        point: 0,
       },
       {
         kind: 'quiz',
@@ -115,6 +116,7 @@ export const PREFLOP_RAKE_LESSONS: LessonContent[] = [
         choices: ['Limped pots pay no rake', 'A pot that ends before the flop pays no rake', 'Rake is taken only on the river'],
         answer: 1,
         explain: 'If everyone folds to a raise before the flop, the room takes nothing. A limped pot that sees a flop still pays. That is one reason raked strategies like to 3bet or fold.',
+        point: 1,
       },
       {
         kind: 'quiz',
@@ -122,15 +124,15 @@ export const PREFLOP_RAKE_LESSONS: LessonContent[] = [
         choices: ['A call that only just beats the price', 'A 3bet that wins the pot at once', 'A call with a premium hand'],
         answer: 0,
         explain:
-          'Rake takes a share of every pot that sees a flop. A call that barely profits can turn into a loss. A strong hand keeps most of its edge. A pot won before the flop pays nothing.',
+          'Like the bars showed, a call that barely profits can turn into a loss. Rake takes a share of every pot that sees a flop. A strong hand keeps most of its edge. A pot won before the flop pays nothing.',
+        point: 2,
       },
       {
         kind: 'takeaway',
         points: [
-          'Rake comes out of the pot, so calls need more equity.',
-          'With a cap, small pots pay the biggest share. Pots with no flop usually pay nothing.',
-          'Close calls flip to folds first, especially in the small blind.',
-          'Raked strategies lean toward 3bet or fold.',
+          'Rake comes out of the pot. So a $12 call into $31 needs 44.6% instead of 38.7%.',
+          'No flop, no drop. A pot that ends before the flop usually pays no rake.',
+          'Close calls flip to folds first. Raked strategies lean toward 3bet or fold.',
         ],
       },
     ],

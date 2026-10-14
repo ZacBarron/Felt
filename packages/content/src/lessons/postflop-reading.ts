@@ -34,7 +34,7 @@ export const POSTFLOP_READING_LESSONS: LessonContent[] = [
             { label: '4. Count', value: 'Value against bluffs', tone: 'green' },
           ],
         },
-        caption: 'On the river, count the hands that beat you and the bluffs. Then compare with your price.',
+        caption: 'An unpaired hand like AQ has 4 × 4 = 16 combos. Each card you can see removes some. On the river, count the hands that beat you and the bluffs. Then compare with your price.',
       },
       {
         kind: 'hand',
@@ -65,7 +65,8 @@ export const POSTFLOP_READING_LESSONS: LessonContent[] = [
         board: 'Qh9h5c',
         choices: ['16', '12', '8', '4'],
         answer: 2,
-        explain: 'Only Q♠ and Q♦ are left. Four aces times 2 queens is 8 combos. The 12 answer removes only the board’s queen. The 16 answer forgets card removal.',
+        explain: 'Like the 4 steps showed, remove what you see. Only Q♠ and Q♦ are left. Four aces times 2 queens is 8 combos. The 12 answer removes only the board’s queen.',
+        point: 0,
       },
       {
         kind: 'visual',
@@ -86,22 +87,23 @@ export const POSTFLOP_READING_LESSONS: LessonContent[] = [
         question: 'Villain bets small on the flop with every hand they hold. What does that bet tell you?',
         choices: ['Villain has a strong hand', 'Very little, since the range did not change', 'Villain has a draw'],
         answer: 1,
-        explain: 'A bet made with every hand keeps every hand. Only the cards you can see shrink the range there. The turn bet is the one that narrows it.',
+        explain: 'Like the range table showed, a bet made with every hand keeps every hand. Only the cards you can see shrink the range there. The big turn bet is the one that narrows it.',
+        point: 1,
       },
       {
         kind: 'quiz',
         question: 'Villain’s river range holds 32 hands that beat you and 8 bluffs. They bet the pot. What should you do?',
         choices: ['Call, since top pair is too strong to fold', 'Call, since you need only 20%', 'Fold, since you win 20% and need 33.3%'],
         answer: 2,
-        explain: 'You win 8 times in 40, which is 20%. Calling a pot sized bet needs 1 ÷ 3, or 33.3%. Top pair looks strong. But this line leaves mostly hands that beat it.',
+        explain: 'Like the ring showed, you win 8 times in 40. That is 20%. Calling a pot sized bet needs 33.3%. Top pair looks strong. But this line leaves mostly hands that beat it.',
+        point: 2,
       },
       {
         kind: 'takeaway',
         points: [
-          'Start with the preflop range and remove the cards you see.',
-          'Keep only the hands that fit each action.',
-          'Bets made with every hand tell you little. Big bets narrow the most.',
-          'On the river, count value and bluffs. Then compare with your price.',
+          'Start from the preflop range. Remove the cards you can see, like your own queen.',
+          'A bet made with every hand tells you little. Big bets narrow the range most.',
+          'On the river, count value and bluffs. Then compare your equity with your price.',
         ],
       },
     ],
@@ -179,6 +181,7 @@ export const POSTFLOP_READING_LESSONS: LessonContent[] = [
         answer: 2,
         explain:
           'When called you average 0.205 × 60 − 20 = −7.73bb. When villain folds you win 20bb. So F = 7.73 ÷ 27.73 = 27.9%. The 50% answer is the price of a pure bluff. It ignores the times you hit.',
+        point: 1,
       },
       {
         kind: 'quiz',
@@ -189,6 +192,7 @@ export const POSTFLOP_READING_LESSONS: LessonContent[] = [
         answer: 1,
         explain:
           'Q♠J♠ has a flush draw and an open ender. Against A♥T♦ it wins 68.9% with 2 cards to come. T♦8♦ has top pair with a weak kicker, so it prefers to call. Q♦8♦ has only a gutshot and one overcard.',
+        point: 2,
       },
       {
         kind: 'quiz',
@@ -196,15 +200,15 @@ export const POSTFLOP_READING_LESSONS: LessonContent[] = [
         choices: ['It can still win when called', 'Villain folds more often to it', 'It never loses money'],
         answer: 0,
         explain:
-          'Villain sees only your bet, not your cards. So the fold rate is the same. The draw wins more because it can hit when called. It still loses money when villain calls and it misses.',
+          'Like the EV tree showed, the draw wins more because it can hit when called. Villain sees only your bet, so the fold rate is the same. The draw still loses when called and it misses.',
+        point: 0,
       },
       {
         kind: 'takeaway',
         points: [
-          'A semi bluff wins by folds now or by hitting later.',
-          'Equity when called lowers the folds you need.',
-          'Bet and raise strong draws, especially draws to the nuts.',
-          'On the river a missed draw is a pure bluff.',
+          'A semi bluff wins when villain folds. It also wins when you hit.',
+          'Equity when called lowers the folds you need. A 20.5% draw shoving pot needs 27.9% folds, not 50%.',
+          'Semi bluff strong draws like flush draws and open enders. Weak draws with a pair often call.',
         ],
       },
     ],

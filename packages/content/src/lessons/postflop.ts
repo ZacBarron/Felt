@@ -58,7 +58,8 @@ export const POSTFLOP_LESSONS: LessonContent[] = [
         choices: ['K♥ K♦ 4♣', '6♠ 5♠ 4♦', 'A♠ 8♦ 3♣'],
         answer: 1,
         explain:
-          'Low connected flops hit the big blind’s connectors and small pairs. BB makes more of the straights and two pair here. K♥K♦4♣ looks scary, but paired high boards still favor BTN.',
+          'Like the 765 board showed, low connected flops hit the big blind’s connectors and small pairs. BB makes more of the straights and two pair. Paired high boards like K♥K♦4♣ still favor BTN.',
+        point: 1,
       },
       {
         kind: 'quiz',
@@ -67,15 +68,24 @@ export const POSTFLOP_LESSONS: LessonContent[] = [
         choices: ['About 75% pot', 'About 125% pot', 'About 33% pot'],
         answer: 2,
         explain:
-          'BTN has the range advantage, but neither player has many very strong hands. A small bet with most of the range does the job. A 75% bet folds out the weak hands a small bet keeps in.',
+          'Like the table showed, high and dry boards get small bets very often. Few hands there are very strong. A 75% bet folds out the weak hands a small bet keeps in.',
+        point: 0,
+      },
+      {
+        kind: 'quiz',
+        question: 'Which flop is dynamic, with equities that swing on many turns?',
+        choiceCards: ['Kd7s2c', 'Th9h8c', 'AsAd4c'],
+        choices: ['K♦ 7♠ 2♣', 'T♥ 9♥ 8♣', 'A♠ A♦ 4♣'],
+        answer: 1,
+        explain: 'Like the static and dynamic step showed, connected boards with a flush draw change on many turns. That pushes toward bigger bets or more checks. On K72 rainbow the best hand usually stays best.',
+        point: 2,
       },
       {
         kind: 'takeaway',
         points: [
-          'High, dry boards favor the raiser.',
-          'Low, connected boards favor the caller.',
-          'Static boards suit small bets.',
-          'Dynamic boards push toward bigger bets or more checks.',
+          'High, dry boards like K72 favor the raiser. It c-bets often and small.',
+          'Low, connected boards like 765 favor the big blind caller.',
+          'Static boards suit small bets. Dynamic boards push toward bigger bets or more checks.',
         ],
       },
     ],
@@ -148,22 +158,31 @@ export const POSTFLOP_LESSONS: LessonContent[] = [
         choices: ['Check most of the range', 'Bet big with most of the range', 'Bet big with strong hands only', 'Bet small with most of the range'],
         answer: 3,
         explain:
-          'On a dry ace high flop, BTN has more aces and more strong hands. Small, frequent bets win the most. Betting big with only strong hands folds out the weak hands you want calls from.',
+          'Like the K72 board showed, BTN bets small with almost everything on dry high flops. It has more aces and more strong hands here. Betting big with only strong hands folds out the weak hands you want calls from.',
+        point: 0,
       },
       {
         kind: 'quiz',
         question: 'Facing a third pot c-bet, how often must the big blind fold for a pure bluff to profit?',
         choices: ['More than 20%', 'More than 25%', 'More than 33%', 'More than 50%'],
         answer: 1,
-        explain: 'Alpha is bet ÷ (pot + bet), so ⅓ ÷ 1⅓ = 25%. The 20% figure is the equity BB needs to call, not the folds a bluff needs.',
+        explain: 'Like the formula showed, alpha is bet ÷ (pot + bet). So ⅓ ÷ 1⅓ = 25%. The 20% figure is the equity BB needs to call, not the folds a bluff needs.',
+        point: 1,
+      },
+      {
+        kind: 'quiz',
+        question: 'On a flop that favors BTN less, which hand usually checks back?',
+        choices: ['Second pair', 'A set', 'A flush draw'],
+        answer: 0,
+        explain: 'Like the check back step said, medium hands with showdown value often check. They win at showdown often but cannot stand a raise. Strong hands and good draws bet.',
+        point: 2,
       },
       {
         kind: 'takeaway',
         points: [
-          'On boards that favor you, bet small with almost everything.',
-          'Elsewhere, bet strong hands and draws.',
-          'Check medium hands that have showdown value.',
-          'Keep some strong hands in your checks.',
+          'On boards that favor you like K72, bet small with almost every hand.',
+          'A third pot bet needs folds 25% of the time. So the big blind must defend 75%.',
+          'On other boards, bet strong hands and draws. Check medium hands like second pair.',
         ],
       },
     ],
@@ -290,7 +309,8 @@ export const POSTFLOP_LESSONS: LessonContent[] = [
         choices: ['50% pot', '125% pot', '33% pot'],
         answer: 1,
         explain:
-          'A polarized range against a capped range wins most with big sizes. Villain cannot raise, and their bluff catchers pay more each time they call. A 50% bet lets those bluff catchers call too cheaply.',
+          'Like the nut advantage tree showed, a polarized range against a capped range wins most with big sizes. Villain cannot raise. Their bluff catchers pay more each time they call.',
+        point: 0,
       },
       {
         kind: 'quiz',
@@ -299,13 +319,13 @@ export const POSTFLOP_LESSONS: LessonContent[] = [
         answer: 2,
         explain:
           'First, 1 + 2 × 89 ÷ 22.5 = 8.91. Its cube root is 2.07. Subtract 1 and halve it to get 0.54. The 116% size is for a single raised pot, where stacks are much deeper compared with the pot.',
+        point: 1,
       },
       {
         kind: 'takeaway',
         points: [
-          'Bet small with wide ranges and big with polarized ones.',
-          'Overbets belong where you have the nut advantage against a capped range.',
-          'Geometric sizing is the natural size for a polarized line.',
+          'Bet small with wide ranges. Bet big or overbet with nuts and bluffs against a capped range.',
+          'Geometric sizing gets stacks in evenly. At SPR 4 over 3 streets it is about 54% pot.',
         ],
       },
     ],
@@ -377,7 +397,8 @@ export const POSTFLOP_LESSONS: LessonContent[] = [
         question: 'Facing a ½ pot c-bet, what equity do you need to call? Ignore later streets.',
         choices: ['17%', '20%', '25%', '33%'],
         answer: 2,
-        explain: 'You call 0.5 to win a final pot of 2, which is 25%. The 33% figure is the folds a half pot bluff needs, not your price to call.',
+        explain: 'Like the table showed, you call 0.5 to win a final pot of 2. That is 25%. The 33% figure is the folds a half pot bluff needs, not your price to call.',
+        point: 0,
       },
       {
         kind: 'quiz',
@@ -387,14 +408,14 @@ export const POSTFLOP_LESSONS: LessonContent[] = [
         choices: ['Q♣ 8♦', 'Q♥ J♥', '6♣ 5♣'],
         answer: 0,
         explain:
-          'Q8o has one overcard and no backdoor flush draw. Q♥J♥ looks similar but has 2 overcards plus backdoor flush and straight draws. 6♣5♣ already has middle pair.',
+          'Like the tree showed, hands with nothing now and little to draw to fold. Q8o has one overcard and no backdoor flush draw. Q♥J♥ has 2 overcards plus backdoor draws. 6♣5♣ already has middle pair.',
+        point: 1,
       },
       {
         kind: 'takeaway',
         points: [
-          'Small bets call for wide defense with pairs and draws.',
-          'Fold hands with nothing now and little to draw to.',
-          'Out of position, weigh the price against the equity you will realize.',
+          'Facing a ½ pot c-bet you need 25% equity. Facing ⅓ pot you need 20%.',
+          'Against small bets, defend pairs and draws. Fold hands with nothing now and little to draw to.',
         ],
       },
     ],
@@ -456,7 +477,8 @@ export const POSTFLOP_LESSONS: LessonContent[] = [
         choices: ['A♥ 2♣', 'K♦ 6♠', 'J♥ T♥'],
         answer: 2,
         explain:
-          'J♥T♥ has an open ender and a flush draw. That is a lot of equity with many good turns. A♥2♣ has only a backdoor flush draw. K♦6♠ is a weak pair that prefers to call.',
+          'Like the tree showed, strong draws raise as semi bluffs. J♥T♥ has an open ender and a flush draw. A♥2♣ has only a backdoor flush draw. K♦6♠ is a weak pair that prefers to call.',
+        point: 1,
       },
       {
         kind: 'quiz',
@@ -465,14 +487,13 @@ export const POSTFLOP_LESSONS: LessonContent[] = [
         answer: 0,
         explain:
           'Check raises lean on a nut advantage. On K72, BTN has all the sets of kings and most of the best top pairs. BB 3bets KK and AK before the flop. On 765, BB holds more of the straights and two pair.',
+        point: 0,
       },
       {
         kind: 'takeaway',
         points: [
-          'Check raise most where the big blind has the nut advantage.',
-          'Raise sets and two pair for value.',
-          'Semi bluff with strong draws.',
-          'Call with medium hands that have showdown value.',
+          'Check raise most where the big blind has the nut advantage, like 765.',
+          'Raise sets, two pair and strong draws. Call with medium pairs that have showdown value.',
         ],
       },
     ],
@@ -538,7 +559,8 @@ export const POSTFLOP_LESSONS: LessonContent[] = [
         board: '7h6h2c5d',
         choices: ['BTN', 'BB', 'Both about equally'],
         answer: 1,
-        explain: 'The 5 makes straights for hands like 84s and 43s. BTN opens neither, but BB defends both. So BTN should slow down with many hands.',
+        explain: 'Like the turn table showed, low connecting cards help the caller. The 5 makes straights for hands like 84s and 43s. BB defends both, and BTN opens neither.',
+        point: 1,
       },
       {
         kind: 'quiz',
@@ -547,14 +569,23 @@ export const POSTFLOP_LESSONS: LessonContent[] = [
         choiceCards: ['Ah', '6c', '5d'],
         choices: ['A♥', '6♣', '5♦'],
         answer: 0,
-        explain: 'BTN holds AK and AA far more often, since BB 3bets them before the flop. Low cards like the 6 or 5 help BB’s connected hands more.',
+        explain: 'Like the turn ace step showed, BTN holds AK and AA far more often. BB 3bets them before the flop. Low cards like the 6 or 5 help BB’s connected hands more.',
+        point: 0,
+      },
+      {
+        kind: 'quiz',
+        question: 'On the turn, which hand makes a good semi bluff barrel?',
+        choices: ['A draw that just picked up outs', 'Weak top pair on a scary card', 'A hand with no pair and no draw'],
+        answer: 0,
+        explain: 'Like the barrel tree showed, good barrels beat calls or have equity when called. A draw that picked up outs has equity. The other two do neither, so they often check.',
+        point: 2,
       },
       {
         kind: 'takeaway',
         points: [
-          'High cards usually favor the preflop raiser.',
-          'Low connecting cards usually favor the caller.',
-          'Barrel hands that beat calls or have equity when called.',
+          'Overcard turns like an A or K usually favor the preflop raiser.',
+          'Low connecting turns usually favor the big blind caller.',
+          'Barrel hands that beat calls or have equity when called. Others often check.',
         ],
       },
     ],
@@ -584,7 +615,6 @@ export const POSTFLOP_LESSONS: LessonContent[] = [
         },
         caption:
           'A hand that sometimes wins by checking should usually check. Holding cards villain needs to call makes those calls less likely. If you hold their busted draws, they more often have a hand that calls.',
-        evidence: 'math',
       },
       {
         kind: 'board',
@@ -618,21 +648,30 @@ export const POSTFLOP_LESSONS: LessonContent[] = [
         board: 'Kc8h5h2s2d',
         choices: ['About 10%', 'About 20%', 'About 35%', 'About 50%'],
         answer: 2,
-        explain: 'They fall from 55 to 36, so 19 combos are gone. That is 19 ÷ 55, or about 35%. Those were folding hands, so 7♣6♣ is the better bluff.',
+        explain: 'Like the combo table showed, they fall from 55 to 36. So 19 combos are gone, about 35%. Those were folding hands, so 7♣6♣ is the better bluff.',
+        point: 1,
       },
       {
         kind: 'quiz',
         question: 'Your river bluff has no showdown value. It holds a card villain needs for many of their calls. How does that change the bluff?',
         choices: ['It makes the bluff better', 'It makes the bluff worse', 'It makes no difference'],
         answer: 0,
-        explain: 'Blocking calls means villain holds fewer calling hands. So a fold is more likely. Blocking folds is what hurts a bluff.',
+        explain: 'Like the 3 rules showed, blocking calls means villain holds fewer calling hands. So a fold is more likely. Blocking folds is what hurts a bluff.',
+        point: 1,
+      },
+      {
+        kind: 'quiz',
+        question: 'Villain checks the river to you. You hold bottom pair, which sometimes wins at showdown. What usually fits?',
+        choices: ['Check, since it can win at showdown', 'Bluff, since it is a weak hand', 'Bet big for value'],
+        answer: 0,
+        explain: 'Like the 3 rules showed, a good bluff has no showdown value. Bottom pair sometimes wins by checking. So it checks, and hands with nothing bluff instead.',
+        point: 0,
       },
       {
         kind: 'takeaway',
         points: [
-          'Bluff with hands that cannot win at showdown.',
-          'Prefer bluffs that block villain’s calls.',
-          'Avoid bluffs that block villain’s folds.',
+          'Bluff with hands that cannot win at showdown. A hand that can win by checking should check.',
+          'Prefer bluffs that block villain’s calls. Avoid bluffs that hold villain’s busted draws.',
         ],
       },
     ],
@@ -661,7 +700,6 @@ export const POSTFLOP_LESSONS: LessonContent[] = [
         },
         caption:
           'Against a balanced bettor, small blocker effects decide which bluff catchers call. Against an unbalanced one, how often they bluff matters far more.',
-        evidence: 'math',
       },
       {
         kind: 'hand',
@@ -696,7 +734,8 @@ export const POSTFLOP_LESSONS: LessonContent[] = [
         board: 'AhKh7c4h2s',
         choices: ['21', '28', '36', '45'],
         answer: 2,
-        explain: 'Nine hearts are left, so 9 × 8 ÷ 2 = 36. You get 45 only when you hold no heart.',
+        explain: 'Like the bars showed, 9 hearts are left. So 9 × 8 ÷ 2 = 36. You get 45 only when you hold no heart.',
+        point: 1,
       },
       {
         kind: 'quiz',
@@ -704,14 +743,23 @@ export const POSTFLOP_LESSONS: LessonContent[] = [
         choices: ['The one that blocks bluffs', 'The one that blocks value', 'Either one, since they are equal'],
         answer: 1,
         explain:
-          'Removing value combos raises the share of bluffs in villain’s range. So the hand that blocks value calls. Blocking bluffs does the opposite and makes calling worse.',
+          'Like the mirror tree showed, removing value combos raises the share of bluffs in villain’s range. So the hand that blocks value calls. Blocking bluffs makes calling worse.',
+        point: 0,
+      },
+      {
+        kind: 'quiz',
+        question: 'Villain almost never bluffs big on the river. You hold the best blocker among your bluff catchers. What should you do?',
+        choices: ['Fold', 'Call, since the blocker helps', 'Raise as a bluff'],
+        answer: 0,
+        explain: 'Like the callout said, blockers are only a tiebreak. Against a player who rarely bluffs, even the best blocker loses money. First decide whether villain bluffs enough.',
+        point: 2,
       },
       {
         kind: 'takeaway',
         points: [
-          'Call with hands that block value.',
-          'Avoid calling with hands that block bluffs.',
-          'Check how often villain bluffs first. Use blockers second.',
+          'Call with bluff catchers that block value and leave bluffs in.',
+          'Count the blocked combos. With the Q♥, villain has 36 flushes instead of 45.',
+          'First check how often villain bluffs. Use blockers second.',
         ],
       },
     ],

@@ -203,6 +203,9 @@ describe('what bb/100 means', () => {
     expect(branch(a, 'Hands, estimated')).toBe(`5 hours × ${LIVE_HPH} = ${hands} hands`);
     expect(branch(a, 'Win rate')).toBe(`${bb} ÷ ${hands} × 100 = ${r1((bb / hands) * 100)} bb/100`);
     expect(text(key)).toContain(`Its model uses ${LIVE_HPH} hands an hour`);
+    const q = quiz(key, 'You play 10 hours live and do not count hands. How many hands does Felt’s model estimate?');
+    expect(q.choices[q.answer]).toBe(`${10 * LIVE_HPH}`);
+    expect(q.choices).toContain(`${10 * ONLINE_HPH}`);
   });
 
   it('answers its questions with exact division', () => {

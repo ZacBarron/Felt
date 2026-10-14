@@ -103,7 +103,8 @@ export const POSTFLOP_MORE_LESSONS: LessonContent[] = [
         choices: ['BTN, because it has more equity', 'BB, because it defends more eights', 'Both hold about the same'],
         answer: 1,
         explain:
-          'BB holds 10.2% trips or better against BTN’s 7.1%. That is true even though BTN has more equity and more overpairs. Range advantage and nut advantage can point different ways.',
+          'Like the bars showed, BB holds 10.2% trips or better against BTN’s 7.1%. BTN still has more equity and more overpairs. Range advantage and nut advantage can point different ways.',
+        point: 1,
       },
       {
         kind: 'quiz',
@@ -112,16 +113,14 @@ export const POSTFLOP_MORE_LESSONS: LessonContent[] = [
         choices: ['7♥6♥5♣', '8♠8♦3♣', 'Q♥J♦T♣', 'A♠8♦3♣'],
         answer: 0,
         explain:
-          'On 7♥6♥5♣, BTN has 48.9% equity. So BB has 51.1%. Low connected cards hit BB’s small connected hands and pairs. On 8♠8♦3♣, BB has more trips. But BTN still has 53.5% equity.',
+          'Like the equity table showed, BTN has 48.9% on 7♥6♥5♣. So BB has 51.1%. Low connected cards hit BB’s small connected hands and pairs. On 8♠8♦3♣, BTN still has 53.5% equity.',
+        point: 0,
       },
       {
         kind: 'takeaway',
         points: [
-          'Range advantage sets how often you bet.',
-          'Nut advantage sets how big you bet.',
-          'High boards favor the raiser, and low connected boards favor the caller.',
-          'Paired boards can split. The raiser has the equity, but the caller can have more trips.',
-          'These are raw equities. Position changes how much each side realizes.',
+          'Range advantage sets how often you bet. On 765 the big blind has more equity.',
+          'Nut advantage sets how big you bet. On 883 BTN has more equity, but BB has more trips.',
         ],
       },
     ],
@@ -203,7 +202,8 @@ export const POSTFLOP_MORE_LESSONS: LessonContent[] = [
         choices: ['Less often, since it acts first', 'More often, since its range is stronger', 'Just as often, with a different size'],
         answer: 0,
         explain:
-          'Out of position you realize less equity. The button’s calling range is also condensed, with few hands that fold to any bet. Both push toward more checking. A stronger range alone does not make up for acting first.',
+          'Like the first picture said, out of position you realize less equity. The button’s calling range also has few hands that fold to any bet. Both push toward more checking.',
+        point: 0,
       },
       {
         kind: 'quiz',
@@ -211,15 +211,24 @@ export const POSTFLOP_MORE_LESSONS: LessonContent[] = [
         choices: ['Because sets lose value when they bet', 'To protect its checking range', 'To keep the pot small for the river'],
         answer: 1,
         explain:
-          'Strong hands in your checks let you check raise or check call. Without them, the caller can bet every time you check. Sets do not lose value by betting. Checking some of them keeps your checks hard to attack.',
+          'Like the tree showed, strong hands in your checks let you check raise or check call. Without them, the caller can bet every time you check. Sets do not lose value by betting.',
+        point: 1,
+      },
+      {
+        kind: 'quiz',
+        question: 'You 3bet from the big blind and the button calls. The flop is K♠7♦2♣. What does your strategy usually do?',
+        board: 'Ks7d2c',
+        choices: ['C-bet often with a small size', 'Check almost every hand', 'Overbet with sets only'],
+        answer: 0,
+        explain: 'Like the sizing step said, the 3bettor has a large range advantage. On dry high boards, small bets with a wide range still work out of position. Checking everything gives that edge away.',
+        point: 2,
       },
       {
         kind: 'takeaway',
         points: [
-          'Out of position, c-bet less often.',
-          'Check more medium hands.',
-          'Keep some strong hands in your checking range.',
-          'Small bets still work on boards with a big range advantage, especially as the 3bettor.',
+          'Out of position, c-bet less often. Check more medium hands like second pair.',
+          'Keep some strong hands in your checks. Then a bet behind your check is costly.',
+          'Small bets still work on dry high boards, especially as the 3bettor.',
         ],
       },
     ],
@@ -310,7 +319,8 @@ export const POSTFLOP_MORE_LESSONS: LessonContent[] = [
         choices: ['BB gains equity on every turn card', 'BB wins more pots by betting first', 'BTN’s range is capped after it checks'],
         answer: 2,
         explain:
-          'BTN bets most of its strong hands on the flop. Its check back cannot defend well against bets. So BB’s value bets get paid by weaker hands, and its bluffs get folds. Many turn cards do not help BB at all.',
+          'Like the tree showed, BTN bets most of its strong hands on the flop. Its check back cannot defend well against bets. Many turn cards do not help BB at all.',
+        point: 0,
       },
       {
         kind: 'quiz',
@@ -320,15 +330,23 @@ export const POSTFLOP_MORE_LESSONS: LessonContent[] = [
         choices: ['4♠3♠, bottom pair', '8♣7♣, two pair', 'A♦5♣, ace high'],
         answer: 1,
         explain:
-          'Two pair is strong against a capped range and wants to build the pot. Bottom pair has some showdown value and gains little by betting. Ace high is not a value hand.',
+          'Like the probe table showed, two pair is strong against a capped range and wants to build the pot. Bottom pair and ace high check. They have showdown value but gain little by betting.',
+        point: 1,
+      },
+      {
+        kind: 'quiz',
+        question: 'BB checks the flop and BTN checks back. BB checks the turn too. Why can BTN now bet many hands?',
+        choices: ['BB probes most of its strength, so its range is weak too', 'BTN’s flop check made its range stronger', 'BB can no longer raise on the turn'],
+        answer: 0,
+        explain: 'Like the delayed c-bet step said, after 2 checks BB’s range is weak too. So BTN can bet hands that checked to trap or for showdown. It also bets hands that improved and draws.',
+        point: 2,
       },
       {
         kind: 'takeaway',
         points: [
-          'A check back from the raiser is usually capped.',
-          'Probe often with value hands, protection hands and draws.',
-          'If BB checks again, the raiser can make a delayed c-bet.',
-          'Against players who trap on the flop, the check back is not capped.',
+          'A flop check back from the raiser is usually capped. So BB can probe the turn often.',
+          'Probe with value hands, protection hands and draws. Check bottom pair and ace high.',
+          'If BB checks the turn too, its range is weak. The raiser can then make a delayed c-bet.',
         ],
       },
     ],
@@ -414,7 +432,8 @@ export const POSTFLOP_MORE_LESSONS: LessonContent[] = [
         choices: ['J♥T♥', 'Q♣J♣', '8♣8♠'],
         answer: 0,
         explain:
-          'J♥T♥ now has a flush draw, so it wins sometimes when called. Q♣J♣ has no draw and little equity when called. 8♣8♠ has showdown value, so it usually checks.',
+          'Like the turn barrel hand showed, J♥T♥ now has a flush draw. So it wins sometimes when called. Q♣J♣ has no draw and little equity. 8♣8♠ has showdown value, so it usually checks.',
+        point: 1,
       },
       {
         kind: 'quiz',
@@ -423,15 +442,24 @@ export const POSTFLOP_MORE_LESSONS: LessonContent[] = [
         answer: 2,
         explain:
           'First, 1 + 2 × 81.5 ÷ 37.5 = 5.35. Its square root is 2.31. Subtract 1 and halve it to get about 0.66. The 184% size is for a single raised pot, where stacks are deeper compared with the pot.',
+        point: 2,
+      },
+      {
+        kind: 'quiz',
+        question: 'You bet 8♣ 6♦ 2♠ and got called. Which turn is the best card to keep betting?',
+        board: '8c6d2s',
+        choiceCards: ['Ah', '5h', '4c'],
+        choices: ['A♥', '5♥', '4♣'],
+        answer: 0,
+        explain: 'Like the turn boards showed, the ace is an overcard you hold more of than the caller. Low connecting cards like the 5 or 4 can complete the caller’s straights.',
+        point: 0,
       },
       {
         kind: 'takeaway',
         points: [
-          'Barrel turns that help your range.',
-          'Slow down on turns that help theirs.',
-          'Turn bluffs need equity. Hands with nothing mostly give up.',
-          'River bluffs block calls and unblock folds.',
-          'Geometric sizing is the reference for a polarized line.',
+          'Barrel turns that help your range, like an overcard. Slow down on low cards that help theirs.',
+          'Turn bluffs need equity. Bet flush draws and open enders, and give up hands with nothing.',
+          'Geometric sizing is the reference for a polarized line. At SPR 2.2, two bets of about 66% get stacks in.',
         ],
       },
     ],
@@ -537,7 +565,8 @@ export const POSTFLOP_MORE_LESSONS: LessonContent[] = [
         question: 'Three opponents each fold 60% of the time, independently. How often do all 3 fold?',
         choices: ['13.0%', '21.6%', '36.0%', '60.0%'],
         answer: 1,
-        explain: 'Multiply 0.6 × 0.6 × 0.6 to get 0.216, or 21.6%. The 36.0% figure is for 2 opponents. Each extra player multiplies the chance again.',
+        explain: 'Like the table showed, multiply 0.6 × 0.6 × 0.6 to get 21.6%. The 36.0% figure is for 2 opponents. Each extra player multiplies the chance again.',
+        point: 0,
       },
       {
         kind: 'quiz',
@@ -546,14 +575,23 @@ export const POSTFLOP_MORE_LESSONS: LessonContent[] = [
         answer: 2,
         explain:
           'Both must fold, and 0.5 × 0.5 = 25%. A half pot bluff needs 33.3% folds, so it loses. The 75% figure is the chance that at least one player folds, which does not win the pot.',
+        point: 0,
+      },
+      {
+        kind: 'quiz',
+        question: 'K♠Q♦ on K♥8♣4♦ has 86.4% against one random hand. About how much does it have against 4?',
+        cards: 'KsQd',
+        board: 'Kh8c4d',
+        choices: ['About 86%', 'About 57%', 'About 25%'],
+        answer: 1,
+        explain: 'Like the bars showed, it falls to about 56.5% against 4 random hands. With more players, someone more often connects. So multiway you bet stronger hands for value.',
+        point: 1,
       },
       {
         kind: 'takeaway',
         points: [
-          'Bluffs need everyone to fold, and that gets rare fast.',
-          'Your equity drops with each extra player.',
-          'Bet stronger hands for value.',
-          'Range advantage matters less, and defense is shared.',
+          'A bluff needs everyone to fold. Three players who each fold 60% all fold only 21.6%.',
+          'Your equity drops with each extra player. So bet stronger hands for value.',
         ],
       },
     ],
@@ -644,6 +682,7 @@ export const POSTFLOP_MORE_LESSONS: LessonContent[] = [
         answer: 0,
         explain:
           'Your call does not close the action. It also has to hold up against 2 ranges. So the middle player continues tighter and raises mostly strong hands. The bigger pot does not make up for that.',
+        point: 1,
       },
       {
         kind: 'quiz',
@@ -651,16 +690,23 @@ export const POSTFLOP_MORE_LESSONS: LessonContent[] = [
         choices: ['Mostly pure bluffs', 'Strong hands and strong draws', 'Medium pairs that want protection'],
         answer: 1,
         explain:
-          'A bluff needs 2 players to fold, so multiway check raises lean toward value. Strong draws are the main semi bluffs. Medium pairs usually call, since a raise folds out worse hands.',
+          'Like the check raise step said, a bluff needs 2 players to fold. So multiway check raises lean toward value. Strong draws are the main semi bluffs. Medium pairs usually call.',
+        point: 2,
+      },
+      {
+        kind: 'quiz',
+        question: 'You open the cutoff. The button and the big blind call. Compared with heads up, how do you c-bet?',
+        choices: ['Less often, with stronger hands', 'Small with the whole range', 'More often, to fold out 2 players'],
+        answer: 0,
+        explain: 'Like the bet less step said, the range bet mostly disappears multiway. The bets that remain lean toward strong made hands and good draws. Medium hands check more.',
+        point: 0,
       },
       {
         kind: 'takeaway',
         points: [
           'Multiway, c-bet less often and with stronger hands.',
-          'Bet small on dry boards and bigger where draws need charging.',
-          'The middle player continues tighter.',
-          'The last player can call a bit wider.',
-          'Multiway check raises are mostly strong.',
+          'The middle player continues tighter. The last player can call a bit wider.',
+          'Multiway check raises are mostly strong hands and strong draws.',
         ],
       },
     ],

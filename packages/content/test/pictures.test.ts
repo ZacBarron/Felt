@@ -552,6 +552,22 @@ describe('picture pass: exploit, mindset and tournaments', () => {
     const p = [7, 8, 9, 10].reduce((s, k) => s + choose(10, k), 0) / 2 ** 10;
     expect(pick(art('exploit/profiling/hud-stats', 'Chances, not hands'), 'ring').value).toBe(p);
     expect(r1(p * 100)).toBe(17.2);
+    // A true 25% VPIP: the share of samples inside each range in the table, by exact counting.
+    const within = (n: number, lo: number, hi: number) => {
+      let s = 0;
+      for (let k = lo; k <= hi; k++) s += choose(n, k) * 0.25 ** k * 0.75 ** (n - k);
+      return r1(s * 100);
+    };
+    expect([within(20, 2, 9), within(50, 7, 19), within(200, 38, 62)]).toEqual([96.2, 96.7, 95.9]);
+    const vpip = step('exploit/profiling/hud-stats', 'A true 25% VPIP player');
+    if (vpip.kind !== 'table') throw new Error('expected a table');
+    const share = (k: number, n: number) => `${Math.round((k / n) * 100)}%`;
+    expect(vpip.rows.map((r) => r[2])).toEqual([[2, 9, 20], [7, 19, 50], [38, 62, 200]].map(([lo, hi, n]) => `${share(lo, n)} to ${share(hi, n)}`));
+    // Button against one limper: small pairs split, offsuit aces from A9o raise.
+    const iso = buildChart(STARTER_CHARTS.find((c) => c.id === '9max-100-iso-btn-vs-1limp')!);
+    for (const h of ['22', '33', '44', '55', '66']) expect(iso.mixes.get(h)).toEqual({ raise: 0.5, call: 0.5 });
+    for (const h of ['A9o', 'ATo', 'AJo', 'AQo', 'AKo']) expect(iso.mixes.get(h)).toEqual({ raise: 1 });
+    expect(iso.mixes.get('A8o')?.raise).toBeLessThan(1);
     expect(bars(art('exploit/tells/physical', 'Close calls only'))).toEqual([0.1, 0.3, 0.36].map((b) => Math.round(b * 300 - 100)));
   });
 
