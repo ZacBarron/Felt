@@ -238,8 +238,26 @@ export const CLOSE_TOLERANCE = 0.4;
 export function scoreMixAnswer(chartMix: HandMix, answer: HandMix): { accuracy: number; verdict: MixVerdict; distance: number } {
   const distance = mixDistance(chartMix, answer);
   if (distance <= MIX_TOLERANCE + 1e-9) return { accuracy: 1, verdict: 'right', distance };
-  if (distance <= CLOSE_TOLERANCE + 1e-9) return { accuracy: 0.5, verdict: 'close', distance };
+  if (distance <= CLOSE_TOLERANCE + 1e-9 || partOfMix(chartMix, answer)) return { accuracy: 0.5, verdict: 'close', distance };
   return { accuracy: 0, verdict: 'wrong', distance };
+}
+
+/** A real share of a mix: one 25% step. */
+export const PART_OF_MIX = 0.25;
+
+/**
+ * True when the answer is one action that the chart plays at least
+ * PART_OF_MIX of the time. At equilibrium every action in a mix earns the
+ * same, so taking one of them is never a miss, though it misses the mix.
+ */
+export function partOfMix(chartMix: HandMix, answer: HandMix): boolean {
+  // Only a pure answer: one action all of the time.
+  const used = Object.entries(answer).filter(([, f]) => f > 0);
+  if (used.length !== 1 || used[0][1] < 1 - 1e-9) return false;
+  const action = used[0][0];
+  // Fold is whatever the chart does not play.
+  const share = action === 'fold' ? 1 - Object.entries(chartMix).reduce((t, [a, f]) => (a === 'fold' ? t : t + f), 0) : (chartMix[action] ?? 0);
+  return share >= PART_OF_MIX - 1e-9;
 }
 
 export interface CardSeed {

@@ -1,4 +1,4 @@
-import { type Chart, type DrillOutcome, handClassCombos, type HandMix, mixAnswerOptions, scoreMixAnswer, scoreRecall } from '@felt/core';
+import { type Chart, type DrillOutcome, handClassCombos, type HandMix, mixAnswerOptions, partOfMix, scoreMixAnswer, scoreRecall } from '@felt/core';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { actionColor } from '../components/actionColors';
 import { MixBar } from '../components/MixBar';
@@ -68,9 +68,11 @@ export function QuickRecall({ chart, hand, targetMs, onAnswer, onNext, compact, 
       let accuracy: number;
       let kind: keyof typeof VERDICTS;
       if (mixes) {
-        const scored = scoreMixAnswer(mix, answerMix ?? { [choice]: 1 });
+        const given = answerMix ?? { [choice]: 1 };
+        const scored = scoreMixAnswer(mix, given);
         accuracy = scored.accuracy;
-        kind = scored.verdict;
+        // One action of a real mix is a fine play that misses the mix: say so rather than "Close".
+        kind = scored.verdict === 'close' && partOfMix(mix, given) ? 'mix' : scored.verdict;
       } else {
         accuracy = scoreRecall(mix, choice);
         kind = accuracy === 1 ? 'right' : accuracy > 0 ? 'mix' : 'wrong';

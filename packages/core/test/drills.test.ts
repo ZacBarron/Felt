@@ -9,6 +9,7 @@ import {
   primaryAction,
   mixAnswerOptions,
   mixBrushes,
+  partOfMix,
   scoreMixAnswer,
   mixDistance,
   scoreMixPainting,
@@ -138,6 +139,18 @@ describe('mix answers', () => {
     expect(scoreMixAnswer({ fold: 1 }, { raise: 0.5 })).toMatchObject({ verdict: 'wrong' });
     // Raising a quarter of the time with a pure fold is a quarter off: close, not right.
     expect(scoreMixAnswer({ fold: 1 }, { raise: 0.25 })).toMatchObject({ verdict: 'close' });
+  });
+
+  it('never calls one action of a real mix a miss', () => {
+    // 97s 3bets half the time and calls half: a pure 3bet or a pure call is part of the mix.
+    expect(scoreMixAnswer({ threeBet: 0.5, call: 0.5 }, { threeBet: 1 })).toMatchObject({ verdict: 'close', accuracy: 0.5 });
+    expect(scoreMixAnswer({ threeBet: 0.5, call: 0.5 }, { call: 1 })).toMatchObject({ verdict: 'close' });
+    // Folding a hand that folds 30% of the time (fold is implied).
+    expect(scoreMixAnswer({ raise: 0.7 }, { fold: 1 })).toMatchObject({ verdict: 'close' });
+    // An action played under a quarter of the time is still a miss.
+    expect(scoreMixAnswer({ raise: 0.85, call: 0.15 }, { call: 1 })).toMatchObject({ verdict: 'wrong' });
+    expect(partOfMix({ raise: 0.25 }, { raise: 1 })).toBe(true);
+    expect(partOfMix({ raise: 0.5 }, { raise: 0.5 })).toBe(false);
   });
 });
 
