@@ -69,6 +69,20 @@ describe('several goals', () => {
     expect(goalsLine(['win-live', 'move-up', 'master-gto'])).toBe('Built for your 3 goals');
   });
 
+  it('starts someone new with the basics, whatever their goals', async () => {
+    const { pathPrefs } = await import('../src/state/goals');
+    const progress = await lessonProgress();
+    for (const experience of ['new', 'casual'] as const) {
+      const prefs = pathPrefs({ onboarded: true, experience, goals: ['move-up'], focus: [], dailyMinutes: 10 });
+      expect(recommendedLessons(progress, prefs)[0].key, experience).toBe('basics/rules/goal');
+    }
+    // A casual player placed past the basics follows their placement and goals instead.
+    const placed = pathPrefs({ onboarded: true, experience: 'casual', placedAt: 'preflop/rfi', goals: ['move-up'], focus: [], dailyMinutes: 10 });
+    expect(placed.focus[0]).toBe('preflop/3bet-pots');
+    const regular = pathPrefs({ onboarded: true, experience: 'winning', goals: ['move-up'], focus: [], dailyMinutes: 10 });
+    expect(regular.focus[0]).toBe('preflop/3bet-pots');
+  });
+
   it('reads saves from before goals were a list', async () => {
     const { pathPrefs } = await import('../src/state/goals');
     const old = { onboarded: true, goal: 'master-gto', focus: [], dailyMinutes: 10 } as unknown as Parameters<typeof pathPrefs>[0];

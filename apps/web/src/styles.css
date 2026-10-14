@@ -5081,3 +5081,297 @@ a.card.more-me,
   color: var(--label-2);
   background: transparent;
 }
+
+/* Onboarding: welcome, ladder, first hand, proof ------------------------- */
+
+.onb-intro-felt {
+  min-height: 0;
+  padding: 2.4rem 1rem 1.6rem;
+  gap: 0.7rem;
+}
+
+.onb-hand {
+  display: flex;
+  gap: 10px;
+  margin-top: 0.5rem;
+}
+
+.onb-hand > :first-child {
+  rotate: -7deg;
+  translate: 4px 4px;
+}
+
+.onb-hand > :last-child {
+  rotate: 7deg;
+  translate: -4px 4px;
+}
+
+.onb-intro-copy {
+  gap: 1rem;
+  padding-top: 1.5rem;
+  padding-bottom: 1rem;
+}
+
+.onb-intro-copy .onb-title {
+  font-size: 2.3rem;
+  margin: 0;
+  text-wrap: balance;
+}
+
+.onb-lead {
+  margin: 0;
+  font-size: 1.05rem;
+  line-height: 1.4;
+}
+
+.ladder-track {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.ladder-steps {
+  display: grid;
+  grid-template-columns: repeat(9, 1fr);
+  align-items: end;
+  gap: 4px;
+  height: 22px;
+}
+
+.ladder-step {
+  /* Each tier a little taller than the one below: a climb, not a progress bar. */
+  height: calc(6px + var(--i) * 2px);
+  border-radius: 3px;
+  background: var(--fill);
+}
+
+.ladder-step.on {
+  background: color-mix(in srgb, var(--tint-fill) 70%, var(--fill));
+}
+
+.ladder-step.goal {
+  background: var(--tint-fill);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--tint-fill) 30%, transparent);
+}
+
+.ladder-track.climb .ladder-step.on {
+  transform-origin: bottom;
+  animation: ladder-rise 420ms var(--spring) backwards;
+  animation-delay: calc(1500ms + var(--i) * 90ms);
+}
+
+.plan-climb .ladder-track.climb .ladder-step.on {
+  animation-delay: calc(200ms + var(--i) * 90ms);
+}
+
+@keyframes ladder-rise {
+  from {
+    transform: scaleY(0);
+    opacity: 0;
+  }
+}
+
+.ladder-ends {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--label-2);
+  letter-spacing: 0.01em;
+}
+
+.ladder-goal {
+  color: var(--tint);
+}
+
+.onb-proof {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.onb-proof li {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 0.7rem 0.75rem;
+  border-radius: 16px;
+  background: var(--surface);
+}
+
+.onb-proof-num {
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  line-height: 1;
+  color: var(--label);
+}
+
+.onb-proof-label {
+  font-size: 0.78rem;
+  color: var(--label-2);
+  line-height: 1.2;
+}
+
+.onb-quotes {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.onb-quote {
+  margin: 0;
+  padding: 0.9rem 1rem;
+  border-radius: 16px;
+  background: var(--surface);
+}
+
+.onb-quote blockquote {
+  margin: 0 0 0.4rem;
+  font-size: 1rem;
+  line-height: 1.4;
+}
+
+.onb-quote figcaption {
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+.onb-reply {
+  margin: 0;
+  padding: 0.75rem 1rem;
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--tint) 9%, var(--surface));
+  color: var(--label);
+  font-weight: 560;
+}
+
+/* A choice's check lands with a small spring. */
+.onb-choice.selected .onb-check,
+.target-rung.selected .target-dot {
+  animation: pop 320ms var(--spring) both;
+}
+
+.target-ladder {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.target-rung {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  width: 100%;
+  text-align: left;
+  padding: 0.85rem 1rem;
+  border-radius: 18px;
+  background: var(--surface);
+  color: var(--label);
+  box-shadow: inset 0 0 0 1.5px var(--separator);
+  transition:
+    box-shadow 180ms var(--ease),
+    background 180ms var(--ease);
+}
+
+.target-rung.selected {
+  box-shadow: inset 0 0 0 2px var(--tint);
+  background: color-mix(in srgb, var(--tint) 7%, var(--surface));
+}
+
+.target-dot {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--surface);
+  box-shadow: inset 0 0 0 2px var(--separator);
+  color: var(--on-tint);
+}
+
+.target-rung.below .target-dot {
+  box-shadow: inset 0 0 0 2px var(--tint);
+}
+
+.target-rung.selected .target-dot {
+  background: var(--tint-fill);
+  box-shadow: none;
+}
+
+.target-name {
+  display: block;
+  font-weight: 650;
+  font-size: 1.05rem;
+}
+
+.target-rung .footnote {
+  display: block;
+  margin-top: 2px;
+}
+
+.target-min {
+  flex: none;
+  font-weight: 600;
+  color: var(--label-2);
+  font-size: 0.9rem;
+}
+
+.onb-why .list-row {
+  align-items: flex-start;
+  padding-block: 0.9rem;
+}
+
+.onb-why-icon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--tint) 12%, var(--surface));
+  color: var(--tint);
+}
+
+.onb-why-title {
+  display: block;
+  font-weight: 650;
+  margin-bottom: 2px;
+}
+
+/* Each reason is short enough to read in full: no two line clamp here. */
+.onb-why .list-row .grow > .footnote {
+  display: block;
+  overflow: visible;
+}
+
+.onb-cite {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.75rem;
+  color: var(--label-2);
+  font-style: italic;
+}
+
+.onb-steps .list-row {
+  gap: 0.8rem;
+}
+
+.plan-climb {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.plan-done {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--green-text);
+  font-weight: 600;
+}

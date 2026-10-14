@@ -19,6 +19,10 @@ interface Props {
   onNext: () => void;
   /** The page above already names the spot and its seats (Ranges), so skip the header. */
   compact?: boolean;
+  /** No clock, whatever the setting says. Used for a first hand during setup. */
+  untimed?: boolean;
+  /** Label for the button after an answer. */
+  nextLabel?: string;
 }
 
 /** The clock starts once both cards have flipped face up. */
@@ -32,9 +36,9 @@ const VERDICTS = {
 };
 
 /** "You are UTG+1 with KTo, folded to you. Raise or fold?" Timed, then shows the full mix. */
-export function QuickRecall({ chart, hand, targetMs, onAnswer, onNext, compact }: Props) {
+export function QuickRecall({ chart, hand, targetMs, onAnswer, onNext, compact, untimed: forceUntimed, nextLabel = 'Next hand' }: Props) {
   const { settings } = useSettings();
-  const untimed = !!settings.study.untimed;
+  const untimed = !!forceUntimed || !!settings.study.untimed;
   const shortcuts = settings.study.shortcuts !== false;
   const started = useRef(performance.now() + FLIP_MS);
   const revealRef = useRef<HTMLDivElement>(null);
@@ -196,7 +200,7 @@ export function QuickRecall({ chart, hand, targetMs, onAnswer, onNext, compact }
           </div>
         ) : (
           <button className="btn btn-primary btn-lg btn-block swap-in" onClick={onNext} autoFocus aria-keyshortcuts="Enter">
-            Next hand
+            {nextLabel}
           </button>
         )}
       </BottomBar>

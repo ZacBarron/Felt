@@ -48,6 +48,8 @@ See [MONETIZATION.md](MONETIZATION.md).
 - [x] Path ordering: in progress, then placement module, then focus areas
 - [x] Today leads with the next lesson in the plan and a three task plan (lesson, review, daily challenge)
 - [x] Felt Pro paywall with plan cards, trial timeline and honest fine print; free tier is the first module of every track
+- [x] Onboarding v2: welcome with the Newcomer to Elite ladder and real content counts, a reply to each answer, a target tier, a first hand before any commitment, cited reasons Felt works, basics first for new players, and a Day 1 moment after the pledge
+- [ ] Testimonials: add real quotes from test players to `TESTIMONIALS` in `packages/content/src/onboarding.ts` (with permission)
 - [x] Developer switch for Pro, onboarding replay and progress reset
 - [x] Saves: bookmark any lesson screen or solver hand; a Saved page with notes; every save becomes a review card (quizzes graded, other screens as self graded flashcards, solver hands graded against the solver's mix), plus a saved only review session
 - [x] Felt Rating: Glicko rating overall and per area from every graded answer, provisional until settled, tiers, history (see ENGAGEMENT.md)

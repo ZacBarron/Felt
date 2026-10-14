@@ -1,3 +1,4 @@
+import { CURRICULUM } from '@felt/content';
 import type { Experience, Focus, Goal, Profile } from './settings';
 
 /** Copy for onboarding choices. `plan` finishes the sentence "Your plan to ..." */
@@ -14,6 +15,25 @@ export const EXPERIENCE: { id: Experience; label: string; note: string }[] = [
   { id: 'casual', label: 'I know the rules', note: 'I play for fun now and then' },
   { id: 'winning', label: 'I play regularly', note: 'I want a bigger edge in my games' },
   { id: 'pro', label: 'Poker is my job', note: 'Or close to it' },
+];
+
+/** A short reply under the experience question, so each answer feels heard. */
+export const EXPERIENCE_REPLY: Record<Experience, string> = {
+  new: 'Perfect. You start with how a hand works.',
+  casual: 'Good. A short quiz will skip what you know.',
+  winning: 'Good. Your quiz will skip straight to your gaps.',
+  pro: 'Then expect hard spots. Your quiz skips the rest.',
+};
+
+/**
+ * Tiers a player can aim for, from the rating ladder in core. What each one
+ * means describes skill, never money: winnings depend on the game too.
+ */
+export const TARGETS: { tier: string; note: string }[] = [
+  { tier: 'Solid', note: 'Sound basics and fewer costly mistakes' },
+  { tier: 'Regular', note: 'Strong preflop and a plan on every street' },
+  { tier: 'Expert', note: 'Mixed strategies and exploits on purpose' },
+  { tier: 'Elite', note: 'Close to solver play in every spot Felt rates' },
 ];
 
 export const FOCUS: { id: Focus; label: string; module: string }[] = [
@@ -65,10 +85,18 @@ export function goalsLine(goals: readonly Goal[]): string | undefined {
   return `Built for your ${plans.length} goals`;
 }
 
-/** Path preferences from a profile: focus areas first, then the modules each goal needs, in the order picked. */
+const BASICS_MODULES = (CURRICULUM.find((t) => t.id === 'basics')?.modules ?? []).map((m) => `basics/${m.id}`);
+
+/**
+ * Path preferences from a profile: focus areas first, then the modules each
+ * goal needs, in the order picked. Someone new starts with the basics
+ * whatever their goals, and so does a casual player who skipped placement:
+ * a goal like moving up should never put a 3bet lesson before the rules.
+ */
 export function pathPrefs(profile: Profile) {
   const goals = profile.goals ?? (profile.goal ? [profile.goal] : []);
-  const modules = [...FOCUS.filter((f) => profile.focus.includes(f.id)).map((f) => f.module), ...goals.flatMap((g) => GOAL_MODULES[g])];
+  const basicsFirst = profile.experience === 'new' || (profile.experience === 'casual' && !profile.placedAt);
+  const modules = [...(basicsFirst ? BASICS_MODULES : []), ...FOCUS.filter((f) => profile.focus.includes(f.id)).map((f) => f.module), ...goals.flatMap((g) => GOAL_MODULES[g])];
   return {
     placedAt: profile.placedAt && profile.placedAt !== 'all' ? profile.placedAt : undefined,
     focus: [...new Set(modules)],

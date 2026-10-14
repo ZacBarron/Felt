@@ -81,6 +81,12 @@ Compiled October 2026 to ground Felt's rating, scheduling, motivation and moneti
 - **Duolingo streaks** (*company source*, blog.duolingo.com, "The habit-building research behind your Duolingo streak"): a streak wager raised day 7 retention 14%; a streak milestone animation raised new learner day 7 retention 1.7%; 7 day streak holders were 2.4 times more likely to return next day (correlational). No peer reviewed controlled study of streaks alone was found.
 - **Risks.** Deci, E. L., Koestner, R., Ryan, R. M. (1999). *Psychological Bulletin* 125(6), 627-668. 128 studies: engagement, completion and performance contingent rewards cut free choice intrinsic motivation (d = -0.40, -0.36, -0.28); positive feedback raised it (d = 0.33). Mathur, A., et al. (2019). "Dark patterns at scale." *Proc. ACM HCI* 3(CSCW), 81. doi:10.1145/3359183: 1,818 dark pattern instances in 15 types across about 11% of 11K sites, including false urgency and confirmshaming.
 
+- **Self efficacy.** Bandura, A. (1977). "Self-efficacy: Toward a unifying theory of behavioral change." *Psychological Review* 84(2), 191-215. Efficacy expectations decide whether people start, how hard they try and how long they persist. Performance accomplishments are the most dependable source (*abstract level*; the ranking of sources is from secondary summaries).
+- **Endowed progress.** Nunes, J. C., Drèze, X. (2006). "The endowed progress effect: How artificial advancement increases effort." *Journal of Consumer Research* 32(4), 504-512. doi:10.1086/500480. An 8 step task framed as 10 steps with 2 already done raised completion and shortened completion time (*abstract level*; the car wash completion rates were not confirmed).
+- **Labor illusion.** Buell, R. W., Norton, M. I. (2011). "The labor illusion: How operational transparency increases perceived value." *Management Science* 57(9), 1564-1579. Showing the work behind a result raises its perceived value (citation confirmed; findings *secondary*).
+- **Social proof.** Goldstein, N. J., Cialdini, R. B., Griskevicius, V. (2008). "A room with a viewpoint: Using social norms to motivate environmental conservation in hotels." *Journal of Consumer Research* 35(3), 472-482. doi:10.1086/586910. Descriptive norms beat the standard appeal, and norms from the most similar group worked best (*abstract level*).
+- **Try before signing up.** Duolingo lets people finish a lesson before asking for an account. A reported 20% lift in DAUs from moving sign up later comes from an executive interview quoted by Taplytics (*secondary*; no primary Duolingo source found).
+
 ---
 
 ## 5. Apps that grew and monetized
@@ -112,6 +118,7 @@ Compiled October 2026 to ground Felt's rating, scheduling, motivation and moneti
 7. **Honest variance**: bb/100 with confidence intervals, a "too few hands" state under about 1,500 hands, rake always included (Potter van Loon et al. 2015; Levitt and Miles 2014).
 8. **Forgiving streaks**: streak freezes, "one miss is fine" copy, and an if-then plan at setup (Kahneman and Tversky 1979; Lally et al. 2010; Gollwitzer 1999; Duolingo streak blog).
 9. **Compete with your past self first**; any social board groups similar levels (Festinger 1954; Landers et al. 2017; Hanus and Fox 2015).
-10. **Rewards inform, not bribe**: badges mark real competence gains; no false urgency or confirmshaming in reminders or paywalls (Deci, Koestner and Ryan 1999; Ryan and Deci 2000; Mathur et al. 2019).
-11. **Few, varied reminders** that decay when ignored (Duolingo KDD 2020).
-12. **Monetization**: freemium with annual plans and a longer trial suits education (RevenueCat 2025, 2026); about 9% paid share is achievable at scale (Duolingo 10-K); poker players accept tiers by depth of solver content (GTO Wizard).
+10. **Onboarding earns trust**: a winnable first hand before any ask (Bandura 1977; Duolingo, *secondary*), shown work and a step already done in the plan (Buell and Norton 2011; Nunes and Drèze 2006), and only real social proof (Goldstein et al. 2008).
+11. **Rewards inform, not bribe**: badges mark real competence gains; no false urgency or confirmshaming in reminders or paywalls (Deci, Koestner and Ryan 1999; Ryan and Deci 2000; Mathur et al. 2019).
+12. **Few, varied reminders** that decay when ignored (Duolingo KDD 2020).
+13. **Monetization**: freemium with annual plans and a longer trial suits education (RevenueCat 2025, 2026); about 9% paid share is achievable at scale (Duolingo 10-K); poker players accept tiers by depth of solver content (GTO Wizard).

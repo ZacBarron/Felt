@@ -12,15 +12,24 @@ How Felt turns a first open into a daily habit and a paid subscription, and why 
 
 | Screen | What it does | Why it works |
 | --- | --- | --- |
-| Welcome | Brand, one line promise | Sets the frame: serious training, minutes a day |
-| Goal | Win live, move up, go pro, master GTO, tournaments | A stated goal raises follow through, and the goal is quoted back in the plan and on Today |
-| Game | Live 1/3, live 2/5+, online, tournaments | Sets the game preset, so charts and money amounts match from the first screen |
-| Experience | New to pro | Decides whether placement is recommended |
-| Focus | What costs you money (multi select) | Moves those modules up the path; the player sees their own words reflected |
-| Daily goal | 5, 10, 15 or 20 minutes, with the honest finish time for each | A specific, small, chosen target; the projection is computed from real lesson lengths |
-| Find your level | Placement test or start from scratch | Nobody repeats what they know, and skipped lessons are instant progress |
-| Plan | Daily target, lessons skipped, finish date, first three lessons, then hold to commit | A short build step, then a plan that is clearly theirs; holding to commit is a small deliberate act that makes the pledge real |
+| Welcome | Two aces dealt on the felt, "From your first hand to Elite", the rating ladder climbing, and real counts of lessons, questions and charts. "I have an account" appears only when a server answers | Names the whole journey for a beginner and a regular alike. The proof is depth that can be checked, not claims |
+| Level | New to pro, with a one line reply to the answer | Each answer is heard (the reply), and it decides basics first or placement |
+| Target | Pick a tier to aim for: Solid, Regular, Expert or Elite, with what each means and its rating | A specific, hard goal beats "do your best" (Locke and Latham 2002); Elite is the cap because higher tiers could not be measured honestly |
+| Goal | Win live, move up, go pro, master GTO, tournaments | The goal is quoted back in the plan and on Today |
+| Game | Live 1/3, live 2/5+, online, tournaments | Sets the game preset, so the first hand and every chart match |
+| Focus | What costs you money (multi select). Skipped for new players | Moves those modules up the path |
+| First hand | New players pick the better of two starting hands; players get a real button open from their game, untimed, graded with its mix | Value before the ask. It is winnable on purpose: an early success is the strongest source of self efficacy (Bandura 1977). Letting people try before signing up is how Duolingo onboards (secondary reports of a large lift) |
+| Why it works | Sources on every answer, recall over rereading (61% vs 40% a week later), a rating built on Elo and Glicko | Real, cited reasons in place of invented social proof |
+| Daily goal | 5, 10, 15 or 20 minutes | A specific, small, chosen target |
+| Study cue | When they will study | Implementation intention (Gollwitzer 1999) |
+| Find where you start | Placement or start from the basics. Skipped for new players | Nobody repeats what they know |
+| Plan | Pledge, the climb to their target, and the first week starting with a done "Set up your plan" row, then hold to commit | The labor of building is shown (Buell and Norton 2011). A step already done is honest endowed progress (Nunes and Drèze 2006) |
+| Day 1 | A short moment: "Your plan is set" | Marks the commitment the player just made |
 | Paywall | Felt Pro, personalized headline | Shown at peak intent, right after commitment |
+
+New players always start with the basics, whatever their goals; so does a casual player who skips placement (`pathPrefs` in `state/goals.ts`).
+
+**Social proof.** Felt shows only proof that is true: counts read from the content, cited research and, once real players give them, quotes in `TESTIMONIALS` (`packages/content/src/onboarding.ts`). Social proof persuades most when it describes people like the reader (Goldstein, Cialdini and Griskevicius 2008), and invented numbers or reviews would break the trust the product depends on. The section stays hidden while the list is empty.
 
 The progress bar at the top of every step keeps the end in sight.
 

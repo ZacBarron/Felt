@@ -54,6 +54,8 @@ export interface Profile {
   /** Older saves kept a single goal; read through `goals` instead. */
   goal?: Goal;
   experience?: Experience;
+  /** The tier the player is aiming for, from `TIERS` in core. */
+  target?: string;
   focus: Focus[];
   /** Daily study target in minutes. */
   dailyMinutes: number;
