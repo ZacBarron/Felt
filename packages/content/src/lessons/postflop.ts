@@ -44,11 +44,12 @@ export const POSTFLOP_LESSONS: LessonContent[] = [
         evidence: 'solver',
       },
       {
-        kind: 'callout',
-        tone: 'theory',
+        kind: 'board',
         title: 'Static and dynamic',
-        body:
-          'On a static board like K72 rainbow, the best hand on the flop usually stays best. So a small bet does most of the work. On a dynamic board like 976 two tone, equities swing on every turn. That pushes strategies toward bigger bets or more checks.',
+        board: '9h7h6c',
+        caption:
+          'On a static board like K72 rainbow, the best hand on the flop usually stays best. So a small bet does most of the work. On a dynamic board like this one, equities swing on every turn. That pushes strategies toward bigger bets or more checks.',
+        evidence: 'solver',
       },
       {
         kind: 'quiz',
@@ -209,21 +210,34 @@ export const POSTFLOP_LESSONS: LessonContent[] = [
         evidence: 'solver',
       },
       {
-        kind: 'text',
+        kind: 'visual',
         title: 'Why small works with a wide range',
-        body: [
-          'A small bet gets called by many worse hands. So medium hands can bet for value. It also needs few folds to work as a bluff.',
-          'A big bet with a wide range gets called mostly by better hands. It folds out the worse hands you want calls from.',
-        ],
+        art: {
+          kind: 'bars',
+          unit: '%',
+          bars: [
+            { label: '⅓ pot bet', value: 25, tone: 'green' },
+            { label: '¾ pot bet', value: 42.9, tone: 'red' },
+          ],
+        },
+        caption:
+          'Each bar is the folds a bluff needs at that size. A small bet needs few folds. It also gets called by many worse hands, so medium hands can bet for value. A big bet with a wide range gets called mostly by better hands.',
         evidence: 'math',
       },
       {
-        kind: 'text',
+        kind: 'visual',
         title: 'Why nut advantage means bigger',
-        body: [
-          'Say you hold many more of the strongest hands than villain. Big bets then win more from their medium hands. They cannot raise, and they must call often enough to stop your bluffs.',
-          'That is the logic behind turn and river overbets. Villain’s line has removed most of their strongest hands. So the bettor can size up with the nuts and the best bluffs.',
-        ],
+        art: {
+          kind: 'tree',
+          root: 'A big bet with more of the nuts',
+          branches: [
+            { label: 'Your nut hands', value: 'Win more', tone: 'green' },
+            { label: 'Villain’s medium hands', value: 'Must call enough', tone: 'gray' },
+            { label: 'Villain’s raises', value: 'Few strong hands', tone: 'gray' },
+          ],
+        },
+        caption:
+          'Big bets win more from villain’s medium hands. They cannot raise, and they must call often enough to stop your bluffs. That is the logic behind turn and river overbets. Villain’s line has removed most of their strongest hands.',
         evidence: 'solver',
       },
       {
@@ -321,13 +335,20 @@ export const POSTFLOP_LESSONS: LessonContent[] = [
         evidence: 'math',
       },
       {
-        kind: 'text',
+        kind: 'visual',
         title: 'Which hands continue',
-        body: [
-          'Against a small bet, continue with any pair and most gutshots. Also continue with overcards that have a backdoor flush draw.',
-          'Fold hands that have nothing now and little to draw to.',
-          'Out of position, you realize less of your equity. So the bare price is not enough. A weak high card hand with no backdoors often folds, even at 20%.',
-        ],
+        art: {
+          kind: 'tree',
+          root: 'Facing a small c-bet',
+          branches: [
+            { label: 'Any pair', value: 'Continue', tone: 'green' },
+            { label: 'Most gutshots', value: 'Continue', tone: 'green' },
+            { label: 'Overcards with a backdoor flush draw', value: 'Continue', tone: 'green' },
+            { label: 'Nothing now, little to draw to', value: 'Fold', tone: 'gray' },
+          ],
+        },
+        caption:
+          'Out of position you realize less of your equity. So the bare price is not enough. A weak high card hand with no backdoors often folds, even at 20%.',
         evidence: 'solver',
       },
       {
@@ -338,10 +359,18 @@ export const POSTFLOP_LESSONS: LessonContent[] = [
         caption: 'You have 2 overcards plus backdoor flush and straight draws. That is plenty of equity to call a small bet. Many turns also give you a real draw to keep going.',
       },
       {
-        kind: 'callout',
-        tone: 'exploit',
+        kind: 'visual',
         title: 'Honest c-bets',
-        body: 'Some live players c-bet strong hands and check weak ones, especially multiway. If your notes show that, fold more to their big c-bets. Against players who c-bet every flop, defend wider and check raise more.',
+        art: {
+          kind: 'tree',
+          root: 'How does this player c-bet?',
+          branches: [
+            { label: 'Strong hands only', value: 'Fold more to big bets', tone: 'gray' },
+            { label: 'Every flop', value: 'Defend wider, raise more', tone: 'green' },
+          ],
+        },
+        caption: 'Some live players c-bet strong hands and check weak ones, especially multiway. Check your notes before you lean on either read.',
+        evidence: 'exploit',
       },
       {
         kind: 'quiz',
@@ -390,13 +419,19 @@ export const POSTFLOP_LESSONS: LessonContent[] = [
         evidence: 'solver',
       },
       {
-        kind: 'text',
+        kind: 'visual',
         title: 'Which hands raise',
-        body: [
-          '**Value** comes from the strongest hands, like sets and two pair. On some boards, strong top pairs that need protection raise too.',
-          '**Semi bluffs** are draws with real equity. Open enders and combo draws are best, like a gutshot with a flush draw.',
-          'Hands with showdown value but little room to improve usually call instead. Middle pair is an example. Raising it folds out worse and gets called by better.',
-        ],
+        art: {
+          kind: 'tree',
+          root: 'Facing a small c-bet',
+          branches: [
+            { label: 'Sets and two pair', value: 'Raise for value', tone: 'red' },
+            { label: 'Open enders, combo draws', value: 'Raise as a semi bluff', tone: 'red' },
+            { label: 'Middle pair', value: 'Call', tone: 'green' },
+          ],
+        },
+        caption:
+          'On some boards, strong top pairs that need protection raise too. Hands with showdown value but little room to improve usually call. Raising them folds out worse and gets called by better.',
         evidence: 'solver',
       },
       {
@@ -468,13 +503,18 @@ export const POSTFLOP_LESSONS: LessonContent[] = [
         evidence: 'solver',
       },
       {
-        kind: 'text',
+        kind: 'visual',
         title: 'Equity, not just strength',
-        body: [
-          'Good barrels either beat the hands that call or have equity when called.',
-          'Strong pairs and sets barrel for value. Draws that picked up outs barrel as semi bluffs.',
-          'Some hands neither beat a call nor improve much. Weak top pairs on scary turns are an example. They often check.',
-        ],
+        art: {
+          kind: 'tree',
+          root: 'Barrel the turn?',
+          branches: [
+            { label: 'Strong pairs and sets', value: 'Bet for value', tone: 'red' },
+            { label: 'Draws that picked up outs', value: 'Semi bluff', tone: 'red' },
+            { label: 'Weak top pair, scary turn', value: 'Often check', tone: 'green' },
+          ],
+        },
+        caption: 'Good barrels either beat the hands that call or have equity when called. Some hands do neither. They often check.',
         evidence: 'solver',
       },
       {
@@ -483,6 +523,13 @@ export const POSTFLOP_LESSONS: LessonContent[] = [
         board: 'Ks7d2cAh',
         caption:
           'BTN holds AK and AA far more often than BB, which 3bets most of them. So the ace is a good card to keep betting. BTN can bet its strong hands and bluff more, since BB rarely has a strong ace.',
+        evidence: 'solver',
+      },
+      {
+        kind: 'board',
+        title: 'A low turn on K72',
+        board: 'Ks7d2c6h',
+        caption: 'A low card connects with the big blind’s calling range. Hands like 76 now hold two pair, and 65 holds a pair. So BTN slows down with more of its range.',
         evidence: 'solver',
       },
       {
@@ -524,13 +571,19 @@ export const POSTFLOP_LESSONS: LessonContent[] = [
         body: 'On the river, a bluff has no equity. So 2 things decide a good bluff. It should have no chance to win at showdown. It should also remove the right cards from villain’s range.',
       },
       {
-        kind: 'text',
+        kind: 'visual',
         title: 'Three rules',
-        body: [
-          '**No showdown value.** A hand that sometimes wins by checking should usually check.',
-          '**Block calls.** Holding cards villain needs to call makes those calls less likely.',
-          '**Unblock folds.** Avoid holding the cards in villain’s folding hands. If you hold their busted draws, they more often have a hand that calls.',
-        ],
+        art: {
+          kind: 'tree',
+          root: 'A good river bluff',
+          branches: [
+            { label: 'No showdown value', value: 'Cannot win by checking', tone: 'brass' },
+            { label: 'Blocks calls', value: 'Fewer calling hands', tone: 'brass' },
+            { label: 'Unblocks folds', value: 'More folding hands', tone: 'brass' },
+          ],
+        },
+        caption:
+          'A hand that sometimes wins by checking should usually check. Holding cards villain needs to call makes those calls less likely. If you hold their busted draws, they more often have a hand that calls.',
         evidence: 'math',
       },
       {
@@ -596,13 +649,18 @@ export const POSTFLOP_LESSONS: LessonContent[] = [
         body: 'A bluff catcher beats only bluffs. Among hands of similar strength, the best callers remove villain’s value hands. They also leave villain’s bluffs in.',
       },
       {
-        kind: 'text',
+        kind: 'visual',
         title: 'The mirror of bluff selection',
-        body: [
-          '**Block value.** Cards villain needs for value bets make those bets less likely.',
-          '**Unblock bluffs.** Avoid holding the cards villain bluffs with.',
+        art: {
+          kind: 'tree',
+          root: 'A good bluff catcher',
+          branches: [
+            { label: 'Blocks value', value: 'Fewer value bets', tone: 'green' },
+            { label: 'Unblocks bluffs', value: 'Bluffs stay in', tone: 'green' },
+          ],
+        },
+        caption:
           'Against a balanced bettor, small blocker effects decide which bluff catchers call. Against an unbalanced one, how often they bluff matters far more.',
-        ],
         evidence: 'math',
       },
       {
@@ -613,14 +671,16 @@ export const POSTFLOP_LESSONS: LessonContent[] = [
         caption: 'Villain bets big on a board with 3 hearts. Queens are a pure bluff catcher here. Holding the **Q♥** removes a fifth of villain’s flushes.',
       },
       {
-        kind: 'table',
+        kind: 'visual',
         title: 'Villain’s flush combos',
-        columns: ['You hold', 'Hearts left', 'Flush combos'],
-        rows: [
-          ['Q♠ Q♣', '10', '45'],
-          ['Q♥ Q♦', '9', '36'],
-        ],
-        note: 'The board has 3 hearts. A flush needs 2 more in villain’s hand.',
+        art: {
+          kind: 'bars',
+          bars: [
+            { label: 'You hold Q♠Q♣', value: 45, tone: 'red' },
+            { label: 'You hold Q♥Q♦', value: 36, tone: 'green' },
+          ],
+        },
+        caption: 'The board has 3 hearts, so a flush needs 2 more in villain’s hand. With no heart you leave 10 hearts and 10 × 9 ÷ 2 = 45 combos. The Q♥ leaves 9 hearts and 36 combos.',
         evidence: 'math',
       },
       {

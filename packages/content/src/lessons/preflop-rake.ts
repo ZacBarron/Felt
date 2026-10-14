@@ -21,13 +21,20 @@ export const PREFLOP_RAKE_LESSONS: LessonContent[] = [
         body: 'Rake is the room’s share of a pot. It comes out of the pot before the winner is paid. So every call wins a little less than the pot shows. Close calls feel it first.',
       },
       {
-        kind: 'text',
+        kind: 'visual',
         title: 'How rooms take rake',
-        body: [
-          'Most rooms take a percentage of the pot up to a cap. Many live rooms add a fixed amount for a jackpot or a promotion.',
-          'In most rooms a pot that ends before the flop pays nothing. This is called **no flop, no drop**.',
-          'Some rooms charge a fee for each half hour instead. Then pots are not raked at all. Always check how your room does it.',
-        ],
+        art: {
+          kind: 'tree',
+          root: 'Where the rake comes from',
+          branches: [
+            { label: 'A share of the pot', value: 'Up to a cap', tone: 'red' },
+            { label: 'A jackpot drop', value: 'A fixed extra', tone: 'red' },
+            { label: 'Ends before the flop', value: 'Usually $0', tone: 'green' },
+            { label: 'A time charge', value: 'Pots not raked', tone: 'gray' },
+          ],
+        },
+        caption:
+          'Most rooms take a percentage of the pot up to a cap. Many live rooms add a fixed amount for a jackpot. A pot that ends before the flop usually pays nothing. This is called **no flop, no drop**. Always check how your room does it.',
       },
       {
         kind: 'table',
@@ -69,13 +76,18 @@ export const PREFLOP_RAKE_LESSONS: LessonContent[] = [
         evidence: 'math',
       },
       {
-        kind: 'text',
+        kind: 'visual',
         title: 'Close calls flip first',
-        body: [
-          'Now take an online game with 5% rake, capped at 3bb. Against a 2.5bb open, the big blind’s price moves from **27.3%** to **28.7%**.',
-          'Say a big blind call realizes 28% equity in the 5.5bb pot. With no rake it earns 0.28 × 5.5 − 1.5 = **+0.04bb**.',
-          'With rake the pot pays 5.225bb. The same call earns 0.28 × 5.225 − 1.5 = **−0.04bb**. It has become a fold.',
-        ],
+        art: {
+          kind: 'bars',
+          unit: 'bb',
+          bars: [
+            { label: 'No rake', value: 0.04, tone: 'green' },
+            { label: '5% rake', value: -0.04, tone: 'red' },
+          ],
+        },
+        caption:
+          'An online game takes 5% up to 3bb. Against a 2.5bb open, the big blind’s price moves from **27.3%** to **28.7%**. Say a call realizes 28% equity in the 5.5bb pot. With no rake it earns 0.28 × 5.5 − 1.5 = **+0.04bb**. Rake leaves 5.225bb, so the call earns **−0.04bb**. It has become a fold.',
         evidence: 'math',
       },
       {

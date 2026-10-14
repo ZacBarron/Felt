@@ -20,13 +20,18 @@ export const PREFLOP_LIVE_LESSONS: LessonContent[] = [
         body: 'A hand’s value depends on how much money sits behind it. Shallow stacks reward raw card strength. Deep stacks reward hands that can make the nuts.',
       },
       {
-        kind: 'text',
+        kind: 'visual',
         title: 'What depth changes',
-        body: [
-          'Preflop equity does not change with stack depth. What changes is how much you can win or lose after the flop. Compare that with what you paid to see it.',
-          'Shallow, the stacks are only a few pots deep. One strong pair can often get all the money in.',
-          'Deep, getting stacks in takes several large bets. The hands willing to go that far are usually better than one pair.',
-        ],
+        art: {
+          kind: 'chips',
+          stacks: [
+            { label: 'Pot', bb: 22.5 },
+            { label: 'Behind at 40bb', bb: 29 },
+            { label: 'Behind at 200bb', bb: 189 },
+          ],
+        },
+        caption:
+          'The same 3bet pot at two depths. Preflop equity does not change. What changes is how much you can win or lose after the flop. At 40bb one strong pair can get it all in. At 200bb it takes several large bets. The hands willing to go that far are usually better than one pair.',
         evidence: 'math',
       },
       {
@@ -43,14 +48,11 @@ export const PREFLOP_LIVE_LESSONS: LessonContent[] = [
         evidence: 'math',
       },
       {
-        kind: 'text',
+        kind: 'hand',
         title: 'Shallow: high cards gain',
-        body: [
-          'At an SPR of 1 or 2, top pair with a good kicker is usually happy to get all in. So hands that make strong top pairs gain value, like AJo and KQo.',
-          'Small pairs and suited connectors lose value. They rarely flop a strong hand, and little is left to win when they do.',
-          'At 40bb, a 3bet and a 4bet commit most of the stack. So 4bets are usually all in.',
-        ],
-        evidence: 'solver',
+        cards: 'AdJc',
+        caption:
+          'At an SPR of 1 or 2, top pair with a good kicker is usually happy to get all in. So hands like AJo and KQo gain value. Small pairs and suited connectors lose value. At 40bb a 3bet and a 4bet commit most of the stack. So 4bets are usually all in.',
       },
       {
         kind: 'formula',
@@ -60,24 +62,18 @@ export const PREFLOP_LIVE_LESSONS: LessonContent[] = [
           'You open 2.5bb and the button 3bets to 8bb. You call 5.5bb more with 5♠5♦. You flop a set or better **11.8%** of the time. So you need about **29bb** extra on average when you hit. At 40bb you have 32bb left, so the 3bettor must stack off almost every time. At 100bb you have 92bb left. This treats a set as always winning and a miss as always folding. That flatters set mining.',
       },
       {
-        kind: 'text',
+        kind: 'hand',
         title: 'Deep: playability gains',
-        body: [
-          'At 200bb, pairs and suited hands that make straights and flushes gain value. When they hit, the pot can grow large enough to pay for all the misses.',
-          'Offsuit broadways lose value. A hand like KJo makes second best hands that cost a lot when stacks are deep.',
-          'Position is worth more, because more big bets are left after the flop.',
-          '3bet and 4bet sizes grow with depth. That keeps the pot from being tiny next to the stacks.',
-        ],
-        evidence: 'solver',
+        cards: '9s8s',
+        caption:
+          'At 200bb, pairs and suited hands that make straights and flushes gain value. When they hit, the pot can pay for all the misses. Offsuit broadways like KJo lose value. Position is worth more too. 3bet and 4bet sizes grow with depth.',
       },
       {
-        kind: 'text',
+        kind: 'visual',
         title: 'Shallow 3bets get called by jams',
-        body: [
-          'At 40bb, say the big blind 3bets to 9bb against a 2.5bb button open. The button moves all in.',
-          'Calling 31bb into a 49.5bb pot needs only **38.5%** equity. So the 3bettor calls with most of its range.',
-          'A light 3bet that must fold to a jam just loses its chips. So shallow 3bet bluffs lean toward hands with good all in equity, like Ax and big suited cards. Small suited connectors make worse shallow 3bets.',
-        ],
+        art: { kind: 'ring', value: 31 / 80.5, label: 'Equity to call', caption: 'A 9bb 3bet facing a 40bb jam' },
+        caption:
+          'At 40bb the big blind 3bets to 9bb and the button jams. Calling 31bb into 49.5bb needs only **38.5%**. So the 3bettor calls with most of its range. Shallow 3bet bluffs lean toward hands with good all in equity, like Ax and big suited cards.',
         evidence: 'solver',
       },
       {
@@ -188,14 +184,11 @@ export const PREFLOP_LIVE_LESSONS: LessonContent[] = [
         evidence: 'math',
       },
       {
-        kind: 'text',
+        kind: 'visual',
         title: 'The small blind opens bigger',
-        body: [
-          'From the small blind only the big blind is left. But you are out of position on every street.',
-          'An open of about 3bb wins the pot preflop more often. It also makes the big blind pay more to use its position.',
-          'Against it, the big blind calls 2bb into 4bb and needs **33.3%**.',
-          'Many solver solutions also limp part of the small blind range, especially with rake. A raise only strategy is the simpler version.',
-        ],
+        art: { kind: 'ring', value: 2 / 6, label: 'Equity to call', caption: 'Big blind against a 3bb small blind open' },
+        caption:
+          'From the small blind you are out of position on every street. An open of about 3bb wins the pot more often. It also makes the big blind pay more to use its position. Many solver solutions also limp part of this range, especially with rake.',
         evidence: 'solver',
       },
       {
@@ -293,16 +286,18 @@ export const PREFLOP_LIVE_LESSONS: LessonContent[] = [
         evidence: 'math',
       },
       {
-        kind: 'table',
+        kind: 'visual',
         title: 'SPR after the call',
-        columns: ['Open', 'Players', 'Pot', 'SPR'],
-        rows: [
-          ['2.5bb', '2', '6.5', '15.0'],
-          ['5bb', '2', '11.5', '8.3'],
-          ['8bb', '2', '17.5', '5.3'],
-          ['8bb', '4', '33.5', '2.7'],
-        ],
-        note: '100bb stacks, and the blinds fold. SPR (stack to pot ratio) is the stack behind ÷ the pot.',
+        art: {
+          kind: 'bars',
+          bars: [
+            { label: '2.5bb open', value: 15, tone: 'gray' },
+            { label: '5bb open', value: 8.3 },
+            { label: '8bb open', value: 5.3 },
+            { label: '8bb, 4 players', value: 2.7, tone: 'red' },
+          ],
+        },
+        caption: 'SPR (stack to pot ratio) is the stack behind ÷ the pot. Stacks are 100bb and the blinds fold. A bigger open leaves less room to play after the flop.',
         evidence: 'math',
       },
       {
@@ -313,25 +308,34 @@ export const PREFLOP_LIVE_LESSONS: LessonContent[] = [
           'You call 8bb on the button with 4♣4♦. You flop a set or better **11.8%** of the time. So you need about **51bb** extra on average when you hit, with 92bb behind. The same call against a 2.5bb open needs about **15bb**. This assumes a set always wins and you fold every miss.',
       },
       {
-        kind: 'text',
+        kind: 'visual',
         title: 'Who pays off',
-        body: [
-          'Set mining a big open works only against players who stack off with one pair.',
-          'Many live players who open big seem to get all in with overpairs and top pair at a low SPR. Against them, pairs stay a call. That is even more true when others have already called.',
-          'Against a tight player who can fold one pair, small pairs and suited connectors fold. Keep calling with hands that make strong hands and dominate, like suited broadways and suited aces.',
-          'Offsuit hands that make weak top pairs become folds, like KTo and QJo.',
-        ],
+        art: {
+          kind: 'tree',
+          root: 'Facing an 8bb open',
+          branches: [
+            { label: 'Stacks off with one pair', value: 'Call small pairs', tone: 'green' },
+            { label: 'Folds one pair', value: 'Fold small pairs', tone: 'gray' },
+            { label: 'KTo, QJo', value: 'Fold', tone: 'gray' },
+          ],
+        },
+        caption:
+          'Set mining a big open works only against players who stack off with one pair. Many live players who open big seem to do that at a low SPR. Against a tight player, keep calling hands that make strong hands and dominate. Suited broadways and suited aces are examples.',
         evidence: 'exploit',
       },
       {
-        kind: 'text',
+        kind: 'visual',
         title: '3bet linear, for value',
-        body: [
-          'A 3bet against 8bb has to be big, about 24bb in position. A pure bluff risks 24bb to win 9.5bb, so it needs folds **71.6%** of the time.',
-          'A 7.5bb 3bet over a 2.5bb open needs only **65.2%**. If the 24bb 3bet is called, the SPR is about **1.5**.',
-          'Many live players who open big also call 3bets too wide. At that SPR they rarely fold after the flop.',
-          'So 3bet a linear value range and drop most light 3bets. QQ+ and AK qualify, and often JJ and AQ.',
-        ],
+        art: {
+          kind: 'bars',
+          unit: '%',
+          bars: [
+            { label: '7.5bb vs 2.5bb', value: 65.2, tone: 'gray' },
+            { label: '24bb vs 8bb', value: 71.6, tone: 'red' },
+          ],
+        },
+        caption:
+          'Each bar shows the folds a pure 3bet bluff needs. Against 8bb the 3bet must be about 24bb, and a call leaves an SPR of about **1.5**. Many live players who open big also call 3bets too wide. So 3bet a linear value range and drop most light 3bets. QQ+ and AK qualify, and often JJ and AQ.',
         evidence: 'exploit',
       },
       {
@@ -378,13 +382,18 @@ export const PREFLOP_LIVE_LESSONS: LessonContent[] = [
         evidence: 'math',
       },
       {
-        kind: 'text',
+        kind: 'visual',
         title: 'The straddle is the new big blind',
-        body: [
-          'Calling costs 2bb and the smallest raise is to 4bb.',
-          'After the flop the normal order returns. The straddler acts right after the blinds, so it is out of position against every other player.',
-          'Dead money before anyone acts is 3.5bb instead of 1.5bb.',
-        ],
+        art: {
+          kind: 'chips',
+          stacks: [
+            { label: 'SB', bb: 0.5 },
+            { label: 'BB', bb: 1 },
+            { label: 'Straddle', bb: 2 },
+          ],
+        },
+        caption:
+          'Dead money before anyone acts is 3.5bb instead of 1.5bb. Calling costs 2bb and the smallest raise is to 4bb. After the flop the normal order returns. The straddler acts right after the blinds, out of position against every other player.',
         evidence: 'math',
       },
       {
@@ -422,15 +431,18 @@ export const PREFLOP_LIVE_LESSONS: LessonContent[] = [
         evidence: 'math',
       },
       {
-        kind: 'table',
+        kind: 'visual',
         title: 'Prices against a 6bb button open',
-        columns: ['Player', 'Calls', 'Needs'],
-        rows: [
-          ['SB', '5.5bb', '36.7%'],
-          ['BB', '5bb', '34.5%'],
-          ['Straddle', '4bb', '29.6%'],
-        ],
-        note: 'Folded to the button, who opens to 3 straddles. Each blind has already posted its share. Raw equity, before realization.',
+        art: {
+          kind: 'bars',
+          unit: '%',
+          bars: [
+            { label: 'SB calls 5.5bb', value: 36.7, tone: 'gray' },
+            { label: 'BB calls 5bb', value: 34.5, tone: 'gray' },
+            { label: 'Straddle calls 4bb', value: 29.6, tone: 'green' },
+          ],
+        },
+        caption: 'Folded to the button, who opens to 3 straddles. Each player’s bar is the raw equity a call needs. The straddler already posted 2bb, so it gets the best price.',
         evidence: 'math',
       },
       {
@@ -487,15 +499,19 @@ export const PREFLOP_LIVE_LESSONS: LessonContent[] = [
           'On the button behind one limper, you limp 1bb into a 2.5bb pot. The price alone asks for **28.6%**. With 3♠3♦ you flop a set or better **11.8%** of the time. So you need only about **5bb** extra when you hit. Calling a 2.5bb open cold needs about **15bb**. This assumes a set always wins and the blinds do not raise.',
       },
       {
-        kind: 'text',
+        kind: 'visual',
         title: 'Which hands overlimp',
-        body: [
-          'Overlimp hands that make strong hands and lose little when they miss.',
-          'Small pairs make sets. Suited connectors make straights and flushes. Small suited aces make nut flushes and wheels.',
-          'These hands like cheap multiway flops with deep stacks behind.',
-          'Iso raise hands that win as the best high card hand, like strong aces and broadways. They dominate a limping range and win more often heads up.',
-          'Offsuit hands that do neither mostly fold, like K9o or 76o.',
-        ],
+        art: {
+          kind: 'tree',
+          root: 'Behind a limper',
+          branches: [
+            { label: 'Small pairs, suited connectors', value: 'Overlimp', tone: 'green' },
+            { label: 'Strong aces, broadways', value: 'Iso raise', tone: 'red' },
+            { label: 'K9o, 76o', value: 'Fold', tone: 'gray' },
+          ],
+        },
+        caption:
+          'Overlimp hands that make strong hands and lose little when they miss. They like cheap multiway flops with deep stacks behind. Iso raise hands that win as the best high card. They dominate a limping range and win more often heads up.',
         evidence: 'exploit',
       },
       {
@@ -531,13 +547,17 @@ export const PREFLOP_LIVE_LESSONS: LessonContent[] = [
         evidence: 'exploit',
       },
       {
-        kind: 'text',
+        kind: 'visual',
         title: 'Multiway limped pots after the flop',
-        body: [
-          'Say 4 players see a limped flop with 100bb stacks. The pot is about 4.5bb and the SPR (stack to pot ratio) is about **22**.',
-          'One pair is rarely worth stacks here. Value bet strong hands and play top pair as a medium hand.',
-          'So bluff less often in multiway pots. When you do, prefer hands that draw to the nuts.',
-        ],
+        art: {
+          kind: 'chips',
+          stacks: [
+            { label: 'Pot', bb: 4.5 },
+            { label: 'Behind', bb: 99 },
+          ],
+        },
+        caption:
+          'Say 4 players see a limped flop with 100bb stacks. The SPR (stack to pot ratio) is about **22**. One pair is rarely worth stacks here. Value bet strong hands and play top pair as a medium hand. Bluff less often. When you do, prefer hands that draw to the nuts.',
         evidence: 'solver',
       },
       {

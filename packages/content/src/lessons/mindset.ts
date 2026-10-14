@@ -17,36 +17,33 @@ export const MINDSET_LESSONS: LessonContent[] = [
         body: 'Tilt is not only rage after a bad beat. Most of it is quiet. It is a slightly wider call, or a bluff you would not make fresh. It is one more orbit you should not play. You cannot avoid the triggers, but you can catch tilt early.',
       },
       {
-        kind: 'table',
+        kind: 'visual',
         title: 'Four common types',
-        columns: ['Type', 'Trigger', 'Typical leak'],
-        rows: [
-          ['Losing', 'Being down on the day', 'Playing to get even'],
-          ['Injustice', 'Bad beats, coolers', 'Feels owed, calls light'],
-          ['Entitlement', 'Losing to weaker players', 'Bluffs players who never fold'],
-          ['Revenge', 'A player who needled you', 'Fights them with weak hands'],
-        ],
-        note: 'A way to name what you feel, not a measured system. Most tilt mixes more than one type.',
+        art: {
+          kind: 'tree',
+          root: 'What set it off',
+          branches: [
+            { label: 'Losing: down on the day', value: 'Plays to get even', tone: 'red' },
+            { label: 'Injustice: bad beats, coolers', value: 'Feels owed, calls light', tone: 'red' },
+            { label: 'Entitlement: losing to weaker players', value: 'Bluffs players who never fold', tone: 'red' },
+            { label: 'Revenge: a player who needled you', value: 'Fights them with weak hands', tone: 'red' },
+          ],
+        },
+        caption: 'Each trigger leads to a typical leak. This is a way to name what you feel, not a measured system. Most tilt mixes more than one type.',
       },
       {
-        kind: 'text',
+        kind: 'visual',
         title: 'Early warning signs',
-        body: [
-          'Tilt shows up in your body and your thinking before it shows up in your results. You replay a hand in your head. Your pulse speeds up or your jaw goes tight. You want one player in particular to put chips in.',
-          'Then it shows up in your play. You act fast without a plan. You call just to see the cards. You open hands you know are folds, or rebuy the moment you lose a stack.',
-        ],
-      },
-      {
-        kind: 'table',
-        title: 'Illustration: what tilt costs',
-        columns: ['Hands', 'Share', 'Win rate'],
-        rows: [
-          ['A game', '80%', '+10bb/100'],
-          ['On tilt', '20%', '−20bb/100'],
-          ['Overall', '100%', '+4bb/100'],
-        ],
-        note: 'Made up inputs, not a fact about any player or pool. 0.8 × 10 + 0.2 × (−20) = 4. Put in your own numbers.',
-        evidence: 'math',
+        art: {
+          kind: 'tree',
+          root: 'Tilt shows up first',
+          branches: [
+            { label: 'In your head', value: 'You replay a hand', tone: 'gray' },
+            { label: 'In your body', value: 'Fast pulse, tight jaw', tone: 'gray' },
+            { label: 'In your play', value: 'Fast calls and loose opens', tone: 'red' },
+          ],
+        },
+        caption: 'The first signs come before your results change. You may want one player in particular to put chips in. Catch it there.',
       },
       {
         kind: 'visual',
@@ -59,7 +56,8 @@ export const MINDSET_LESSONS: LessonContent[] = [
             { label: 'Overall', value: 4 },
           ],
         },
-        caption: 'Made up inputs in bb/100. One hand in five on tilt cuts the win rate by **60%**, from 10 to 4bb/100. The A game hands are fine. So the fix is to play fewer hands while tilted.',
+        caption:
+          'These are made up inputs in bb/100. 0.8 × 10 + 0.2 × (−20) = 4. One hand in five on tilt cuts the win rate by **60%**. The A game hands are fine. So the fix is to play fewer hands while tilted. Put in your own numbers.',
         evidence: 'math',
       },
       {
@@ -164,34 +162,58 @@ export const MINDSET_LESSONS: LessonContent[] = [
         evidence: 'math',
       },
       {
-        kind: 'text',
+        kind: 'visual',
         title: 'What the table says',
-        body: [
-          'After 10,000 hands a real 10bb/100 winner still shows a loss **15.9%** of the time. That is about 333 live hours. Even after 30,000 hands the range runs from a small loss to a big win.',
-          'Halving the uncertainty takes four times the hands. Most live players never reach a sample that pins their win rate down.',
-        ],
+        art: {
+          kind: 'curve',
+          points: [
+            [2.5, 39.2],
+            [5, 27.7],
+            [10, 19.6],
+            [20, 13.9],
+            [30, 11.3],
+            [50, 8.8],
+            [75, 7.2],
+            [100, 6.2],
+          ],
+          xLabel: 'Hands played, thousands',
+          yLabel: 'Range either side, bb/100',
+          mark: [10, 19.6],
+        },
+        caption:
+          'After 10,000 hands a real 10bb/100 winner still shows a loss **15.9%** of the time. That is about 333 live hours. Halving the uncertainty takes four times the hands. Most live players never reach a sample that pins their win rate down.',
         evidence: 'math',
       },
       {
-        kind: 'table',
+        kind: 'visual',
         title: 'Chance of ever falling this far',
-        columns: ['Drop', 'Buy ins', 'Chance'],
-        rows: [
-          ['500bb', '5', '36.8%'],
-          ['1,000bb', '10', '13.5%'],
-          ['1,500bb', '15', '5.0%'],
-          ['2,000bb', '20', '1.8%'],
-        ],
-        note: 'Same assumed win rate and SD, with 100bb buy ins. The chance of ever falling this far below a starting point is exp(−2 × win rate × drop ÷ SD²). Over a career you start from many points. So you are far more likely to see drops like these at some point.',
+        art: {
+          kind: 'bars',
+          unit: '%',
+          bars: [
+            { label: '5 buy ins', value: 36.8, tone: 'red' },
+            { label: '10', value: 13.5, tone: 'red' },
+            { label: '15', value: 5 },
+            { label: '20', value: 1.8, tone: 'gray' },
+          ],
+        },
+        caption:
+          'This uses the same win rate and SD, with 100bb buy ins. The chance is exp(−2 × win rate × drop ÷ SD²). Over a career you start from many points. So you are far more likely to see drops like these at some point.',
         evidence: 'math',
       },
       {
-        kind: 'text',
+        kind: 'visual',
         title: 'Results versus decisions',
-        body: [
-          'With this much noise, a month of results says little about how well you played. Judge yourself on what you can check, like drill accuracy and reviewed hands.',
-          'A losing month is normal for a winner. A month of sloppy decisions is a real problem, whatever the results say.',
-        ],
+        art: {
+          kind: 'tree',
+          root: 'Judge a month by',
+          branches: [
+            { label: 'Results', value: 'Mostly noise', tone: 'gray' },
+            { label: 'Drill accuracy', value: 'You can check it', tone: 'green' },
+            { label: 'Reviewed hands', value: 'You can check it', tone: 'green' },
+          ],
+        },
+        caption: 'A losing month is normal for a winner. A month of sloppy decisions is a real problem, whatever the results say.',
       },
       {
         kind: 'quiz',
@@ -330,12 +352,19 @@ export const MINDSET_LESSONS: LessonContent[] = [
         ],
       },
       {
-        kind: 'text',
+        kind: 'visual',
         title: 'Keep the life roll separate',
-        body: [
-          'Money for rent and bills is not bankroll. Neither are your savings. If a downswing would touch money you need to live on, your roll is smaller than you think. The fear of losing it will bend your decisions.',
-          'Take money out on a schedule. Recount your buy ins after every withdrawal.',
-        ],
+        art: {
+          kind: 'tree',
+          root: 'Is it bankroll?',
+          branches: [
+            { label: 'Rent and bills', value: 'No', tone: 'red' },
+            { label: 'Savings', value: 'No', tone: 'red' },
+            { label: 'Money set aside only for poker', value: 'Yes', tone: 'green' },
+          ],
+        },
+        caption:
+          'If a downswing would touch money you need to live on, your roll is smaller than you think. The fear of losing it will bend your decisions. Take money out on a schedule. Recount your buy ins after every withdrawal.',
       },
       {
         kind: 'quiz',
@@ -399,16 +428,20 @@ export const MINDSET_LESSONS: LessonContent[] = [
         caption: 'Felt schedules every drill card this way. It grades drill answers on accuracy and speed, so you never grade yourself. A range you need 8 seconds to recall is not usable at the table.',
       },
       {
-        kind: 'table',
+        kind: 'visual',
         title: 'The Felt loop',
-        columns: ['Step', 'What you do'],
-        rows: [
-          ['Learn', 'A short lesson on one idea'],
-          ['Drill', 'Recall it under time until automatic'],
-          ['Apply', 'Full hands, graded by EV loss'],
-          ['Play', 'Log sessions and key hands'],
-          ['Review', 'Misses feed tomorrow’s queue'],
-        ],
+        art: {
+          kind: 'tree',
+          root: 'One idea, all the way to the table',
+          branches: [
+            { label: '1. Learn', value: 'A short lesson on one idea', tone: 'brass' },
+            { label: '2. Drill', value: 'Recall it under time', tone: 'brass' },
+            { label: '3. Apply', value: 'Full hands, graded by EV loss', tone: 'brass' },
+            { label: '4. Play', value: 'Log sessions and key hands', tone: 'brass' },
+            { label: '5. Review', value: 'Misses feed tomorrow’s queue', tone: 'green' },
+          ],
+        },
+        caption: 'Drill each idea until recall is automatic. Then the loop starts again.',
       },
       {
         kind: 'text',
@@ -478,23 +511,26 @@ export const MINDSET_LESSONS: LessonContent[] = [
         body: 'Your own hands are the spots you actually face, against the players you actually meet. The goal of a review is a better decision next time. It is not a verdict on what happened.',
       },
       {
-        kind: 'table',
+        kind: 'visual',
         title: 'Pick hands with a filter',
-        columns: ['Filter', 'Why'],
-        rows: [
-          ['Big pots', 'Mistakes cost the most'],
-          ['Spots you were unsure', 'Doubt marks a gap'],
-          ['Spots that repeat', 'Small leaks add up'],
-          ['Hands that felt bad', 'Check for tilt or bias'],
-        ],
+        art: {
+          kind: 'tree',
+          root: 'Review these hands',
+          branches: [
+            { label: 'Big pots', value: 'Mistakes cost the most', tone: 'brass' },
+            { label: 'Spots you were unsure', value: 'Doubt marks a gap', tone: 'brass' },
+            { label: 'Spots that repeat', value: 'Small leaks add up', tone: 'brass' },
+            { label: 'Hands that felt bad', value: 'Check for tilt or bias', tone: 'brass' },
+          ],
+        },
+        caption: 'A short filter keeps reviews on the hands that teach the most.',
       },
       {
-        kind: 'text',
+        kind: 'visual',
         title: 'Write the ranges, street by street',
-        body: [
-          'Before judging any action, write both ranges. Start with what each player opens or calls preflop. Then narrow them after each street’s action.',
-          'Do this before you look at what villain showed. Seeing their cards first anchors you to one hand instead of a range.',
-        ],
+        art: { kind: 'streets' },
+        caption:
+          'Before judging any action, write both ranges. Start with what each player opens or calls preflop. Then narrow them after each street. Do this before you look at what villain showed. Seeing their cards first anchors you to one hand.',
       },
       {
         kind: 'text',
@@ -505,15 +541,18 @@ export const MINDSET_LESSONS: LessonContent[] = [
         ],
       },
       {
-        kind: 'table',
+        kind: 'visual',
         title: 'River: call 75 into 100',
-        columns: ['Villain bluffs', 'Call EV'],
-        rows: [
-          ['40% of bets', '+25'],
-          ['30% of bets', '0'],
-          ['20% of bets', '−25'],
-        ],
-        note: 'Your hand beats every bluff and loses to every value bet. You call 75 to win 250, so you need 75 ÷ 250 = 30%. EV = bluff share × 250 − 75.',
+        art: {
+          kind: 'bars',
+          bars: [
+            { label: '40% bluffs', value: 25, tone: 'green' },
+            { label: '30% bluffs', value: 0, tone: 'gray' },
+            { label: '20% bluffs', value: -25, tone: 'red' },
+          ],
+        },
+        caption:
+          'Your hand beats every bluff and loses to every value bet. You call 75 to win 250, so you need **30%** bluffs. EV = bluff share × 250 − 75.',
         evidence: 'math',
       },
       {

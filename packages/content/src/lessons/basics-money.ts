@@ -208,13 +208,18 @@ export const BASICS_MONEY_LESSONS: LessonContent[] = [
         ],
       },
       {
-        kind: 'text',
+        kind: 'visual',
         title: 'Buying chips',
-        body: [
-          'You can buy chips at the **cage**, the room’s cashier. Many rooms can also sell you chips at the table.',
-          'Your buy in must fall between the room’s minimum and maximum. Check the limits for your game before you buy.',
-          'When you leave, take your chips to the cage. They swap them back for money.',
-        ],
+        art: {
+          kind: 'tree',
+          root: 'Where chips change hands',
+          branches: [
+            { label: 'The cage', value: 'The room’s cashier', tone: 'brass' },
+            { label: 'Your table', value: 'Many rooms sell chips there', tone: 'brass' },
+            { label: 'When you leave', value: 'Cash out at the cage', tone: 'green' },
+          ],
+        },
+        caption: 'Your buy in must fall between the room’s minimum and maximum. Check the limits for your game before you buy.',
       },
       {
         kind: 'visual',

@@ -132,19 +132,19 @@ describe('numbers in lesson art agree with the core math', () => {
     expect(pick(cover('foundations/math/pot-odds'), 'ring').value).toBe(potOdds(1.5, 0.5));
     for (const [x, y] of pick(visual('foundations/math/pot-odds', 'Bigger bets, worse prices'), 'curve').points) expect(y).toBeCloseTo(r1(potOdds(1 + x, x) * 100), 5);
     expect(pick(cover('foundations/math/mdf-alpha'), 'ring').value).toBeCloseTo(mdf(1, 0.5), 12);
-    for (const [x, y] of pick(visual('foundations/math/mdf-alpha'), 'curve').points) expect(y).toBeCloseTo(r1(mdf(1, x) * 100), 5);
+    for (const [x, y] of pick(visual('foundations/math/mdf-alpha', 'Bigger bets, less defense'), 'curve').points) expect(y).toBeCloseTo(r1(mdf(1, x) * 100), 5);
     expect(pick(cover('postflop/defense/vs-cbet'), 'ring').value).toBeCloseTo(potOdds(1 + 1 / 3, 1 / 3), 12);
     expect(pick(cover('mindset/study/hand-review'), 'ring').value).toBeCloseTo(potOdds(175, 75), 12);
     expect(pick(cover('exploit/adjustments/vs-aggro'), 'ring').value).toBeCloseTo(potOdds(200, 100), 12);
     // BB against a 2.5bb open, SB against it, and a call of an 11bb 3bet.
-    expect(pick(visual('preflop/vs-open/bb-defense'), 'ring').value).toBeCloseTo(potOdds(4, 1.5), 12);
+    expect(pick(visual('preflop/vs-open/bb-defense', 'The best price at the table'), 'ring').value).toBeCloseTo(potOdds(4, 1.5), 12);
     expect(pick(cover('preflop/vs-open/sb-vs-open'), 'ring').value).toBeCloseTo(potOdds(4, 2), 12);
     expect(pick(cover('preflop/3bet-pots/vs-3bet'), 'ring').value).toBeCloseTo(potOdds(14, 8.5), 12);
     // Bigger opens: the BB pays the open minus its blind into 1.5 + open.
     expect(bars(cover('preflop/live-preflop/big-opens'))).toEqual([2.5, 5, 8].map((o) => r1(potOdds(1.5 + o, o - 1) * 100)));
     for (const [o, y] of pick(cover('preflop/stack-depth/open-sizing'), 'curve').points) expect(y).toBeCloseTo(r1(potOdds(1.5 + o, o - 1) * 100), 5);
     // A shove of SPR times the pot.
-    for (const [s, y] of pick(visual('postflop/3bet-postflop/low-spr'), 'curve').points) expect(y).toBeCloseTo(r1(potOdds(1 + s, s) * 100), 5);
+    for (const [s, y] of pick(visual('postflop/3bet-postflop/low-spr', 'Lower SPR, cheaper calls'), 'curve').points) expect(y).toBeCloseTo(r1(potOdds(1 + s, s) * 100), 5);
   });
 
   it('EV trees and bars', () => {
@@ -163,13 +163,13 @@ describe('numbers in lesson art agree with the core math', () => {
     expect(0.1 * 200 - 0.9 * 100).toBe(-70);
     // A tell nudging a close call: pot 100, bet 100.
     expect(bars(cover('exploit/tells/physical'))).toEqual([0.3, 0.36].map((b) => Math.round(b * 300 - 100)));
-    for (const [b, y] of pick(visual('exploit/adjustments/vs-aggro'), 'curve').points) expect(y).toBeCloseTo((b / 100) * 300 - 100, 9);
+    for (const [b, y] of pick(visual('exploit/adjustments/vs-aggro', 'When calling starts to pay'), 'curve').points) expect(y).toBeCloseTo((b / 100) * 300 - 100, 9);
     // Regret matching: +6 bet, +2 check, -3 fold.
     expect(bars(cover('foundations/theory/solvers'))).toEqual([75, 25, 0]);
     // Implied odds: 20 / (8/46) = 115 against a final pot of 100.
     expect(bars(cover('foundations/math/implied-odds'))).toEqual([100, 20 / (8 / 46)]);
     // The tilt illustration: 0.8 x 10 + 0.2 x -20.
-    expect(bars(visual('mindset/mental/tilt'))).toEqual([10, -20, 0.8 * 10 + 0.2 * -20]);
+    expect(bars(visual('mindset/mental/tilt', 'Illustration: a fifth of hands on tilt'))).toEqual([10, -20, 0.8 * 10 + 0.2 * -20]);
   });
 
   it('outs and equity', () => {
@@ -184,7 +184,7 @@ describe('numbers in lesson art agree with the core math', () => {
 
   it('preflop matchups, exact over every board', () => {
     const eq = (a: string, b: string) => r1(exactEquity(parseCards(a) as [Card, Card], parseCards(b) as [Card, Card], []).equity * 100);
-    expect(bars(visual('foundations/theory/equity-benchmarks'))).toEqual([
+    expect(bars(visual('foundations/theory/equity-benchmarks', 'Five matchups to know'))).toEqual([
       eq('AsAh', 'KdKc'),
       eq('AsKd', 'AhQc'),
       eq('8s8h', 'AdKc'),

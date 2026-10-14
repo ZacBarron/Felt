@@ -160,10 +160,11 @@ export const BASICS_LESSONS: LessonContent[] = [
         evidence: 'math',
       },
       {
-        kind: 'callout',
-        tone: 'tip',
+        kind: 'hand',
         title: 'Names you will hear',
-        body: 'Four of a kind is also called **quads**. A full house is a **boat**. Three of a kind is **trips**. With a pair in your hand and a third card on the board, it is a **set**.',
+        cards: '7h7d',
+        board: '7cKs2d',
+        caption: 'A pair in your hand plus a third card on the board is a **set**. Three of a kind is also called **trips**. Four of a kind is **quads**. A full house is a **boat**.',
       },
       {
         kind: 'quiz',
@@ -459,13 +460,18 @@ export const BASICS_LESSONS: LessonContent[] = [
         evidence: 'math',
       },
       {
-        kind: 'text',
+        kind: 'visual',
         title: 'Words for preflop',
-        body: [
-          'Calling the big blind with no raise before you is a **limp**.',
-          'If nobody raises, the big blind can check. Their blind already matches the bet.',
-          'Raising when everyone before you folded is called **opening**. A raise of a raise is a **3bet**.',
-        ],
+        art: {
+          kind: 'tree',
+          root: 'Before the flop',
+          branches: [
+            { label: 'Limp', value: 'Call the big blind, no raise before you', tone: 'green' },
+            { label: 'Open', value: 'Raise when everyone before you folded', tone: 'brass' },
+            { label: '3bet', value: 'Raise a raise', tone: 'purple' },
+          ],
+        },
+        caption: 'If nobody raises, the big blind can check. Their blind already matches the bet.',
         evidence: 'math',
       },
       {

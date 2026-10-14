@@ -19,24 +19,30 @@ export const TOURNAMENT_LESSONS: LessonContent[] = [
         body: 'Antes put chips in the pot that nobody has to defend. More to win for the same risk means more hands are worth playing. That holds for the opener and for the blinds.',
       },
       {
-        kind: 'table',
+        kind: 'visual',
         title: 'The pot before anyone acts',
-        columns: ['Format', 'Pot'],
-        rows: [
-          ['Blinds only', '1.5bb'],
-          ['Big blind ante of 1bb', '2.5bb'],
-          ['9 players ante 0.125bb each', '2.625bb'],
-        ],
-        note: 'Blinds are 0.5bb and 1bb. With a big blind ante, the big blind posts one ante for the whole table.',
+        art: {
+          kind: 'chips',
+          stacks: [
+            { label: 'Blinds only', bb: 1.5 },
+            { label: '1bb BB ante', bb: 2.5 },
+          ],
+        },
+        caption: 'Blinds are 0.5bb and 1bb. With a big blind ante, the big blind posts one ante for the whole table. If instead 9 players each ante 0.125bb, the pot is **2.625bb**.',
         evidence: 'math',
       },
       {
-        kind: 'text',
+        kind: 'visual',
         title: 'The ante is dead',
-        body: [
-          'The big blind’s 1bb blind is live, so it counts toward a call. The ante is not live. It belongs to the pot and does not reduce what the big blind has to put in.',
-          'So against a 2.2bb open, the big blind still calls **1.2bb**. It just calls into a bigger pot.',
-        ],
+        art: {
+          kind: 'tree',
+          root: 'The big blind’s 2bb in front',
+          branches: [
+            { label: 'The 1bb blind', value: 'Live, counts toward a call', tone: 'green' },
+            { label: 'The 1bb ante', value: 'Dead, belongs to the pot', tone: 'gray' },
+          ],
+        },
+        caption: 'So against a 2.2bb open, the big blind still calls **1.2bb**. It just calls into a bigger pot.',
         evidence: 'math',
       },
       {
@@ -46,14 +52,20 @@ export const TOURNAMENT_LESSONS: LessonContent[] = [
         example: 'The pot before the call is 0.5 + 1 + 1 ante + 2.2 open = 4.7bb. The big blind needs **20.3%** equity, before realization. Without the ante it needs 24.5%.',
       },
       {
-        kind: 'table',
+        kind: 'visual',
         title: 'Prices with and without the ante',
-        columns: ['Spot', 'No ante', 'BB ante'],
-        rows: [
-          ['Folds a 2.2bb steal needs', '59.5%', '46.8%'],
-          ['Equity BB needs to call 2.2bb', '24.5%', '20.3%'],
-        ],
-        note: 'Steal = risk ÷ (pot + risk), with pots of 1.5bb and 2.5bb. Call = 1.2 ÷ (pot + 1.2), with pots of 3.7bb and 4.7bb. A cash game BB facing a 2.5bb open with no ante needs 27.3%.',
+        art: {
+          kind: 'bars',
+          unit: '%',
+          bars: [
+            { label: 'Steal, no ante', value: 59.5, tone: 'gray' },
+            { label: 'Steal, BB ante', value: 46.8 },
+            { label: 'BB call, no ante', value: 24.5, tone: 'gray' },
+            { label: 'BB call, BB ante', value: 20.3, tone: 'green' },
+          ],
+        },
+        caption:
+          'A 2.2bb steal needs fewer folds with the ante. The big blind needs less equity to call it. Both prices drop because there is more to win for the same risk.',
         evidence: 'math',
       },
       {
@@ -114,13 +126,11 @@ export const TOURNAMENT_LESSONS: LessonContent[] = [
         body: 'With a short stack, raising and then folding to a reraise throws away too much of your stack. Shoving gets the most fold equity. It also never leaves you guessing on later streets.',
       },
       {
-        kind: 'text',
+        kind: 'visual',
         title: 'Why short stacks shove',
-        body: [
-          'At 10bb, a 2.2bb open is 22% of your stack. If someone shoves over it, you are often priced in. You can end up playing for stacks with a hand you did not want to.',
-          'Shoving makes every opponent decide for their whole stack. It also denies them the chance to outplay you after the flop.',
-          'Full solutions at 12 to 15bb still use small opens, and some small blind limps. The shorter the stack, the closer the full strategy gets to pure push or fold.',
-        ],
+        art: { kind: 'ring', value: 0.22, label: 'Of your stack in a 2.2bb open', caption: 'A 10bb stack' },
+        caption:
+          'If someone shoves over the open, you are often priced in. You may end up playing for stacks with a hand you did not want to. A shove makes every opponent decide for their whole stack. Full solutions at 12 to 15bb still use small opens and some small blind limps. The shorter the stack, the closer they get to pure push or fold.',
         evidence: 'solver',
       },
       {
@@ -174,16 +184,19 @@ export const TOURNAMENT_LESSONS: LessonContent[] = [
         evidence: 'math',
       },
       {
-        kind: 'table',
+        kind: 'visual',
         title: 'Fold equity compounds with players behind',
-        columns: ['Players behind', 'All fold'],
-        rows: [
-          ['1', '85.0%'],
-          ['2', '72.3%'],
-          ['5', '44.4%'],
-          ['8', '27.3%'],
-        ],
-        note: 'An illustration. Each player behind folds 85% of the time, treated as independent. Card removal makes real folds slightly linked.',
+        art: {
+          kind: 'bars',
+          unit: '%',
+          bars: [
+            { label: '1 behind', value: 85, tone: 'green' },
+            { label: '2 behind', value: 72.3 },
+            { label: '5 behind', value: 44.4 },
+            { label: '8 behind', value: 27.2, tone: 'red' },
+          ],
+        },
+        caption: 'This is an illustration. Each player behind folds 85% of the time, treated as separate choices. Each bar is the chance that all of them fold. Card removal makes real folds slightly linked.',
         evidence: 'math',
       },
       {
@@ -340,12 +353,16 @@ export const TOURNAMENT_LESSONS: LessonContent[] = [
         evidence: 'math',
       },
       {
-        kind: 'text',
+        kind: 'visual',
         title: 'What the table shows',
-        body: [
-          'Third place pays $20 even with zero chips left. That is why the short stack’s money share beats its chip share.',
-          'Per chip, A’s stack is worth about half as much money as C’s. That is $0.0077 against $0.0144.',
-        ],
+        art: {
+          kind: 'bars',
+          bars: [
+            { label: 'A’s stack', value: 7.7, tone: 'gray' },
+            { label: 'C’s stack', value: 14.4, tone: 'green' },
+          ],
+        },
+        caption: 'Each bar is dollars per 1,000 chips. Per chip, A’s stack is worth about half as much money as C’s. Third place pays $20 even with zero chips left. That is why the short stack’s money share beats its chip share.',
         evidence: 'math',
       },
       {
@@ -368,13 +385,19 @@ export const TOURNAMENT_LESSONS: LessonContent[] = [
           'B needs eq ≥ 12.75 ÷ 21 = **60.7%** to call. Chip EV says 50.0%, since B risks 3,000 to win 3,000. The extra 10.7 points is the risk premium. Winning gains $8.25, but losing costs $12.75.',
       },
       {
-        kind: 'text',
+        kind: 'visual',
         title: 'Who pays the most',
-        body: [
-          'In the same model, say C shoves 2,000 and A calls. A needs only **52.1%**, because A covers C and a loss does not knock A out.',
-          'Across all six pairings in this example, the biggest premium falls on the middle stack calling the big stack.',
-          'So under ICM the covering stack can shove wider. Covered stacks must call tighter than chip EV says.',
-        ],
+        art: {
+          kind: 'bars',
+          unit: '%',
+          bars: [
+            { label: 'Chip EV', value: 50, tone: 'gray' },
+            { label: 'A calls C', value: 52.1 },
+            { label: 'B calls A', value: 60.7, tone: 'red' },
+          ],
+        },
+        caption:
+          'A covers C, so a loss does not knock A out. Across all six pairings here, the biggest premium falls on the middle stack calling the big stack. So the covering stack can shove wider. Covered stacks must call tighter than chip EV says.',
         evidence: 'math',
       },
       {

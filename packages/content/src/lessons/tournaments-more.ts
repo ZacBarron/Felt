@@ -14,13 +14,17 @@ export const TOURNAMENT_MORE_LESSONS: LessonContent[] = [
         body: 'With 12 to 25bb, your 3bet is often all in. A reshove wins the open and the blinds with no flop. It also makes the opener decide for their whole stack.',
       },
       {
-        kind: 'text',
+        kind: 'visual',
         title: 'Why all in',
-        body: [
-          'At 20bb, a 3bet to 5bb uses a quarter of your stack. If the opener shoves back, you are priced in with most hands.',
-          'A shove gets the folds without that problem. It also never leaves you guessing after the flop.',
-          'Deeper than about 25bb, a shove risks too much to win the pot. Smaller 3bets take over there.',
-        ],
+        art: {
+          kind: 'chips',
+          stacks: [
+            { label: 'A 3bet to 5bb', bb: 5 },
+            { label: 'Left behind', bb: 15 },
+          ],
+        },
+        caption:
+          'At 20bb, a 3bet to 5bb uses a quarter of your stack. If the opener shoves back, you are priced in with most hands. A shove gets the folds without that problem. Deeper than about 25bb, smaller 3bets take over.',
         evidence: 'solver',
       },
       {
@@ -48,13 +52,18 @@ export const TOURNAMENT_MORE_LESSONS: LessonContent[] = [
         evidence: 'math',
       },
       {
-        kind: 'text',
+        kind: 'visual',
         title: 'Fold equity comes from their range',
-        body: [
-          'The button opens many hands it cannot call with. So it folds **82.4%** of the time, and the shove earns **+2.67bb**.',
-          'The lojack opens tight and calls with over half its opens. The same shove loses **1.55bb**.',
-          'So reshove wide against wide openers. Tighten up against tight ones.',
-        ],
+        art: {
+          kind: 'bars',
+          unit: 'bb',
+          bars: [
+            { label: 'Over the button', value: 2.67, tone: 'green' },
+            { label: 'Over the lojack', value: -1.55, tone: 'red' },
+          ],
+        },
+        caption:
+          'The button opens many hands it cannot call with, so it folds **82.4%** of the time. The lojack opens tight and calls with over half its opens. So reshove wide against wide openers. Tighten up against tight ones.',
         evidence: 'math',
       },
       {
@@ -163,23 +172,34 @@ export const TOURNAMENT_MORE_LESSONS: LessonContent[] = [
         evidence: 'math',
       },
       {
-        kind: 'text',
+        kind: 'visual',
         title: 'The big stack covers everyone',
-        body: [
-          'When A calls and loses, A is still in the tournament. So A needs only **52.9%** to call D’s shove. A needs **63.1%** to call B’s shove.',
-          'B needs **53.7%** to call D, since B covers D too.',
-          'So the pressure falls hardest on stacks that are covered. It is lightest on the stack that covers.',
-        ],
+        art: {
+          kind: 'bars',
+          unit: '%',
+          bars: [
+            { label: 'A calls D', value: 52.9, tone: 'green' },
+            { label: 'B calls D', value: 53.7, tone: 'green' },
+            { label: 'A calls B', value: 63.1 },
+            { label: 'B calls A', value: 72.9, tone: 'red' },
+          ],
+        },
+        caption: 'When A calls and loses, A is still in the tournament. B covers D too. So the pressure falls hardest on stacks that are covered. It is lightest on the stack that covers.',
         evidence: 'math',
       },
       {
-        kind: 'text',
+        kind: 'visual',
         title: 'How bubble strategies adjust',
-        body: [
-          'Equilibrium bubble strategies have the big stack open and shove much wider. Few hands can call it.',
-          'Medium stacks tighten up the most, above all against the big stack. They still attack the stacks they cover.',
-          'The exact ranges depend on the stacks and payouts. These are directions, not charts.',
-        ],
+        art: {
+          kind: 'tree',
+          root: 'On the bubble',
+          branches: [
+            { label: 'The big stack', value: 'Opens and shoves much wider', tone: 'red' },
+            { label: 'Medium stacks vs the big stack', value: 'Tighten the most', tone: 'gray' },
+            { label: 'Medium stacks vs smaller stacks', value: 'Still attack', tone: 'red' },
+          ],
+        },
+        caption: 'Few hands can call the big stack. The exact ranges depend on the stacks and payouts. These are directions, not charts.',
         evidence: 'solver',
       },
       {
@@ -269,13 +289,18 @@ export const TOURNAMENT_MORE_LESSONS: LessonContent[] = [
         evidence: 'math',
       },
       {
-        kind: 'text',
+        kind: 'visual',
         title: 'A tiny stack adds pressure',
-        body: [
-          'Keep A at 30,000 and B at 20,000. Now make D and E 28,000 and 2,000 instead of 15,000 each.',
-          'B now needs **64.9%** to call A, up from 62.8%. The 2,000 stack will often bust first. That pays B one more jump for free.',
-          'So a very short stack makes the medium stacks tighten further.',
-        ],
+        art: {
+          kind: 'bars',
+          unit: '%',
+          bars: [
+            { label: 'D and E at 15bb', value: 62.8 },
+            { label: 'D at 28bb, E at 2bb', value: 64.9, tone: 'red' },
+          ],
+        },
+        caption:
+          'Each bar is the equity B needs to call A. Keep A at 30,000 and B at 20,000. Make D and E 28,000 and 2,000. The 2,000 stack will often bust first. That pays B one more jump for free. So the medium stacks tighten further.',
         evidence: 'math',
       },
       {

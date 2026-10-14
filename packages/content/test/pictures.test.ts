@@ -1,5 +1,10 @@
 import {
   actionFrequencies,
+  actionRange,
+  equityVsRange,
+  exactEquity,
+  rangeToCombos,
+  seededRng,
   bluffBreakeven,
   buildChart,
   callEV,
@@ -353,3 +358,221 @@ describe('exploit, mindset and tournament pictures', () => {
     for (const [x, y] of pick(art('tournaments/mtt-basics/final-table', 'Heads up, chips are money again'), 'curve').points) expect(y).toBeCloseTo(250 + (x / 100) * 150, 9);
   });
 });
+
+/**
+ * The picture pass: text steps turned into bars, rings, chips, curves, trees,
+ * hands and boards. Every number is recomputed here, and every hand claim is
+ * checked with the evaluator.
+ */
+describe('picture pass: foundations', () => {
+  it('EV, outs, MDF and combos', () => {
+    // Calling 100 into 200: win 200 against a bluff, lose 100 against value.
+    const call = (b: number) => b * 200 - (1 - b) * 100;
+    bars(art('foundations/math/ev', 'A bluff catcher facing a pot bet')).forEach((v, i) => expect(v).toBeCloseTo(call([0.2, 1 / 3, 0.5][i]), 9));
+    expect(bars(art('foundations/math/outs', 'Price one card at a time'))).toEqual([r1((9 / 47) * 100), r1(outsToEquity(9, 47, 2) * 100)]);
+    expect(bars(art('foundations/math/mdf-alpha', 'One half pot bet, three numbers'))).toEqual([
+      r1(bluffBreakeven(1, 0.5) * 100),
+      r1(mdf(1, 0.5) * 100),
+      r1(potOdds(1.5, 0.5) * 100),
+    ]);
+    expect(bars(art('foundations/math/combos', 'Combos per hand'))).toEqual([comboCount('QQ'), comboCount('AKs'), comboCount('AKo'), comboCount('AKs') + comboCount('AKo')]);
+    expect(r1(16 / 6)).toBe(2.7);
+  });
+
+  it('geometric bets in a single raised pot', () => {
+    const f = geometricBetFraction(5.5, 97.5, 3);
+    expect(Math.round(f * 100)).toBe(116);
+    let pot = 5.5;
+    const sizes: number[] = [];
+    for (let i = 0; i < 3; i++) {
+      sizes.push(f * pot);
+      pot += 2 * f * pot;
+    }
+    expect(sizes.reduce((a, b) => a + b)).toBeCloseTo(97.5, 9);
+    expect(bars(art('foundations/math/spr', 'Same fraction, growing bets'))).toEqual(sizes.map(r1));
+  });
+
+  it('bluff catchers, a missed board and the shared ace', () => {
+    expect(bars(art('foundations/ranges/range-shapes', 'Facing a polarized bet'))).toEqual([1 / 3, 1 / 2, 1, 2].map((b) => r1(potOdds(1 + b, b) * 100)));
+    const s = step('foundations/ranges/range-shapes', 'A pure bluff catcher');
+    if (s.kind !== 'hand') throw new Error('expected a hand');
+    expect(category(s.cards + s.board)).toBe(HandCategory.Pair);
+    // Top pair: the king is the highest board card.
+    expect(rankOf(parseCards(s.board!)[0])).toBe('K');
+    // The hearts missed and no straight is possible: no 2 cards make a straight or flush.
+    const left = remainingDeck(parseCards(s.cards + s.board));
+    for (let i = 0; i < left.length; i++)
+      for (let j = i + 1; j < left.length; j++) {
+        const c = categoryOf(evaluate([left[i], left[j], ...parseCards(s.board!)]));
+        expect([HandCategory.Straight, HandCategory.Flush, HandCategory.StraightFlush]).not.toContain(c);
+      }
+    const dom = step('foundations/theory/equity-benchmarks', 'Why domination hurts');
+    if (dom.kind !== 'hand') throw new Error('expected a hand');
+    expect(new Set(parseCards(dom.cards + 'AsKd')).size).toBe(4);
+    expect(rankOf(parseCards(dom.cards)[0])).toBe('A');
+  });
+
+  it('pairs against overcards, exact over every board', () => {
+    const eq = (a: string, b: string) => r1(exactEquity(parseCards(a) as [Card, Card], parseCards(b) as [Card, Card], []).equity * 100);
+    expect(bars(art('foundations/theory/equity-benchmarks', 'Not all flips are equal'))).toEqual([eq('8s8h', 'AdKc'), eq('8s8h', 'AdKd'), eq('AsKd', '2c2h')]);
+  }, 60_000);
+});
+
+describe('picture pass: preflop', () => {
+  const chart = (id: string) => buildChart(STARTER_CHARTS.find((c) => c.id === id)!);
+  const vsRange = (hand: string, combos: (dead: Card[]) => ReturnType<typeof rangeToCombos>) => {
+    const hero = parseCards(hand) as [Card, Card];
+    return equityVsRange(hero, combos(hero), [], { iterations: 200_000, rng: seededRng(7) }).equity * 100;
+  };
+
+  it('big blind hands that clear the price but fold', () => {
+    const btn = actionRange(chart('9max-100-rfi-btn'), 'raise');
+    const [price, ...rest] = bars(art('preflop/vs-open/bb-defense', 'Where the defending range stops'));
+    expect(price).toBe(r1(potOdds(4, 1.5) * 100));
+    const eqs = ['Th6c', '9h3c', '6h4c', '4c2c'].map((h) => Math.round(vsRange(h, (dead) => rangeToCombos(btn, dead))));
+    expect(rest).toEqual(eqs);
+    for (const e of eqs) expect(e).toBeGreaterThan(price);
+  }, 30_000);
+
+  it('4bet bluffs against QQ+ and AK', () => {
+    // Exact over every board, averaged over the combos left (computed once by enumeration, about 50s each; checked here by sampling).
+    const EXACT = { As5s: 30.153, Ks5s: 24.449, AsQd: 24.42 };
+    for (const [hand, exact] of Object.entries(EXACT)) expect(Math.abs(vsRange(hand, (dead) => parseComboRange('QQ+, AK', dead)) - exact)).toBeLessThan(0.4);
+    expect(bars(art('preflop/3bet-pots/4bet', 'Why the ace, not the king'))).toEqual(Object.values(EXACT).map(Math.round));
+  }, 30_000);
+
+  it('button flats, squeezes, rake and depth', () => {
+    const f = actionFrequencies(chart('9max-100-btn-vs-co'));
+    expect([Math.round(f.call * 100), Math.round(f['3bet'] * 100)]).toEqual([11, 8]);
+    expect(bars(art('preflop/vs-open/squeeze', 'Folds a pure bluff needs'))).toEqual([r1(bluffBreakeven(4, 10) * 100), r1(bluffBreakeven(6.5, 12) * 100)]);
+    // 5% rake on a 5.5bb pot is under the 3bb cap.
+    const raked = 5.5 - 0.05 * 5.5;
+    expect(raked).toBeCloseTo(5.225, 12);
+    expect(bars(art('preflop/stack-depth/rake', 'Close calls flip first'))).toEqual([0.28 * 5.5 - 1.5, 0.28 * raked - 1.5].map((x) => Math.round(x * 100) / 100));
+    expect(r1((1.5 / raked) * 100)).toBe(28.7);
+    expect(chips(art('preflop/stack-depth/depth', 'What depth changes'))).toEqual([22.5, 40 - 11, 200 - 11]);
+    // 40bb: BB 3bets to 9bb, the button jams, the SB's 0.5bb is in.
+    expect(pick(art('preflop/stack-depth/depth', 'Shallow 3bets get called by jams'), 'ring').value).toBeCloseTo(potOdds(40 + 9 + 0.5, 31), 12);
+    expect(r1(potOdds(49.5, 31) * 100)).toBe(38.5);
+    expect(pick(art('preflop/stack-depth/open-sizing', 'The small blind opens bigger'), 'ring').value).toBeCloseTo(potOdds(4, 2), 12);
+  });
+
+  it('big opens, straddles and limped pots', () => {
+    const spr = (open: number, players: number) => r1((100 - open) / (players * open + 1.5));
+    expect(bars(art('preflop/live-preflop/big-opens', 'SPR after the call'))).toEqual([spr(2.5, 2), spr(5, 2), spr(8, 2), spr(8, 4)]);
+    expect(bars(art('preflop/live-preflop/big-opens', '3bet linear, for value'))).toEqual([r1(bluffBreakeven(4, 7.5) * 100), r1(bluffBreakeven(9.5, 24) * 100)]);
+    expect(chips(art('preflop/live-preflop/straddles', 'The straddle is the new big blind')).reduce((a, b) => a + b)).toBe(3.5);
+    // A 6bb open into 3.5bb of blinds: SB, BB and straddle call the open minus what they posted.
+    expect(bars(art('preflop/live-preflop/straddles', 'Prices against a 6bb button open'))).toEqual([5.5, 5, 4].map((c) => r1(potOdds(9.5, c) * 100)));
+    const [pot, behind] = chips(art('preflop/live-preflop/limped-pots', 'Multiway limped pots after the flop'));
+    expect([pot, behind]).toEqual([3 + 1 + 0.5, 100 - 1]);
+    expect(Math.round(behind / pot)).toBe(22);
+  });
+});
+
+describe('picture pass: postflop', () => {
+  const chart = (id: string) => buildChart(STARTER_CHARTS.find((c) => c.id === id)!);
+
+  it('bet sizes and boards', () => {
+    expect(bars(art('postflop/cbet/sizing', 'Why small works with a wide range'))).toEqual([r1(bluffBreakeven(1, 1 / 3) * 100), r1(bluffBreakeven(1, 0.75) * 100)]);
+    const low = step('postflop/later-streets/turn-cards', 'A low turn on K72');
+    if (low.kind !== 'board') throw new Error('expected a board');
+    expect(category('7c6s' + low.board)).toBe(HandCategory.TwoPair);
+    expect(category('5s6s' + low.board)).toBe(HandCategory.Pair);
+    const flushes = (hole: string) => {
+      const hearts = remainingDeck(parseCards(hole + 'AhKh7c4h2s')).filter((c) => suitIndex(c) === suitIndex(parseCards('2h')[0])).length;
+      return (hearts * (hearts - 1)) / 2;
+    };
+    expect(bars(art('postflop/later-streets/bluff-catching', 'Villain’s flush combos'))).toEqual([flushes('QsQc'), flushes('QhQd')]);
+  });
+
+  it('who holds overpairs and trips on 8♠8♦3♣', () => {
+    const board = parseCards('8s8d3c');
+    const share = (id: string, action: string, test: (c: Card[]) => boolean) => {
+      let all = 0;
+      let hit = 0;
+      for (const c of rangeToCombos(actionRange(chart(id), action), board)) {
+        all += c.weight;
+        if (test(c.cards)) hit += c.weight;
+      }
+      return r1((hit / all) * 100);
+    };
+    const over = (c: Card[]) => rankOf(c[0]) === rankOf(c[1]) && '9TJQKA'.includes(rankOf(c[0]));
+    const trips = (c: Card[]) => categoryOf(evaluate([...c, ...board])) >= HandCategory.Trips;
+    expect(bars(art('postflop/textures/who-it-favors', 'Reading the numbers'))).toEqual([
+      share('9max-100-rfi-btn', 'raise', over),
+      share('9max-100-bb-vs-btn', 'call', over),
+      share('9max-100-rfi-btn', 'raise', trips),
+      share('9max-100-bb-vs-btn', 'call', trips),
+    ]);
+  });
+
+  it('top pair against one random hand, exact', () => {
+    const hero = parseCards('KsQd') as [Card, Card];
+    const board = parseCards('Kh8c4d');
+    const left = remainingDeck([...hero, ...board]);
+    let sum = 0;
+    let n = 0;
+    for (let i = 0; i < left.length; i++)
+      for (let j = i + 1; j < left.length; j++) {
+        sum += exactEquity(hero, [left[i], left[j]], board).equity;
+        n++;
+      }
+    expect(bars(art('postflop/multiway/multiway', 'Top pair, good kicker vs more hands'))[0]).toBe(r1((sum / n) * 100));
+  }, 60_000);
+
+  it('river sizes, raises and low SPR pots', () => {
+    expect(bars(art('postflop/river/overbets', 'What villain needs'))).toEqual([1, 1.5, 2].map((b) => r1(potOdds(1 + b, b) * 100)));
+    const raise = step('postflop/river/river-raises', 'Why the bar is so high');
+    if (raise.kind !== 'hand') throw new Error('expected a hand');
+    const mine = score(raise.cards + raise.board);
+    expect(category(raise.cards + raise.board)).toBe(HandCategory.TwoPair);
+    // Flushes, straights and sets all beat top two pair here.
+    for (const villain of ['Ah3h', 'QcJc', 'Jd7c', '7s6c', '8h8c', '4d4s', '2c2d']) expect(score(villain + raise.board)).toBeGreaterThan(mine);
+    expect(bars(art('postflop/3bet-postflop/cbet-3bp', 'Stack to pot ratio on the flop'))).toEqual([r1(97.5 / 5.5), r1(89 / 22.5), r1(92.5 / 16.5)]);
+    // Pot 1 with 4 behind: shoved on at once, or after a third pot bet.
+    expect(bars(art('postflop/3bet-postflop/low-spr', 'Bet, then shoved on'))).toEqual([r1(potOdds(1 + 4, 4) * 100), r1(potOdds(1 + 1 / 3 + 4, 4 - 1 / 3) * 100)]);
+  });
+});
+
+describe('picture pass: exploit, mindset and tournaments', () => {
+  it('exploit numbers', () => {
+    const [one, two, blinds] = bars(art('exploit/adjustments/live-limpers', 'How big to raise'));
+    expect([two, blinds]).toEqual([one + 2, one + 1]);
+    expect(bars(art('exploit/adjustments/node-lock', 'River, pot 100, bet 100')).map(Math.round)).toEqual([Math.round(0.6 * 100 - 0.4 * 100), Math.round(0.1 * 200 - 0.9 * 100)]);
+    expect((0.75 * 1.5) / 0.25).toBeCloseTo(4.5, 12);
+    const nit = step('exploit/adjustments/vs-nit', 'Do not pay off');
+    if (nit.kind !== 'hand') throw new Error('expected a hand');
+    expect(category(nit.cards + nit.board)).toBe(HandCategory.Pair);
+    expect(rankOf(parseCards(nit.board!)[0])).toBe(rankOf(parseCards(nit.cards)[1]));
+    expect(pick(art('exploit/profiling/archetypes', 'Why the counters point opposite ways'), 'ring').value).toBe(bluffBreakeven(1, 1));
+    for (const [n, y] of pick(art('exploit/profiling/hud-stats', 'The error shrinks slowly'), 'curve').points) expect(y).toBe(r1(Math.sqrt((0.25 * 0.75) / n) * 100));
+    // 7 or more folds in 10 chances at a true 50%.
+    const choose = (n: number, k: number): number => (k === 0 ? 1 : (choose(n, k - 1) * (n - k + 1)) / k);
+    const p = [7, 8, 9, 10].reduce((s, k) => s + choose(10, k), 0) / 2 ** 10;
+    expect(pick(art('exploit/profiling/hud-stats', 'Chances, not hands'), 'ring').value).toBe(p);
+    expect(r1(p * 100)).toBe(17.2);
+    expect(bars(art('exploit/tells/physical', 'Close calls only'))).toEqual([0.1, 0.3, 0.36].map((b) => Math.round(b * 300 - 100)));
+  });
+
+  it('variance, drawdowns and a reviewed river call', () => {
+    for (const [n, y] of pick(art('mindset/mental/variance', 'What the table says'), 'curve').points) expect(y).toBe(r1((1.96 * 100) / Math.sqrt((n * 1000) / 100)));
+    expect(bars(art('mindset/mental/variance', 'Chance of ever falling this far'))).toEqual([5, 10, 15, 20].map((b) => r1(Math.exp((-2 * 10 * b * 100) / 100 ** 2) * 100)));
+    expect(bars(art('mindset/study/hand-review', 'River: call 75 into 100'))).toEqual([0.4, 0.3, 0.2].map((b) => Math.round(b * 250 - 75)));
+    expect(bars(art('mindset/mental/tilt', 'Illustration: a fifth of hands on tilt'))).toEqual([10, -20, 0.8 * 10 + 0.2 * -20]);
+  });
+
+  it('antes, push or fold and fold equity behind', () => {
+    expect(chips(art('tournaments/mtt-basics/antes', 'The pot before anyone acts'))).toEqual([0.5 + 1, 0.5 + 1 + 1]);
+    expect(0.5 + 1 + 9 * 0.125).toBe(2.625);
+    expect(bars(art('tournaments/mtt-basics/antes', 'Prices with and without the ante'))).toEqual([
+      r1(bluffBreakeven(1.5, 2.2) * 100),
+      r1(bluffBreakeven(2.5, 2.2) * 100),
+      r1(potOdds(3.7, 1.2) * 100),
+      r1(potOdds(4.7, 1.2) * 100),
+    ]);
+    expect(pick(art('tournaments/mtt-basics/push-fold', 'Why short stacks shove'), 'ring').value).toBeCloseTo(2.2 / 10, 12);
+    expect(bars(art('tournaments/mtt-basics/push-fold', 'Fold equity compounds with players behind'))).toEqual([1, 2, 5, 8].map((n) => Math.round(0.85 ** n * 1000 + 1e-9) / 10));
+  });
+});
+

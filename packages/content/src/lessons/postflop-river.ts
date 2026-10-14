@@ -165,13 +165,19 @@ export const POSTFLOP_RIVER_LESSONS: LessonContent[] = [
         body: 'An overbet is a bet bigger than the pot. It fits one situation. Your range holds many more of the strongest hands than villain’s. And villain’s line has capped their range.',
       },
       {
-        kind: 'text',
+        kind: 'visual',
         title: 'Nut advantage against a capped range',
-        body: [
-          'A range is capped when the line has removed most of its strongest hands. Those hands would have raised earlier, for example.',
-          'If you hold many nut hands and villain holds few, villain cannot punish a big bet with raises. Their best hands are medium bluff catchers. A bigger bet charges those hands more each time they call.',
-          'This is why overbets show up mostly on turns and rivers. Ranges are narrower there, and the gap in nut hands is widest.',
-        ],
+        art: {
+          kind: 'tree',
+          root: 'Before you overbet',
+          branches: [
+            { label: 'Your range', value: 'Many nut hands', tone: 'green' },
+            { label: 'Villain’s range', value: 'Capped, few nut hands', tone: 'gray' },
+            { label: 'Villain’s best hands', value: 'Bluff catchers', tone: 'gray' },
+          ],
+        },
+        caption:
+          'A range is capped when the line has removed most of its strongest hands. Then villain cannot punish a big bet with raises. A bigger bet charges their bluff catchers more each time they call. Overbets show up mostly on turns and rivers, where the gap in nut hands is widest.',
         evidence: 'solver',
       },
       {
@@ -189,13 +195,19 @@ export const POSTFLOP_RIVER_LESSONS: LessonContent[] = [
         evidence: 'math',
       },
       {
-        kind: 'text',
+        kind: 'visual',
         title: 'What villain needs',
-        body: [
-          'Facing a 2x pot bet, villain calls 2 to win 3. So a call needs **40.0%** equity. At 1.5x pot, it needs **37.5%**.',
-          'In return, you may bluff more. At 2x pot, 40.0% of your betting range can be bluffs. That is 2 bluffs for every 3 value bets.',
-          'MDF falls to 33.3% at 2x pot. So villain may fold up to 66.7% of their range. If they fold more than that, your bluffs profit.',
-        ],
+        art: {
+          kind: 'bars',
+          unit: '%',
+          bars: [
+            { label: 'Pot', value: 33.3, tone: 'gray' },
+            { label: '1.5x pot', value: 37.5 },
+            { label: '2x pot', value: 40, tone: 'red' },
+          ],
+        },
+        caption:
+          'Each bar is the equity villain needs to call that size. Facing 2x pot, villain calls 2 to win 3. In return you may bluff more. At 2x pot, 2 of every 5 bets can be bluffs. MDF falls to 33.3%. If villain folds more than 66.7%, your bluffs profit.',
         evidence: 'math',
       },
       {
@@ -217,13 +229,18 @@ export const POSTFLOP_RIVER_LESSONS: LessonContent[] = [
           'AK makes the nut straight here. Holding an ace cuts villain’s AK from **16** combos to **12**. The nuts never folds to an overbet and may raise. So a missed hand with an ace makes a better bluff than one without.',
       },
       {
-        kind: 'text',
+        kind: 'visual',
         title: 'When not to overbet',
-        body: [
-          'Skip the overbet when villain is not capped and holds as many strong hands as you.',
-          'Skip it when your range is full of medium hands that want calls from worse.',
-          'Skip it when a smaller bet already gets the stacks in by the river.',
-        ],
+        art: {
+          kind: 'tree',
+          root: 'Skip the overbet when',
+          branches: [
+            { label: 'Villain is not capped', value: 'As many strong hands', tone: 'gray' },
+            { label: 'Your range is mostly medium', value: 'You want calls from worse', tone: 'gray' },
+            { label: 'Stacks are short', value: 'A smaller bet gets them in', tone: 'gray' },
+          ],
+        },
+        caption: 'Any one of these is enough reason to bet smaller.',
         evidence: 'solver',
       },
       {
@@ -335,12 +352,18 @@ export const POSTFLOP_RIVER_LESSONS: LessonContent[] = [
         evidence: 'math',
       },
       {
-        kind: 'text',
+        kind: 'visual',
         title: 'How to respond',
-        body: [
-          'Against a balanced player, folding a bluff catcher to a small bet is rarely right.',
-          'Raise for value when you beat more than half of the hands that call a raise. Raise as a bluff only when you expect many medium hands to fold.',
-        ],
+        art: {
+          kind: 'tree',
+          root: 'Facing a small river bet',
+          branches: [
+            { label: 'Bluff catcher', value: 'Rarely fold', tone: 'green' },
+            { label: 'Raise for value', value: 'Beat over half of calls', tone: 'red' },
+            { label: 'Raise as a bluff', value: 'Only if medium hands fold', tone: 'red' },
+          ],
+        },
+        caption: 'Against a balanced player, folding a bluff catcher to a small bet is rarely right. Raise only when the hands behind the raise make it pay.',
         evidence: 'solver',
       },
       {
@@ -448,14 +471,12 @@ export const POSTFLOP_RIVER_LESSONS: LessonContent[] = [
         evidence: 'math',
       },
       {
-        kind: 'text',
+        kind: 'hand',
         title: 'Why the bar is so high',
-        body: [
-          'The hands that call a river raise are the value part of villain’s betting range. Beating half of those usually takes one of the best few hands on the board.',
-          'Strong hands that are not near the nuts often just call. Top two pair on a wet board is an example.',
-          'This is why solver river raise ranges are polar and very strong.',
-        ],
-        evidence: 'solver',
+        cards: 'Ts9s',
+        board: 'Th9h4c8d2h',
+        caption:
+          'You hold top two pair on a wet board. Flushes, straights and sets all beat it. The hands that call a river raise are villain’s value bets. Beating half of those usually takes one of the best few hands. So this hand often just calls. Solver river raise ranges are polar and very strong.',
       },
       {
         kind: 'callout',
@@ -514,24 +535,33 @@ export const POSTFLOP_RIVER_LESSONS: LessonContent[] = [
         body: 'In a 3bet pot, the pot is large and the stacks behind are small next to it. Both ranges are narrower. The 3bettor holds most of the premium hands. That changes how often and how big to c-bet.',
       },
       {
-        kind: 'table',
+        kind: 'visual',
         title: 'Stack to pot ratio on the flop',
-        columns: ['Pot', 'Pot size', 'Behind', 'SPR'],
-        rows: [
-          ['Single raised, BTN vs BB', '5.5', '97.5', '17.7'],
-          ['BB 3bets BTN to 11', '22.5', '89', '4.0'],
-          ['BTN 3bets CO to 7.5', '16.5', '92.5', '5.6'],
-        ],
-        note: 'Stacks are 100bb and opens are 2.5bb. The 3bet gets called, and blinds that fold stay in the pot. SPR (stack to pot ratio) = stack behind ÷ pot.',
+        art: {
+          kind: 'bars',
+          bars: [
+            { label: 'Single raised', value: 17.7, tone: 'gray' },
+            { label: 'BB 3bets BTN to 11bb', value: 4 },
+            { label: 'BTN 3bets CO to 7.5bb', value: 5.6 },
+          ],
+        },
+        caption:
+          'SPR (stack to pot ratio) is the stack behind ÷ the pot. Stacks are 100bb and opens are 2.5bb. The 3bet gets called, and blinds that fold stay in the pot. A 3bet pot starts with about a quarter of the room.',
         evidence: 'math',
       },
       {
-        kind: 'text',
+        kind: 'visual',
         title: 'Two different ranges',
-        body: [
-          'The 3bettor’s range holds most of the AA to QQ and AK. It adds some bluffs like suited aces and suited connectors.',
-          'The caller’s range is condensed. It 4bets many of its best hands and folds its weakest. What is left is mostly medium pairs and suited hands.',
-        ],
+        art: {
+          kind: 'tree',
+          root: 'In a 3bet pot',
+          branches: [
+            { label: 'The 3bettor', value: 'Most of AA to QQ and AK', tone: 'purple' },
+            { label: 'The caller', value: 'Medium pairs, suited hands', tone: 'green' },
+          ],
+        },
+        caption:
+          'The 3bettor adds some bluffs like suited aces and suited connectors. The caller 4bets many of its best hands and folds its weakest. So its range is condensed.',
         evidence: 'solver',
       },
       {
@@ -628,25 +658,42 @@ export const POSTFLOP_RIVER_LESSONS: LessonContent[] = [
         evidence: 'math',
       },
       {
-        kind: 'table',
-        title: 'Calling an all in',
-        columns: ['SPR', 'Equity needed'],
-        rows: [
-          ['1', '33.3%'],
-          ['2', '40.0%'],
-          ['3', '42.9%'],
-          ['4', '44.4%'],
-        ],
-        note: 'Villain shoves SPR × pot before you have bet. You need SPR ÷ (1 + 2 × SPR). The price gets closer to 50% as SPR grows.',
+        kind: 'visual',
+        title: 'Lower SPR, cheaper calls',
+        art: {
+          kind: 'curve',
+          points: [
+            [0.5, 25],
+            [1, 33.3],
+            [1.5, 37.5],
+            [2, 40],
+            [3, 42.9],
+            [4, 44.4],
+            [6, 46.2],
+            [8, 47.1],
+            [10, 47.6],
+          ],
+          xLabel: 'SPR',
+          yLabel: 'Equity to call a shove, %',
+          mark: [4, 44.4],
+        },
+        caption:
+          'Villain shoves SPR times the pot before you have bet. You need SPR ÷ (1 + 2 × SPR). That is **33.3%** at SPR 1 and **44.4%** at SPR 4. The price gets closer to 50% as SPR grows.',
         evidence: 'math',
       },
       {
-        kind: 'text',
+        kind: 'visual',
         title: 'Bet, then shoved on',
-        body: [
-          'Take a pot of 1 with 4 behind. You bet a third of the pot and villain shoves. You call 3.67 to win a final pot of 9. You need **40.7%** equity.',
-          'Once you put money in, the price to call the rest keeps getting better. So commitment is decided early. If you will not call a shove, think hard before betting into a low SPR pot.',
-        ],
+        art: {
+          kind: 'bars',
+          unit: '%',
+          bars: [
+            { label: 'Shoved on first', value: 44.4, tone: 'gray' },
+            { label: 'Bet ⅓ pot first', value: 40.7, tone: 'green' },
+          ],
+        },
+        caption:
+          'Take a pot of 1 with 4 behind. Bet a third of the pot and villain shoves. You call 3.67 to win a final pot of 9, so you need **40.7%**. Once you put money in, the price keeps getting better. So commitment is decided early. If you will not call a shove, think hard before you bet.',
         evidence: 'math',
       },
       {
@@ -694,29 +741,6 @@ export const POSTFLOP_RIVER_LESSONS: LessonContent[] = [
         answer: 0,
         explain:
           'At SPR 2, only 2 pots are left behind. Villain’s calling and shoving ranges include many worse hands. Deeper, a big pot more often comes from hands that beat one pair.',
-      },
-      {
-        kind: 'visual',
-        title: 'Lower SPR, cheaper calls',
-        art: {
-          kind: 'curve',
-          points: [
-            [0.5, 25],
-            [1, 33.3],
-            [1.5, 37.5],
-            [2, 40],
-            [3, 42.9],
-            [4, 44.4],
-            [6, 46.2],
-            [8, 47.1],
-            [10, 47.6],
-          ],
-          xLabel: 'SPR',
-          yLabel: 'Equity to call a shove, %',
-          mark: [4, 44.4],
-        },
-        caption: 'Facing a shove of SPR times the pot, you need SPR ÷ (1 + 2 × SPR). That is **33.3%** at SPR 1 and **44.4%** at SPR 4.',
-        evidence: 'math',
       },
       {
         kind: 'takeaway',

@@ -14,7 +14,12 @@ const lesson = (key: string): LessonContent => {
   return l;
 };
 const text = (key: string) => JSON.stringify(lesson(key));
-const visuals = (key: string) => lesson(key).steps.flatMap((s) => (s.kind === 'visual' ? [s.art] : []));
+/** The art of the visual step with this title. Looked up by title, so new steps do not shift it. */
+const visual = (key: string, title: string): LessonArt => {
+  const s = lesson(key).steps.find((x) => x.kind === 'visual' && x.title === title);
+  if (!s || s.kind !== 'visual') throw new Error(`${key}: no visual "${title}"`);
+  return s.art;
+};
 function pick<K extends LessonArt['kind']>(art: LessonArt, kind: K): Extract<LessonArt, { kind: K }> {
   expect(art.kind).toBe(kind);
   return art as Extract<LessonArt, { kind: K }>;
@@ -91,7 +96,7 @@ describe('hand reading', () => {
     const showdown = (range: string) => parseComboRange(range, dead).map((c) => exactEquity(pc('QcJc'), c.cards as [Card, Card], board).equity);
     expect(showdown(value).every((e) => e === 0)).toBe(true);
     expect(showdown(draws).every((e) => e === 1)).toBe(true);
-    const ring = pick(visuals(key)[0], 'ring');
+    const ring = pick(visual(key, 'Count, then compare'), 'ring');
     expect(ring.value).toBe(8 / 40);
     expect(pct(potOdds(2, 1))).toBe('33.3');
   });
@@ -114,7 +119,7 @@ describe('semi bluffs', () => {
     expect([(0.6 * eq * 40).toFixed(2), (0.6 * (1 - eq) * 20).toFixed(2)]).toEqual(['4.91', '9.55']);
     expect(betEV(20, 20, 0.4, eq).toFixed(2)).toBe('3.36');
     expect(bluffEV(20, 20, 0.4)).toBe(-4);
-    const tree = pick(visuals(key)[0], 'tree');
+    const tree = pick(visual(key, 'Where the EV comes from'), 'tree');
     expect(tree.branches.map((b) => b.label)).toEqual(['Villain folds, 40%', 'Called and you hit, 12.3%', 'Called and you miss, 47.7%']);
   });
 
@@ -169,8 +174,10 @@ describe('bubble', () => {
     const b = allIn(stacks, pay, 0, 1);
     expect([b.fold.toFixed(2), b.win.toFixed(2), b.lose]).toEqual(['29.49', '40.45', 0]);
     expect([need(0, 3), need(0, 2), need(0, 1)]).toEqual(['61.1', '70.2', '72.9']);
-    expect(bars(visuals(key)[0])).toEqual([50, 61.1, 70.2, 72.9]);
+    expect(bars(visual(key, 'Equity needed to call the big stack'))).toEqual([50, 61.1, 70.2, 72.9]);
     expect([need(3, 0), need(1, 0), need(3, 1)]).toEqual(['52.9', '63.1', '53.7']);
+    // A calls D, B calls D, A calls B, B calls A.
+    expect(bars(visual(key, 'The big stack covers everyone'))).toEqual([need(3, 0), need(3, 1), need(1, 0), need(0, 1)].map(Number));
   });
 });
 
@@ -189,9 +196,10 @@ describe('final table', () => {
   it('covering stacks call lighter, and a tiny stack adds pressure', () => {
     const bCallsA = allIn(stacks, pay, 0, 1);
     expect([bCallsA.fold.toFixed(2), bCallsA.win.toFixed(2), bCallsA.lose]).toEqual(['201.98', '274.15', 80]);
-    expect(bars(visuals(key)[0])).toEqual([50, Number(pct(allIn(stacks, pay, 1, 0).need)), Number(pct(bCallsA.need))]);
+    expect(bars(visual(key, 'Covering against covered'))).toEqual([50, Number(pct(allIn(stacks, pay, 1, 0).need)), Number(pct(bCallsA.need))]);
     expect([pct(allIn(stacks, pay, 1, 0).need), pct(bCallsA.need)]).toEqual(['57.6', '62.8']);
     expect(pct(allIn([30000, 20000, 20000, 28000, 2000], pay, 0, 1).need)).toBe('64.9');
+    expect(bars(visual(key, 'A tiny stack adds pressure'))).toEqual([bCallsA.need, allIn([30000, 20000, 20000, 28000, 2000], pay, 0, 1).need].map((n) => Number(pct(n))));
   });
 
   it('heads up, money is linear in chips', () => {
@@ -232,7 +240,10 @@ describe('reshoves', () => {
     expect([pct(fold(button, 'As5d')), pct(fold(lojack, 'As5d')), pct(fold(button, '7s6s'))]).toEqual(['82.4', '45.7', '80.4']);
     expect(ev(fold(button, 'As5d'), EQ.As5d, 20).toFixed(2)).toBe('2.67');
     expect(ev(fold(lojack, 'As5d'), EQ.As5d, 20).toFixed(2)).toBe('-1.55');
-    expect(bars(visuals(key)[0])).toEqual([12, 20, 25].map((s) => Number(ev(fold(lojack, 'As5d'), EQ.As5d, s).toFixed(2))));
+    expect(bars(visual(key, 'Fold equity comes from their range'))).toEqual([button, lojack].map((o) => Number(ev(fold(o, 'As5d'), EQ.As5d, 20).toFixed(2))));
+    // A 3bet to 5bb at 20bb leaves 15bb, a quarter of the stack in.
+    expect(pick(visual(key, 'Why all in'), 'chips').stacks.map((x) => x.bb)).toEqual([5, 20 - 5]);
+    expect(bars(visual(key, 'A♠5♦ against the lojack'))).toEqual([12, 20, 25].map((s) => Number(ev(fold(lojack, 'As5d'), EQ.As5d, s).toFixed(2))));
   });
 
   it('equity against the calls', () => {
@@ -243,4 +254,19 @@ describe('reshoves', () => {
     }
     expect([pct(EQ.As5d), pct(EQ['7s6s'])]).toEqual(['29.4', '32.0']);
   }, 60_000);
+});
+
+describe('ICM pictures', () => {
+  const stacks = [5000, 3000, 2000];
+  const pay = [50, 30, 20];
+  const key = 'tournaments/mtt-basics/icm';
+
+  it('money per 1,000 chips and who pays the most', () => {
+    const money = icm(stacks, pay);
+    expect(bars(visual(key, 'What the table shows'))).toEqual([money[0] / 5, money[2] / 2].map((m) => Number(m.toFixed(1))));
+    // Chip EV, A calling C's shove, B calling A's shove.
+    const need = (shover: number, caller: number) => Number(pct(allIn(stacks, pay, shover, caller).need));
+    expect(bars(visual(key, 'Who pays the most'))).toEqual([50, need(2, 0), need(0, 1)]);
+    expect([need(2, 0), need(0, 1)]).toEqual([52.1, 60.7]);
+  });
 });

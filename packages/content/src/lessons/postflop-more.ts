@@ -28,14 +28,11 @@ export const POSTFLOP_MORE_LESSONS: LessonContent[] = [
         evidence: 'solver',
       },
       {
-        kind: 'text',
+        kind: 'chart',
+        chartId: '9max-100-bb-vs-btn',
         title: 'What each range holds',
-        body: [
-          'In Felt’s charts, BTN opens every suited ace and most offsuit aces. It also opens most big cards and folds its weakest offsuit hands.',
-          'BB 3bets AA to QQ and AK. It calls with many small connected hands, suited and offsuit.',
-          'So BTN usually has more top pairs and overpairs on high boards. BB has more low and middle cards. Those make two pair and straights on low connected boards.',
-        ],
-        evidence: 'solver',
+        caption:
+          'BB 3bets AA to QQ and AK. It calls with many small connected hands, suited and offsuit. BTN opens every suited ace and most big cards. So BTN has more top pairs and overpairs on high boards. BB has more low and middle cards.',
       },
       {
         kind: 'table',
@@ -67,23 +64,36 @@ export const POSTFLOP_MORE_LESSONS: LessonContent[] = [
         evidence: 'math',
       },
       {
-        kind: 'text',
+        kind: 'visual',
         title: 'Reading the numbers',
-        body: [
-          'A♠8♦3♣ and Q♥J♦T♣ favor BTN on every count. On Q♥J♦T♣, BTN has more straights. That is largely because BB 3bets AK instead of calling.',
-          'On 8♠8♦3♣ the counts split. BTN has more equity and more overpairs, **6.9%** to **2.2%**. But BB holds more trips or better, **10.2%** to **7.1%**. It defends more hands with an eight.',
-          '9♥8♥6♣ is close to even. BTN has a little more equity, and BB has a few more strong hands. On 7♥6♥5♣, BB leads on every count.',
-        ],
+        art: {
+          kind: 'bars',
+          unit: '%',
+          bars: [
+            { label: 'BTN overpairs', value: 6.9 },
+            { label: 'BB overpairs', value: 2.2, tone: 'green' },
+            { label: 'BTN trips+', value: 7.1 },
+            { label: 'BB trips+', value: 10.2, tone: 'green' },
+          ],
+        },
+        caption:
+          'On 8♠8♦3♣ the counts split. BTN has more equity and more overpairs. BB holds more trips or better because it defends more hands with an eight. A♠8♦3♣ and Q♥J♦T♣ favor BTN on every count. 9♥8♥6♣ is close to even. On 7♥6♥5♣, BB leads on every count.',
         evidence: 'math',
       },
       {
-        kind: 'text',
+        kind: 'visual',
         title: 'From counts to strategy',
-        body: [
-          'On boards like A83, the raiser leads on both counts. Neither side has many strong hands. There small, frequent bets are the norm.',
-          'On boards like 765, the caller holds more strong hands. The raiser checks much more, and BB check raises more.',
-          'On paired boards like 883, the raiser’s equity edge still supports frequent small bets. Big bets run into the caller’s extra trips.',
-        ],
+        art: {
+          kind: 'tree',
+          root: 'BTN opens, BB calls',
+          branches: [
+            { label: 'A83: BTN leads both counts', value: 'Small, frequent bets', tone: 'brass' },
+            { label: '765: BB has more strong hands', value: 'BTN checks much more', tone: 'green' },
+            { label: '883: the counts split', value: 'Small bets, few big ones', tone: 'brass' },
+          ],
+        },
+        caption:
+          'On 765, BB also check raises more. On 883 the raiser’s equity edge still supports frequent small bets. Big bets run into the caller’s extra trips.',
         evidence: 'solver',
       },
       {
@@ -129,14 +139,11 @@ export const POSTFLOP_MORE_LESSONS: LessonContent[] = [
         body: 'You open the cutoff and the button calls. Or you 3bet from the blinds and get called. Now you have the stronger range but act first on every street. That changes how often you bet.',
       },
       {
-        kind: 'text',
+        kind: 'visual',
         title: 'Why you bet less often',
-        body: [
-          'Out of position, you realize less of your equity. The caller realizes more of theirs.',
-          'Medium hands that bet can face a raise and lose value. So they prefer to check.',
-          'A button that flats a cutoff open has 3bet many of its best hands. It has also folded its worst. So its calling range is mostly medium strength.',
-          'It holds fewer trash hands than a big blind defending against the button. Fewer of its hands fold to any bet.',
-        ],
+        art: { kind: 'table', seats: 9, button: 'BTN', hero: 'CO', highlight: ['BTN'], note: 'You act first after the flop' },
+        caption:
+          'Out of position you realize less of your equity. Medium hands that bet can face a raise, so they prefer to check. A button that flats a cutoff open has 3bet many of its best hands. It has also folded its worst. So fewer of its hands fold to any bet.',
         evidence: 'solver',
       },
       {
@@ -153,12 +160,17 @@ export const POSTFLOP_MORE_LESSONS: LessonContent[] = [
         evidence: 'solver',
       },
       {
-        kind: 'text',
+        kind: 'visual',
         title: 'Protect your checks',
-        body: [
-          'Say you bet every strong hand and check only weak ones. Then the caller can bet every time you check. You will have to fold too often.',
-          'So solver strategies out of position check some strong hands, like sets and good top pairs. Those hands can check raise or check call. That makes betting behind your check costly.',
-        ],
+        art: {
+          kind: 'tree',
+          root: 'You check out of position',
+          branches: [
+            { label: 'Only weak hands', value: 'They bet every time', tone: 'red' },
+            { label: 'Some sets and good top pairs', value: 'Check raise or call', tone: 'green' },
+          ],
+        },
+        caption: 'If your checks hold only weak hands, you will have to fold too often. So solver strategies out of position check some strong hands. That makes betting behind your check costly.',
         evidence: 'solver',
       },
       {
@@ -231,12 +243,18 @@ export const POSTFLOP_MORE_LESSONS: LessonContent[] = [
         caption: 'BB checks the flop and BTN checks behind. On the turn BB acts first again. A bet now is a **probe**.',
       },
       {
-        kind: 'text',
+        kind: 'visual',
         title: 'The check back is capped',
-        body: [
-          'In position, the raiser bets most of its strongest hands on the flop. Its checks are mostly medium and weak hands. Only some strong hands stay back.',
-          'How capped it is depends on the board. Where BTN bets small with almost everything, its checks are very weak. Where BTN checks a lot, its checks keep more strength.',
-        ],
+        art: {
+          kind: 'tree',
+          root: 'BTN’s flop check back holds',
+          branches: [
+            { label: 'Medium and weak hands', value: 'Most of it', tone: 'gray' },
+            { label: 'Strong hands', value: 'Only some', tone: 'red' },
+          ],
+        },
+        caption:
+          'In position, the raiser bets most of its strongest hands on the flop. How capped the check is depends on the board. Where BTN bets small with almost everything, its checks are very weak. Where BTN checks a lot, they keep more strength.',
         evidence: 'solver',
       },
       {
@@ -467,16 +485,20 @@ export const POSTFLOP_MORE_LESSONS: LessonContent[] = [
         evidence: 'math',
       },
       {
-        kind: 'table',
+        kind: 'visual',
         title: 'Top pair, good kicker vs more hands',
-        columns: ['Opponents', 'K♠Q♦ on K♥8♣4♦'],
-        rows: [
-          ['1', '86.4%'],
-          ['2', '74.8%'],
-          ['3', '64.9%'],
-          ['4', '56.5%'],
-        ],
-        note: 'Computed with Felt’s core against random hands. The 1 opponent row is exact. The other rows use 24 million random deals each, accurate to within 0.1%. Real calling ranges beat random hands, so the true numbers are lower.',
+        art: {
+          kind: 'bars',
+          unit: '%',
+          bars: [
+            { label: '1 opponent', value: 86.4, tone: 'green' },
+            { label: '2', value: 74.8 },
+            { label: '3', value: 64.9 },
+            { label: '4', value: 56.5, tone: 'red' },
+          ],
+        },
+        caption:
+          'This is K♠Q♦ on K♥8♣4♦ against random hands. The heads up number is exact. The rest come from 24 million random deals each. Real calling ranges beat random hands, so the true numbers are lower.',
         evidence: 'math',
       },
       {
@@ -487,15 +509,6 @@ export const POSTFLOP_MORE_LESSONS: LessonContent[] = [
           'The preflop raiser’s range advantage also matters less. The chance that at least one opponent hit the board grows with each player.',
         ],
         evidence: 'solver',
-      },
-      {
-        kind: 'text',
-        title: 'Defense is shared',
-        body: [
-          'Against a pot sized bet, the group must continue **50%** of the time together. Each player does not need 50% alone.',
-          'Like MDF (minimum defense frequency), this is a river idea and a simplification. But the direction holds. Each player can fold more than heads up.',
-        ],
-        evidence: 'math',
       },
       {
         kind: 'visual',
@@ -509,7 +522,8 @@ export const POSTFLOP_MORE_LESSONS: LessonContent[] = [
             { label: 'Each of 3 players', value: 20.6, tone: 'green' },
           ],
         },
-        caption: 'Against a pot sized bet, players defending independently share the 50%. With 2 players each needs **29.3%**, since 1 − (1 − x)² = 0.5. With 3 players each needs **20.6%**.',
+        caption:
+          'Against a pot sized bet, the group must continue **50%** of the time together. With 2 players each needs **29.3%**, since 1 − (1 − x)² = 0.5. With 3 players each needs **20.6%**. Like MDF this is a river idea and a simplification. But each player can fold more than heads up.',
         evidence: 'math',
       },
       {
@@ -571,12 +585,17 @@ export const POSTFLOP_MORE_LESSONS: LessonContent[] = [
         evidence: 'solver',
       },
       {
-        kind: 'text',
+        kind: 'visual',
         title: 'Size depends on the board',
-        body: [
-          'There is no single multiway size. On dry boards where few hands can continue, smaller bets still appear.',
-          'On wet boards, your strong hands face several draws at once. Protection is worth more there. So bigger bets that charge those draws are more common.',
-        ],
+        art: {
+          kind: 'tree',
+          root: 'Multiway c-bet size',
+          branches: [
+            { label: 'Dry board, few hands continue', value: 'Smaller bets', tone: 'brass' },
+            { label: 'Wet board, several draws', value: 'Bigger bets', tone: 'red' },
+          ],
+        },
+        caption: 'There is no single multiway size. On wet boards your strong hands face several draws at once. Protection is worth more there.',
         evidence: 'solver',
       },
       {

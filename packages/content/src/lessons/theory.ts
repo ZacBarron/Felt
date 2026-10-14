@@ -58,12 +58,17 @@ export const THEORY_LESSONS: LessonContent[] = [
         evidence: 'math',
       },
       {
-        kind: 'text',
+        kind: 'visual',
         title: 'Cannot lose, with conditions',
-        body: [
-          'Heads up, the value of the game is zero when you average over both seats. That is before rake. So an equilibrium strategy cannot lose in expectation over both seats.',
-          'In a single spot the value can be negative. The big blind loses money on average even when it plays perfectly. It posts a blind and plays out of position. Unexploitable means you lose no more than the spot is worth.',
-        ],
+        art: {
+          kind: 'tree',
+          root: 'Heads up, before rake',
+          branches: [
+            { label: 'Averaged over both seats', value: 'Value is 0', tone: 'green' },
+            { label: 'The big blind alone', value: 'Value below 0', tone: 'red' },
+          ],
+        },
+        caption: 'So an equilibrium strategy cannot lose over both seats. The big blind still loses on average when it plays perfectly. It posts a blind and plays out of position. Unexploitable means you lose no more than the spot is worth.',
         evidence: 'math',
       },
       {
@@ -91,12 +96,18 @@ export const THEORY_LESSONS: LessonContent[] = [
         evidence: 'math',
       },
       {
-        kind: 'text',
+        kind: 'visual',
         title: 'Three or more players',
-        body: [
-          'With three or more players, equilibria still exist. The guarantee does not. There can be several equilibria with different payoffs. Mixing parts of different equilibria is not an equilibrium.',
-          'Even if you play an equilibrium strategy, the other players’ choices can cost you. No collusion is needed. Multiway solver outputs are useful guides, not guarantees.',
-        ],
+        art: {
+          kind: 'tree',
+          root: 'Three or more players',
+          branches: [
+            { label: 'Equilibria', value: 'Still exist', tone: 'green' },
+            { label: 'Their payoffs', value: 'Can differ', tone: 'gray' },
+            { label: 'The guarantee', value: 'Gone', tone: 'red' },
+          ],
+        },
+        caption: 'Mixing parts of different equilibria is not an equilibrium. Even when you play one, the other players’ choices can cost you. No collusion is needed. Multiway solver outputs are useful guides, not guarantees.',
         evidence: 'math',
       },
       {
@@ -203,12 +214,17 @@ export const THEORY_LESSONS: LessonContent[] = [
         evidence: 'math',
       },
       {
-        kind: 'text',
+        kind: 'visual',
         title: 'The average converges',
-        body: [
-          'In two player zero sum games, the **average** strategy over all iterations converges to an equilibrium. The latest iteration’s strategy can keep cycling around it.',
-          'Modern variants weight later iterations more heavily. That usually converges faster, and the idea is the same.',
-        ],
+        art: {
+          kind: 'tree',
+          root: 'After many iterations',
+          branches: [
+            { label: 'The latest strategy', value: 'Can keep cycling', tone: 'red' },
+            { label: 'The average strategy', value: 'Converges', tone: 'green' },
+          ],
+        },
+        caption: 'In two player zero sum games, the **average** strategy converges to an equilibrium. Modern variants weight later iterations more heavily. That usually converges faster.',
         evidence: 'math',
       },
       {
@@ -234,14 +250,18 @@ export const THEORY_LESSONS: LessonContent[] = [
         evidence: 'math',
       },
       {
-        kind: 'text',
+        kind: 'visual',
         title: 'Reading a solution',
-        body: [
-          '**Frequencies** show how often each hand takes each action.',
-          '**EV per hand** shows what each hand is worth under the strategy. It tells you which hands are close.',
-          '**Aggregate reports** average one decision over many flops. They show patterns you can learn, instead of single boards you cannot.',
-          'Start from the aggregate pattern. Then use the hand detail to see why the exceptions differ.',
-        ],
+        art: {
+          kind: 'tree',
+          root: 'A solution shows',
+          branches: [
+            { label: 'Frequencies', value: 'How often each action', tone: 'brass' },
+            { label: 'EV per hand', value: 'Which hands are close', tone: 'brass' },
+            { label: 'Aggregate reports', value: 'Patterns over many flops', tone: 'brass' },
+          ],
+        },
+        caption: 'Aggregate reports show patterns you can learn, not single boards. Start from the pattern. Then use the hand detail to see why the exceptions differ.',
         evidence: 'math',
       },
       {
@@ -386,12 +406,11 @@ export const THEORY_LESSONS: LessonContent[] = [
         evidence: 'solver',
       },
       {
-        kind: 'text',
+        kind: 'board',
         title: 'When simplifying hurts',
-        body: [
-          'Simple rules lose more when the full strategy splits the range sharply. One example is betting big with some hands and checking many others. Range betting small on a low connected board as the preflop raiser is a costly case.',
-          'Rivers are less forgiving, because value to bluff ratios matter more there. Errors also scale with the pot. So deep stacks and 3bet pots punish sloppy shortcuts more.',
-        ],
+        board: '7h6h5c',
+        caption:
+          'Simple rules lose more when the full strategy splits the range sharply. Range betting small on a low connected board like this one is a costly case for the preflop raiser. Rivers are less forgiving because value to bluff ratios matter more there. Errors also scale with the pot. So deep stacks and 3bet pots punish shortcuts more.',
         evidence: 'solver',
       },
       {
@@ -468,12 +487,18 @@ export const THEORY_LESSONS: LessonContent[] = [
         evidence: 'math',
       },
       {
-        kind: 'text',
+        kind: 'visual',
         title: 'Not all flips are equal',
-        body: [
-          'A pair against two overcards is a small favorite. It has **55.6%** against offsuit AK. It has only **52.3%** when AK is suited, because of AK’s flush chances.',
-          'AK against a small pair is the same matchup from the other side. A♠K♦ has **47.0%** against 2♣2♥.',
-        ],
+        art: {
+          kind: 'bars',
+          unit: '%',
+          bars: [
+            { label: '8♠8♥ vs A♦K♣', value: 55.6, tone: 'green' },
+            { label: '8♠8♥ vs A♦K♦', value: 52.3, tone: 'green' },
+            { label: 'A♠K♦ vs 2♣2♥', value: 47 },
+          ],
+        },
+        caption: 'A pair against two overcards is a small favorite. Suited AK cuts the edge with its flush chances. AK against a small pair is the same matchup from the other side.',
         evidence: 'math',
       },
       {
@@ -491,13 +516,11 @@ export const THEORY_LESSONS: LessonContent[] = [
         evidence: 'math',
       },
       {
-        kind: 'text',
+        kind: 'hand',
         title: 'Why domination hurts',
-        body: [
-          'When two hands share a card, that card helps neither. AQ mostly needs a queen to win. So AK holds **74.0%**, more than AK against a lower pair or two lower cards.',
-          'This is why hands like AQ and KJ do badly calling large raises. The hands that keep going often hold the same high card with a better kicker.',
-        ],
-        evidence: 'math',
+        cards: 'AhQc',
+        caption:
+          'Against A♠K♦ both hands hold an ace, so it helps neither. This AQ mostly needs a queen to win. So AK holds **74.0%**. Hands like AQ and KJ do badly calling large raises. The hands that keep going often hold the same high card with a better kicker.',
       },
       {
         kind: 'table',

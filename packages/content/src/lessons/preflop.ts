@@ -302,14 +302,21 @@ export const PREFLOP_LESSONS: LessonContent[] = [
         evidence: 'solver',
       },
       {
-        kind: 'text',
+        kind: 'visual',
         title: 'Where the defending range stops',
-        body: [
-          'Raw equity does not set the bottom of the calling range. How much equity a hand realizes does.',
-          'T6o has about **36%** against this button range. 93o has about **32%**. Both clear the 27% price, and both fold.',
-          'They flop few strong hands or good draws. Out of position, they get pushed off their equity.',
-          '42s and 64o both have about **34%**. The chart calls 42s and folds 64o. Flushes and draws let the suited hand keep its equity.',
-        ],
+        art: {
+          kind: 'bars',
+          unit: '%',
+          bars: [
+            { label: 'Price', value: 27.3 },
+            { label: 'T6o folds', value: 36, tone: 'gray' },
+            { label: '93o folds', value: 32, tone: 'gray' },
+            { label: '64o folds', value: 34, tone: 'gray' },
+            { label: '42s calls', value: 34, tone: 'green' },
+          ],
+        },
+        caption:
+          'Each hand’s bar is its raw equity against this button range, rounded. All four clear the 27.3% price. Only 42s calls. Realization sets the bottom of the range, not raw equity. Offsuit hands flop few strong hands or draws. Out of position they get pushed off their equity.',
         evidence: 'solver',
       },
       {

@@ -22,14 +22,19 @@ export const POSTFLOP_READING_LESSONS: LessonContent[] = [
         body: 'You will rarely know villain’s exact hand. You can know the hands they could have. Each action keeps some of those hands and drops others. By the river, the range is often small enough to count.',
       },
       {
-        kind: 'text',
+        kind: 'visual',
         title: 'Four steps',
-        body: [
-          '**Start wide.** Write down the hands villain plays from that seat.',
-          '**Remove what you can see.** Your cards and the board cut combos from that range.',
-          '**Keep what fits.** After each action, keep only the hands that would take it.',
-          '**Count.** On the river, count the hands that beat you and the bluffs. Then compare with your price.',
-        ],
+        art: {
+          kind: 'tree',
+          root: 'Read villain’s range',
+          branches: [
+            { label: '1. Start wide', value: 'Hands from that seat', tone: 'gray' },
+            { label: '2. Remove what you see', value: 'Your cards, the board', tone: 'gray' },
+            { label: '3. Keep what fits', value: 'After each action', tone: 'brass' },
+            { label: '4. Count', value: 'Value against bluffs', tone: 'green' },
+          ],
+        },
+        caption: 'On the river, count the hands that beat you and the bluffs. Then compare with your price.',
       },
       {
         kind: 'hand',

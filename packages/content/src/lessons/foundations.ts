@@ -187,15 +187,17 @@ export const FOUNDATIONS_LESSONS: LessonContent[] = [
         evidence: 'math',
       },
       {
-        kind: 'table',
+        kind: 'visual',
         title: 'A bluff catcher facing a pot bet',
-        columns: ['Villain bluffs', 'EV of calling 100 into 200'],
-        rows: [
-          ['20.0%', '−40'],
-          ['33.3%', '0'],
-          ['50.0%', '+50'],
-        ],
-        note: 'The pot is 100 and villain bets 100. EV = bluff share × 200 − value share × 100. At one bluff for every two value bets, calling and folding are worth the same.',
+        art: {
+          kind: 'bars',
+          bars: [
+            { label: '20% bluffs', value: -40, tone: 'red' },
+            { label: '33.3% bluffs', value: 0, tone: 'gray' },
+            { label: '50% bluffs', value: 50, tone: 'green' },
+          ],
+        },
+        caption: 'Each bar is the EV of calling a pot bet of 100. A call wins 200 against a bluff and loses 100 against value. At **33.3%** bluffs, calling and folding are worth the same.',
         evidence: 'math',
       },
       {
@@ -276,11 +278,18 @@ export const FOUNDATIONS_LESSONS: LessonContent[] = [
         evidence: 'math',
       },
       {
-        kind: 'callout',
-        tone: 'theory',
+        kind: 'visual',
         title: 'Price one card at a time',
-        body:
-          'The flop column assumes you see both the turn and the river. Facing a flop bet, you usually pay to see only the turn. You may face another bet after that. So price a flop call with the one card number.',
+        art: {
+          kind: 'bars',
+          unit: '%',
+          bars: [
+            { label: 'Turn only', value: 19.1, tone: 'green' },
+            { label: 'Turn and river', value: 35, tone: 'gray' },
+          ],
+        },
+        caption: 'A flush draw hits the turn **19.1%** of the time. The 35.0% assumes you see the river too. A flop bet usually buys only the turn. So price a flop call with the one card number.',
+        evidence: 'math',
       },
       {
         kind: 'callout',
@@ -359,13 +368,19 @@ export const FOUNDATIONS_LESSONS: LessonContent[] = [
         evidence: 'math',
       },
       {
-        kind: 'text',
+        kind: 'visual',
         title: 'What makes implied odds real',
-        body: [
-          'Deep stacks give you room to win more later. A disguised draw gets paid when it hits.',
-          'Position helps too. You can size the river bet after you see what villain does.',
-          'An obvious draw is worth much less than the formula suggests. When it completes, a careful opponent stops paying.',
-        ],
+        art: {
+          kind: 'tree',
+          root: 'Your draw hits',
+          branches: [
+            { label: 'Deep stacks', value: 'Room to win more', tone: 'green' },
+            { label: 'A disguised draw', value: 'Gets paid', tone: 'green' },
+            { label: 'Position', value: 'Size the river last', tone: 'green' },
+            { label: 'An obvious draw', value: 'They stop paying', tone: 'red' },
+          ],
+        },
+        caption: 'Implied odds are only as real as the money you collect later. An obvious draw is worth much less than the formula suggests.',
       },
       {
         kind: 'text',
@@ -439,6 +454,21 @@ export const FOUNDATIONS_LESSONS: LessonContent[] = [
       },
       {
         kind: 'visual',
+        title: 'One half pot bet, three numbers',
+        art: {
+          kind: 'bars',
+          unit: '%',
+          bars: [
+            { label: 'Alpha', value: 33.3, tone: 'red' },
+            { label: 'MDF', value: 66.7, tone: 'green' },
+            { label: 'Bluff share', value: 25 },
+          ],
+        },
+        caption: 'Bet 50 into 100. A pure bluff must work **33.3%** of the time. The defender continues with **66.7%**. A balanced betting range holds **25%** bluffs.',
+        evidence: 'math',
+      },
+      {
+        kind: 'visual',
         title: 'Bigger bets, less defense',
         art: {
           kind: 'curve',
@@ -477,13 +507,11 @@ export const FOUNDATIONS_LESSONS: LessonContent[] = [
         evidence: 'math',
       },
       {
-        kind: 'text',
+        kind: 'visual',
         title: 'Where MDF applies, and where it does not',
-        body: [
-          'MDF is cleanest on the river against a polarized range. There, bluffs have no equity.',
-          'On the flop and turn, bets with draws are not pure bluffs. The defender’s range may also be too weak to defend that much. Equilibrium strategies often fold more than MDF on earlier streets. This happens most out of position.',
-          'MDF also ignores what the bettor actually holds. When the betting range is mostly value, defending to MDF just pays it off.',
-        ],
+        art: { kind: 'streets', active: 'river' },
+        caption:
+          'MDF is cleanest on the river against a polarized range. There bluffs have no equity. Earlier bets with draws are not pure bluffs. Equilibrium strategies often fold more than MDF on the flop and turn, most of all out of position. MDF also ignores what the bettor holds. Against mostly value, defending to MDF just pays it off.',
         evidence: 'solver',
       },
       {
@@ -537,16 +565,18 @@ export const FOUNDATIONS_LESSONS: LessonContent[] = [
         body: 'Counting combos tells you how often villain holds each hand. The cards you can see change the count.',
       },
       {
-        kind: 'table',
+        kind: 'visual',
         title: 'Combos per hand',
-        columns: ['Hand type', 'Example', 'Combos'],
-        rows: [
-          ['Pair', 'QQ', '6'],
-          ['Suited', 'AKs', '4'],
-          ['Offsuit', 'AKo', '12'],
-          ['Unpaired, any suits', 'AK', '16'],
-        ],
-        note: 'AK has 16 combos and AA has 6. So AK is about 2.7 times as common as AA.',
+        art: {
+          kind: 'bars',
+          bars: [
+            { label: 'QQ', value: 6, tone: 'gray' },
+            { label: 'AKs', value: 4 },
+            { label: 'AKo', value: 12 },
+            { label: 'AK', value: 16, tone: 'green' },
+          ],
+        },
+        caption: 'A pair has 6 combos. A suited hand has 4 and an offsuit hand has 12. So AK has 16 combos and AA has 6. AK is about 2.7 times as common as AA.',
         evidence: 'math',
       },
       {
@@ -659,11 +689,26 @@ export const FOUNDATIONS_LESSONS: LessonContent[] = [
           'This is the one pot fraction that gets stacks in evenly by the river. In a single raised pot with three streets, it is **116%** of pot each street. In a 3bet pot it is **54%**.',
       },
       {
+        kind: 'visual',
+        title: 'Same fraction, growing bets',
+        art: {
+          kind: 'bars',
+          unit: 'bb',
+          bars: [
+            { label: 'Flop', value: 6.4 },
+            { label: 'Turn', value: 21.1 },
+            { label: 'River', value: 70 },
+          ],
+        },
+        caption: 'In the single raised pot, bet **116%** of the pot on each street. The bets grow from 6.4bb to 70bb. Together they put in all 97.5bb.',
+        evidence: 'math',
+      },
+      {
         kind: 'text',
         title: 'Why geometric matters',
         body: [
-          'A polarized range wants as much money in as possible with its best hands. Betting the same fraction each street does that. Each bet stays the same size relative to the pot.',
-          'This is why equilibrium strategies bet smaller in low SPR pots. It is also why big polarized lines in deep pots often include overbets.',
+          'A polarized range wants as much money in as possible with its best hands. The same fraction each street does that.',
+          'This is why equilibrium strategies bet smaller in low SPR pots. Big polarized lines in deep pots often include overbets.',
         ],
         evidence: 'solver',
       },
@@ -741,13 +786,20 @@ export const FOUNDATIONS_LESSONS: LessonContent[] = [
         evidence: 'solver',
       },
       {
-        kind: 'text',
+        kind: 'visual',
         title: 'Seeing the shape',
-        body: [
-          'An equity graph shows the shape. Sort a range’s hands by equity against the other range and plot them.',
-          'A polarized range is steep at both ends. A condensed range is flat in the middle.',
-        ],
-        evidence: 'solver',
+        art: {
+          kind: 'curve',
+          points: [
+            [0, 10],
+            [50, 10],
+            [50, 90],
+            [100, 90],
+          ],
+          xLabel: 'Hands, weakest first, %',
+          yLabel: 'Equity, %',
+        },
+        caption: 'An equity graph sorts a range’s hands by equity and plots them. This is the polarized range from before. It jumps from 10% to 90%. The condensed range would be a flat line at 50%.',
       },
       {
         kind: 'quiz',
@@ -782,15 +834,19 @@ export const FOUNDATIONS_LESSONS: LessonContent[] = [
         body: 'Range advantage means more equity overall. Nut advantage means more of the very best hands. They drive different decisions.',
       },
       {
-        kind: 'table',
+        kind: 'visual',
         title: 'What each advantage changes',
-        columns: ['Advantage', 'Drives', 'Typical result'],
-        rows: [
-          ['Range', 'How often you bet', 'Bet a wide range, often small'],
-          ['Nut', 'How big you bet', 'Larger bets and overbets'],
-          ['Both', 'Both', 'Bet often, sizes can grow'],
-          ['Neither', 'Checking', 'Check more, defend well'],
-        ],
+        art: {
+          kind: 'tree',
+          root: 'Which advantage do you have?',
+          branches: [
+            { label: 'Range', value: 'Bet often, often small', tone: 'brass' },
+            { label: 'Nut', value: 'Bet bigger, overbet', tone: 'red' },
+            { label: 'Both', value: 'Bet often, sizes grow', tone: 'red' },
+            { label: 'Neither', value: 'Check more', tone: 'green' },
+          ],
+        },
+        caption: 'Range advantage drives how often you bet. Nut advantage drives how big.',
         evidence: 'solver',
       },
       {
@@ -876,20 +932,40 @@ export const FOUNDATIONS_LESSONS: LessonContent[] = [
         evidence: 'solver',
       },
       {
-        kind: 'text',
+        kind: 'visual',
         title: 'Protect your checking range',
-        body: [
-          'If you bet every strong hand, your checks hold only weak and medium hands. Opponents can then bet into your checks with anything.',
-          'Checking some strong hands lets your checking range fight back. Equilibrium strategies do this often. They do it most out of position, and when they bet only a small part of their range.',
-        ],
+        art: {
+          kind: 'tree',
+          root: 'Your flop checks hold',
+          branches: [
+            { label: 'Only weak and medium hands', value: 'Easy to attack', tone: 'red' },
+            { label: 'Some strong hands too', value: 'Can fight back', tone: 'green' },
+          ],
+        },
+        caption: 'If you bet every strong hand, opponents can bet into your checks with anything. Equilibrium strategies check some strong hands. They do it most out of position. They also do it when they bet only a small part of their range.',
         evidence: 'solver',
       },
       {
-        kind: 'text',
+        kind: 'hand',
+        title: 'A pure bluff catcher',
+        cards: 'Kc8d',
+        board: 'Kh9h4c2s7d',
+        caption: 'You have top pair with a weak kicker. The hearts missed. Villain bets big with nuts or air. Your hand beats only the bluffs.',
+      },
+      {
+        kind: 'visual',
         title: 'Facing a polarized bet',
-        body: [
-          'Against nuts or air, your medium hands are pure bluff catchers. Whether they call depends only on how often the bettor bluffs. The bluff share and MDF numbers describe exactly that.',
-        ],
+        art: {
+          kind: 'bars',
+          unit: '%',
+          bars: [
+            { label: '1/3 pot', value: 20 },
+            { label: '1/2 pot', value: 25 },
+            { label: 'Pot', value: 33.3 },
+            { label: '2x pot', value: 40 },
+          ],
+        },
+        caption: 'A bluff catcher calls only when the bettor bluffs often enough. These are the bluff shares that make a call break even. The bigger the bet, the more bluffs it needs.',
         evidence: 'math',
       },
       {
@@ -938,13 +1014,19 @@ export const FOUNDATIONS_LESSONS: LessonContent[] = [
         evidence: 'solver',
       },
       {
-        kind: 'text',
+        kind: 'visual',
         title: 'What drives it',
-        body: [
-          '**Position** matters most. In position, hands can realize more than 100% of their raw equity.',
-          '**Playability** comes next. Suited and connected hands make strong draws and nut hands. Offsuit and dominated hands get pushed off their equity more often.',
-          '**Range strength** matters too. A capped range realizes less because it cannot stand up to pressure.',
-        ],
+        art: {
+          kind: 'tree',
+          root: 'Equity you keep',
+          branches: [
+            { label: 'In position', value: 'Can top 100%', tone: 'green' },
+            { label: 'Suited and connected', value: 'Keeps more', tone: 'green' },
+            { label: 'Offsuit or dominated', value: 'Pushed off', tone: 'red' },
+            { label: 'A capped range', value: 'Keeps less', tone: 'red' },
+          ],
+        },
+        caption: '**Position** matters most. **Playability** comes next because strong draws and nut hands keep betting. A capped range cannot stand up to pressure.',
         evidence: 'solver',
       },
       {

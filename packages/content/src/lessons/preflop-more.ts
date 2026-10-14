@@ -158,14 +158,11 @@ export const PREFLOP_MORE_LESSONS: LessonContent[] = [
         evidence: 'solver',
       },
       {
-        kind: 'text',
+        kind: 'chart',
+        chartId: '9max-100-btn-vs-co',
         title: 'Where calling is allowed',
-        body: [
-          'Felt’s button chart against a cutoff open calls about 11% of hands. It 3bets about 8%.',
-          'In the cutoff and earlier, players behind can squeeze or join. Calling ranges there shrink to a few hands.',
-          'In the small blind, the big blind still acts behind you. You are also out of position, so calling is rare.',
-        ],
-        evidence: 'solver',
+        caption:
+          'Felt’s button chart against a cutoff open calls about 11% of hands. It 3bets about 8%. In the cutoff and earlier, players behind can squeeze or join. So calling ranges there shrink to a few hands. In the small blind, calling is rare.',
       },
       {
         kind: 'table',
@@ -290,14 +287,19 @@ export const PREFLOP_MORE_LESSONS: LessonContent[] = [
         caption: 'The button opened and the big blind still acts behind you. After the flop you act first against both.',
       },
       {
-        kind: 'text',
+        kind: 'visual',
         title: 'Why 3bet or fold',
-        body: [
-          'A call pays a worse price than the big blind gets. It also plays out of position against the opener.',
-          'A call invites the big blind in too. The big blind can squeeze, or call cheaply and make the pot multiway.',
-          'A 3bet takes the initiative and often wins the pot at once. It usually folds the big blind out too.',
-          'Solver strategies with rake keep at most a small calling range here.',
-        ],
+        art: {
+          kind: 'tree',
+          root: 'Small blind facing an open',
+          branches: [
+            { label: '3bet', value: 'Often wins at once', tone: 'purple' },
+            { label: 'Call', value: 'Worse price, BB behind', tone: 'green' },
+            { label: 'Fold', value: 'Most hands', tone: 'gray' },
+          ],
+        },
+        caption:
+          'A call pays a worse price than the big blind gets. It plays out of position and invites the big blind to squeeze or join. A 3bet takes the initiative and usually folds the big blind out too. Solver strategies with rake keep at most a small calling range here.',
         evidence: 'solver',
       },
       {
@@ -393,12 +395,24 @@ export const PREFLOP_MORE_LESSONS: LessonContent[] = [
         example: 'In the big blind you face a pot of **6.5bb**. After an open alone it would be 4bb. A squeeze that folds both players wins all of it.',
       },
       {
-        kind: 'text',
+        kind: 'visual',
+        title: 'Dead money and a capped caller',
+        art: { kind: 'table', seats: 9, button: 'BTN', hero: 'BB', highlight: ['CO', 'BTN'], note: '6.5bb in the pot' },
+        caption: 'The cutoff opened and the button called. In the big blind you face **6.5bb** of dead money. The caller’s range is capped.',
+      },
+      {
+        kind: 'visual',
         title: 'The capped caller',
-        body: [
-          'A player who flats an open would usually 3bet their best hands. What is left is medium pairs and suited hands. Most of it folds to a squeeze.',
-          'The opener is caught in the middle. Even if it calls, the caller still acts behind it. So the opener continues tighter than against a plain 3bet.',
-        ],
+        art: {
+          kind: 'tree',
+          root: 'You squeeze',
+          branches: [
+            { label: 'The caller', value: 'Capped, mostly folds', tone: 'gray' },
+            { label: 'The opener', value: 'Caught in the middle', tone: 'red' },
+          ],
+        },
+        caption:
+          'A player who flats would usually 3bet their best hands. What is left is medium pairs and suited hands. Even if the opener calls, the caller still acts behind it. So the opener continues tighter than against a plain 3bet.',
         evidence: 'solver',
       },
       {
@@ -413,14 +427,18 @@ export const PREFLOP_MORE_LESSONS: LessonContent[] = [
         evidence: 'solver',
       },
       {
-        kind: 'table',
+        kind: 'visual',
         title: 'Folds a pure bluff needs',
-        columns: ['Play', 'Risk', 'Pot', 'Folds'],
-        rows: [
-          ['BB 3bets to 11 vs BTN', '10bb', '4bb', '71.4%'],
-          ['BB squeezes to 13 vs CO and BTN', '12bb', '6.5bb', '64.9%'],
-        ],
-        note: 'Zero equity when called. Folds is how often everyone must fold. The extra dead money pays for the bigger size.',
+        art: {
+          kind: 'bars',
+          unit: '%',
+          bars: [
+            { label: '3bet to 11bb', value: 71.4, tone: 'gray' },
+            { label: 'Squeeze to 13bb', value: 64.9 },
+          ],
+        },
+        caption:
+          'A big blind 3bet to 11bb risks 10bb to win 4bb. A squeeze to 13bb risks 12bb to win 6.5bb. With zero equity when called, everyone must fold this often. The extra dead money pays for the bigger size.',
         evidence: 'math',
       },
       {
@@ -462,12 +480,6 @@ export const PREFLOP_MORE_LESSONS: LessonContent[] = [
         explain: 'Risking 12bb to win 6.5bb needs 64.9% folds. Risking 10bb to win 4bb needs 71.4%. A capped caller does fold often, but that changes how often you win. It does not change the folds you need.',
       },
       {
-        kind: 'visual',
-        title: 'Dead money and a capped caller',
-        art: { kind: 'table', seats: 9, button: 'BTN', hero: 'BB', highlight: ['CO', 'BTN'], note: '6.5bb in the pot' },
-        caption: 'The cutoff opened and the button called. In the big blind you face **6.5bb** of dead money. The caller’s range is capped.',
-      },
-      {
         kind: 'takeaway',
         points: [
           'An open plus a call means more dead money and a capped caller.',
@@ -500,14 +512,18 @@ export const PREFLOP_MORE_LESSONS: LessonContent[] = [
         evidence: 'math',
       },
       {
-        kind: 'text',
+        kind: 'visual',
         title: 'In position vs out of position',
-        body: [
-          'In position you realize more of your equity. So calling is the main way to continue.',
-          'A 3bettor out of position sizes up, which worsens your price. Position makes up for much of it.',
-          'Out of position, the price is often better because the 3bettor sized small. But you realize less.',
-          'Hands that need to realize equity lose value, like small pairs and weak suited connectors. So the strategy leans more on folding and 4betting.',
-        ],
+        art: {
+          kind: 'tree',
+          root: 'Your open gets 3bet',
+          branches: [
+            { label: 'In position', value: 'Call more', tone: 'green' },
+            { label: 'Out of position', value: 'Fold and 4bet more', tone: 'purple' },
+          ],
+        },
+        caption:
+          'In position you face bigger 3bets but realize more of your equity. Out of position the price is often better, but you realize less. Small pairs and weak suited connectors lose the most value there.',
         evidence: 'solver',
       },
       {
@@ -607,13 +623,18 @@ export const PREFLOP_MORE_LESSONS: LessonContent[] = [
         body: 'At 100bb, a 4bet commits a large share of the stack. Ranges get narrow and blockers matter a lot. The 5bet is all in.',
       },
       {
-        kind: 'text',
+        kind: 'visual',
         title: 'What 4bets',
-        body: [
-          'For value, 4bet mostly QQ+ and AK. Against wide 3bettors, more hands join.',
-          'Against tight 3bettors, even QQ and AK often prefer to call.',
-          'For bluffs, use mostly suited aces like A5s and A4s. They make the 3bettor’s best hands less likely. They also keep equity when called.',
-        ],
+        art: {
+          kind: 'tree',
+          root: 'Your 4bet range',
+          branches: [
+            { label: 'Value', value: 'QQ+ and AK', tone: 'purple' },
+            { label: 'Bluffs', value: 'A5s, A4s', tone: 'purple' },
+          ],
+        },
+        caption:
+          'Against wide 3bettors, more value hands join. Against tight ones, even QQ and AK often prefer to call. Suited aces make the 3bettor’s best hands less likely. They also keep equity when called.',
         evidence: 'solver',
       },
       {
@@ -630,13 +651,19 @@ export const PREFLOP_MORE_LESSONS: LessonContent[] = [
         evidence: 'math',
       },
       {
-        kind: 'text',
+        kind: 'visual',
         title: 'Why the ace, not the king',
-        body: [
-          'A5s and K5s remove the same 7 combos of QQ+ and AK. But the ace halves AA, the hand that never folds. The ace also plays better when called.',
-          'A♠5♠ has about **30%** equity against QQ+ and AK. K♠5♠ has about **25%**.',
-          'A♠Q♦ has only about **24%**. AK dominates it, and AA and QQ crush it.',
-        ],
+        art: {
+          kind: 'bars',
+          unit: '%',
+          bars: [
+            { label: 'A♠5♠', value: 30, tone: 'green' },
+            { label: 'K♠5♠', value: 24, tone: 'gray' },
+            { label: 'A♠Q♦', value: 24, tone: 'gray' },
+          ],
+        },
+        caption:
+          'The bars show each hand’s equity against QQ+ and AK, rounded. A5s and K5s remove the same 7 combos. But the ace halves AA, the hand that never folds. A♠Q♦ does no better because AK dominates it.',
         evidence: 'math',
       },
       {
@@ -704,7 +731,7 @@ export const PREFLOP_MORE_LESSONS: LessonContent[] = [
         question: 'Why is A5s a better 4bet bluff than K5s, though both remove 7 combos of QQ+ and AK?',
         choices: ['A5s is strong enough to call a shove', 'The ace halves AA and plays better when called', 'K5s blocks fewer of the hands that call'],
         answer: 1,
-        explain: 'A5s cuts AA from 6 combos to 3. It has about 30% against QQ+ and AK, against about 25% for K5s. It still folds to a shove, since it needs 37.3% and has about 29%.',
+        explain: 'A5s cuts AA from 6 combos to 3. It has about 30% against QQ+ and AK, against about 24% for K5s. It still folds to a shove, since it needs 37.3% and has about 29%.',
       },
       {
         kind: 'takeaway',
