@@ -4,18 +4,21 @@ The full lesson map lives in [`packages/content/src/curriculum.ts`](../packages/
 
 ## Tracks
 
-0. **Poker basics**: the rules and a first strategy, for anyone who has never played. A last topic covers playing for money: stakes and buy ins, a first visit to a card room and a first bankroll. Free. The test is whether someone who knows nothing can follow it. The placement quiz skips the rules and first strategy for players who already know the game. Playing for money is practical knowledge, not a skill check. So placement leaves it out.
+0. **Poker basics**: the rules (including all in and side pots) and a first strategy (including reading the board for the nuts), for anyone who has never played. A last topic covers playing for money: stakes and buy ins, a first visit to a card room and a first bankroll. Free. The test is whether someone who knows nothing can follow it. The placement quiz skips the rules and first strategy for players who already know the game. Playing for money is practical knowledge, not a skill check. So placement leaves it out.
 1. **Foundations**: poker math and range thinking. Prerequisite for everything after it.
 2. **Preflop GTO**: opening, defending, 3bet and 4bet pots, blind vs blind, stack depth.
-3. **Postflop GTO**: textures, c-betting, defending, check raising, turn and river play, multiway.
-4. **Exploitation**: profiling, node locking, adjustments by archetype, tells.
-5. **Mental game and bankroll**: tilt, variance, bankroll, study habits.
+3. **Postflop GTO**: textures, c-betting, defending, check raising, turn and river play, showdown value and pot control, multiway.
+4. **Exploitation**: profiling, node locking, adjustments by archetype, tells. The tells topic stays grounded: a poker face is mostly consistency, and a tell only moves a decision that is already close.
+5. **Mental game and bankroll**: tilt, variance, bankroll, stop rules, study habits. Knowing when to stop also names the signs that poker has become a problem, and points the player to someone they trust or a professional.
+6. **Win rate, rake and variance**: the math home for results. Win rates (bb/100, per hour in bb and money, what rake and tips cost, choosing a table), rake (how rooms take it, what it costs in bb/100, how it changes strategy) and variance (SD, sample size, downswings, risk of ruin, luck and skill). It sits right after Mental game and goes deeper than its short variance and bankroll lessons, with the same formulas. Every number uses the app's own win rate model (`winrate.ts`, `variance.ts`: presets, 27 hands an hour and SD 120 live, 75 and SD 90 online) and is recomputed in `results.test.ts`. Rake rules are arithmetic. Pot sizes, tips, pace, SD and the skill edge are labelled as assumptions or as the model. Variance pictures use the `paths` illustration: seeded sample results of players who share one true win rate, with the 95% band, always labelled as simulated. Win rates is the free topic.
 
 Suggested order: Poker basics for new players, then Foundations math, then Preflop RFI and BB defense in parallel with Foundations ranges, then Postflop, with Exploitation and Mental game woven in once the GTO baseline is solid.
 
+The Tournaments track covers antes, push or fold, reshoves, ICM, the bubble and final tables, then two formats: bounty events (the bounty priced as part of the pot, a labelled chip model) and satellites (ICM at its most extreme, since every seat pays the same).
+
 ## Where lessons live
 
-Lesson content is in [`packages/content/src/lessons/`](../packages/content/src/lessons/), one file per track, keyed `track/module/lesson` to match the curriculum. Step kinds: `intro`, `text`, `formula`, `table`, `chart`, `hand`, `board`, `visual` (a drawn illustration: ring, bars, table, streets, ladder, chips, tree, curve, cards or chart), `callout` (tip, exploit or theory), `quiz` (with optional cards, board and card faces per choice) and `takeaway`. Covers use the same illustrations. Each lesson is `core` or `advanced`.
+Lesson content is in [`packages/content/src/lessons/`](../packages/content/src/lessons/), one file per track, keyed `track/module/lesson` to match the curriculum. Lessons added later to fill topic gaps live in `gaps-*.ts` files, appended to the end of their topic. Step kinds: `intro`, `text`, `formula`, `table`, `chart`, `hand`, `board`, `visual` (a drawn illustration: ring, bars, table, streets, ladder, chips, tree, curve, paths, cards or chart), `callout` (tip, exploit or theory), `quiz` (with optional cards, board and card faces per choice) and `takeaway`. Covers use the same illustrations. Each lesson is `core` or `advanced`.
 
 ## Accuracy policy
 

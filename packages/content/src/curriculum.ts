@@ -48,6 +48,7 @@ export const CURRICULUM: Track[] = [
           lesson('hand-flow', 'How a hand plays out', ['concept']),
           lesson('actions', 'Your options on your turn', ['concept']),
           lesson('table-rules', 'Live table basics', ['concept']),
+          lesson('side-pots', 'All in and side pots', ['concept', 'math']),
         ],
       },
       {
@@ -59,6 +60,7 @@ export const CURRICULUM: Track[] = [
           lesson('starting-hands', 'Starting hands', ['concept']),
           lesson('ranges', 'What a range is', ['concept']),
           lesson('odds', 'Odds in plain words', ['math']),
+          lesson('the-nuts', 'Reading the board: the nuts', ['concept']),
         ],
       },
       {
@@ -213,6 +215,7 @@ export const CURRICULUM: Track[] = [
           lesson('barreling', 'Double and triple barrels', ['spot-action', 'frequency']),
           lesson('bluff-selection', 'Choosing bluffs with blockers', ['spot-action', 'math']),
           lesson('bluff-catching', 'Bluff catching on the river', ['spot-action', 'math']),
+          lesson('pot-control', 'Showdown value and pot control', ['spot-action', 'concept']),
         ],
       },
       {
@@ -275,6 +278,8 @@ export const CURRICULUM: Track[] = [
           lesson('bet-patterns', 'Sizing and timing tells', ['concept']),
           lesson('physical', 'Physical live tells and their reliability', ['concept']),
           lesson('own-image', 'Managing your own image and tells', ['concept']),
+          lesson('poker-face', 'Your poker face', ['concept']),
+          lesson('using-tells', 'How much to trust a tell', ['concept', 'math']),
         ],
       },
     ],
@@ -291,6 +296,7 @@ export const CURRICULUM: Track[] = [
           lesson('tilt', 'Recognizing and stopping tilt', ['concept']),
           lesson('variance', 'Variance, downswings and sample size', ['concept', 'math']),
           lesson('bankroll', 'Bankroll management and moving up', ['concept', 'math']),
+          lesson('stop-rules', 'Knowing when to stop', ['concept']),
         ],
       },
       {
@@ -299,6 +305,43 @@ export const CURRICULUM: Track[] = [
         lessons: [
           lesson('study-plan', 'A study routine that sticks', ['concept']),
           lesson('hand-review', 'Reviewing your own hands', ['concept']),
+        ],
+      },
+    ],
+  },
+  {
+    id: 'results',
+    title: 'Win rate, rake and variance',
+    summary: 'What you win per hour, what the game costs and how much it swings.',
+    modules: [
+      {
+        id: 'win-rate',
+        title: 'Win rates',
+        lessons: [
+          lesson('bb-per-100', 'What bb/100 means', ['concept', 'math']),
+          lesson('per-hour', 'Win rate per hour', ['math']),
+          lesson('true-cost', 'What the game costs you', ['concept', 'math']),
+          lesson('table-selection', 'Choosing a good table', ['concept']),
+        ],
+      },
+      {
+        id: 'rake',
+        title: 'Rake',
+        lessons: [
+          lesson('how-rake-works', 'How rooms take rake', ['concept', 'math']),
+          lesson('rake-cost', 'What rake costs you', ['math']),
+          lesson('rake-strategy', 'Playing a raked game', ['concept']),
+        ],
+      },
+      {
+        id: 'variance',
+        title: 'Variance',
+        lessons: [
+          lesson('standard-deviation', 'How much results swing', ['concept', 'math']),
+          lesson('sample-size', 'How many hands you need', ['math']),
+          lesson('downswings', 'Downswings', ['concept', 'math']),
+          lesson('risk-of-ruin', 'Risk of ruin', ['math']),
+          lesson('luck-vs-skill', 'Luck and skill', ['concept', 'math']),
         ],
       },
     ],
@@ -318,6 +361,8 @@ export const CURRICULUM: Track[] = [
           lesson('icm', 'ICM: why chips are not money', ['concept', 'math']),
           lesson('bubble', 'The bubble and pay jumps', ['concept', 'math']),
           lesson('final-table', 'Final tables', ['concept', 'math']),
+          lesson('bounties', 'Bounty tournaments', ['concept', 'math']),
+          lesson('satellites', 'Satellites', ['concept', 'math']),
         ],
       },
     ],

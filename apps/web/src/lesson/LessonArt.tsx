@@ -1,5 +1,5 @@
 import type { ArtTone, LessonArt as Art } from '@felt/content';
-import { actionFrequencies, type Card, gridHandClass, parseCards, positionsFor, rankOf, suitOf } from '@felt/core';
+import { actionFrequencies, type Card, gridHandClass, parseCards, positionsFor, rankOf, simulateResults, suitOf } from '@felt/core';
 import type { CSSProperties } from 'react';
 import { actionColor, sortActions } from '../components/actionColors';
 import { PlayingCard } from '../components/PlayingCard';
@@ -58,6 +58,8 @@ function ArtBody({ art, size }: { art: Art; size: ArtSize }) {
       return size === 'step' ? <TreeStep root={art.root} branches={art.branches} /> : <TreeArt root={art.root} branches={art.branches} />;
     case 'curve':
       return <CurveArt {...art} cover={size !== 'step'} />;
+    case 'paths':
+      return <PathsArt {...art} cover={size !== 'step'} />;
   }
 }
 
@@ -202,6 +204,16 @@ export function describeArt(art: Art): string {
       const range = from && to ? ` It goes from ${fy(from[1])} at ${fx(from[0])} to ${fy(to[1])} at ${fx(to[0])}.` : '';
       const mark = art.mark ? ` Marked: ${fy(art.mark[1])} at ${fx(art.mark[0])}.` : '';
       return `Line chart of ${y.title.toLowerCase()} against ${x.title.toLowerCase()}.${range}${mark}`;
+    }
+    case 'paths': {
+      const sim = simulateResults(art);
+      const k = pathsScale(art.unit);
+      const unit = art.unit === 'buy ins' ? ' buy ins' : 'bb';
+      const ends = sim.paths.map((p) => p[p.length - 1] * k).sort((a, b) => a - b);
+      const behind = ends.filter((e) => e < 0).length;
+      const last = sim.hands.length - 1;
+      const spread = ends.length ? ` Final results run from ${formatNumber(ends[0], true)}${unit} to ${formatNumber(ends[ends.length - 1], true)}${unit}. ${behind} of ${ends.length} end behind.` : '';
+      return `Simulated from the model: ${ends.length} players who all have a true win rate of ${formatNumber(art.winRate)}bb/100 and SD ${formatNumber(art.sd100)}bb/100, over ${art.hands.toLocaleString('en-US')} hands.${spread} 95% of results land between ${formatNumber(sim.low[last] * k, true)}${unit} and ${formatNumber(sim.high[last] * k, true)}${unit}. The dashed line is the expected result.`;
     }
   }
 }
@@ -775,6 +787,98 @@ function CurveArt({ points, xLabel, yLabel, mark, cover }: { points: [number, nu
           </text>
         </g>
       )}
+    </svg>
+  );
+}
+
+/* Paths ------------------------------------------------------------------- */
+
+/** Paths are simulated in big blinds; a buy in is 100bb. */
+function pathsScale(unit?: 'bb' | 'buy ins'): number {
+  return unit === 'buy ins' ? 1 / 100 : 1;
+}
+
+const PAD_PATHS = { l: 46, r: 14, t: 30, b: 52 };
+
+/**
+ * Running results of simulated players who share one true win rate, with the
+ * band where 95% of results land and the expected result as a dashed line.
+ * Paths that end behind are drawn in red. The drawing says it is simulated.
+ */
+function PathsArt({
+  winRate,
+  sd100,
+  hands,
+  paths,
+  seed,
+  unit,
+  cover,
+}: {
+  winRate: number;
+  sd100: number;
+  hands: number;
+  paths: number;
+  seed: number;
+  unit?: 'bb' | 'buy ins';
+  cover: boolean;
+}) {
+  const sim = simulateResults({ winRate, sd100, hands, paths, seed });
+  if (sim.hands.length < 2 || !(hands > 0)) return null;
+  const PAD = cover ? PAD_COVER : PAD_PATHS;
+  const cw = cover ? CW : STEP_W;
+  const ch = cover ? CH : STEP_H;
+  const k = pathsScale(unit);
+  const all = [...sim.paths.flat(), ...sim.low, ...sim.high, 0].map((v) => v * k);
+  const ystep = niceStep(Math.max(...all) - Math.min(...all));
+  const y0 = Math.floor(Math.min(...all) / ystep) * ystep;
+  const y1 = Math.ceil(Math.max(...all) / ystep) * ystep || ystep;
+  const x1 = hands;
+  const sx = (x: number) => PAD.l + (x / x1) * (cw - PAD.l - PAD.r);
+  const sy = (y: number) => ch - PAD.b - ((y * k - y0) / (y1 - y0)) * (ch - PAD.t - PAD.b);
+  const line = (ys: number[]) => ys.map((y, i) => `${i ? 'L' : 'M'}${sx(sim.hands[i]).toFixed(1)} ${sy(y).toFixed(1)}`).join(' ');
+  const band = `${line(sim.high)} ${[...sim.low]
+    .map((y, i) => [y, i] as const)
+    .reverse()
+    .map(([y, i]) => `L${sx(sim.hands[i]).toFixed(1)} ${sy(y).toFixed(1)}`)
+    .join(' ')} Z`;
+  const xt = ticks(0, x1 / 1000, niceStep(x1 / 1000)).map((v) => v * 1000);
+  const yt = ticks(y0, y1, ystep);
+  const tickY = ch - PAD.b + (cover ? 14 : 20);
+  return (
+    <svg className="art-paths-svg" viewBox={`0 0 ${cw} ${ch}`} aria-hidden="true">
+      <path className="paths-band" d={band} />
+      {yt.map((v) => (
+        <g key={`y${v}`}>
+          <line className={v === 0 ? 'curve-zero' : 'curve-grid'} x1={PAD.l} x2={cw - PAD.r} y1={sy(v / k)} y2={sy(v / k)} />
+          <text className="curve-tick" x={PAD.l - 7} y={sy(v / k)} textAnchor="end" dominantBaseline="middle">
+            {formatNumber(v)}
+          </text>
+        </g>
+      ))}
+      {xt.map((v) => (
+        <text key={`x${v}`} className="curve-tick" x={sx(v)} y={tickY} textAnchor="middle">
+          {formatNumber(v / 1000)}
+        </text>
+      ))}
+      <text className="curve-axis" x={PAD.l - 8} y={14}>
+        {unit === 'buy ins' ? 'Result, buy ins' : 'Result, bb'}
+      </text>
+      <text className="curve-axis paths-tag" x={cw - PAD.r} y={14} textAnchor="end">
+        Simulated
+      </text>
+      <text className="curve-axis" x={(PAD.l + cw - PAD.r) / 2} y={ch - (cover ? 6 : 4)} textAnchor="middle">
+        Hands played, thousands
+      </text>
+      {sim.paths.map((p, i) => (
+        <path
+          key={i}
+          className={p[p.length - 1] < 0 ? 'paths-line paths-line-behind' : 'paths-line'}
+          d={line(p)}
+          pathLength="1"
+          style={{ animationDelay: `${120 + i * 70}ms` } as CSSProperties}
+        />
+      ))}
+      <path className="paths-expected" d={line(sim.expected)} />
     </svg>
   );
 }

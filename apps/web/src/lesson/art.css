@@ -1223,6 +1223,77 @@
   animation: art-fade 420ms var(--ease) 950ms backwards;
 }
 
+/* Paths (simulated results) ---------------------------------------------- */
+
+.art-paths-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.cover .art-paths-svg {
+  width: auto;
+  height: 86cqh;
+  max-width: 100%;
+}
+
+.paths-band {
+  fill: color-mix(in srgb, var(--art-accent) 16%, transparent);
+}
+
+.paths-line {
+  fill: none;
+  stroke: var(--art-muted);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0.8;
+}
+
+/* A path that ends behind is drawn in the loss color, so the eye finds it. */
+.paths-line-behind {
+  stroke: var(--red);
+  opacity: 0.9;
+}
+
+.paths-expected {
+  fill: none;
+  stroke: var(--art-accent-text);
+  stroke-width: 2;
+  stroke-dasharray: 5 4;
+}
+
+.paths-tag {
+  fill: var(--art-accent-text);
+}
+
+.art-step .art-paths-svg .curve-tick {
+  font-size: 14px;
+}
+
+.art-step .art-paths-svg .curve-axis {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.cover .art-k-paths :is(.curve-tick, .curve-axis, .curve-grid) {
+  display: none;
+}
+
+.cover .paths-line {
+  stroke-width: 2.4;
+}
+
+:is(.art-anim, .intro-cover .art) .paths-line {
+  stroke-dasharray: 1;
+  animation: art-draw 1100ms var(--ease) backwards;
+}
+
+:is(.art-anim, .intro-cover .art) :is(.paths-band, .paths-expected) {
+  animation: art-fade 600ms var(--ease) backwards;
+}
+
 /* Streets at step size ---------------------------------------------------- */
 
 .art-streets-list {

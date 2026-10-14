@@ -41,7 +41,15 @@ export type LessonArt =
   /** One decision branching into outcomes, like the parts of an EV sum. */
   | { kind: 'tree'; root: string; branches: { label: string; value?: string; tone?: ArtTone }[] }
   /** A simple line, like required equity as the bet grows. Points are [x, y]. */
-  | { kind: 'curve'; points: [number, number][]; xLabel: string; yLabel: string; mark?: [number, number] };
+  | { kind: 'curve'; points: [number, number][]; xLabel: string; yLabel: string; mark?: [number, number] }
+  /**
+   * Running results of `paths` simulated players who share one true win rate
+   * (bb/100) and SD per 100 hands, over `hands` hands, with the band where 95%
+   * of results land. Drawn from `seed` by simulateResults in @felt/core with
+   * its default 100 steps, so tests see the same paths. The picture always
+   * says it is simulated from the model.
+   */
+  | { kind: 'paths'; winRate: number; sd100: number; hands: number; paths: number; seed: number; unit?: 'bb' | 'buy ins' };
 
 export type LessonCover = LessonArt;
 

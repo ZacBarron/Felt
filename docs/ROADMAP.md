@@ -104,6 +104,8 @@ See [SOLVER_DATA.md](SOLVER_DATA.md).
 ## Phase 4: Math and the Spot Lab builder
 
 - [x] Gap lessons: hand reading, semi-bluffs, rake, reshoves, the bubble, final tables, live table basics
+- [x] Second gap pass: side pots, reading the board for the nuts, showdown value and pot control, your poker face, how much to trust a tell, bounty tournaments, satellites, knowing when to stop (every number and hand claim recomputed in `gaps2.test.ts`)
+- [x] Win rate, rake and variance track: 12 lessons on bb/100 and hourly rates, the true cost of rake and tips, table selection, how rake works and what it costs, raked strategy, SD, sample size, downswings, risk of ruin, and luck and skill. New pure helpers in `core/src/variance.ts` and a seeded `paths` illustration. Every number recomputed in `results.test.ts`
 - [x] Picture pass: every lesson has at most 2 text steps in a row, every core lesson at least 2 pictures; hand flow is a street by street walkthrough
 - [x] Mixed answers in hand quizzes (frequencies and splits), graded by mix distance
 - [x] Math facts deck in review: pot odds, MDF, alpha, combos, outs (exact, four choices)

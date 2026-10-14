@@ -1,0 +1,1521 @@
+import type { LessonContent } from './types';
+
+/**
+ * Win rate, rake and variance: the math home for results. Every number comes
+ * from the same model the You page uses (packages/core winrate.ts and
+ * variance.ts): the game presets' rake rules, Felt's default table
+ * assumptions (27 hands an hour and SD 120 bb/100 at live 1/3, 75 hands an
+ * hour and SD 90 online) and the normal model of results. The content test
+ * results.test.ts recomputes each one. Rake rules are arithmetic; pot sizes,
+ * tips, hands per hour, SD and the skill edge are labelled as assumptions or
+ * as the model, and simulated pictures say they are simulated.
+ */
+export const RESULTS_LESSONS: LessonContent[] = [
+  /* Win rates ------------------------------------------------------------ */
+  {
+    key: 'results/win-rate/bb-per-100',
+    level: 'core',
+    minutes: 5,
+    cover: {
+      kind: 'tree',
+      root: 'Won 300bb in 2,000 hands',
+      branches: [
+        { label: 'Per hand', value: '0.15bb', tone: 'gray' },
+        { label: 'Per 100 hands', value: '15 bb/100', tone: 'brass' },
+      ],
+    },
+    steps: [
+      {
+        kind: 'intro',
+        title: 'Your win rate in one number',
+        body: 'Your **win rate** is what you win on average. Felt measures it in **bb/100**, the big blinds you win per 100 hands. It works the same at every stake.',
+      },
+      {
+        kind: 'formula',
+        title: 'Win rate in bb/100',
+        formula: 'bb/100 = bb won ÷ hands × 100',
+        parts: [
+          ['bb won', 'your total result in big blinds'],
+          ['hands', 'the hands you were dealt'],
+        ],
+        example: 'You win 300bb over 2,000 hands. 300 ÷ 2,000 × 100 = **15 bb/100**.',
+      },
+      {
+        kind: 'visual',
+        title: 'From a result to a win rate',
+        art: {
+          kind: 'tree',
+          root: 'Won 300bb in 2,000 hands',
+          branches: [
+            { label: 'Per hand', value: '0.15bb', tone: 'gray' },
+            { label: 'Per 100 hands', value: '15 bb/100', tone: 'brass' },
+          ],
+        },
+        caption: 'A win per hand is a tiny number. So poker players count per 100 hands. The same result reads as 15 bb/100.',
+        evidence: 'math',
+      },
+      {
+        kind: 'text',
+        title: 'Why big blinds and not dollars',
+        body: [
+          'Money depends on the stake. Big blinds do not.',
+          'A win rate of 15 bb/100 is $45 per 100 hands at 1/3. At 2/5 it is $75.',
+          'Counting in big blinds lets you compare your results across stakes.',
+        ],
+        evidence: 'math',
+      },
+      {
+        kind: 'visual',
+        title: 'One win rate, two stakes',
+        art: {
+          kind: 'bars',
+          bars: [
+            { label: 'At 1/3, $ per 100 hands', value: 45, tone: 'brass' },
+            { label: 'At 2/5, $ per 100 hands', value: 75, tone: 'green' },
+          ],
+        },
+        caption: 'Both bars are 15 bb/100. Only the size of the big blind changes. So Felt keeps win rates in big blinds.',
+        evidence: 'math',
+      },
+      {
+        kind: 'text',
+        title: 'Count hands, not sessions',
+        body: [
+          'A win rate needs a hand count. Online sites count hands for you.',
+          'Live, few players count hands. Felt estimates them from your hours. Its model uses 27 hands an hour at a live table.',
+          'Your result already includes the rake. It came out of the pots you won.',
+        ],
+      },
+      {
+        kind: 'visual',
+        title: 'A live session in bb/100',
+        art: {
+          kind: 'tree',
+          root: 'Up $90 at 1/3 in 5 hours',
+          branches: [
+            { label: 'Result in bb', value: '$90 ÷ $3 = 30bb', tone: 'gray' },
+            { label: 'Hands, estimated', value: '5 hours × 27 = 135 hands', tone: 'gray' },
+            { label: 'Win rate', value: '30 ÷ 135 × 100 = 22.2 bb/100', tone: 'brass' },
+          ],
+        },
+        caption: 'The hand count is an estimate from Felt’s model. One session is far too short to show skill. The Variance topic shows why.',
+        evidence: 'math',
+      },
+      {
+        kind: 'callout',
+        tone: 'tip',
+        title: 'Log every session',
+        body: 'Write down every session, the losing ones too. Leaving out bad nights makes your win rate look better than it is.',
+      },
+      {
+        kind: 'quiz',
+        question: 'You win 450bb over 3,000 hands. What is your win rate?',
+        choices: ['0.15 bb/100', '15 bb/100', '6.7 bb/100'],
+        answer: 1,
+        explain: '450 ÷ 3,000 is 0.15bb a hand. Times 100 is 15 bb/100. The 0.15 answer is the win per hand. The 6.7 answer divides the wrong way.',
+      },
+      {
+        kind: 'quiz',
+        question: 'You are up $600 at 2/5 over 4,000 hands. What is your win rate?',
+        choices: ['15 bb/100', '3 bb/100', '7.5 bb/100'],
+        answer: 1,
+        explain: '$600 ÷ $5 is 120bb. Then 120 ÷ 4,000 × 100 = 3 bb/100. The 15 answer counts dollars instead of big blinds. The 7.5 answer divides by the $2 small blind.',
+      },
+      {
+        kind: 'quiz',
+        question: 'Why does Felt measure win rates in big blinds?',
+        choices: ['It lets you compare results across stakes', 'Big blinds leave out the rake', 'Dollars are harder to count'],
+        answer: 0,
+        explain: 'A big blind means the same thing at every stake. Your results include the rake either way.',
+      },
+      {
+        kind: 'takeaway',
+        points: [
+          'bb/100 = bb won ÷ hands × 100.',
+          'Big blinds let you compare stakes.',
+          'Live, hands are estimated from hours. Felt’s model uses 27 an hour.',
+          'Your results already include the rake you paid.',
+        ],
+      },
+    ],
+  },
+  {
+    key: 'results/win-rate/per-hour',
+    level: 'core',
+    minutes: 6,
+    cover: {
+      kind: 'bars',
+      unit: 'bb',
+      bars: [
+        { label: 'Live 10 bb/100, per hour', value: 2.7, tone: 'brass' },
+        { label: 'Online 5 bb/100, per hour', value: 3.75, tone: 'green' },
+      ],
+    },
+    steps: [
+      {
+        kind: 'intro',
+        title: 'From bb/100 to an hourly rate',
+        body: 'bb/100 tells you how well you play. A rate per hour tells you what your time earns. You need both to compare live and online poker.',
+      },
+      {
+        kind: 'formula',
+        title: 'Big blinds per hour',
+        formula: 'bb per hour = bb/100 × hands per hour ÷ 100',
+        parts: [
+          ['bb/100', 'your win rate'],
+          ['hands per hour', 'how fast you are dealt hands'],
+        ],
+        example: 'At 10 bb/100 and 27 hands an hour, 10 × 27 ÷ 100 = **2.7bb an hour**.',
+      },
+      {
+        kind: 'visual',
+        title: 'Hands per hour',
+        art: {
+          kind: 'bars',
+          bars: [
+            { label: 'Live table', value: 27, tone: 'brass' },
+            { label: 'Online, 1 table', value: 75, tone: 'green' },
+          ],
+        },
+        caption: 'These are Felt’s model values. Live dealing is slow. Shuffles and chip counts take time. Online deals almost 3 times as fast.',
+      },
+      {
+        kind: 'visual',
+        title: 'Not the same per hour',
+        art: {
+          kind: 'bars',
+          unit: 'bb',
+          bars: [
+            { label: 'Live 10 bb/100, per hour', value: 2.7, tone: 'brass' },
+            { label: 'Online 5 bb/100, per hour', value: 3.75, tone: 'green' },
+          ],
+        },
+        caption: 'The online player has half the bb/100. Yet they win more big blinds each hour. They see almost 3 times as many hands.',
+        evidence: 'math',
+      },
+      {
+        kind: 'formula',
+        title: 'Money per hour',
+        formula: 'Money per hour = bb per hour × big blind',
+        parts: [['big blind', 'in money, like $3 at 1/3']],
+        example: '2.7bb an hour at 1/3 is 2.7 × $3 = **$8.10 an hour**.',
+      },
+      {
+        kind: 'table',
+        title: 'An hour at 3 games',
+        columns: ['Game', 'Win rate', 'bb per hour', 'Per hour'],
+        rows: [
+          ['Live $1/$3', '10 bb/100', '2.7bb', '$8.10'],
+          ['Live $2/$5', '10 bb/100', '2.7bb', '$13.50'],
+          ['Online $0.50/$1', '5 bb/100', '3.75bb', '$3.75'],
+        ],
+        note: 'Live uses 27 hands an hour. Online uses 75 at one table. These are Felt’s model values. The rest is plain arithmetic.',
+        evidence: 'math',
+      },
+      {
+        kind: 'visual',
+        title: 'More tables, more hands',
+        art: {
+          kind: 'bars',
+          unit: 'bb',
+          bars: [
+            { label: '1 table, per hour', value: 3.75, tone: 'gray' },
+            { label: '2 tables, per hour', value: 7.5, tone: 'brass' },
+            { label: '4 tables, per hour', value: 15, tone: 'green' },
+          ],
+        },
+        caption: 'Online you can play more than 1 table. At 5 bb/100 on each, 4 tables would earn 15bb an hour. Your win rate may drop as you add tables. Check it with your own results.',
+        evidence: 'math',
+      },
+      {
+        kind: 'callout',
+        tone: 'theory',
+        title: 'Why 27 and not 30',
+        body: 'A live table deals about 30 hands an hour while you sit. Breaks and missed hands lower your count. So Felt’s model uses 27. Change it on the You page if your pace differs.',
+      },
+      {
+        kind: 'quiz',
+        question: 'You win 10 bb/100 live at 27 hands an hour. How many big blinds is that per hour?',
+        choices: ['10bb', '27bb', '2.7bb'],
+        answer: 2,
+        explain: '10 × 27 ÷ 100 = 2.7bb an hour. The 10bb answer would need 100 hands an hour.',
+      },
+      {
+        kind: 'quiz',
+        question: 'Live 10 bb/100 at 27 hands an hour, or online 5 bb/100 at 75. Which wins more big blinds per hour?',
+        choices: ['The online player', 'The live player', 'They win the same'],
+        answer: 0,
+        explain: 'Online is 5 × 75 ÷ 100 = 3.75bb an hour. Live is 10 × 27 ÷ 100 = 2.7bb. More hands make up for the lower bb/100.',
+      },
+      {
+        kind: 'quiz',
+        question: 'You win 2.7bb an hour at 2/5. How much money is that per hour?',
+        choices: ['$5.40', '$13.50', '$8.10'],
+        answer: 1,
+        explain: '2.7 × $5 = $13.50. The $5.40 answer uses the $2 small blind. The $8.10 answer is the same rate at 1/3.',
+      },
+      {
+        kind: 'takeaway',
+        points: [
+          'bb per hour = bb/100 × hands per hour ÷ 100.',
+          'Money per hour = bb per hour × big blind.',
+          'Felt’s model uses 27 hands an hour live and 75 online.',
+          'Compare games per hour as well as per 100 hands.',
+        ],
+      },
+    ],
+  },
+  {
+    key: 'results/win-rate/true-cost',
+    level: 'core',
+    minutes: 6,
+    cover: {
+      kind: 'bars',
+      unit: 'bb',
+      bars: [
+        { label: 'Rake per 100 hands', value: 12.9, tone: 'red' },
+        { label: 'Tips per 100 hands', value: 3.0, tone: 'brass' },
+      ],
+    },
+    steps: [
+      {
+        kind: 'intro',
+        title: 'The game costs money',
+        body: 'Before costs poker is a **zero sum game**. What one player wins, the others lose. Then the room takes rake and dealers get tips. So the table as a whole loses money every hour.',
+      },
+      {
+        kind: 'visual',
+        title: 'Where each pot goes',
+        art: {
+          kind: 'tree',
+          root: 'Every pot with a flop',
+          branches: [
+            { label: 'Rake', value: 'to the room', tone: 'red' },
+            { label: 'Tip', value: 'to the dealer, live', tone: 'brass' },
+            { label: 'The rest', value: 'to the winner', tone: 'green' },
+          ],
+        },
+        caption: 'Rake and tips leave the table for good. So the average player loses exactly what the table pays. That part is arithmetic.',
+        evidence: 'math',
+      },
+      {
+        kind: 'visual',
+        title: 'What the average player pays',
+        art: {
+          kind: 'bars',
+          unit: 'bb',
+          bars: [
+            { label: 'Rake per 100 hands', value: 12.9, tone: 'red' },
+            { label: 'Tips per 100 hands', value: 3.0, tone: 'brass' },
+          ],
+        },
+        caption: 'Felt’s live 1/3 model costs each player about 15.9 bb/100. At 27 hands an hour that is about 4.3bb. In money it is about $12.90 an hour.',
+      },
+      {
+        kind: 'table',
+        title: 'What is arithmetic and what is assumed',
+        columns: ['Input', 'Live 1/3', 'Kind'],
+        rows: [
+          ['Rake rule', '10% up to $5, plus $1', 'Your setting'],
+          ['No flop, no drop', 'Yes', 'Your setting'],
+          ['Players', '9', 'Your setting'],
+          ['Hands that see a flop', '80%', 'Assumption'],
+          ['Average pot with a flop', '20bb', 'Assumption'],
+          ['Tip per pot with a flop', '$1', 'Assumption'],
+        ],
+        note: 'Settings feed exact arithmetic. Assumptions are Felt’s starting guesses for the game. Change them on the You page. Pots vary around the average, so Felt averages the rake over a spread of sizes.',
+      },
+      {
+        kind: 'visual',
+        title: 'A winner who still loses',
+        art: {
+          kind: 'tree',
+          root: 'Beats the players by 12 bb/100',
+          branches: [
+            { label: 'Rake', value: '−12.9 bb/100', tone: 'red' },
+            { label: 'Tips', value: '−3.0 bb/100', tone: 'red' },
+            { label: 'Win rate after costs', value: '−3.9 bb/100', tone: 'red' },
+          ],
+        },
+        caption: 'This player beats the other players by 12 bb/100. The costs are bigger, so they lose. The 12 is an example. The costs come from Felt’s live 1/3 model.',
+        evidence: 'math',
+      },
+      {
+        kind: 'text',
+        title: 'Your edge is a model',
+        body: [
+          'Your **edge** is how much you win from the other players before costs. Nobody can measure it exactly.',
+          'The You page estimates it from your Felt Rating. That estimate is a model with stated assumptions. Your logged results take over as they grow.',
+        ],
+      },
+      {
+        kind: 'visual',
+        title: 'Costs by game',
+        art: {
+          kind: 'bars',
+          unit: 'bb',
+          bars: [
+            { label: 'Live 1/3, per 100 hands', value: 15.9, tone: 'red' },
+            { label: 'Live 2/5, per 100 hands', value: 12.3, tone: 'brass' },
+            { label: 'Online 6-max, per 100 hands', value: 5.5, tone: 'green' },
+          ],
+        },
+        caption: 'These are rake plus tips per player in Felt’s model of each preset. The 2/5 cap is smaller in big blinds. Online games have no tips.',
+      },
+      {
+        kind: 'callout',
+        tone: 'theory',
+        title: 'Per hour the gap shrinks',
+        body: 'Online deals almost 3 times as many hands. So 5.5 bb/100 costs about 4.1bb an hour. Live 1/3 costs about 4.3bb an hour.',
+      },
+      {
+        kind: 'quiz',
+        question: 'In Felt’s live 1/3 model, what is the win rate of an average player?',
+        choices: ['About 0 bb/100', 'About −15.9 bb/100', 'About −3.0 bb/100'],
+        answer: 1,
+        explain: 'Before costs the average player breaks even. Then rake and tips take 15.9 bb/100. The −3.0 answer counts only the tips.',
+      },
+      {
+        kind: 'quiz',
+        question: 'You beat the other players by 10 bb/100 at live 1/3. What do you win after costs in Felt’s model?',
+        choices: ['About +10 bb/100', 'About −2.9 bb/100', 'About −5.9 bb/100'],
+        answer: 2,
+        explain: '10 − 12.9 − 3.0 = −5.9 bb/100. The −2.9 answer forgets the tips. Only a bigger edge would win here.',
+      },
+      {
+        kind: 'quiz',
+        question: 'Which input to the cost estimate is an assumption?',
+        choices: ['The average pot size', 'Your room’s rake rule', 'The number of players at the table'],
+        answer: 0,
+        explain: 'The rake rule and the players are facts about your game. Pot sizes vary with the players. So Felt assumes an average you can change.',
+      },
+      {
+        kind: 'takeaway',
+        points: [
+          'The average player loses exactly the rake and tips.',
+          'In Felt’s live 1/3 model that is about 15.9 bb/100.',
+          'You need an edge bigger than the costs to win.',
+          'Rake rules are arithmetic. Pot sizes are assumptions.',
+        ],
+      },
+    ],
+  },
+  {
+    key: 'results/win-rate/table-selection',
+    level: 'core',
+    minutes: 5,
+    cover: { kind: 'table', seats: 9, hero: 'CO', button: 'BTN', highlight: ['HJ'], note: 'An aggressive player on your right' },
+    steps: [
+      {
+        kind: 'intro',
+        title: 'Your opponents set your win rate',
+        body: 'Your win rate is not only about you. It depends on how much better you play than the table. So choosing where you sit is part of winning.',
+      },
+      {
+        kind: 'visual',
+        title: 'One player, three tables',
+        art: {
+          kind: 'bars',
+          unit: 'bb',
+          bars: [
+            { label: 'Table average 1200', value: 26, tone: 'green' },
+            { label: 'Table average 1350', value: 7.1, tone: 'brass' },
+            { label: 'Table average 1500', value: -14, tone: 'red' },
+          ],
+        },
+        caption: 'This is Felt’s model of the edge before costs in bb/100. The player is rated 1400. Only the table’s average rating changes. The size of the edge rests on assumptions. The pattern is the point.',
+      },
+      {
+        kind: 'visual',
+        title: 'Moving up is not always a raise',
+        art: {
+          kind: 'tree',
+          root: 'A player rated 1400',
+          branches: [
+            { label: 'Live 1/3, table average 1200', value: '+10.1 bb/100 after costs', tone: 'green' },
+            { label: 'Live 2/5, table average 1350', value: '−5.2 bb/100 after costs', tone: 'red' },
+          ],
+        },
+        caption: 'In the model this player wins about $8 an hour at 1/3. At 2/5 the players are better and they lose. The table averages are Felt’s defaults for each stake.',
+      },
+      {
+        kind: 'visual',
+        title: 'Signs of a good table',
+        art: {
+          kind: 'tree',
+          root: 'Look for',
+          branches: [
+            { label: 'Many players see each flop', value: 'Loose calls before the flop', tone: 'green' },
+            { label: 'Big pots with weak hands', value: 'Mistakes after the flop', tone: 'green' },
+            { label: 'Lots of limping', value: 'Passive players', tone: 'green' },
+            { label: 'Few 3bets', value: 'Less pressure on you', tone: 'brass' },
+          ],
+        },
+        caption: 'These are common habits of weak players, not laws. Check them against what you see in your own games.',
+        evidence: 'exploit',
+      },
+      {
+        kind: 'text',
+        title: 'Watch before you sit',
+        body: [
+          'Watch a few hands while you wait for a seat. Count how many players see each flop.',
+          'Notice who plays many hands. Notice who bets big with weak hands. Those players are where your edge comes from.',
+        ],
+        evidence: 'exploit',
+      },
+      {
+        kind: 'visual',
+        title: 'Choose your seat',
+        art: { kind: 'table', seats: 9, hero: 'CO', button: 'BTN', highlight: ['HJ'], note: 'An aggressive player on your right' },
+        caption: 'Try to sit with loose aggressive players on your right. They act before you most of the time. You see their bet before you choose.',
+      },
+      {
+        kind: 'callout',
+        tone: 'tip',
+        title: 'Change tables',
+        body: 'If your table is tough, ask the floor for a table change. A softer table at your stake can beat a tough game above it.',
+      },
+      {
+        kind: 'quiz',
+        question: 'Where do you want a loose aggressive player to sit?',
+        choices: ['On your left', 'On your right', 'It does not matter'],
+        answer: 1,
+        explain: 'On your right they act before you most of the time. You see their bet before you decide. On your left they act after you and can raise you.',
+      },
+      {
+        kind: 'quiz',
+        question: 'In Felt’s model, what sets your edge before costs?',
+        choices: ['Your rating against the table’s average', 'The stake you play', 'How long you play'],
+        answer: 0,
+        explain: 'The model compares your Felt Rating with the table’s average rating. The same player has a big edge at a weak table and none at a strong one.',
+      },
+      {
+        kind: 'quiz',
+        question: 'Which table looks best for you?',
+        choices: ['Many players see each flop and pots get big', 'Most hands end with a raise and no call', 'Players 3bet often and rarely fold'],
+        answer: 0,
+        explain: 'Loose calls and big pots with weak hands are where your edge comes from. Tables full of raises and 3bets are tougher.',
+      },
+      {
+        kind: 'takeaway',
+        points: [
+          'Your win rate depends on the players at your table.',
+          'Look for tables where many players see each flop.',
+          'Seat loose aggressive players on your right.',
+          'A soft game at your stake can beat a tough game above it.',
+        ],
+      },
+    ],
+  },
+
+  /* Rake ----------------------------------------------------------------- */
+  {
+    key: 'results/rake/how-rake-works',
+    level: 'core',
+    minutes: 5,
+    cover: {
+      kind: 'curve',
+      points: [
+        [10, 20],
+        [20, 15],
+        [30, 13.3],
+        [40, 12.5],
+        [50, 12],
+        [60, 10],
+        [80, 7.5],
+        [100, 6],
+        [150, 4],
+        [200, 3],
+      ],
+      xLabel: 'Pot, $',
+      yLabel: 'Rake, % of pot',
+      mark: [20, 15],
+    },
+    steps: [
+      {
+        kind: 'intro',
+        title: 'The room’s share of each pot',
+        body: 'Rake is the fee a room takes from pots. It pays for the dealer and the room. Rooms take it in a few different ways. This lesson shows the common ones.',
+      },
+      {
+        kind: 'visual',
+        title: 'Pot rake',
+        art: {
+          kind: 'tree',
+          root: 'A $60 pot at live $1/$3',
+          branches: [
+            { label: '10% of the pot', value: '$6, cut to the $5 cap', tone: 'gray' },
+            { label: 'Jackpot drop', value: '$1', tone: 'brass' },
+            { label: 'Rake taken', value: '$6', tone: 'red' },
+          ],
+        },
+        caption: 'Most rooms take a **percentage** of the pot up to a **cap**. Many live rooms add a fixed amount for a jackpot. This is Felt’s live $1/$3 preset.',
+        evidence: 'math',
+      },
+      {
+        kind: 'visual',
+        title: 'Small pots pay the biggest share',
+        art: {
+          kind: 'curve',
+          points: [
+            [10, 20],
+            [20, 15],
+            [30, 13.3],
+            [40, 12.5],
+            [50, 12],
+            [60, 10],
+            [80, 7.5],
+            [100, 6],
+            [150, 4],
+            [200, 3],
+          ],
+          xLabel: 'Pot, $',
+          yLabel: 'Rake, % of pot',
+          mark: [20, 15],
+        },
+        caption: 'A $20 pot pays $3, which is 15%. A $200 pot pays $6, which is 3%. The cap and the fixed $1 cause the gap.',
+        evidence: 'math',
+      },
+      {
+        kind: 'text',
+        title: 'No flop, no drop',
+        body: [
+          'In most rooms a pot that ends before the flop pays no rake. This rule is called **no flop, no drop**.',
+          'So a raise that wins the blinds pays nothing. A limped pot that sees a flop pays the full rule.',
+        ],
+        evidence: 'math',
+      },
+      {
+        kind: 'table',
+        title: 'Felt’s presets',
+        columns: ['Game', 'Rule', 'Most a pot pays'],
+        rows: [
+          ['Live $1/$3', '10% up to $5, plus $1', '$6, which is 2bb'],
+          ['Live $2/$5', '10% up to $6, plus $1', '$7, which is 1.4bb'],
+          ['Online $0.25/$0.50', '5% up to $1.50', '$1.50, which is 3bb'],
+        ],
+        note: 'All 3 use no flop, no drop. They are example rules. Set your own room’s rule in your game settings.',
+        evidence: 'math',
+      },
+      {
+        kind: 'visual',
+        title: 'The most a pot pays',
+        art: {
+          kind: 'bars',
+          unit: 'bb',
+          bars: [
+            { label: 'Live $1/$3', value: 2, tone: 'red' },
+            { label: 'Live $2/$5', value: 1.4, tone: 'brass' },
+            { label: 'Online $0.25/$0.50', value: 3, tone: 'green' },
+          ],
+        },
+        caption: 'The online cap is the biggest in big blinds here. But the online rate is half the live rate. So most online pots pay less.',
+        evidence: 'math',
+      },
+      {
+        kind: 'text',
+        title: 'Time collection',
+        body: [
+          'Some rooms do not rake pots. They charge each player a fee every half hour instead. This is called **time collection**.',
+          'The fee does not depend on the pots. A big pot costs nothing extra. A slow table costs more per hand.',
+        ],
+      },
+      {
+        kind: 'visual',
+        title: 'Time collection in bb/100',
+        art: {
+          kind: 'tree',
+          root: 'An example fee at $1/$3',
+          branches: [
+            { label: 'Fee', value: '$6 each half hour', tone: 'gray' },
+            { label: 'Per hour', value: '$12, which is 4bb', tone: 'brass' },
+            { label: 'At 27 hands an hour', value: '14.8 bb/100', tone: 'red' },
+          ],
+        },
+        caption: 'This fee is made up for the example. It costs the same in big pots and small ones. Ask your room what it charges.',
+        evidence: 'math',
+      },
+      {
+        kind: 'callout',
+        tone: 'tip',
+        title: 'Ask how your room rakes',
+        body: 'Rules vary from room to room. Ask for the percentage and the cap. Ask about any extra drop too. Then set them in Felt so its numbers match your game.',
+      },
+      {
+        kind: 'quiz',
+        question: 'The rule is 10% up to $5, plus $1. How much rake does a $40 pot pay?',
+        choices: ['$4', '$5', '$6'],
+        answer: 1,
+        explain: '10% of $40 is $4, under the cap. Add the $1 to get $5. The $4 answer forgets the $1. The $6 answer is the most any pot pays.',
+      },
+      {
+        kind: 'quiz',
+        question: 'The room uses no flop, no drop. You raise and everyone folds. How much rake is taken?',
+        choices: ['Nothing', '10% of the blinds', 'Just the $1 jackpot drop'],
+        answer: 0,
+        explain: 'The pot ended before the flop. So the room takes nothing, not even the jackpot drop.',
+      },
+      {
+        kind: 'quiz',
+        question: 'Online the rule is 5% up to $1.50 at $0.25/$0.50. A 40bb pot sees a flop. How much is the rake?',
+        choices: ['$1, which is 2bb', '$1.50, which is 3bb', '$2, which is 4bb'],
+        answer: 0,
+        explain: '40bb is $20. 5% of $20 is $1, under the $1.50 cap. That is 2bb.',
+      },
+      {
+        kind: 'quiz',
+        question: 'Under the live $1/$3 rule, which pot pays the biggest share in rake?',
+        choices: ['$20', '$60', '$200'],
+        answer: 0,
+        explain: 'A $20 pot pays $3, which is 15%. A $60 pot pays 10%. A $200 pot pays only 3%.',
+      },
+      {
+        kind: 'takeaway',
+        points: [
+          'Most rooms take a percentage of the pot up to a cap.',
+          'Small pots pay the biggest share.',
+          'Under no flop, no drop a pot won before the flop pays nothing.',
+          'Some rooms charge by the half hour instead. Ask your room.',
+        ],
+      },
+    ],
+  },
+  {
+    key: 'results/rake/rake-cost',
+    level: 'core',
+    minutes: 6,
+    cover: {
+      kind: 'bars',
+      unit: 'bb',
+      bars: [
+        { label: 'Live 1/3', value: 12.9, tone: 'red' },
+        { label: 'Live 2/5', value: 9.2, tone: 'brass' },
+        { label: 'Online 6-max', value: 5.5, tone: 'green' },
+      ],
+    },
+    steps: [
+      {
+        kind: 'intro',
+        title: 'Rake in bb/100',
+        body: 'Rake is easy to ignore one pot at a time. Over 100 hands it adds up. Felt turns your room’s rule into bb/100. Then you can set it next to your win rate.',
+      },
+      {
+        kind: 'formula',
+        title: 'Your share of the rake',
+        formula: 'Rake per player = rake per hand × 100 ÷ players',
+        parts: [
+          ['rake per hand', 'what the whole table pays each hand, in bb'],
+          ['players', 'seats dealt in'],
+        ],
+        example: 'Felt’s live 1/3 model pays about 1.16bb a hand. Then 1.16 × 100 ÷ 9 = **12.9 bb/100** for each player.',
+      },
+      {
+        kind: 'visual',
+        title: 'Where 1.16bb a hand comes from',
+        art: {
+          kind: 'tree',
+          root: 'Live 1/3 model, per hand',
+          branches: [
+            { label: '80% see a flop', value: 'Rake about $4.37 on average', tone: 'brass' },
+            { label: '20% end before the flop', value: 'No rake', tone: 'gray' },
+            { label: 'Per hand, whole table', value: 'About 1.16bb', tone: 'red' },
+          ],
+        },
+        caption: 'A pot with a flop averages 20bb, which is $60. The rule would charge $6 on exactly $60. Real pots vary in size. The cap only bites the big ones, so the average is about $4.37. Only 80% of hands pay it. So the table pays about 1.16bb a hand.',
+        evidence: 'math',
+      },
+      {
+        kind: 'visual',
+        title: 'Rake per 100 hands by game',
+        art: {
+          kind: 'bars',
+          unit: 'bb',
+          bars: [
+            { label: 'Live 1/3', value: 12.9, tone: 'red' },
+            { label: 'Live 2/5', value: 9.2, tone: 'brass' },
+            { label: 'Online 6-max', value: 5.5, tone: 'green' },
+          ],
+        },
+        caption: 'Each bar is rake per player in Felt’s model of each preset. Tips are left out. Live games pay far more per hand than online. The small live game pays the most.',
+      },
+      {
+        kind: 'table',
+        title: 'Rake on 4 pots at live $1/$3',
+        columns: ['Pot', 'Rake', 'In bb', 'Share'],
+        rows: [
+          ['10bb, $30', '$4', '1.33bb', '13.3%'],
+          ['20bb, $60', '$6', '2bb', '10%'],
+          ['50bb, $150', '$6', '2bb', '4%'],
+          ['100bb, $300', '$6', '2bb', '2%'],
+        ],
+        note: 'The rule is 10% up to $5, plus $1. Big pots hit the cap. Small pots pay the full 10% plus the $1.',
+        evidence: 'math',
+      },
+      {
+        kind: 'text',
+        title: 'Why small stakes pay more',
+        body: [
+          'The cap is set in money. At $1/$3 the most a pot pays is 2bb. At $2/$5 it is 1.4bb.',
+          'Felt’s model also assumes smaller pots at 1/3. Pots with a flop average 20bb there and 25bb at 2/5.',
+        ],
+      },
+      {
+        kind: 'visual',
+        title: 'An hour of rake at live 1/3',
+        art: {
+          kind: 'tree',
+          root: 'Live 1/3 model, per hour',
+          branches: [
+            { label: 'The whole table pays', value: 'About $94', tone: 'red' },
+            { label: 'Your share', value: 'About $10.50', tone: 'brass' },
+          ],
+        },
+        caption: '27 hands at about 1.16bb each is about 31.4bb, which is $94. Split 9 ways that is about $10.50 each. Tips come on top.',
+        evidence: 'math',
+      },
+      {
+        kind: 'callout',
+        tone: 'tip',
+        title: 'Check your own game',
+        body: 'These numbers rest on assumed pot sizes. Change them on the You page to match your game. The rake rule itself is exact arithmetic.',
+      },
+      {
+        kind: 'quiz',
+        question: 'In Felt’s model, which game costs the most rake per 100 hands?',
+        choices: ['Live $2/$5', 'Online 6-max', 'Live $1/$3'],
+        answer: 2,
+        explain: 'Live 1/3 pays about 12.9 bb/100. Live 2/5 pays about 9.2 and online 6-max about 5.5.',
+      },
+      {
+        kind: 'quiz',
+        question: 'A 6-handed table pays 1.2bb of rake a hand. What does each player pay per 100 hands?',
+        choices: ['20 bb/100', '120 bb/100', '7.2 bb/100'],
+        answer: 0,
+        explain: '1.2 × 100 ÷ 6 = 20 bb/100. The 120 answer is the whole table’s rake. Each player pays a sixth of it on average.',
+      },
+      {
+        kind: 'quiz',
+        question: 'A room charges $6 each half hour at $1/$3. You play 27 hands an hour. What is that in bb/100?',
+        choices: ['About 7.4 bb/100', 'About 14.8 bb/100', 'About 4 bb/100'],
+        answer: 1,
+        explain: '$12 an hour is 4bb. Then 4 × 100 ÷ 27 = 14.8 bb/100. The 7.4 answer counts only 1 half hour. The 4 answer is per hour.',
+      },
+      {
+        kind: 'quiz',
+        question: 'Why does a capped rake cost small stakes more?',
+        choices: ['Rooms charge a higher percentage', 'The cap is more big blinds at small stakes', 'Small games deal fewer hands'],
+        answer: 1,
+        explain: 'The cap is set in money. The most a pot pays is 2bb at $1/$3 but only 1.4bb at $2/$5. The percentage is the same 10% in both.',
+      },
+      {
+        kind: 'takeaway',
+        points: [
+          'Rake per player = rake per hand × 100 ÷ players.',
+          'Felt’s live 1/3 model puts rake at about 12.9 bb/100.',
+          'A cap set in money is bigger in big blinds at small stakes.',
+          'Pot sizes are assumptions. Set them for your game on the You page.',
+        ],
+      },
+    ],
+  },
+  {
+    key: 'results/rake/rake-strategy',
+    level: 'core',
+    minutes: 4,
+    cover: {
+      kind: 'bars',
+      unit: '%',
+      bars: [
+        { label: 'Limped 5 ways, $15', value: 16.7, tone: 'red' },
+        { label: 'Raised and called, $34', value: 12.9, tone: 'brass' },
+        { label: '3bet pot, $94', value: 6.4, tone: 'green' },
+        { label: 'Raise wins before the flop', value: 0, tone: 'gray' },
+      ],
+    },
+    steps: [
+      {
+        kind: 'intro',
+        title: 'Rake changes the best play',
+        body: 'Rake takes the biggest bite from small pots. So a raked game rewards plays that win pots cheaply. It punishes plays that build small multiway pots.',
+      },
+      {
+        kind: 'visual',
+        title: 'Rake as a share of the pot',
+        art: {
+          kind: 'bars',
+          unit: '%',
+          bars: [
+            { label: 'Limped 5 ways, $15', value: 16.7, tone: 'red' },
+            { label: 'Raised and called, $34', value: 12.9, tone: 'brass' },
+            { label: '3bet pot, $94', value: 6.4, tone: 'green' },
+            { label: 'Raise wins before the flop', value: 0, tone: 'gray' },
+          ],
+        },
+        caption: 'This uses the live $1/$3 rule of 10% up to $5, plus $1. The raises are to $15 and the 3bet to $45. A small limped pot pays the biggest share.',
+        evidence: 'math',
+      },
+      {
+        kind: 'visual',
+        title: 'Raise first rather than limp',
+        art: {
+          kind: 'tree',
+          root: 'First in at live $1/$3',
+          branches: [
+            { label: 'Raise', value: 'Often wins the blinds with no rake', tone: 'green' },
+            { label: 'Limp', value: 'Invites a small multiway pot', tone: 'red' },
+          ],
+        },
+        caption: 'A raise can win the pot before the flop. Under no flop, no drop that pot is free. A limp invites more players into a small pot with a big rake share.',
+      },
+      {
+        kind: 'text',
+        title: 'What raked strategies do',
+        body: [
+          'Solutions with rake open a little tighter. They also call less and 3bet or fold more.',
+          'Their weakest calls and opens made the least. So rake wipes them out first. These are directions, and exact ranges vary.',
+        ],
+        evidence: 'solver',
+      },
+      {
+        kind: 'chart',
+        chartId: '9max-100-bb-vs-btn',
+        title: 'Where the cuts come',
+        caption: 'Felt’s starter chart for the big blind against a button open. Its weakest calls are the first to go in a raked game. The Rake lesson in Preflop works through the numbers.',
+      },
+      {
+        kind: 'callout',
+        tone: 'tip',
+        title: 'Rakeback and promotions',
+        body: 'Some rooms and sites return part of the rake as **rakeback** or promotions. Terms vary and can change. Count it only once it is paid.',
+      },
+      {
+        kind: 'quiz',
+        question: 'Which play pays no rake under no flop, no drop?',
+        choices: ['A limp that sees a flop', 'A raise that wins the blinds', 'A call that sees a flop'],
+        answer: 1,
+        explain: 'A pot that ends before the flop pays nothing. Any pot that sees a flop pays the full rule.',
+      },
+      {
+        kind: 'quiz',
+        question: 'At live $1/$3, 5 players each put in $3 and see a flop. What share of the $15 pot is rake?',
+        choices: ['10%', '6.7%', '16.7%'],
+        answer: 2,
+        explain: '10% of $15 is $1.50. Add $1 for $2.50. That is 16.7% of the pot. The 10% answer forgets the $1. The 6.7% answer is the $1 alone.',
+      },
+      {
+        kind: 'quiz',
+        question: 'Which change fits a game with heavy rake?',
+        choices: ['Fewer close calls and more 3bet or fold', 'Limp more to see cheap flops', 'Call more to build bigger pots'],
+        answer: 0,
+        explain: 'Close calls lose the most to rake. A 3bet often wins the pot before the flop for free. Limps and calls build small raked pots.',
+      },
+      {
+        kind: 'quiz',
+        question: 'A site offers rakeback. How should you count it?',
+        choices: ['As a sure part of your win rate', 'As a bonus that may change', 'As a reason to play looser'],
+        answer: 1,
+        explain: 'Rakeback terms vary and can change. Count it once it is paid. Never let it talk you into close calls.',
+      },
+      {
+        kind: 'takeaway',
+        points: [
+          'Rake hits small pots hardest.',
+          'Pots won before the flop usually pay nothing.',
+          'Raise first rather than limp. Trim close calls.',
+          'Rakeback terms vary. Count it once it is paid.',
+        ],
+      },
+    ],
+  },
+
+  /* Variance ------------------------------------------------------------- */
+  {
+    key: 'results/variance/standard-deviation',
+    level: 'core',
+    minutes: 6,
+    cover: { kind: 'paths', winRate: 10, sd100: 120, hands: 10_000, paths: 8, seed: 3, unit: 'buy ins' },
+    steps: [
+      {
+        kind: 'intro',
+        title: 'Same skill, different results',
+        body: 'Two players with the same skill can end a year far apart. Over short stretches the cards decide a lot. One number measures how much your results swing.',
+      },
+      {
+        kind: 'visual',
+        title: 'Eight players, one win rate',
+        art: { kind: 'paths', winRate: 10, sd100: 120, hands: 10_000, paths: 8, seed: 3, unit: 'buy ins' },
+        caption: 'Each line is a simulated player with a true win rate of 10 bb/100. They play 10,000 hands, about 370 hours live. At any point 95% of players sit inside the band. The dashed line is the expected result. 2 of these 8 end behind.',
+      },
+      {
+        kind: 'text',
+        title: 'How much results swing',
+        body: [
+          'That number is your **SD**, short for standard deviation. It is in bb/100, like your win rate.',
+          'It is the typical distance between one 100 hand result and your win rate. About 68% of 100 hand stretches land within 1 SD of it.',
+        ],
+        evidence: 'math',
+      },
+      {
+        kind: 'visual',
+        title: 'SD in Felt’s model',
+        art: {
+          kind: 'bars',
+          unit: 'bb',
+          bars: [
+            { label: 'Online 6-max', value: 90, tone: 'green' },
+            { label: 'Live 1/3', value: 120, tone: 'brass' },
+            { label: 'Live 2/5 and up', value: 140, tone: 'red' },
+          ],
+        },
+        caption: 'These are model values per 100 hands. Live pots are deeper and more often multiway. So live results swing more. Your own SD shows up in your results over time.',
+      },
+      {
+        kind: 'formula',
+        title: 'Swings grow slower than hands',
+        formula: 'Spread of your total = SD × √(hands ÷ 100)',
+        parts: [
+          ['SD', 'in bb per 100 hands'],
+          ['hands', 'hands played'],
+        ],
+        example: 'At SD 120 over 10,000 hands, 120 × √100 = **1,200bb**. A 10 bb/100 winner expects to win 1,000bb. So 1 SD of luck is bigger than the whole expected win.',
+      },
+      {
+        kind: 'visual',
+        title: 'Skill catches up slowly',
+        art: {
+          kind: 'bars',
+          unit: 'bb',
+          bars: [
+            { label: 'Expected win, 10,000 hands', value: 1000, tone: 'green' },
+            { label: '1 SD of luck, 10,000 hands', value: 1200, tone: 'red' },
+            { label: 'Expected win, 100,000 hands', value: 10000, tone: 'green' },
+            { label: '1 SD of luck, 100,000 hands', value: 3795, tone: 'red' },
+          ],
+        },
+        caption: 'Skill grows with the hands. Luck grows with the square root of the hands. So skill wins in the end, but only after a long time. This uses 10 bb/100 and SD 120.',
+        evidence: 'math',
+      },
+      {
+        kind: 'callout',
+        tone: 'theory',
+        title: 'One session says little',
+        body: 'A 5 hour live session is about 135 hands. At SD 120, 1 SD over 135 hands is about 139bb. A winning night says almost nothing about skill.',
+      },
+      {
+        kind: 'quiz',
+        question: 'Your SD is 120 bb/100. About what share of 100 hand stretches land within 120bb of your win rate?',
+        choices: ['About 95%', 'About 68%', 'About 50%'],
+        answer: 1,
+        explain: 'Within 1 SD of the average holds about 68% of a bell curve. About 95% lands within 1.96 SD.',
+      },
+      {
+        kind: 'quiz',
+        question: 'You play 4 times as many hands. What happens to the spread of your total result?',
+        choices: ['It doubles', 'It grows 4 times', 'It stays the same'],
+        answer: 0,
+        explain: 'The spread grows with the square root of the hands. The square root of 4 is 2. Your expected win grows 4 times, so skill gains on luck.',
+      },
+      {
+        kind: 'quiz',
+        question: 'Your SD is 120 bb/100 over 10,000 hands. What is 1 SD of your total result?',
+        choices: ['120bb', '12,000bb', '1,200bb'],
+        answer: 2,
+        explain: '120 × √(10,000 ÷ 100) = 120 × 10 = 1,200bb. The 12,000 answer multiplies by 100 instead of its square root.',
+      },
+      {
+        kind: 'takeaway',
+        points: [
+          'SD measures how much results swing, in bb/100.',
+          'Felt’s model uses 120 at live 1/3 and 90 online.',
+          'The spread of your total grows with the square root of hands.',
+          'Over short stretches luck is bigger than skill.',
+        ],
+      },
+    ],
+  },
+  {
+    key: 'results/variance/sample-size',
+    level: 'core',
+    minutes: 6,
+    cover: {
+      kind: 'curve',
+      points: [
+        [5, 33.3],
+        [10, 23.5],
+        [20, 16.6],
+        [30, 13.6],
+        [50, 10.5],
+        [75, 8.6],
+        [100, 7.4],
+      ],
+      xLabel: 'Hands played, thousands',
+      yLabel: 'Range either side, bb/100',
+      mark: [10, 23.5],
+    },
+    steps: [
+      {
+        kind: 'intro',
+        title: 'How sure is your win rate?',
+        body: 'Your measured win rate is your true win rate plus luck. The more hands you play, the less luck is left. This lesson shows how many hands that takes.',
+      },
+      {
+        kind: 'formula',
+        title: 'The 95% range of your win rate',
+        formula: 'Win rate ± 1.96 × SD ÷ √(hands ÷ 100)',
+        parts: [
+          ['SD', 'how much results swing, bb/100'],
+          ['1.96', 'covers 95% of a bell curve'],
+        ],
+        example: 'At live SD 120 over 10,000 hands, 1.96 × 120 ÷ 10 = **23.5 bb/100** either side.',
+      },
+      {
+        kind: 'visual',
+        title: 'The range shrinks slowly',
+        art: {
+          kind: 'curve',
+          points: [
+            [5, 33.3],
+            [10, 23.5],
+            [20, 16.6],
+            [30, 13.6],
+            [50, 10.5],
+            [75, 8.6],
+            [100, 7.4],
+          ],
+          xLabel: 'Hands played, thousands',
+          yLabel: 'Range either side, bb/100',
+          mark: [10, 23.5],
+        },
+        caption: 'This is the range either side of a measured win rate at Felt’s live SD of 120. 10,000 hands still leaves 23.5 bb/100 either side. 100,000 hands leaves 7.4.',
+        evidence: 'math',
+      },
+      {
+        kind: 'visual',
+        title: 'A winner, or not?',
+        art: {
+          kind: 'tree',
+          root: '15 bb/100 over 10,000 live hands',
+          branches: [
+            { label: 'Low end of the range', value: '−8.5 bb/100', tone: 'red' },
+            { label: 'High end of the range', value: '+38.5 bb/100', tone: 'green' },
+          ],
+        },
+        caption: 'The 95% range runs from a loss to a huge win. 10,000 hands is about 370 hours live. It still cannot tell a winner from a loser.',
+        evidence: 'math',
+      },
+      {
+        kind: 'table',
+        title: 'Hands to pin down a win rate',
+        columns: ['Goal', 'Hands', 'Hours'],
+        rows: [
+          ['Live, within 10 bb/100', '55,300', '2,050'],
+          ['Live, within 5 bb/100', '221,300', '8,200'],
+          ['Online, within 10 bb/100', '31,100', '415'],
+          ['Online, within 5 bb/100', '124,500', '1,660'],
+        ],
+        note: 'Hands and hours are rounded. Live uses SD 120 at 27 hands an hour. Online uses SD 90 at 75 hands an hour on 1 table. These are Felt’s model values.',
+        evidence: 'math',
+      },
+      {
+        kind: 'text',
+        title: 'What Felt does with this',
+        body: [
+          'Felt calls your results mostly luck until their 95% range is within 10 bb/100. At live SD 120 that takes about 55,000 hands.',
+          'Until then your Felt Rating and the model carry more weight. Your results take over as they grow.',
+        ],
+      },
+      {
+        kind: 'visual',
+        title: 'A real winner, behind',
+        art: { kind: 'ring', value: 0.202, label: 'chance to be behind', caption: 'after 10,000 live hands' },
+        caption: 'In the model a true 10 bb/100 winner has SD 120. After 10,000 hands they still show a loss 20.2% of the time. The variance lesson in Mental game used SD 100 and got 15.9%.',
+        evidence: 'math',
+      },
+      {
+        kind: 'quiz',
+        question: 'SD 120 bb/100 over 10,000 hands. How wide is the 95% range either side of your win rate?',
+        choices: ['12 bb/100', '23.5 bb/100', '2.35 bb/100'],
+        answer: 1,
+        explain: '1.96 × 120 ÷ √100 = 23.5. The 12 answer forgets the 1.96.',
+      },
+      {
+        kind: 'quiz',
+        question: 'About how many live hands at SD 120 pin your win rate within 10 bb/100?',
+        choices: ['About 10,000', 'About 5,500', 'About 55,000'],
+        answer: 2,
+        explain: 'You need 1.96 × 120 ÷ √(hands ÷ 100) to equal 10. That takes about 55,300 hands. At 27 hands an hour that is about 2,050 hours.',
+      },
+      {
+        kind: 'quiz',
+        question: 'You are up 15 bb/100 over 10,000 live hands. What can you conclude?',
+        choices: ['Not much yet. The range still includes a loss.', 'You are a proven winner', 'You should move up now'],
+        answer: 0,
+        explain: 'The 95% range runs from −8.5 to +38.5 bb/100. Keep playing and keep reviewing decisions.',
+      },
+      {
+        kind: 'takeaway',
+        points: [
+          '95% range = win rate ± 1.96 × SD ÷ √(hands ÷ 100).',
+          '10,000 live hands still leaves 23.5 bb/100 either side.',
+          'Within 10 bb/100 takes about 55,000 live hands.',
+          'Halving the range takes 4 times the hands.',
+        ],
+      },
+    ],
+  },
+  {
+    key: 'results/variance/downswings',
+    level: 'core',
+    minutes: 6,
+    cover: { kind: 'paths', winRate: 10, sd100: 120, hands: 50_000, paths: 5, seed: 3, unit: 'buy ins' },
+    steps: [
+      {
+        kind: 'intro',
+        title: 'Winners have long losing stretches',
+        body: 'A **downswing** is a drop from your best result so far. Every winner has them. Knowing how deep and long they get helps you play well through them.',
+      },
+      {
+        kind: 'visual',
+        title: 'Five winners, 50,000 hands',
+        art: { kind: 'paths', winRate: 10, sd100: 120, hands: 50_000, paths: 5, seed: 3, unit: 'buy ins' },
+        caption: 'Each line is a simulated player with a true 10 bb/100 and SD 120. That is about 1,850 hours live. All 5 end ahead. 4 of them still fell 15 buy ins below a peak on the way.',
+      },
+      {
+        kind: 'visual',
+        title: 'Downswings in 10,000 hands',
+        art: {
+          kind: 'bars',
+          unit: '%',
+          bars: [
+            { label: '5 buy ins or more', value: 95, tone: 'brass' },
+            { label: '10 buy ins or more', value: 43, tone: 'red' },
+            { label: '15 buy ins or more', value: 14, tone: 'red' },
+          ],
+        },
+        caption: 'This is the share of 4,000 simulated winners who hit a drop this deep. Each has a true 10 bb/100 and SD 120. 10,000 hands is about 370 hours live. A buy in is 100bb.',
+      },
+      {
+        kind: 'text',
+        title: 'How long they last',
+        body: [
+          'Climbing out of a hole takes time. On average it takes the depth divided by your win rate per hand.',
+          'At 10 bb/100 a 10 buy in hole takes about 10,000 hands. That is about 370 hours live.',
+        ],
+        evidence: 'math',
+      },
+      {
+        kind: 'visual',
+        title: 'Hours to climb back',
+        art: {
+          kind: 'bars',
+          bars: [
+            { label: 'From 5 buy ins down, hours', value: 185, tone: 'brass' },
+            { label: 'From 10 buy ins down, hours', value: 370, tone: 'red' },
+            { label: 'From 15 buy ins down, hours', value: 556, tone: 'red' },
+          ],
+        },
+        caption: 'These are average live hours to win back each depth at 10 bb/100 and 27 hands an hour. At 5 bb/100 every bar doubles.',
+        evidence: 'math',
+      },
+      {
+        kind: 'visual',
+        title: 'How far below your best',
+        art: { kind: 'ring', value: 0.249, label: 'of the time 10 buy ins or more below the peak', caption: 'over a long run' },
+        caption: 'Over a long career the model winner often sits far below their best. They are 10 or more buy ins down 24.9% of the time. On average they sit 7.2 buy ins below it.',
+        evidence: 'math',
+      },
+      {
+        kind: 'callout',
+        tone: 'tip',
+        title: 'In a downswing',
+        body: 'Check your decisions, not your graph. Review a few big hands. If your play holds up, keep going. Move down if your roll falls below your floor.',
+      },
+      {
+        kind: 'quiz',
+        question: 'At a true 10 bb/100, how many hands does it take on average to win back 1,000bb?',
+        choices: ['1,000', '10,000', '100,000'],
+        answer: 1,
+        explain: '10 bb/100 is 0.1bb a hand. 1,000 ÷ 0.1 = 10,000 hands. That is about 370 live hours.',
+      },
+      {
+        kind: 'quiz',
+        question: 'You lose 10 buy ins over 8,000 hands. What does that prove?',
+        choices: ['Little. Winners have drops this deep.', 'You are a losing player', 'You should play more to win it back'],
+        answer: 0,
+        explain: 'In the model 43% of 10 bb/100 winners hit a 10 buy in drop within 10,000 hands. Check your decisions instead.',
+      },
+      {
+        kind: 'quiz',
+        question: 'Over a long run, how often does the model winner sit 10 buy ins or more below their best?',
+        choices: ['About 1% of the time', 'About 25% of the time', 'Never'],
+        answer: 1,
+        explain: 'The share is exp(−2 × 10 × 1,000 ÷ 120²), which is 24.9%. Deep holes are a normal part of a winner’s graph.',
+      },
+      {
+        kind: 'takeaway',
+        points: [
+          'A downswing is a drop from your best result so far.',
+          'Deep drops are normal for winners in the model.',
+          'At 10 bb/100 a 10 buy in hole takes about 370 live hours to fill.',
+          'Judge your decisions in a downswing, not the graph.',
+        ],
+      },
+    ],
+  },
+  {
+    key: 'results/variance/risk-of-ruin',
+    level: 'core',
+    minutes: 6,
+    cover: {
+      kind: 'curve',
+      points: [
+        [5, 49.9],
+        [10, 24.9],
+        [15, 12.5],
+        [20, 6.2],
+        [25, 3.1],
+        [30, 1.6],
+        [40, 0.4],
+      ],
+      xLabel: 'Buy ins',
+      yLabel: 'Risk of ruin, %',
+      mark: [20, 6.2],
+    },
+    steps: [
+      {
+        kind: 'intro',
+        title: 'The chance of going broke',
+        body: '**Risk of ruin** is the chance of ever losing your whole bankroll. The bankroll lesson in Mental game gives the formula. Here you see what each part does.',
+      },
+      {
+        kind: 'formula',
+        title: 'Risk of ruin',
+        formula: 'RoR = exp(−2 × WR × B ÷ SD²)',
+        parts: [
+          ['WR', 'true win rate, bb/100'],
+          ['B', 'bankroll, bb'],
+          ['SD', 'how much results swing, bb/100'],
+        ],
+        example: 'Take WR 10 and SD 120 with 20 buy ins of 100bb. 2 × 10 × 2,000 ÷ 14,400 = 2.78, and exp(−2.78) = **6.2%**.',
+      },
+      {
+        kind: 'visual',
+        title: 'More buy ins, less risk',
+        art: {
+          kind: 'curve',
+          points: [
+            [5, 49.9],
+            [10, 24.9],
+            [15, 12.5],
+            [20, 6.2],
+            [25, 3.1],
+            [30, 1.6],
+            [40, 0.4],
+          ],
+          xLabel: 'Buy ins',
+          yLabel: 'Risk of ruin, %',
+          mark: [20, 6.2],
+        },
+        caption: 'This is risk of ruin at a true 10 bb/100 and Felt’s live SD of 120. 20 buy ins gives 6.2%. The bankroll lesson used SD 100 and got 1.8%.',
+        evidence: 'math',
+      },
+      {
+        kind: 'table',
+        title: 'What each input does',
+        columns: ['Change', 'Effect on risk'],
+        rows: [
+          ['Double the win rate', 'Same as doubling the roll'],
+          ['Double the roll', 'The risk is squared'],
+          ['Double the SD', 'Needs 4 times the roll for the same risk'],
+          ['Win rate 0 or less', 'Ruin is certain in the long run'],
+        ],
+        note: 'Squaring a small chance makes it much smaller. At SD 120 and 10 bb/100, 10 buy ins gives 24.9%. 20 buy ins gives 24.9% squared, which is 6.2%.',
+        evidence: 'math',
+      },
+      {
+        kind: 'visual',
+        title: 'Win rate matters as much as the roll',
+        art: {
+          kind: 'bars',
+          unit: '%',
+          bars: [
+            { label: '10 bb/100', value: 6.2, tone: 'green' },
+            { label: '5 bb/100', value: 24.9, tone: 'brass' },
+            { label: '2.5 bb/100', value: 49.9, tone: 'red' },
+          ],
+        },
+        caption: 'All 3 use SD 120 and 20 buy ins. Halving the win rate does as much harm as halving the roll. So an overestimated win rate is dangerous.',
+        evidence: 'math',
+      },
+      {
+        kind: 'text',
+        title: 'No safe roll for a non winner',
+        body: [
+          'If your true win rate is 0 or less, ruin is certain in the long run. No roll size changes that.',
+          'A player who breaks even before costs loses after them. A bigger roll only delays the end. Fix the win rate first.',
+        ],
+        evidence: 'math',
+      },
+      {
+        kind: 'visual',
+        title: 'A losing player over time',
+        art: { kind: 'paths', winRate: -5, sd100: 120, hands: 50_000, paths: 5, seed: 8, unit: 'buy ins' },
+        caption: 'These simulated players have a true −5 bb/100 after costs. 3 of them were up 13 buy ins or more at some point. All 5 end behind.',
+      },
+      {
+        kind: 'callout',
+        tone: 'tip',
+        title: 'Use a cautious win rate',
+        body: 'Plug in a win rate below your best guess. Your measured rate carries a wide range for a long time. Moving down at your floor also cuts your real risk.',
+      },
+      {
+        kind: 'quiz',
+        question: 'Your true win rate is 0 bb/100. What is your risk of ruin in the long run?',
+        choices: ['50%', 'It depends on the roll', '100%'],
+        answer: 2,
+        explain: 'With no edge your results drift with luck alone. In the long run any roll is lost. After rake a 0 before costs is a loss.',
+      },
+      {
+        kind: 'quiz',
+        question: 'Your SD doubles from 60 to 120 bb/100. How much bigger must your roll be for the same risk?',
+        choices: ['4 times', '2 times', 'The same'],
+        answer: 0,
+        explain: 'SD is squared in the formula. Twice the SD is 4 times the SD². So the roll must grow 4 times.',
+      },
+      {
+        kind: 'quiz',
+        question: 'WR 10 bb/100, SD 120 and 20 buy ins of 100bb. What is the risk of ruin?',
+        choices: ['1.8%', '6.2%', '24.9%'],
+        answer: 1,
+        explain: '2 × 10 × 2,000 ÷ 14,400 = 2.78, and exp(−2.78) is 6.2%. The 1.8% answer uses SD 100. The 24.9% answer is 10 buy ins.',
+      },
+      {
+        kind: 'takeaway',
+        points: [
+          'RoR = exp(−2 × WR × B ÷ SD²).',
+          'Halving the win rate hurts as much as halving the roll.',
+          'Doubling the SD needs 4 times the roll.',
+          'A player who does not win has no safe bankroll.',
+        ],
+      },
+    ],
+  },
+  {
+    key: 'results/variance/luck-vs-skill',
+    level: 'core',
+    minutes: 5,
+    cover: {
+      kind: 'bars',
+      unit: 'bb',
+      bars: [
+        { label: 'If you win', value: 100, tone: 'green' },
+        { label: 'If you lose', value: -100, tone: 'red' },
+        { label: 'All in EV', value: 50.7, tone: 'brass' },
+      ],
+    },
+    steps: [
+      {
+        kind: 'intro',
+        title: 'Judge the decision, not the result',
+        body: 'Every hand mixes luck and skill. Over a short run luck wins. You can still measure your skill. Look at your decisions instead of your results.',
+      },
+      {
+        kind: 'hand',
+        title: 'You get it all in',
+        cards: '8s8d',
+        board: '8h7h2c',
+        caption: 'You flop a set of 8s. Your opponent holds the ace and king of hearts. You both put in 100bb. An exact count of the turn and river gives you 75.4% to win.',
+      },
+      {
+        kind: 'formula',
+        title: 'All in EV',
+        formula: 'All in EV = equity × final pot − your money in',
+        parts: [
+          ['equity', 'your share of the pot on average'],
+          ['final pot', '200bb here'],
+        ],
+        example: '0.7535 × 200 − 100 = **+50.7bb**. That is what this all in is worth on average. Leave rake aside here.',
+      },
+      {
+        kind: 'visual',
+        title: 'Two results, one decision',
+        art: {
+          kind: 'bars',
+          unit: 'bb',
+          bars: [
+            { label: 'If you win', value: 100, tone: 'green' },
+            { label: 'If you lose', value: -100, tone: 'red' },
+            { label: 'All in EV', value: 50.7, tone: 'brass' },
+          ],
+        },
+        caption: 'You win 100bb or lose 100bb. Either way the decision was worth +50.7bb. A loss here is not a mistake.',
+        evidence: 'math',
+      },
+      {
+        kind: 'callout',
+        tone: 'tip',
+        title: 'Keep an all in log',
+        body: 'Note your big all in hands. Compare what you won with their all in EV. The gap is luck you can see.',
+      },
+      {
+        kind: 'visual',
+        title: 'Four ways a hand can go',
+        art: {
+          kind: 'tree',
+          root: 'Decision and result',
+          branches: [
+            { label: 'Good decision, good result', value: 'Well played', tone: 'green' },
+            { label: 'Good decision, bad result', value: 'Bad luck. Keep doing it.', tone: 'brass' },
+            { label: 'Bad decision, good result', value: 'Lucky. Fix it anyway.', tone: 'red' },
+            { label: 'Bad decision, bad result', value: 'A lesson. Fix it.', tone: 'red' },
+          ],
+        },
+        caption: 'Only the decision is yours. When you review a hand, ask what the best play was. Do not ask whether you won.',
+      },
+      {
+        kind: 'visual',
+        title: 'No edge, big winners',
+        art: { kind: 'paths', winRate: 0, sd100: 120, hands: 10_000, paths: 8, seed: 6, unit: 'buy ins' },
+        caption: 'These 8 simulated players have a true win rate of 0 after costs. After 10,000 hands 2 of them are up about 20 buy ins. A good result alone does not prove skill.',
+      },
+      {
+        kind: 'text',
+        title: 'How Felt measures skill',
+        body: [
+          'Your Felt Rating moves only on answers that can be checked. These are questions and chart decisions. Solver spots count too.',
+          'Those answers do not depend on the cards that came. So they show your skill far sooner than results do.',
+        ],
+      },
+      {
+        kind: 'quiz',
+        question: 'You put in 50bb with 60% equity. The final pot is 100bb. What is your all in EV?',
+        choices: ['+60bb', '+10bb', '−50bb'],
+        answer: 1,
+        explain: 'Your share is 0.6 × 100 = 60bb. Take away your 50bb to get +10bb. The +60bb answer forgets your own money. The −50bb answer is what you lose when it misses.',
+      },
+      {
+        kind: 'quiz',
+        question: 'You get all in with 75% equity and lose. What does that say about your decision?',
+        choices: ['It was a mistake', 'Nothing bad. The decision was still good.', 'Avoid all ins from now on'],
+        answer: 1,
+        explain: 'A 75% favorite still loses 1 time in 4. The all in was worth a lot on average. The result was luck.',
+      },
+      {
+        kind: 'quiz',
+        question: 'Over one month, which tells you more about your skill?',
+        choices: ['Your profit for the month', 'How many big pots you won', 'Your answers on decisions that can be checked'],
+        answer: 2,
+        explain: 'A month of results is mostly luck. Checked decisions do not depend on the cards. So they show skill much sooner.',
+      },
+      {
+        kind: 'takeaway',
+        points: [
+          'All in EV = equity × final pot − your money in.',
+          'Results swing. The value of a decision does not.',
+          'Players with no edge can look like big winners for 10,000 hands.',
+          'Judge decisions, not outcomes.',
+        ],
+      },
+    ],
+  },
+];

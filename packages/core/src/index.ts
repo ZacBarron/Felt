@@ -12,6 +12,7 @@ export * from './solver';
 export * from './placement';
 export * from './rating';
 export * from './winrate';
+export * from './variance';
 export * from './habits';
 export * from './handhistory';
 export * from './sessions';

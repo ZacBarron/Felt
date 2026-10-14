@@ -5,7 +5,7 @@ import { LessonArt } from './LessonArt';
  * Drawings with words in them (a tree, a table, axis labels) are drawn at
  * reading size on the lesson intro. The rest keep their cover drawing there.
  */
-const READ_ON_INTRO = new Set<Cover['kind']>(['tree', 'bars', 'chips', 'curve', 'table', 'streets', 'ladder']);
+const READ_ON_INTRO = new Set<Cover['kind']>(['tree', 'bars', 'chips', 'curve', 'paths', 'table', 'streets', 'ladder']);
 
 /** The art on a lesson card: the picture that says the lesson's idea, drawn by LessonArt. */
 export function LessonCover({ cover, size = 'md' }: { cover: Cover; size?: 'sm' | 'md' | 'intro' }) {
