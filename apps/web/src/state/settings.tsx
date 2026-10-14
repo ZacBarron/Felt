@@ -56,6 +56,10 @@ export interface Profile {
   experience?: Experience;
   /** The tier the player is aiming for, from `TIERS` in core. */
   target?: string;
+  /** Who a regular player usually faces. Sets the pool assumption and which lessons come first. */
+  opponents?: 'soft' | 'mixed' | 'tough';
+  /** Whether a regular player has hands or sessions Felt could import. */
+  handSource?: 'online' | 'tracked' | 'none';
   focus: Focus[];
   /** Daily study target in minutes. */
   dailyMinutes: number;

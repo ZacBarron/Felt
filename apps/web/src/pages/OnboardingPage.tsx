@@ -1,5 +1,5 @@
 import { FIRST_HAND_CASUAL, FIRST_HAND_NEW, LESSON_CONTENT, STARTER_CHARTS, TESTIMONIALS } from '@felt/content';
-import { parseCard, PRESETS, TIERS } from '@felt/core';
+import { defaultAssumptions, parseCard, PRESETS, TIERS } from '@felt/core';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
@@ -8,7 +8,7 @@ import { canOpenLesson, isPro } from '../state/access';
 import { plural } from '../ui/format';
 import type { StoredLesson } from '../state/db';
 import { track } from '../state/events';
-import { CUES, cueCopy, DAILY_OPTIONS, EXPERIENCE, EXPERIENCE_REPLY, FOCUS, goalsFor, goalsLine, isBeginner, pathPrefs, TARGETS } from '../state/goals';
+import { CUES, cueCopy, DAILY_OPTIONS, EXPERIENCE, EXPERIENCE_REPLY, FOCUS, goalsFor, goalsLine, HAND_SOURCES, isBeginner, OPPONENTS, pathPrefs, TARGETS } from '../state/goals';
 import { isComplete, LESSON_ENTRIES, lessonProgress, recommendedLessons } from '../state/lessons';
 import { studyReminder } from '../state/reminders';
 import { type Experience, type Focus, type Profile, useSettings } from '../state/settings';
@@ -34,10 +34,20 @@ import { requestPersistentStorage } from '../state/backup';
  * testimonials appear only once real players have given them.
  */
 
-type Step = 'intro' | 'level' | 'target' | 'goal' | 'game' | 'focus' | 'try' | 'why' | 'daily' | 'when' | 'place' | 'plan';
-const STEPS: Step[] = ['intro', 'level', 'target', 'goal', 'game', 'focus', 'try', 'why', 'daily', 'when', 'place', 'plan'];
-/** Steps that only make sense for someone who already plays. */
-const PLAYER_ONLY: Step[] = ['focus', 'place'];
+type Step = 'intro' | 'level' | 'target' | 'goal' | 'game' | 'focus' | 'opponents' | 'hands' | 'try' | 'why' | 'daily' | 'when' | 'place' | 'plan';
+const STEPS: Step[] = ['intro', 'level', 'target', 'goal', 'game', 'focus', 'opponents', 'hands', 'try', 'why', 'daily', 'when', 'place', 'plan'];
+
+/**
+ * Questions follow what a player can answer. Someone new cannot name a leak,
+ * so they skip it and placement. Someone who plays for fun gets an optional,
+ * plain "what feels hardest". Regular and pro players get the leak question
+ * plus who they play and whether they have hands to import, because each
+ * answer changes their plan.
+ */
+function stepsFor(experience?: Profile['experience']): Step[] {
+  const skip: Step[] = experience === 'new' ? ['focus', 'opponents', 'hands', 'place'] : experience === 'casual' ? ['opponents', 'hands'] : [];
+  return STEPS.filter((s) => !skip.includes(s));
+}
 
 const QUIZ_COUNT = [...LESSON_CONTENT.values()].reduce((n, l) => n + l.steps.filter((s) => s.kind === 'quiz').length, 0);
 const PROOF = [
@@ -377,7 +387,7 @@ export function OnboardingPage() {
   const heading = useRef<HTMLHeadingElement>(null);
 
   const setProfile = (patch: Partial<Profile>) => update({ ...settings, profile: { ...profile, ...patch } });
-  const flow = STEPS.filter((s) => !(profile.experience === 'new' && PLAYER_ONLY.includes(s)));
+  const flow = stepsFor(profile.experience);
   const index = flow.indexOf(step);
   const go = (next: Step) => {
     window.scrollTo({ top: 0 });
@@ -613,8 +623,8 @@ export function OnboardingPage() {
       ),
     },
     focus: {
-      title: beginner ? 'What do you want to get better at?' : 'What costs you the most money?',
-      sub: 'Pick as many as you like. They come first in your plan.',
+      title: beginner ? 'What feels hardest right now?' : 'What costs you the most money?',
+      sub: beginner ? 'Optional. Pick any that fit, or skip.' : 'Pick as many as you like. They come first in your plan.',
       ready: true,
       body: (
         <div className="onb-choices" role="group" aria-labelledby="onb-title">
@@ -625,13 +635,44 @@ export function OnboardingPage() {
                 key={f.id}
                 multi
                 selected={on}
-                label={f.label}
-                note={f.note}
+                label={beginner ? f.note : f.label}
+                note={beginner ? undefined : f.note}
                 onClick={() => setProfile({ focus: on ? profile.focus.filter((x) => x !== f.id) : [...profile.focus, f.id as Focus] })}
               />
             );
           })}
         </div>
+      ),
+    },
+    opponents: {
+      title: 'Who do you usually play against?',
+      sub: 'Felt brings the right lessons forward and tunes its win rate estimates.',
+      ready: !!profile.opponents,
+      body: (
+        <div className="onb-choices" role="radiogroup" onKeyDown={onRadioKeys} aria-labelledby="onb-title">
+          {OPPONENTS.map((o) => (
+            <Choice key={o.id} selected={profile.opponents === o.id} label={o.label} note={o.note} onClick={() => setProfile({ opponents: o.id })} />
+          ))}
+        </div>
+      ),
+    },
+    hands: {
+      title: 'Do you have hands to import?',
+      sub: 'Real hands show your leaks better than any guess.',
+      ready: !!profile.handSource,
+      body: (
+        <>
+          <div className="onb-choices" role="radiogroup" onKeyDown={onRadioKeys} aria-labelledby="onb-title">
+            {HAND_SOURCES.map((h) => (
+              <Choice key={h.id} selected={profile.handSource === h.id} label={h.label} note={h.note} onClick={() => setProfile({ handSource: h.id })} />
+            ))}
+          </div>
+          {profile.handSource && profile.handSource !== 'none' && (
+            <p key={profile.handSource} className="onb-reply reveal" role="status">
+              {profile.handSource === 'online' ? 'Great. Import them from Today after setup.' : 'Great. Import your session log from Today after setup.'}
+            </p>
+          )}
+        </>
       ),
     },
     daily: {
@@ -783,9 +824,15 @@ export function OnboardingPage() {
   const screen = screens[step];
   const advance = () => {
     if (step === 'game' && gameChoice) update({ ...settings, game: PRESETS[gameChoice.preset].settings });
+    if (step === 'opponents') {
+      // One tier up or down from the default pool for this game, or the default for a mix.
+      const shift = OPPONENTS.find((o) => o.id === profile.opponents)?.poolShift ?? 0;
+      const { poolRating: _old, ...rest } = settings.assumptions ?? {};
+      update({ ...settings, assumptions: shift ? { ...rest, poolRating: defaultAssumptions(settings.game).poolRating + shift } : rest });
+    }
     track('onboarding_step_answered', {
       step,
-      value: step === 'goal' ? profile.goals.join(',') : step === 'game' ? game : step === 'daily' ? profile.dailyMinutes : step === 'when' ? profile.cue : step === 'level' ? profile.experience : step === 'target' ? profile.target : profile.focus.length,
+      value: step === 'goal' ? profile.goals.join(',') : step === 'game' ? game : step === 'daily' ? profile.dailyMinutes : step === 'when' ? profile.cue : step === 'level' ? profile.experience : step === 'target' ? profile.target : step === 'opponents' ? profile.opponents : step === 'hands' ? profile.handSource : profile.focus.length,
     });
     forward();
   };

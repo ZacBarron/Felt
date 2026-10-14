@@ -5424,3 +5424,14 @@ a.card.more-me,
   margin: 0;
   padding-inline: 0.25rem;
 }
+
+.import-card-icon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--tint) 13%, var(--surface));
+  color: var(--tint);
+}

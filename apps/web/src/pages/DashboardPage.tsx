@@ -14,6 +14,7 @@ import { chartsTaught, reviewTotal } from '../state/decks';
 import { buildQueue, masteryForCharts, todayStats } from '../state/review';
 import { useSettings } from '../state/settings';
 import { Avatar } from '../ui/Avatar';
+import { ImportCard } from '../ui/ImportCard';
 import { InstallCard } from '../ui/InstallCard';
 import { HeroPattern } from '../ui/Brand';
 import { plural } from '../ui/format';
@@ -164,6 +165,7 @@ export function DashboardPage() {
       )}
 
       <InstallCard />
+      <ImportCard />
 
       <section className="card quests reveal" aria-labelledby="today-plan">
         <div className="quests-head">

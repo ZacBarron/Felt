@@ -83,6 +83,14 @@ describe('several goals', () => {
     expect(regular.focus[0]).toBe('preflop/3bet-pots');
   });
 
+  it('brings lessons forward for who a player faces, after their own focus picks', async () => {
+    const { pathPrefs } = await import('../src/state/goals');
+    const base = { onboarded: true, experience: 'winning' as const, goals: [], dailyMinutes: 10 };
+    expect(pathPrefs({ ...base, focus: ['math'], opponents: 'soft' }).focus).toEqual(['foundations/math', 'exploit/adjustments']);
+    expect(pathPrefs({ ...base, focus: [], opponents: 'tough' }).focus).toEqual(['foundations/theory']);
+    expect(pathPrefs({ ...base, focus: [], opponents: 'mixed' }).focus).toEqual([]);
+  });
+
   it('reads saves from before goals were a list', async () => {
     const { pathPrefs } = await import('../src/state/goals');
     const old = { onboarded: true, goal: 'master-gto', focus: [], dailyMinutes: 10 } as unknown as Parameters<typeof pathPrefs>[0];

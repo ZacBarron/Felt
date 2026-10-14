@@ -63,6 +63,25 @@ export const TARGETS: { tier: string; note: string }[] = [
   { tier: 'Elite', note: 'Close to perfect in every spot Felt rates' },
 ];
 
+/**
+ * Who a regular player usually faces. It moves lessons forward (exploits
+ * against loose games, theory against strong ones) and shifts the pool
+ * rating assumption by one tier (150 points), which the player can see and
+ * change with the other win rate assumptions.
+ */
+export const OPPONENTS: { id: NonNullable<Profile['opponents']>; label: string; note: string; module?: string; poolShift: number }[] = [
+  { id: 'soft', label: 'Mostly loose, casual players', note: 'Lots of calling and few big bluffs', module: 'exploit/adjustments', poolShift: -150 },
+  { id: 'mixed', label: 'A mix', note: 'Some regulars and some casual players', poolShift: 0 },
+  { id: 'tough', label: 'Mostly strong regulars', note: 'Tight, aggressive and hard to read', module: 'foundations/theory', poolShift: 150 },
+];
+
+/** Whether a regular player has data Felt can read. Real hands beat guesses about leaks. */
+export const HAND_SOURCES: { id: NonNullable<Profile['handSource']>; label: string; note: string }[] = [
+  { id: 'online', label: 'Yes, I have hand histories', note: 'From an online site or a tracker' },
+  { id: 'tracked', label: 'I log my sessions', note: 'Wins, losses and hours' },
+  { id: 'none', label: 'Not yet', note: 'Felt can help you start' },
+];
+
 /** Each area says what it means in plain words, so the list works for every level. */
 export const FOCUS: { id: Focus; label: string; note: string; module: string }[] = [
   { id: 'preflop', label: 'Preflop ranges', note: 'Which hands to play from each seat', module: 'preflop/rfi' },
@@ -129,7 +148,8 @@ const BASICS_MODULES = (CURRICULUM.find((t) => t.id === 'basics')?.modules ?? []
 export function pathPrefs(profile: Profile) {
   const goals = profile.goals ?? (profile.goal ? [profile.goal] : []);
   const basicsFirst = profile.experience === 'new' || (profile.experience === 'casual' && !profile.placedAt);
-  const modules = [...(basicsFirst ? BASICS_MODULES : []), ...FOCUS.filter((f) => profile.focus.includes(f.id)).map((f) => f.module), ...goals.flatMap((g) => GOAL_MODULES[g])];
+  const pool = OPPONENTS.find((o) => o.id === profile.opponents)?.module;
+  const modules = [...(basicsFirst ? BASICS_MODULES : []), ...FOCUS.filter((f) => profile.focus.includes(f.id)).map((f) => f.module), ...(pool ? [pool] : []), ...goals.flatMap((g) => GOAL_MODULES[g])];
   return {
     placedAt: profile.placedAt && profile.placedAt !== 'all' ? profile.placedAt : undefined,
     focus: [...new Set(modules)],
