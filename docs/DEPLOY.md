@@ -160,6 +160,10 @@ Every setting is an environment variable. `apps/server/.env.example` lists them 
 | `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` | Takes payments for Felt Pro. | Optional |
 | `STRIPE_PRICE_ANNUAL`, `STRIPE_PRICE_MONTHLY` | The 2 Stripe price ids. | Optional |
 | `TRIAL_DAYS` | Length of the free trial. The default is 7. | Optional |
+| `ANTHROPIC_API_KEY` | Turns on the AI coach for Felt Pro players. Without it the coach is off. | Optional |
+| `COACH_MODEL` | The Claude model the coach uses. The default is `claude-opus-5-5`. | Optional |
+| `COACH_EFFORT` | How hard the model thinks: `low`, `medium`, `high`, `xhigh` or `max`. The default is `medium`. | Optional |
+| `COACH_DAILY_LIMIT` | Coach messages each player can send a day. The default is 40. | Optional |
 | `VITE_SUPPORT_EMAIL` | Contact address on the legal pages. It is read when the app is built. | Optional |
 
 ### Without an email key
@@ -177,6 +181,18 @@ For real testers, set up Resend. Its free tier is enough.
 3. Set the 4 Stripe variables and redeploy.
 
 The health check reports billing as on once all 4 are set. Use test mode keys until you are ready to charge.
+
+### The AI coach (optional)
+
+The coach answers questions about a player's own game. It uses Claude from Anthropic. Only signed in Felt Pro players can use it.
+
+1. Create an API key at console.anthropic.com. Set a monthly spend limit there.
+2. Set `ANTHROPIC_API_KEY` and redeploy. On Fly, use `fly secrets set ANTHROPIC_API_KEY=sk-ant-...`.
+3. Open `/api/health`. It reports the coach as on.
+
+Each player gets `COACH_DAILY_LIMIT` messages a day, counted on the server. The count resets at midnight in the player's time zone. A failed call does not count. The server never sends the key to the app.
+
+The app sends a short summary with each question. It holds the Felt Rating, goals, game settings and recent misses. Nothing else from the device leaves it.
 
 ### Backups
 

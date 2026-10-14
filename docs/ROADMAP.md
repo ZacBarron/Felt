@@ -55,6 +55,7 @@ See [MONETIZATION.md](MONETIZATION.md).
 - [x] Felt Rating: Glicko rating overall and per area from every graded answer, provisional until settled, tiers, history (see ENGAGEMENT.md)
 - [x] Win rate model: rake and tips per player from the rake rules, skill edge from rating against the table, 95% range, Bayesian blend with entered results
 - [x] Daily challenge: five decisions, the same for everyone, harder as it goes, saved after every answer, rated, a decision list that adds misses to review, and a shareable spoiler free grid
+- [x] Weekly Pro challenge: 10 harder decisions per ISO week, the same for every Pro player, balanced across math, mixed hands, close calls, solver graded rivers and advanced questions, harder as it goes, mixes graded by mix distance, one attempt, rated, personal bests against earlier weeks, misses to review, a share grid, a card on Today for Pro players
 - [x] Streaks with freezes: one to start, one earned every seven days in a row
 - [x] Research brief with verified sources (docs/research/sources.md)
 - [x] Tiers every 150 points (nine tiers, Newcomer to Elite, none while provisional) with progress to the next
@@ -116,7 +117,7 @@ See [SOLVER_DATA.md](SOLVER_DATA.md).
 
 - [x] Scenario engine: walk a hand tree, grade each decision by EV loss (12 river scenarios solved on device)
 - [ ] Curated scenario packs per lesson; replay your own logged hands as scenarios
-- [ ] Daily challenge, speed rounds, personal bests, module boss fights
+- [ ] Speed rounds, module boss fights (daily challenge and weekly personal bests done)
 - [ ] Skill stats: EV loss trend, accuracy by position and street, mastery levels
 
 ## Phase 6: Exploitation and tells
@@ -131,6 +132,7 @@ See [SOLVER_DATA.md](SOLVER_DATA.md).
 - [ ] Push/fold Nash charts and ICM calculator, computed in `@felt/core`
 - [x] Tournament track lessons (ICM, bubble, short stack play)
 - [ ] AI hand review grounded in solver data and your leak history (Claude API)
+- [x] AI coach chat for Felt Pro, using Felt's charts, your Felt Rating and recent misses (Claude API, `apps/server/src/coach.ts`, `/coach`)
 - [ ] Voice note hand capture; online hand history import
 - [x] Optional cloud sync and backup
 - [ ] Leak driven study plans

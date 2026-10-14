@@ -21,10 +21,10 @@ import { Section } from '../ui/Section';
 import './screens.css';
 import { useBodyClass } from '../ui/useBodyClass';
 
-const GRADE_TEXT = { best: 'Best play', good: 'Good play', inaccuracy: 'Inaccuracy', mistake: 'Mistake', blunder: 'Blunder' } as const;
+export const GRADE_TEXT = { best: 'Best play', good: 'Good play', inaccuracy: 'Inaccuracy', mistake: 'Mistake', blunder: 'Blunder' } as const;
 
 /** Readable action names from solver ids: bet75 is a bet of 75% of the pot. */
-function actionText(id: string, label: string) {
+export function actionText(id: string, label: string) {
   if (id === 'check') return 'Check';
   if (id === 'call') return 'Call';
   if (id === 'fold') return 'Fold';
@@ -35,7 +35,7 @@ function actionText(id: string, label: string) {
   return label;
 }
 
-function lineText(id: string, who: string) {
+export function lineText(id: string, who: string) {
   const you = who === 'You';
   if (id === 'check') return `${who} ${you ? 'check' : 'checks'}.`;
   if (id === 'call') return `${who} ${you ? 'call' : 'calls'}.`;
@@ -44,7 +44,7 @@ function lineText(id: string, who: string) {
   return `${who} ${you ? 'go' : 'goes'} all in.`;
 }
 
-function Board({ cards }: { cards: string }) {
+export function Board({ cards }: { cards: string }) {
   const list = cards.match(/.{2}/g) ?? [];
   return (
     <div className="row felt-strip scenario-board" style={{ justifyContent: 'center', gap: 8 }}>
@@ -344,7 +344,7 @@ function ScenarioPlayer({ scenario }: { scenario: ScenarioSpec }) {
   );
 }
 
-function RiverResultView({
+export function RiverResultView({
   hand,
   chosen,
   graded,

@@ -7,7 +7,9 @@ import { describeMix, RangeGrid } from '../components/RangeGrid';
 import { SeatStrip } from '../components/SeatStrip';
 import { haptic } from '../haptics';
 import { BottomBar } from '../ui/BottomBar';
-import { CheckIcon, CloseIcon, MinusIcon } from '../ui/icons';
+import { CheckIcon, CloseIcon, CoachIcon, MinusIcon } from '../ui/icons';
+import { Link } from 'react-router-dom';
+import { useCanAskCoach } from '../state/coach';
 import { actionLabels, spotLine } from './labels';
 import { untimedMs, useSettings } from '../state/settings';
 
@@ -23,6 +25,8 @@ interface Props {
   untimed?: boolean;
   /** Label for the button after an answer. */
   nextLabel?: string;
+  /** Offer mixed answers and grade by mix distance whatever the setting, so everyone is graded alike. */
+  mixAnswers?: boolean;
 }
 
 /** The clock starts once both cards have flipped face up. */
@@ -36,15 +40,17 @@ const VERDICTS = {
 };
 
 /** "You are UTG+1 with KTo, folded to you. Raise or fold?" Timed, then shows the full mix. */
-export function QuickRecall({ chart, hand, targetMs, onAnswer, onNext, compact, untimed: forceUntimed, nextLabel = 'Next hand' }: Props) {
+export function QuickRecall({ chart, hand, targetMs, onAnswer, onNext, compact, untimed: forceUntimed, nextLabel = 'Next hand', mixAnswers }: Props) {
   const { settings } = useSettings();
   const untimed = !!forceUntimed || !!settings.study.untimed;
   const shortcuts = settings.study.shortcuts !== false;
   const started = useRef(performance.now() + FLIP_MS);
   const revealRef = useRef<HTMLDivElement>(null);
+  // Only shown when the server offers the coach and this player has Pro there.
+  const canAskCoach = useCanAskCoach();
   const [answer, setAnswer] = useState<{ choice: string; label: string; outcome: DrillOutcome; kind: keyof typeof VERDICTS }>();
   // Mixed answers are on unless turned off, the same switch as painting mixes.
-  const mixes = settings.study.paintMixes !== false;
+  const mixes = !!mixAnswers || settings.study.paintMixes !== false;
   const combo = useMemo(() => {
     const combos = handClassCombos(hand);
     return combos[Math.floor(Math.random() * combos.length)];
@@ -166,6 +172,12 @@ export function QuickRecall({ chart, hand, targetMs, onAnswer, onNext, compact, 
           </div>
           <MixBar mix={mix} labels={labels} />
           <RangeGrid mixes={chart.mixes} reach={chart.reach} selected={hand} />
+          {canAskCoach && (
+            <Link to="/coach" state={{ spot: { chartId: chart.spec.id, hand, chose: answer.label, verdict: verdict.text } }} className="btn btn-tinted">
+              <CoachIcon size={18} />
+              Ask the coach
+            </Link>
+          )}
         </div>
       )}
 

@@ -44,3 +44,13 @@ services:
         sync: false
       - key: STRIPE_PRICE_MONTHLY
         sync: false
+      # AI coach for Felt Pro players (console.anthropic.com). Optional: off without a key.
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      # Optional coach settings. Defaults: claude-opus-5-5, medium, 40 messages a day.
+      - key: COACH_MODEL
+        sync: false
+      - key: COACH_EFFORT
+        sync: false
+      - key: COACH_DAILY_LIMIT
+        sync: false

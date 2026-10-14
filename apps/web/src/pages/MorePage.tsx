@@ -12,13 +12,14 @@ import { BrandFooter } from '../ui/Brand';
 import { ChevronRightIcon } from '../ui/icons';
 import { NavRow } from '../ui/NavRow';
 import { PageHeader } from '../ui/PageHeader';
+import { WeeklyMoreRow } from './WeeklyPage';
 
 const inTabs = new Set(TABS.map((t) => t.to));
 const item = (to: string) => NAV_ITEMS.find((i) => i.to === to)!;
 
 /** Big tiles for the places you go to train; small rows for the rest. */
 const TILES = ['/daily', '/scenarios', '/solver', '/lab', '/saved', '/exploit'].filter((to) => !inTabs.has(to));
-const GAME_ROWS = ['/log', '/import', '/league'];
+const GAME_ROWS = ['/coach', '/log', '/import', '/league'];
 const APP_ROWS = ['/account', '/settings'];
 
 /** Phone only: everything that does not fit in the tab bar, as a launcher. */
@@ -64,6 +65,7 @@ export function MorePage() {
             <Tile key={to} item={item(to)} badge={badge[to]} />
           ))}
         </div>
+        <WeeklyMoreRow />
       </section>
 
       <section>
@@ -71,7 +73,7 @@ export function MorePage() {
         <div className="list with-icons">
           {GAME_ROWS.map((to) => {
             const i = item(to);
-            return <NavRow key={to} to={to} icon={i.icon} color={i.color} title={i.label} detail={to === '/log' && stats?.sessions ? String(stats.sessions) : undefined} />;
+            return <NavRow key={to} to={to} icon={i.icon} color={i.color} title={i.label} subtitle={to === '/coach' ? 'Ask about your game' : undefined} detail={to === '/log' && stats?.sessions ? String(stats.sessions) : undefined} />;
           })}
         </div>
       </section>

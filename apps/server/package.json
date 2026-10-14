@@ -12,6 +12,7 @@
     "vapid": "node -e \"const w=require('web-push');const k=w.generateVAPIDKeys();console.log('VAPID_PUBLIC_KEY='+k.publicKey);console.log('VAPID_PRIVATE_KEY='+k.privateKey)\""
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "0.133.0",
     "@hono/node-server": "1.13.8",
     "hono": "4.6.20",
     "web-push": "3.6.7"

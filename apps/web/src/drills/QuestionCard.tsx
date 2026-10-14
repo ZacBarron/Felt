@@ -12,6 +12,8 @@ interface Props {
   targetMs: number;
   onAnswer: (outcome: DrillOutcome) => void;
   onNext: () => void;
+  /** Label for the button after an answer. */
+  nextLabel?: string;
 }
 
 const fmt = (v: number, unit: '%' | 'combos') => (unit === '%' ? `${v}%` : String(v));
@@ -24,6 +26,7 @@ function Question({
   targetMs,
   onAnswer,
   onNext,
+  nextLabel = 'Next card',
 }: Props & { step: Extract<LessonStep, { kind: 'quiz' }>; source: React.ReactNode; lessonKey?: string }) {
   const [reading, setReading] = useState(false);
   const started = useRef(performance.now());
@@ -48,7 +51,7 @@ function Question({
       {reading && lessonKey && <LessonSheet lessonKey={lessonKey} onClose={() => setReading(false)} />}
       <BottomBar>
         <button className="btn btn-primary btn-lg btn-block" disabled={!done} onClick={onNext} autoFocus={done}>
-          {done ? 'Next card' : 'Choose an answer'}
+          {done ? nextLabel : 'Choose an answer'}
         </button>
       </BottomBar>
     </div>

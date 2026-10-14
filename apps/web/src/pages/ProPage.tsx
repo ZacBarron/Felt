@@ -5,14 +5,15 @@ import { defaultAssumptions, formatAmount, skillEdge, stakesLabel } from '@felt/
 import { annualSavings, canOpenLesson, formatPrice, isLessonFree, isPro, PLANS, type PlanOption, type ProPerkId, proPerks, purchase, restorePurchases, SUPPORT_EMAIL } from '../state/access';
 import { pathPrefs } from '../state/goals';
 import { ratingSnapshot } from '../state/rating';
-import { refreshMe, serverFeatures } from '../state/api';
+import { refreshMe } from '../state/api';
+import { useCoachAvailable } from '../state/coach';
 import { track } from '../state/events';
 import { LESSON_ENTRIES } from '../state/lessons';
 import { trialReminder } from '../state/reminders';
 import { type Access, type Profile, useSettings } from '../state/settings';
 import { BrandMark, HeroPattern } from '../ui/Brand';
 import { BottomBar } from '../ui/BottomBar';
-import { AccountIcon, BellIcon, ChevronRightIcon, CloseIcon, LearnIcon, ReviewIcon, SolverIcon, TrophyIcon } from '../ui/icons';
+import { AccountIcon, BellIcon, ChevronRightIcon, CloseIcon, CoachIcon, LearnIcon, MedalIcon, SolverIcon } from '../ui/icons';
 import { useBodyClass } from '../ui/useBodyClass';
 import { onRadioKeys } from '../ui/radioKeys';
 
@@ -41,20 +42,13 @@ const LEAD_PERK: Record<string, ProPerkId> = { lesson: 'lessons', check: 'lesson
 
 const PERK_ICONS: Record<ProPerkId, typeof LearnIcon> = {
   lessons: LearnIcon,
-  coach: ReviewIcon,
-  weekly: TrophyIcon,
+  coach: CoachIcon,
+  weekly: MedalIcon,
   solver: SolverIcon,
   support: AccountIcon,
 };
 
-/** Whether this build's server offers the AI coach. */
-function useCoachLive() {
-  const [live, setLive] = useState(false);
-  useEffect(() => {
-    void serverFeatures().then((f) => setLive(!!(f as { coach?: boolean } | null)?.coach));
-  }, []);
-  return live;
-}
+
 
 /**
  * The Felt Pro paywall. Honest by design: the plans and price come first,
@@ -71,7 +65,7 @@ export function ProPage() {
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string>();
   const [rating, setRating] = useState<number>();
-  const coachLive = useCoachLive();
+  const coachLive = !!useCoachAvailable();
   useEffect(() => {
     void ratingSnapshot().then((r) => r.overall.games > 0 && setRating(r.overall.rating));
   }, []);
@@ -116,8 +110,8 @@ export function ProPage() {
         </div>
         <div className="list">
           {[
-            { to: '/coach', label: 'Ask your AI coach', Icon: ReviewIcon, show: coachLive },
-            { to: '/weekly', label: 'Play the weekly Pro challenge', Icon: TrophyIcon, show: true },
+            { to: '/coach', label: 'Ask your AI coach', Icon: CoachIcon, show: coachLive },
+            { to: '/weekly', label: 'Play the weekly Pro challenge', Icon: MedalIcon, show: true },
             { to: '/solver', label: 'Solve your own spots', Icon: SolverIcon, show: true },
           ]
             .filter((r) => r.show)

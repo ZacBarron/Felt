@@ -356,6 +356,17 @@ export function TrophyIcon(p: IconProps) {
   );
 }
 
+/** The weekly challenge: a medal hanging from a ribbon. */
+export function MedalIcon(p: IconProps) {
+  return (
+    <Svg {...p}>
+      <path d="M8.5 3.75h7l-2.6 6.15M8.5 3.75l2.6 6.15" />
+      <circle cx="12" cy="15" r="5.25" {...fillProps(p.filled)} />
+      <path d="m12 12.6.75 1.5 1.65.25-1.2 1.15.3 1.65-1.5-.8-1.5.8.3-1.65-1.2-1.15 1.65-.25z" fill="currentColor" stroke="none" />
+    </Svg>
+  );
+}
+
 /** Save: a bookmark ribbon. */
 export function BookmarkIcon(p: IconProps) {
   return (
@@ -412,6 +423,28 @@ export function CodeIcon(p: IconProps) {
   return (
     <Svg {...p}>
       <path d="M8.5 7.5 4 12l4.5 4.5M15.5 7.5 20 12l-4.5 4.5M13.25 5.5l-2.5 13" />
+    </Svg>
+  );
+}
+
+/** Coach: a speech bubble holding a card pip, a coach talking through a hand. */
+export function CoachIcon(p: IconProps) {
+  return (
+    <Svg {...p}>
+      <path
+        d="M12 4.25c4.56 0 8.25 3.03 8.25 6.75s-3.69 6.75-8.25 6.75c-.9 0-1.77-.12-2.58-.33L5.25 19.5l1.1-3.6C4.75 14.66 3.75 12.92 3.75 11c0-3.72 3.69-6.75 8.25-6.75z"
+        {...fillProps(p.filled)}
+      />
+      <path d="M12 8.2 10.2 11 12 13.8 13.8 11z" fill="currentColor" stroke="none" />
+    </Svg>
+  );
+}
+
+/** Send: an arrow pointing up, as in Messages. */
+export function SendIcon(p: IconProps) {
+  return (
+    <Svg {...p}>
+      <path d="M12 19V5.5M6.5 11 12 5.5l5.5 5.5" />
     </Svg>
   );
 }

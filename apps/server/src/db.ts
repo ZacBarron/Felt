@@ -94,6 +94,15 @@ const MIGRATIONS: string[] = [
   CREATE INDEX answers_item ON answers (item_id);
   CREATE TABLE stripe_events (id TEXT PRIMARY KEY, at TEXT NOT NULL);
   `,
+  // Coach messages per player per day (the player's own date), for the daily cap.
+  `
+  CREATE TABLE coach_usage (
+    user_id TEXT NOT NULL REFERENCES users (id) ON DELETE CASCADE,
+    day TEXT NOT NULL,
+    count INTEGER NOT NULL DEFAULT 0,
+    PRIMARY KEY (user_id, day)
+  );
+  `,
 ];
 
 export function openDb(path: string): Db {

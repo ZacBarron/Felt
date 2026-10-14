@@ -13,6 +13,8 @@ export interface ServerFeatures {
   accounts: boolean;
   billing: boolean;
   push: boolean;
+  /** The AI coach for Felt Pro players. Older servers leave it out, which reads as off. */
+  coach: boolean;
 }
 
 export interface ServerAccess {

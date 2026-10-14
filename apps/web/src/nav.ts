@@ -2,6 +2,7 @@ import {
   AccountIcon,
   LeagueIcon,
   BookmarkIcon,
+  CoachIcon,
   ExploitsIcon,
   ImportIcon,
   type IconComponent,
@@ -46,6 +47,7 @@ export const NAV_SECTIONS: { section: string; items: NavItem[] }[] = [
       { to: '/solver', label: 'Solver', icon: SolverIcon, color: 'var(--base-500)' },
       { to: '/lab', label: 'Spot Lab', icon: LabIcon, color: 'var(--base-500)' },
       { to: '/exploit', label: 'Exploits', icon: ExploitsIcon, color: 'var(--base-500)' },
+      { to: '/coach', label: 'Coach', icon: CoachIcon, color: 'var(--base-500)' },
     ],
   },
   {

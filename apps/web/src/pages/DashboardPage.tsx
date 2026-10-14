@@ -16,6 +16,7 @@ import { useSettings } from '../state/settings';
 import { Avatar } from '../ui/Avatar';
 import { ImportCard } from '../ui/ImportCard';
 import { InstallCard } from '../ui/InstallCard';
+import { WeeklyTodayCard } from './WeeklyPage';
 import { HeroPattern } from '../ui/Brand';
 import { plural } from '../ui/format';
 import { CheckIcon, ChevronRightIcon, FlameIcon } from '../ui/icons';
@@ -166,6 +167,8 @@ export function DashboardPage() {
 
       <InstallCard />
       <ImportCard />
+
+      <WeeklyTodayCard />
 
       <section className="card quests reveal" aria-labelledby="today-plan">
         <div className="quests-head">

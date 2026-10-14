@@ -131,6 +131,7 @@ Use one name for each thing, everywhere.
 | drill | Practice on one chart, not scheduled | free practice |
 | practice | 10 decisions at your level | workout |
 | daily challenge | The same 5 decisions for everyone each day | Felt Daily (except in the share text) |
+| weekly Pro challenge | The same 10 harder decisions for every Pro player each week, labelled "Pro event" | Felt Weekly (except in the share text), tournament |
 | decision | A rated hand or question | item |
 | chart | One spot's strategy grid | range (for the grid) |
 | range | The hands a player has | |

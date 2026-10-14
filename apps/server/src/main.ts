@@ -3,6 +3,7 @@ import { join, relative, resolve } from 'node:path';
 import { serve } from '@hono/node-server';
 import { serveStatic } from '@hono/node-server/serve-static';
 import { createApp } from './app.ts';
+import { createCoachClient } from './coach.ts';
 import { loadConfig } from './config.ts';
 import { openDb } from './db.ts';
 import { createPushSender, runReminders } from './push.ts';
@@ -15,6 +16,7 @@ const app = createApp({
   config,
   mailer: createMailer(config.email.resendKey, config.email.from),
   stripe: config.stripe.secretKey ? createStripe(config.stripe.secretKey) : undefined,
+  coach: config.coach.apiKey ? createCoachClient(config.coach.apiKey) : undefined,
 });
 
 // The web app, when built next to the server: one service hosts both.

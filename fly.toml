@@ -12,6 +12,10 @@ primary_region = "iad"
   DATABASE_PATH = "/data/felt.sqlite"
   # The address players use. Change it when you add your own domain.
   APP_URL = "https://felt-app.fly.dev"
+  # AI coach settings (optional). The key is a secret: fly secrets set ANTHROPIC_API_KEY=sk-ant-...
+  # COACH_MODEL = "claude-opus-5-5"
+  # COACH_EFFORT = "medium"
+  # COACH_DAILY_LIMIT = "40"
 
 # One volume holds the SQLite file. Create it once: fly volumes create felt_data --size 1
 [[mounts]]

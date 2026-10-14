@@ -4,6 +4,7 @@ import { Link, Navigate, NavLink, Route, Routes, useLocation } from 'react-route
 import { NAV_SECTIONS, TABS } from './nav';
 import { CheckPage, PlacementPage } from './pages/CheckPage';
 import { DailyPage } from './pages/DailyPage';
+import { WeeklyPage } from './pages/WeeklyPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { ImportPage } from './pages/ImportPage';
 import { LabPage } from './pages/LabPage';
@@ -25,6 +26,7 @@ import { SolverPage } from './pages/SolverPage';
 import { YouPage } from './pages/YouPage';
 import { AccountPage } from './pages/AccountPage';
 import { LeaguePage } from './pages/LeaguePage';
+import { CoachPage } from './pages/CoachPage';
 import { LegalPage } from './pages/LegalPage';
 import { accessFromServer } from './state/access';
 import { useSession } from './state/api';
@@ -142,10 +144,12 @@ export function App() {
             <Route path="/stats" element={<Navigate to="/you" replace />} />
             <Route path="/you" element={<YouPage />} />
             <Route path="/daily" element={<DailyPage />} />
+            <Route path="/weekly" element={<WeeklyPage />} />
             <Route path="/import" element={<ImportPage />} />
             <Route path="/practice" element={<PracticePage />} />
             <Route path="/account" element={<AccountPage />} />
             <Route path="/league" element={<LeaguePage />} />
+            <Route path="/coach" element={<CoachPage />} />
             <Route path="/terms" element={<LegalPage doc="terms" />} />
             <Route path="/privacy" element={<LegalPage doc="privacy" />} />
           </Routes>

@@ -25,10 +25,12 @@ interface Props {
   last: boolean;
   onScore: (score: number) => void;
   onNext: () => void;
+  /** Grade range decisions by mix distance with mixed answers offered, whatever the setting. */
+  mixAnswers?: boolean;
 }
 
 /** Renders a decision, records it toward the Felt Rating, and reports the score. */
-export function DecisionItem({ decision, source, last, onScore, onNext }: Props) {
+export function DecisionItem({ decision, source, last, onScore, onNext, mixAnswers }: Props) {
   const [answered, setAnswered] = useState(false);
   // A new decision is read from the top by screen readers.
   const top = useRef<HTMLDivElement>(null);
@@ -43,6 +45,7 @@ export function DecisionItem({ decision, source, last, onScore, onNext }: Props)
         chart={chart}
         hand={decision.hand}
         targetMs={3000}
+        mixAnswers={mixAnswers}
         onAnswer={(o: DrillOutcome) => {
           onScore(o.accuracy);
           const difficulty = chartItemDifficulty(chart.mixes.get(decision.hand) ?? { fold: 1 }, chartChoices(chart));

@@ -59,7 +59,7 @@ export interface StoredAnswer {
   domain: SkillDomain;
   difficulty: number;
   score: number;
-  source: 'review' | 'lesson' | 'check' | 'daily';
+  source: 'review' | 'lesson' | 'check' | 'daily' | 'weekly';
 }
 
 /** An imported hand, summarized from the hero's seat, with the original text. */
@@ -162,6 +162,28 @@ export interface StoredDaily {
   ratingAfter: number;
 }
 
+/** A weekly challenge, keyed by ISO week, saved after every answer. One attempt per week. */
+export interface StoredWeekly {
+  /** ISO week, like '2026-W42'. */
+  id: string;
+  /** Weekly challenge number. */
+  number: number;
+  at: Date;
+  /** The set as it was dealt, so a content update mid week cannot change a run in progress. */
+  items: WeeklyDecision[];
+  scores: number[];
+  finished: boolean;
+  ratingBefore: number;
+  ratingAfter: number;
+}
+
+/** A weekly decision: a range decision or lesson question, a math fact, or a scenario river solved by Felt Solver. */
+export type WeeklyDecision =
+  | { kind: 'chart'; chartId: string; hand: string }
+  | { kind: 'quiz'; key: string; step: number }
+  | { kind: 'math'; factId: string }
+  | { kind: 'river'; scenarioId: string };
+
 export interface StoredReview {
   id?: number;
   cardId: string;
@@ -196,6 +218,7 @@ export const db = new Dexie('felt') as Dexie & {
   events: EntityTable<StoredEvent, 'id'>;
   scenarios: EntityTable<StoredScenario, 'id'>;
   logged: EntityTable<LoggedHand, 'id'>;
+  weekly: EntityTable<StoredWeekly, 'id'>;
 };
 
 db.version(1).stores({
@@ -254,4 +277,9 @@ db.version(7)
 db.version(8).stores({
   scenarios: 'id, at',
   logged: '++id, at, sessionId, flagged',
+});
+
+// Version 9 adds weekly challenge results.
+db.version(9).stores({
+  weekly: 'id, at',
 });

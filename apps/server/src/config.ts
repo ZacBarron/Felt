@@ -19,7 +19,12 @@ export interface Config {
   push: { publicKey?: string; privateKey?: string; subject: string };
   /** Largest sync snapshot accepted, in bytes. */
   maxSnapshotBytes: number;
+  /** The AI coach (Claude). Off when no API key is set. */
+  coach: { apiKey?: string; model: string; effort: CoachEffort; dailyLimit: number };
 }
+
+export const COACH_EFFORTS = ['low', 'medium', 'high', 'xhigh', 'max'] as const;
+export type CoachEffort = (typeof COACH_EFFORTS)[number];
 
 export function loadConfig(raw: Record<string, string | undefined> = process.env): Config {
   // Host dashboards often save a blank field as an empty string. Blank means unset.
@@ -42,5 +47,16 @@ export function loadConfig(raw: Record<string, string | undefined> = process.env
     },
     push: { publicKey: env.VAPID_PUBLIC_KEY, privateKey: env.VAPID_PRIVATE_KEY, subject: env.VAPID_SUBJECT ?? 'mailto:support@example.com' },
     maxSnapshotBytes: Number(env.MAX_SNAPSHOT_BYTES ?? 40 * 1024 * 1024),
+    coach: {
+      apiKey: env.ANTHROPIC_API_KEY,
+      model: env.COACH_MODEL ?? 'claude-opus-5-5',
+      effort: COACH_EFFORTS.find((e) => e === env.COACH_EFFORT) ?? 'medium',
+      dailyLimit: positiveInt(env.COACH_DAILY_LIMIT, 40),
+    },
   };
+}
+
+function positiveInt(raw: string | undefined, fallback: number): number {
+  const n = Number(raw);
+  return Number.isInteger(n) && n > 0 ? n : fallback;
 }

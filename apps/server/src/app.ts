@@ -1,11 +1,13 @@
 import { Hono, type Context } from 'hono';
 import { bodyLimit } from 'hono/body-limit';
+import { askCoach, type CoachClient, coachErrorResponse, parseCoachRequest, REFUSAL_REPLY, TRUNCATED_NOTE } from './coach.ts';
 import type { Config } from './config.ts';
 import { type Db, tx } from './db.ts';
 import {
   CALIBRATION_MIN_ANSWERS,
   dailySummary,
   entitlementFromSubscription,
+  localTime,
   fitDifficulty,
   LEAGUE_SIZE,
   type Mailer,
@@ -26,6 +28,8 @@ export interface Deps {
   config: Config;
   mailer: Mailer;
   stripe?: StripeCall;
+  /** The AI coach's Claude client. Without it the coach is off. */
+  coach?: CoachClient;
   now?: () => Date;
 }
 
@@ -76,7 +80,7 @@ async function json<T>(c: Context): Promise<Partial<T>> {
   }
 }
 
-export function createApp({ db, config, mailer, stripe, now = () => new Date() }: Deps) {
+export function createApp({ db, config, mailer, stripe, coach, now = () => new Date() }: Deps) {
   const app = new Hono<Env>();
   const iso = () => now().toISOString();
 
@@ -111,6 +115,7 @@ export function createApp({ db, config, mailer, stripe, now = () => new Date() }
         accounts: !!config.email.resendKey || config.devCodes,
         billing: !!(stripe && config.stripe.priceAnnual && config.stripe.priceMonthly),
         push: !!(config.push.publicKey && config.push.privateKey),
+        coach: !!coach,
       },
     }),
   );
@@ -353,6 +358,66 @@ export function createApp({ db, config, mailer, stripe, now = () => new Date() }
     db.prepare('DELETE FROM push_subs WHERE endpoint = ? AND user_id = ?').run(endpoint ?? '', c.get('user').id);
     return c.json({ ok: true });
   });
+
+  // AI coach ---------------------------------------------------------------------
+
+  const hasPro = (u: UserRow) => !!u.pro_until && new Date(u.pro_until) > now();
+
+  /** The player's own date, so the daily cap resets at their midnight. */
+  const coachDay = (u: UserRow) => {
+    try {
+      return localTime(now(), u.tz ?? 'UTC').day;
+    } catch {
+      return localTime(now(), 'UTC').day;
+    }
+  };
+
+  const coachUsed = (userId: string, day: string) =>
+    (db.prepare('SELECT count FROM coach_usage WHERE user_id = ? AND day = ?').get(userId, day) as { count: number } | undefined)?.count ?? 0;
+
+  app.get('/api/coach', requireUser, (c) => {
+    const u = c.get('user');
+    const limit = config.coach.dailyLimit;
+    return c.json({ on: !!coach, pro: hasPro(u), limit, remaining: Math.max(0, limit - coachUsed(u.id, coachDay(u))) });
+  });
+
+  app.post(
+    '/api/coach',
+    requireUser,
+    bodyLimit({ maxSize: 64 * 1024, onError: (c) => c.json({ error: 'This chat is too long. Start a new chat.' }, 413) }),
+    async (c) => {
+      if (!coach) return c.json({ error: 'The coach is not turned on for this server.' }, 503);
+      const u = c.get('user');
+      if (!hasPro(u)) return c.json({ error: 'The coach is part of Felt Pro.', reason: 'pro' }, 403);
+      const parsed = parseCoachRequest(await json(c));
+      if (!parsed.ok) return c.json({ error: parsed.error }, 400);
+
+      // Reserve today's message before calling, so two requests at once cannot pass the cap.
+      const day = coachDay(u);
+      const limit = config.coach.dailyLimit;
+      const reserved = tx(db, () => {
+        const n = coachUsed(u.id, day);
+        if (n >= limit) return undefined;
+        db.prepare('INSERT INTO coach_usage (user_id, day, count) VALUES (?, ?, 1) ON CONFLICT (user_id, day) DO UPDATE SET count = count + 1').run(u.id, day);
+        return n + 1;
+      });
+      if (reserved === undefined)
+        return c.json({ error: `You have used all ${limit} coach messages for today. You get ${limit} more at midnight.`, remaining: 0 }, 429);
+      const remaining = Math.max(0, limit - reserved);
+
+      try {
+        const result = await askCoach(coach, { model: config.coach.model, effort: config.coach.effort, messages: parsed.messages, context: parsed.context });
+        if (result.kind === 'refusal') return c.json({ reply: REFUSAL_REPLY, refused: true, remaining });
+        return c.json({ reply: result.text + (result.truncated ? TRUNCATED_NOTE : ''), remaining });
+      } catch (err) {
+        // A failed call does not use up a message.
+        db.prepare('UPDATE coach_usage SET count = MAX(0, count - 1) WHERE user_id = ? AND day = ?').run(u.id, day);
+        console.error('Coach request failed', err);
+        const { status, error } = coachErrorResponse(err);
+        return c.json({ error }, status);
+      }
+    },
+  );
 
   // Daily challenge stats ------------------------------------------------------------
 
