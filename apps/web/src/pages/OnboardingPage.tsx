@@ -12,7 +12,7 @@ import { CUES, cueCopy, DAILY_OPTIONS, EXPERIENCE, EXPERIENCE_REPLY, FOCUS, goal
 import { isComplete, LESSON_ENTRIES, lessonProgress, recommendedLessons } from '../state/lessons';
 import { studyReminder } from '../state/reminders';
 import { type Experience, type Focus, type Profile, useSettings } from '../state/settings';
-import { BrandMark, HeroPattern, TAGLINE, Wordmark } from '../ui/Brand';
+import { BrandMark, HeroPattern, Wordmark } from '../ui/Brand';
 import { BottomBar } from '../ui/BottomBar';
 import { BellIcon, CheckIcon, ChevronLeftIcon, ClockIcon, LockIcon, ReviewIcon, SolverIcon, StatsIcon, TargetIcon } from '../ui/icons';
 import { PlayingCard } from '../components/PlayingCard';
@@ -22,7 +22,8 @@ import { serverFeatures, useServerFeatures, useSession } from '../state/api';
 import { readPrompt } from '../state/accountPrompt';
 import { useClaudeCloud } from '../state/cloud';
 import { SaveProgress } from './SignInPage';
-import { firstHandSpot } from '../state/charts';
+import { firstHandSpot, getChart } from '../state/charts';
+import { RangeGrid } from '../components/RangeGrid';
 import { useBodyClass } from '../ui/useBodyClass';
 import { onRadioKeys } from '../ui/radioKeys';
 import { requestPersistentStorage } from '../state/backup';
@@ -258,48 +259,137 @@ function Testimonials() {
   );
 }
 
+/** A mini quiz like the ones in every lesson. AJo always opens from the button (checked in welcome.test.ts). */
+function ValueQuiz() {
+  return (
+    <div className="value-quiz" aria-hidden="true">
+      <div className="value-quiz-q">Folded to you on the button</div>
+      <div className="value-quiz-cards">
+        <PlayingCard card={parseCard('As')} size="md" />
+        <PlayingCard card={parseCard('Jd')} size="md" />
+      </div>
+      <div className="value-quiz-choices">
+        <span className="value-choice right">
+          <CheckIcon size={14} /> Raise
+        </span>
+        <span className="value-choice">Fold</span>
+      </div>
+    </div>
+  );
+}
+
+const BTN_OPEN = getChart('9max-100-rfi-btn');
+
+/**
+ * What Felt is, shown rather than told: three cards, each a real piece of the
+ * app (a lesson question, a range chart, the rating ladder). Swipe, or let it
+ * advance on its own until the player touches it.
+ */
+const VALUE = [
+  { id: 'learn', title: 'Learn by playing real hands', body: 'Short lessons with a picture on every screen. Every answer says why.', Art: ValueQuiz },
+  {
+    id: 'chart',
+    title: 'Know the right play',
+    body: 'Charts show how often to raise or fold every hand, the way solvers play.',
+    Art: () => (BTN_OPEN ? <div className="value-grid" aria-hidden="true"><RangeGrid mixes={BTN_OPEN.mixes} /></div> : null),
+  },
+  {
+    id: 'climb',
+    title: 'Watch your skill climb',
+    body: 'Your Felt Rating moves only on real answers. Newcomer to Elite.',
+    Art: () => (
+      <div className="value-ladder">
+        <div className="value-rating" aria-hidden="true">
+          <span>
+            <span className="value-rating-num num">{tierMin('Solid')}</span>
+            <span className="value-rating-tier">Solid</span>
+          </span>
+          <span className="value-rating-arrow">→</span>
+          <span>
+            <span className="value-rating-num num goal">{tierMin('Elite')}</span>
+            <span className="value-rating-tier">Elite</span>
+          </span>
+        </div>
+        <LadderTrack climb />
+      </div>
+    ),
+  },
+];
+
+function ValueCarousel() {
+  const track = useRef<HTMLDivElement>(null);
+  const [page, setPage] = useState(0);
+  const touched = useRef(false);
+  useEffect(() => {
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const t = setInterval(() => {
+      const el = track.current;
+      if (!el || touched.current) return;
+      const next = (Math.round(el.scrollLeft / el.clientWidth) + 1) % VALUE.length;
+      el.scrollTo({ left: next * el.clientWidth, behavior: 'smooth' });
+    }, 4200);
+    return () => clearInterval(t);
+  }, []);
+  return (
+    <div className="value-carousel">
+      <div
+        ref={track}
+        className="value-track"
+        onPointerDown={() => (touched.current = true)}
+        onScroll={(e) => setPage(Math.round(e.currentTarget.scrollLeft / e.currentTarget.clientWidth))}
+        aria-roledescription="carousel"
+        aria-label="What Felt does"
+      >
+        {VALUE.map(({ id, title, body, Art }, i) => (
+          <article key={id} className="value-card" aria-roledescription="slide" aria-label={`${i + 1} of ${VALUE.length}`}>
+            <div className="value-art">
+              <Art />
+            </div>
+            <h2 className="value-title">{title}</h2>
+            <p className="value-body">{body}</p>
+          </article>
+        ))}
+      </div>
+      <div className="value-dots" aria-hidden="true">
+        {VALUE.map((v, i) => (
+          <span key={v.id} className={i === page ? 'on' : ''} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function Welcome({ heading, onStart }: { heading: React.RefObject<HTMLHeadingElement>; onStart: () => void }) {
   const navigate = useNavigate();
   const [server, setServer] = useState(false);
   useEffect(() => {
-    void serverFeatures().then((f) => setServer(!!f));
+    void serverFeatures().then((f) => setServer(!!f?.accounts));
   }, []);
   return (
-    <div className="onb-intro">
+    <div className="onb-intro onb-welcome">
       <div className="onb-intro-felt">
         <HeroPattern />
-        <div className="onb-intro-mark">
-          <BrandMark size={64} animate />
+        <div className="onb-welcome-brand reveal">
+          <BrandMark size={40} animate />
+          <Wordmark height={26} color="#fff" />
         </div>
-        <div className="reveal" style={{ animationDelay: '900ms' }}>
-          <Wordmark height={34} color="#fff" />
-        </div>
-        <p className="onb-tagline reveal" style={{ animationDelay: '1050ms' }}>
-          {TAGLINE}
-        </p>
-        <div className="onb-hand" aria-hidden="true">
-          <PlayingCard card={parseCard('As')} size="lg" flip delayMs={1150} />
-          <PlayingCard card={parseCard('Ah')} size="lg" flip delayMs={1240} />
-        </div>
-      </div>
-      <div className="onb-intro-copy stack">
-        <h1 ref={heading} tabIndex={-1} className="display onb-title reveal" style={{ animationDelay: '1250ms' }}>
+        <h1 ref={heading} tabIndex={-1} className="display onb-welcome-title reveal" style={{ animationDelay: '500ms' }}>
           From your first hand to Elite.
         </h1>
-        <p className="muted reveal onb-lead" style={{ animationDelay: '1350ms' }}>
-          Short daily lessons. Real answers with their sources. A rating that shows your climb.
+        <p className="onb-welcome-sub reveal" style={{ animationDelay: '650ms' }}>
+          Poker training in a few minutes a day.
         </p>
-        <div className="reveal" style={{ animationDelay: '1450ms' }}>
-          <LadderTrack climb />
-        </div>
-        <ul className="onb-proof reveal" style={{ animationDelay: '1550ms' }}>
-          {PROOF.map((p) => (
-            <li key={p.label}>
-              <span className="onb-proof-num num">{p.value}</span>
-              <span className="onb-proof-label">{p.label}</span>
-            </li>
-          ))}
+        <ul className="onb-levels reveal" style={{ animationDelay: '800ms' }} aria-label="Built for every level">
+          <li>New to poker</li>
+          <li>Play for fun</li>
+          <li>Play for money</li>
         </ul>
+      </div>
+      <div className="onb-intro-copy stack">
+        <ValueCarousel />
+        <p className="onb-proof-line footnote">
+          {PROOF.map((p) => `${p.value} ${p.label}`).join(' · ')}
+        </p>
         <Testimonials />
       </div>
       <BottomBar>
