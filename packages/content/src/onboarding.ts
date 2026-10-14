@@ -1,3 +1,4 @@
+import { BASICS_LESSONS } from './lessons/basics';
 import type { LessonStep } from './lessons/types';
 
 type Quiz = Extract<LessonStep, { kind: 'quiz' }>;
@@ -16,6 +17,14 @@ export const FIRST_HAND_NEW: Quiz = {
   answer: 0,
   explain: 'Two aces is the best starting hand in poker. It beats 7 2 about 87% of the time. Felt teaches you which hands to play and when.',
 };
+
+/**
+ * The first hand for someone who knows the rules: a hand ranking question
+ * from the rankings lesson, so it is checked like every lesson quiz.
+ */
+export const FIRST_HAND_CASUAL: Quiz = BASICS_LESSONS.find((l) => l.key === 'basics/rules/rankings')!.steps.find(
+  (s): s is Quiz => s.kind === 'quiz' && s.question.startsWith('You have a full house'),
+)!;
 
 /** The hands behind FIRST_HAND_NEW's chance, for the test that checks it. */
 export const FIRST_HAND_NEW_MATCHUP = { hero: 'AsAh', villain: '7c2d', winPct: 87 } as const;

@@ -1,4 +1,5 @@
 import { BASICS_LESSONS } from './basics';
+import { BASICS_MONEY_LESSONS } from './basics-money';
 import { BASICS_TABLE_LESSONS } from './basics-table';
 import { EXPLOIT_LESSONS } from './exploit';
 import { EXPLOIT_MORE_LESSONS } from './exploit-more';
@@ -22,6 +23,7 @@ export * from './types';
 const ALL: LessonContent[] = [
   ...BASICS_LESSONS,
   ...BASICS_TABLE_LESSONS,
+  ...BASICS_MONEY_LESSONS,
   ...FOUNDATIONS_LESSONS,
   ...THEORY_LESSONS,
   ...PREFLOP_LESSONS,

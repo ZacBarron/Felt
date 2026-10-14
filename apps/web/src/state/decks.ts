@@ -48,10 +48,28 @@ export function deckOf(card: Pick<StoredCard, 'chartId' | 'mode'>): DeckId {
   return 'charts';
 }
 
+/**
+ * Review strengthens what was taught, so a deck starts dealing new cards only
+ * after the lesson that introduces it. Someone brand new is never quizzed on
+ * a range chart before they know what one is. A passed lesson counts too, so
+ * placement unlocks these at once for players who already know them.
+ */
+const CHART_INTRO = 'basics/first-strategy/starting-hands';
+const MATH_INTRO = 'basics/first-strategy/odds';
+
+export function chartsTaught(progress: ReadonlyMap<string, Parameters<typeof isComplete>[0]>): boolean {
+  return isComplete(progress.get(CHART_INTRO)) || [...progress].some(([key, l]) => key.startsWith('preflop/') && isComplete(l));
+}
+
+export function mathTaught(progress: ReadonlyMap<string, Parameters<typeof isComplete>[0]>): boolean {
+  return isComplete(progress.get(MATH_INTRO)) || [...progress].some(([key, l]) => key.startsWith('foundations/math/') && isComplete(l));
+}
+
 /** Every card a deck could hold, in the order new ones are introduced. */
 async function seedsFor(deck: DeckId, charts: readonly Chart[]): Promise<QueueItem[]> {
-  if (deck === 'charts') return deckForCharts(charts).map((s) => toItem(s, true));
+  if (deck === 'charts') return chartsTaught(await lessonProgress()) ? deckForCharts(charts).map((s) => toItem(s, true)) : [];
   if (deck === 'math') {
+    if (!mathTaught(await lessonProgress())) return [];
     return MATH_FACTS.map((f) => ({ id: f.id, chartId: MATH_DECK, mode: 'math', factId: f.id, targetMs: MATH_TARGET_MS, isNew: true }));
   }
   if (deck === 'lessons') {

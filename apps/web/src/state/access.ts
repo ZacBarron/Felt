@@ -77,7 +77,36 @@ export function canOpenLesson(key: string, access: Access): boolean {
 }
 
 /** Paid features outside lessons. */
-export type ProFeature = 'solver' | 'all-lessons' | 'paint-drills';
+export type ProFeature = 'solver' | 'all-lessons' | 'paint-drills' | 'coach' | 'weekly';
+
+/**
+ * Where Pro players reach a person for priority support. Empty hides priority
+ * support everywhere: never promise a perk with no one behind it.
+ */
+export const SUPPORT_EMAIL = '';
+
+/**
+ * Everything Pro adds, in the order the paywall shows it. `live` is false for
+ * a perk that needs something this build does not have yet (the coach needs a
+ * server with the coach turned on); the paywall labels those "Coming soon".
+ */
+export type ProPerkId = 'lessons' | 'coach' | 'weekly' | 'solver' | 'support';
+export interface ProPerk {
+  id: ProPerkId;
+  title: string;
+  note: string;
+  live: boolean;
+}
+
+export function proPerks({ proLessons, coach }: { proLessons: number; coach: boolean }): ProPerk[] {
+  return [
+    { id: 'lessons', title: `${proLessons} more lessons`, note: 'River play, exploits and tournaments', live: true },
+    { id: 'coach', title: 'AI coach', note: 'Ask about any hand. It knows your weak spots.', live: coach },
+    { id: 'weekly', title: 'Weekly Pro challenge', note: 'Ten hard spots each week. Beat your best.', live: true },
+    { id: 'solver', title: 'Solve your own spots', note: 'Any board, range and stack size', live: true },
+    ...(SUPPORT_EMAIL ? [{ id: 'support' as const, title: 'Priority support', note: 'Your questions go to the front of the line', live: true }] : []),
+  ];
+}
 
 export function canUse(feature: ProFeature, access: Access): boolean {
   return isPro(access) || feature === 'paint-drills';

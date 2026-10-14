@@ -1,14 +1,41 @@
 import { CURRICULUM } from '@felt/content';
 import type { Experience, Focus, Goal, Profile } from './settings';
 
-/** Copy for onboarding choices. `plan` finishes the sentence "Your plan to ..." */
-export const GOALS: { id: Goal; label: string; note: string; plan: string }[] = [
-  { id: 'win-live', label: 'Win more at live cash', note: 'Beat the games I play now', plan: 'win more at live cash' },
-  { id: 'move-up', label: 'Move up in stakes', note: 'Get good enough for bigger games', plan: 'move up in stakes' },
-  { id: 'go-pro', label: 'Play professionally', note: 'Poker as a real income', plan: 'play at a professional level' },
-  { id: 'master-gto', label: 'Master GTO', note: 'Understand why solvers play the way they do', plan: 'master GTO' },
-  { id: 'tournaments', label: 'Go deep in tournaments', note: 'Short stacks and final tables', plan: 'go deep in tournaments' },
+type Audience = 'beginner' | 'player' | 'all';
+
+/**
+ * Copy for onboarding choices. `plan` finishes the sentence "Your plan to ...".
+ * Beginners (new, or play for fun) see goals in their own words; regular and
+ * professional players see the ones that name their game. `plain` rewords a
+ * shared goal for beginners.
+ */
+export const GOALS: { id: Goal; label: string; note: string; plan: string; audience: Audience; plain?: { label: string; note: string } }[] = [
+  { id: 'learn', label: 'Learn the game properly', note: 'From the rules to a solid plan', plan: 'learn the game properly', audience: 'beginner' },
+  { id: 'home-games', label: 'Win at home games', note: 'Beat friends and family', plan: 'win at home games', audience: 'beginner' },
+  { id: 'casino', label: 'Play at a casino', note: 'Feel ready at a real table', plan: 'feel ready at a casino', audience: 'beginner' },
+  { id: 'climb', label: 'Get really good', note: 'Climb as high as I can', plan: 'get really good at poker', audience: 'beginner' },
+  { id: 'win-live', label: 'Win more at live cash', note: 'Beat the games I play now', plan: 'win more at live cash', audience: 'player' },
+  { id: 'move-up', label: 'Move up in stakes', note: 'Get good enough for bigger games', plan: 'move up in stakes', audience: 'player' },
+  { id: 'go-pro', label: 'Play professionally', note: 'Poker as a real income', plan: 'play at a professional level', audience: 'player' },
+  { id: 'master-gto', label: 'Master GTO', note: 'Understand why solvers play the way they do', plan: 'master GTO', audience: 'player' },
+  {
+    id: 'tournaments',
+    label: 'Go deep in tournaments',
+    note: 'Short stacks and final tables',
+    plan: 'go deep in tournaments',
+    audience: 'all',
+    plain: { label: 'Play tournaments', note: 'One buy in. Prizes go to the last players left.' },
+  },
 ];
+
+/** New players and people who play for fun get plain words and the basics first. */
+export const isBeginner = (experience?: Experience) => experience === 'new' || experience === 'casual';
+
+/** The goals to offer for an experience level, worded for that player. */
+export function goalsFor(experience?: Experience) {
+  const beginner = isBeginner(experience);
+  return GOALS.filter((g) => g.audience === 'all' || (g.audience === 'beginner') === beginner).map((g) => (beginner && g.plain ? { ...g, ...g.plain } : g));
+}
 
 export const EXPERIENCE: { id: Experience; label: string; note: string }[] = [
   { id: 'new', label: 'New to poker', note: 'Start with the rules. No experience needed.' },
@@ -30,19 +57,21 @@ export const EXPERIENCE_REPLY: Record<Experience, string> = {
  * means describes skill, never money: winnings depend on the game too.
  */
 export const TARGETS: { tier: string; note: string }[] = [
-  { tier: 'Solid', note: 'Sound basics and fewer costly mistakes' },
-  { tier: 'Regular', note: 'Strong preflop and a plan on every street' },
-  { tier: 'Expert', note: 'Mixed strategies and exploits on purpose' },
-  { tier: 'Elite', note: 'Close to solver play in every spot Felt rates' },
+  { tier: 'Solid', note: 'Sound basics and few big mistakes' },
+  { tier: 'Regular', note: 'The right play in common spots' },
+  { tier: 'Expert', note: 'Adjust to each opponent on purpose' },
+  { tier: 'Elite', note: 'Close to perfect in every spot Felt rates' },
 ];
 
-export const FOCUS: { id: Focus; label: string; module: string }[] = [
-  { id: 'preflop', label: 'Preflop ranges', module: 'preflop/rfi' },
-  { id: 'postflop', label: 'Postflop decisions', module: 'postflop/cbet' },
-  { id: 'sizing', label: 'Bet sizing', module: 'postflop/river' },
-  { id: 'reads', label: 'Reading opponents', module: 'exploit/profiling' },
-  { id: 'math', label: 'Poker math', module: 'foundations/math' },
-  { id: 'mental', label: 'Tilt and mindset', module: 'mindset/mental' },
+/** Each area says what it means in plain words, so the list works for every level. */
+export const FOCUS: { id: Focus; label: string; note: string; module: string }[] = [
+  { id: 'preflop', label: 'Preflop ranges', note: 'Which hands to play from each seat', module: 'preflop/rfi' },
+  { id: 'postflop', label: 'Postflop decisions', note: 'What to do after the flop', module: 'postflop/cbet' },
+  { id: 'sizing', label: 'Bet sizing', note: 'How much to bet and why', module: 'postflop/river' },
+  { id: 'reads', label: 'Reading opponents', note: 'Spot their habits and use them', module: 'exploit/profiling' },
+  { id: 'math', label: 'Poker math', note: 'Pot odds and your chance to win', module: 'foundations/math' },
+  { id: 'mental', label: 'Tilt and mindset', note: 'Play well after a bad beat', module: 'mindset/mental' },
+  { id: 'bankroll', label: 'Bankroll and swings', note: 'How much money to bring and why', module: 'mindset/mental' },
 ];
 
 /** What each daily amount buys, never a finish line: there is always more to train. */
@@ -69,6 +98,10 @@ export function goalCopy(goal?: Goal) {
 
 /** Modules each goal brings forward in the path. */
 export const GOAL_MODULES: Record<Goal, string[]> = {
+  learn: [],
+  'home-games': ['preflop/live-preflop', 'exploit/profiling'],
+  casino: ['basics/money', 'preflop/live-preflop'],
+  climb: ['foundations/math', 'preflop/rfi'],
   'win-live': ['preflop/live-preflop', 'exploit/adjustments'],
   'move-up': ['preflop/3bet-pots', 'postflop/river'],
   'go-pro': ['postflop/later-streets', 'exploit/profiling'],

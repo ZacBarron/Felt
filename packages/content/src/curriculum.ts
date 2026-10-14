@@ -36,7 +36,7 @@ export const CURRICULUM: Track[] = [
   {
     id: 'basics',
     title: 'Poker basics',
-    summary: 'The rules and a first strategy, for anyone who has never played.',
+    summary: 'The rules, a first strategy and how to play for money.',
     modules: [
       {
         id: 'rules',
@@ -59,6 +59,15 @@ export const CURRICULUM: Track[] = [
           lesson('starting-hands', 'Starting hands', ['concept']),
           lesson('ranges', 'What a range is', ['concept']),
           lesson('odds', 'Odds in plain words', ['math']),
+        ],
+      },
+      {
+        id: 'money',
+        title: 'Playing for money',
+        lessons: [
+          lesson('stakes', 'How stakes work', ['concept', 'math']),
+          lesson('card-room', 'Your first time at a card room', ['concept']),
+          lesson('bankroll-start', 'Money set aside for poker', ['concept', 'math']),
         ],
       },
     ],

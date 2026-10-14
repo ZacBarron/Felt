@@ -42,9 +42,9 @@ export interface UiSettings {
   palette: Palette;
 }
 
-export type Goal = 'win-live' | 'move-up' | 'go-pro' | 'master-gto' | 'tournaments';
+export type Goal = 'learn' | 'home-games' | 'casino' | 'climb' | 'win-live' | 'move-up' | 'go-pro' | 'master-gto' | 'tournaments';
 export type Experience = 'new' | 'casual' | 'winning' | 'pro';
-export type Focus = 'preflop' | 'postflop' | 'sizing' | 'reads' | 'math' | 'mental';
+export type Focus = 'preflop' | 'postflop' | 'sizing' | 'reads' | 'math' | 'mental' | 'bankroll';
 
 /** What the player told us during onboarding. Drives their plan and copy. */
 export interface Profile {

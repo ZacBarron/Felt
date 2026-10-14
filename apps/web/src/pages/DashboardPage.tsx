@@ -10,7 +10,7 @@ import { db, type StoredLesson } from '../state/db';
 import { cueCopy, goalCopy, pathPrefs } from '../state/goals';
 import { lessonPath, lessonProgress, pickNextLesson } from '../state/lessons';
 import { ratingSnapshot, streakNow } from '../state/rating';
-import { reviewTotal } from '../state/decks';
+import { chartsTaught, reviewTotal } from '../state/decks';
 import { buildQueue, masteryForCharts, todayStats } from '../state/review';
 import { useSettings } from '../state/settings';
 import { Avatar } from '../ui/Avatar';
@@ -59,6 +59,8 @@ export function DashboardPage() {
   const idea = ideaForDay(new Date());
   const lessonToday = [...progress.values()].some((l) => l.status === 'done' && l.updatedAt >= new Date(new Date().setHours(0, 0, 0, 0)));
   const reviewDone = !!stats && remaining === 0;
+  // Until a player has learned what a range chart is, Today does not send them to chart questions.
+  const taught = chartsTaught(progress);
   const tasks = [
     nextLesson && {
       done: lessonToday,
@@ -66,13 +68,13 @@ export function DashboardPage() {
       to: lessonPath(nextLesson.key),
       detail: lessonToday ? '' : `${nextLesson.content?.minutes ?? 5} min`,
     },
-    {
+    (taught || remaining > 0) && {
       done: reviewDone,
       label: reviewDone ? 'Review cleared' : 'Clear your review',
       to: reviewDone ? '/practice' : '/review',
       detail: !stats ? '' : reviewDone ? (stats.reviewedToday ? '' : 'Nothing due') : plural(remaining, 'card'),
     },
-    { done: !!dailyDone?.finished || (!!dailyDone && dailyDone.finished === undefined), label: dailyDone && dailyDone.finished !== false ? 'Challenge done' : 'Play the daily challenge', to: '/daily', detail: !dailyDone ? '5 decisions' : dailyDone.finished === false ? `${dailyDone.scores.length} of 5 done` : `${dailyDone.scores.filter((x) => x >= 1).length} of 5 right` },
+    taught && { done: !!dailyDone?.finished || (!!dailyDone && dailyDone.finished === undefined), label: dailyDone && dailyDone.finished !== false ? 'Challenge done' : 'Play the daily challenge', to: '/daily', detail: !dailyDone ? '5 decisions' : dailyDone.finished === false ? `${dailyDone.scores.length} of 5 done` : `${dailyDone.scores.filter((x) => x >= 1).length} of 5 right` },
   ].filter(Boolean) as { done: boolean; label: string; to: string; detail: string }[];
   const tasksDone = tasks.filter((t) => t.done).length;
   const touchedCharts = mastery?.filter((m) => m.solid + m.learning > 0) ?? [];
@@ -131,7 +133,7 @@ export function DashboardPage() {
                 </>
               )}
             </div>
-            {next && nextChart && remaining > 0 && (
+            {next && nextChart && remaining > 0 && taught && (
               <div className="up-next" aria-hidden="true">
                 <div className="fan">
                   {next.mode === 'quick' && next.hand ? (
@@ -165,7 +167,7 @@ export function DashboardPage() {
 
       <section className="card quests reveal" aria-labelledby="today-plan">
         <div className="quests-head">
-          <ProgressRing value={tasksDone / tasks.length} size={52} stroke={6} label={`${tasksDone} of ${tasks.length} done`}>
+          <ProgressRing value={tasks.length ? tasksDone / tasks.length : 1} size={52} stroke={6} label={`${tasksDone} of ${tasks.length} done`}>
             {tasksDone === tasks.length ? (
               <CheckIcon size={20} style={{ color: 'var(--tint)' }} />
             ) : (

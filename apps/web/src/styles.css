@@ -5375,3 +5375,52 @@ a.card.more-me,
   color: var(--green-text);
   font-weight: 600;
 }
+
+/* Felt Pro perks: a two column grid so every perk fits above the plans. */
+.pro-perks {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.6rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pro-perk {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  min-width: 0;
+  padding: 0.85rem;
+  border-radius: 18px;
+  background: var(--surface);
+}
+
+.pro-perk strong {
+  font-weight: 650;
+  line-height: 1.2;
+}
+
+.pro-perk .footnote {
+  line-height: 1.3;
+}
+
+.pro-perk.lead {
+  box-shadow: inset 0 0 0 2px var(--tint);
+}
+
+/* An odd last perk spans the row, so the grid never leaves a hole. */
+.pro-perk:last-child:nth-child(odd) {
+  grid-column: 1 / -1;
+}
+
+.pro-soon {
+  align-self: flex-start;
+  font-size: 0.7rem;
+}
+
+.pro-estimate {
+  margin: 0;
+  padding-inline: 0.25rem;
+}

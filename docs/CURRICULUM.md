@@ -4,7 +4,7 @@ The full lesson map lives in [`packages/content/src/curriculum.ts`](../packages/
 
 ## Tracks
 
-0. **Poker basics**: the rules and a first strategy, for anyone who has never played. Free. The test is whether someone who knows nothing can follow it. The placement quiz skips it for players who already know the game.
+0. **Poker basics**: the rules and a first strategy, for anyone who has never played. A last topic covers playing for money: stakes and buy ins, a first visit to a card room and a first bankroll. Free. The test is whether someone who knows nothing can follow it. The placement quiz skips the rules and first strategy for players who already know the game. Playing for money is practical knowledge, not a skill check. So placement leaves it out.
 1. **Foundations**: poker math and range thinking. Prerequisite for everything after it.
 2. **Preflop GTO**: opening, defending, 3bet and 4bet pots, blind vs blind, stack depth.
 3. **Postflop GTO**: textures, c-betting, defending, check raising, turn and river play, multiway.

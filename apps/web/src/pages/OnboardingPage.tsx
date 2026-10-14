@@ -1,4 +1,4 @@
-import { FIRST_HAND_NEW, LESSON_CONTENT, STARTER_CHARTS, TESTIMONIALS } from '@felt/content';
+import { FIRST_HAND_CASUAL, FIRST_HAND_NEW, LESSON_CONTENT, STARTER_CHARTS, TESTIMONIALS } from '@felt/content';
 import { parseCard, PRESETS, TIERS } from '@felt/core';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { useEffect, useRef, useState } from 'react';
@@ -8,10 +8,10 @@ import { canOpenLesson, isPro } from '../state/access';
 import { plural } from '../ui/format';
 import type { StoredLesson } from '../state/db';
 import { track } from '../state/events';
-import { CUES, cueCopy, DAILY_OPTIONS, EXPERIENCE, EXPERIENCE_REPLY, FOCUS, GOALS, goalsLine, pathPrefs, TARGETS } from '../state/goals';
+import { CUES, cueCopy, DAILY_OPTIONS, EXPERIENCE, EXPERIENCE_REPLY, FOCUS, goalsFor, goalsLine, isBeginner, pathPrefs, TARGETS } from '../state/goals';
 import { isComplete, LESSON_ENTRIES, lessonProgress, recommendedLessons } from '../state/lessons';
 import { studyReminder } from '../state/reminders';
-import { type Focus, type Profile, useSettings } from '../state/settings';
+import { type Experience, type Focus, type Profile, useSettings } from '../state/settings';
 import { BrandMark, HeroPattern, TAGLINE, Wordmark } from '../ui/Brand';
 import { BottomBar } from '../ui/BottomBar';
 import { BellIcon, CheckIcon, ChevronLeftIcon, ClockIcon, LockIcon, ReviewIcon, SolverIcon, StatsIcon, TargetIcon } from '../ui/icons';
@@ -48,12 +48,22 @@ const PROOF = [
 
 const tierMin = (name: string) => TIERS.find((t) => t.name === name)?.min ?? 0;
 
+/** Games for players, named the way they talk about them. `preset` is the game preset in core. */
 const GAMES = [
-  { id: 'live-1-3', label: 'Live cash, 1/2 or 1/3', note: '9-handed, deep and loose' },
-  { id: 'live-2-5', label: 'Live cash, 2/5 and up', note: '9-handed, deeper stacks' },
-  { id: 'online-6max', label: 'Online cash', note: '6-max, 100bb' },
-  { id: 'mtt-9max', label: 'Tournaments', note: 'Live or online' },
-] as const;
+  { id: 'live-1-3', preset: 'live-1-3', label: 'Live cash, 1/2 or 1/3', note: '$1 and $3 blinds. 9 players, loose games.' },
+  { id: 'live-2-5', preset: 'live-2-5', label: 'Live cash, 2/5 and up', note: '9 players with deeper stacks' },
+  { id: 'online-6max', preset: 'online-6max', label: 'Online cash', note: '6 players. 100 big blinds each.' },
+  { id: 'mtt-9max', preset: 'mtt-9max', label: 'Tournaments', note: 'Live or online' },
+];
+
+/** The same games in a beginner's words. Each one sets the game Felt teaches with. */
+const PLAIN_GAMES = [
+  { id: 'home', preset: 'live-1-3', label: 'Home games', note: 'With friends, for small amounts' },
+  { id: 'casino', preset: 'live-1-3', label: 'A casino or card room', note: 'Small games with $1 and $2 or $3 blinds' },
+  { id: 'online', preset: 'online-6max', label: 'Online', note: 'Fast games with 6 players a table' },
+  { id: 'tournaments', preset: 'mtt-9max', label: 'Tournaments', note: 'One buy in. Prizes for the last players left.' },
+  { id: 'unsure', preset: 'live-1-3', label: 'Not sure yet', note: 'Felt starts you in a small casino style game' },
+];
 
 const shortDate = (days: number) => new Date(Date.now() + days * 86_400_000).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
 
@@ -305,18 +315,20 @@ const WHY = [
 ];
 
 /** Hard hands for someone new are a lesson, not a test: the first one is winnable. */
-function FirstHand({ beginner, game, onDone }: { beginner: boolean; game: Parameters<typeof firstHandSpot>[0]; onDone: () => void }) {
+function FirstHand({ experience, game, onDone }: { experience?: Experience; game: Parameters<typeof firstHandSpot>[0]; onDone: () => void }) {
   const [answered, setAnswered] = useState(false);
-  const spot = beginner ? undefined : firstHandSpot(game);
+  // New players pick a starting hand, rules knowers rank a hand, players face a real chart spot.
+  const spot = isBeginner(experience) ? undefined : firstHandSpot(game);
+  const quiz = experience === 'casual' ? FIRST_HAND_CASUAL : FIRST_HAND_NEW;
   if (spot) {
     return <QuickRecall chart={spot.chart} hand={spot.hand} targetMs={6000} untimed nextLabel="Continue" onAnswer={() => setAnswered(true)} onNext={onDone} />;
   }
   return (
     <>
-      <StepView step={FIRST_HAND_NEW} onAnswer={() => setAnswered(true)} />
+      <StepView step={quiz} onAnswer={() => setAnswered(true)} />
       <BottomBar>
         <button className="btn btn-primary btn-lg btn-block" disabled={!answered} onClick={onDone}>
-          {answered ? 'Continue' : 'Pick a hand'}
+          {answered ? 'Continue' : 'Choose an answer'}
         </button>
       </BottomBar>
     </>
@@ -358,9 +370,10 @@ export function OnboardingPage() {
   const [step, setStep] = useState<Step>(() => (params.get('step') as Step) ?? 'intro');
   const [building, setBuilding] = useState(step === 'plan');
   const progress = useLiveQuery(lessonProgress, [], new Map<string, StoredLesson>());
-  const [game, setGame] = useState<string>(
-    () => GAMES.find((g) => PRESETS[g.id].settings.venue === settings.game.venue && PRESETS[g.id].settings.format === settings.game.format)?.id ?? 'live-1-3',
-  );
+  const beginner = isBeginner(profile.experience);
+  const games = beginner ? PLAIN_GAMES : GAMES;
+  const [game, setGame] = useState<string>();
+  const gameChoice = games.find((g) => g.id === game);
   const heading = useRef<HTMLHeadingElement>(null);
 
   const setProfile = (patch: Partial<Profile>) => update({ ...settings, profile: { ...profile, ...patch } });
@@ -572,7 +585,7 @@ export function OnboardingPage() {
       ready: profile.goals.length > 0,
       body: (
         <div className="onb-choices" role="group" aria-labelledby="onb-title">
-          {GOALS.map((g) => (
+          {goalsFor(profile.experience).map((g) => (
             <Choice
               key={g.id}
               multi
@@ -588,19 +601,19 @@ export function OnboardingPage() {
       ),
     },
     game: {
-      title: 'Where do you play most?',
-      sub: 'Your charts and examples will match this game. You can change it any time.',
-      ready: true,
+      title: beginner ? 'Where do you want to play?' : 'Where do you play most?',
+      sub: beginner ? 'Felt teaches with this kind of game. You can change it any time.' : 'Your charts and examples will match this game. You can change it any time.',
+      ready: !!gameChoice,
       body: (
         <div className="onb-choices" role="radiogroup" onKeyDown={onRadioKeys} aria-labelledby="onb-title">
-          {GAMES.map((g) => (
+          {games.map((g) => (
             <Choice key={g.id} selected={game === g.id} label={g.label} note={g.note} onClick={() => setGame(g.id)} />
           ))}
         </div>
       ),
     },
     focus: {
-      title: 'What costs you the most money?',
+      title: beginner ? 'What do you want to get better at?' : 'What costs you the most money?',
       sub: 'Pick as many as you like. They come first in your plan.',
       ready: true,
       body: (
@@ -613,6 +626,7 @@ export function OnboardingPage() {
                 multi
                 selected={on}
                 label={f.label}
+                note={f.note}
                 onClick={() => setProfile({ focus: on ? profile.focus.filter((x) => x !== f.id) : [...profile.focus, f.id as Focus] })}
               />
             );
@@ -660,7 +674,17 @@ export function OnboardingPage() {
         <>
           <div className="onb-choices" role="radiogroup" onKeyDown={onRadioKeys} aria-labelledby="onb-title">
             {EXPERIENCE.map((x) => (
-              <Choice key={x.id} selected={profile.experience === x.id} label={x.label} note={x.note} onClick={() => setProfile({ experience: x.id })} />
+              <Choice
+                key={x.id}
+                selected={profile.experience === x.id}
+                label={x.label}
+                note={x.note}
+                onClick={() => {
+                  // Goals are worded per level, so keep only the ones the new level offers.
+                  const offered = new Set(goalsFor(x.id).map((g) => g.id));
+                  setProfile({ experience: x.id, goals: profile.goals.filter((g) => offered.has(g)) });
+                }}
+              />
             ))}
           </div>
           {profile.experience && (
@@ -725,7 +749,12 @@ export function OnboardingPage() {
   };
 
   if (step === 'try') {
-    const beginner = profile.experience === 'new';
+    const subline =
+      profile.experience === 'new'
+        ? 'No experience needed. Go with your gut.'
+        : profile.experience === 'casual'
+          ? 'You know the rules. Here is a quick one.'
+          : 'A real spot from your game. Make your call.';
     return (
       <div className="stack focus-column">
         {top}
@@ -735,14 +764,14 @@ export function OnboardingPage() {
               Try one hand
             </h1>
             <p className="muted" style={{ margin: '0.4rem 0 0' }}>
-              {beginner ? 'No experience needed. Go with your gut.' : 'A real spot from your game. Make your call.'}
+              {subline}
             </p>
           </div>
           <FirstHand
-            beginner={beginner}
+            experience={profile.experience}
             game={settings.game}
             onDone={() => {
-              track('onboarding_step_answered', { step, value: beginner ? 'basics' : 'chart' });
+              track('onboarding_step_answered', { step, value: beginner ? profile.experience : 'chart' });
               forward();
             }}
           />
@@ -753,7 +782,7 @@ export function OnboardingPage() {
 
   const screen = screens[step];
   const advance = () => {
-    if (step === 'game') update({ ...settings, game: PRESETS[game].settings });
+    if (step === 'game' && gameChoice) update({ ...settings, game: PRESETS[gameChoice.preset].settings });
     track('onboarding_step_answered', {
       step,
       value: step === 'goal' ? profile.goals.join(',') : step === 'game' ? game : step === 'daily' ? profile.dailyMinutes : step === 'when' ? profile.cue : step === 'level' ? profile.experience : step === 'target' ? profile.target : profile.focus.length,

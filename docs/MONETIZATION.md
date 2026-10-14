@@ -15,10 +15,10 @@ How Felt turns a first open into a daily habit and a paid subscription, and why 
 | Welcome | Two aces dealt on the felt, "From your first hand to Elite", the rating ladder climbing, and real counts of lessons, questions and charts. "I have an account" appears only when a server answers | Names the whole journey for a beginner and a regular alike. The proof is depth that can be checked, not claims |
 | Level | New to pro, with a one line reply to the answer | Each answer is heard (the reply), and it decides basics first or placement |
 | Target | Pick a tier to aim for: Solid, Regular, Expert or Elite, with what each means and its rating | A specific, hard goal beats "do your best" (Locke and Latham 2002); Elite is the cap because higher tiers could not be measured honestly |
-| Goal | Win live, move up, go pro, master GTO, tournaments | The goal is quoted back in the plan and on Today |
-| Game | Live 1/3, live 2/5+, online, tournaments | Sets the game preset, so the first hand and every chart match |
-| Focus | What costs you money (multi select). Skipped for new players | Moves those modules up the path |
-| First hand | New players pick the better of two starting hands; players get a real button open from their game, untimed, graded with its mix | Value before the ask. It is winnable on purpose: an early success is the strongest source of self efficacy (Bandura 1977). Letting people try before signing up is how Duolingo onboards (secondary reports of a large lift) |
+| Goal | Beginners (new, or play for fun) see goals in their words: learn the game, home games, a casino, get really good, tournaments. Regular and pro players see win live, move up, go pro, master GTO, tournaments | The goal is quoted back in the plan and on Today. Changing level drops goals the new level does not offer |
+| Game | Beginners: home games, a casino or card room, online, tournaments, not sure yet. Players: live 1/3, live 2/5+, online, tournaments, each with what the label means | Sets the game preset, so the first hand and every chart match |
+| Focus | What to get better at (multi select), each with a plain note, including bankroll and swings. Skipped for new players | Moves those modules up the path |
+| First hand | New players pick the better of two starting hands; people who know the rules answer a hand ranking question from the rankings lesson; players get a real button open from their game, untimed, graded with its mix | Value before the ask. It is winnable on purpose: an early success is the strongest source of self efficacy (Bandura 1977). Letting people try before signing up is how Duolingo onboards (secondary reports of a large lift) |
 | Why it works | Sources on every answer, recall over rereading (61% vs 40% a week later), a rating built on Elo and Glicko | Real, cited reasons in place of invented social proof |
 | Daily goal | 5, 10, 15 or 20 minutes | A specific, small, chosen target |
 | Study cue | When they will study | Implementation intention (Gollwitzer 1999) |
@@ -27,7 +27,7 @@ How Felt turns a first open into a daily habit and a paid subscription, and why 
 | Day 1 | A short moment: "Your plan is set" | Marks the commitment the player just made |
 | Paywall | Felt Pro, personalized headline | Shown at peak intent, right after commitment |
 
-New players always start with the basics, whatever their goals; so does a casual player who skips placement (`pathPrefs` in `state/goals.ts`).
+New players always start with the basics, whatever their goals; so does a casual player who skips placement (`pathPrefs` in `state/goals.ts`). After onboarding, review deals chart cards only once the lesson that introduces charts is done (or any preflop lesson), and math cards only after the odds or a math lesson (`chartsTaught` and `mathTaught` in `state/decks.ts`). Today hides the daily challenge until then, so a beginner is never sent to a range chart they have not learned.
 
 **Social proof.** Felt shows only proof that is true: counts read from the content, cited research and, once real players give them, quotes in `TESTIMONIALS` (`packages/content/src/onboarding.ts`). Social proof persuades most when it describes people like the reader (Goldstein, Cialdini and Griskevicius 2008), and invented numbers or reviews would break the trust the product depends on. The section stays hidden while the list is empty.
 
@@ -56,7 +56,10 @@ Skipped lessons show as "Skipped" and count as complete. The plan and Today both
 
 | | Free | Pro |
 | --- | --- | --- |
-| Lessons | First module of every track (about a quarter of the library) | All lessons |
+| Lessons | The whole basics track and the first module of every other track | All lessons |
+| AI coach | No | Ask about any hand, with your rating and recent misses as context (needs a server with the coach turned on) |
+| Weekly Pro challenge | No | Ten hard spots each ISO week, the same for every Pro player, scored like the daily |
+| Priority support | No | Shown only when `SUPPORT_EMAIL` is set in `state/access.ts` |
 | Placement and test outs | Yes, for every module | Yes |
 | Spaced review and drills | Yes | Yes |
 | Solver | Example spots | Any board, range, pot and stack |
@@ -72,7 +75,7 @@ Set in `PLANS` in `state/access.ts`. Current placeholders: yearly $79.99 with a 
 1. Close button, always visible.
 2. Felt hero with a headline that names why the player arrived ("Add every lesson to your plan", "This lesson is part of Felt Pro", "Solve your own spots").
 3. Two plan cards, yearly preselected with its saving, so the price is on screen before any benefit.
-4. Only what Pro adds (more lessons, solving your own spots, what is added later), then a line listing what stays free.
+4. Only what Pro adds, as a two column grid of perks from `proPerks()` in `state/access.ts`: more lessons, the AI coach, the weekly Pro challenge, solving your own spots and priority support. The perk that brought the player here comes first. A perk this build cannot deliver yet is labelled "Coming soon", and priority support is hidden until a support address is set. The skill to winnings estimate sits under the grid, labelled as a model.
 5. Trial timeline with real dates: today, two days before the end (with a calendar reminder offered once the trial starts), the charge date and amount. The bottom bar repeats the price and charge date next to the button, and declining sits in the same bar.
 6. Fine print: price, renewal, how to cancel, restore purchases, terms, privacy.
 7. One primary button in the thumb zone.

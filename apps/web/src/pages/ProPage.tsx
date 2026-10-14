@@ -2,17 +2,17 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { haptic } from '../haptics';
 import { defaultAssumptions, formatAmount, skillEdge, stakesLabel } from '@felt/core';
-import { annualSavings, canOpenLesson, formatPrice, isLessonFree, isPro, PLANS, type PlanOption, purchase, restorePurchases } from '../state/access';
+import { annualSavings, canOpenLesson, formatPrice, isLessonFree, isPro, PLANS, type PlanOption, type ProPerkId, proPerks, purchase, restorePurchases, SUPPORT_EMAIL } from '../state/access';
 import { pathPrefs } from '../state/goals';
 import { ratingSnapshot } from '../state/rating';
-import { refreshMe } from '../state/api';
+import { refreshMe, serverFeatures } from '../state/api';
 import { track } from '../state/events';
 import { LESSON_ENTRIES } from '../state/lessons';
 import { trialReminder } from '../state/reminders';
 import { type Access, type Profile, useSettings } from '../state/settings';
 import { BrandMark, HeroPattern } from '../ui/Brand';
 import { BottomBar } from '../ui/BottomBar';
-import { BellIcon, CloseIcon, LearnIcon, SolverIcon, StatsIcon } from '../ui/icons';
+import { AccountIcon, BellIcon, ChevronRightIcon, CloseIcon, LearnIcon, ReviewIcon, SolverIcon, TrophyIcon } from '../ui/icons';
 import { useBodyClass } from '../ui/useBodyClass';
 import { onRadioKeys } from '../ui/radioKeys';
 
@@ -32,7 +32,29 @@ const HEADLINES: Record<string, string> = {
   lesson: 'This lesson is in Felt Pro',
   check: 'Unlock the lessons you need',
   solver: 'Solve your own spots',
+  coach: 'Get a coach in your pocket',
+  weekly: 'Join the weekly Pro challenge',
 };
+
+/** The perk a paywall reason is about, shown first. */
+const LEAD_PERK: Record<string, ProPerkId> = { lesson: 'lessons', check: 'lessons', solver: 'solver', coach: 'coach', weekly: 'weekly' };
+
+const PERK_ICONS: Record<ProPerkId, typeof LearnIcon> = {
+  lessons: LearnIcon,
+  coach: ReviewIcon,
+  weekly: TrophyIcon,
+  solver: SolverIcon,
+  support: AccountIcon,
+};
+
+/** Whether this build's server offers the AI coach. */
+function useCoachLive() {
+  const [live, setLive] = useState(false);
+  useEffect(() => {
+    void serverFeatures().then((f) => setLive(!!(f as { coach?: boolean } | null)?.coach));
+  }, []);
+  return live;
+}
 
 /**
  * The Felt Pro paywall. Honest by design: the plans and price come first,
@@ -49,6 +71,7 @@ export function ProPage() {
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string>();
   const [rating, setRating] = useState<number>();
+  const coachLive = useCoachLive();
   useEffect(() => {
     void ratingSnapshot().then((r) => r.overall.games > 0 && setRating(r.overall.rating));
   }, []);
@@ -90,6 +113,33 @@ export function ProPage() {
           <BrandMark size={52} />
           <h1 className="display pro-title">You have Felt Pro</h1>
           <p className="pro-sub">{trialEnds ? `Your free trial runs until ${new Date(trialEnds).toLocaleDateString()}.` : 'Every lesson and tool is unlocked.'}</p>
+        </div>
+        <div className="list">
+          {[
+            { to: '/coach', label: 'Ask your AI coach', Icon: ReviewIcon, show: coachLive },
+            { to: '/weekly', label: 'Play the weekly Pro challenge', Icon: TrophyIcon, show: true },
+            { to: '/solver', label: 'Solve your own spots', Icon: SolverIcon, show: true },
+          ]
+            .filter((r) => r.show)
+            .map(({ to, label, Icon }) => (
+              <Link key={to} to={to} className="list-row">
+                <Icon size={20} style={{ color: 'var(--tint)' }} />
+                <span className="grow">{label}</span>
+                <ChevronRightIcon size={14} className="chev" />
+              </Link>
+            ))}
+          {SUPPORT_EMAIL && (
+            <a className="list-row" href={`mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent('Felt Pro support')}`}>
+              <AccountIcon size={20} style={{ color: 'var(--tint)' }} />
+              <span className="grow">
+                Priority support
+                <span className="footnote" style={{ display: 'block' }}>
+                  {SUPPORT_EMAIL}
+                </span>
+              </span>
+              <ChevronRightIcon size={14} className="chev" />
+            </a>
+          )}
         </div>
         {trialEnds && (
           <button className="btn btn-tinted btn-block" onClick={() => trialReminder(trialEnds)}>
@@ -143,6 +193,9 @@ export function ProPage() {
   const perHour = (per100 * assumptions.handsPerHour) / 100;
   const inPlan = planProLessons(settings.profile, settings.access);
   const charge = dateIn(plan.trialDays);
+  const lead = LEAD_PERK[from];
+  const allPerks = proPerks({ proLessons: PRO_LESSONS, coach: coachLive });
+  const perks = [...allPerks.filter((p) => p.id === lead), ...allPerks.filter((p) => p.id !== lead)];
 
   return (
     <div className="pro-page focus-column">
@@ -162,39 +215,28 @@ export function ProPage() {
         <h1 className="display pro-head-title">{HEADLINES[from] ?? 'Train every spot you play'}</h1>
       </header>
 
-      <ul className="pro-values" aria-label="What Felt Pro adds">
-        <li>
-          <span className="pro-benefit-icon" aria-hidden="true">
-            <LearnIcon size={20} />
-          </span>
-          <span className="grow">
-            <strong>{PRO_LESSONS} more lessons</strong>
-            <span className="footnote">{inPlan > 0 ? `${inPlan} of them are in your plan.` : 'River play, exploits and tournaments.'}</span>
-          </span>
-        </li>
-        <li>
-          <span className="pro-benefit-icon" aria-hidden="true">
-            <SolverIcon size={20} />
-          </span>
-          <span className="grow">
-            <strong>Solve your own spots</strong>
-            <span className="footnote">Any board, range and stack size.</span>
-          </span>
-        </li>
-        <li>
-          <span className="pro-benefit-icon" aria-hidden="true">
-            <StatsIcon size={20} />
-          </span>
-          <span className="grow">
-            <strong>Turn skill into winnings</strong>
-            <span className="footnote">
-              {per100 > 0.05
-                ? `By our estimate, 100 more rating points is worth about ${g.units === 'money' ? `${formatAmount(Math.round(perHour), g)} an hour` : `${per100.toFixed(1)} bb per 100 hands`} at ${stakesLabel(g.stakes)} ${g.venue}.`
-                : 'Your Felt Rating shows every step you take.'}
-            </span>
-          </span>
-        </li>
+      <ul className="pro-perks" aria-label="What Felt Pro adds">
+        {perks.map((p) => {
+          const Icon = PERK_ICONS[p.id];
+          return (
+            <li key={p.id} className={`pro-perk${p.id === lead ? ' lead' : ''}`}>
+              <span className="pro-benefit-icon" aria-hidden="true">
+                <Icon size={20} />
+              </span>
+              <strong>{p.title}</strong>
+              <span className="footnote">{p.id === 'lessons' && inPlan > 0 ? `${inPlan} of them are in your plan` : p.note}</span>
+              {!p.live && <span className="pill pro-soon">Coming soon</span>}
+            </li>
+          );
+        })}
       </ul>
+      {per100 > 0.05 && (
+        <p className="footnote pro-estimate">
+          By our estimate, 100 more rating points is worth about{' '}
+          {g.units === 'money' ? `${formatAmount(Math.round(perHour), g)} an hour` : `${per100.toFixed(1)} bb per 100 hands`} at {stakesLabel(g.stakes)} {g.venue}. It is a
+          model, not a promise.
+        </p>
+      )}
 
       <div className="plan-tiles" role="radiogroup" onKeyDown={onRadioKeys} aria-label="Choose a plan">
         {PLANS.map((p) => (

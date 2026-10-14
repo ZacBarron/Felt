@@ -66,6 +66,7 @@ See [MONETIZATION.md](MONETIZATION.md).
 - [x] Charts with graded edges in 5% steps, like published solutions
 - [x] Avatar with rating on Today; milestone moments for tiers and streaks; game sheet from Ranges
 - [x] Poker basics track for complete beginners (rules, rankings, how a hand plays, position, starting hands, ranges, odds), skippable by placement
+- [x] Playing for money in Poker basics: how stakes and buy ins work (cash games and tournaments), a first visit to a card room (the list, chips, the dealer, rake), and a first bankroll that agrees with the full bankroll lesson
 - [x] Lesson illustrations drawn in the brand style for covers and visual steps
 - [x] Review overview like Anki: decks (preflop charts, lesson questions, math facts, saved) with new, learning and due counts, per deck limits, session size, timer, and custom study (extra, ahead, weakest, missed today)
 - [x] Import stats: flop c-bet, fold to 3bet, aggression and won at showdown, with a stakes filter
