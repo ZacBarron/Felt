@@ -145,6 +145,7 @@ export const GLOSSARY: GlossaryTerm[] = [
   {
     id: 'all-in',
     term: 'all in',
+    link: false,
     aliases: ['all ins', 'all-in', 'going all in'],
     short: 'Betting every chip you have in front of you. You can then win only what you matched from each player.',
     lesson: 'basics/rules/side-pots',
@@ -152,6 +153,7 @@ export const GLOSSARY: GlossaryTerm[] = [
   {
     id: 'shove',
     term: 'shove',
+    link: false,
     aliases: ['shoves', 'shoved', 'shoving', 'shover', 'jam', 'jams', 'jammed'],
     short: 'To go all in with a bet or raise. It puts your whole stack in at once.',
     lesson: 'tournaments/mtt-basics/push-fold',
@@ -159,6 +161,7 @@ export const GLOSSARY: GlossaryTerm[] = [
   {
     id: 'blinds',
     term: 'blinds',
+    link: false,
     aliases: ['blind'],
     short: 'The 2 forced bets posted before any cards are dealt. They give every pot something to win.',
     lesson: 'basics/rules/hand-flow',
@@ -166,6 +169,7 @@ export const GLOSSARY: GlossaryTerm[] = [
   {
     id: 'small-blind',
     term: 'small blind',
+    link: false,
     aliases: ['SB', 'small blinds'],
     short: 'The smaller forced bet, posted by the seat just left of the button. The player in that seat is the SB.',
     lesson: 'basics/rules/hand-flow',
@@ -173,6 +177,7 @@ export const GLOSSARY: GlossaryTerm[] = [
   {
     id: 'big-blind',
     term: 'big blind',
+    link: false,
     aliases: ['BB', 'big blinds'],
     short: 'The larger forced bet, posted 2 seats left of the button. The player in that seat is the BB.',
     lesson: 'basics/rules/hand-flow',
@@ -200,6 +205,7 @@ export const GLOSSARY: GlossaryTerm[] = [
   {
     id: 'straddle',
     term: 'straddle',
+    link: false,
     aliases: ['straddles', 'straddled', 'straddler', 'straddling'],
     short: 'An optional third blind of 2bb, usually posted under the gun before the deal. It doubles the stakes of the hand.',
     lesson: 'preflop/live-preflop/straddles',
@@ -213,6 +219,7 @@ export const GLOSSARY: GlossaryTerm[] = [
   {
     id: 'button',
     term: 'button',
+    link: false,
     aliases: ['BTN', 'buttons', 'dealer button'],
     short: 'The seat marked by a disc that moves 1 seat left each hand. It acts last after the flop and is written BTN.',
     lesson: 'basics/first-strategy/position',
@@ -221,6 +228,7 @@ export const GLOSSARY: GlossaryTerm[] = [
   {
     id: 'street',
     term: 'street',
+    link: false,
     aliases: ['streets'],
     short: 'One round of betting. A hand has 4 of them, from preflop to the river.',
     lesson: 'basics/rules/hand-flow',
@@ -228,6 +236,7 @@ export const GLOSSARY: GlossaryTerm[] = [
   {
     id: 'preflop',
     term: 'preflop',
+    link: false,
     aliases: ['pre-flop'],
     short: 'The first betting round. It comes after the hole cards are dealt and before the flop.',
     lesson: 'basics/rules/hand-flow',
@@ -235,6 +244,7 @@ export const GLOSSARY: GlossaryTerm[] = [
   {
     id: 'flop',
     term: 'flop',
+    link: false,
     aliases: ['flops', 'flopped', 'flopping'],
     short: 'The first 3 shared cards, dealt face up together. It also names the betting round that follows.',
     lesson: 'basics/rules/hand-flow',
@@ -242,6 +252,7 @@ export const GLOSSARY: GlossaryTerm[] = [
   {
     id: 'turn',
     term: 'turn',
+    link: false,
     aliases: ['turn card', 'turn cards', 'turned'],
     short: 'The 4th shared card. It also names the betting round that follows.',
     lesson: 'basics/rules/hand-flow',
@@ -261,6 +272,7 @@ export const GLOSSARY: GlossaryTerm[] = [
   {
     id: 'river',
     term: 'river',
+    link: false,
     aliases: ['rivers', 'rivered'],
     short: 'The 5th and last shared card. It also names the last betting round.',
     lesson: 'basics/rules/hand-flow',
@@ -268,6 +280,7 @@ export const GLOSSARY: GlossaryTerm[] = [
   {
     id: 'postflop',
     term: 'postflop',
+    link: false,
     aliases: ['post-flop', 'after the flop'],
     short: 'Every betting round once the flop is dealt. That is the flop, turn and river.',
     lesson: 'basics/rules/hand-flow',
@@ -275,6 +288,7 @@ export const GLOSSARY: GlossaryTerm[] = [
   {
     id: 'showdown',
     term: 'showdown',
+    link: false,
     aliases: ['showdowns', 'show down', 'shows down'],
     short: 'When the players left after the last bet show their cards. The best hand wins the pot.',
     lesson: 'basics/rules/hand-flow',
@@ -351,6 +365,7 @@ export const GLOSSARY: GlossaryTerm[] = [
   {
     id: 'high-card',
     term: 'high card',
+    link: false,
     aliases: ['high cards'],
     short: 'A hand with no pair or better. The highest card decides it.',
     lesson: 'basics/rules/rankings',
@@ -365,6 +380,7 @@ export const GLOSSARY: GlossaryTerm[] = [
   {
     id: 'pair',
     term: 'one pair',
+    link: false,
     aliases: ['pair', 'pairs'],
     short: '2 cards of the same rank, like 2 kings. It ranks just above high card.',
     lesson: 'basics/rules/rankings',
@@ -372,6 +388,7 @@ export const GLOSSARY: GlossaryTerm[] = [
   {
     id: 'two-pair',
     term: 'two pair',
+    link: false,
     aliases: ['top two pair'],
     short: '2 cards of one rank and 2 of another, like kings and nines.',
     lesson: 'basics/rules/rankings',
@@ -415,6 +432,7 @@ export const GLOSSARY: GlossaryTerm[] = [
   {
     id: 'straight',
     term: 'straight',
+    link: false,
     aliases: ['straights'],
     short: '5 cards of ranks in a row in any suits, like 9 T J Q K. The ace can be high or low.',
     lesson: 'basics/rules/rankings',
@@ -423,6 +441,7 @@ export const GLOSSARY: GlossaryTerm[] = [
   {
     id: 'flush',
     term: 'flush',
+    link: false,
     aliases: ['flushes'],
     short: '5 cards of the same suit in any order. It beats a straight.',
     lesson: 'basics/rules/rankings',
@@ -430,6 +449,7 @@ export const GLOSSARY: GlossaryTerm[] = [
   {
     id: 'full-house',
     term: 'full house',
+    link: false,
     aliases: ['full houses', 'boat'],
     short: '3 cards of one rank and 2 of another. It beats a flush.',
     lesson: 'basics/rules/rankings',
@@ -451,6 +471,7 @@ export const GLOSSARY: GlossaryTerm[] = [
   {
     id: 'kicker',
     term: 'kicker',
+    link: false,
     aliases: ['kickers'],
     short: 'Your highest card outside a pair or other made hand. It breaks ties between equal hands.',
     lesson: 'basics/rules/best-five',
@@ -535,12 +556,14 @@ export const GLOSSARY: GlossaryTerm[] = [
   {
     id: 'suited',
     term: 'suited',
+    link: false,
     short: 'Hole cards of the same suit, written with an s. AKs is ace king of one suit.',
     lesson: 'basics/first-strategy/starting-hands',
   },
   {
     id: 'offsuit',
     term: 'offsuit',
+    link: false,
     short: 'Hole cards of different suits, written with an o. AKo is ace king of 2 suits.',
     lesson: 'basics/first-strategy/starting-hands',
   },
@@ -604,6 +627,7 @@ export const GLOSSARY: GlossaryTerm[] = [
   {
     id: 'position',
     term: 'position',
+    link: false,
     aliases: ['positions'],
     short: 'Where you sit compared with the button. It decides when you act, and acting later is an edge.',
     lesson: 'basics/first-strategy/position',
@@ -693,6 +717,7 @@ export const GLOSSARY: GlossaryTerm[] = [
   {
     id: 'heads-up',
     term: 'heads up',
+    link: false,
     aliases: ['heads-up'],
     short: 'A pot or game with only 2 players.',
     lesson: 'postflop/multiway/multiway',
@@ -729,6 +754,7 @@ export const GLOSSARY: GlossaryTerm[] = [
   {
     id: 'stakes',
     term: 'stakes',
+    link: false,
     aliases: ['stake'],
     short: 'How big a game is, named by its blinds. A 1/3 game has a $1 small blind and a $3 big blind.',
     lesson: 'basics/money/stakes',
@@ -765,6 +791,7 @@ export const GLOSSARY: GlossaryTerm[] = [
   {
     id: 'buy-in',
     term: 'buy in',
+    link: false,
     aliases: ['buy ins', 'buy-in', 'buy-ins', 'buyin', 'buyins', 'buying in', 'minimum buy in', 'maximum buy in'],
     short: 'The money you pay to join a game or tournament. Felt often counts a bankroll in buy ins of 100bb.',
     lesson: 'basics/money/stakes',
@@ -772,6 +799,7 @@ export const GLOSSARY: GlossaryTerm[] = [
   {
     id: 'stack',
     term: 'stack',
+    link: false,
     aliases: ['stacks'],
     short: 'All the chips you have on the table. Felt counts it in big blinds.',
     lesson: 'basics/first-strategy/big-blinds',
@@ -786,6 +814,7 @@ export const GLOSSARY: GlossaryTerm[] = [
   {
     id: 'deep',
     term: 'deep',
+    link: false,
     aliases: ['deep stacks', 'deep stack', 'deeper', 'bb deep', 'stack depth'],
     short: 'How many big blinds are in the stacks. More big blinds leave more room to bet after the flop.',
     lesson: 'preflop/stack-depth/depth',
@@ -824,6 +853,7 @@ export const GLOSSARY: GlossaryTerm[] = [
   {
     id: 'open',
     term: 'open',
+    link: false,
     aliases: ['opens', 'opened', 'opening', 'opener', 'openers', 'open raise', 'open raises', 'opening range', 'opening ranges'],
     short: 'The first raise before the flop, made when everyone before you folded.',
     lesson: 'basics/rules/actions',
@@ -846,6 +876,7 @@ export const GLOSSARY: GlossaryTerm[] = [
   {
     id: 'limp',
     term: 'limp',
+    link: false,
     aliases: ['limps', 'limped', 'limping', 'limper', 'limpers', 'limp in', 'limps in', 'limped pot', 'limped pots'],
     short: 'To just call the big blind before the flop when nobody has raised.',
     lesson: 'basics/rules/actions',
@@ -996,6 +1027,7 @@ export const GLOSSARY: GlossaryTerm[] = [
   {
     id: 'check-back',
     term: 'check back',
+    link: false,
     aliases: ['checks back', 'checked back', 'checking back', 'check behind', 'checks behind'],
     short: 'To check when you are last to act. That ends the betting round with no bet.',
     lesson: 'postflop/defense/probe',
@@ -1074,6 +1106,7 @@ export const GLOSSARY: GlossaryTerm[] = [
   {
     id: 'bluff',
     term: 'bluff',
+    link: false,
     aliases: ['bluffs', 'bluffing', 'bluffed', 'bluffer', 'bluffers', 'pure bluff', 'pure bluffs'],
     short: 'A bet or raise with a weak hand that wins mainly when better hands fold.',
     lesson: 'postflop/later-streets/bluff-selection',
@@ -1162,6 +1195,7 @@ export const GLOSSARY: GlossaryTerm[] = [
   {
     id: 'sizing',
     term: 'sizing',
+    link: false,
     aliases: ['bet sizing', 'bet size', 'bet sizes'],
     short: 'How big you bet or raise, usually as a share of the pot.',
     lesson: 'postflop/cbet/sizing',
@@ -1178,6 +1212,7 @@ export const GLOSSARY: GlossaryTerm[] = [
   {
     id: 'draw',
     term: 'draw',
+    link: false,
     aliases: ['draws', 'drawing', 'straight draw', 'straight draws'],
     short: 'A hand that needs more cards to become strong, like 4 cards to a flush.',
     lesson: 'foundations/math/outs',
@@ -1366,12 +1401,14 @@ export const GLOSSARY: GlossaryTerm[] = [
   {
     id: 'hero',
     term: 'hero',
+    link: false,
     short: 'The player telling the hand, usually you.',
     lesson: 'basics/first-strategy/ranges',
   },
   {
     id: 'villain',
     term: 'villain',
+    link: false,
     aliases: ['villains'],
     short: 'The opponent in a hand you are talking through. It is not a judgment of the player.',
     lesson: 'basics/first-strategy/ranges',
@@ -1647,6 +1684,7 @@ export const GLOSSARY: GlossaryTerm[] = [
   {
     id: 'spot',
     term: 'spot',
+    link: false,
     aliases: ['spots'],
     short: 'One situation in a hand, like the button against the big blind on a given flop.',
     lesson: 'foundations/theory/solvers',
@@ -1655,6 +1693,7 @@ export const GLOSSARY: GlossaryTerm[] = [
   {
     id: 'chart',
     term: 'chart',
+    link: false,
     aliases: ['charts', 'starter chart', 'starter charts'],
     short: 'A 13 by 13 grid of starting hands. It shows what a strategy does with each hand in one spot.',
     lesson: 'basics/first-strategy/starting-hands',
@@ -1671,6 +1710,7 @@ export const GLOSSARY: GlossaryTerm[] = [
   {
     id: 'tight',
     term: 'tight',
+    link: false,
     aliases: ['tighter', 'tightest', 'tighten', 'tightens', 'tightening'],
     short: 'Playing few hands. Such a player folds most hands before the flop.',
     lesson: 'exploit/profiling/archetypes',
@@ -1679,6 +1719,7 @@ export const GLOSSARY: GlossaryTerm[] = [
   {
     id: 'loose',
     term: 'loose',
+    link: false,
     aliases: ['looser', 'loosen'],
     short: 'Playing many hands. Such a player enters lots of pots.',
     lesson: 'exploit/profiling/archetypes',
@@ -1924,6 +1965,7 @@ export const GLOSSARY: GlossaryTerm[] = [
   {
     id: 'win-rate',
     term: 'win rate',
+    link: false,
     aliases: ['win rates', 'winrate', 'WR'],
     short: 'How much you win on average. Felt measures it in big blinds per 100 hands.',
     lesson: 'results/win-rate/bb-per-100',
@@ -2090,6 +2132,7 @@ export const GLOSSARY: GlossaryTerm[] = [
   {
     id: 'cover',
     term: 'cover',
+    link: false,
     aliases: ['covers', 'covering', 'covered'],
     short: 'To have at least as many chips as another player. You can knock them out and they cannot knock you out.',
     lesson: 'tournaments/mtt-basics/bounties',

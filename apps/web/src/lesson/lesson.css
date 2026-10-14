@@ -80,8 +80,9 @@
  */
 .lesson-step .evidence-line {
   display: flex;
+  flex-direction: column;
   align-items: flex-start;
-  gap: 0.55rem;
+  gap: 0.35rem;
   margin: 0.4rem 0 0;
   padding-top: 0.75rem;
   border-top: 0.5px solid var(--separator);
@@ -501,4 +502,25 @@
   vertical-align: -2px;
   margin-left: 4px;
   opacity: 0.75;
+}
+
+.evidence-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 32px;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: inherit;
+}
+
+.evidence-info {
+  color: var(--label-2);
+}
+
+.evidence-text {
+  margin: 0;
+  padding-left: calc(20px + 0.45rem);
 }

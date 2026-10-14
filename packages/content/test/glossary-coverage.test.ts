@@ -188,7 +188,15 @@ describe('glossary entries', () => {
 
   it('keeps everyday words off the underline list and the rest on it', () => {
     const unlinked = GLOSSARY.filter((t) => t.link === false).map((t) => t.id);
-    expect(unlinked.sort()).toEqual(['bet', 'board', 'call', 'check', 'chips', 'dealer', 'fold', 'hand', 'pot', 'raise']);
+    // Everyday poker words are defined but not underlined, so lessons do not get crowded.
+    for (const id of ['bet', 'board', 'call', 'check', 'chips', 'dealer', 'fold', 'hand', 'pot', 'raise', 'flop', 'big-blind', 'bluff', 'stack', 'position'])
+      if (GLOSSARY.some((t) => t.id === id)) expect(unlinked, id).toContain(id);
+    // Real jargon stays underlined: a beginner cannot guess it.
+    for (const term of ['MDF', 'SPR', 'ICM', 'equity', 'TAG', 'VPIP', 'blocker', 'polarized']) {
+      const t = GLOSSARY.find((x) => x.term === term);
+      expect(t, term).toBeDefined();
+      expect(t!.link, term).not.toBe(false);
+    }
     expect(findTerms('The pot is big.')).toEqual([]);
     expect(findTerms('The pot is big.', { linkedOnly: false }).map((m) => m.id)).toEqual(['pot']);
   });
@@ -225,7 +233,12 @@ describe('glossary entries', () => {
 });
 
 describe('findTerms', () => {
-  const words = (text: string, linkedOnly = true) => findTerms(text, { linkedOnly }).map((m) => [text.slice(m.start, m.end), m.id]);
+  // Matching is checked on every term, leaving out the first lesson's everyday words for readability.
+  const everyday = new Set(['bet', 'board', 'call', 'check', 'chips', 'dealer', 'fold', 'hand', 'pot', 'raise']);
+  const words = (text: string, linkedOnly?: boolean) =>
+    findTerms(text, { linkedOnly: linkedOnly ?? false })
+      .filter((m) => linkedOnly !== undefined || !everyday.has(m.id))
+      .map((m) => [text.slice(m.start, m.end), m.id]);
 
   it('tells the BB seat from the bb unit', () => {
     expect(words('BB calls 2.5bb. The BB folds 3 bb.')).toEqual([

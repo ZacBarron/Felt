@@ -6,7 +6,7 @@ import { RangeGrid } from '../components/RangeGrid';
 import { SeatStrip } from '../components/SeatStrip';
 import { haptic } from '../haptics';
 import { getChart } from '../state/charts';
-import { CheckIcon, CloseIcon, ExploitsIcon, SolverIcon } from '../ui/icons';
+import { CheckIcon, CloseIcon, ExploitsIcon, InfoIcon, SolverIcon } from '../ui/icons';
 import { LessonArt } from './LessonArt';
 import { Rich } from './rich';
 import './lesson.css';
@@ -33,17 +33,21 @@ const EVIDENCE: Record<Evidence, { lead: string; text: string; Icon: typeof Chec
 };
 
 function EvidenceNote({ evidence }: { evidence?: Evidence }) {
+  const [open, setOpen] = useState(false);
   if (!evidence) return null;
   const { lead, text, Icon } = EVIDENCE[evidence];
+  // Just the label; what it means opens on tap so the screen stays quiet.
   return (
-    <p className={`evidence-line evidence-${evidence}`}>
-      <span className="evidence-icon" aria-hidden="true">
-        <Icon size={13} />
-      </span>
-      <span>
-        <strong>{lead}</strong> {text}
-      </span>
-    </p>
+    <div className={`evidence-line evidence-${evidence}`}>
+      <button type="button" className="evidence-toggle" aria-expanded={open} data-haptic="select" onClick={() => setOpen((o) => !o)}>
+        <span className="evidence-icon" aria-hidden="true">
+          <Icon size={13} />
+        </span>
+        <strong>{lead.replace(/\.$/, '')}</strong>
+        <InfoIcon size={14} className="evidence-info" aria-hidden="true" />
+      </button>
+      {open && <p className="evidence-text reveal">{text}</p>}
+    </div>
   );
 }
 
