@@ -450,3 +450,14 @@ export function SendIcon(p: IconProps) {
 }
 
 export type IconComponent =(p: IconProps) => React.ReactElement;
+
+/** Glossary: a page with a capital A and two lines of definition. */
+export function GlossaryIcon(p: IconProps) {
+  return (
+    <Svg {...p}>
+      <rect x="4.25" y="3.75" width="15.5" height="16.5" rx="3" {...fillProps(p.filled)} />
+      <path d="M7.75 15.25 10 8.75l2.25 6.5M8.55 13h2.9" />
+      <path d="M14.75 10.5h2M14.75 13.5h2" />
+    </Svg>
+  );
+}

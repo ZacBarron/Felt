@@ -27,6 +27,7 @@ import { YouPage } from './pages/YouPage';
 import { AccountPage } from './pages/AccountPage';
 import { LeaguePage } from './pages/LeaguePage';
 import { CoachPage } from './pages/CoachPage';
+import { GlossaryPage } from './pages/GlossaryPage';
 import { LegalPage } from './pages/LegalPage';
 import { accessFromServer } from './state/access';
 import { useSession } from './state/api';
@@ -150,6 +151,7 @@ export function App() {
             <Route path="/account" element={<AccountPage />} />
             <Route path="/league" element={<LeaguePage />} />
             <Route path="/coach" element={<CoachPage />} />
+            <Route path="/glossary" element={<GlossaryPage />} />
             <Route path="/terms" element={<LegalPage doc="terms" />} />
             <Route path="/privacy" element={<LegalPage doc="privacy" />} />
           </Routes>

@@ -124,7 +124,7 @@ export function StepView({ step, onAnswer, answered }: Props) {
                   <tr key={i} style={{ animationDelay: `${i * 45}ms` }}>
                     {r.map((cell, j) => (
                       <td key={j} className={textCols[j] ? 'text-col' : undefined}>
-                        {cell}
+                        {textCols[j] || j === 0 ? <Rich text={cell} /> : cell}
                       </td>
                     ))}
                   </tr>
@@ -296,7 +296,9 @@ function Quiz({
     <div className="lesson-step">
       <div className="lesson-kicker quiz-kicker">Question</div>
       {(step.cards || step.board) && <QuizCards cards={step.cards} board={step.board} />}
-      <h2 className="lesson-question">{step.question}</h2>
+      <h2 className="lesson-question">
+        <Rich text={step.question} />
+      </h2>
       <div className="choices">
         {step.choices.map((c, i) => {
           const state = !done ? '' : i === step.answer ? ' correct' : i === chosen ? ' wrong' : ' faded';

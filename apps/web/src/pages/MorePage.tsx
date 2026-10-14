@@ -19,7 +19,7 @@ const item = (to: string) => NAV_ITEMS.find((i) => i.to === to)!;
 
 /** Big tiles for the places you go to train; small rows for the rest. */
 const TILES = ['/daily', '/scenarios', '/solver', '/lab', '/saved', '/exploit'].filter((to) => !inTabs.has(to));
-const GAME_ROWS = ['/coach', '/log', '/import', '/league'];
+const GAME_ROWS = ['/coach', '/glossary', '/log', '/import', '/league'];
 const APP_ROWS = ['/account', '/settings'];
 
 /** Phone only: everything that does not fit in the tab bar, as a launcher. */
@@ -73,7 +73,7 @@ export function MorePage() {
         <div className="list with-icons">
           {GAME_ROWS.map((to) => {
             const i = item(to);
-            return <NavRow key={to} to={to} icon={i.icon} color={i.color} title={i.label} subtitle={to === '/coach' ? 'Ask about your game' : undefined} detail={to === '/log' && stats?.sessions ? String(stats.sessions) : undefined} />;
+            return <NavRow key={to} to={to} icon={i.icon} color={i.color} title={i.label} subtitle={to === '/coach' ? 'Ask about your game' : to === '/glossary' ? 'Every poker term in plain words' : undefined} detail={to === '/log' && stats?.sessions ? String(stats.sessions) : undefined} />;
           })}
         </div>
       </section>

@@ -4,6 +4,7 @@ import {
   BookmarkIcon,
   CoachIcon,
   ExploitsIcon,
+  GlossaryIcon,
   ImportIcon,
   type IconComponent,
   LabIcon,
@@ -48,6 +49,7 @@ export const NAV_SECTIONS: { section: string; items: NavItem[] }[] = [
       { to: '/lab', label: 'Spot Lab', icon: LabIcon, color: 'var(--base-500)' },
       { to: '/exploit', label: 'Exploits', icon: ExploitsIcon, color: 'var(--base-500)' },
       { to: '/coach', label: 'Coach', icon: CoachIcon, color: 'var(--base-500)' },
+      { to: '/glossary', label: 'Glossary', icon: GlossaryIcon, color: 'var(--base-500)' },
     ],
   },
   {

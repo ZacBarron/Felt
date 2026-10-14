@@ -5,3 +5,4 @@ export * from './lessons/index';
 export * from './scenarios';
 export * from './exploits';
 export * from './onboarding';
+export * from './glossary';
