@@ -132,7 +132,7 @@ export const FOUNDATIONS_LESSONS: LessonContent[] = [
       {
         kind: 'intro',
         title: 'The only number that matters',
-        body: 'Expected value is the average result of a decision over every way the hand can go. Folding is worth zero. Every other action is measured against it.',
+        body: 'Expected value (EV) is the average result of a decision over every way the hand can go. Folding is worth zero. Every other action is measured against it.',
       },
       {
         kind: 'formula',

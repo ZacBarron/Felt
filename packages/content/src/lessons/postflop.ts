@@ -89,7 +89,7 @@ export const POSTFLOP_LESSONS: LessonContent[] = [
       {
         kind: 'intro',
         title: 'The button c-bet',
-        body: 'In position as the preflop raiser, you are in a comfortable spot. The question is not whether to bet. It is which hands bet and which check back.',
+        body: 'A continuation bet (c-bet) is a flop bet by the preflop raiser. In position you are in a comfortable spot. The question is not whether to bet. It is which hands bet and which check back.',
       },
       {
         kind: 'board',

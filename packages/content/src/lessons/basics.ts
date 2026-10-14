@@ -456,7 +456,7 @@ export const BASICS_LESSONS: LessonContent[] = [
         kind: 'visual',
         title: 'Preflop is different',
         art: { kind: 'table', seats: 9, button: 'BTN', highlight: ['UTG', 'BB'], note: 'UTG acts first preflop' },
-        caption: 'Preflop the big blind counts as a bet. UTG acts first, so it cannot check. It can fold, call the big blind or raise.',
+        caption: 'Preflop the big blind counts as a bet. The seat to its left is under the gun (UTG). UTG acts first, so it cannot check. It can fold, call the big blind or raise.',
         evidence: 'math',
       },
       {

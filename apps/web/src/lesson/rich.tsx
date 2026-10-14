@@ -1,5 +1,5 @@
-import { findTerms } from '@felt/content';
-import { Fragment } from 'react';
+import { findTerms, type LessonStep } from '@felt/content';
+import { createContext, Fragment, useContext } from 'react';
 import { Term } from '../ui/Term';
 
 const SUIT_CLASS: Record<string, string> = { '♠': 'suit-s', '♥': 'suit-h', '♦': 'suit-d', '♣': 'suit-c' };
@@ -26,15 +26,50 @@ function Suits({ text }: { text: string }) {
 }
 
 /**
+ * Which glossary terms a screen may underline. A lesson sets it per step so a
+ * term is underlined only where it first appears, and a screen never carries
+ * more than a few. Outside lessons nothing is set and each block links freely.
+ */
+export const TermScope = createContext<ReadonlySet<string> | undefined>(undefined);
+
+/** Every string a step shows, for finding the terms it uses. */
+function stepStrings(value: unknown): string[] {
+  if (typeof value === 'string') return [value];
+  if (Array.isArray(value)) return value.flatMap(stepStrings);
+  if (value && typeof value === 'object') return Object.entries(value).flatMap(([k, v]) => (k === 'kind' || k === 'chartId' ? [] : stepStrings(v)));
+  return [];
+}
+
+/** At most this many underlines on one screen. Abbreviations come first: they are the hardest to guess. */
+const PER_SCREEN = 3;
+
+/**
+ * The terms step `index` of a lesson may underline: ones not seen in an
+ * earlier step, abbreviations first, then in reading order, capped per screen.
+ */
+export function termsForStep(steps: readonly LessonStep[], index: number): Set<string> {
+  const seen = new Set(steps.slice(0, index).flatMap((s) => stepStrings(s).flatMap((t) => findTerms(t).map((m) => m.id))));
+  const here: { id: string; abbr: boolean }[] = [];
+  for (const t of stepStrings(steps[index])) {
+    for (const m of findTerms(t)) {
+      if (seen.has(m.id) || here.some((h) => h.id === m.id)) continue;
+      here.push({ id: m.id, abbr: /^[A-Z0-9+/$]{2,}/.test(t.slice(m.start, m.end)) });
+    }
+  }
+  return new Set([...here.filter((h) => h.abbr), ...here.filter((h) => !h.abbr)].slice(0, PER_SCREEN).map((h) => h.id));
+}
+
+/**
  * Underlines glossary terms in plain text, each term once per block (`seen`
  * is shared across a block's parts). Bold text is not linked: a bold term is
  * the one being defined right there.
  */
 function Glossed({ text, seen }: { text: string; seen: Set<string> }) {
+  const allowed = useContext(TermScope);
   const out: React.ReactNode[] = [];
   let at = 0;
   for (const m of findTerms(text)) {
-    if (seen.has(m.id)) continue;
+    if (seen.has(m.id) || (allowed && !allowed.has(m.id))) continue;
     seen.add(m.id);
     if (m.start > at) out.push(<Suits key={`t${at}`} text={text.slice(at, m.start)} />);
     out.push(

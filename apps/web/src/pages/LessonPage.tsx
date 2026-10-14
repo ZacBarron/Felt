@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Link, Navigate, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { haptic } from '../haptics';
 import { LessonCover } from '../lesson/LessonCover';
+import { termsForStep, TermScope } from '../lesson/rich';
 import { StepView } from '../lesson/StepView';
 import { canOpenLesson } from '../state/access';
 import { getChart } from '../state/charts';
@@ -229,10 +230,19 @@ function Lesson({ lessonKey: key }: { lessonKey: string }) {
             {entry.moduleTitle}, {content.minutes} min{content.level === 'advanced' && <span className="pill">Advanced</span>}
           </div>
         )}
-        {step && <StepView step={step} points={points} answered={answers[i]} onAnswer={(choice) => {
-              setAnswers((a) => ({ ...a, [i]: choice }));
-              if (step.kind === 'quiz') void recordLessonQuiz(key, i, choice === step.answer, 'lesson');
-            }} />}
+        {step && (
+          <TermScope.Provider value={termsForStep(content.steps, i)}>
+            <StepView
+              step={step}
+              points={points}
+              answered={answers[i]}
+              onAnswer={(choice) => {
+                setAnswers((a) => ({ ...a, [i]: choice }));
+                if (step.kind === 'quiz') void recordLessonQuiz(key, i, choice === step.answer, 'lesson');
+              }}
+            />
+          </TermScope.Provider>
+        )}
         {i === 0 && (
           <div className="intro-cover reveal">
             <LessonCover cover={content.cover} size="intro" />

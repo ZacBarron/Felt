@@ -10,7 +10,7 @@ export const PREFLOP_MORE_LESSONS: LessonContent[] = [
       {
         kind: 'intro',
         title: 'Raise it or leave it',
-        body: 'Facing an open from the cutoff or earlier, raked strategies mostly 3bet or fold. The small blind does the same. Only the button and the big blind keep a real calling range.',
+        body: 'A 3bet is a raise over an open. Facing an open from the cutoff or earlier, raked strategies mostly 3bet or fold. The small blind does the same. Only the button and the big blind keep a real calling range.',
       },
       {
         kind: 'visual',
@@ -498,7 +498,7 @@ export const PREFLOP_MORE_LESSONS: LessonContent[] = [
       {
         kind: 'intro',
         title: 'Your open got 3bet',
-        body: 'Now you choose between folding, calling and 4betting. Your price and your position shape the mix. So does how strong your opening range was.',
+        body: 'A raise over your open is a 3bet. Now you choose between folding, calling and 4betting. Your price and your position shape the mix. So does how strong your opening range was.',
       },
       {
         kind: 'table',
@@ -620,7 +620,7 @@ export const PREFLOP_MORE_LESSONS: LessonContent[] = [
       {
         kind: 'intro',
         title: 'Four bets in, stacks are next',
-        body: 'At 100bb, a 4bet commits a large share of the stack. Ranges get narrow and blockers matter a lot. The 5bet is all in.',
+        body: 'A 4bet is a raise over a 3bet. At 100bb it commits a large share of the stack. Ranges get narrow and blockers matter a lot. A 5bet raises once more and is all in.',
       },
       {
         kind: 'visual',

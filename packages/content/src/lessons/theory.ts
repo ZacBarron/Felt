@@ -18,7 +18,7 @@ export const THEORY_LESSONS: LessonContent[] = [
       {
         kind: 'intro',
         title: 'Unexploitable, not maximal',
-        body: 'GTO means playing your part of a Nash equilibrium. It protects you against any opponent. It is not the strategy that wins the most against the opponent in front of you.',
+        body: 'GTO (game theory optimal) means playing your part of a Nash equilibrium. It protects you against any opponent. It is not the strategy that wins the most against the opponent in front of you.',
       },
       {
         kind: 'text',
