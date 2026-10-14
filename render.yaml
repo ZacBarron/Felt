@@ -28,6 +28,16 @@ services:
         sync: false
       - key: EMAIL_FROM
         sync: false
+      # Passkeys: the domain the app's pages live on, and their exact origins.
+      # For the GitHub Pages link: zacbarron.github.io and https://zacbarron.github.io
+      - key: WEBAUTHN_RP_ID
+        sync: false
+      - key: WEBAUTHN_ORIGINS
+        sync: false
+      # Other sites that may call this API from a browser, comma separated.
+      # For the GitHub Pages link: https://zacbarron.github.io
+      - key: ALLOWED_ORIGINS
+        sync: false
       # Study reminders: pnpm --filter @felt/server vapid
       - key: VAPID_PUBLIC_KEY
         sync: false

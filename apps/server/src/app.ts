@@ -1,8 +1,10 @@
 import { Hono, type Context } from 'hono';
 import { bodyLimit } from 'hono/body-limit';
+import { cors } from 'hono/cors';
 import { askCoach, type CoachClient, coachErrorResponse, parseCoachRequest, REFUSAL_REPLY, TRUNCATED_NOTE } from './coach.ts';
 import type { Config } from './config.ts';
 import { type Db, tx } from './db.ts';
+import { mountPasskeys, passkeysReady, simpleWebAuthn, type WebAuthnLib } from './passkeys.ts';
 import {
   CALIBRATION_MIN_ANSWERS,
   dailySummary,
@@ -30,12 +32,15 @@ export interface Deps {
   stripe?: StripeCall;
   /** The AI coach's Claude client. Without it the coach is off. */
   coach?: CoachClient;
+  /** Passkey verification. Tests pass a fake; the real library is the default. */
+  webauthn?: WebAuthnLib;
   now?: () => Date;
 }
 
 interface UserRow {
   id: string;
-  email: string;
+  /** Optional: a passkey account can have no email. */
+  email: string | null;
   handle: string | null;
   created_at: string;
   tz: string | null;
@@ -55,13 +60,18 @@ type Env = { Variables: { user: UserRow; token: string } };
 const CODE_TTL_MS = 10 * 60 * 1000;
 const MAX_CODE_ATTEMPTS = 5;
 const MAX_CODES_PER_HOUR = 5;
-const SESSION_IDLE_DAYS = 180;
+/**
+ * A session lasts until it goes unused for this long. Every signed in request
+ * renews it, so a player who opens Felt now and then stays signed in.
+ */
+export const SESSION_IDLE_DAYS = 180;
 
-export function publicUser(u: UserRow, now: Date) {
+export function publicUser(u: UserRow, now: Date, passkeys = 0) {
   const pro = !!u.pro_until && new Date(u.pro_until) > now;
   return {
     id: u.id,
     email: u.email,
+    passkeys,
     handle: u.handle,
     tz: u.tz,
     cueMinutes: u.cue_minutes,
@@ -80,9 +90,25 @@ async function json<T>(c: Context): Promise<Partial<T>> {
   }
 }
 
-export function createApp({ db, config, mailer, stripe, coach, now = () => new Date() }: Deps) {
+export function createApp({ db, config, mailer, stripe, coach, webauthn = simpleWebAuthn, now = () => new Date() }: Deps) {
   const app = new Hono<Env>();
   const iso = () => now().toISOString();
+
+  // Browsers on the listed sites (such as the GitHub Pages copy of the app) may call the API.
+  // Sign in uses bearer tokens, never cookies, so credentials stay off.
+  if (config.allowedOrigins.length) {
+    const allowed = new Set(config.allowedOrigins);
+    app.use(
+      '/api/*',
+      cors({
+        origin: (origin) => (allowed.has(origin) ? origin : null),
+        allowHeaders: ['Authorization', 'Content-Type'],
+        allowMethods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+        maxAge: 86_400,
+        credentials: false,
+      }),
+    );
+  }
 
   // Plain error messages players can act on; details stay in the log.
   app.onError((err, c) => {
@@ -90,21 +116,46 @@ export function createApp({ db, config, mailer, stripe, coach, now = () => new D
     return c.json({ error: 'Something went wrong on the server. Try again in a moment.' }, 500);
   });
 
-  const requireUser = async (c: Context<Env>, next: () => Promise<void>) => {
+  /** The user behind this request's bearer token, renewing the session. */
+  const sessionUser = (c: Context): { user: UserRow; token: string } | undefined => {
     const header = c.req.header('Authorization') ?? '';
     const token = header.startsWith('Bearer ') ? header.slice(7) : '';
-    if (!token) return c.json({ error: 'Sign in first.' }, 401);
+    if (!token) return undefined;
     const row = db
       .prepare('SELECT u.*, s.last_seen FROM sessions s JOIN users u ON u.id = s.user_id WHERE s.token_hash = ?')
       .get(sha256(token)) as (UserRow & { last_seen: string }) | undefined;
-    if (!row || now().getTime() - Date.parse(row.last_seen) > SESSION_IDLE_DAYS * 86_400_000) return c.json({ error: 'Your sign in has expired. Sign in again.' }, 401);
+    if (!row) return undefined;
+    if (now().getTime() - Date.parse(row.last_seen) > SESSION_IDLE_DAYS * 86_400_000) {
+      db.prepare('DELETE FROM sessions WHERE token_hash = ?').run(sha256(token));
+      return undefined;
+    }
     db.prepare('UPDATE sessions SET last_seen = ? WHERE token_hash = ?').run(iso(), sha256(token));
-    c.set('user', row);
-    c.set('token', token);
+    const { last_seen: _seen, ...user } = row;
+    return { user, token };
+  };
+
+  const requireUser = async (c: Context<Env>, next: () => Promise<void>) => {
+    const header = c.req.header('Authorization') ?? '';
+    if (!header.startsWith('Bearer ')) return c.json({ error: 'Sign in first.' }, 401);
+    const found = sessionUser(c);
+    if (!found) return c.json({ error: 'Your sign in has expired. Sign in again.' }, 401);
+    c.set('user', found.user);
+    c.set('token', found.token);
     await next();
   };
 
   const freshUser = (id: string) => db.prepare('SELECT * FROM users WHERE id = ?').get(id) as unknown as UserRow;
+  const passkeyCount = (id: string) => (db.prepare('SELECT COUNT(*) AS n FROM passkeys WHERE user_id = ?').get(id) as { n: number }).n;
+  const userJson = (u: UserRow) => publicUser(u, now(), passkeyCount(u.id));
+
+  /** A new session for a user: the token goes to the device, only its hash is stored. */
+  const startSession = (userId: string) => {
+    const token = newToken();
+    db.prepare('INSERT INTO sessions (token_hash, user_id, created_at, last_seen) VALUES (?, ?, ?, ?)').run(sha256(token), userId, iso(), iso());
+    return { token, user: userJson(freshUser(userId)) };
+  };
+
+  const emailReady = () => !!config.email.resendKey || config.devCodes;
 
   // Health and features -------------------------------------------------------
 
@@ -112,7 +163,9 @@ export function createApp({ db, config, mailer, stripe, coach, now = () => new D
     c.json({
       ok: true,
       features: {
-        accounts: !!config.email.resendKey || config.devCodes,
+        accounts: emailReady() || passkeysReady(config),
+        email: emailReady(),
+        passkeys: passkeysReady(config),
         billing: !!(stripe && config.stripe.priceAnnual && config.stripe.priceMonthly),
         push: !!(config.push.publicKey && config.push.privateKey),
         coach: !!coach,
@@ -122,8 +175,10 @@ export function createApp({ db, config, mailer, stripe, coach, now = () => new D
 
   // Sign in with an emailed code ---------------------------------------------------
 
-  app.post('/api/auth/start', async (c) => {
-    const email = normalizeEmail((await json<{ email: string }>(c)).email);
+  /** Emails a 6 digit code, limited to a few an hour for each address. */
+  const sendCode = async (c: Context, rawEmail: unknown) => {
+    if (!emailReady()) return c.json({ error: 'Email sign in is not set up on this server.' }, 503);
+    const email = normalizeEmail(rawEmail);
     if (!email) return c.json({ error: 'Enter a valid email address.' }, 400);
     const hourAgo = new Date(now().getTime() - 3_600_000).toISOString();
     const recent = (db.prepare('SELECT COUNT(*) AS n FROM login_requests WHERE email = ? AND at > ?').get(email, hourAgo) as { n: number }).n;
@@ -140,10 +195,10 @@ export function createApp({ db, config, mailer, stripe, coach, now = () => new D
     });
     await mailer.send(email, `Your Felt code: ${code}`, `Your Felt sign in code is ${code}. It works for 10 minutes.\n\nIf you did not ask for it, ignore this email.`);
     return c.json({ ok: true, ...(config.devCodes ? { devCode: code } : {}) });
-  });
+  };
 
-  app.post('/api/auth/verify', async (c) => {
-    const body = await json<{ email: string; code: string }>(c);
+  /** Checks a code. Returns the email it proves, or an error response. A right code works once. */
+  const checkCode = (c: Context, body: { email?: unknown; code?: unknown }): { email: string } | Response => {
     const email = normalizeEmail(body.email);
     const code = typeof body.code === 'string' ? body.code.trim() : '';
     if (!email || !/^\d{6}$/.test(code)) return c.json({ error: 'Enter the 6 digit code from the email.' }, 400);
@@ -156,18 +211,43 @@ export function createApp({ db, config, mailer, stripe, coach, now = () => new D
       db.prepare('UPDATE login_codes SET attempts = attempts + 1 WHERE email = ?').run(email);
       return c.json({ error: 'That code is not right. Check the email and try again.' }, 400);
     }
-    const token = newToken();
+    db.prepare('DELETE FROM login_codes WHERE email = ?').run(email);
+    return { email };
+  };
+
+  app.post('/api/auth/start', async (c) => sendCode(c, (await json<{ email: string }>(c)).email));
+
+  app.post('/api/auth/verify', async (c) => {
+    const checked = checkCode(c, await json<{ email: string; code: string }>(c));
+    if (checked instanceof Response) return checked;
+    const { email } = checked;
     const user = tx(db, () => {
-      db.prepare('DELETE FROM login_codes WHERE email = ?').run(email);
       let u = db.prepare('SELECT * FROM users WHERE email = ?').get(email) as unknown as UserRow | undefined;
       if (!u) {
         db.prepare('INSERT INTO users (id, email, created_at) VALUES (?, ?, ?)').run(newId(), email, iso());
         u = db.prepare('SELECT * FROM users WHERE email = ?').get(email) as unknown as UserRow;
       }
-      db.prepare('INSERT INTO sessions (token_hash, user_id, created_at, last_seen) VALUES (?, ?, ?, ?)').run(sha256(token), u.id, iso(), iso());
       return u;
     });
-    return c.json({ token, user: publicUser(user, now()) });
+    return c.json(startSession(user.id));
+  });
+
+  // Add an email to the signed in account (a passkey account starts without one).
+  app.post('/api/me/email/start', requireUser, async (c) => {
+    const email = normalizeEmail((await json<{ email: string }>(c)).email);
+    if (email && db.prepare('SELECT 1 FROM users WHERE email = ? AND id != ?').get(email, c.get('user').id))
+      return c.json({ error: 'That email is already used by another Felt account.' }, 409);
+    return sendCode(c, email ?? '');
+  });
+
+  app.post('/api/me/email/verify', requireUser, async (c) => {
+    const checked = checkCode(c, await json<{ email: string; code: string }>(c));
+    if (checked instanceof Response) return checked;
+    const u = c.get('user');
+    if (db.prepare('SELECT 1 FROM users WHERE email = ? AND id != ?').get(checked.email, u.id))
+      return c.json({ error: 'That email is already used by another Felt account.' }, 409);
+    db.prepare('UPDATE users SET email = ? WHERE id = ?').run(checked.email, u.id);
+    return c.json({ user: userJson(freshUser(u.id)) });
   });
 
   app.post('/api/auth/logout', requireUser, (c) => {
@@ -177,7 +257,7 @@ export function createApp({ db, config, mailer, stripe, coach, now = () => new D
 
   // Profile -----------------------------------------------------------------
 
-  app.get('/api/me', requireUser, (c) => c.json({ user: publicUser(c.get('user'), now()) }));
+  app.get('/api/me', requireUser, (c) => c.json({ user: userJson(c.get('user')) }));
 
   app.patch('/api/me', requireUser, async (c) => {
     const body = await json<{
@@ -217,7 +297,7 @@ export function createApp({ db, config, mailer, stripe, coach, now = () => new D
     }
     const keys = Object.keys(set);
     if (keys.length) db.prepare(`UPDATE users SET ${keys.map((k) => `${k} = ?`).join(', ')} WHERE id = ?`).run(...(Object.values(set) as never[]), u.id);
-    return c.json({ user: publicUser(freshUser(u.id), now()) });
+    return c.json({ user: userJson(freshUser(u.id)) });
   });
 
   /** Deletes the account and everything stored with it. Billing must be cancelled in Stripe separately. */
@@ -268,6 +348,18 @@ export function createApp({ db, config, mailer, stripe, coach, now = () => new D
     },
   );
 
+  // Passkeys ---------------------------------------------------------------------
+
+  mountPasskeys(app, {
+    db,
+    config,
+    lib: webauthn,
+    now,
+    userFor: (c) => sessionUser(c)?.user,
+    signIn: startSession,
+    userJson: (id) => userJson(freshUser(id)),
+  });
+
   // Billing (Stripe) ---------------------------------------------------------
 
   const billingReady = () => !!(stripe && config.stripe.priceAnnual && config.stripe.priceMonthly);
@@ -280,7 +372,7 @@ export function createApp({ db, config, mailer, stripe, coach, now = () => new D
     const u = c.get('user');
     let customer = u.stripe_customer;
     if (!customer) {
-      customer = (await stripe!('POST', 'customers', { email: u.email, metadata: { user_id: u.id } })).id as string;
+      customer = (await stripe!('POST', 'customers', { email: u.email ?? undefined, metadata: { user_id: u.id } })).id as string;
       db.prepare('UPDATE users SET stripe_customer = ? WHERE id = ?').run(customer, u.id);
     }
     // One free trial per player, on the yearly plan, matching the paywall.

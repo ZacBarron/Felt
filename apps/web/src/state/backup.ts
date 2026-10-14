@@ -6,7 +6,8 @@ import { db } from './db';
  * so a cleared browser or a new phone does not cost months of review.
  */
 
-const TABLES = ['cards', 'reviews', 'lessons', 'saved', 'answers', 'daily', 'hands', 'sessions', 'events', 'scenarios', 'logged', 'weekly'] as const;
+/** Every table in the database. A test checks this list against the schema, so a new table cannot be left out. */
+export const TABLES = ['cards', 'reviews', 'lessons', 'saved', 'answers', 'daily', 'hands', 'sessions', 'events', 'scenarios', 'logged', 'weekly'] as const;
 const SETTINGS_KEY = 'felt.settings.v1';
 const FORMAT = 'felt-backup';
 
@@ -46,10 +47,22 @@ export interface RestoreSummary {
   settings: boolean;
 }
 
+/** Reads a backup without applying it. Throws on anything that is not a Felt backup. */
+export function parseBackup(text: string): Backup {
+  let backup: Backup;
+  try {
+    backup = JSON.parse(text, reviver) as Backup;
+  } catch {
+    throw new Error('This file is not a Felt backup.');
+  }
+  if (backup?.format !== FORMAT || backup.version !== 1 || typeof backup.tables !== 'object' || backup.tables === null)
+    throw new Error('This file is not a Felt backup.');
+  return backup;
+}
+
 /** Replaces this device's data with a backup. Throws on a file that is not a Felt backup, before touching anything. */
 export async function importBackup(text: string): Promise<RestoreSummary> {
-  const backup = JSON.parse(text, reviver) as Backup;
-  if (backup?.format !== FORMAT || backup.version !== 1 || typeof backup.tables !== 'object') throw new Error('This file is not a Felt backup.');
+  const backup = parseBackup(text);
   let rows = 0;
   await db.transaction('rw', TABLES.map((t) => db.table(t)), async () => {
     for (const name of TABLES) {
@@ -70,6 +83,29 @@ export async function importBackup(text: string): Promise<RestoreSummary> {
     }
   }
   return { rows, settings };
+}
+
+/**
+ * Removes everything Felt keeps on this device: every table and every saved
+ * setting. Used when logging out of a shared phone, after a successful save.
+ */
+export async function clearDeviceData(): Promise<void> {
+  await db.transaction('rw', TABLES.map((t) => db.table(t)), async () => {
+    for (const name of TABLES) await db.table(name).clear();
+  });
+  // Only Felt's own keys: on a shared host (like github.io) other apps live on the same origin.
+  for (const store of [globalThis.localStorage, globalThis.sessionStorage]) {
+    try {
+      const keys: string[] = [];
+      for (let i = 0; i < store.length; i++) {
+        const k = store.key(i);
+        if (k?.startsWith('felt.')) keys.push(k);
+      }
+      keys.forEach((k) => store.removeItem(k));
+    } catch {
+      // Storage blocked or missing: nothing was saved there either.
+    }
+  }
 }
 
 /**

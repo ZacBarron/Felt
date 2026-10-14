@@ -137,6 +137,11 @@ See [SOLVER_DATA.md](SOLVER_DATA.md).
 - [x] AI coach chat for Felt Pro, using Felt's charts, your Felt Rating and recent misses (Claude API, `apps/server/src/coach.ts`, `/coach`)
 - [ ] Voice note hand capture; online hand history import
 - [x] Optional cloud sync and backup
+- [x] Passkey accounts (sign up and sign in with Face ID or a fingerprint, no username), email code as the fallback, an optional email for passkey accounts
+- [x] Accounts on the GitHub Pages link: CORS for listed origins and `FELT_API_URL` at build time
+- [x] Deferred sign up: "Save your progress" after the plan is set, one quiet card on Today later, "Welcome back" with what came back, a clear choice when both copies have progress
+- [x] Log out that saves first, with "remove from this device" for a shared phone; sessions renew on use (180 days idle)
+- [ ] Manage passkeys by name on the Account page (list and remove are in the API)
 - [ ] Leak driven study plans
 
 ## Decisions

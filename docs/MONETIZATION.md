@@ -12,7 +12,7 @@ How Felt turns a first open into a daily habit and a paid subscription, and why 
 
 | Screen | What it does | Why it works |
 | --- | --- | --- |
-| Welcome | Two aces dealt on the felt, "From your first hand to Elite", the rating ladder climbing, and real counts of lessons, questions and charts. "I have an account" appears only when a server answers | Names the whole journey for a beginner and a regular alike. The proof is depth that can be checked, not claims |
+| Welcome | Two aces dealt on the felt, "From your first hand to Elite", the rating ladder climbing, and real counts of lessons, questions and charts. "I have an account" appears only when a server answers and opens sign in (passkey first, email code as the fallback). Signing in there skips onboarding and shows "Welcome back" with the Felt Rating, lessons and streak that came back | Names the whole journey for a beginner and a regular alike. The proof is depth that can be checked, not claims |
 | Level | New to pro, with a one line reply to the answer | Each answer is heard (the reply), and it decides basics first or placement |
 | Target | Pick a tier to aim for: Solid, Regular, Expert or Elite, with what each means and its rating | A specific, hard goal beats "do your best" (Locke and Latham 2002); Elite is the cap because higher tiers could not be measured honestly |
 | Goal | Beginners (new, or play for fun) see goals in their words: learn the game, home games, a casino, get really good, tournaments. Regular and pro players see win live, move up, go pro, master GTO, tournaments | The goal is quoted back in the plan and on Today. Changing level drops goals the new level does not offer |
@@ -27,6 +27,7 @@ How Felt turns a first open into a daily habit and a paid subscription, and why 
 | Find where you start | Placement or start from the basics. Skipped for new players | Nobody repeats what they know |
 | Plan | Pledge, the climb to their target, and the first week starting with a done "Set up your plan" row, then hold to commit | The labor of building is shown (Buell and Norton 2011). A step already done is honest endowed progress (Nunes and Drèze 2006) |
 | Day 1 | A short moment: "Your plan is set" | Marks the commitment the player just made |
+| Save your progress | Only when the server offers accounts and the player is a guest. A calm screen: what an account gives (no password, your plan, rating and streak on any device, safe if the phone is lost), "Create a passkey", "Skip for now" at the same size, and "Use email instead". Asked once. Events: `account_prompt_viewed`, `account_created`, `account_skipped` | Deferred sign up: the ask comes after the player has a plan worth keeping, not before any value. Duolingo lets people finish a lesson before asking for an account and reports more daily users from moving sign up later (secondary source, see research/sources.md). Passkeys make it one tap with nothing to remember. Skipping costs nothing, so the choice stays honest |
 | Paywall | Felt Pro, personalized headline | Shown at peak intent, right after commitment |
 
 New players always start with the basics, whatever their goals; so does a casual player who skips placement (`pathPrefs` in `state/goals.ts`). After onboarding, review deals chart cards only once the lesson that introduces charts is done (or any preflop lesson), and math cards only after the odds or a math lesson (`chartsTaught` and `mathTaught` in `state/decks.ts`). Today hides the daily challenge until then, so a beginner is never sent to a range chart they have not learned.
@@ -34,6 +35,8 @@ New players always start with the basics, whatever their goals; so does a casual
 **Social proof.** Felt shows only proof that is true: counts read from the content, cited research and, once real players give them, quotes in `TESTIMONIALS` (`packages/content/src/onboarding.ts`). Social proof persuades most when it describes people like the reader (Goldstein, Cialdini and Griskevicius 2008), and invented numbers or reviews would break the trust the product depends on. The section stays hidden while the list is empty.
 
 The progress bar at the top of every step keeps the end in sight.
+
+**Later, for guests.** When accounts exist, Today shows one card after real progress worth protecting (3 lessons done or a 3 day streak): "Save your progress to an account. Use Felt on any device." It shows for a day at most once a week, waits 3 days after the onboarding ask, and never returns after two dismissals. No loss framing beyond the plain fact. Rules in `state/accountPrompt.ts` (unit tested).
 
 ## Placement and test outs
 

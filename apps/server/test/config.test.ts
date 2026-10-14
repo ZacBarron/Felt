@@ -26,3 +26,21 @@ describe('config', () => {
     expect(loadConfig({ APP_URL: 'https://felt.example.com/' }).appUrl).toBe('https://felt.example.com');
   });
 });
+
+describe('passkey and CORS config', () => {
+  it('reads origins as a comma list and drops paths and bad entries', () => {
+    const c = loadConfig({
+      WEBAUTHN_RP_ID: ' Zacbarron.github.io ',
+      WEBAUTHN_ORIGINS: 'https://zacbarron.github.io/Felt/, http://localhost:5173 ,,nonsense',
+      ALLOWED_ORIGINS: 'https://zacbarron.github.io',
+    });
+    expect(c.webauthn).toEqual({ rpId: 'zacbarron.github.io', rpName: 'Felt', origins: ['https://zacbarron.github.io', 'http://localhost:5173'] });
+    expect(c.allowedOrigins).toEqual(['https://zacbarron.github.io']);
+  });
+
+  it('is off when blank', () => {
+    const c = loadConfig({ WEBAUTHN_RP_ID: '', WEBAUTHN_ORIGINS: ' ', ALLOWED_ORIGINS: '', WEBAUTHN_RP_NAME: 'Felt Poker' });
+    expect(c.webauthn).toEqual({ rpId: undefined, rpName: 'Felt Poker', origins: [] });
+    expect(c.allowedOrigins).toEqual([]);
+  });
+});

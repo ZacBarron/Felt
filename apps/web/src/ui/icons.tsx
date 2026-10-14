@@ -461,3 +461,55 @@ export function GlossaryIcon(p: IconProps) {
     </Svg>
   );
 }
+
+/** Passkey: a person with a key, the shape people know from passkey prompts. */
+export function PasskeyIcon(p: IconProps) {
+  return (
+    <Svg {...p}>
+      <circle cx="9" cy="8" r="3.5" {...fillProps(p.filled)} />
+      <path d="M2.75 19.5c.95-3.2 3.3-5 6.25-5 1.55 0 2.95.5 4 1.4" />
+      <circle cx="17.5" cy="10.5" r="2.75" {...fillProps(p.filled)} />
+      <path d="M17.5 13.25v7.25M17.5 18.25h2M17.5 16h1.5" />
+    </Svg>
+  );
+}
+
+/** Email: an envelope. */
+export function EmailIcon(p: IconProps) {
+  return (
+    <Svg {...p}>
+      <rect x="3.5" y="5.5" width="17" height="13" rx="2.5" {...fillProps(p.filled)} />
+      <path d="m4.75 7.5 7.25 5.5 7.25-5.5" />
+    </Svg>
+  );
+}
+
+/** Saved to the cloud: a cloud with a check, or a slash when offline. */
+export function CloudIcon({ offline, ...p }: IconProps & { offline?: boolean }) {
+  return (
+    <Svg {...p}>
+      <path d="M7.25 18.5h10a3.75 3.75 0 0 0 .6-7.45A5.5 5.5 0 0 0 7.2 9.55 4.5 4.5 0 0 0 7.25 18.5Z" {...fillProps(p.filled)} />
+      {offline ? <path d="M4.5 4.5l15 15" /> : <path d="m9.75 13.75 1.75 1.75 3-3.25" />}
+    </Svg>
+  );
+}
+
+/** Log out: a door with an arrow leaving it. */
+export function LogOutIcon(p: IconProps) {
+  return (
+    <Svg {...p}>
+      <path d="M13 4.5H7.25a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2H13" />
+      <path d="M10.5 12H20M16.75 8.5 20.25 12l-3.5 3.5" />
+    </Svg>
+  );
+}
+
+/** A device: a phone, for "this device" in sync choices. */
+export function DeviceIcon(p: IconProps) {
+  return (
+    <Svg {...p}>
+      <rect x="6.5" y="3" width="11" height="18" rx="2.75" {...fillProps(p.filled)} />
+      <path d="M10.5 18h3" />
+    </Svg>
+  );
+}

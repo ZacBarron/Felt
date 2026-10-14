@@ -1,24 +1,28 @@
 import { useEffect, useState } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
+import { EmailCode } from '../components/EmailCode';
+import { KeepCopy } from '../components/KeepCopy';
+import { LogOutSheet } from '../components/LogOutSheet';
 import { haptic } from '../haptics';
 import { manageSubscription } from '../state/access';
-import { api, serverFeatures, type ServerFeatures, type ServerUser, setSession, updateMe, useSession } from '../state/api';
-import { track } from '../state/events';
+import { api, emailOn, serverFeatures, type ServerFeatures, type ServerUser, setSession, updateMe, useSession } from '../state/api';
+import { addPasskey, Cancelled, passkeysSupported, sendAddEmailCode, verifyAddEmail } from '../state/auth';
 import { cueCopy } from '../state/goals';
 import { disableReminders, enableReminders, pushBlocker } from '../state/push';
 import { useSettings } from '../state/settings';
 import { useClaudeCloud } from '../state/cloud';
-import { firstSync, keepCopy, pushNow, resetSync, useSyncMeta } from '../state/sync';
-import { BottomBar } from '../ui/BottomBar';
-import { BrandMark } from '../ui/Brand';
-import { AccountIcon, BellIcon, LeagueIcon } from '../ui/icons';
+import { keepCopy, pushNow, resetSync, useSyncMeta } from '../state/sync';
+import { Avatar } from '../ui/Avatar';
+import { AccountIcon, CloudIcon, EmailIcon, LogOutIcon, PasskeyIcon } from '../ui/icons';
 import { PageHeader } from '../ui/PageHeader';
 import { EmptyState, Section } from '../ui/Section';
 import { Toggle } from '../ui/Toggle';
 import './screens.css';
+import './auth.css';
 
 function ago(iso?: string) {
   if (!iso) return 'never';
+  if (Date.now() - Date.parse(iso) < 45_000) return 'just now';
   const mins = Math.round((Date.now() - Date.parse(iso)) / 60_000);
   if (mins < 1) return 'just now';
   if (mins < 60) return `${mins} min ago`;
@@ -33,11 +37,28 @@ const fromTime = (t: string) => {
   return h * 60 + m;
 };
 
-/** Sign in with an emailed code, then sync, reminders, leagues and subscription. */
+/** Whether the browser thinks it is online, kept up to date. */
+function useOnline() {
+  const [online, setOnline] = useState(() => typeof navigator === 'undefined' || navigator.onLine !== false);
+  useEffect(() => {
+    const on = () => setOnline(true);
+    const off = () => setOnline(false);
+    window.addEventListener('online', on);
+    window.addEventListener('offline', off);
+    return () => {
+      window.removeEventListener('online', on);
+      window.removeEventListener('offline', off);
+    };
+  }, []);
+  return online;
+}
+
+/** The account when signed in: who you are, how you sign in, sync, reminders, leagues and subscription. Guests go to sign in. */
 export function AccountPage() {
   const [features, setFeatures] = useState<ServerFeatures | null>();
   const session = useSession();
   const { cloud } = useClaudeCloud();
+  const location = useLocation();
 
   useEffect(() => {
     void serverFeatures().then(setFeatures);
@@ -66,122 +87,9 @@ export function AccountPage() {
       ) : session ? (
         <SignedIn user={session.user} features={features} />
       ) : (
-        <SignIn />
+        <Navigate to={`/signin${location.search}`} replace />
       )}
     </div>
-  );
-}
-
-function SignIn() {
-  const navigate = useNavigate();
-  const [params] = useSearchParams();
-  const next = params.get('next');
-  const [email, setEmail] = useState('');
-  const [code, setCode] = useState('');
-  const [sent, setSent] = useState(false);
-  const [devCode, setDevCode] = useState<string>();
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string>();
-
-  const start = async (e?: React.FormEvent) => {
-    e?.preventDefault();
-    setBusy(true);
-    setError(undefined);
-    try {
-      const r = await api<{ devCode?: string }>('/auth/start', { body: { email } });
-      setSent(true);
-      setDevCode(r.devCode);
-      track('signin_code_sent');
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'We could not send a code. Check your email address and try again.');
-    }
-    setBusy(false);
-  };
-
-  const verify = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setBusy(true);
-    setError(undefined);
-    try {
-      const r = await api<{ token: string; user: ServerUser }>('/auth/verify', { body: { email, code } });
-      resetSync();
-      setSession(r);
-      haptic('success');
-      track('signed_in');
-      const result = await firstSync().catch(() => undefined);
-      if (next && result !== 'choose') navigate(next, { replace: true });
-      if (result === 'pulled') location.reload();
-    } catch (err) {
-      haptic('error');
-      setError(err instanceof Error ? err.message : 'That code did not work. Try again or get a new code.');
-    }
-    setBusy(false);
-  };
-
-  return (
-    <>
-      {!sent && (
-        <EmptyState
-          art={<BrandMark size={72} />}
-          title="Sign in to Felt"
-          body="Keep your progress on all your devices."
-          action={
-            <div className="sc-perks" aria-label="You also get">
-              <span className="sc-perk">
-                <BellIcon size={15} /> Study reminders
-              </span>
-              <span className="sc-perk">
-                <LeagueIcon size={15} /> Weekly leagues
-              </span>
-            </div>
-          }
-        />
-      )}
-      {!sent ? (
-        <form className="stack" style={{ gap: '0.75rem' }} onSubmit={start}>
-          <label className="stack" style={{ gap: '0.35rem' }}>
-            <span className="footnote">Email</span>
-            <input id="account-email" type="email" autoComplete="email" inputMode="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
-          </label>
-          <span className="footnote">There is no password. We email you a code.</span>
-          <BottomBar>
-            <button type="submit" className="btn btn-primary btn-lg btn-block" disabled={busy || !email}>
-              {busy ? 'Sending…' : 'Email me a code'}
-            </button>
-          </BottomBar>
-        </form>
-      ) : (
-        <form className="stack" style={{ gap: '0.75rem' }} onSubmit={verify}>
-          <label className="stack" style={{ gap: '0.35rem' }}>
-            <span className="footnote">Enter the 6 digit code we sent to {email}</span>
-            <input
-              id="account-code"
-              inputMode="numeric"
-              autoComplete="one-time-code"
-              pattern="\d{6}"
-              maxLength={6}
-              required
-              value={code}
-              onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))}
-            />
-          </label>
-          {devCode && <div className="footnote">Development server: your code is {devCode}.</div>}
-          <button type="button" className="link-btn footnote" style={{ alignSelf: 'flex-start' }} onClick={() => void start()} disabled={busy}>
-            Send a new code
-          </button>
-          <BottomBar>
-            <button type="submit" className="btn btn-primary btn-lg btn-block" disabled={busy || code.length !== 6}>
-              {busy ? 'Signing in' : 'Sign in'}
-            </button>
-          </BottomBar>
-        </form>
-      )}
-      {error && (
-        <div className="explain bad" role="alert">
-          {error}
-        </div>
-      )}
-    </>
   );
 }
 
@@ -207,35 +115,106 @@ function SignedIn({ user, features }: { user: ServerUser; features: ServerFeatur
     setBusy(false);
   };
 
-  const signOut = () =>
-    run(async () => {
-      await api('/auth/logout', { body: {} }).catch(() => undefined);
-      setSession(null);
-      resetSync();
-    });
+  const [loggingOut, setLoggingOut] = useState(false);
+  const [addingEmail, setAddingEmail] = useState(false);
+  // Results of adding a passkey or an email show under that section, not under sync.
+  const [signinMessage, setSigninMessage] = useState<string>();
+  const name = settings.profile.name?.trim() || user.handle || (user.email ? user.email.split('@')[0] : 'Your account');
+  const passkeys = user.passkeys ?? 0;
+  const canAddPasskey = !!features.passkeys && passkeysSupported();
 
   return (
     <>
-      <Section title="Signed in" footer="Signing out keeps everything on this device.">
-        <div className="list">
-          <div className="list-row">
-            <span className="sc-icon-tile" aria-hidden="true">
-              <AccountIcon size={22} />
-            </span>
-            <span className="grow" style={{ minWidth: 0, overflowWrap: 'anywhere' }}>
-              <span style={{ display: 'block', fontWeight: 600 }}>{user.handle ?? user.email}</span>
-              {user.handle && <span className="footnote">{user.email}</span>}
-            </span>
-          </div>
-          <button className="list-row" onClick={() => void signOut()} disabled={busy}>
-            <span className="grow" style={{ color: 'var(--tint)' }}>
-              Sign out
-            </span>
-          </button>
+      <section className="card account-id reveal" aria-label="Your account">
+        <Avatar name={settings.profile.name || user.handle || undefined} photo={settings.profile.photo} size={72} />
+        <div className="account-id-name">{name}</div>
+        {user.email && <div className="account-id-email">{user.email}</div>}
+        <div className="account-id-method">
+          {passkeys > 0 ? <PasskeyIcon size={15} /> : <EmailIcon size={15} />}
+          {passkeys > 0 ? 'Signed in with a passkey' : 'Signed in with an email code'}
         </div>
-      </Section>
+      </section>
 
       <SyncSection busy={busy} run={run} message={message} />
+
+      <Section
+        title="Ways to sign in"
+        footer={signinMessage ? <span role="status">{signinMessage}</span> : undefined}
+        info={<p>A passkey signs you in with Face ID, a fingerprint or your device PIN. Add one on each device you use. An email is optional. It lets you sign in with a code and get receipts.</p>}
+      >
+        <div className="list with-icons">
+          <div className="list-row">
+            <span className="sc-icon-tile small" aria-hidden="true">
+              <PasskeyIcon size={20} />
+            </span>
+            <span className="grow">
+              <span style={{ display: 'block' }}>Passkeys</span>
+              <span className="footnote">{passkeys === 0 ? 'None yet' : passkeys === 1 ? '1 passkey' : `${passkeys} passkeys`}</span>
+            </span>
+          </div>
+          {canAddPasskey && (
+            <button
+              className="list-row"
+              disabled={busy}
+              data-haptic="off"
+              onClick={async () => {
+                setBusy(true);
+                setSigninMessage(undefined);
+                try {
+                  await addPasskey();
+                  haptic('success');
+                  setSigninMessage('Passkey added. You can sign in with it on this device.');
+                } catch (e) {
+                  if (!(e instanceof Cancelled)) haptic('error');
+                  setSigninMessage(e instanceof Cancelled ? `${e.message} You can try again.` : e instanceof Error ? e.message : 'Felt could not add a passkey. Try again.');
+                }
+                setBusy(false);
+              }}
+            >
+              <span className="sc-icon-tile small ghost" aria-hidden="true" />
+              <span className="grow" style={{ color: 'var(--tint)' }}>
+                {passkeys === 0 ? 'Add a passkey' : 'Add another passkey'}
+              </span>
+            </button>
+          )}
+          <div className="list-row">
+            <span className="sc-icon-tile small" aria-hidden="true">
+              <EmailIcon size={20} />
+            </span>
+            <span className="grow" style={{ minWidth: 0, overflowWrap: 'anywhere' }}>
+              <span style={{ display: 'block' }}>Email</span>
+              <span className="footnote">{user.email ?? 'Not added. It is optional.'}</span>
+            </span>
+          </div>
+          {!user.email && emailOn(features) && !addingEmail && (
+            <button className="list-row" onClick={() => setAddingEmail(true)}>
+              <span className="sc-icon-tile small ghost" aria-hidden="true" />
+              <span className="grow" style={{ color: 'var(--tint)' }}>
+                Add an email
+              </span>
+            </button>
+          )}
+        </div>
+        {addingEmail && !user.email && (
+          <div className="card account-add-email reveal">
+            <EmailCode
+              inline
+              send={sendAddEmailCode}
+              verify={async (address, code) => {
+                await verifyAddEmail(address, code);
+                haptic('success');
+                setAddingEmail(false);
+                setSigninMessage('Email added. You can sign in with a code too.');
+              }}
+              extra={
+                <button type="button" className="btn btn-plain btn-block" onClick={() => setAddingEmail(false)}>
+                  Cancel
+                </button>
+              }
+            />
+          </div>
+        )}
+      </Section>
 
       {features.push && (
         <Section
@@ -364,6 +343,19 @@ function SignedIn({ user, features }: { user: ServerUser; features: ServerFeatur
         </Section>
       )}
 
+      <Section>
+        <div className="list with-icons">
+          <button className="list-row" onClick={() => setLoggingOut(true)}>
+            <span className="sc-icon-tile small" aria-hidden="true">
+              <LogOutIcon size={20} />
+            </span>
+            <span className="grow" style={{ color: 'var(--tint)' }}>
+              Log out
+            </span>
+          </button>
+        </div>
+      </Section>
+
       <Section title="Delete account">
         <div className="list">
           {!confirmDelete ? (
@@ -375,24 +367,33 @@ function SignedIn({ user, features }: { user: ServerUser; features: ServerFeatur
           ) : (
             <>
               <div className="list-row">
-                <span className="grow footnote">
-                  This permanently deletes your account and your synced progress. Progress on this device stays. Cancel your Felt Pro subscription first.
+                <span className="grow stack" style={{ gap: '0.4rem', padding: '0.3rem 0' }}>
+                  <strong>Delete your account for good?</strong>
+                  <span className="footnote" style={{ display: 'block' }}>
+                    Felt deletes your account and its saved progress. Your league results go too. This cannot be undone.
+                  </span>
+                  <span className="footnote" style={{ display: 'block' }}>
+                    Progress on this device stays as a guest copy.
+                    {user.access.pro && user.access.until ? ' Cancel Felt Pro first so you are not charged again.' : ''}
+                  </span>
                 </span>
               </div>
               <button
                 className="list-row"
                 disabled={busy}
+                data-haptic="off"
                 onClick={() =>
                   void run(async () => {
                     await api('/me', { method: 'DELETE' });
+                    haptic('warning');
                     setSession(null);
                     resetSync();
-                    navigate('/settings');
+                    navigate('/settings', { replace: true });
                   })
                 }
               >
                 <span className="grow" style={{ color: 'var(--red-text)', fontWeight: 600 }}>
-                  Delete my account for good
+                  Delete my account
                 </span>
               </button>
               <button className="list-row" onClick={() => setConfirmDelete(false)}>
@@ -404,6 +405,20 @@ function SignedIn({ user, features }: { user: ServerUser; features: ServerFeatur
           )}
         </div>
       </Section>
+
+      <LogOutSheet
+        open={loggingOut}
+        onClose={() => setLoggingOut(false)}
+        onLoggedOut={(removed) => {
+          if (removed) {
+            // Everything in memory belongs to the account that just left: start fresh.
+            location.assign(`${import.meta.env.BASE_URL}signin?loggedout=removed`);
+            return;
+          }
+          setLoggingOut(false);
+          navigate('/signin?loggedout=1', { replace: true });
+        }}
+      />
     </>
   );
 }
@@ -411,51 +426,58 @@ function SignedIn({ user, features }: { user: ServerUser; features: ServerFeatur
 /** Sync status, the conflict choice and a sync now button, for either kind of account. */
 function SyncSection({ busy, run, message }: { busy: boolean; run: (fn: () => Promise<unknown>, done?: string) => Promise<void>; message?: string }) {
   const sync = useSyncMeta();
+  const online = useOnline();
+  // One line that says where your progress stands, in plain words.
+  const status = sync.saving
+    ? { tone: '', title: 'Saving…', sub: 'Sending your latest progress' }
+    : !online
+      ? { tone: 'warn', title: sync.dirty ? 'Not saved yet. You are offline.' : 'You are offline', sub: sync.dirty ? 'Felt saves when you are back online.' : `Saved ${ago(sync.syncedAt)}` }
+      : sync.error && sync.dirty
+        ? { tone: 'warn', title: 'Not saved yet', sub: sync.error }
+        : sync.dirty
+          ? { tone: '', title: 'Saving soon', sub: `Last saved ${ago(sync.syncedAt)}` }
+          : sync.syncedAt
+            ? { tone: 'good', title: `Saved ${ago(sync.syncedAt)}`, sub: 'Your account has everything on this device.' }
+            : { tone: '', title: 'Not saved yet', sub: 'Felt saves a few seconds after you study.' };
   return (
-  <Section
-    title="Sync"
-    info={<p>Felt syncs on its own a few seconds after you study and when you leave the app.</p>}
-    footer={message || sync.error ? <span role="status">{message ?? sync.error}</span> : undefined}
-  >
-    {sync.conflict ? (
-      <div className="card stack" style={{ gap: '0.75rem' }}>
-        <strong>Choose which progress to keep</strong>
-        <p className="footnote" style={{ margin: 0 }}>
-          This device and your account have different progress. Felt cannot combine them. Pick one to keep. The other will be replaced.
-        </p>
-        <button
-          className="btn btn-tinted btn-block"
-          disabled={busy}
-          onClick={() => void run(() => keepCopy('device'), 'Done. Your account now matches this device.')}
-        >
-          Keep this device's progress
-        </button>
-        <button className="btn btn-tinted btn-block" disabled={busy} onClick={() => void run(() => keepCopy('cloud'))}>
-          Use my account's progress
-        </button>
-        {(sync.conflict.device || sync.conflict.updatedAt) && (
-          <span className="footnote">
-            Your account was last saved{sync.conflict.device ? ` on ${sync.conflict.device}` : ''}
-            {sync.conflict.updatedAt ? ` ${ago(sync.conflict.updatedAt)}` : ''}.
-          </span>
-        )}
-      </div>
-    ) : (
-      <div className="list">
-        <div className="list-row">
-          <span className="grow">
-            <span style={{ display: 'block' }}>{sync.dirty ? 'Changes waiting to sync' : 'Up to date'}</span>
-            <span className="footnote">Last synced {ago(sync.syncedAt)}</span>
-          </span>
+    <Section
+      title="Sync"
+      info={<p>Felt saves to your account a few seconds after you study, and when you leave the app. Sign in on another device and your progress is there.</p>}
+      footer={message ? <span role="status">{message}</span> : undefined}
+    >
+      {sync.conflict ? (
+        <div className="card stack" style={{ gap: '0.75rem' }}>
+          <strong>Choose which progress to keep</strong>
+          <p className="footnote" style={{ margin: 0 }}>
+            This device and your account both changed. Pick the copy you want.
+          </p>
+          <KeepCopy
+            busy={busy}
+            onKeep={(choice) =>
+              void run(() => keepCopy(choice, { reload: false }), choice === 'device' ? 'Done. Your account now matches this device.' : 'Done. This device now shows your account’s progress.')
+            }
+          />
         </div>
-        <button className="list-row" disabled={busy} onClick={() => void run(pushNow, 'Synced.')}>
-          <span className="grow" style={{ color: 'var(--tint)' }}>
-            Sync now
-          </span>
-        </button>
-      </div>
-    )}
-  </Section>
+      ) : (
+        <div className="list with-icons">
+          <div className="list-row" role="status" aria-live="polite">
+            <span className={`sc-icon-tile small sync-tile ${status.tone}`} aria-hidden="true">
+              <CloudIcon size={20} offline={status.tone === 'warn'} />
+            </span>
+            <span className="grow">
+              <span style={{ display: 'block' }}>{status.title}</span>
+              <span className="footnote">{status.sub}</span>
+            </span>
+          </div>
+          <button className="list-row" disabled={busy || sync.saving || !online} onClick={() => void run(pushNow)}>
+            <span className="sc-icon-tile small ghost" aria-hidden="true" />
+            <span className="grow" style={{ color: 'var(--tint)' }}>
+              Save now
+            </span>
+          </button>
+        </div>
+      )}
+    </Section>
   );
 }
 

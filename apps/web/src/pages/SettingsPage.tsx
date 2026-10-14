@@ -125,8 +125,20 @@ function SettingsHome() {
           to="/account"
           icon={AccountIcon}
           color="var(--base-500)"
-          title={<span className="settings-account">{session ? session.user.email : cloud ? cloud.name || 'Signed in' : 'Account'}</span>}
-          subtitle={session ? 'Sync and leagues' : cloud ? 'Signed in with Claude. Progress saves to the cloud.' : 'Sign in to keep your progress'}
+          title={
+            <span className="settings-account">
+              {session ? session.user.email ?? (settings.profile.name?.trim() || 'Your account') : cloud ? cloud.name || 'Signed in' : 'Account'}
+            </span>
+          }
+          subtitle={
+            session
+              ? (session.user.passkeys ?? 0) > 0
+                ? 'Signed in with a passkey. Sync and leagues.'
+                : 'Sync and leagues'
+              : cloud
+                ? 'Signed in with Claude. Progress saves to the cloud.'
+                : 'Sign in to keep your progress'
+          }
         />
       </div>
 

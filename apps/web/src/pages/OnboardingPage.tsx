@@ -18,7 +18,10 @@ import { BellIcon, CheckIcon, ChevronLeftIcon, ClockIcon, LockIcon, ReviewIcon, 
 import { PlayingCard } from '../components/PlayingCard';
 import { QuickRecall } from '../drills/QuickRecall';
 import { StepView } from '../lesson/StepView';
-import { serverFeatures } from '../state/api';
+import { serverFeatures, useServerFeatures, useSession } from '../state/api';
+import { readPrompt } from '../state/accountPrompt';
+import { useClaudeCloud } from '../state/cloud';
+import { SaveProgress } from './SignInPage';
 import { firstHandSpot } from '../state/charts';
 import { useBodyClass } from '../ui/useBodyClass';
 import { onRadioKeys } from '../ui/radioKeys';
@@ -304,7 +307,7 @@ function Welcome({ heading, onStart }: { heading: React.RefObject<HTMLHeadingEle
           Get started
         </button>
         {server && (
-          <button className="btn btn-plain btn-block" onClick={() => navigate('/account')}>
+          <button className="btn btn-plain btn-block" onClick={() => navigate('/signin')}>
             I have an account
           </button>
         )}
@@ -398,6 +401,10 @@ export function OnboardingPage() {
   const forward = () => go(flow[index + 1]);
   const back = () => index > 0 && go(flow[index - 1]);
   const [committed, setCommitted] = useState(false);
+  const features = useServerFeatures();
+  const session = useSession();
+  const { cloud } = useClaudeCloud();
+  const [askAccount, setAskAccount] = useState(false);
 
   // Move focus to each new question so screen readers read it.
   useEffect(() => {
@@ -418,6 +425,11 @@ export function OnboardingPage() {
     setCommitted(true);
   };
   const leave = () => navigate(isPro(settings.access) ? '/' : '/pro?from=onboarding', { replace: true });
+  // Deferred sign up: with a plan worth keeping, offer an account once, before the paywall.
+  const afterPlanSet = () => {
+    if (features?.accounts && !session && !cloud && !readPrompt().onboardingAt) setAskAccount(true);
+    else leave();
+  };
 
   const top = step !== 'intro' && (
     <div className="focus-top">
@@ -450,8 +462,16 @@ export function OnboardingPage() {
     );
   }
 
+  if (askAccount && features) {
+    return (
+      <div className="stack focus-column">
+        <SaveProgress from="onboarding" features={features} onContinue={leave} onSkip={leave} />
+      </div>
+    );
+  }
+
   if (committed) {
-    return <PlanSet target={profile.target} onContinue={leave} />;
+    return <PlanSet target={profile.target} onContinue={afterPlanSet} />;
   }
 
   if (step === 'plan') {

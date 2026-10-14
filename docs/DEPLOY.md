@@ -153,7 +153,11 @@ Every setting is an environment variable. `apps/server/.env.example` lists them 
 | `NODE_ENV` | `production` on a live server. The image sets it. | Set for you |
 | `PORT` | The port the server listens on. The default is 8787. | Set for you |
 | `WEB_DIR` | The built app to serve. The image sets `/app/web`. | Set for you |
-| `RESEND_API_KEY` | Sends sign in emails through Resend. | For accounts |
+| `WEBAUTHN_RP_ID` | The domain the app's pages are on, such as `felt-app.fly.dev` or `zacbarron.github.io`. Passkeys are tied to it. | For passkeys |
+| `WEBAUTHN_ORIGINS` | The exact page origins, comma separated, such as `https://zacbarron.github.io`. | For passkeys |
+| `WEBAUTHN_RP_NAME` | The name in passkey prompts. The default is Felt. | Optional |
+| `ALLOWED_ORIGINS` | Other sites that may call the API from a browser, comma separated. Empty means only the server's own pages. | For the Pages link |
+| `RESEND_API_KEY` | Sends sign in emails through Resend. | For email codes |
 | `EMAIL_FROM` | The sender, such as `Felt <login@yourdomain.com>`. Use your verified domain. | For accounts |
 | `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY` | Signs study reminders. | For reminders |
 | `VAPID_SUBJECT` | A `mailto:` address push services can contact. | For reminders |
@@ -166,9 +170,19 @@ Every setting is an environment variable. `apps/server/.env.example` lists them 
 | `COACH_DAILY_LIMIT` | Coach messages each player can send a day. The default is 40. | Optional |
 | `VITE_SUPPORT_EMAIL` | Contact address on the legal pages. It is read when the app is built. | Optional |
 
+### How players sign in
+
+Passkeys come first. A passkey signs in with Face ID, a fingerprint or the device PIN. There is no password and no email needed. Passkeys are on when `WEBAUTHN_RP_ID` and `WEBAUTHN_ORIGINS` are both set. Use the domain of the page players open, not the server's domain, when they differ.
+
+An emailed code is the fallback. It is on when `RESEND_API_KEY` is set. A passkey player can add an email later, on the Account page, to sign in with a code and get receipts.
+
+The health check lists `passkeys` and `email`. `accounts` is on when either one is.
+
+A sign in lasts until it goes unused for 180 days. Every visit renews it, so a player who opens Felt now and then stays signed in. Logging out ends it on the server.
+
 ### Without an email key
 
-A live server never shows sign in codes. Codes are only printed to the server log. The health check then reports accounts as off. The app hides sign in and says there are no accounts here. Everything else keeps working on each device.
+A live server never shows sign in codes. Codes are only printed to the server log. The health check then reports email as off. With passkeys set up, players still get accounts. With neither, the app hides sign in and says there are no accounts here. Everything else keeps working on each device.
 
 Development mode does show codes on screen. It is turned off whenever `NODE_ENV` is `production`. Do not run a public server in development mode. Anyone could sign in as anyone.
 
@@ -222,6 +236,32 @@ Pick the domain before you invite players. Their browser data and reminders are 
 
 HTTPS is issued automatically. Then set `APP_URL` to the new address and redeploy. On Fly it lives in `fly.toml`.
 
+## Accounts on the GitHub Pages link
+
+The copy at https://zacbarron.github.io/Felt/ is static. It can still have accounts, sync and passkeys: it talks to a Felt server deployed somewhere else.
+
+1. Deploy the server with the Render blueprint (`render.yaml`) or on Fly (`fly.toml`), as above.
+2. On the server, set these and redeploy.
+
+   ```
+   ALLOWED_ORIGINS=https://zacbarron.github.io
+   WEBAUTHN_RP_ID=zacbarron.github.io
+   WEBAUTHN_ORIGINS=https://zacbarron.github.io
+   APP_URL=https://zacbarron.github.io/Felt
+   ```
+
+   `ALLOWED_ORIGINS` lets the Pages site call the API. `APP_URL` makes emails and Stripe links return to the Pages site. To keep passkeys working on the server's own address too, add it to `WEBAUTHN_ORIGINS`. A passkey belongs to one RP ID, so pick the address players will keep.
+3. In GitHub, open the repo's Settings. Choose Secrets and variables, then Actions, then the Variables tab. Add a repository variable named `FELT_API_URL` with the server's address, such as `https://felt.onrender.com`. No trailing slash.
+4. Open the Actions tab and re-run "Deploy to GitHub Pages". The build reads `FELT_API_URL` as `VITE_API_URL`.
+5. Open the Pages link. "I have an account" now shows on the welcome screen. `<server>/api/health` should list `passkeys` as on.
+
+Without the variable, the Pages build has no server and works on its own, as before.
+
+Good to know:
+
+- `github.io` is a shared domain. Passkeys for `zacbarron.github.io` work on every Pages site under that name. Only list origins you trust.
+- The server never uses cookies. The app sends a bearer token, so CORS needs no credentials.
+
 ## 3. Deploy the app alone
 
 Without the server, any static host works. Players get everything except accounts, sync, reminders, leagues and payments. The repo has ready configs for Vercel and Netlify. Build with `pnpm build` and publish `apps/web/dist`. Every route must load `index.html`, because the app uses routes such as `/learn`.
@@ -253,7 +293,8 @@ The service worker updates itself. After a deploy, players get the new version t
 
 Study data lives in the browser (IndexedDB) on each device. A deploy never touches it. A new domain starts empty. Players who sign in also keep a copy on the server, so it follows them to a new device.
 
-- Felt asks the browser to keep its storage after onboarding. Settings, Your data shows whether that was granted.
+- Felt asks the browser to keep its storage after onboarding and after signing up. Settings, Your data shows whether that was granted.
+- Signed in players get every table and their settings back on a new device. Felt saves a few seconds after studying, when the app goes to the background, when the page closes and when the connection returns.
 - Safari clears site data after about 7 days without a visit. Adding Felt to the home screen prevents this. Ask players to do it.
 - Settings, Your data, Save a backup writes one file with everything. Restore from a backup brings it back on any device.
 - Keep the same domain once players use the app. Data is tied to the address.

@@ -28,6 +28,14 @@ export interface SyncMeta {
   answersSent?: number;
   calibratedAt?: string;
   error?: string;
+  /** A push is in flight. Never restored from storage. */
+  saving?: boolean;
+  /**
+   * The account this device last synced with, kept after logging out. Signing
+   * back in to the same account then picks up where it left off instead of
+   * asking which copy to keep.
+   */
+  previous?: { userId: string; version: number };
 }
 
 let meta: SyncMeta = read();
@@ -36,7 +44,7 @@ const listeners = new Set<() => void>();
 function read(): SyncMeta {
   try {
     const saved = JSON.parse(localStorage.getItem(META_KEY) ?? '{}') as Partial<SyncMeta>;
-    return { ...saved, dirty: saved.dirty ?? false };
+    return { ...saved, dirty: saved.dirty ?? false, saving: false };
   } catch {
     return { dirty: false };
   }
@@ -64,10 +72,20 @@ export function useSyncMeta(): SyncMeta {
   );
 }
 
+/** Remembers which account and version this device matched, before logging out. */
+export function rememberAccount(userId: string) {
+  if (meta.version !== undefined && !meta.dirty && !meta.conflict) write({ previous: { userId, version: meta.version } });
+  else write({ previous: undefined });
+}
+
 /** Forget sync state, e.g. on sign out, so another account starts clean. */
 export function resetSync() {
-  write({ version: undefined, syncedAt: undefined, dirty: false, conflict: undefined, answersSent: undefined, error: undefined });
+  write({ version: undefined, syncedAt: undefined, dirty: false, conflict: undefined, answersSent: undefined, error: undefined, saving: false });
 }
+
+/** Tells the app that synced data replaced what was on screen, so settings reload from storage. */
+export const DATA_REPLACED = 'felt:data-replaced';
+const notifyReplaced = () => window.dispatchEvent(new Event(DATA_REPLACED));
 
 /** A cloud to sync with: the Felt server account, or the claude.ai artifact store. */
 export const cloudReady = () => !!currentSession() || !!claudeCloud();
@@ -87,8 +105,16 @@ export function markDirty() {
 }
 
 let started = false;
+let hiddenAt = 0;
+/** Coming back after this long checks for a newer copy from another device. */
+const PULL_AFTER_MS = 2 * 60 * 1000;
 
-/** Watches the database for changes and pushes when the app goes to the background. */
+/**
+ * Watches the database for changes. Saves when the app goes to the
+ * background, when the page is closed and when the connection comes back.
+ * Coming back to the app after a while brings in a newer copy from another
+ * device, when nothing changed here.
+ */
 export function startSync() {
   if (started) return;
   started = true;
@@ -96,9 +122,23 @@ export function startSync() {
     // The local event log is analytics, not progress.
     if (Object.keys(parts).some((k) => !k.includes('/events/'))) markDirty();
   });
+  const saveSoon = () => {
+    if (meta.dirty && cloudReady()) void pushNow().catch(() => undefined);
+  };
   document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'hidden' && meta.dirty && cloudReady()) void pushNow().catch(() => undefined);
+    if (document.visibilityState === 'hidden') {
+      hiddenAt = Date.now();
+      saveSoon();
+    } else if (hiddenAt && Date.now() - hiddenAt > PULL_AFTER_MS) {
+      hiddenAt = 0;
+      void pullIfNewer()
+        .then((replaced) => replaced && notifyReplaced())
+        .catch(() => undefined);
+    }
   });
+  // Best effort when the page is closing: iOS often skips the visibility change.
+  window.addEventListener('pagehide', saveSoon);
+  window.addEventListener('online', saveSoon);
 }
 
 // Push and pull ----------------------------------------------------------------
@@ -139,6 +179,7 @@ const remoteGet = (): Promise<CloudMeta & { data?: string }> => {
 
 async function upload(baseVersion: number) {
   const data = await exportBackup();
+  write({ saving: true });
   try {
     const c = claudeCloud();
     const r =
@@ -158,6 +199,8 @@ async function upload(baseVersion: number) {
     }
     write({ error: e instanceof Error ? e.message : 'Sync did not work. Felt will try again soon.' });
     throw e;
+  } finally {
+    if (meta.saving) write({ saving: false });
   }
 }
 
@@ -188,12 +231,29 @@ export async function pushNow() {
  * an empty device gets the cloud's, and when both have progress the player
  * chooses.
  */
-export async function firstSync(): Promise<'pushed' | 'pulled' | 'choose'> {
+export async function firstSync(): Promise<'pushed' | 'pulled' | 'choose' | 'same'> {
   const cloud = await remoteMeta();
   if (cloud.version === 0) {
     await upload(0);
     await afterSync();
     return 'pushed';
+  }
+  // Back on the account this device last matched: no need to choose.
+  const previous = meta.previous;
+  const userId = currentSession()?.user.id;
+  if (previous && userId && previous.userId === userId) {
+    write({ previous: undefined });
+    if (cloud.version === previous.version) {
+      if (meta.dirty) {
+        await upload(previous.version);
+        await afterSync();
+      } else write({ version: cloud.version, syncedAt: cloud.updatedAt, conflict: undefined, error: undefined });
+      return 'same';
+    }
+    if (!meta.dirty) {
+      await download();
+      return 'pulled';
+    }
   }
   if (!(await hasLocalProgress())) {
     await download();
@@ -218,18 +278,49 @@ export async function pullIfNewer(): Promise<boolean> {
   return download();
 }
 
-/** Resolves a conflict with the copy the player picked. */
-export async function keepCopy(choice: 'device' | 'cloud') {
+/**
+ * Resolves a conflict with the copy the player picked. Taking the cloud copy
+ * reloads the app, unless the caller reloads its settings itself.
+ */
+export async function keepCopy(choice: 'device' | 'cloud', { reload = true }: { reload?: boolean } = {}) {
   const conflict = meta.conflict;
   if (!conflict) return;
   if (choice === 'cloud') {
     await download();
-    location.reload();
+    if (reload) location.reload();
+    else notifyReplaced();
     return;
   }
   write({ conflict: undefined });
   await upload(conflict.version);
   await afterSync();
+}
+
+/** The cloud copy as text, without applying it, so the player can see what it holds. */
+export async function cloudCopy(): Promise<{ data?: string; updatedAt?: string; device?: string | null }> {
+  const cloud = await remoteGet();
+  return { data: cloud.data, updatedAt: cloud.updatedAt, device: cloud.device };
+}
+
+/**
+ * Saves everything now and says whether it worked, for moments that need to
+ * know (like logging out). Never throws.
+ */
+export async function saveNow(): Promise<{ ok: true } | { ok: false; reason: 'offline' | 'conflict' | 'error'; message?: string }> {
+  if (!cloudReady()) return { ok: false, reason: 'error', message: 'You are not signed in.' };
+  if (typeof navigator !== 'undefined' && navigator.onLine === false) return { ok: false, reason: 'offline' };
+  try {
+    if (meta.conflict) return { ok: false, reason: 'conflict' };
+    if (meta.version === undefined) await firstSync();
+    // Nothing changed since the last save: the cloud already matches.
+    else if (meta.dirty) await upload(meta.version);
+    if (meta.conflict) return { ok: false, reason: 'conflict' };
+    if (meta.dirty || meta.version === undefined) return { ok: false, reason: 'error', message: meta.error };
+    return { ok: true };
+  } catch (e) {
+    if (e instanceof ApiError && e.status === 0) return { ok: false, reason: 'offline' };
+    return { ok: false, reason: 'error', message: e instanceof Error ? e.message : undefined };
+  }
 }
 
 // Extras that ride along with a sync ---------------------------------------------

@@ -1,0 +1,465 @@
+/*
+ * Accounts: sign in, save your progress, the code field, keep which copy,
+ * log out and the account card. Content sits on plain grouped surfaces;
+ * only the welcome back moment uses the felt. Colors come from tokens.
+ */
+
+.auth-screen {
+  padding-bottom: 1rem;
+}
+
+.auth-top-space {
+  padding-top: 2.25rem;
+}
+
+.auth-lead {
+  margin: 0.45rem 0 0;
+  font-size: 1.02rem;
+  line-height: 1.45;
+}
+
+.auth-note {
+  margin: 0;
+  padding: 0 0.25rem;
+}
+
+/* The brand mark with a passkey badge: what this screen is about, at a glance. */
+.auth-art {
+  position: relative;
+  width: max-content;
+  margin-top: 1.25rem;
+}
+
+.auth-art-key {
+  position: absolute;
+  right: -14px;
+  bottom: -10px;
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  color: var(--tint);
+  background: var(--surface);
+  box-shadow:
+    0 0 0 3px var(--bg),
+    0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.auth-perks {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  --sep-inset: 3.85rem;
+}
+
+.auth-perks .list-row {
+  align-items: flex-start;
+  padding-block: 0.85rem;
+}
+
+.btn.auth-alt {
+  min-height: 40px;
+  font-size: 0.98rem;
+}
+
+.auth-field {
+  gap: 0.4rem;
+}
+
+.auth-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--label-2);
+  padding-left: 0.2rem;
+}
+
+.auth-field input[type='email'] {
+  min-height: 52px;
+  padding: 0.75rem 1rem;
+  border-radius: 14px;
+  background: var(--surface);
+  box-shadow: inset 0 0 0 1px var(--separator);
+}
+
+.auth-field input[aria-invalid='true'] {
+  box-shadow: inset 0 0 0 1.5px var(--red-text);
+}
+
+.field-error {
+  margin: 0;
+  padding: 0 0.25rem;
+  font-size: 0.88rem;
+  font-weight: 550;
+  color: var(--red-text);
+}
+
+.auth-sent {
+  margin: 0;
+  color: var(--label-2);
+  overflow-wrap: anywhere;
+}
+
+.auth-sent strong {
+  color: var(--label);
+  font-weight: 600;
+}
+
+.auth-links {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.1rem 0.25rem;
+}
+
+/* Text buttons still get a 44pt target. */
+.link-btn.auth-link {
+  min-height: 44px;
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+
+/* Six code slots drawn over one real input, so paste and iOS code autofill just work. */
+.code-boxes {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 0.45rem;
+  max-width: 360px;
+  cursor: text;
+}
+
+.code-box {
+  display: grid;
+  place-items: center;
+  height: 58px;
+  border-radius: 14px;
+  background: var(--surface);
+  box-shadow: inset 0 0 0 1px var(--separator);
+  font-size: 1.6rem;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+  color: var(--label);
+  transition:
+    box-shadow 150ms var(--ease),
+    transform 150ms var(--spring);
+}
+
+.code-box.filled {
+  animation: code-pop 180ms var(--spring) backwards;
+}
+
+.code-boxes:focus-within .code-box.current {
+  box-shadow: inset 0 0 0 2px var(--tint);
+}
+
+/* A caret in the current slot while typing. */
+.code-boxes:focus-within .code-box.current:not(.filled)::after {
+  content: '';
+  width: 2px;
+  height: 26px;
+  border-radius: 1px;
+  background: var(--tint);
+  animation: caret-blink 1s steps(1) infinite;
+}
+
+.code-boxes.invalid .code-box {
+  box-shadow: inset 0 0 0 1.5px var(--red-text);
+}
+
+.code-input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.01;
+  color: transparent;
+  caret-color: transparent;
+  background: transparent;
+  /* At least 16px so iOS does not zoom. */
+  font-size: 16px;
+  letter-spacing: 2em;
+}
+
+.code-input:focus,
+.code-input:focus-visible {
+  outline: none;
+}
+
+@keyframes code-pop {
+  from {
+    transform: scale(0.88);
+  }
+}
+
+@keyframes caret-blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+/* Calm full screen states: syncing, saved, signed in, offline. */
+.auth-center {
+  min-height: calc(100dvh - var(--bottombar-h, 0px) - 6rem);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  text-align: center;
+  padding: 2rem 0.5rem;
+}
+
+.auth-center .auth-lead {
+  max-width: 32ch;
+}
+
+.auth-badge {
+  display: grid;
+  place-items: center;
+  width: 76px;
+  height: 76px;
+  margin-bottom: 0.6rem;
+  border-radius: 50%;
+  color: var(--on-tint);
+  background: var(--tint-fill);
+  box-shadow: 0 10px 28px color-mix(in srgb, var(--tint-fill) 35%, transparent);
+}
+
+.auth-badge.pop {
+  animation: badge-pop 520ms var(--spring) 120ms backwards;
+}
+
+.auth-badge.warn {
+  color: var(--orange-text);
+  background: color-mix(in srgb, var(--orange) 16%, var(--surface));
+  box-shadow: none;
+}
+
+@keyframes badge-pop {
+  from {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+}
+
+.auth-notice {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.75rem 1rem;
+  border-radius: 16px;
+  background: var(--surface);
+  font-size: 0.92rem;
+  font-weight: 550;
+}
+
+.auth-notice svg {
+  flex: none;
+  color: var(--green-text);
+}
+
+/* Welcome back: what came back, on the felt. */
+.welcome-stats {
+  list-style: none;
+  margin: 1.1rem 0 0.2rem;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+  width: min(100%, 380px);
+  animation: rise 500ms var(--ease) 1300ms backwards;
+}
+
+.welcome-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 0.8rem 0.4rem;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: inset 0 0 0 0.5px rgba(255, 255, 255, 0.16);
+}
+
+.welcome-stat-value {
+  font-family: var(--font-display);
+  font-size: 2.1rem;
+  line-height: 1;
+}
+
+.welcome-stat-value.none {
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 650;
+  line-height: 2.1rem;
+}
+
+.welcome-stat-label {
+  font-size: 0.74rem;
+  font-weight: 650;
+  opacity: 0.8;
+}
+
+.welcome-stat-note {
+  font-size: 0.7rem;
+  color: var(--on-felt-accent);
+}
+
+/* Keep which copy */
+.keep-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.onb-choice.keep-option {
+  align-items: flex-start;
+}
+
+.keep-option .onb-check {
+  margin-top: 2px;
+}
+
+.keep-icon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  color: var(--tint);
+  background: color-mix(in srgb, var(--tint) 12%, var(--surface));
+}
+
+.keep-facts {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  margin-top: 0.45rem;
+  font-size: 0.88rem;
+  font-weight: 450;
+  line-height: 1.4;
+  color: var(--label);
+}
+
+/* Log out sheet */
+.sheet-title {
+  margin: 0.2rem 0 0;
+  font-size: 1.35rem;
+  letter-spacing: -0.015em;
+}
+
+.logout-status {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.8rem 0.9rem;
+  border-radius: 16px;
+  background: var(--surface);
+  font-size: 0.95rem;
+  line-height: 1.35;
+}
+
+.logout-status-icon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  color: var(--label-2);
+  background: var(--fill);
+}
+
+.logout-status.good .logout-status-icon {
+  color: var(--green-text);
+  background: color-mix(in srgb, var(--green) 16%, transparent);
+}
+
+.logout-status.warn .logout-status-icon {
+  color: var(--orange-text);
+  background: color-mix(in srgb, var(--orange) 16%, transparent);
+}
+
+.btn.logout-retry {
+  flex: none;
+  min-height: 36px;
+  padding: 0 0.9rem;
+}
+
+.logout-note {
+  margin: -0.25rem 0.25rem 0.2rem;
+  text-align: center;
+}
+
+.btn.btn-destructive {
+  font-size: 1rem;
+  color: var(--red-text);
+  background: color-mix(in srgb, var(--red) 12%, transparent);
+}
+
+/* Account identity */
+.account-id {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 1.4rem 1rem 1.2rem;
+  text-align: center;
+}
+
+.account-id .avatar {
+  margin-bottom: 0.4rem;
+}
+
+.account-id-name {
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  overflow-wrap: anywhere;
+}
+
+.account-id-email {
+  color: var(--label-2);
+  overflow-wrap: anywhere;
+}
+
+.account-id-method {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: 0.45rem;
+  padding: 0.3rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--tint);
+  background: color-mix(in srgb, var(--tint) 12%, transparent);
+}
+
+.account-add-email {
+  margin-top: 0.75rem;
+}
+
+.sc-icon-tile.small {
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+}
+
+/* Keeps action rows lined up with the rows above that have icons. */
+.sc-icon-tile.ghost {
+  background: none;
+}
+
+.sync-tile.good {
+  color: var(--green-text);
+  background: color-mix(in srgb, var(--green) 14%, transparent);
+}
+
+.sync-tile.warn {
+  color: var(--orange-text);
+  background: color-mix(in srgb, var(--orange) 14%, transparent);
+}

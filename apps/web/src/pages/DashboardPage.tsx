@@ -16,6 +16,7 @@ import { useSettings } from '../state/settings';
 import { Avatar } from '../ui/Avatar';
 import { ImportCard } from '../ui/ImportCard';
 import { InstallCard } from '../ui/InstallCard';
+import { AccountCard } from '../ui/AccountCard';
 import { WeeklyTodayCard } from './WeeklyPage';
 import { HeroPattern } from '../ui/Brand';
 import { plural } from '../ui/format';
@@ -206,6 +207,9 @@ export function DashboardPage() {
         ))}
       </section>
 
+
+      {/* After the plan: saving progress never competes with studying. */}
+      <AccountCard />
 
       {stats && stats.reviewedToday > 0 && (
         <section className="reveal">

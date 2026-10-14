@@ -1,4 +1,4 @@
-import { useSyncExternalStore } from 'react';
+import { useEffect, useState, useSyncExternalStore } from 'react';
 
 /**
  * The Felt server is optional: the app works fully offline and on a static
@@ -10,7 +10,12 @@ const BASE = (import.meta.env.VITE_API_URL ?? '').replace(/\/$/, '');
 const SESSION_KEY = 'felt.session.v1';
 
 export interface ServerFeatures {
+  /** Some way to have an account: passkeys, email codes or both. */
   accounts: boolean;
+  /** Sign in with an emailed code. Older servers leave it out; there it matches `accounts`. */
+  email?: boolean;
+  /** Sign in with a passkey (Face ID, a fingerprint or a device PIN). */
+  passkeys?: boolean;
   billing: boolean;
   push: boolean;
   /** The AI coach for Felt Pro players. Older servers leave it out, which reads as off. */
@@ -26,7 +31,10 @@ export interface ServerAccess {
 
 export interface ServerUser {
   id: string;
-  email: string;
+  /** A passkey account can have no email. */
+  email: string | null;
+  /** How many passkeys can sign in to this account. Older servers leave it out. */
+  passkeys?: number;
   handle: string | null;
   tz: string | null;
   cueMinutes: number | null;
@@ -48,7 +56,7 @@ export class ApiError extends Error {
 
 // Session store --------------------------------------------------------------
 
-interface Session {
+export interface Session {
   token: string;
   user: ServerUser;
 }
@@ -126,6 +134,22 @@ export function serverFeatures(): Promise<ServerFeatures | null> {
       features = undefined;
       return null;
     });
+  return features;
+}
+
+/** Email sign in is on: newer servers say so; older ones only had email. */
+export const emailOn = (f: ServerFeatures | null | undefined) => !!f && (f.email ?? f.accounts);
+
+/** What the server offers: undefined while asking, null with no server. */
+export function useServerFeatures(): ServerFeatures | null | undefined {
+  const [features, setFeatures] = useState<ServerFeatures | null>();
+  useEffect(() => {
+    let live = true;
+    void serverFeatures().then((f) => live && setFeatures(f));
+    return () => {
+      live = false;
+    };
+  }, []);
   return features;
 }
 

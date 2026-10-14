@@ -1,7 +1,7 @@
 import { DEFAULT_SETTINGS, type GameSettings, type TableAssumptions } from '@felt/core';
-import { createContext, type ReactNode, useContext, useEffect, useRef, useState } from 'react';
+import { createContext, type ReactNode, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { setHapticsEnabled } from '../haptics';
-import { markDirty } from './sync';
+import { DATA_REPLACED, markDirty } from './sync';
 
 export interface StudySettings {
   /** New review cards introduced per day. */
@@ -117,7 +117,8 @@ const DEFAULTS: AppSettings = {
 };
 const KEY = 'felt.settings.v1';
 
-function load(): AppSettings {
+/** Settings as saved on this device, filled in with defaults. */
+export function loadSettings(): AppSettings {
   try {
     const raw = localStorage.getItem(KEY);
     if (!raw) return DEFAULTS;
@@ -133,6 +134,9 @@ function load(): AppSettings {
         goals: saved.profile?.goals ?? (saved.profile?.goal ? [saved.profile.goal] : []),
       },
       access: { ...DEFAULTS.access, ...saved.access },
+      // Entered results and win rate assumptions are the player's own numbers: keep them.
+      ...(saved.results ? { results: saved.results } : {}),
+      ...(saved.assumptions ? { assumptions: saved.assumptions } : {}),
     };
   } catch {
     return DEFAULTS;
@@ -154,10 +158,15 @@ function applyAppearance(appearance: Appearance) {
   return () => media.removeEventListener('change', update);
 }
 
-const SettingsContext = createContext<{ settings: AppSettings; update: (next: AppSettings) => void } | null>(null);
+const SettingsContext = createContext<{
+  settings: AppSettings;
+  update: (next: AppSettings) => void;
+  /** Reads settings again from storage, after a sync or restore replaced them. Not a local edit. */
+  reload: () => void;
+} | null>(null);
 
 export function SettingsProvider({ children }: { children: ReactNode }) {
-  const [settings, setSettings] = useState<AppSettings>(load);
+  const [settings, setSettings] = useState<AppSettings>(loadSettings);
   useEffect(() => applyAppearance(settings.ui.appearance), [settings.ui.appearance]);
 
   useEffect(() => {
@@ -182,7 +191,18 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
       markDirty();
     }
   }, [settings, synced]);
-  return <SettingsContext.Provider value={{ settings, update: setSettings }}>{children}</SettingsContext.Provider>;
+
+  const reload = useCallback(() => {
+    const next = loadSettings();
+    lastSynced.current = JSON.stringify({ ...next, access: undefined });
+    setSettings(next);
+  }, []);
+  useEffect(() => {
+    window.addEventListener(DATA_REPLACED, reload);
+    return () => window.removeEventListener(DATA_REPLACED, reload);
+  }, [reload]);
+
+  return <SettingsContext.Provider value={{ settings, update: setSettings, reload }}>{children}</SettingsContext.Provider>;
 }
 
 export function useSettings() {

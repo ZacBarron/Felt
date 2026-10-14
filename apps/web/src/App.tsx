@@ -25,6 +25,7 @@ import { SettingsPage } from './pages/SettingsPage';
 import { SolverPage } from './pages/SolverPage';
 import { YouPage } from './pages/YouPage';
 import { AccountPage } from './pages/AccountPage';
+import { SignInPage } from './pages/SignInPage';
 import { LeaguePage } from './pages/LeaguePage';
 import { CoachPage } from './pages/CoachPage';
 import { GlossaryPage } from './pages/GlossaryPage';
@@ -49,7 +50,7 @@ function useReviewCount() {
 }
 
 /** Pages a player can reach before finishing onboarding. */
-const FIRST_RUN = ['/welcome', '/placement', '/pro', '/account', '/terms', '/privacy'];
+const FIRST_RUN = ['/welcome', '/signin', '/placement', '/pro', '/account', '/terms', '/privacy'];
 
 /** Keeps Felt Pro in step with the account: the server's word wins over this device's. */
 function useServerAccess() {
@@ -149,6 +150,7 @@ export function App() {
             <Route path="/import" element={<ImportPage />} />
             <Route path="/practice" element={<PracticePage />} />
             <Route path="/account" element={<AccountPage />} />
+            <Route path="/signin" element={<SignInPage />} />
             <Route path="/league" element={<LeaguePage />} />
             <Route path="/coach" element={<CoachPage />} />
             <Route path="/glossary" element={<GlossaryPage />} />

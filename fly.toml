@@ -12,6 +12,13 @@ primary_region = "iad"
   DATABASE_PATH = "/data/felt.sqlite"
   # The address players use. Change it when you add your own domain.
   APP_URL = "https://felt-app.fly.dev"
+  # Passkeys (optional). The domain your pages are on and their exact origins.
+  # Serving the app from this server: WEBAUTHN_RP_ID = "felt-app.fly.dev", WEBAUTHN_ORIGINS = "https://felt-app.fly.dev"
+  # For the GitHub Pages link instead (or as well, add both origins):
+  # WEBAUTHN_RP_ID = "zacbarron.github.io"
+  # WEBAUTHN_ORIGINS = "https://zacbarron.github.io"
+  # Sites that may call this API from a browser (CORS), comma separated:
+  # ALLOWED_ORIGINS = "https://zacbarron.github.io"
   # AI coach settings (optional). The key is a secret: fly secrets set ANTHROPIC_API_KEY=sk-ant-...
   # COACH_MODEL = "claude-opus-5-5"
   # COACH_EFFORT = "medium"

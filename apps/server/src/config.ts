@@ -21,6 +21,17 @@ export interface Config {
   maxSnapshotBytes: number;
   /** The AI coach (Claude). Off when no API key is set. */
   coach: { apiKey?: string; model: string; effort: CoachEffort; dailyLimit: number };
+  /**
+   * Passkeys (WebAuthn). `rpId` is the domain the app's pages live on, such as
+   * zacbarron.github.io; `origins` are the exact page origins allowed to use
+   * them. Passkeys are off unless both are set.
+   */
+  webauthn: { rpId?: string; rpName: string; origins: string[] };
+  /**
+   * Other sites allowed to call /api from a browser (CORS), such as the
+   * GitHub Pages copy of the app. Empty means same origin only.
+   */
+  allowedOrigins: string[];
 }
 
 export const COACH_EFFORTS = ['low', 'medium', 'high', 'xhigh', 'max'] as const;
@@ -53,7 +64,29 @@ export function loadConfig(raw: Record<string, string | undefined> = process.env
       effort: COACH_EFFORTS.find((e) => e === env.COACH_EFFORT) ?? 'medium',
       dailyLimit: positiveInt(env.COACH_DAILY_LIMIT, 40),
     },
+    webauthn: {
+      rpId: env.WEBAUTHN_RP_ID?.trim().toLowerCase(),
+      rpName: env.WEBAUTHN_RP_NAME?.trim() ?? 'Felt',
+      origins: originList(env.WEBAUTHN_ORIGINS),
+    },
+    allowedOrigins: originList(env.ALLOWED_ORIGINS),
   };
+}
+
+/** A comma separated list of origins, each reduced to scheme, host and port. */
+function originList(raw: string | undefined): string[] {
+  if (!raw) return [];
+  const out = new Set<string>();
+  for (const part of raw.split(',')) {
+    const value = part.trim();
+    if (!value) continue;
+    try {
+      out.add(new URL(value).origin);
+    } catch {
+      console.warn(`Ignoring ${value}: an origin looks like https://example.com`);
+    }
+  }
+  return [...out];
 }
 
 function positiveInt(raw: string | undefined, fallback: number): number {
