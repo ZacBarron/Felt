@@ -74,8 +74,20 @@ export type LessonStep =
       board?: string;
       /** Cards for each choice, shown as card faces, in the same order as `choices`. */
       choiceCards?: string[];
+      /**
+       * Which point of the lesson's takeaway this question reinforces (index
+       * into its points). Shown after the answer as "Remember", so every
+       * question ties back to something the lesson taught.
+       */
+      point?: number;
     }
   | { kind: 'takeaway'; points: string[] };
+
+/** The points a lesson asks the player to remember: its takeaway. */
+export function lessonPoints(lesson: Pick<LessonContent, 'steps'>): string[] {
+  const t = lesson.steps.find((s): s is Extract<LessonStep, { kind: 'takeaway' }> => s.kind === 'takeaway');
+  return t?.points ?? [];
+}
 
 export interface LessonContent {
   key: string;

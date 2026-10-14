@@ -1,5 +1,5 @@
 import { type DrillOutcome, mathFact } from '@felt/core';
-import type { LessonStep } from '@felt/content';
+import { lessonPoints, type LessonStep } from '@felt/content';
 import { useRef, useState } from 'react';
 import { StepView } from '../lesson/StepView';
 import { LessonSheet } from '../lesson/LessonSheet';
@@ -27,7 +27,8 @@ function Question({
   onAnswer,
   onNext,
   nextLabel = 'Next card',
-}: Props & { step: Extract<LessonStep, { kind: 'quiz' }>; source: React.ReactNode; lessonKey?: string }) {
+  points,
+}: Props & { step: Extract<LessonStep, { kind: 'quiz' }>; source: React.ReactNode; lessonKey?: string; points?: string[] }) {
   const [reading, setReading] = useState(false);
   const started = useRef(performance.now());
   const untimed = !!useSettings().settings.study.untimed;
@@ -37,6 +38,7 @@ function Question({
       <div className="saved-head">{source}</div>
       <StepView
         step={step}
+        points={points}
         onAnswer={(choice) => {
           setDone(true);
           onAnswer({ accuracy: choice === step.answer ? 1 : 0, responseMs: untimed ? untimedMs(targetMs) : performance.now() - started.current, targetMs });
@@ -78,6 +80,7 @@ export function LessonQuestionCard({ lessonKey, step: index, ...props }: Props &
       {...props}
       step={step}
       lessonKey={lessonKey}
+      points={entry.content ? lessonPoints(entry.content) : undefined}
       source={
         <>
           <LearnIcon size={16} />

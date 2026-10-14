@@ -430,3 +430,47 @@
   color: var(--label-2);
   margin-top: 1px;
 }
+
+/* What to remember: listed on the intro, and tied to each question after it is answered. */
+.remember-card {
+  margin-top: 1.1rem;
+  padding: 0.95rem 1.05rem;
+  border-radius: 18px;
+  background: var(--surface);
+  max-width: var(--lesson-measure);
+}
+
+.remember-card ul {
+  margin: 0.45rem 0 0;
+  padding-left: 1.15rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  line-height: 1.4;
+}
+
+.remember-label {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--tint);
+}
+
+.explain-remember {
+  display: block;
+  margin-top: 0.75rem;
+  padding-top: 0.7rem;
+  border-top: 0.5px solid var(--separator);
+}
+
+.explain-remember .remember-label {
+  margin-bottom: 0.2rem;
+}
+
+.evidence svg {
+  vertical-align: -2px;
+  margin-left: 4px;
+  opacity: 0.75;
+}

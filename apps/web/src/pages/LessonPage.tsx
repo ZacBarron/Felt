@@ -1,3 +1,4 @@
+import { lessonPoints } from '@felt/content';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { useEffect, useRef, useState } from 'react';
 import { Link, Navigate, useNavigate, useParams, useSearchParams } from 'react-router-dom';
@@ -25,6 +26,7 @@ export function LessonPage() {
 function Lesson({ lessonKey: key }: { lessonKey: string }) {
   const entry = entryFor(key);
   const content = entry?.content;
+  const points = content ? lessonPoints(content) : undefined;
   const navigate = useNavigate();
   const { settings } = useSettings();
   const [search] = useSearchParams();
@@ -227,7 +229,7 @@ function Lesson({ lessonKey: key }: { lessonKey: string }) {
             {entry.moduleTitle}, {content.minutes} min{content.level === 'advanced' && <span className="pill">Advanced</span>}
           </div>
         )}
-        {step && <StepView step={step} answered={answers[i]} onAnswer={(choice) => {
+        {step && <StepView step={step} points={points} answered={answers[i]} onAnswer={(choice) => {
               setAnswers((a) => ({ ...a, [i]: choice }));
               if (step.kind === 'quiz') void recordLessonQuiz(key, i, choice === step.answer, 'lesson');
             }} />}

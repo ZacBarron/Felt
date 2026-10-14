@@ -6,7 +6,7 @@ import { RangeGrid } from '../components/RangeGrid';
 import { SeatStrip } from '../components/SeatStrip';
 import { haptic } from '../haptics';
 import { getChart } from '../state/charts';
-import { CheckIcon, CloseIcon } from '../ui/icons';
+import { CheckIcon, CloseIcon, InfoIcon } from '../ui/icons';
 import { LessonArt } from './LessonArt';
 import { Rich } from './rich';
 import './lesson.css';
@@ -17,12 +17,15 @@ interface Props {
   onAnswer?: (choice: number) => void;
   /** A previous answer, so going back shows it instead of a fresh quiz. */
   answered?: number;
+  /** The lesson's points to remember: listed on the intro, and the one a question tests shown after it. */
+  points?: string[];
 }
 
+/** How sure Felt is about a screen, in plain words. Tap for why. */
 const EVIDENCE: Record<Evidence, { label: string; title: string }> = {
-  math: { label: 'Exact math', title: 'This is pure math, so it is always true.' },
-  solver: { label: 'Approximate solver pattern', title: 'This is how solvers tend to play. Treat it as a direction, not an exact number.' },
-  exploit: { label: 'Player tendency', title: 'This is what many players tend to do. Check it against your own games.' },
+  math: { label: 'Always true', title: 'This is arithmetic. It holds in every game, against every player.' },
+  solver: { label: 'How solvers play', title: 'A pattern from computer solved strategy. Use it as a direction, not an exact number.' },
+  exploit: { label: 'Common in many games', title: 'What many players tend to do. Check it against the players at your table.' },
 };
 
 function EvidenceTag({ evidence }: { evidence?: Evidence }) {
@@ -34,6 +37,7 @@ function EvidenceTag({ evidence }: { evidence?: Evidence }) {
     <span className="evidence-wrap">
       <button type="button" className={`evidence evidence-${evidence}`} aria-expanded={open} onClick={() => setOpen((o) => !o)}>
         {e.label}
+        <InfoIcon size={13} aria-hidden="true" />
       </button>
       {open && <span className="evidence-note">{e.title}</span>}
     </span>
@@ -56,7 +60,7 @@ function isNumeric(cell: string): boolean {
 
 const CALLOUT_LABEL = { tip: 'Tip', exploit: 'Exploit', theory: 'Theory' } as const;
 
-export function StepView({ step, onAnswer, answered }: Props) {
+export function StepView({ step, onAnswer, answered, points }: Props) {
   switch (step.kind) {
     case 'intro':
       return (
@@ -65,6 +69,18 @@ export function StepView({ step, onAnswer, answered }: Props) {
           <p className="lesson-lead">
             <Rich text={step.body} />
           </p>
+          {points && points.length > 0 && (
+            <div className="remember-card">
+              <div className="remember-label">Remember these</div>
+              <ul>
+                {points.map((p) => (
+                  <li key={p}>
+                    <Rich text={p} />
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
       );
     case 'text':
@@ -215,11 +231,11 @@ export function StepView({ step, onAnswer, answered }: Props) {
         </div>
       );
     case 'quiz':
-      return <Quiz step={step} onAnswer={onAnswer} initial={answered} />;
+      return <Quiz step={step} onAnswer={onAnswer} initial={answered} remember={step.point !== undefined ? points?.[step.point] : undefined} />;
     case 'takeaway':
       return (
         <div className="lesson-step">
-          <h2 className="display lesson-h2">Key points</h2>
+          <h2 className="display lesson-h2">Remember this</h2>
           <div className="takeaways">
             {step.points.map((p, i) => (
               <div key={i} className="takeaway" style={{ animationDelay: `${120 + i * 110}ms` }}>
@@ -276,10 +292,13 @@ function Quiz({
   step,
   onAnswer,
   initial,
+  remember,
 }: {
   step: Extract<LessonStep, { kind: 'quiz' }>;
   onAnswer?: (choice: number) => void;
   initial?: number;
+  /** The lesson point this question reinforces, shown once it is answered. */
+  remember?: string;
 }) {
   const [chosen, setChosen] = useState<number | undefined>(initial);
   const done = chosen !== undefined;
@@ -338,6 +357,12 @@ function Quiz({
           <span className="explain-body">
             <Rich text={step.explain} />
           </span>
+          {remember && (
+            <span className="explain-remember">
+              <span className="remember-label">Remember</span>
+              <Rich text={remember} />
+            </span>
+          )}
         </div>
       )}
     </div>
