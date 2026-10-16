@@ -9,11 +9,27 @@ import { isComplete, LESSON_ENTRIES, lessonProgress, quizSteps } from '../state/
 import { DOMAIN_LABELS, domainForLesson, lessonQuizDifficulty, ratingSnapshot } from '../state/rating';
 import { useSettings } from '../state/settings';
 import { BottomBar } from '../ui/BottomBar';
-import { CloseIcon } from '../ui/icons';
+import { CheckIcon, CloseIcon, MinusIcon } from '../ui/icons';
+import { getChart } from '../state/charts';
+import { entryFor } from '../state/lessons';
+import { spotLine } from '../drills/labels';
+import { addHandsToReview } from '../state/review';
+import './review.css';
 import { ProgressRing } from '../ui/ProgressRing';
 import { useBodyClass } from '../ui/useBodyClass';
 
 type Candidate = PracticeItem & { decision: Decision };
+
+/** A short name for a decision and where it is from, for the summary list. */
+function decisionLabel(d: Decision): { title: string; sub?: string } {
+  if (d.kind === 'chart') {
+    const chart = getChart(d.chartId);
+    return chart ? { title: `${d.hand}, ${chart.spec.hero}`, sub: spotLine(chart) || undefined } : { title: d.hand };
+  }
+  const entry = entryFor(d.key);
+  const step = entry?.content?.steps[d.step];
+  return { title: step?.kind === 'quiz' ? step.question : 'Lesson question', sub: entry?.title };
+}
 
 const SESSION = 10;
 /** Items answered this recently are left out, so practice is recall, not repetition. */
@@ -82,6 +98,7 @@ export function PracticePage() {
   }, [settings.game]);
 
   if (!items || before === undefined) return null;
+  const missedHands = items.slice(0, scores.length).filter((it, i) => it.decision.kind === 'chart' && scores[i] < 1).length;
 
   if (items.length === 0 || index >= items.length) {
     const right = scores.filter((s) => s >= 1).length;
@@ -121,6 +138,29 @@ export function PracticePage() {
             </div>
           )}
         </div>
+        {scores.length > 0 && (
+          <section className="practice-results reveal">
+            <h2 className="section-title">Your decisions</h2>
+            <div className="list">
+              {items.slice(0, scores.length).map((item, i) => {
+                const ok = scores[i] >= 1;
+                const label = decisionLabel(item.decision);
+                return (
+                  <div key={item.id} className="list-row">
+                    <span className={`practice-mark ${ok ? 'right' : 'missed'}`} aria-label={ok ? 'Right' : 'Missed'}>
+                      {ok ? <CheckIcon size={14} /> : <MinusIcon size={14} />}
+                    </span>
+                    <span className="grow">
+                      <span className="missed-label">{label.title}</span>
+                      {label.sub && <span className="footnote">{label.sub}</span>}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+            {missedHands > 0 && <div className="section-footer">{missedHands === 1 ? 'The hand you missed is' : `The ${missedHands} hands you missed are`} now in your review.</div>}
+          </section>
+        )}
         <BottomBar>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
             <Link to="/you" className="btn btn-lg glass">
@@ -164,6 +204,10 @@ export function PracticePage() {
         onNext={async () => {
           window.scrollTo({ top: 0 });
           if (index + 1 >= items.length) {
+            // Missed hands come back in review, as they do after the daily challenge.
+            const all = [...scores];
+            const missed = items.flatMap((it, i) => (it.decision.kind === 'chart' && all[i] !== undefined && all[i] < 1 ? [{ chartId: it.decision.chartId, hand: it.decision.hand }] : []));
+            if (missed.length) await addHandsToReview(missed);
             setAfter((await ratingSnapshot()).overall);
             haptic('success');
           }

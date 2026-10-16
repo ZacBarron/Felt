@@ -11,7 +11,7 @@ import type { StudySettings } from './settings';
 export type DeckId = 'charts' | 'lessons' | 'math' | 'saved';
 
 export const DECKS: { id: DeckId; title: string; note: string }[] = [
-  { id: 'charts', title: 'Preflop charts', note: 'Edge hands for your game' },
+  { id: 'charts', title: 'Preflop charts', note: 'Close calls for your game' },
   { id: 'lessons', title: 'Lesson questions', note: 'From lessons you finished' },
   { id: 'math', title: 'Math facts', note: 'Pot odds, outs and combos' },
   { id: 'saved', title: 'Saved', note: 'Your saved lessons and spots' },

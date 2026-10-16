@@ -1,0 +1,272 @@
+/* Review and practice: memory strength, the week ahead and session summaries. */
+
+/* Your memory --------------------------------------------------------------- */
+
+.memory-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+
+.memory-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.memory-figure {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+}
+
+.memory-figure .display {
+  font-size: 2.6rem;
+  line-height: 1;
+}
+
+.memory-unit {
+  font-weight: 650;
+  font-size: 1.05rem;
+}
+
+/* 30 bars of solid cards, one per day. Bars rise from the baseline in a short wave. */
+.memory-chart {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  align-items: end;
+  gap: 2px;
+  height: 64px;
+  margin-top: 0.2rem;
+  border-bottom: 1px solid var(--separator);
+}
+
+.memory-chart > span {
+  display: block;
+  height: max(2px, var(--h));
+  border-radius: 3px 3px 0 0;
+  background: color-mix(in srgb, var(--tint-fill) 45%, transparent);
+  transform-origin: bottom;
+  animation: memory-rise 520ms var(--ease, ease-out) backwards;
+  animation-delay: calc(var(--i) * 12ms);
+}
+
+.memory-chart > span.today {
+  background: var(--tint-fill);
+}
+
+@keyframes memory-rise {
+  from {
+    transform: scaleY(0);
+  }
+}
+
+.memory-axis {
+  display: flex;
+  justify-content: space-between;
+  margin-top: -0.35rem;
+  font-size: 0.75rem;
+  color: var(--label-2);
+}
+
+.memory-split {
+  display: flex;
+  gap: 2px;
+  height: 8px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--fill-2);
+}
+
+.memory-split > span {
+  flex-basis: 0;
+}
+
+.memory-split .solid,
+.memory-legend i.solid {
+  background: var(--tint-fill);
+}
+
+.memory-split .learning,
+.memory-legend i.learning {
+  background: color-mix(in srgb, var(--tint-fill) 42%, transparent);
+}
+
+.memory-legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 1rem;
+  font-size: 0.82rem;
+  color: var(--label-2);
+}
+
+.memory-legend > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.memory-legend > span:last-child {
+  margin-left: auto;
+}
+
+.memory-legend i {
+  width: 9px;
+  height: 9px;
+  border-radius: 3px;
+}
+
+.memory-divider {
+  height: 1px;
+  margin: 0.25rem 0;
+  background: var(--separator);
+}
+
+.forecast-title {
+  font-weight: 650;
+}
+
+/* Cards due on each of the next seven days, like Anki's forecast. */
+.forecast {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.forecast-day {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.forecast-n {
+  min-height: 1.1em;
+  font-size: 0.8rem;
+  font-weight: 650;
+  color: var(--label-2);
+}
+
+.forecast-track {
+  display: flex;
+  align-items: flex-end;
+  width: 100%;
+  max-width: 30px;
+  height: 52px;
+  border-radius: 7px;
+  background: var(--fill-2);
+  overflow: hidden;
+}
+
+.forecast-track > span {
+  display: block;
+  width: 100%;
+  border-radius: 7px;
+  background: color-mix(in srgb, var(--tint-fill) 45%, transparent);
+}
+
+.forecast-day.next .forecast-track > span {
+  background: var(--tint-fill);
+}
+
+.forecast-day.next .forecast-n,
+.forecast-day.next .forecast-label {
+  color: var(--tint);
+}
+
+.forecast-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--label-2);
+}
+
+/* Empty review: two real cards instead of an icon. */
+.review-locked-art {
+  display: inline-flex;
+  gap: 0;
+}
+
+.review-locked-art > :first-child {
+  transform: rotate(-8deg) translateX(8px);
+}
+
+.review-locked-art > :last-child {
+  transform: rotate(7deg) translateX(-8px) translateY(4px);
+}
+
+/* Session summary ------------------------------------------------------------ */
+
+.comeback-row {
+  min-height: 48px;
+}
+
+.comeback-bar {
+  flex: 0 0 72px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--fill-2);
+  overflow: hidden;
+}
+
+.comeback-bar > span {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--tint-fill);
+}
+
+.comeback-n {
+  flex: none;
+  min-width: 4.6rem;
+  text-align: right;
+  font-weight: 600;
+  color: var(--label-2);
+}
+
+.missed-row {
+  min-height: 46px;
+}
+
+.missed-dot {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--orange);
+}
+
+.missed-label {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Practice summary: each decision, right or missed. */
+.practice-results .list-row {
+  min-height: 46px;
+}
+
+.practice-mark {
+  flex: none;
+  display: inline-grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  color: var(--on-action);
+}
+
+.practice-mark.right {
+  background: var(--green);
+}
+
+.practice-mark.missed {
+  background: var(--orange);
+}

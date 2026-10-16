@@ -169,6 +169,12 @@ function Results({ title, result, back }: { title: string; result: CheckResult; 
             Continue
           </Link>
         )}
+        {locked && (
+          // The free path stays open: lessons you passed are marked, and Learn has the free lessons.
+          <Link to={back} className="btn btn-plain btn-block">
+            Back to Learn
+          </Link>
+        )}
       </BottomBar>
     </div>
   );

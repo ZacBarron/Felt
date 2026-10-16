@@ -1,4 +1,4 @@
-import { currentRating } from '@felt/core';
+import { cardStrength, comebackGroups, currentRating, dueForecast, mathFact, parseCard, solidHistory } from '@felt/core';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
@@ -6,12 +6,19 @@ import { DrillRunner } from '../drills/DrillRunner';
 import { haptic } from '../haptics';
 import { chartsForGame } from '../state/charts';
 import { db } from '../state/db';
-import { buildSession, type DeckCount, deckCounts, type DeckId, type DeckPref, deckPrefs, DECKS, type SessionConfig } from '../state/decks';
+import { buildSession, type DeckCount, deckCounts, type DeckId, deckOf, type DeckPref, deckPrefs, DECKS, reviewTotal, type SessionConfig } from '../state/decks';
+import { getChart } from '../state/charts';
+import { entryFor } from '../state/lessons';
+import { spotLine } from '../drills/labels';
+import { PlayingCard } from '../components/PlayingCard';
+import { EmptyState } from '../ui/Section';
+import './review.css';
 import { type QueueItem, recordAnswer, RELEARN_WINDOW_MS, startOfToday } from '../state/review';
 import { ratingSnapshot } from '../state/rating';
 import { useSettings } from '../state/settings';
 import { BottomBar } from '../ui/BottomBar';
 import { CheckIcon, ChevronRightIcon, CloseIcon, DrillsIcon } from '../ui/icons';
+import type { Chart } from '@felt/core';
 import { Segmented } from '../ui/Segmented';
 import { Stepper } from '../ui/Stepper';
 import { Toggle } from '../ui/Toggle';
@@ -27,12 +34,19 @@ function CountUp({ value }: { value: number }) {
 
 const EXTRA_BATCH = 20;
 
+/** One answer in a session. `id` is missing in sessions saved by older versions. */
+interface Result {
+  accuracy: number;
+  ms: number;
+  id?: string;
+}
+
 /** A session in progress, kept for this tab so leaving and coming back resumes it. */
 interface SavedSession {
   config: SessionConfig;
   queue: QueueItem[];
   index: number;
-  results: { accuracy: number; ms: number }[];
+  results: Result[];
   phase: 'due' | 'extra';
   answered: string[];
 }
@@ -88,14 +102,27 @@ export function ReviewPage() {
         }}
       />
     );
-  return <ReviewSession key={run} config={session} resume={resume} onHome={() => setSession(null)} />;
+  return (
+    <ReviewSession
+      key={run}
+      config={session}
+      resume={resume}
+      onHome={() => setSession(null)}
+      onStart={(c) => {
+        writeSession(undefined);
+        setResume(undefined);
+        setSession(c);
+        setRun((r) => r + 1);
+      }}
+    />
+  );
 }
 
-function ReviewSession({ config, resume, onHome }: { config: SessionConfig; resume?: SavedSession; onHome: () => void }) {
+function ReviewSession({ config, resume, onHome, onStart }: { config: SessionConfig; resume?: SavedSession; onHome: () => void; onStart: (c: SessionConfig) => void }) {
   const { settings } = useSettings();
   const [queue, setQueue] = useState<QueueItem[] | undefined>(resume?.queue);
   const [index, setIndex] = useState(resume?.index ?? 0);
-  const [results, setResults] = useState<{ accuracy: number; ms: number }[]>(resume?.results ?? []);
+  const [results, setResults] = useState<Result[]>(resume?.results ?? []);
   // The chosen cards first; then a pause to celebrate; then extra practice that never runs out.
   const [phase, setPhase] = useState<'due' | 'cleared' | 'extra'>(resume?.phase ?? (config.kind === 'extra' ? 'extra' : 'due'));
   const [nothingDue, setNothingDue] = useState(false);
@@ -162,13 +189,16 @@ function ReviewSession({ config, resume, onHome }: { config: SessionConfig; resu
   if (!queue) return <p className="muted">Loading your review…</p>;
 
   if (!item) {
-    if (phase === 'extra' && exhausted) return <SessionDone results={results} onMore={null} onHome={onHome} startRating={startRating.current} />;
+    if (phase === 'extra' && exhausted)
+      return <SessionDone results={results} items={queue} onMore={null} onHome={onHome} onStart={onStart} startRating={startRating.current} />;
     if (phase === 'extra') return <p className="muted">Loading more cards…</p>;
     return (
       <SessionDone
         results={results}
+        items={queue}
         startRating={startRating.current}
         onHome={onHome}
+        onStart={onStart}
         onMore={() => {
           setPhase('extra');
           setQueue((q) => (q ?? []).slice(0, index));
@@ -206,7 +236,7 @@ function ReviewSession({ config, resume, onHome }: { config: SessionConfig; resu
         item={item}
         onAnswer={(outcome) => {
           answered.current.add(item.id);
-          setResults((r) => [...r, { accuracy: outcome.accuracy, ms: outcome.responseMs }]);
+          setResults((r) => [...r, { accuracy: outcome.accuracy, ms: outcome.responseMs, id: item.id }]);
           void recordAnswer(item, outcome).then((due) => {
             if (due.getTime() - Date.now() < RELEARN_WINDOW_MS) setQueue((q) => [...(q ?? []), { ...item, isNew: false }]);
           });
@@ -251,15 +281,21 @@ function ReviewHome({ onStart, onResume, resumable }: { onStart: (c: SessionConf
     setStudy({ decks: { ...study.decks, [id]: { ...study.decks?.[id], ...patch } } });
   };
 
+  const memory = useMemory(charts);
   const onDecks = counts?.filter((c) => prefs[c.deck].on) ?? [];
   const total = onDecks.reduce((t, c) => t + c.fresh + c.learning + c.due, 0);
   const limit = study.sessionLimit ?? 0;
   const inSession = limit > 0 ? Math.min(limit, total) : total;
-  const minutes = Math.max(1, Math.round((inSession * 8) / 60));
+  // About 8 seconds a card. The estimate covers everything ready, so it matches the count beside it.
+  const minutes = Math.max(1, Math.round((total * 8) / 60));
+  // Nothing to review yet: every deck waits for the lesson that teaches it.
+  const locked = !!counts && counts.every((c) => c.total + c.fresh + c.learning + c.due === 0);
+
+  if (locked && !resumable) return <ReviewLocked />;
 
   return (
     <div className="stack" style={{ gap: '1.4rem' }}>
-      <PageHeader title="Review" subtitle={counts ? (total ? `${plural(total, 'card')} today, about ${minutes} min` : 'All caught up for today') : ' '} />
+      <PageHeader title="Review" subtitle={counts ? (total ? `${plural(total, 'card')} ready, about ${minutes} min` : caughtUpLine(memory?.forecast)) : ' '} />
 
       {resumable && (
         <button className="card resume-card" onClick={onResume}>
@@ -275,6 +311,9 @@ function ReviewHome({ onStart, onResume, resumable }: { onStart: (c: SessionConf
           <ChevronRightIcon size={16} className="chev" />
         </button>
       )}
+
+      {/* Nothing due: lead with how your memory is doing and when cards come back. */}
+      {memory && memory.started > 0 && counts && total === 0 && <MemorySection memory={memory} />}
 
       <section>
         <div className="list review-decks">
@@ -301,6 +340,8 @@ function ReviewHome({ onStart, onResume, resumable }: { onStart: (c: SessionConf
           })}
         </div>
       </section>
+
+      {memory && memory.started > 0 && total > 0 && <MemorySection memory={memory} />}
 
       <section>
         <h2 className="section-title">Session</h2>
@@ -438,41 +479,93 @@ function RatingChange({ from }: { from?: number }) {
   );
 }
 
+/** A short name for a card and where it is from, for the list of misses at the end of a session. */
+function cardLabel(item: QueueItem, savedTitles: Map<string, string>): { title: string; sub?: string } {
+  if (item.mode === 'saved') return { title: savedTitles.get(item.savedId ?? '') ?? 'A saved item', sub: 'Saved' };
+  if (item.mode === 'math') return { title: mathFact(item.factId ?? '')?.prompt ?? 'Math fact', sub: 'Math fact' };
+  if (item.mode === 'quiz') {
+    const entry = item.lessonKey ? entryFor(item.lessonKey) : undefined;
+    const step = entry?.content?.steps[item.step ?? -1];
+    return { title: step?.kind === 'quiz' ? step.question : 'Lesson question', sub: entry?.title };
+  }
+  const chart = getChart(item.chartId);
+  if (!chart) return { title: 'Chart card' };
+  if (item.mode === 'paint') return { title: `Paint the ${chart.spec.hero} chart`, sub: spotLine(chart) || undefined };
+  return { title: `${item.hand}, ${chart.spec.hero}`, sub: spotLine(chart) || undefined };
+}
+
+const COMEBACK: { key: 'today' | 'tomorrow' | 'week' | 'later'; label: string }[] = [
+  { key: 'today', label: 'Later today' },
+  { key: 'tomorrow', label: 'Tomorrow' },
+  { key: 'week', label: 'In 2 to 6 days' },
+  { key: 'later', label: 'In a week or more' },
+];
+
 function SessionDone({
   results,
+  items,
   onMore,
   onHome,
+  onStart,
   startRating,
 }: {
-  results: { accuracy: number; ms: number }[];
+  results: Result[];
+  items: QueueItem[];
   onMore: (() => void) | null;
   onHome: () => void;
+  onStart: (c: SessionConfig) => void;
   startRating?: number;
 }) {
-  const done = results.length > 0;
-  const avg = done ? results.reduce((a, r) => a + r.accuracy, 0) / results.length : 0;
-  const perfect = results.filter((r) => r.accuracy === 1).length;
-  const secs = done ? results.reduce((a, r) => a + r.ms, 0) / results.length / 1000 : 0;
+  const { settings } = useSettings();
+  const { charts } = chartsForGame(settings.game);
+  // Judge each card by its first answer. A card missed, then relearned, still counts as missed.
+  const first = new Map<string, Result>();
+  for (const r of results) if (r.id && !first.has(r.id)) first.set(r.id, r);
+  const tries = first.size ? [...first.values()] : results;
+  const done = tries.length > 0;
+  const right = tries.filter((r) => r.accuracy >= 1).length;
+  const byId = new Map(items.map((i) => [i.id, i]));
+  const missed = [...first].filter(([, r]) => r.accuracy < 1).flatMap(([id]) => (byId.has(id) ? [byId.get(id)!] : []));
+  const ids = [...first.keys()];
+
+  const summary = useLiveQuery(async () => {
+    const now = new Date();
+    const cards = (await db.cards.bulkGet(ids)).filter((c) => c !== undefined);
+    const savedIds = missed.flatMap((i) => (i.savedId ? [i.savedId] : []));
+    const saved = (await db.saved.bulkGet(savedIds)).filter((x) => x !== undefined);
+    return {
+      comeback: comebackGroups(
+        cards.map((c) => c.due),
+        now,
+      ),
+      remaining: await reviewTotal(charts, settings.study, now),
+      savedTitles: new Map(saved.map((x) => [x.id, x.title])),
+    };
+  }, [ids.join(','), settings.game.tableSize, settings.game.format]);
+
+  const limit = settings.study.sessionLimit ?? 0;
+  const remaining = summary?.remaining ?? 0;
+  const next = limit > 0 ? Math.min(limit, remaining) : remaining;
+  const SHOWN = 5;
 
   return (
-    <div className="stack focus-column">
+    <div className="stack focus-column review-done">
       <PageHeader title="Review" />
       <div className="card stack reveal" style={{ alignItems: 'center', textAlign: 'center', padding: '2rem 1.25rem', gap: '1.1rem' }}>
         {done ? (
           <>
-            <ProgressRing value={avg} size={150} stroke={14} color={avg >= 0.9 ? 'var(--green)' : avg >= 0.6 ? 'var(--orange)' : 'var(--red)'}>
-              <div>
-                <div className="display num" style={{ fontSize: '3rem', lineHeight: 1 }}>
-                  <CountUp value={Math.round(avg * 100)} />%
-                </div>
-                <div className="caption">accuracy</div>
+            <ProgressRing value={right / tries.length} size={140} stroke={13} label={`${right} of ${tries.length} right the first time`}>
+              <div className="display num" style={{ fontSize: '2.8rem', lineHeight: 1 }} aria-hidden="true">
+                <CountUp value={right} />/{tries.length}
               </div>
             </ProgressRing>
             <RatingChange from={startRating} />
             <div>
-              <h2 className="display" style={{ fontSize: '2rem' }}>Review done</h2>
+              <h2 className="display" style={{ fontSize: '2rem' }}>
+                Review done
+              </h2>
               <div className="footnote" style={{ marginTop: 4 }}>
-                You got {perfect} of {plural(results.length, 'card')} perfect. That took {secs.toFixed(1)} seconds per card.
+                You got {right} of {plural(tries.length, 'card')} right the first time.
               </div>
             </div>
           </>
@@ -481,27 +574,235 @@ function SessionDone({
             <span className="icon-tile" style={{ width: 64, height: 64, borderRadius: 18, background: 'var(--green)' }}>
               <CheckIcon size={34} />
             </span>
-            <h2 className="display" style={{ fontSize: '2rem' }}>All caught up</h2>
+            <h2 className="display" style={{ fontSize: '2rem' }}>
+              All caught up
+            </h2>
+            <p className="footnote" style={{ maxWidth: 360, margin: 0 }}>
+              You have practiced every card here. Paint or quiz any chart in Ranges.
+            </p>
           </>
         )}
-        <p className="footnote" style={{ maxWidth: 360, margin: 0 }}>
-          {onMore
-            ? 'Your due cards are done. Keep going with extra practice. It picks the cards closest to slipping and adds new ones.'
-            : 'You have practiced every card here. Paint or quiz any chart in Ranges, or come back later.'}
-        </p>
       </div>
+
+      {done && summary && (
+        <section className="reveal">
+          <h2 className="section-title">When they come back</h2>
+          <div className="list">
+            {COMEBACK.filter((g) => summary.comeback[g.key] > 0).map((g) => (
+              <div key={g.key} className="list-row comeback-row">
+                <span className="grow">{g.label}</span>
+                <span className="comeback-bar" aria-hidden="true">
+                  <span style={{ width: `${(summary.comeback[g.key] / ids.length) * 100}%` }} />
+                </span>
+                <span className="num comeback-n">{plural(summary.comeback[g.key], 'card')}</span>
+              </div>
+            ))}
+          </div>
+          <div className="section-footer">Cards you knew well come back later. Misses come back soon.</div>
+        </section>
+      )}
+
+      {missed.length > 0 && (
+        <section className="reveal">
+          <h2 className="section-title">To work on</h2>
+          <div className="list">
+            {missed.slice(0, SHOWN).map((i) => {
+              const label = cardLabel(i, summary?.savedTitles ?? new Map());
+              return (
+                <div key={i.id} className="list-row missed-row">
+                  <span className="missed-dot" aria-hidden="true" />
+                  <span className="grow">
+                    <span className="missed-label">{label.title}</span>
+                    {label.sub && <span className="footnote">{label.sub}</span>}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+          {missed.length > SHOWN && <div className="section-footer">And {plural(missed.length - SHOWN, 'more card')}.</div>}
+        </section>
+      )}
+
+      {!done || remaining > 0 || !onMore ? null : (
+        <p className="footnote" style={{ margin: '0 1rem' }}>
+          Your due cards are done. Extra practice picks the cards closest to slipping.
+        </p>
+      )}
+
       <BottomBar>
-        {onMore && (
+        {summary && next > 0 ? (
+          <button className="btn btn-primary btn-lg btn-block" onClick={() => onStart({ kind: 'today' })}>
+            Study {plural(next, 'more card')}
+          </button>
+        ) : onMore ? (
           <button className="btn btn-primary btn-lg btn-block" onClick={onMore}>
             Keep going
           </button>
+        ) : (
+          <Link to="/ranges?mode=quick" className="btn btn-primary btn-lg btn-block">
+            <DrillsIcon size={19} /> Practice any chart
+          </Link>
         )}
-        <Link to="/ranges?mode=quick" className={`btn btn-lg btn-block ${onMore ? 'btn-plain' : 'btn-primary'}`}>
-          <DrillsIcon size={19} /> Practice any chart
-        </Link>
         <button className="btn btn-plain btn-block" onClick={onHome}>
           Done for now
         </button>
+      </BottomBar>
+    </div>
+  );
+}
+
+const HISTORY_DAYS = 30;
+
+interface Memory {
+  /** Cards studied at least once, or added to review. */
+  started: number;
+  solid: number;
+  learning: number;
+  /** Solid cards at the end of each of the last 30 days, oldest first. */
+  history: number[];
+  /** Cards due on each of the next 7 days in decks that are on, today first. Today is in the deck list, so the chart starts tomorrow. */
+  forecast: number[];
+}
+
+/** Memory strength and what is coming, straight from the scheduler's stored cards and grades. */
+function useMemory(charts: readonly Chart[]): Memory | undefined {
+  const { settings } = useSettings();
+  const prefs = deckPrefs(settings.study);
+  const key = charts.map((c) => c.spec.id).join(',');
+  return useLiveQuery(async () => {
+    const chartIds = new Set(charts.map((c) => c.spec.id));
+    const cards = (await db.cards.toArray()).filter((c) => deckOf(c) !== 'charts' || chartIds.has(c.chartId));
+    const cardIds = new Set(cards.map((c) => c.id));
+    const reviews = (await db.reviews.toArray()).filter((r) => cardIds.has(r.cardId));
+    const now = new Date();
+    const solid = cards.filter((c) => cardStrength(c.fsrs) === 'solid').length;
+    const history = solidHistory(reviews, now, HISTORY_DAYS);
+    // Today is what the scheduler holds now, so the chart ends on the number above it.
+    history[history.length - 1] = solid;
+    return {
+      started: cards.length,
+      solid,
+      learning: cards.length - solid,
+      history,
+      forecast: dueForecast(
+        cards.filter((c) => prefs[deckOf(c)].on).map((c) => c.due),
+        now,
+        8,
+      ),
+    };
+  }, [key, JSON.stringify(prefs)]);
+}
+
+/** The subtitle once nothing is due: when the next cards come back. */
+function caughtUpLine(forecast?: number[]): string {
+  if (!forecast) return 'All caught up for today';
+  const come = (n: number) => `${plural(n, 'card')} ${n === 1 ? 'comes' : 'come'} back`;
+  if (forecast[0] > 0) return `All caught up for now. ${come(forecast[0])} later today.`;
+  const day = forecast.findIndex((n, i) => i > 0 && n > 0);
+  if (day === 1) return `All caught up. ${come(forecast[1])} tomorrow.`;
+  if (day > 1) return `All caught up. Your next cards come back in ${day} days.`;
+  return 'All caught up for today';
+}
+
+function dayLabel(i: number): string {
+  if (i === 0) return 'Today';
+  const d = new Date();
+  d.setDate(d.getDate() + i);
+  return d.toLocaleDateString(undefined, { weekday: 'short' });
+}
+
+/** Solid cards over time, the split of solid and learning, and the cards due this week. */
+function MemorySection({ memory }: { memory: Memory }) {
+  const { solid, learning, started, history, forecast } = memory;
+  const weekAgo = history[history.length - 8] ?? 0;
+  const gained = solid - weekAgo;
+  const peak = Math.max(1, ...history);
+  const week = forecast.slice(1);
+  const busiest = Math.max(1, ...week);
+  const shown = Math.round(useCountUp(solid, 900));
+  return (
+    <section>
+      <h2 className="section-title">Your memory</h2>
+      <div className="card memory-card">
+        <div className="memory-head">
+          <div>
+            <div className="memory-figure">
+              <span className="display num">{shown}</span>
+              <span className="memory-unit">solid {solid === 1 ? 'card' : 'cards'}</span>
+            </div>
+            <div className="footnote">{plural(learning, 'card')} still learning</div>
+          </div>
+          {gained > 0 && <span className="pill pill-good num">{gained} more this week</span>}
+        </div>
+        <div className="memory-chart" role="img" aria-label={`Solid cards over the last ${HISTORY_DAYS} days. ${history[0]} then, ${solid} today.`}>
+          {history.map((n, i) => (
+            <span key={i} className={i === history.length - 1 ? 'today' : undefined} style={{ '--h': `${(n / peak) * 100}%`, '--i': i } as React.CSSProperties} />
+          ))}
+        </div>
+        <div className="memory-axis">
+          <span>{HISTORY_DAYS} days ago</span>
+          <span>Today</span>
+        </div>
+        <div className="memory-split" aria-hidden="true">
+          <span className="solid" style={{ flexGrow: solid }} />
+          <span className="learning" style={{ flexGrow: learning }} />
+        </div>
+        <div className="memory-legend">
+          <span>
+            <i className="solid" aria-hidden="true" />
+            Solid {solid}
+          </span>
+          <span>
+            <i className="learning" aria-hidden="true" />
+            Learning {learning}
+          </span>
+          <span className="num">{Math.round((solid / Math.max(1, started)) * 100)}% solid</span>
+        </div>
+        <div className="memory-divider" />
+        <div className="forecast-title">Coming up</div>
+        <ul className="forecast" aria-label="Cards due each day of the next week">
+          {week.map((n, d) => {
+            const i = d + 1;
+            return (
+              <li key={i} className={`forecast-day${i === 1 ? ' next' : ''}`} aria-label={`${dayLabel(i)}: ${plural(n, 'card')}`}>
+                <span className="forecast-n num" aria-hidden="true">
+                  {n > 0 ? n : ''}
+                </span>
+                <span className="forecast-track" aria-hidden="true">
+                  <span style={{ height: n > 0 ? `${Math.max(10, (n / busiest) * 100)}%` : 0 }} />
+                </span>
+                <span className="forecast-label" aria-hidden="true">
+                  {dayLabel(i)}
+                </span>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+      <div className="section-footer">A solid card should stay with you for a week without review. These counts come from your review history.</div>
+    </section>
+  );
+}
+
+/** Before the first lesson there is nothing to review. Say why and how to start. */
+function ReviewLocked() {
+  return (
+    <div className="stack" style={{ gap: '1.4rem' }}>
+      <PageHeader title="Review" />
+      <EmptyState
+        art={
+          <span className="review-locked-art">
+            <PlayingCard card={parseCard('As')} size="md" />
+            <PlayingCard card={parseCard('Kh')} size="md" />
+          </span>
+        }
+        title="Review starts after a lesson"
+        body="Each lesson adds cards here. Felt brings each one back before you forget it."
+      />
+      <BottomBar>
+        <Link to="/learn" className="btn btn-primary btn-lg btn-block">
+          Start a lesson
+        </Link>
       </BottomBar>
     </div>
   );
