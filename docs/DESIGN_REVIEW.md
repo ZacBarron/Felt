@@ -23,3 +23,7 @@ October 2026. A pass over every main screen at phone size (390 by 844), light an
 - **Type scale** (rem is 17px): large title 2.75 serif, title 1.35, section 1.18 bold, headline 1 semibold, body 1, subhead 0.88, footnote 0.8, caption 0.72.
 
 Honesty labels from CLAUDE.md never move behind an info button: Approximate, Exploit, Player tendency, and which win rate parts are model assumptions.
+
+## Fit on real phones
+
+Every screen must fit three cases: an iPhone with its safe areas (393 by 852 with 59pt at the top and 34pt at the bottom), a Safari tab with its toolbars (about 393 by 660), and Display Zoom (320 by 693). Run `node apps/web/scripts/fit-audit.cjs <out dir> 8812 iphone16|safari|zoom` against `vite preview`. It emulates the safe areas through Chromium and lists any button or text hidden behind the bars. Heights that must track the visible screen use `dvh`, not `vh`. On the paywall the price stays above the button at every size: short screens drop the lesson fan first, then the least relevant perk.

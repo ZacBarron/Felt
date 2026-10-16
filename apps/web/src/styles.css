@@ -4085,6 +4085,8 @@ button.evidence {
   width: 100%;
   max-width: 560px;
   max-height: min(88vh, 760px);
+  /* Dynamic height: in a Safari tab the toolbars take part of the screen, and vh would ignore them. */
+  max-height: min(88dvh, 760px);
   margin: auto auto 0;
   padding: 0;
   border: none;

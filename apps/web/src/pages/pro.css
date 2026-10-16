@@ -486,6 +486,78 @@ body.has-bottom-bar .pw {
   }
 }
 
+/* Short screens (a Safari tab with its toolbars, Display Zoom, older phones):
+   the plans and price must stay in view above the bar, so the hero gives way first. */
+@media (max-height: 700px) {
+  .pw-fan {
+    display: none;
+  }
+  .pw-hero {
+    padding-bottom: 0.9rem;
+  }
+  .pw-title {
+    font-size: 1.7rem;
+  }
+  .pw {
+    gap: 0.65rem;
+  }
+  .pw-row {
+    min-height: 34px;
+  }
+  .pw-row-head {
+    min-height: 26px;
+  }
+  .pw-row-label {
+    font-size: 0.92rem;
+  }
+  .pw-plan {
+    min-height: 82px;
+    padding: 0.6rem 0.8rem;
+  }
+  .pw-plan-price {
+    font-size: 1.25rem;
+  }
+  .pw-hero {
+    gap: 0.2rem;
+    padding-top: calc(env(safe-area-inset-top, 0px) + 0.3rem);
+  }
+  /* Declining stays one tap away, as a lighter button, so the price keeps its room. */
+  .pw-bar-actions .btn:last-child {
+    min-height: 44px;
+    background: none;
+    box-shadow: none;
+  }
+}
+
+/* Narrow screens (Display Zoom, small phones): slimmer columns so each perk stays on one line. */
+@media (max-width: 360px) {
+  .pw-row {
+    grid-template-columns: minmax(0, 1fr) 40px 50px;
+    padding-left: 0.85rem;
+  }
+  .pw-compare::after {
+    width: 50px;
+  }
+  .pw-row + .pw-row:not(.pw-row-head)::before {
+    left: 0.85rem;
+    right: calc(0.55rem + 50px);
+  }
+  .pw-row-label {
+    font-size: 0.88rem;
+  }
+}
+
+/* Short and narrow (Display Zoom): keep the 3 most relevant perks, so the price stays in view.
+   Rows are ordered with the reason for the visit first. */
+@media (max-height: 700px) and (max-width: 360px) {
+  .pw-row:nth-child(n + 6) {
+    display: none;
+  }
+  .pw-title {
+    font-size: 1.5rem;
+  }
+}
+
 /* Restore sheet: on a raised surface, so it reads as a sheet in dark mode too. */
 .restore-dialog {
   background: var(--surface);
