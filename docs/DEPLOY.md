@@ -255,7 +255,7 @@ The copy at https://zacbarron.github.io/Felt/ is static. It can still have accou
 4. Open the Actions tab and re-run "Deploy to GitHub Pages". The build reads `FELT_API_URL` as `VITE_API_URL`.
 5. Open the Pages link. "I have an account" now shows on the welcome screen. `<server>/api/health` should list `passkeys` as on.
 
-Without the variable, the Pages build has no server and works on its own, as before.
+The workflow defaults to the live server at https://felt-4g8a.onrender.com, so the variable is only needed to point at a different server.
 
 Good to know:
 
