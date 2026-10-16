@@ -122,7 +122,7 @@ export function ImportPage() {
 
   return (
     <div className="stack" style={{ gap: '1.5rem' }}>
-      <PageHeader title="Import" back={{ to: '/more', label: 'More' }} />
+      <PageHeader title="Import" back={{ to: '/you', label: 'You' }} />
 
       <Section
         info={

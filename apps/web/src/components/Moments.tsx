@@ -18,7 +18,7 @@ import "./tiers.css";
 const KEY = "felt.moments";
 const STREAK_MILESTONES = [3, 7, 14, 30, 50, 100, 200, 365];
 /** Moments wait for a calm screen, never interrupting a question. */
-const CALM = ["/", "/you", "/more", "/learn"];
+const CALM = ["/", "/you", "/train", "/learn"];
 
 interface Seen {
   tier: number;

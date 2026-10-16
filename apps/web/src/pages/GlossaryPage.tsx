@@ -25,7 +25,7 @@ export function GlossaryPage() {
 
   return (
     <div className="stack" style={{ gap: '1.2rem' }}>
-      <PageHeader title="Glossary" back={{ to: '/more', label: 'More' }} />
+      <PageHeader title="Glossary" back={{ to: '/learn', label: 'Learn' }} />
       <input
         className="glossary-search"
         type="search"

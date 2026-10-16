@@ -71,6 +71,7 @@ export function RangesPage() {
     <div className="stack">
       <PageHeader
         title="Ranges"
+        back={{ to: '/train', label: 'Train' }}
         trailing={
           <div className="ranges-head-actions">
             <button

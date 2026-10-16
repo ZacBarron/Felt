@@ -68,10 +68,10 @@ export function CoachPage() {
   return (
     <div className="stack coach-page" style={{ gap: '1.2rem' }}>
       {available === undefined ? (
-        <PageHeader title="Coach" back={{ to: '/more', label: 'More' }} />
+        <PageHeader title="Coach" back={{ to: '/train', label: 'Train' }} />
       ) : !available ? (
         <>
-          <PageHeader title="Coach" back={{ to: '/more', label: 'More' }} />
+          <PageHeader title="Coach" back={{ to: '/train', label: 'Train' }} />
           <EmptyState
             art={<Art />}
             title="No coach here yet"
@@ -80,12 +80,12 @@ export function CoachPage() {
         </>
       ) : !session ? (
         <>
-          <PageHeader title="Coach" back={{ to: '/more', label: 'More' }} />
+          <PageHeader title="Coach" back={{ to: '/train', label: 'Train' }} />
           <Pitch signIn />
         </>
       ) : !pro ? (
         <>
-          <PageHeader title="Coach" back={{ to: '/more', label: 'More' }} />
+          <PageHeader title="Coach" back={{ to: '/train', label: 'Train' }} />
           <Pitch />
         </>
       ) : (
@@ -175,7 +175,9 @@ function Conversation({ incoming, limit, remaining, onRemaining, onLostPro }: Co
   const { settings } = useSettings();
   const navigate = useNavigate();
   const [chat, setChat] = useState<Chat>(() => initialChat(incoming));
-  const [draft, setDraft] = useState('');
+  // A missed question arrives as a draft, so the player reads it before it is sent.
+  const location = useLocation();
+  const [draft, setDraft] = useState(() => (location.state as { question?: string } | null)?.question ?? '');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<{ message: string; retry: boolean }>();
   const [preview, setPreview] = useState<CoachContext>();
@@ -267,7 +269,7 @@ function Conversation({ incoming, limit, remaining, onRemaining, onLostPro }: Co
     <>
       <PageHeader
         title="Coach"
-        back={{ to: '/more', label: 'More' }}
+        back={{ to: '/train', label: 'Train' }}
         trailing={
           (chat.messages.length > 0 || chat.spot) && (
             <button type="button" className="btn btn-tinted coach-new" onClick={newChat} disabled={busy}>

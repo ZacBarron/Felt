@@ -1,7 +1,7 @@
 import { useLiveQuery } from 'dexie-react-hooks';
 import { useEffect, useRef } from 'react';
 import { Link, Navigate, NavLink, Route, Routes, useLocation } from 'react-router-dom';
-import { NAV_SECTIONS, TABS } from './nav';
+import { NAV_SECTIONS, TABS, tabFor } from './nav';
 import { CheckPage, PlacementPage } from './pages/CheckPage';
 import { DailyPage } from './pages/DailyPage';
 import { WeeklyPage } from './pages/WeeklyPage';
@@ -10,7 +10,6 @@ import { ImportPage } from './pages/ImportPage';
 import { LabPage } from './pages/LabPage';
 import { LearnPage } from './pages/LearnPage';
 import { LessonPage } from './pages/LessonPage';
-import { MorePage } from './pages/MorePage';
 import { OnboardingPage } from './pages/OnboardingPage';
 import { Moments } from './components/Moments';
 import { ExploitsPage } from './pages/ExploitsPage';
@@ -20,6 +19,7 @@ import { PracticePage } from './pages/PracticePage';
 import { ProPage } from './pages/ProPage';
 import { RangesPage } from './pages/RangesPage';
 import { ReviewPage } from './pages/ReviewPage';
+import { TrainPage } from './pages/TrainPage';
 import { SavedPage } from './pages/SavedPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { SolverPage } from './pages/SolverPage';
@@ -71,11 +71,8 @@ export function App() {
   const { settings } = useSettings();
   const reviewCount = useReviewCount();
   useServerAccess();
-  // Lesson pages live under /learn, so match on the first path segment.
-  const section = '/' + (location.pathname.split('/')[1] ?? '');
-  const tabIndex = TABS.findIndex((t) => t.to === section);
-  // Pages reached through More keep More selected.
-  const activeTab = tabIndex === -1 ? TABS.length - 1 : tabIndex;
+  // A page pushed from a tab keeps that tab selected.
+  const activeTab = Math.max(0, TABS.findIndex((t) => t.to === tabFor(location.pathname)));
   const indicator = useRef<HTMLSpanElement>(null);
   const firstRender = useRef(true);
 
@@ -101,16 +98,16 @@ export function App() {
         <Link to="/" className="brand" aria-label="Suited home">
           <Lockup size={30} />
         </Link>
-        {NAV_SECTIONS.map(({ section, items }) => (
+        {[{ section: '', items: TABS }, ...NAV_SECTIONS].map(({ section, items }) => (
           <div key={section} className="nav-group">
-            <div className="section">{section}</div>
+            {section && <div className="section">{section}</div>}
             {items.map(({ to, label, icon: Icon }) => (
               <NavLink key={to} to={to} end={to === '/'} data-haptic="select">
                 {({ isActive }) => (
                   <>
                     <Icon size={22} filled={isActive} />
                     <span>{label}</span>
-                    {to === '/review' && reviewCount > 0 && <span className="count">{reviewCount}</span>}
+                    {(to === '/review' || to === '/train') && reviewCount > 0 && <span className="count">{reviewCount}</span>}
                   </>
                 )}
               </NavLink>
@@ -123,6 +120,7 @@ export function App() {
         <div key={location.pathname} className="page">
           <Routes location={location}>
             <Route path="/" element={<DashboardPage />} />
+            <Route path="/train" element={<TrainPage />} />
             <Route path="/review" element={<ReviewPage />} />
             <Route path="/drills" element={<RangesPage />} />
             <Route path="/learn" element={<LearnPage />} />
@@ -138,7 +136,7 @@ export function App() {
             <Route path="/pro" element={<ProPage />} />
             <Route path="/solver" element={<SolverPage />} />
             <Route path="/saved" element={<SavedPage />} />
-            <Route path="/more" element={<MorePage />} />
+            <Route path="/more" element={<Navigate to="/you" replace />} />
             <Route path="/scenarios" element={<ScenariosPage />} />
             <Route path="/scenarios/:id" element={<ScenariosPage />} />
             <Route path="/exploit" element={<ExploitsPage />} />
@@ -159,13 +157,13 @@ export function App() {
           </Routes>
         </div>
       </main>
-      <nav className="tabbar glass" aria-label="Tabs">
+      <nav className="tabbar glass" aria-label="Tabs" style={{ "--tabs": TABS.length } as React.CSSProperties}>
         <span ref={indicator} className="tab-indicator" style={{ transform: `translateX(${activeTab * 100}%)` }} />
         {TABS.map(({ to, label, icon: Icon }, i) => (
           <NavLink key={to} to={to} end={to === '/'} data-haptic="select" className={i === activeTab ? 'active' : undefined}>
             <Icon size={25} filled={i === activeTab} />
             {label}
-            {to === '/review' && reviewCount > 0 && (
+            {to === '/train' && reviewCount > 0 && (
               <span className="badge-dot num">
                 {reviewCount > 99 ? '99+' : reviewCount}
                 <span className="sr-only"> due</span>

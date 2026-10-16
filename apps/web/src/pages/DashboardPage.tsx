@@ -6,7 +6,8 @@ import { MasteryGrid } from '../components/MasteryGrid';
 import { StreakWeek, useStreakWeek } from '../components/StreakWeek';
 import { TierCard } from '../components/TierCard';
 import { PlayingCard } from '../components/PlayingCard';
-import { canOpenLesson } from '../state/access';
+import { canOpenLesson, isPro } from '../state/access';
+import { useCoachAvailable } from '../state/coach';
 import { chartsForGame, getChart } from '../state/charts';
 import { db, type StoredLesson } from '../state/db';
 import { cueCopy, goalCopy, pathPrefs } from '../state/goals';
@@ -23,7 +24,8 @@ import { AccountCard } from '../ui/AccountCard';
 import { WeeklyTodayCard } from './WeeklyPage';
 import { HeroPattern } from '../ui/Brand';
 import { plural } from '../ui/format';
-import { CheckIcon, ChevronRightIcon, LockIcon } from '../ui/icons';
+import { CheckIcon, ChevronRightIcon, CoachIcon, LockIcon } from '../ui/icons';
+import { NavRow } from '../ui/NavRow';
 import { PageHeader } from '../ui/PageHeader';
 import { Section } from '../ui/Section';
 import { ProgressRing } from '../ui/ProgressRing';
@@ -57,6 +59,7 @@ export function DashboardPage() {
   const proNext = !nextLesson && pathNext?.content && !canOpenLesson(pathNext.key, settings.access) ? pathNext : undefined;
   const dailyDone = useLiveQuery(() => db.daily.get(challengeNumber(new Date())), []);
   const week = useStreakWeek();
+  const coach = useCoachAvailable();
   const rating = useLiveQuery(async () => currentRating((await ratingSnapshot()).overall), []);
 
   const total = useLiveQuery(() => reviewTotal(charts, settings.study), [...deps, JSON.stringify(settings.study)]);
@@ -296,6 +299,12 @@ export function DashboardPage() {
           <p>{idea.body}</p>
         </article>
       </section>
+
+      {coach !== false && (
+        <div className="list with-icons">
+          <NavRow to="/coach" icon={CoachIcon} color="var(--base-500)" title="Ask the coach" subtitle="About a hand you played or anything here" detail={isPro(settings.access) ? undefined : 'Pro'} />
+        </div>
+      )}
 
       {touchedCharts.length > 0 && (
         <section>

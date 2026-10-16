@@ -1,12 +1,14 @@
 import type { Evidence, LessonStep } from '@felt/content';
 import { parseCards } from '@felt/core';
 import { useEffect, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { PlayingCard } from '../components/PlayingCard';
 import { RangeGrid } from '../components/RangeGrid';
 import { SeatStrip } from '../components/SeatStrip';
 import { haptic } from '../haptics';
 import { getChart } from '../state/charts';
-import { CheckIcon, CloseIcon, ExploitsIcon, InfoIcon, SolverIcon } from '../ui/icons';
+import { useCanAskCoach } from '../state/coach';
+import { CheckIcon, CloseIcon, CoachIcon, ExploitsIcon, InfoIcon, SolverIcon } from '../ui/icons';
 import { LessonArt } from './LessonArt';
 import { Rich } from './rich';
 import './lesson.css';
@@ -324,6 +326,7 @@ function Quiz({
   const [chosen, setChosen] = useState<number | undefined>(initial);
   const done = chosen !== undefined;
   const right = chosen === step.answer;
+  const canAskCoach = useCanAskCoach();
   // A fresh answer brings the reason into view above the bottom bar. A revisited one stays put.
   const explainRef = useRef<HTMLDivElement>(null);
   const fresh = useRef(false);
@@ -400,6 +403,18 @@ function Quiz({
           )}
         </div>
       )}
+      {done && !right && canAskCoach && (
+        <Link to="/coach" state={{ question: missQuestion(step, chosen) }} className="btn btn-tinted quiz-coach">
+          <CoachIcon size={18} />
+          Ask the coach
+        </Link>
+      )}
     </div>
   );
+}
+
+/** A first question for the coach about a missed quiz, left as a draft so the player can change it. */
+export function missQuestion(step: { question: string; choices: string[]; answer: number }, chosen: number): string {
+  const plain = (t: string) => t.replaceAll('**', '');
+  return `The question was: "${plain(step.question)}" I chose "${plain(step.choices[chosen])}" but the answer is "${plain(step.choices[step.answer])}". Why?`;
 }

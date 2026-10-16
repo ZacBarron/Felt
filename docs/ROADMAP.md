@@ -90,6 +90,20 @@ See [MONETIZATION.md](MONETIZATION.md).
 - [ ] Turn on billing (Stripe keys and prices) and email codes (Resend)
 - [ ] Turn off `PRO_FOR_EVERYONE` and remove the Pro testing switch from Settings
 
+## Train, Play and You
+
+See [PLAY.md](PLAY.md).
+
+- [x] Tabs become Today, Learn, Train and You. Train opens with one Start button (review when cards are due, else practice) over every way to train and the study tools. Ranges moves inside Train. More becomes You, with Settings in the corner. Glossary sits on Learn
+- [x] Coach where questions come up: on a missed chart decision, on a missed lesson question (as an editable draft) and on Today
+- [ ] Play engine in `@felt/core`: hand state machine, side pots, seeded dealing, bot policy interface
+- [ ] Bots: characters built from the archetypes with a style and a strength, a Bot tag on every seat
+- [ ] Play tab: table size, stack depth, bot picks and presets, skip clear folds
+- [ ] Recap: preflop and against-this-bot grades, decision quality first, mistakes to Review, Ask the coach
+- [ ] River grading with the live solver, then turn grading in the recap
+- [ ] Bot ratings measured by self play on the Suited Rating scale
+- [ ] Flop grading from the first postflop pack
+
 ## Phase 2: Live game essentials
 
 - [x] Session tracker: one tap start and stop, stakes, buy ins, cash out, venue, notes

@@ -1471,7 +1471,7 @@ table.kv td:last-child {
 
   .tabbar {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(var(--tabs, 4), 1fr);
     position: fixed;
     left: 14px;
     right: 14px;
@@ -1488,7 +1488,7 @@ table.kv td:last-child {
     top: 4px;
     bottom: 4px;
     left: 4px;
-    width: calc((100% - 8px) / 5);
+    width: calc((100% - 8px) / var(--tabs, 4));
     border-radius: 999px;
     background: var(--fill-2);
     transition: transform 420ms var(--spring);
@@ -5475,4 +5475,10 @@ a.card.more-me,
   display: flex;
   flex-wrap: wrap;
   gap: 0.45rem;
+}
+
+/* An icon button beside a large title, such as Settings on You or Glossary on Learn. */
+.header-icon {
+  padding: 0.35rem;
+  color: var(--tint);
 }

@@ -30,7 +30,9 @@ import {
 } from "../state/rating";
 import { useSettings } from "../state/settings";
 import { signed } from "../ui/format";
-import { ChevronRightIcon, FlameIcon, ShareIcon } from "../ui/icons";
+import { ChevronRightIcon, FlameIcon, SettingsIcon, ShareIcon } from "../ui/icons";
+import { BrandFooter } from "../ui/Brand";
+import { AccountRows, GameRows, ProCard } from "../components/YouLinks";
 import { AvatarPicker } from "../ui/Avatar";
 import { RatingShareSheet } from "../components/RatingShare";
 import { TierCard } from "../components/TierCard";
@@ -278,7 +280,14 @@ export function YouPage() {
 
   return (
     <div className="stack" style={{ gap: "1.5rem" }}>
-      <PageHeader title="You" back={{ to: "/more", label: "More" }} />
+      <PageHeader
+        title="You"
+        trailing={
+          <Link to="/settings" className="btn btn-plain header-icon" aria-label="Settings">
+            <SettingsIcon size={24} />
+          </Link>
+        }
+      />
 
       <section className="you-profile">
         <AvatarPicker
@@ -422,22 +431,9 @@ export function YouPage() {
 
       <TierCard rating={overall} />
 
-      <div className="list">
-        <Link to="/practice" className="list-row">
-          <span className="grow">
-            <span className="you-row-title">Practice at your level</span>
-            <span className="footnote">10 decisions picked for your level</span>
-          </span>
-          <ChevronRightIcon size={16} className="chev" />
-        </Link>
-        <Link to="/league" className="list-row">
-          <span className="grow">
-            <span className="you-row-title">Weekly league</span>
-            <span className="footnote">Real players near your rating</span>
-          </span>
-          <ChevronRightIcon size={16} className="chev" />
-        </Link>
-      </div>
+      <ProCard />
+
+      <GameRows />
 
       <Section
         title="By area"
@@ -672,6 +668,10 @@ export function YouPage() {
           <Link to="/settings/rake">Settings</Link>.
         </div>
       </section>
+
+      <AccountRows />
+
+      <BrandFooter />
     </div>
   );
 }

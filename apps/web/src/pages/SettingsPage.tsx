@@ -121,7 +121,7 @@ function SettingsHome() {
 
   return (
     <div className="stack settings" style={{ gap: '1.6rem' }}>
-      <PageHeader title="Settings" back={{ to: '/more', label: 'More' }} />
+      <PageHeader title="Settings" back={{ to: '/you', label: 'You' }} />
 
       <div className="list with-icons">
         <NavRow

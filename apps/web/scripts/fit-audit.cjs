@@ -28,7 +28,7 @@ const onboarded = { profile: { onboarded: true, experience: 'casual', goals: ['w
 const fresh = { profile: { onboarded: false, goals: [], focus: [], dailyMinutes: 10 }, access: { pro: false } };
 const ROUTES = [
   ['today', '/', onboarded], ['learn', '/learn', onboarded], ['review', '/review', onboarded], ['ranges', '/ranges', onboarded],
-  ['more', '/more', onboarded], ['you', '/you', onboarded], ['settings', '/settings', onboarded], ['account', '/account', onboarded],
+  ['train', '/train', onboarded], ['you', '/you', onboarded], ['settings', '/settings', onboarded], ['account', '/account', onboarded],
   ['pro', '/pro?from=onboarding', onboarded], ['pro-lesson', '/pro?from=lesson', onboarded], ['signin', '/signin', onboarded], ['daily', '/daily', onboarded],
   ['weekly', '/weekly', onboarded], ['league', '/league', onboarded], ['solver', '/solver', onboarded], ['coach', '/coach', onboarded],
   ['glossary', '/glossary', onboarded], ['practice', '/practice', onboarded], ['check', '/check', onboarded], ['saved', '/saved', onboarded],

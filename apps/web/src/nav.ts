@@ -3,6 +3,7 @@ import {
   LeagueIcon,
   BookmarkIcon,
   CoachIcon,
+  DrillsIcon,
   ExploitsIcon,
   GlossaryIcon,
   ImportIcon,
@@ -10,13 +11,11 @@ import {
   LabIcon,
   LearnIcon,
   LogIcon,
-  MoreIcon,
   RangesIcon,
   ReviewIcon,
   ScenariosIcon,
   SettingsIcon,
   SolverIcon,
-  StatsIcon,
   TodayIcon,
   TrophyIcon,
 } from './ui/icons';
@@ -29,51 +28,76 @@ export interface NavItem {
   color: string;
 }
 
-export const NAV_SECTIONS: { section: string; items: NavItem[] }[] = [
+const tint = 'var(--base-500)';
+
+/** The tabs on a phone and the top of the sidebar. Play joins between Train and You when it ships. */
+export const TABS: NavItem[] = [
+  { to: '/', label: 'Today', icon: TodayIcon, color: tint },
+  { to: '/learn', label: 'Learn', icon: LearnIcon, color: tint },
+  { to: '/train', label: 'Train', icon: ReviewIcon, color: tint },
+  { to: '/you', label: 'You', icon: AccountIcon, color: tint },
+];
+
+/** Everything under a tab, grouped the way the Train and You pages group it. */
+export const NAV_SECTIONS: { section: string; tab: string; items: NavItem[] }[] = [
   {
     section: 'Train',
+    tab: '/train',
     items: [
-      { to: '/', label: 'Today', icon: TodayIcon, color: 'var(--base-500)' },
-      { to: '/review', label: 'Review', icon: ReviewIcon, color: 'var(--base-500)' },
-      { to: '/daily', label: 'Daily challenge', icon: TrophyIcon, color: 'var(--base-500)' },
-      { to: '/learn', label: 'Learn', icon: LearnIcon, color: 'var(--base-500)' },
-      { to: '/scenarios', label: 'Scenarios', icon: ScenariosIcon, color: 'var(--base-500)' },
+      { to: '/review', label: 'Review', icon: ReviewIcon, color: tint },
+      { to: '/practice', label: 'Practice', icon: DrillsIcon, color: tint },
+      { to: '/daily', label: 'Daily challenge', icon: TrophyIcon, color: tint },
+      { to: '/ranges', label: 'Ranges', icon: RangesIcon, color: tint },
+      { to: '/scenarios', label: 'Scenarios', icon: ScenariosIcon, color: tint },
     ],
   },
   {
-    section: 'Study',
+    section: 'Tools',
+    tab: '/train',
     items: [
-      { to: '/ranges', label: 'Ranges', icon: RangesIcon, color: 'var(--base-500)' },
-      { to: '/saved', label: 'Saved', icon: BookmarkIcon, color: 'var(--base-500)' },
-      { to: '/solver', label: 'Solver', icon: SolverIcon, color: 'var(--base-500)' },
-      { to: '/lab', label: 'Spot Lab', icon: LabIcon, color: 'var(--base-500)' },
-      { to: '/exploit', label: 'Exploits', icon: ExploitsIcon, color: 'var(--base-500)' },
-      { to: '/coach', label: 'Coach', icon: CoachIcon, color: 'var(--base-500)' },
-      { to: '/glossary', label: 'Glossary', icon: GlossaryIcon, color: 'var(--base-500)' },
+      { to: '/coach', label: 'Coach', icon: CoachIcon, color: tint },
+      { to: '/solver', label: 'Solver', icon: SolverIcon, color: tint },
+      { to: '/lab', label: 'Spot Lab', icon: LabIcon, color: tint },
+      { to: '/exploit', label: 'Exploits', icon: ExploitsIcon, color: tint },
+      { to: '/saved', label: 'Saved', icon: BookmarkIcon, color: tint },
     ],
   },
   {
     section: 'Your game',
+    tab: '/you',
     items: [
-      { to: '/log', label: 'Log', icon: LogIcon, color: 'var(--base-500)' },
-      { to: '/you', label: 'You', icon: StatsIcon, color: 'var(--base-500)' },
-      { to: '/league', label: 'League', icon: LeagueIcon, color: 'var(--base-500)' },
-      { to: '/import', label: 'Import', icon: ImportIcon, color: 'var(--base-500)' },
-      { to: '/account', label: 'Account', icon: AccountIcon, color: 'var(--base-500)' },
-      { to: '/settings', label: 'Settings', icon: SettingsIcon, color: 'var(--base-500)' },
+      { to: '/log', label: 'Log', icon: LogIcon, color: tint },
+      { to: '/import', label: 'Import', icon: ImportIcon, color: tint },
+      { to: '/league', label: 'League', icon: LeagueIcon, color: tint },
+      { to: '/settings', label: 'Settings', icon: SettingsIcon, color: tint },
     ],
   },
 ];
 
-export const NAV_ITEMS: NavItem[] = NAV_SECTIONS.flatMap((s) => s.items);
+export const NAV_ITEMS: NavItem[] = [...TABS, ...NAV_SECTIONS.flatMap((s) => s.items), { to: '/glossary', label: 'Glossary', icon: GlossaryIcon, color: tint }];
 
-const byPath = (to: string) => NAV_ITEMS.find((i) => i.to === to)!;
+export const navItem = (to: string) => NAV_ITEMS.find((i) => i.to === to)!;
 
-/** Bottom tab bar on phones: the daily loop first, everything else under More. */
-export const TABS: NavItem[] = [
-  byPath('/'),
-  byPath('/learn'),
-  byPath('/review'),
-  byPath('/ranges'),
-  { to: '/more', label: 'More', icon: MoreIcon, color: 'var(--base-500)' },
-];
+/** Pages that are not in a section but still belong to a tab. */
+const EXTRA: Record<string, string> = {
+  '/drills': '/train',
+  '/weekly': '/train',
+  '/check': '/learn',
+  '/placement': '/learn',
+  '/glossary': '/learn',
+  '/stats': '/you',
+  '/more': '/you',
+  '/account': '/you',
+  '/signin': '/you',
+  '/pro': '/you',
+  '/terms': '/you',
+  '/privacy': '/you',
+};
+
+/** The tab that stays selected for a path, so a pushed page keeps its parent tab lit. */
+export function tabFor(pathname: string): string {
+  const first = '/' + (pathname.split('/')[1] ?? '');
+  if (TABS.some((t) => t.to === first)) return first;
+  const section = NAV_SECTIONS.find((s) => s.items.some((i) => i.to === first));
+  return section?.tab ?? EXTRA[first] ?? '/';
+}

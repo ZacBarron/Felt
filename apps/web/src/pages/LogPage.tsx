@@ -54,7 +54,7 @@ export function LogPage() {
   const [tab, setTab] = useState<Tab>('sessions');
   return (
     <div className="stack" style={{ gap: '1.3rem' }}>
-      <PageHeader title="Log" back={{ to: '/more', label: 'More' }} />
+      <PageHeader title="Log" back={{ to: '/you', label: 'You' }} />
       <Segmented<Tab>
         ariaLabel="Section"
         stretch

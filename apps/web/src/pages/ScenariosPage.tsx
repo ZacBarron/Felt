@@ -78,7 +78,7 @@ function ScenarioList() {
   const next = SCENARIOS.find((s) => !byId.has(s.id)) ?? SCENARIOS[0];
   return (
     <div className="stack" style={{ gap: '1.4rem' }}>
-      <PageHeader title="Scenarios" subtitle="Graded by Suited Solver" back={{ to: '/more', label: 'More' }} />
+      <PageHeader title="Scenarios" subtitle="Graded by Suited Solver" back={{ to: '/train', label: 'Train' }} />
       {SCENARIOS.length === 0 ? (
         <p className="muted">Scenarios are on their way.</p>
       ) : (

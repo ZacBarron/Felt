@@ -295,7 +295,7 @@ function ReviewHome({ onStart, onResume, resumable }: { onStart: (c: SessionConf
 
   return (
     <div className="stack" style={{ gap: '1.4rem' }}>
-      <PageHeader title="Review" subtitle={counts ? (total ? `${plural(total, 'card')} ready, about ${minutes} min` : caughtUpLine(memory?.forecast)) : ' '} />
+      <PageHeader title="Review" back={{ to: '/train', label: 'Train' }} subtitle={counts ? (total ? `${plural(total, 'card')} ready, about ${minutes} min` : caughtUpLine(memory?.forecast)) : ' '} />
 
       {resumable && (
         <button className="card resume-card" onClick={onResume}>

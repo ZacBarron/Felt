@@ -524,3 +524,8 @@
   margin: 0;
   padding-left: calc(20px + 0.45rem);
 }
+
+/* Ask the coach after a missed question. */
+.quiz-coach {
+  margin-top: 0.75rem;
+}

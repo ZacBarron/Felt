@@ -11,7 +11,7 @@ import type { StoredLesson } from '../state/db';
 import { canOpenLesson, FREE_MODULES, isPro } from '../state/access';
 import { pathPrefs } from '../state/goals';
 import { useSettings } from '../state/settings';
-import { CheckIcon, ChevronRightIcon, LockIcon, TargetIcon } from '../ui/icons';
+import { CheckIcon, ChevronRightIcon, GlossaryIcon, LockIcon, TargetIcon } from '../ui/icons';
 import { PageHeader } from '../ui/PageHeader';
 import { loadPlacement } from '../state/placementProgress';
 import { moduleKeyOf, shouldShowModuleIntro } from '../state/moduleIntros';
@@ -51,7 +51,15 @@ export function LearnPage() {
 
   return (
     <div ref={page} className="stack" style={{ gap: '1.6rem' }}>
-      <PageHeader title="Learn" subtitle={`${done} of ${playable.length} lessons done`} />
+      <PageHeader
+        title="Learn"
+        subtitle={`${done} of ${playable.length} lessons done`}
+        trailing={
+          <Link to="/glossary" className="btn btn-plain header-icon" aria-label="Glossary">
+            <GlossaryIcon size={24} />
+          </Link>
+        }
+      />
 
       {next?.content && (
         <Link to={lessonPath(next.key)} className="hero learn-hero" onClick={(e) => openLesson(e, next.key)}>
