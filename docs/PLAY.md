@@ -1,6 +1,6 @@
 # Play
 
-Play is a full table against bots. You play whole hands, from the deal to showdown. Afterwards a recap grades every decision Suited can grade honestly and says which ones it cannot. It gets its own tab between Train and You once the engine ships.
+Play is a full table against bots. You play whole hands, from the deal to showdown. Afterwards a recap grades every decision Suited can grade honestly and says which ones it cannot. It has its own tab between Train and You.
 
 Drills train one decision at a time. Play trains the same decisions in the order a real hand brings them, with the stack, the pot and the players left in the hand all changing as you go.
 
@@ -82,6 +82,13 @@ The engine lives in `packages/core` as pure TypeScript, with unit tests for ever
 - Seeded dealing, so a hand can be replayed and a bot's rating measured again exactly.
 - The bot policy interface: given the state and the bot's settings, return a mix over legal actions. Bots sample from the mix, so mixed strategies stay mixed.
 - Grading helpers for tier 2: equity against a known range with `equity.ts`.
+
+## What ships first
+
+- Preflop: graded by the chart when the spot matches what the chart assumes (no callers before you, about a 2.5bb open, 60 to 150bb stacks, 3 to 9 players). Seats match charts by the players behind them. Other preflop spots say why they are not graded.
+- Calls and folds after the flop: graded against the bots' real ranges (tier 2). Only exact river calls against one bot, with no one left to act, count toward the rating, in the exploit area.
+- Bets, raises and checks after the flop: shown as not graded until solver grading lands.
+- Bots show no rating yet. A rating appears only once it has been measured.
 
 ## Build order
 

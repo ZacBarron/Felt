@@ -27,7 +27,7 @@ export function TrainPage() {
     { to: '/daily', label: 'Daily challenge', badge: !stats ? undefined : !daily ? 'New' : daily.finished === false ? `${daily.scores.length} of 5` : 'Done' },
     { to: '/ranges', label: 'Ranges' },
     { to: '/scenarios', label: 'Scenarios', badge: stats ? `${stats.played} of ${SCENARIOS.length}` : undefined },
-    { to: '/practice', label: 'At your level', badge: '10' },
+    { to: '/practice', label: 'At your level' },
     { to: '/weekly', label: 'Weekly challenge', badge: weeklyAvailable(settings.access) ? undefined : 'Pro' },
   ];
 

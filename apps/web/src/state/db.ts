@@ -59,7 +59,7 @@ export interface StoredAnswer {
   domain: SkillDomain;
   difficulty: number;
   score: number;
-  source: 'review' | 'lesson' | 'check' | 'daily' | 'weekly';
+  source: 'review' | 'lesson' | 'check' | 'daily' | 'weekly' | 'play';
 }
 
 /** An imported hand, summarized from the hero's seat, with the original text. */

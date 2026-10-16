@@ -315,6 +315,8 @@ export const DIFFICULTY = {
   scenarioRiver: 1500,
   /** A math fact from the review deck, like the price of a half pot bet. */
   mathFact: 1250,
+  /** A river call or fold in Play, priced exactly against the bot's real range. */
+  playCall: 1400,
 } as const;
 
 /**

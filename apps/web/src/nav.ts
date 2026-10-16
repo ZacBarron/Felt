@@ -2,6 +2,7 @@ import {
   AccountIcon,
   LeagueIcon,
   BookmarkIcon,
+  ChipIcon,
   CoachIcon,
   DrillsIcon,
   ExploitsIcon,
@@ -31,11 +32,12 @@ export interface NavItem {
 
 const tint = 'var(--base-500)';
 
-/** The tabs on a phone and the top of the sidebar. Play joins between Train and You when it ships. */
+/** The tabs on a phone and the top of the sidebar. */
 export const TABS: NavItem[] = [
   { to: '/', label: 'Today', icon: TodayIcon, color: tint },
   { to: '/learn', label: 'Learn', icon: LearnIcon, color: tint },
   { to: '/train', label: 'Train', icon: ReviewIcon, color: tint },
+  { to: '/play', label: 'Play', icon: ChipIcon, color: tint },
   { to: '/you', label: 'You', icon: AccountIcon, color: tint },
 ];
 

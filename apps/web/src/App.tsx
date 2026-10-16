@@ -20,6 +20,7 @@ import { ProPage } from './pages/ProPage';
 import { RangesPage } from './pages/RangesPage';
 import { ReviewPage } from './pages/ReviewPage';
 import { TrainPage } from './pages/TrainPage';
+import { PlayPage } from './pages/PlayPage';
 import { SavedPage } from './pages/SavedPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { SolverPage } from './pages/SolverPage';
@@ -121,6 +122,7 @@ export function App() {
           <Routes location={location}>
             <Route path="/" element={<DashboardPage />} />
             <Route path="/train" element={<TrainPage />} />
+            <Route path="/play" element={<PlayPage />} />
             <Route path="/review" element={<ReviewPage />} />
             <Route path="/drills" element={<RangesPage />} />
             <Route path="/learn" element={<LearnPage />} />

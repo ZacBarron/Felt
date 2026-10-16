@@ -94,12 +94,12 @@ See [MONETIZATION.md](MONETIZATION.md).
 
 See [PLAY.md](PLAY.md).
 
-- [x] Tabs become Today, Learn, Train and You. Train opens with one Start button (review when cards are due, else practice) over every way to train and the study tools. Ranges moves inside Train. More becomes You, with Settings in the corner. Glossary sits on Learn
-- [x] Coach where questions come up: on a missed chart decision, on a missed lesson question (as an editable draft) and on Today
-- [ ] Play engine in `@felt/core`: hand state machine, side pots, seeded dealing, bot policy interface
-- [ ] Bots: characters built from the archetypes with a style and a strength, a Bot tag on every seat
-- [ ] Play tab: table size, stack depth, bot picks and presets, skip clear folds
-- [ ] Recap: preflop and against-this-bot grades, decision quality first, mistakes to Review, Ask the coach
+- [x] Tabs: Today, Learn, Train, Play and You. Train is six tiles (Review, Daily challenge, Ranges, Scenarios, At your level, Weekly challenge). Study tools (Coach, Solver, Spot Lab, Exploits) sit at the end of Learn, with Glossary in its corner. More became You, with Settings in the corner and Saved under Your game
+- [x] Coach where questions come up: on a missed chart decision, on a missed lesson question (as an editable draft), on Today and on every Play hand
+- [x] Play engine in `@felt/core` (`play.ts`): blinds and antes, the big blind's option, minimum raises, short all ins, side pots, split pots, seeded dealing, fuzz tested
+- [x] Bots (`bots.ts`): mixes over legal actions, charts preflop through the app's advisor, a measured hand strength order elsewhere (`preflopStrength.ts`), rule based postflop. Ten characters from the Exploits player types with drawn portraits and a Bot tag on every seat
+- [x] Play tab: 2 to 9 players, 50 to 200bb, three table presets, skip clear folds (only hands the chart folds every time)
+- [x] Recap: preflop graded by the chart where it matches the spot, calls and folds graded against the bots' real ranges (exact on the river heads up), coaching notes, decision quality first, mistakes to Review, Ask the coach
 - [ ] River grading with the live solver, then turn grading in the recap
 - [ ] Bot ratings measured by self play on the Suited Rating scale
 - [ ] Flop grading from the first postflop pack
