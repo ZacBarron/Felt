@@ -53,6 +53,9 @@ See [MONETIZATION.md](MONETIZATION.md).
 - [ ] Testimonials: add real quotes from test players to `TESTIMONIALS` in `packages/content/src/onboarding.ts` (with permission)
 - [x] Developer switch for Pro, onboarding replay and progress reset
 - [x] Paywall v2 on one phone screen, Restore purchases that always answers (signed out, found, not found, server down), Unlock Felt Pro for testing in Settings and `PRO_FOR_EVERYONE` on the server
+- [x] Paywall v3: felt hero with real Pro lessons, Free vs Pro table, trial timeline (patterns from Mobbin)
+- [x] Reminders by push: the daily study reminder from the Today card, and a trial reminder 2 days before a free week ends (switch on the paywall, on by default, sent once)
+- [x] Log out reliably; create a new account or continue without one from the signed out screen
 - [x] Saves: bookmark any lesson screen or solver hand; a Saved page with notes; every save becomes a review card (quizzes graded, other screens as self graded flashcards, solver hands graded against the solver's mix), plus a saved only review session
 - [x] Felt Rating: Glicko rating overall and per area from every graded answer, provisional until settled, tiers, history (see ENGAGEMENT.md)
 - [x] Win rate model: rake and tips per player from the rake rules, skill edge from rating against the table, 95% range, Bayesian blend with entered results
@@ -79,6 +82,12 @@ See [MONETIZATION.md](MONETIZATION.md).
 - [x] Calendar reminders (.ics) for the study time and the trial end; local event log with export
 - [x] Copy, accessibility (WCAG 2.2 AA pass) and visual review from simulated expert panels
 - [x] Server: item calibration, real pool ratings per stake, leagues with real players, push reminders, global daily stats
+
+## Before launch
+
+- [ ] Turn on push on the live server: set the 3 VAPID values on Render (see DEPLOY.md). Reminders and the trial reminder stay off until then.
+- [ ] Turn on billing (Stripe keys and prices) and email codes (Resend)
+- [ ] Turn off `PRO_FOR_EVERYONE` and remove the Pro testing switch from Settings
 
 ## Phase 2: Live game essentials
 

@@ -18,7 +18,8 @@ import {
   testingPro,
 } from '../state/access';
 import { pathPrefs } from '../state/goals';
-import { refreshMe, useServerFeatures } from '../state/api';
+import { currentSession, refreshMe, useServerFeatures, useSession } from '../state/api';
+import { pushBlocker, setTrialReminder } from '../state/push';
 import { useCoachAvailable } from '../state/coach';
 import { track } from '../state/events';
 import { LESSON_ENTRIES } from '../state/lessons';
@@ -30,6 +31,7 @@ import { LessonCover } from '../lesson/LessonCover';
 import { AccountIcon, BellIcon, CheckIcon, ChevronRightIcon, CloseIcon, CoachIcon, LockIcon, MedalIcon, SolverIcon } from '../ui/icons';
 import { useBodyClass } from '../ui/useBodyClass';
 import { onRadioKeys } from '../ui/radioKeys';
+import { Toggle } from '../ui/Toggle';
 import './pro.css';
 
 const WRITTEN = LESSON_ENTRIES.filter((e) => e.content);
@@ -121,6 +123,9 @@ export function ProPage() {
   const [message, setMessage] = useState<{ text: string; bad?: boolean }>();
   // Back from signing in to restore: the sheet opens again on its own.
   const [restoring, setRestoring] = useState(params.get('restore') === '1');
+  // Blinkist's timeline, with Vocabulary's switch: a reminder before the charge, on unless turned off.
+  const [remind, setRemind] = useState(true);
+  const session = useSession();
   const coachLive = !!useCoachAvailable();
   const plan = PLANS.find((p) => p.id === planId)!;
   const firstRun = FIRST_RUN_FROM.has(from);
@@ -206,11 +211,14 @@ export function ProPage() {
             </a>
           )}
         </div>
-        {trialEnds && (
-          <button className="btn btn-tinted btn-block" onClick={() => trialReminder(trialEnds)}>
-            <BellIcon size={18} /> Add a reminder 2 days before the trial ends
-          </button>
-        )}
+        {trialEnds &&
+          (session?.user.trialReminder !== false && features?.push && typeof Notification !== 'undefined' && Notification.permission === 'granted' ? (
+            <p className="footnote pw-testing">We will remind you on {new Date(Date.parse(trialEnds) - 2 * 86_400_000).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}.</p>
+          ) : (
+            <button className="btn btn-tinted btn-block" onClick={() => trialReminder(trialEnds)}>
+              <BellIcon size={18} /> Add a reminder 2 days before the trial ends
+            </button>
+          ))}
         <BottomBar>
           <Link to={firstRun ? '/' : '/learn'} replace={firstRun} className="btn btn-primary btn-lg btn-block">
             Keep learning
@@ -222,9 +230,11 @@ export function ProPage() {
   }
 
   const buy = async () => {
-    track('paywall_cta_tapped', { from, plan: plan.id });
+    track('paywall_cta_tapped', { from, plan: plan.id, remind: String(remindable && remind) });
     setBusy(true);
     setMessage(undefined);
+    // Set the reminder while the tap still counts as the player's, so the browser can ask for permission.
+    if (remindable && currentSession()) await setTrialReminder(remind).catch(() => undefined);
     const result = await purchase(plan, settings);
     track('purchase_result', { plan: plan.id, ok: String(result.ok) });
     // Leaving for Stripe Checkout: keep the button busy until the page goes.
@@ -250,6 +260,8 @@ export function ProPage() {
   const covers = heroLessons(settings.profile, settings.access);
   const decline = firstRun ? 'Continue with the free plan' : 'Not now';
   const timeline = open === true && plan.trialDays > 0;
+  // A push is promised only where one can arrive: the server sends them and this browser can show them.
+  const remindable = timeline && !!features?.push && !pushBlocker();
 
   return (
     <div className="pw focus-column">
@@ -337,12 +349,25 @@ export function ProPage() {
             <strong>Today</strong>
             <span>Everything in Pro unlocks. You pay nothing.</span>
           </li>
+          {remindable && remind && (
+            <li>
+              <span className="pw-dot" aria-hidden="true" />
+              <strong>{dateIn(plan.trialDays - 2)}</strong>
+              <span>We send you a reminder before you pay.</span>
+            </li>
+          )}
           <li>
             <span className="pw-dot" aria-hidden="true" />
             <strong>{charge}</strong>
             <span>You pay {formatPrice(plan.price)} for the year. Cancel before then and pay nothing.</span>
           </li>
           <li className="pw-renews">It renews each year until you cancel in Account.</li>
+          {remindable && (
+            <li className="pw-remind">
+              <span>Remind me before I pay</span>
+              <Toggle checked={remind} onChange={setRemind} label="Remind me before I pay" />
+            </li>
+          )}
         </ol>
       )}
 

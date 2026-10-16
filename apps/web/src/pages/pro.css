@@ -256,7 +256,7 @@
   column-gap: 0.75rem;
 }
 
-.pw-timeline li:first-child::after {
+.pw-timeline li:has(+ li > .pw-dot)::after {
   content: '';
   position: absolute;
   left: 6px;
@@ -276,7 +276,7 @@
   background: var(--tint-fill);
 }
 
-.pw-timeline li:nth-child(2) .pw-dot {
+.pw-timeline li:has(.pw-dot):not(:has(+ li > .pw-dot)) .pw-dot {
   background: var(--surface);
   box-shadow: inset 0 0 0 2px var(--tint);
 }
@@ -286,6 +286,23 @@
   padding-top: 0.15rem;
   font-size: 0.8rem;
   color: var(--label-2);
+}
+
+.pw-timeline .pw-remind {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: 0.1rem;
+  padding-top: 0.75rem;
+  border-top: 0.5px solid var(--separator);
+  font-size: 0.95rem;
+  font-weight: 560;
+}
+
+.pw-timeline .pw-remind span {
+  font-size: inherit;
+  color: var(--label);
 }
 
 .pw-timeline strong {

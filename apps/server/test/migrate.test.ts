@@ -32,7 +32,7 @@ describe('migrations', () => {
     old.close();
 
     const db = openDb(path);
-    expect((db.prepare('PRAGMA user_version').get() as { user_version: number }).user_version).toBe(3);
+    expect((db.prepare('PRAGMA user_version').get() as { user_version: number }).user_version).toBe(4);
     expect(db.prepare('SELECT id, email, handle, pro_until FROM users').all()).toEqual([{ id: 'u1', email: 'a@b.co', handle: 'ace', pro_until: '2027-01-01' }]);
     expect((db.prepare('SELECT COUNT(*) AS n FROM sessions').get() as { n: number }).n).toBe(1);
     expect((db.prepare('SELECT version FROM snapshots').get() as { version: number }).version).toBe(3);

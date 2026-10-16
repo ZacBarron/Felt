@@ -42,6 +42,8 @@ export interface ServerUser {
   tz: string | null;
   cueMinutes: number | null;
   reminders: boolean;
+  /** A push 2 days before a free trial ends. Older servers leave it out. */
+  trialReminder?: boolean;
   leagues: boolean;
   lastStudyDay: string | null;
   access: ServerAccess;
@@ -77,8 +79,10 @@ function readSession(): Session | null {
   }
 }
 
-export const isSession = (s: unknown): s is Session =>
-  !!s && typeof (s as Session).token === 'string' && !!(s as Session).token && !!(s as Session).user;
+// A function declaration, so it is ready when the session is read at module load.
+export function isSession(s: unknown): s is Session {
+  return !!s && typeof (s as Session).token === 'string' && !!(s as Session).token && !!(s as Session).user;
+}
 
 /**
  * Updates the signed in user, but only while the same session is still
@@ -184,7 +188,7 @@ export async function refreshMe(): Promise<ServerUser | null> {
   return user;
 }
 
-export async function updateMe(patch: Partial<Pick<ServerUser, 'handle' | 'tz' | 'cueMinutes' | 'reminders' | 'leagues' | 'lastStudyDay'>>) {
+export async function updateMe(patch: Partial<Pick<ServerUser, 'handle' | 'tz' | 'cueMinutes' | 'reminders' | 'trialReminder' | 'leagues' | 'lastStudyDay'>>) {
   const token = session?.token;
   const { user } = await api<{ user: ServerUser }>('/me', { method: 'PATCH', body: patch });
   if (token) updateSessionUser(token, user);

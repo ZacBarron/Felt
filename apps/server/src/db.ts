@@ -148,6 +148,16 @@ const MIGRATIONS: string[] = [
     expires_at TEXT NOT NULL
   );
   `,
+  `
+  ALTER TABLE users ADD COLUMN trial_reminder INTEGER NOT NULL DEFAULT 1;
+  CREATE TABLE notices_sent (
+    user_id TEXT NOT NULL REFERENCES users (id) ON DELETE CASCADE,
+    kind TEXT NOT NULL,
+    key TEXT NOT NULL,
+    at TEXT NOT NULL,
+    PRIMARY KEY (user_id, kind, key)
+  );
+  `,
 ];
 
 export function openDb(path: string): Db {

@@ -61,3 +61,19 @@ describe('logging out', () => {
     expect(currentSession()).toBeNull();
   });
 });
+
+describe('opening the app', () => {
+  it('keeps a stored session when the app loads', async () => {
+    store.set('felt.session.v1', JSON.stringify({ token: 'kept', user: user('u1') }));
+    vi.resetModules();
+    const fresh = await import('../src/state/api');
+    expect(fresh.currentSession()?.token).toBe('kept');
+  });
+
+  it('drops a stored session without a token when the app loads', async () => {
+    store.set('felt.session.v1', JSON.stringify({ user: user('u1') }));
+    vi.resetModules();
+    const fresh = await import('../src/state/api');
+    expect(fresh.currentSession()).toBeNull();
+  });
+});

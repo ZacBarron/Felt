@@ -65,3 +65,52 @@ export async function runReminders(db: Db, send: PushSender, now = new Date()): 
   }
   return sent;
 }
+
+const DAY_MS = 86_400_000;
+
+/**
+ * The trial reminder: when the free week ends and how to cancel, sent
+ * once, 2 days before. Plain facts, the same tone as the paywall timeline.
+ */
+export function trialEndingNotice(proUntil: string, tz: string | null) {
+  let date: string;
+  try {
+    date = new Date(proUntil).toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: tz ?? 'UTC' });
+  } catch {
+    date = new Date(proUntil).toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' });
+  }
+  return { title: 'Your free week ends in 2 days', body: `Felt Pro starts on ${date}. To cancel, open Account in Felt.`, url: '/account' };
+}
+
+/**
+ * Sends trial reminders that are due: players in a free trial that ends in
+ * 36 to 60 hours, who kept the reminder on and have a device to reach.
+ * Each trial gets at most one, keyed by its end date.
+ */
+export async function runTrialNotices(db: Db, send: PushSender, now = new Date()): Promise<number> {
+  const from = new Date(now.getTime() + 1.5 * DAY_MS).toISOString();
+  const to = new Date(now.getTime() + 2.5 * DAY_MS).toISOString();
+  const users = db
+    .prepare(
+      `SELECT id, tz, pro_until FROM users
+       WHERE trialing = 1 AND trial_reminder = 1 AND pro_until > ? AND pro_until <= ?
+       AND EXISTS (SELECT 1 FROM push_subs p WHERE p.user_id = users.id)
+       AND NOT EXISTS (SELECT 1 FROM notices_sent n WHERE n.user_id = users.id AND n.kind = 'trial-ending' AND n.key = users.pro_until)`,
+    )
+    .all(from, to) as { id: string; tz: string | null; pro_until: string }[];
+  let sent = 0;
+  for (const u of users) {
+    db.prepare("INSERT OR IGNORE INTO notices_sent (user_id, kind, key, at) VALUES (?, 'trial-ending', ?, ?)").run(u.id, u.pro_until, now.toISOString());
+    const payload = JSON.stringify(trialEndingNotice(u.pro_until, u.tz));
+    const subs = db.prepare('SELECT endpoint, p256dh, auth FROM push_subs WHERE user_id = ?').all(u.id) as unknown as PushSub[];
+    for (const sub of subs) {
+      try {
+        if ((await send(sub, payload)) === 'gone') db.prepare('DELETE FROM push_subs WHERE endpoint = ?').run(sub.endpoint);
+        else sent++;
+      } catch (e) {
+        console.error('Push failed', e);
+      }
+    }
+  }
+  return sent;
+}

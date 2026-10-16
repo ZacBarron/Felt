@@ -6,7 +6,7 @@ import { createApp } from './app.ts';
 import { createCoachClient } from './coach.ts';
 import { loadConfig } from './config.ts';
 import { openDb } from './db.ts';
-import { createPushSender, runReminders } from './push.ts';
+import { createPushSender, runReminders, runTrialNotices } from './push.ts';
 import { createMailer, createStripe } from './services.ts';
 
 const config = loadConfig();
@@ -45,7 +45,10 @@ serve({ fetch: app.fetch, port: config.port }, ({ port }) => {
 
 const sender = createPushSender(config);
 if (sender) {
-  const tick = () => runReminders(db, sender).catch((e) => console.error('Reminders failed', e));
+  const tick = () => {
+    void runReminders(db, sender).catch((e) => console.error('Reminders failed', e));
+    void runTrialNotices(db, sender).catch((e) => console.error('Trial reminders failed', e));
+  };
   setInterval(tick, 5 * 60 * 1000);
   void tick();
 }

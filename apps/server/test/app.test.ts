@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { createApp } from '../src/app.ts';
 import { loadConfig } from '../src/config.ts';
 import { type Db, openDb } from '../src/db.ts';
-import { runReminders } from '../src/push.ts';
+import { runReminders, runTrialNotices, trialEndingNotice } from '../src/push.ts';
 import type { StripeCall } from '../src/services.ts';
 
 let db: Db;
@@ -301,5 +301,42 @@ describe('reminders', () => {
     // Studied today: no reminder tomorrow's check uses the new day.
     await call('PATCH', '/api/me', { lastStudyDay: '2026-10-15' }, token);
     expect(await runReminders(db, sender, new Date(clock.getTime() + 86_400_000))).toBe(0);
+  });
+});
+
+describe('trial reminders', () => {
+  const startTrial = (endsInHours: number) => {
+    const until = new Date(clock.getTime() + endsInHours * 3_600_000).toISOString();
+    db.prepare('UPDATE users SET trialing = 1, pro_until = ?, plan = ?').run(until, 'annual');
+    return until;
+  };
+
+  it('sends once, 2 days before the trial ends, with the date and how to cancel', async () => {
+    const { token } = await signIn();
+    await call('PATCH', '/api/me', { tz: 'America/New_York' }, token);
+    await call('POST', '/api/push/subscribe', { endpoint: 'https://push.example/1', keys: { p256dh: 'k', auth: 'a' } }, token);
+    const sent: string[] = [];
+    const sender = async (_sub: unknown, payload: string) => {
+      sent.push(payload);
+      return 'ok' as const;
+    };
+    startTrial(5 * 24);
+    expect(await runTrialNotices(db, sender, clock)).toBe(0);
+    const until = startTrial(48);
+    expect(await runTrialNotices(db, sender, clock)).toBe(1);
+    expect(await runTrialNotices(db, sender, new Date(clock.getTime() + 5 * 60_000))).toBe(0);
+    expect(JSON.parse(sent[0])).toEqual(trialEndingNotice(until, 'America/New_York'));
+    expect(JSON.parse(sent[0]).body).toBe('Felt Pro starts on Oct 16. To cancel, open Account in Felt.');
+  });
+
+  it('respects the reminder switch and needs a device to reach', async () => {
+    const { token } = await signIn();
+    const sender = async () => 'ok' as const;
+    startTrial(48);
+    expect(await runTrialNotices(db, sender, clock)).toBe(0);
+    await call('POST', '/api/push/subscribe', { endpoint: 'https://push.example/1', keys: { p256dh: 'k', auth: 'a' } }, token);
+    const me = await (await call('PATCH', '/api/me', { trialReminder: false }, token)).json();
+    expect(me.user.trialReminder).toBe(false);
+    expect(await runTrialNotices(db, sender, clock)).toBe(0);
   });
 });

@@ -53,6 +53,8 @@ interface UserRow {
   trialing: number;
   trial_used: number;
   stripe_customer: string | null;
+  /** 1 when the player wants a push 2 days before a free trial ends. */
+  trial_reminder: number;
 }
 
 type Env = { Variables: { user: UserRow; token: string } };
@@ -87,6 +89,7 @@ export function publicUser(u: UserRow, now: Date, passkeys = 0, proForEveryone =
     tz: u.tz,
     cueMinutes: u.cue_minutes,
     reminders: !!u.reminders,
+    trialReminder: u.trial_reminder !== 0,
     leagues: !!u.leagues,
     lastStudyDay: u.last_study_day,
     access: { pro, until, plan: u.plan, trialing: paid && !!u.trialing },
@@ -278,6 +281,7 @@ export function createApp({ db, config, mailer, stripe, coach, webauthn = simple
       tz: string;
       cueMinutes: number | null;
       reminders: boolean;
+      trialReminder: boolean;
       leagues: boolean;
       lastStudyDay: string;
     }>(c);
@@ -303,6 +307,7 @@ export function createApp({ db, config, mailer, stripe, coach, webauthn = simple
       set.cue_minutes = body.cueMinutes;
     }
     if (body.reminders !== undefined) set.reminders = body.reminders ? 1 : 0;
+    if (body.trialReminder !== undefined) set.trial_reminder = body.trialReminder ? 1 : 0;
     if (body.leagues !== undefined) set.leagues = body.leagues ? 1 : 0;
     if (body.lastStudyDay !== undefined) {
       if (!/^\d{4}-\d{2}-\d{2}$/.test(body.lastStudyDay)) return c.json({ error: 'Bad date.' }, 400);

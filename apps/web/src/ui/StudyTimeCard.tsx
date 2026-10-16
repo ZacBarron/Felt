@@ -1,4 +1,7 @@
 import { useState } from 'react';
+import { useServerFeatures } from '../state/api';
+import { canPush, enableReminders } from '../state/push';
+import { haptic } from '../haptics';
 import { track } from '../state/events';
 import { CUES, cueCopy } from '../state/goals';
 import { studyReminder } from '../state/reminders';
@@ -26,6 +29,9 @@ export function StudyTimeCard() {
   const profile = settings.profile;
   const [hidden, setHidden] = useState(dismissedBefore);
   const [picked, setPicked] = useState<string>();
+  const [note, setNote] = useState<string>();
+  const [busy, setBusy] = useState(false);
+  const features = useServerFeatures();
   if (hidden || !profile.firstLessonAt || (profile.cue && !picked)) return null;
 
   const close = () => {
@@ -39,23 +45,52 @@ export function StudyTimeCard() {
 
   if (picked) {
     const cue = cueCopy(picked);
+    const [h, m] = cue?.time ?? [8, 0];
+    const at = new Date(2000, 0, 1, h, m).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
+    // A push at the cue's time when one can arrive; a calendar event otherwise.
+    const push = canPush(features);
+    const remind = async () => {
+      setBusy(true);
+      setNote(undefined);
+      try {
+        await enableReminders(h * 60 + m);
+        haptic('success');
+        track('reminder_added', { kind: 'study', cue: picked, from: 'today', via: 'push' });
+        close();
+      } catch (e) {
+        haptic('warning');
+        setNote(e instanceof Error ? e.message : 'Felt could not turn on reminders.');
+        setBusy(false);
+      }
+    };
     return (
       <div className="card study-card reveal">
         <div className="study-card-title">
           When you {cue?.phrase}, you study for {profile.dailyMinutes} minutes.
         </div>
-        <div className="row" style={{ gap: 8 }}>
-          <button
-            className="btn btn-tinted"
-            onClick={() => {
-              studyReminder(picked, profile.dailyMinutes);
-              track('reminder_added', { kind: 'study', cue: picked, from: 'today' });
-              close();
-            }}
-          >
-            Add to my calendar
-          </button>
-          <button className="btn btn-plain" onClick={close}>
+        {note && (
+          <p className="footnote" role="status">
+            {note}
+          </p>
+        )}
+        <div className="row" style={{ gap: 8, flexWrap: 'wrap' }}>
+          {push ? (
+            <button className="btn btn-tinted" disabled={busy} onClick={() => void remind()} data-haptic="off">
+              Remind me at {at}
+            </button>
+          ) : (
+            <button
+              className="btn btn-tinted"
+              onClick={() => {
+                studyReminder(picked, profile.dailyMinutes);
+                track('reminder_added', { kind: 'study', cue: picked, from: 'today', via: 'calendar' });
+                close();
+              }}
+            >
+              Add to my calendar
+            </button>
+          )}
+          <button className="btn btn-plain" disabled={busy} onClick={close}>
             Done
           </button>
         </div>
