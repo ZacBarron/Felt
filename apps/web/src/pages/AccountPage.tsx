@@ -146,7 +146,7 @@ function SignedIn({ user, features }: { user: ServerUser; features: ServerFeatur
               <span className="account-plan-name">{user.access.pro ? (user.access.trialing ? 'Suited Pro trial' : 'Suited Pro') : 'Free plan'}</span>
               <span className="footnote">
                 {user.access.pro && user.access.until
-                  ? `${user.access.trialing ? 'Trial ends' : 'Renews'} ${shortDate(user.access.until)}`
+                  ? `${user.access.trialing ? 'Trial ends' : user.access.plan === 'invite' ? 'From invites, free until' : 'Renews'} ${shortDate(user.access.until)}`
                   : user.access.pro
                     ? 'Active'
                     : 'Every track has free lessons.'}

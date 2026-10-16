@@ -161,6 +161,21 @@ const MIGRATIONS: string[] = [
   `
   ALTER TABLE users ADD COLUMN reminder_body TEXT;
   `,
+  // Invites: a code per player. A friend who joins with it gets a month of Pro
+  // at once; the inviter gets a month once the friend has studied (rewarded).
+  `
+  ALTER TABLE users ADD COLUMN ref_code TEXT;
+  CREATE UNIQUE INDEX users_ref_code ON users (ref_code);
+  ALTER TABLE users ADD COLUMN bonus_until TEXT;
+  CREATE TABLE referrals (
+    referred_id TEXT PRIMARY KEY REFERENCES users (id) ON DELETE CASCADE,
+    referrer_id TEXT NOT NULL REFERENCES users (id) ON DELETE CASCADE,
+    joined_at TEXT NOT NULL,
+    qualified_at TEXT,
+    rewarded INTEGER NOT NULL DEFAULT 0
+  );
+  CREATE INDEX referrals_referrer ON referrals (referrer_id);
+  `,
 ];
 
 export function openDb(path: string): Db {

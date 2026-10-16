@@ -375,6 +375,9 @@ export function ProPage() {
         <button className="link-btn" onClick={() => setRestoring(true)} data-haptic="select">
           Restore purchases
         </button>
+        <Link to="/invite" className="link-btn">
+          Invite a friend for a free month
+        </Link>
         <Link to="/terms" className="link-btn">
           Terms
         </Link>

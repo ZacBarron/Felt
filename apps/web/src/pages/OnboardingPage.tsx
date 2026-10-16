@@ -23,6 +23,7 @@ import { RangeGrid } from '../components/RangeGrid';
 import { useBodyClass } from '../ui/useBodyClass';
 import { onRadioKeys } from '../ui/radioKeys';
 import { requestPersistentStorage } from '../state/backup';
+import { inviterName, pendingReferral } from '../state/referral';
 
 /**
  * First run. Short, personal and honest: about five screens, each question
@@ -224,6 +225,22 @@ function ValueCarousel() {
   );
 }
 
+/** Who invited this device and what it gets. Shown only with a known invite code. */
+function InvitedBanner() {
+  const [name, setName] = useState<string | null>();
+  useEffect(() => {
+    const code = pendingReferral();
+    if (!code) return;
+    void inviterName(code).then((r) => r && setName(r.name ?? ''));
+  }, []);
+  if (name === undefined || name === null) return null;
+  return (
+    <p className="onb-invited reveal" style={{ animationDelay: '800ms' }}>
+      {name ? `${name} invited you.` : 'A friend invited you.'} Make an account and your first month of Pro is free.
+    </p>
+  );
+}
+
 function Welcome({ heading, onStart }: { heading: React.RefObject<HTMLHeadingElement>; onStart: () => void }) {
   const navigate = useNavigate();
   const [server, setServer] = useState(false);
@@ -244,6 +261,7 @@ function Welcome({ heading, onStart }: { heading: React.RefObject<HTMLHeadingEle
         <p className="onb-welcome-sub reveal" style={{ animationDelay: '650ms' }}>
           Poker training in a few minutes a day.
         </p>
+        <InvitedBanner />
       </div>
       <div className="onb-intro-copy stack">
         <ValueCarousel />

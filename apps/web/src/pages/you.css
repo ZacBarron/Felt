@@ -260,3 +260,92 @@ a.hero.train-hero {
 .train-bar {
   margin-top: 0.45rem;
 }
+
+/* Invite friends: the reward on the felt, the link to share, then the tracker. */
+.invite-hero {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.invite-share {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin-top: 1rem;
+}
+
+.invite-share .btn-hero {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.invite-link {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.35rem 0.35rem 0.9rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.invite-link-text {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.85rem;
+  user-select: all;
+}
+
+.invite-copy {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.45rem 1rem;
+}
+
+.invite-code {
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  opacity: 0.75;
+}
+
+.invite-signin {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem;
+}
+
+.invite-stats {
+  grid-template-columns: 1fr 1fr;
+}
+
+.invite-until {
+  margin: 0.6rem 1rem 0;
+}
+
+.invite-steps {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.invite-step-n {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--on-tint);
+  background: var(--tint-fill);
+}

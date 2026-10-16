@@ -57,6 +57,10 @@ interface UserRow {
   trial_reminder: number;
   /** What the daily reminder says is waiting, written by the player's device. */
   reminder_body: string | null;
+  /** Invite code, made the first time the player opens Invite. */
+  ref_code: string | null;
+  /** Free Pro from invites runs to this date. */
+  bonus_until: string | null;
 }
 
 type Env = { Variables: { user: UserRow; token: string } };
@@ -70,19 +74,33 @@ const MAX_CODES_PER_HOUR = 5;
  */
 export const SESSION_IDLE_DAYS = 180;
 
+/** Graded answers a friend gives before an invite pays the inviter. */
+export const QUALIFY_ANSWERS = 10;
+/** Months of Pro an inviter can earn in a year. */
+export const MAX_REFERRAL_MONTHS = 12;
+/** Days of Pro a month of invite reward is. */
+export const REFERRAL_MONTH_DAYS = 30;
+/** How long after making an account a player can still claim an invite. */
+export const REFERRAL_CLAIM_DAYS = 14;
+
 /** Paid through a date still ahead. */
 const paidPro = (u: UserRow, now: Date) => !!u.pro_until && new Date(u.pro_until) > now;
 
-/** Suited Pro for this player: paid, or every signed in player while PRO_FOR_EVERYONE is on. */
+/** Free Pro earned from invites, still running. */
+const bonusPro = (u: UserRow, now: Date) => !!u.bonus_until && new Date(u.bonus_until) > now;
+
+/** Suited Pro for this player: paid, from invites, or every signed in player while PRO_FOR_EVERYONE is on. */
 export function userHasPro(u: UserRow, now: Date, proForEveryone = false) {
-  return proForEveryone || paidPro(u, now);
+  return proForEveryone || paidPro(u, now) || bonusPro(u, now);
 }
 
 export function publicUser(u: UserRow, now: Date, passkeys = 0, proForEveryone = false) {
   const paid = paidPro(u, now);
-  const pro = paid || proForEveryone;
+  const bonus = bonusPro(u, now);
+  const pro = paid || bonus || proForEveryone;
   // Pro for testing has no end date. A lapsed date would read as expired on the device.
-  const until = paid || !proForEveryone ? u.pro_until : null;
+  const latest = [paid ? u.pro_until : null, bonus ? u.bonus_until : null].filter(Boolean).sort().at(-1) ?? null;
+  const until = paid || bonus || !proForEveryone ? (latest ?? u.pro_until) : null;
   return {
     id: u.id,
     email: u.email,
@@ -95,7 +113,7 @@ export function publicUser(u: UserRow, now: Date, passkeys = 0, proForEveryone =
     reminderBody: u.reminder_body,
     leagues: !!u.leagues,
     lastStudyDay: u.last_study_day,
-    access: { pro, until, plan: u.plan, trialing: paid && !!u.trialing },
+    access: { pro, until, plan: paid ? u.plan : bonus ? 'invite' : u.plan, trialing: paid && !!u.trialing },
   };
 }
 
@@ -618,6 +636,80 @@ export function createApp({ db, config, mailer, stripe, coach, webauthn = simple
     });
   });
 
+  // Invites ------------------------------------------------------------------------
+  // A friend who joins with a code gets a month of Pro. The inviter gets a month
+  // once the friend has answered QUALIFY_ANSWERS graded questions, up to
+  // MAX_REFERRAL_MONTHS a year. Rewards follow study, not sign ups.
+
+  const REF_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  const newRefCode = () => Array.from(crypto.getRandomValues(new Uint8Array(7)), (b) => REF_ALPHABET[b % REF_ALPHABET.length]).join('');
+  const addMonth = (u: UserRow) => {
+    const from = Math.max(now().getTime(), u.bonus_until ? Date.parse(u.bonus_until) : 0, u.pro_until ? Date.parse(u.pro_until) : 0);
+    db.prepare('UPDATE users SET bonus_until = ? WHERE id = ?').run(new Date(from + REFERRAL_MONTH_DAYS * 86_400_000).toISOString(), u.id);
+  };
+  const userById = (id: string) => db.prepare('SELECT * FROM users WHERE id = ?').get(id) as UserRow | undefined;
+  const rewardedThisYear = (referrer: string) =>
+    (db.prepare('SELECT COUNT(*) AS n FROM referrals WHERE referrer_id = ? AND rewarded = 1 AND qualified_at > ?').get(referrer, new Date(now().getTime() - 365 * 86_400_000).toISOString()) as { n: number }).n;
+
+  /** Counts an invite once the friend has studied enough, and pays the inviter if they have months left this year. */
+  const qualifyReferral = (userId: string) => {
+    const ref = db.prepare('SELECT referrer_id FROM referrals WHERE referred_id = ? AND qualified_at IS NULL').get(userId) as { referrer_id: string } | undefined;
+    if (!ref) return;
+    const { n } = db.prepare('SELECT COUNT(*) AS n FROM answers WHERE user_id = ?').get(userId) as { n: number };
+    if (n < QUALIFY_ANSWERS) return;
+    tx(db, () => {
+      const pay = rewardedThisYear(ref.referrer_id) < MAX_REFERRAL_MONTHS;
+      db.prepare('UPDATE referrals SET qualified_at = ?, rewarded = ? WHERE referred_id = ?').run(iso(), pay ? 1 : 0, userId);
+      const referrer = userById(ref.referrer_id);
+      if (pay && referrer) addMonth(referrer);
+    });
+  };
+
+  app.get('/api/referrals', requireUser, (c) => {
+    let u = c.get('user');
+    if (!u.ref_code) {
+      for (let i = 0; i < 5 && !u.ref_code; i++) {
+        try {
+          db.prepare('UPDATE users SET ref_code = ? WHERE id = ? AND ref_code IS NULL').run(newRefCode(), u.id);
+        } catch {
+          // A clash with another code: try again.
+        }
+        u = userById(u.id)!;
+      }
+    }
+    const friends = db.prepare('SELECT joined_at, qualified_at FROM referrals WHERE referrer_id = ? ORDER BY joined_at DESC').all(u.id) as { joined_at: string; qualified_at: string | null }[];
+    const months = (db.prepare('SELECT COUNT(*) AS n FROM referrals WHERE referrer_id = ? AND rewarded = 1').get(u.id) as { n: number }).n;
+    return c.json({
+      code: u.ref_code,
+      friends: friends.map((f) => ({ joinedAt: f.joined_at, qualified: !!f.qualified_at })),
+      months,
+      monthsLeft: Math.max(0, MAX_REFERRAL_MONTHS - rewardedThisYear(u.id)),
+      bonusUntil: u.bonus_until && Date.parse(u.bonus_until) > now().getTime() ? u.bonus_until : null,
+    });
+  });
+
+  app.get('/api/referrals/code/:code', (c) => {
+    const row = db.prepare('SELECT handle FROM users WHERE ref_code = ?').get(c.req.param('code').toUpperCase()) as { handle: string | null } | undefined;
+    return row ? c.json({ name: row.handle }) : c.json({ error: 'That invite code is not known.' }, 404);
+  });
+
+  app.post('/api/referrals/claim', requireUser, async (c) => {
+    const u = c.get('user');
+    const code = String((await json<{ code: string }>(c)).code ?? '').toUpperCase();
+    const referrer = db.prepare('SELECT * FROM users WHERE ref_code = ?').get(code) as UserRow | undefined;
+    if (!referrer) return c.json({ error: 'That invite code is not known.' }, 404);
+    if (referrer.id === u.id) return c.json({ error: 'You cannot invite yourself.' }, 400);
+    if (now().getTime() - Date.parse(u.created_at) > REFERRAL_CLAIM_DAYS * 86_400_000) return c.json({ error: 'Invites are for new accounts.' }, 400);
+    const already = db.prepare('SELECT 1 FROM referrals WHERE referred_id = ?').get(u.id);
+    if (already) return c.json({ user: userJson(userById(u.id)!), claimed: false });
+    tx(db, () => {
+      db.prepare('INSERT INTO referrals (referred_id, referrer_id, joined_at) VALUES (?, ?, ?)').run(u.id, referrer.id, iso());
+      addMonth(u);
+    });
+    qualifyReferral(u.id);
+    return c.json({ user: userJson(userById(u.id)!), claimed: true });
+  });
+
   // Item calibration -----------------------------------------------------------------
 
   app.post('/api/answers', requireUser, async (c) => {
@@ -631,6 +723,7 @@ export function createApp({ db, config, mailer, stripe, coach, webauthn = simple
         stored += Number(insert.run(c.get('user').id, a.itemId, a.score, a.rating, a.at).changes);
       }
     });
+    if (stored) qualifyReferral(c.get('user').id);
     return c.json({ stored });
   });
 

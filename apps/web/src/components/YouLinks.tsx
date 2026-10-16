@@ -6,7 +6,7 @@ import { useServerFeatures, useSession } from '../state/api';
 import { useClaudeCloud } from '../state/cloud';
 import { db } from '../state/db';
 import { useSettings } from '../state/settings';
-import { MedalIcon } from '../ui/icons';
+import { MedalIcon, ShareIcon } from '../ui/icons';
 import { NavRow } from '../ui/NavRow';
 
 const shortDate = (iso: string) => new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
@@ -37,6 +37,7 @@ export function GameRows() {
     <section>
       <h2 className="section-title">Your game</h2>
       <div className="list with-icons">
+        <NavRow to="/invite" icon={ShareIcon} color="var(--base-500)" title="Invite friends" subtitle="Give a month of Pro, get a month" />
         {row('/log', 'Sessions you played', counts?.sessions ? String(counts.sessions) : undefined)}
         {row('/import', 'Hand histories from your poker site')}
         {row('/saved', 'Hands you kept for later', counts?.saved ? String(counts.saved) : undefined)}
@@ -67,7 +68,7 @@ export function AccountRows() {
     : access.trialEndsAt && new Date(access.trialEndsAt) > new Date()
       ? `Trial ends ${shortDate(access.trialEndsAt)}`
       : access.until
-        ? `Renews ${shortDate(access.until)}`
+        ? `${access.plan === 'invite' ? 'Free until' : 'Renews'} ${shortDate(access.until)}`
         : 'Active';
   return (
     <div className="list with-icons">

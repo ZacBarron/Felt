@@ -361,3 +361,72 @@ describe('what the daily reminder says', () => {
     expect(sent[1]).toEqual(REMINDER);
   });
 });
+
+describe('invites', () => {
+  const answers = (n: number, offset = 0) => ({
+    answers: Array.from({ length: n }, (_, i) => ({ itemId: `chart:x:${offset + i}`, score: 1, rating: 1100, at: clock.toISOString() })),
+  });
+
+  it('gives each player one stable code and names them to an invited friend', async () => {
+    const zac = await signIn('zac@example.com');
+    await call('PATCH', '/api/me', { handle: 'Zac' }, zac.token);
+    const first = await (await call('GET', '/api/referrals', undefined, zac.token)).json();
+    expect(first.code).toMatch(/^[A-Z2-9]{7}$/);
+    const again = await (await call('GET', '/api/referrals', undefined, zac.token)).json();
+    expect(again.code).toBe(first.code);
+    expect(first).toMatchObject({ friends: [], months: 0, monthsLeft: 12, bonusUntil: null });
+    const named = await (await call('GET', `/api/referrals/code/${first.code.toLowerCase()}`)).json();
+    expect(named.name).toBe('Zac');
+    expect((await call('GET', '/api/referrals/code/NOPE123')).status).toBe(404);
+  });
+
+  it('gives the friend a month at once and the inviter a month after the friend studies', async () => {
+    const zac = await signIn('zac@example.com');
+    const { code } = await (await call('GET', '/api/referrals', undefined, zac.token)).json();
+    const amy = await signIn('amy@example.com');
+    const claim = await (await call('POST', '/api/referrals/claim', { code }, amy.token)).json();
+    expect(claim.claimed).toBe(true);
+    expect(claim.user.access).toMatchObject({ pro: true, plan: 'invite' });
+    expect(Date.parse(claim.user.access.until) - clock.getTime()).toBe(30 * 86_400_000);
+    // Claiming twice does nothing more.
+    expect((await (await call('POST', '/api/referrals/claim', { code }, amy.token)).json()).claimed).toBe(false);
+
+    let mine = await (await call('GET', '/api/referrals', undefined, zac.token)).json();
+    expect(mine.friends).toEqual([{ joinedAt: clock.toISOString(), qualified: false }]);
+    expect((await (await call('GET', '/api/me', undefined, zac.token)).json()).user.access.pro).toBe(false);
+
+    await call('POST', '/api/answers', answers(9), amy.token);
+    mine = await (await call('GET', '/api/referrals', undefined, zac.token)).json();
+    expect(mine.friends[0].qualified).toBe(false);
+    await call('POST', '/api/answers', answers(1, 9), amy.token);
+    mine = await (await call('GET', '/api/referrals', undefined, zac.token)).json();
+    expect(mine).toMatchObject({ months: 1, monthsLeft: 11 });
+    expect(mine.friends[0].qualified).toBe(true);
+    const me = (await (await call('GET', '/api/me', undefined, zac.token)).json()).user;
+    expect(me.access).toMatchObject({ pro: true, plan: 'invite' });
+  });
+
+  it('refuses your own code and invites for older accounts', async () => {
+    const zac = await signIn('zac@example.com');
+    const { code } = await (await call('GET', '/api/referrals', undefined, zac.token)).json();
+    expect((await call('POST', '/api/referrals/claim', { code }, zac.token)).status).toBe(400);
+    clock = new Date(clock.getTime() + 20 * 86_400_000);
+    const late = await signIn('late@example.com');
+    clock = new Date(clock.getTime() + 15 * 86_400_000);
+    expect((await call('POST', '/api/referrals/claim', { code }, late.token)).status).toBe(400);
+    expect((await call('POST', '/api/referrals/claim', { code: 'NOPE123' }, late.token)).status).toBe(404);
+  });
+
+  it('pays at most 12 months a year', async () => {
+    const zac = await signIn('zac@example.com');
+    const { code } = await (await call('GET', '/api/referrals', undefined, zac.token)).json();
+    for (let i = 0; i < 13; i++) {
+      const f = await signIn(`f${i}@example.com`);
+      await call('POST', '/api/referrals/claim', { code }, f.token);
+      await call('POST', '/api/answers', answers(10, i * 100), f.token);
+    }
+    const mine = await (await call('GET', '/api/referrals', undefined, zac.token)).json();
+    expect(mine).toMatchObject({ months: 12, monthsLeft: 0 });
+    expect(mine.friends.filter((f: { qualified: boolean }) => f.qualified)).toHaveLength(13);
+  });
+});

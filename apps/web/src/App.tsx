@@ -1,6 +1,6 @@
 import { useLiveQuery } from 'dexie-react-hooks';
 import { useEffect, useRef } from 'react';
-import { Link, Navigate, NavLink, Route, Routes, useLocation } from 'react-router-dom';
+import { Link, Navigate, NavLink, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { NAV_SECTIONS, TABS, tabFor } from './nav';
 import { CheckPage, PlacementPage } from './pages/CheckPage';
 import { DailyPage } from './pages/DailyPage';
@@ -21,6 +21,7 @@ import { RangesPage } from './pages/RangesPage';
 import { ReviewPage } from './pages/ReviewPage';
 import { TrainPage } from './pages/TrainPage';
 import { PlayPage } from './pages/PlayPage';
+import { InvitePage } from './pages/InvitePage';
 import { SavedPage } from './pages/SavedPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { SolverPage } from './pages/SolverPage';
@@ -32,7 +33,8 @@ import { CoachPage } from './pages/CoachPage';
 import { GlossaryPage } from './pages/GlossaryPage';
 import { LegalPage } from './pages/LegalPage';
 import { accessFromServer } from './state/access';
-import { useSession } from './state/api';
+import { refreshMe, useSession } from './state/api';
+import { claimPendingReferral, pendingReferral } from './state/referral';
 import { chartsForGame } from './state/charts';
 import { reviewTotal } from './state/decks';
 import { useSettings } from './state/settings';
@@ -67,11 +69,37 @@ function useServerAccess() {
   }, [JSON.stringify(serverAccess)]);
 }
 
+/** An invite that came with the link is claimed as soon as there is an account. */
+function useClaimInvite() {
+  const session = useSession();
+  useEffect(() => {
+    if (!session || !pendingReferral()) return;
+    void claimPendingReferral().then((ok) => (ok ? refreshMe() : null));
+  }, [session?.user.id]);
+}
+
+/** A shared daily result links to the same challenge: open it once the player is set up. */
+function useChallengeLink() {
+  const navigate = useNavigate();
+  const { settings } = useSettings();
+  useEffect(() => {
+    const url = new URL(location.href);
+    if (!url.searchParams.has('daily') || !settings.profile.onboarded) return;
+    url.searchParams.delete('daily');
+    history.replaceState(history.state, '', url.pathname + url.search + url.hash);
+    navigate('/daily');
+    // Only on arrival.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [settings.profile.onboarded]);
+}
+
 export function App() {
   const location = useLocation();
   const { settings } = useSettings();
   const reviewCount = useReviewCount();
   useServerAccess();
+  useClaimInvite();
+  useChallengeLink();
   // A page pushed from a tab keeps that tab selected.
   const activeTab = Math.max(0, TABS.findIndex((t) => t.to === tabFor(location.pathname)));
   const indicator = useRef<HTMLSpanElement>(null);
@@ -123,6 +151,7 @@ export function App() {
             <Route path="/" element={<DashboardPage />} />
             <Route path="/train" element={<TrainPage />} />
             <Route path="/play" element={<PlayPage />} />
+            <Route path="/invite" element={<InvitePage />} />
             <Route path="/review" element={<ReviewPage />} />
             <Route path="/drills" element={<RangesPage />} />
             <Route path="/learn" element={<LearnPage />} />

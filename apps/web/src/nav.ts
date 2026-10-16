@@ -91,6 +91,7 @@ const EXTRA: Record<string, string> = {
   '/stats': '/you',
   '/more': '/you',
   '/account': '/you',
+  '/invite': '/you',
   '/signin': '/you',
   '/pro': '/you',
   '/terms': '/you',

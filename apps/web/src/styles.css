@@ -5482,3 +5482,15 @@ a.card.more-me,
   padding: 0.35rem;
   color: var(--tint);
 }
+
+/* An invited friend sees who sent them and what they get. */
+.onb-invited {
+  align-self: flex-start;
+  margin: 0.4rem 0 0;
+  padding: 0.45rem 0.8rem;
+  border-radius: 14px;
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--on-tint);
+  background: var(--tint-fill);
+}

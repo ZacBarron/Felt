@@ -40,9 +40,10 @@ import {
   useTableSession,
 } from '../state/playTable';
 import { addHandsToReview } from '../state/review';
+import { shareUrl } from '../state/referral';
 import { BotPortrait } from '../ui/BotPortrait';
 import { HeroPattern } from '../ui/Brand';
-import { ChevronLeftIcon, ChevronRightIcon, CoachIcon, MoreIcon } from '../ui/icons';
+import { ChevronLeftIcon, ChevronRightIcon, CoachIcon, MoreIcon, ShareIcon } from '../ui/icons';
 import { PageHeader } from '../ui/PageHeader';
 import { Segmented } from '../ui/Segmented';
 import { Toggle } from '../ui/Toggle';
@@ -725,6 +726,33 @@ function coachQuestion(rec: HandRecord, seats: readonly PlaySeat[]): string {
   return `I played this hand against bots, ${s0.players.length} handed, with ${fmt(me.stack + me.total)}bb. I had ${cardsToString(me.cards)} in the ${me.position}.\n${lines.join('\n')}\nWhat should I have done differently?`;
 }
 
+/**
+ * A hand to send a friend, stopped at your first real decision after the flop
+ * so it asks a question instead of telling the result. The link carries your
+ * invite code.
+ */
+export function shareHandText(rec: HandRecord, seats: readonly PlaySeat[], link: string): string {
+  const s0 = rec.history[0]?.state ?? rec.final;
+  const me = s0.players[HERO];
+  const lines: string[] = [];
+  let street = '';
+  const name = (s: number) => (s === HERO ? 'I' : `${seats[s].bot?.name ?? 'A player'} (${s0.players[s].position})`);
+  for (const d of rec.history) {
+    if (d.state.toAct === HERO && d.state.street !== 'preflop') {
+      if (d.state.street !== street) lines.push(`${STREET_WORDS[d.state.street]} ${pretty(d.state.board)}`);
+      lines.push('What do I do?');
+      break;
+    }
+    if (d.state.street !== street) {
+      street = d.state.street;
+      lines.push(d.state.street === 'preflop' ? 'Preflop' : `${STREET_WORDS[d.state.street]} ${pretty(d.state.board)}`);
+    }
+    lines.push(`${name(d.state.toAct!)} ${actionText(d.state, d.action).toLowerCase()}`);
+  }
+  if (lines.at(-1) !== 'What do I do?') lines.push('How would you have played it?');
+  return [`${s0.players.length} handed, ${fmt(me.stack + me.total)}bb. I have ${pretty(me.cards)} in the ${me.position}.`, ...lines, `Play it on Suited: ${link}`].join('\n');
+}
+
 function LastHandSheet({ open, onClose, hands, seats }: { open: boolean; onClose: () => void; hands: HandRecord[]; seats: readonly PlaySeat[] }) {
   const [back, setBack] = useState(0);
   const canAskCoach = useCanAskCoach();
@@ -812,6 +840,17 @@ function LastHandSheet({ open, onClose, hands, seats }: { open: boolean; onClose
                 {added === rec.id ? 'Added to Review' : 'Add to Review'}
               </button>
             )}
+            <button
+              className="btn btn-tinted"
+              onClick={() => {
+                const text = shareHandText(rec, seats, shareUrl('play'));
+                if (navigator.share) void navigator.share({ title: 'How would you play this?', text }).catch(() => undefined);
+                else void navigator.clipboard?.writeText(text).catch(() => undefined);
+              }}
+            >
+              <ShareIcon size={18} />
+              Share hand
+            </button>
             {canAskCoach && (
               <Link to="/coach" state={{ question: coachQuestion(rec, seats) }} className="btn btn-tinted">
                 <CoachIcon size={18} />
