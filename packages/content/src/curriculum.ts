@@ -583,6 +583,22 @@ export const CURRICULUM: Track[] = [
           lesson('satellites', 'Satellites', ['concept', 'math']),
         ],
       },
+      {
+        id: 'icm-play',
+        title: 'Advanced tournament play',
+        intro: {
+          why: 'Near the money, the same hand can be a call for one stack and a fold for another. Exact ICM math shows which.',
+          when: 'It comes up on the bubble and at final tables. It also comes up when the players left talk about a deal.',
+          youWill: ['Price any all in call with the bubble factor', 'Know which stacks can attack and which must wait', 'Compare a chip chop with an ICM chop'],
+        },
+        lessons: [
+          lesson('bubble-factor', 'Bubble factor and risk premium', ['math', 'concept']),
+          lesson('big-stack', 'The big stack on the bubble', ['concept', 'math']),
+          lesson('middle-stacks', 'Short and medium stacks on the bubble', ['concept', 'math']),
+          lesson('pay-jumps', 'Folding into a pay jump', ['concept', 'math']),
+          lesson('deals', 'ICM deals', ['concept', 'math']),
+        ],
+      },
     ],
   },
 ];

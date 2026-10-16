@@ -21,6 +21,7 @@ import { RESULTS_LESSONS } from './results';
 import { THEORY_LESSONS } from './theory';
 import { TOURNAMENT_LESSONS } from './tournaments';
 import { TOURNAMENT_MORE_LESSONS } from './tournaments-more';
+import { TOURNAMENT_ICM_LESSONS } from './tournaments-icm';
 import { FOUNDATIONS_LESSONS } from './foundations';
 import { POSTFLOP_LESSONS } from './postflop';
 import { PREFLOP_LESSONS } from './preflop';
@@ -51,6 +52,7 @@ const ALL: LessonContent[] = [
   ...RESULTS_LESSONS,
   ...TOURNAMENT_LESSONS,
   ...TOURNAMENT_MORE_LESSONS,
+  ...TOURNAMENT_ICM_LESSONS,
   ...GAPS_BASICS_LESSONS,
   ...GAPS_STRATEGY_LESSONS,
   ...GAPS_TOURNAMENT_LESSONS,

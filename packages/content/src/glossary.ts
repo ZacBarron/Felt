@@ -2220,6 +2220,27 @@ export const GLOSSARY: GlossaryTerm[] = [
     short: 'A tournament whose prizes are seats in a bigger event. Every seat is worth the same.',
     lesson: 'tournaments/mtt-basics/satellites',
   },
+  {
+    id: 'bubble-factor',
+    term: 'bubble factor',
+    aliases: ['bubble factors'],
+    short: 'The money a lost all in costs you, divided by the money a won one adds. Above 1, a call needs more than 50%.',
+    lesson: 'tournaments/icm-play/bubble-factor',
+  },
+  {
+    id: 'chip-chop',
+    term: 'chip chop',
+    aliases: ['chip chops'],
+    short: 'A deal where every player locks in the lowest payout left. The rest of the money is split by chips.',
+    lesson: 'tournaments/icm-play/deals',
+  },
+  {
+    id: 'icm-chop',
+    term: 'ICM chop',
+    aliases: ['ICM chops', 'ICM deal', 'ICM deals'],
+    short: 'A deal that pays each player the prize money the independent chip model gives their stack.',
+    lesson: 'tournaments/icm-play/deals',
+  },
 ];
 
 const byId = new Map(GLOSSARY.map((t) => [t.id, t]));

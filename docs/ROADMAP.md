@@ -146,8 +146,10 @@ See [SOLVER_DATA.md](SOLVER_DATA.md).
 
 ## Phase 7: Tournaments, coach and sync
 
-- [ ] Push/fold Nash charts and ICM calculator, computed in `@felt/core`
+- [x] ICM calculator in `@felt/core` (`icm.ts`): exact Malmuth-Harville $EV and finishing chances, all in outcomes with blinds and dead money, required equity, risk premium, bubble factor and chip chop (no UI yet)
+- [ ] Push/fold Nash charts, computed in `@felt/core`
 - [x] Tournament track lessons (ICM, bubble, short stack play)
+- [x] Advanced tournament play topic: bubble factor and risk premium, the big stack on the bubble (with an exact one hand ICM equilibrium), short and medium stacks, folding into a pay jump and ICM deals (every number from `icm.ts`, recomputed in `tournaments-icm.test.ts`)
 - [ ] AI hand review grounded in solver data and your leak history (Claude API)
 - [x] AI coach chat for Felt Pro, using Felt's charts, your Felt Rating and recent misses (Claude API, `apps/server/src/coach.ts`, `/coach`)
 - [ ] Voice note hand capture; online hand history import
