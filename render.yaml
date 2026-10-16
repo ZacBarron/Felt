@@ -64,3 +64,6 @@ services:
         sync: false
       - key: COACH_DAILY_LIMIT
         sync: false
+      # Testing only: true gives every signed in player Felt Pro, coach included. Default false.
+      - key: PRO_FOR_EVERYONE
+        sync: false

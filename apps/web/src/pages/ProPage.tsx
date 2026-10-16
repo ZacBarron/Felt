@@ -1,11 +1,24 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { haptic } from '../haptics';
-import { defaultAssumptions, formatAmount, skillEdge, stakesLabel } from '@felt/core';
-import { annualSavings, canOpenLesson, formatPrice, isLessonFree, isPro, PLANS, type PlanOption, type ProPerkId, proPerks, purchase, restorePurchases, SUPPORT_EMAIL } from '../state/access';
+import { RestoreSheet } from '../components/RestoreSheet';
+import {
+  annualSavings,
+  canOpenLesson,
+  formatPrice,
+  isLessonFree,
+  isPro,
+  PLANS,
+  type PlanOption,
+  type ProPerkId,
+  proPerks,
+  purchase,
+  purchasesOpen,
+  SUPPORT_EMAIL,
+  testingPro,
+} from '../state/access';
 import { pathPrefs } from '../state/goals';
-import { ratingSnapshot } from '../state/rating';
-import { refreshMe } from '../state/api';
+import { refreshMe, useServerFeatures } from '../state/api';
 import { useCoachAvailable } from '../state/coach';
 import { track } from '../state/events';
 import { LESSON_ENTRIES } from '../state/lessons';
@@ -13,9 +26,10 @@ import { trialReminder } from '../state/reminders';
 import { type Access, type Profile, useSettings } from '../state/settings';
 import { BrandMark, HeroPattern } from '../ui/Brand';
 import { BottomBar } from '../ui/BottomBar';
-import { AccountIcon, BellIcon, ChevronRightIcon, CloseIcon, CoachIcon, LearnIcon, MedalIcon, SolverIcon } from '../ui/icons';
+import { AccountIcon, BellIcon, CheckIcon, ChevronDownIcon, ChevronRightIcon, CloseIcon, CoachIcon, LearnIcon, LockIcon, MedalIcon, SolverIcon } from '../ui/icons';
 import { useBodyClass } from '../ui/useBodyClass';
 import { onRadioKeys } from '../ui/radioKeys';
+import './pro.css';
 
 const WRITTEN = LESSON_ENTRIES.filter((e) => e.content);
 const PRO_LESSONS = WRITTEN.filter((e) => !isLessonFree(e.key)).length;
@@ -30,12 +44,16 @@ function dateIn(days: number) {
 
 const HEADLINES: Record<string, string> = {
   onboarding: 'Train every spot you play',
+  'first-lesson': 'Keep the momentum',
   lesson: 'This lesson is in Felt Pro',
   check: 'Unlock the lessons you need',
   solver: 'Solve your own spots',
   coach: 'Get a coach in your pocket',
   weekly: 'Join the weekly Pro challenge',
 };
+
+/** Arrivals at the end of a first run flow: declining goes on to Today. */
+const FIRST_RUN_FROM = new Set(['onboarding', 'first-lesson']);
 
 /** The perk a paywall reason is about, shown first. */
 const LEAD_PERK: Record<string, ProPerkId> = { lesson: 'lessons', check: 'lessons', solver: 'solver', coach: 'coach', weekly: 'weekly' };
@@ -48,55 +66,77 @@ const PERK_ICONS: Record<ProPerkId, typeof LearnIcon> = {
   support: AccountIcon,
 };
 
-
+/** At most 4 perks: live ones first, the reason for the visit on top. */
+function orderPerks(coach: boolean, lead: ProPerkId | undefined) {
+  const all = proPerks({ proLessons: PRO_LESSONS, coach });
+  const rank = (id: ProPerkId) => (id === lead ? 0 : 1);
+  return [...all.filter((p) => p.live), ...all.filter((p) => !p.live)]
+    .map((p, i) => ({ p, i }))
+    .sort((a, b) => Number(!a.p.live) - Number(!b.p.live) || rank(a.p.id) - rank(b.p.id) || a.i - b.i)
+    .map(({ p }) => p)
+    .slice(0, 4);
+}
 
 /**
- * The Felt Pro paywall. Honest by design: the plans and price come first,
- * the charge date sits next to the button, declining is as easy as buying,
- * and the benefits list only what Pro adds.
+ * The Felt Pro paywall. Honest by design: the price and the charge date sit
+ * next to the button, declining is a button of the same size, and the perks
+ * list only what Pro adds. Fine print waits behind a disclosure.
  */
 export function ProPage() {
   useBodyClass('focus-mode');
   const navigate = useNavigate();
-  const [params] = useSearchParams();
+  const [params, setParams] = useSearchParams();
   const from = params.get('from') ?? 'direct';
   const { settings, update } = useSettings();
+  const features = useServerFeatures();
   const [planId, setPlanId] = useState<PlanOption['id']>('annual');
   const [busy, setBusy] = useState(false);
-  const [message, setMessage] = useState<string>();
-  const [rating, setRating] = useState<number>();
+  const [message, setMessage] = useState<{ text: string; bad?: boolean }>();
+  // Back from signing in to restore: the sheet opens again on its own.
+  const [restoring, setRestoring] = useState(params.get('restore') === '1');
+  const [billingOpen, setBillingOpen] = useState(false);
   const coachLive = !!useCoachAvailable();
-  useEffect(() => {
-    void ratingSnapshot().then((r) => r.overall.games > 0 && setRating(r.overall.rating));
-  }, []);
   const plan = PLANS.find((p) => p.id === planId)!;
+  const firstRun = FIRST_RUN_FROM.has(from);
   const close = () => {
     track('paywall_dismissed', { from });
-    if (from === 'onboarding') navigate('/', { replace: true });
-    else navigate(-1);
+    if (firstRun) navigate('/', { replace: true });
+    else if (window.history.length > 1) navigate(-1);
+    else navigate('/', { replace: true });
   };
 
   useEffect(() => {
     track('paywall_viewed', { from });
   }, [from]);
 
+  useEffect(() => {
+    if (params.get('restore') !== '1') return;
+    const next = new URLSearchParams(params);
+    next.delete('restore');
+    setParams(next, { replace: true });
+    // Only on arrival.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // Back from Stripe Checkout: the webhook may land a moment after the redirect, so check a few times.
   const checkout = params.get('checkout');
   useEffect(() => {
-    if (checkout === 'cancel') setMessage('Checkout cancelled. You were not charged.');
+    if (checkout === 'cancel') setMessage({ text: 'Checkout cancelled. You were not charged.' });
     if (checkout !== 'success') return;
     track('checkout_returned');
     let tries = 0;
     const check = async () => {
       const user = await refreshMe().catch(() => null);
       if (user?.access.pro || ++tries >= 5) {
-        if (!user?.access.pro) setMessage('Payment received. Felt Pro will switch on within a minute. If it has not, reopen this page.');
+        if (!user?.access.pro) setMessage({ text: 'Payment received. Felt Pro switches on within a minute. If it has not, reopen this page.' });
         return;
       }
       setTimeout(() => void check(), 2000);
     };
     void check();
   }, [checkout]);
+
+  const sheet = <RestoreSheet open={restoring} onClose={() => setRestoring(false)} returnTo={`/pro?from=${encodeURIComponent(from)}`} />;
 
   if (isPro(settings.access)) {
     const trialEnds = settings.access.trialEndsAt;
@@ -108,6 +148,11 @@ export function ProPage() {
           <h1 className="display pro-title">You have Felt Pro</h1>
           <p className="pro-sub">{trialEnds ? `Your free trial runs until ${new Date(trialEnds).toLocaleDateString()}.` : 'Every lesson and tool is unlocked.'}</p>
         </div>
+        {testingPro(settings.access) && (
+          <p className="footnote pw-testing">
+            Unlocked for testing on this device. Turn it off in Settings.
+          </p>
+        )}
         <div className="list">
           {[
             { to: '/coach', label: 'Ask your AI coach', Icon: CoachIcon, show: coachLive },
@@ -141,10 +186,11 @@ export function ProPage() {
           </button>
         )}
         <BottomBar>
-          <Link to="/learn" className="btn btn-primary btn-lg btn-block">
+          <Link to={firstRun ? '/' : '/learn'} replace={firstRun} className="btn btn-primary btn-lg btn-block">
             Keep learning
           </Link>
         </BottomBar>
+        {sheet}
       </div>
     );
   }
@@ -161,138 +207,148 @@ export function ProPage() {
     if (!result.ok) {
       haptic('warning');
       if (result.needsAccount) {
-        navigate(`/account?next=${encodeURIComponent(`/pro?from=${from}`)}`);
+        navigate(`/signin?next=${encodeURIComponent(`/pro?from=${from}`)}`);
         return;
       }
-      setMessage(result.reason);
+      setMessage({ text: result.reason, bad: true });
       return;
     }
     haptic('success');
     update({ ...settings, access: result.access });
   };
 
-  const restore = async () => {
-    const result = await restorePurchases(settings);
-    if (result.ok === true) update({ ...settings, access: result.access });
-    else if (result.ok === false) {
-      if (result.needsAccount) navigate(`/account?next=${encodeURIComponent('/pro')}`);
-      else setMessage(result.reason);
-    }
-  };
-
-  const g = settings.game;
-  const assumptions = { ...defaultAssumptions(g), ...settings.assumptions };
-  const base = rating ?? assumptions.poolRating;
-  const per100 = skillEdge(base + 100, assumptions) - skillEdge(base, assumptions);
-  const perHour = (per100 * assumptions.handsPerHour) / 100;
+  const open = purchasesOpen(features, settings.access);
   const inPlan = planProLessons(settings.profile, settings.access);
   const charge = dateIn(plan.trialDays);
-  const lead = LEAD_PERK[from];
-  const allPerks = proPerks({ proLessons: PRO_LESSONS, coach: coachLive });
-  const perks = [...allPerks.filter((p) => p.id === lead), ...allPerks.filter((p) => p.id !== lead)];
+  const perks = orderPerks(coachLive, LEAD_PERK[from]);
+  const decline = firstRun ? 'Continue with the free plan' : 'Not now';
 
   return (
-    <div className="pro-page focus-column">
-      <div className="focus-top pro-top">
-        <button className="icon-btn glass" aria-label="Close" onClick={close} data-haptic="off">
+    <div className="pw focus-column">
+      <div className="pw-top">
+        <button className="icon-btn btn glass" aria-label="Close" onClick={close} data-haptic="off">
           <CloseIcon size={18} />
-        </button>
-        <button className="link-btn footnote" onClick={() => void restore()}>
-          Restore purchases
         </button>
       </div>
 
-      <header className="pro-head">
-        <div className="pro-eyebrow">
-          <BrandMark size={22} /> Felt Pro
+      <header className="pw-head">
+        <div className="pw-eyebrow">
+          <BrandMark size={20} /> Felt Pro
         </div>
-        <h1 className="display pro-head-title">{HEADLINES[from] ?? 'Train every spot you play'}</h1>
+        <h1 className="display pw-title">{HEADLINES[from] ?? 'Train every spot you play'}</h1>
       </header>
 
-      <ul className="pro-perks" aria-label="What Felt Pro adds">
+      <ul className="pw-perks" aria-label="What Felt Pro adds">
         {perks.map((p) => {
           const Icon = PERK_ICONS[p.id];
           return (
-            <li key={p.id} className={`pro-perk${p.id === lead ? ' lead' : ''}`}>
-              <span className="pro-benefit-icon" aria-hidden="true">
-                <Icon size={20} />
+            <li key={p.id} className="pw-perk">
+              <span className="pw-perk-icon" aria-hidden="true">
+                <Icon size={18} />
               </span>
-              <strong>{p.title}</strong>
-              <span className="footnote">{p.id === 'lessons' && inPlan > 0 ? `${inPlan} of them are in your plan` : p.note}</span>
-              {!p.live && <span className="pill pro-soon">Coming soon</span>}
+              <span className="pw-perk-title">{p.title}</span>
+              {p.id === 'lessons' && inPlan > 0 && <span className="pw-perk-note">{inPlan} in your plan</span>}
+              {!p.live && <span className="pw-soon">Coming soon</span>}
             </li>
           );
         })}
       </ul>
-      {per100 > 0.05 && (
-        <p className="footnote pro-estimate">
-          By our estimate, 100 more rating points is worth about{' '}
-          {g.units === 'money' ? `${formatAmount(Math.round(perHour), g)} an hour` : `${per100.toFixed(1)} bb per 100 hands`} at {stakesLabel(g.stakes)} {g.venue}. It is a
-          model, not a promise.
-        </p>
-      )}
 
-      <div className="plan-tiles" role="radiogroup" onKeyDown={onRadioKeys} aria-label="Choose a plan">
+      <div className="pw-plans" role="radiogroup" onKeyDown={onRadioKeys} aria-label="Choose a plan">
         {PLANS.map((p) => (
           <button
             key={p.id}
             role="radio"
             aria-checked={p.id === planId}
-            className={`plan-tile${p.id === planId ? ' selected' : ''}`}
+            className={`pw-plan${p.id === planId ? ' selected' : ''}`}
             data-haptic="select"
             onClick={() => setPlanId(p.id)}
           >
-            {p.id === 'annual' && <span className="plan-badge">Save {annualSavings()}%</span>}
-            <span className="plan-label">{p.label}</span>
-            <span className="plan-tile-price num">
-              {formatPrice(perMonth(p))}
-              <span className="footnote"> a month</span>
+            {p.id === 'annual' && <span className="pw-badge">Save {annualSavings()}%</span>}
+            <span className="pw-check" aria-hidden="true">
+              {p.id === planId && <CheckIcon size={14} strokeWidth={2.6} />}
             </span>
-            <span className="footnote">{p.period === 'year' ? `${formatPrice(p.price)} a year` : 'Billed monthly'}</span>
+            <span className="pw-plan-label">{p.label}</span>
+            <span className="pw-plan-price num">{formatPrice(p.price)}</span>
+            <span className="pw-plan-per">{p.period === 'year' ? `${formatPrice(perMonth(p))} a month` : 'Billed monthly'}</span>
           </button>
         ))}
       </div>
 
-      {message && (
-        <div className="explain bad reveal" role="alert">
-          {message}
+      <div className="pw-fine">
+        <div className="pw-links">
+          <button className="link-btn" onClick={() => setRestoring(true)} data-haptic="select">
+            Restore purchases
+          </button>
+          <Link to="/terms" className="link-btn">
+            Terms
+          </Link>
+          <Link to="/privacy" className="link-btn">
+            Privacy
+          </Link>
         </div>
-      )}
-
-      <details className="pro-details">
-        <summary>How the trial and billing work</summary>
-        <div className="stack" style={{ gap: '0.5rem', paddingTop: '0.5rem' }}>
-          {plan.trialDays > 0 && (
-            <p>
-              Today everything unlocks for free. On {dateIn(plan.trialDays - 2)}, you have 2 days left. On {charge}, you pay {formatPrice(plan.price)}.
-              Cancel before then and you pay nothing.
-            </p>
-          )}
-          <p>It renews until you cancel. You can cancel any time in Account or in the store you used.</p>
-          <p>Always free: review, drills, the daily challenge, placement, saves, imports and the first topic of every track.</p>
-          <p>
-            <Link to="/terms" className="link-btn">
-              Terms
-            </Link>
-            {' · '}
-            <Link to="/privacy" className="link-btn">
-              Privacy
-            </Link>
-          </p>
+        <div className="pw-links">
+          <button
+            className="link-btn pw-billing-toggle"
+            aria-expanded={billingOpen}
+            aria-controls="pw-billing"
+            onClick={() => {
+              setBillingOpen((o) => !o);
+              // Bring the answer into view above the bar.
+              requestAnimationFrame(() => document.getElementById('pw-billing')?.scrollIntoView({ block: 'nearest', behavior: 'smooth' }));
+            }}
+            data-haptic="select"
+          >
+            How billing works <ChevronDownIcon size={14} />
+          </button>
         </div>
-      </details>
+        {billingOpen && (
+          <div id="pw-billing" className="pw-details-body">
+            {plan.trialDays > 0 && (
+              <p>
+                Today everything unlocks for free. On {charge} you pay {formatPrice(plan.price)}. Cancel before then and you pay nothing.
+              </p>
+            )}
+            <p>Felt Pro renews until you cancel. Cancel any time in Account.</p>
+            <p>Review, drills and the daily challenge stay free. So do placement and the first topic of every track.</p>
+          </div>
+        )}
+      </div>
 
       <BottomBar>
-        <div className="pro-cta-price footnote">
-          {plan.trialDays > 0 ? `Free until ${charge}. Then ${formatPrice(plan.price)} a year.` : `${formatPrice(plan.price)} a month. Cancel any time.`}
+        {message ? (
+          <p className={`pw-note${message.bad ? ' bad' : ''}`} role="status">
+            {message.text}
+          </p>
+        ) : (
+          <p className="pw-charge">
+            {open === false ? (
+              'Nothing is charged. Free features stay free.'
+            ) : plan.trialDays > 0 ? (
+              <>
+                Free until <strong>{charge}</strong>. Then {formatPrice(plan.price)} a year.
+              </>
+            ) : (
+              `${formatPrice(plan.price)} a month. Cancel any time.`
+            )}
+          </p>
+        )}
+        <div className="pw-bar-actions">
+          {open === false ? (
+            <div className="pw-closed" role="status">
+              <LockIcon size={18} /> Purchases are not open yet
+            </div>
+          ) : (
+            <button className="btn btn-primary btn-lg btn-block" onClick={buy} disabled={busy || open === undefined} data-haptic="off">
+              {busy ? 'One moment' : plan.trialDays > 0 ? 'Start my free week' : 'Subscribe monthly'}
+            </button>
+          )}
+          <button className="btn btn-lg btn-block" onClick={close} data-haptic="off">
+            {decline}
+          </button>
         </div>
-        <button className="btn btn-primary btn-lg btn-block" onClick={buy} disabled={busy} data-haptic="off">
-          {busy ? 'One moment' : plan.trialDays > 0 ? 'Start my free week' : 'Subscribe'}
-        </button>
-        <button className="btn btn-plain btn-block pro-later" onClick={close}>
-          {from === 'onboarding' ? 'Continue with the free plan' : 'Not now'}
-        </button>
       </BottomBar>
+      {sheet}
     </div>
   );
 }

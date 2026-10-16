@@ -1,5 +1,5 @@
 import { CURRICULUM } from '@felt/content';
-import { api, currentSession, refreshMe, serverFeatures, type ServerAccess } from './api';
+import { api, currentSession, refreshMe, serverFeatures, type ServerAccess, type ServerFeatures, type ServerUser } from './api';
 import type { Access, AppSettings } from './settings';
 
 /**
@@ -48,11 +48,23 @@ export const FREE_MODULES: ReadonlySet<string> = new Set(
 );
 
 export function isPro(access: Access, now = new Date()): boolean {
-  if (access.devMode && access.devPro !== undefined) return access.devPro;
+  // The testing switch unlocks Pro on its own. Forcing Pro off needs developer mode.
+  if (access.devPro === true) return true;
+  if (access.devMode && access.devPro === false) return false;
   // A server entitlement has an end date and lapses on its own, even offline.
   if (access.until !== undefined) return new Date(access.until) > now;
   if (access.trialEndsAt && new Date(access.trialEndsAt) > now) return true;
   return access.pro;
+}
+
+/**
+ * "Unlock Felt Pro for testing" in Settings: the developer Pro override,
+ * switched on or off without developer mode. It changes this device only.
+ */
+export const testingPro = (access: Access) => access.devPro === true;
+
+export function setTestingPro(access: Access, on: boolean): Access {
+  return { ...access, devPro: on ? true : undefined };
 }
 
 /** Access as the Felt server reports it, keeping this device's developer switches. */
@@ -62,7 +74,8 @@ export function accessFromServer(server: ServerAccess, local: Access): Access {
     devPro: local.devPro,
     pro: server.pro,
     plan: server.plan ?? undefined,
-    until: server.until ?? new Date(0).toISOString(),
+    // Pro with no end date (testing on the server) stays on. No Pro and no date reads as lapsed.
+    until: server.until ?? (server.pro ? undefined : new Date(0).toISOString()),
     trialEndsAt: server.trialing && server.until ? server.until : undefined,
   };
 }
@@ -119,6 +132,17 @@ export type PurchaseResult =
   | { ok: 'redirect' };
 
 /**
+ * Whether a tap on the buy button can complete: the server takes payments,
+ * or this is a developer build or device. undefined while the server is asked.
+ * The paywall says calmly that purchases are not open instead of failing after a tap.
+ */
+export function purchasesOpen(features: ServerFeatures | null | undefined, access: Access, dev = import.meta.env.DEV): boolean | undefined {
+  if (dev || access.devMode) return true;
+  if (features === undefined) return undefined;
+  return !!features?.billing;
+}
+
+/**
  * Starts a purchase. With the Felt server and Stripe set up, this opens
  * Stripe Checkout for the signed in player. Otherwise only developer mode
  * can complete one, locally.
@@ -142,20 +166,71 @@ export async function purchase(plan: PlanOption, settings: AppSettings): Promise
   return { ok: true, access: { ...settings.access, pro: true, plan: plan.id, trialEndsAt } };
 }
 
-export async function restorePurchases(settings: AppSettings): Promise<PurchaseResult> {
-  const features = await serverFeatures();
-  if (features?.billing) {
-    if (!currentSession()) return { ok: false, reason: 'Sign in with the email you subscribed with.', needsAccount: true };
+/**
+ * What "Restore purchases" found. Every outcome has words to show: a restore
+ * never ends silently.
+ * - `restored`: the account has Felt Pro, and `access` switches it on here.
+ * - `sign-in`: purchases belong to an account, so the player signs in first.
+ * - `not-found`: signed in, but this account has no Felt Pro.
+ * - `unavailable`: Felt could not check (no server, offline, no accounts).
+ */
+export type RestoreResult =
+  | { kind: 'restored'; title: string; message: string; access: Access }
+  | { kind: 'sign-in' | 'not-found' | 'unavailable'; title: string; message: string };
+
+export interface RestoreFacts {
+  /** What the server offers, or null when it did not answer. */
+  features: ServerFeatures | null;
+  /** Signed in after asking the server (an expired sign in reads as signed out). */
+  signedIn: boolean;
+  /** The account as the server just reported it. */
+  user?: ServerUser | null;
+  /** Set when the server answered health but the account check failed. */
+  error?: string;
+  local: Access;
+}
+
+/** The decision behind "Restore purchases", kept pure so every state is tested. */
+export function decideRestore({ features, signedIn, user, error, local }: RestoreFacts): RestoreResult {
+  if (!features)
+    return { kind: 'unavailable', title: 'Felt could not check', message: 'The Felt server did not answer. Check your connection and try again.' };
+  if (!features.accounts)
+    return { kind: 'unavailable', title: 'No accounts here yet', message: 'Felt Pro is restored through an account. This server has no accounts yet.' };
+  if (!signedIn)
+    return { kind: 'sign-in', title: 'Sign in to restore', message: 'Felt Pro belongs to your account. Sign in and Felt checks it for you.' };
+  if (error || !user) return { kind: 'unavailable', title: 'Felt could not check', message: error ?? 'Felt could not reach your account. Try again in a moment.' };
+  const name = user.email ?? 'this account';
+  if (user.access.pro || features.proForEveryone) {
+    // An older answer from a testing server can still say no Pro; the server's switch wins.
+    const server: ServerAccess = user.access.pro ? user.access : { pro: true, until: null, plan: null, trialing: false };
+    return { kind: 'restored', title: 'Felt Pro is back on', message: `Felt Pro is on for ${name}.`, access: accessFromServer(server, local) };
+  }
+  if (!features.billing)
+    return { kind: 'not-found', title: 'No purchase found', message: `There is no Felt Pro purchase on ${name}. Purchases are not open yet, so there is nothing to restore.` };
+  return {
+    kind: 'not-found',
+    title: 'No purchase found',
+    message: `There is no Felt Pro purchase on ${name}. If you bought it with another account, log out and sign in with that one.`,
+  };
+}
+
+/**
+ * Restore purchases: asks the Felt server what this account owns. A host
+ * waking from sleep can be slow, so health gets longer than usual here.
+ */
+export async function restorePurchases(settings: AppSettings): Promise<RestoreResult> {
+  const features = await serverFeatures(15_000);
+  let user: ServerUser | null | undefined;
+  let error: string | undefined;
+  if (features?.accounts && currentSession()) {
     try {
-      const user = await refreshMe();
-      if (user?.access.pro) return { ok: true, access: accessFromServer(user.access, settings.access) };
-      return { ok: false, reason: 'We did not find a subscription on this account.' };
+      user = await refreshMe();
     } catch (e) {
-      return { ok: false, reason: e instanceof Error ? e.message : 'We could not check your subscription. Try again.' };
+      // An expired sign in clears the session, which reads as signed out below.
+      if (currentSession()) error = e instanceof Error ? e.message : undefined;
     }
   }
-  if (settings.access.pro) return { ok: true, access: settings.access };
-  return { ok: false, reason: 'We did not find any purchases on this device.' };
+  return decideRestore({ features, signedIn: !!currentSession(), user, error, local: settings.access });
 }
 
 /** Opens Stripe's page for changing or cancelling a subscription. */

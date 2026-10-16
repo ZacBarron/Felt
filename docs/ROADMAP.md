@@ -52,6 +52,7 @@ See [MONETIZATION.md](MONETIZATION.md).
 - [x] Onboarding v2: welcome with the Newcomer to Elite ladder and real content counts, a reply to each answer, a target tier, a first hand before any commitment, cited reasons Felt works, basics first for new players, and a Day 1 moment after the pledge
 - [ ] Testimonials: add real quotes from test players to `TESTIMONIALS` in `packages/content/src/onboarding.ts` (with permission)
 - [x] Developer switch for Pro, onboarding replay and progress reset
+- [x] Paywall v2 on one phone screen, Restore purchases that always answers (signed out, found, not found, server down), Unlock Felt Pro for testing in Settings and `PRO_FOR_EVERYONE` on the server
 - [x] Saves: bookmark any lesson screen or solver hand; a Saved page with notes; every save becomes a review card (quizzes graded, other screens as self graded flashcards, solver hands graded against the solver's mix), plus a saved only review session
 - [x] Felt Rating: Glicko rating overall and per area from every graded answer, provisional until settled, tiers, history (see ENGAGEMENT.md)
 - [x] Win rate model: rake and tips per player from the rake rules, skill edge from rating against the table, 95% range, Bayesian blend with entered results

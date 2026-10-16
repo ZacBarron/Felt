@@ -67,24 +67,50 @@ Set in `PLANS` in `state/access.ts`. Current placeholders: yearly $79.99 with a 
 
 ### Paywall layout
 
-1. Close button, always visible.
-2. Felt hero with a headline that names why the player arrived ("Add every lesson to your plan", "This lesson is part of Felt Pro", "Solve your own spots").
-3. Two plan cards, yearly preselected with its saving, so the price is on screen before any benefit.
-4. Only what Pro adds, as a two column grid of perks from `proPerks()` in `state/access.ts`: more lessons, the AI coach, the weekly Pro challenge, solving your own spots and priority support. The perk that brought the player here comes first. A perk this build cannot deliver yet is labelled "Coming soon", and priority support is hidden until a support address is set. The skill to winnings estimate sits under the grid, labelled as a model.
-5. Trial timeline with real dates: today, two days before the end (with a calendar reminder offered once the trial starts), the charge date and amount. The bottom bar repeats the price and charge date next to the button, and declining sits in the same bar.
-6. Fine print: price, renewal, how to cancel, restore purchases, terms, privacy.
-7. One primary button in the thumb zone.
+One phone screen at 390 by 844 with no scrolling. Code in `ProPage.tsx` and `pages/pro.css`.
+
+1. Close button, always visible, on glass. From onboarding or the first lesson offer (`from=onboarding`, `from=first-lesson`) it goes on to Today.
+2. "Felt Pro" eyebrow and a short serif headline that names why the player arrived ("This lesson is in Felt Pro", "Get a coach in your pocket", "Keep the momentum").
+3. Up to 4 perks from `proPerks()` in `state/access.ts`, one line each with an icon. The perk that brought the player here comes first. Live perks come before any that is not, and only a perk this build cannot deliver says "Coming soon". Priority support is hidden until a support address is set.
+4. Two plan tiles. Yearly is preselected and shows its saving, computed rather than typed. The billed price is the largest number on each tile. The monthly equivalent sits under it.
+5. Fine print in one compact block: Restore purchases, Terms and Privacy, then a "How billing works" disclosure with the trial dates, renewal, how to cancel and what stays free.
+6. The bottom bar holds the charge line ("Free until Oct 23. Then $79.99 a year."), the buy button and a decline button of the same size ("Not now", or "Continue with the free plan" at the end of a first run).
+
+When purchases are not open (no billing on the server and not a developer device, see `purchasesOpen()`), a calm "Purchases are not open yet" sits in the buy button's place and the charge line says nothing is charged. The tap never fails after the fact.
+
+The skill to winnings estimate is not on the paywall. It did not fit in one short line with its label, and it lives in You with its assumptions.
+
+### Restore purchases
+
+`restorePurchases()` asks the server what the signed in account owns. The decision is `decideRestore()` in `state/access.ts`, unit tested in `apps/web/test/access.test.ts`. A sheet (`components/RestoreSheet.tsx`) opens at once with "Checking your account", then always answers:
+
+| State | What the player sees |
+| --- | --- |
+| Server did not answer | "Felt could not check" and Try again |
+| Server has no accounts | "No accounts here yet" |
+| Signed out | "Sign in to restore" and Sign in. After signing in, the page reopens with `restore=1` and checks again on its own |
+| Account has Felt Pro (or the server has `PRO_FOR_EVERYONE` on) | "Felt Pro is back on", and Pro switches on |
+| Account has no Felt Pro | "No purchase found", naming the account. With billing off it says purchases are not open yet. With billing on it suggests signing in with the account that bought it |
+
+Health gets 15 seconds here, so a host waking from sleep is not mistaken for no server.
 
 ### Connecting payments
 
-`purchase()` and `restorePurchases()` in `state/access.ts` are the only seams. To go live, wire them to a store SDK (for example RevenueCat for App Store and Play, or Stripe Checkout on the web) and set `access.pro`, `plan` and `trialEndsAt` from the store's entitlement. Until then, release builds say purchases are not open yet.
+`purchase()` and `restorePurchases()` in `state/access.ts` are the only seams. To go live, wire them to a store SDK (for example RevenueCat for App Store and Play, or Stripe Checkout on the web) and set `access.pro`, `plan` and `trialEndsAt` from the store's entitlement. Until then, the paywall says purchases are not open yet.
+
+### Pro for testing
+
+Two switches, for the time before purchases open.
+
+- **Settings, Testing, Unlock Felt Pro for testing.** Always visible. It sets the developer Pro override (`access.devPro`) through `setTestingPro()`, without developer mode. It unlocks Felt Pro on this device only and charges nothing. Settings then shows Felt Pro as "On for testing", and the Pro screen says so. The AI coach still checks Pro on the server.
+- **`PRO_FOR_EVERYONE=true` on the server.** Every signed in player has Felt Pro, the coach included. `/api/health` reports `proForEveryone: true`, and `/api/me` reports Pro with no end date. See DEPLOY.md for the Render steps. Turn it off before purchases open.
 
 ### Developer switch
 
 In Settings, tap the version number seven times to show the Developer section (always shown in dev builds). It has:
 
 - **Developer mode**: purchases complete locally, so the whole flow can be tested.
-- **Pro unlocked**: forces Pro on or off regardless of purchases.
+- **Pro unlocked**: forces Pro on, or with developer mode on forces it off, regardless of purchases. It is the same override as the testing switch.
 - **Clear purchase**, **Replay onboarding** and **Clear lesson progress**.
 
 ## Metrics to watch once live

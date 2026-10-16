@@ -32,6 +32,11 @@ export interface Config {
    * GitHub Pages copy of the app. Empty means same origin only.
    */
   allowedOrigins: string[];
+  /**
+   * Testing only: every signed in player counts as Felt Pro, so the coach and
+   * other Pro checks work before purchases are open. Off unless set to true.
+   */
+  proForEveryone: boolean;
 }
 
 export const COACH_EFFORTS = ['low', 'medium', 'high', 'xhigh', 'max'] as const;
@@ -70,6 +75,7 @@ export function loadConfig(raw: Record<string, string | undefined> = process.env
       origins: originList(env.WEBAUTHN_ORIGINS),
     },
     allowedOrigins: originList(env.ALLOWED_ORIGINS),
+    proForEveryone: flag(env.PRO_FOR_EVERYONE),
   };
 }
 
@@ -87,6 +93,11 @@ function originList(raw: string | undefined): string[] {
     }
   }
   return [...out];
+}
+
+/** true, 1, yes or on (any case) turn a switch on. Anything else is off. */
+function flag(raw: string | undefined): boolean {
+  return ['true', '1', 'yes', 'on'].includes((raw ?? '').trim().toLowerCase());
 }
 
 function positiveInt(raw: string | undefined, fallback: number): number {

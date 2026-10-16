@@ -49,7 +49,10 @@ describe('Felt Pro access', () => {
   it('lets the developer switch override purchases, and honors trials', () => {
     expect(isPro({ pro: true, devMode: true, devPro: false })).toBe(false);
     expect(isPro({ pro: false, devMode: true, devPro: true })).toBe(true);
-    expect(isPro({ pro: false, devMode: false, devPro: true })).toBe(false);
+    // The override on is also Settings' "Unlock Felt Pro for testing", which needs no developer mode.
+    expect(isPro({ pro: false, devMode: false, devPro: true })).toBe(true);
+    // Forcing Pro off still needs developer mode.
+    expect(isPro({ pro: true, devMode: false, devPro: false })).toBe(true);
     expect(isPro({ pro: false, trialEndsAt: new Date(Date.now() + 86_400_000).toISOString() })).toBe(true);
   });
 

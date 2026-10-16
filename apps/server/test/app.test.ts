@@ -188,6 +188,47 @@ describe('billing', () => {
   });
 });
 
+describe('Pro for everyone (testing)', () => {
+  const testingApp = (env: Record<string, string>) =>
+    createApp({ db, config: loadConfig({ DEV_CODES: '1', ...env }), mailer: { send: async () => undefined }, now: () => clock });
+
+  it('is off by default and when blank', async () => {
+    expect(config.proForEveryone).toBe(false);
+    expect(loadConfig({ PRO_FOR_EVERYONE: '' }).proForEveryone).toBe(false);
+    expect(loadConfig({ PRO_FOR_EVERYONE: 'false' }).proForEveryone).toBe(false);
+    expect(loadConfig({ PRO_FOR_EVERYONE: ' TRUE ' }).proForEveryone).toBe(true);
+    const health = await (await call('GET', '/api/health')).json();
+    expect(health.features.proForEveryone).toBe(false);
+    const { token } = await signIn();
+    expect((await (await call('GET', '/api/me', undefined, token)).json()).user.access.pro).toBe(false);
+    expect((await (await call('GET', '/api/coach', undefined, token)).json()).pro).toBe(false);
+  });
+
+  it('treats every signed in player as Pro and says so in health', async () => {
+    app = testingApp({ PRO_FOR_EVERYONE: 'true' });
+    expect((await (await call('GET', '/api/health')).json()).features.proForEveryone).toBe(true);
+    const { token, user } = await signIn();
+    // Pro from sign in on, with no end date so the device never reads it as lapsed.
+    expect(user.access).toMatchObject({ pro: true, until: null, trialing: false });
+    expect((await (await call('GET', '/api/me', undefined, token)).json()).user.access.pro).toBe(true);
+    expect((await (await call('GET', '/api/coach', undefined, token)).json()).pro).toBe(true);
+    // Signed out players get nothing.
+    expect((await call('GET', '/api/coach')).status).toBe(401);
+  });
+
+  it('keeps a real subscription date when there is one', async () => {
+    app = testingApp({ PRO_FOR_EVERYONE: 'true' });
+    const { token, user } = await signIn();
+    const until = new Date(clock.getTime() + 30 * 86_400_000).toISOString();
+    db.prepare('UPDATE users SET pro_until = ?, plan = ? WHERE id = ?').run(until, 'annual', user.id);
+    expect((await (await call('GET', '/api/me', undefined, token)).json()).user.access).toMatchObject({ pro: true, until, plan: 'annual' });
+    // A lapsed one is not sent, so it cannot switch Pro off on the device.
+    const lapsed = new Date(clock.getTime() - 86_400_000).toISOString();
+    db.prepare('UPDATE users SET pro_until = ? WHERE id = ?').run(lapsed, user.id);
+    expect((await (await call('GET', '/api/me', undefined, token)).json()).user.access).toMatchObject({ pro: true, until: null });
+  });
+});
+
 describe('daily challenge stats', () => {
   it('counts each player once and ranks a result', async () => {
     const players = await Promise.all(['a', 'b', 'c', 'd'].map((n) => signIn(`${n}@example.com`)));

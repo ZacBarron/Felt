@@ -1,11 +1,12 @@
 import { type GameSettings, MAX_TABLE_SIZE, MIN_TABLE_SIZE, positionsFor, PRESETS, stakesLabel } from '@felt/core';
 import { type ReactNode, useEffect, useRef, useState } from 'react';
-import { Link, Navigate, useNavigate, useParams } from 'react-router-dom';
+import { Link, Navigate, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { haptic, hapticsSupported } from '../haptics';
-import { isPro, restorePurchases } from '../state/access';
+import { isPro, setTestingPro, testingPro } from '../state/access';
+import { RestoreSheet } from '../components/RestoreSheet';
 import { db } from '../state/db';
 import { useClaudeCloud } from '../state/cloud';
-import { useSession } from '../state/api';
+import { useServerFeatures, useSession } from '../state/api';
 import { exportBackup, importBackup, requestPersistentStorage } from '../state/backup';
 import { exportEvents } from '../state/events';
 import { studyReminder, trialReminder } from '../state/reminders';
@@ -83,6 +84,7 @@ function shortDate(iso: string) {
 }
 
 function proSummary(access: Access) {
+  if (testingPro(access)) return 'On for testing';
   if (!isPro(access)) return 'Free plan';
   return access.trialEndsAt ? `Trial to ${shortDate(access.trialEndsAt)}` : 'Active';
 }
@@ -175,6 +177,8 @@ function SettingsHome() {
       <div className="list with-icons settings-pro">
         <NavRow to="/settings/pro" icon={ProGlyph} color="var(--tint-fill)" title="Felt Pro" detail={proSummary(access)} />
       </div>
+
+      <TestingSection />
 
       {devVisible && (
         <div className="list with-icons">
@@ -544,33 +548,55 @@ function DataPage() {
   );
 }
 
-function ProSettingsPage() {
+/**
+ * Pro for testing, in plain sight while purchases are not open. It reuses
+ * the developer Pro override and changes this device only (docs/MONETIZATION.md).
+ */
+function TestingSection() {
   const { settings, update } = useSettings();
-  const navigate = useNavigate();
+  const session = useSession();
+  const features = useServerFeatures();
+  const on = testingPro(settings.access);
+  const serverOn = !!features?.proForEveryone;
+  return (
+    <Section
+      title="Testing"
+      footer={
+        <span className="settings-status">
+          {serverOn
+            ? session
+              ? 'The server has Felt Pro on for every signed in player. The AI coach works too.'
+              : 'The server has Felt Pro on for signed in players. Sign in to get it everywhere.'
+            : 'For testing only. This unlocks Felt Pro on this device and charges nothing. The AI coach still checks your account.'}
+        </span>
+      }
+    >
+      <div className="list">
+        <Row label="Unlock Felt Pro for testing" hint={on ? 'On for this device' : 'Only this device'}>
+          <Toggle label="Unlock Felt Pro for testing" checked={on} onChange={(next) => update({ ...settings, access: setTestingPro(settings.access, next) })} />
+        </Row>
+      </div>
+    </Section>
+  );
+}
+
+function ProSettingsPage() {
+  const { settings } = useSettings();
   const access = settings.access;
-  const [restoreMessage, setRestoreMessage] = useState<string>();
-  const restore = async () => {
-    const result = await restorePurchases(settings);
-    if (result.ok === false && result.needsAccount) {
-      navigate('/account?next=/settings/pro');
-      return;
-    }
-    if (result.ok === true) {
-      update({ ...settings, access: result.access });
-      setRestoreMessage('Purchases restored.');
-    } else if (result.ok === false) setRestoreMessage(result.reason);
-  };
+  const [params, setParams] = useSearchParams();
+  // Back from signing in to restore: the sheet opens again on its own.
+  const [restoring, setRestoring] = useState(params.get('restore') === '1');
+  useEffect(() => {
+    if (params.get('restore') === '1') setParams({}, { replace: true });
+    // Only on arrival.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <SubPage title="Felt Pro">
       <Section
         title="Subscription"
         info={<p>Cancel or change Felt Pro from your account. Your progress stays either way.</p>}
-        footer={
-          <span role="status" className="settings-status">
-            {restoreMessage}
-          </span>
-        }
       >
         <div className="list">
           <Link to="/pro?from=settings" className="list-row">
@@ -587,13 +613,14 @@ function ProSettingsPage() {
               </span>
             </button>
           )}
-          <button className="list-row" onClick={() => void restore()}>
+          <button className="list-row" onClick={() => setRestoring(true)}>
             <span className="grow" style={{ color: 'var(--tint)' }}>
               Restore purchases
             </span>
           </button>
         </div>
       </Section>
+      <RestoreSheet open={restoring} onClose={() => setRestoring(false)} returnTo="/settings/pro" />
     </SubPage>
   );
 }

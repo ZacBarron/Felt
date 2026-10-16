@@ -168,6 +168,7 @@ Every setting is an environment variable. `apps/server/.env.example` lists them 
 | `COACH_MODEL` | The Claude model the coach uses. The default is `claude-opus-5-5`. | Optional |
 | `COACH_EFFORT` | How hard the model thinks: `low`, `medium`, `high`, `xhigh` or `max`. The default is `medium`. | Optional |
 | `COACH_DAILY_LIMIT` | Coach messages each player can send a day. The default is 40. | Optional |
+| `PRO_FOR_EVERYONE` | Testing only. `true` gives every signed in player Felt Pro, including the AI coach. The default is `false`. | Optional |
 | `VITE_SUPPORT_EMAIL` | Contact address on the legal pages. It is read when the app is built. | Optional |
 
 ### How players sign in
@@ -207,6 +208,24 @@ The coach answers questions about a player's own game. It uses Claude from Anthr
 Each player gets `COACH_DAILY_LIMIT` messages a day, counted on the server. The count resets at midnight in the player's time zone. A failed call does not count. The server never sends the key to the app.
 
 The app sends a short summary with each question. It holds the Felt Rating, goals, game settings and recent misses. Nothing else from the device leaves it.
+
+### Felt Pro for testing (optional)
+
+Before purchases are open, you can give every signed in player Felt Pro. The AI coach and every other server check then treat them as Pro. Nobody is charged.
+
+On Render:
+
+1. Open the dashboard and pick the `felt` service.
+2. Choose Environment, then Add Environment Variable.
+3. Set the key to `PRO_FOR_EVERYONE` and the value to `true`.
+4. Choose Save and deploy.
+5. Open `<your address>/api/health`. It lists `proForEveryone` as `true`.
+
+On Fly, run `fly secrets set PRO_FOR_EVERYONE=true`. To turn it off, set it to `false` or delete it, then redeploy.
+
+Players see Felt Pro as on once they sign in. Guests stay on the free plan. To test Pro on one device without an account, use Settings, Testing, Unlock Felt Pro for testing. That switch only changes that device, so the coach still needs this variable or a real subscription.
+
+Turn it off before you open purchases.
 
 ### Backups
 

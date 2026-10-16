@@ -20,6 +20,8 @@ export interface ServerFeatures {
   push: boolean;
   /** The AI coach for Felt Pro players. Older servers leave it out, which reads as off. */
   coach: boolean;
+  /** Testing: the server gives every signed in player Felt Pro (PRO_FOR_EVERYONE). */
+  proForEveryone?: boolean;
 }
 
 export interface ServerAccess {
@@ -126,9 +128,12 @@ export async function api<T = Record<string, unknown>>(path: string, init: { met
 
 let features: Promise<ServerFeatures | null> | undefined;
 
-/** What the server offers, or null when there is no server (static hosting, offline). */
-export function serverFeatures(): Promise<ServerFeatures | null> {
-  features ??= api<{ features: ServerFeatures }>('/health', { timeoutMs: 4000 })
+/**
+ * What the server offers, or null when there is no server (static hosting, offline).
+ * A slow first answer (a host waking up) can be given longer with `timeoutMs`.
+ */
+export function serverFeatures(timeoutMs = 4000): Promise<ServerFeatures | null> {
+  features ??= api<{ features: ServerFeatures }>('/health', { timeoutMs })
     .then((r) => r.features)
     .catch(() => {
       features = undefined;

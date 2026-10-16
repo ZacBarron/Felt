@@ -66,8 +66,19 @@ const MAX_CODES_PER_HOUR = 5;
  */
 export const SESSION_IDLE_DAYS = 180;
 
-export function publicUser(u: UserRow, now: Date, passkeys = 0) {
-  const pro = !!u.pro_until && new Date(u.pro_until) > now;
+/** Paid through a date still ahead. */
+const paidPro = (u: UserRow, now: Date) => !!u.pro_until && new Date(u.pro_until) > now;
+
+/** Felt Pro for this player: paid, or every signed in player while PRO_FOR_EVERYONE is on. */
+export function userHasPro(u: UserRow, now: Date, proForEveryone = false) {
+  return proForEveryone || paidPro(u, now);
+}
+
+export function publicUser(u: UserRow, now: Date, passkeys = 0, proForEveryone = false) {
+  const paid = paidPro(u, now);
+  const pro = paid || proForEveryone;
+  // Pro for testing has no end date. A lapsed date would read as expired on the device.
+  const until = paid || !proForEveryone ? u.pro_until : null;
   return {
     id: u.id,
     email: u.email,
@@ -78,7 +89,7 @@ export function publicUser(u: UserRow, now: Date, passkeys = 0) {
     reminders: !!u.reminders,
     leagues: !!u.leagues,
     lastStudyDay: u.last_study_day,
-    access: { pro, until: u.pro_until, plan: u.plan, trialing: pro && !!u.trialing },
+    access: { pro, until, plan: u.plan, trialing: paid && !!u.trialing },
   };
 }
 
@@ -146,7 +157,7 @@ export function createApp({ db, config, mailer, stripe, coach, webauthn = simple
 
   const freshUser = (id: string) => db.prepare('SELECT * FROM users WHERE id = ?').get(id) as unknown as UserRow;
   const passkeyCount = (id: string) => (db.prepare('SELECT COUNT(*) AS n FROM passkeys WHERE user_id = ?').get(id) as { n: number }).n;
-  const userJson = (u: UserRow) => publicUser(u, now(), passkeyCount(u.id));
+  const userJson = (u: UserRow) => publicUser(u, now(), passkeyCount(u.id), config.proForEveryone);
 
   /** A new session for a user: the token goes to the device, only its hash is stored. */
   const startSession = (userId: string) => {
@@ -169,6 +180,8 @@ export function createApp({ db, config, mailer, stripe, coach, webauthn = simple
         billing: !!(stripe && config.stripe.priceAnnual && config.stripe.priceMonthly),
         push: !!(config.push.publicKey && config.push.privateKey),
         coach: !!coach,
+        // Testing: every signed in player has Felt Pro.
+        proForEveryone: config.proForEveryone,
       },
     }),
   );
@@ -453,7 +466,7 @@ export function createApp({ db, config, mailer, stripe, coach, webauthn = simple
 
   // AI coach ---------------------------------------------------------------------
 
-  const hasPro = (u: UserRow) => !!u.pro_until && new Date(u.pro_until) > now();
+  const hasPro = (u: UserRow) => userHasPro(u, now(), config.proForEveryone);
 
   /** The player's own date, so the daily cap resets at their midnight. */
   const coachDay = (u: UserRow) => {
