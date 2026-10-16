@@ -32,7 +32,7 @@ export type Palette = 'card-room' | 'ink' | 'oxblood' | 'cobalt';
 export const PALETTES: { id: Palette; name: string; note: string; felt: [string, string]; accent: string }[] = [
   { id: 'card-room', name: 'Card room', note: 'Spruce and brass', felt: ['#2a7461', '#0b2421'], accent: '#e3b261' },
   { id: 'ink', name: 'Ink', note: 'Navy and brass', felt: ['#2f4f8a', '#0b1426'], accent: '#e3b261' },
-  { id: 'oxblood', name: 'Oxblood', note: 'Wine and cream', felt: ['#8a3142', '#2a0e14'], accent: '#ecd9b4' },
+  { id: 'oxblood', name: 'Burgundy', note: 'Wine and cream', felt: ['#8a3142', '#2a0e14'], accent: '#ecd9b4' },
   { id: 'cobalt', name: 'Cobalt', note: 'Blue and ice', felt: ['#4573ff', '#0a1a4a'], accent: '#dfe7ff' },
 ];
 

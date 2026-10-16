@@ -28,12 +28,12 @@ Ordered for the main game (live 1/3 cash, 9-handed, on a phone) and so the core 
 - [x] Free practice mode that does not touch the schedule
 - [x] Phone layout with a bottom tab bar; installable PWA that works offline
 - [x] Liquid Glass redesign: iOS system colors, light and dark modes, glass tab bar and sidebar, large titles with a collapsing nav bar, inset grouped lists, a custom icon set
-- [x] Rebrand to Suited (October 2026): a real 13x13 range chart with an S painted in it, "Poker, suited to you.", color blind friendly action colors as an option in Settings
+- [x] Rebrand to Suited (October 2026): the suited half of a range chart as the mark, "Poker, suited to you.", color blind friendly action colors as an option in Settings
 - [x] Brand identity: F mark painted in a 6x6 range grid, serif wordmark, Card room palette (spruce and brass), guidelines in BRAND.md, app icons, Home with a felt hero, up next hand preview, mastery map, key idea and chart progress, motion (card flip, diagonal grid wave, ink painting, liquid tab pill, count ups)
 - [x] UI pass: press states on every control, haptics (Android vibration, iOS switch tick), thumb zone answer buttons, focus mode for review, animated verdicts and score rings, settings with segmented controls, steppers and toggles, keyboard shortcuts on laptops
 - [x] Lesson player: one idea per screen (text, formulas, tables, charts, hands on felt, callouts, quick checks, takeaways), story style progress, swipe and keyboard navigation, resume where you left off, completion with practice links
 - [x] 11 lessons: pot odds, MDF and alpha, combos and blockers, outs, equity realization, early and late position opens, small blind, big blind defense, live pool tendencies, punishing limpers (quiz answers tested against the charts)
-- [x] Themes: Card room (brand default), Ink, Oxblood, Cobalt
+- [x] Themes: Card room (brand default), Ink, Burgundy, Cobalt
 - [x] 29 lessons across foundations (EV and indifference, implied odds, SPR and geometric sizing, range vs range, range and nut advantage, range shapes), postflop (textures, c-betting in position, sizing, defending c-bets, check raising, turn cards, bluff selection, bluff catching) and exploitation (node locking, stations, nits, sizing tells)
 - [x] Accuracy pass: every lesson claim labelled exact math, solver pattern (approximate) or pool tendency; every math number recomputed in tests; range numbers computed from Suited's charts
 - [x] Full curriculum: 70 lessons across foundations and game theory, preflop (including live preflop), postflop (river play, 3bet pots, multiway), exploitation, mental game and study, and tournaments; every lesson has at least two quiz questions
