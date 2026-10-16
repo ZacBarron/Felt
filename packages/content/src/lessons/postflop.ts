@@ -48,7 +48,7 @@ export const POSTFLOP_LESSONS: LessonContent[] = [
         title: 'Static and dynamic',
         board: '9h7h6c',
         caption:
-          'On a static board like K72 rainbow, the best hand on the flop usually stays best. So a small bet does most of the work. On a dynamic board like this one, equities swing on every turn. That pushes strategies toward bigger bets or more checks.',
+          'On a static board like K72 rainbow, the best hand on the flop usually stays best. On a dynamic board like this one, equities swing on every turn. Dry or wet does not set the size by itself. High dry boards get small, frequent bets. Low dry boards like 732 can take big bets with overpairs. Size follows thick value and the nut edge.',
         evidence: 'solver',
       },
       {
@@ -77,7 +77,7 @@ export const POSTFLOP_LESSONS: LessonContent[] = [
         choiceCards: ['Kd7s2c', 'Th9h8c', 'AsAd4c'],
         choices: ['K♦ 7♠ 2♣', 'T♥ 9♥ 8♣', 'A♠ A♦ 4♣'],
         answer: 1,
-        explain: 'Like the static and dynamic step showed, connected boards with a flush draw change on many turns. That pushes toward bigger bets or more checks. On K72 rainbow the best hand usually stays best.',
+        explain: 'Like the static and dynamic step showed, connected boards with a flush draw change on many turns. On K72 rainbow the best hand usually stays best. Neither fact sets the bet size alone. Size follows thick value and the nut edge.',
         point: 2,
       },
       {
@@ -85,7 +85,7 @@ export const POSTFLOP_LESSONS: LessonContent[] = [
         points: [
           'High, dry boards like K72 favor the raiser. It c-bets often and small.',
           'Low, connected boards like 765 favor the big blind caller.',
-          'Static boards suit small bets. Dynamic boards push toward bigger bets or more checks.',
+          'Dynamic boards swing on many turns. Size follows thick value and the nut edge, so low dry boards like 732 can take big bets.',
         ],
       },
     ],
@@ -221,11 +221,11 @@ export const POSTFLOP_LESSONS: LessonContent[] = [
         title: 'Three size families',
         columns: ['Size', 'Range shape', 'Typical spots'],
         rows: [
-          ['25 to 40% pot', 'Wide and linear', 'Static boards where you have the range advantage'],
-          ['60 to 80% pot', 'More polarized', 'Dynamic boards where value needs protection'],
+          ['25 to 40% pot', 'Wide and linear', 'High dry boards with a range advantage, and spots where value is thin'],
+          ['60 to 80% pot', 'More polarized', 'Boards where value stays thick, like overpairs on 732'],
           ['100% pot or more', 'Polarized', 'Turns and rivers where you have the nut advantage'],
         ],
-        note: 'Typical solver patterns, not exact rules.',
+        note: 'Typical solver patterns, not exact rules. A wet board alone does not call for a big bet. The next lesson shows why.',
         evidence: 'solver',
       },
       {
@@ -467,7 +467,7 @@ export const POSTFLOP_LESSONS: LessonContent[] = [
         kind: 'formula',
         title: 'Size',
         formula: 'Raise to about 3 to 4 times the c-bet',
-        example: 'Facing a bet of 2bb into 6bb, raise to about 6bb to 8bb. Bigger raises suit dynamic boards where hands need protection. Smaller ones suit static boards.',
+        example: 'Facing a bet of 2bb into 6bb, raise to about 6bb to 8bb. Bigger raises suit hands that stay far ahead when called. Smaller ones keep in the weaker hands you beat.',
       },
       {
         kind: 'quiz',

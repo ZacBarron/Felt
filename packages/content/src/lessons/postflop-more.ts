@@ -661,7 +661,8 @@ export const POSTFLOP_MORE_LESSONS: LessonContent[] = [
             { label: 'Wet board, several draws', value: 'Bigger bets', tone: 'red' },
           ],
         },
-        caption: 'There is no single multiway size. On wet boards your strong hands face several draws at once. Protection is worth more there.',
+        caption:
+          'There is no single multiway size. On wet boards your strong hands face several draws at once. Protection is worth more there. This is a multiway idea. Heads up, size follows thick value instead.',
         evidence: 'solver',
       },
       {

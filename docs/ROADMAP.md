@@ -117,6 +117,7 @@ See [SOLVER_DATA.md](SOLVER_DATA.md).
 
 - [x] Gap lessons: hand reading, semi-bluffs, rake, reshoves, the bubble, final tables, live table basics
 - [x] Second gap pass: side pots, reading the board for the nuts, showdown value and pot control, your poker face, how much to trust a tell, bounty tournaments, satellites, knowing when to stop (every number and hand claim recomputed in `gaps2.test.ts`)
+- [x] Thick and thin value: a c-bet lesson on why bet size follows how far ahead you stay when called, not board wetness, with BB's equity curves against KK on 7♦5♠4♠ and 7♦3♣2♠ from Felt's charts (recomputed in `value.test.ts`). Texture, sizing and multiway lessons no longer say wet boards mean big bets
 - [x] Win rate, rake and variance track: 12 lessons on bb/100 and hourly rates, the true cost of rake and tips, table selection, how rake works and what it costs, raked strategy, SD, sample size, downswings, risk of ruin, and luck and skill. New pure helpers in `core/src/variance.ts` and a seeded `paths` illustration. Every number recomputed in `results.test.ts`
 - [x] Picture pass: every lesson has at most 2 text steps in a row, every core lesson at least 2 pictures; hand flow is a street by street walkthrough
 - [x] Mixed answers in hand quizzes (frequencies and splits), graded by mix distance

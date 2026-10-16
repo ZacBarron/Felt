@@ -1104,6 +1104,13 @@ export const GLOSSARY: GlossaryTerm[] = [
     lesson: 'postflop/river/thin-value',
   },
   {
+    id: 'thick-value',
+    term: 'thick value',
+    aliases: ['thick value bet', 'thick value bets'],
+    short: 'A value bet that stays far ahead of the hands that call. It can use a big size and still get paid.',
+    lesson: 'postflop/cbet/thick-thin',
+  },
+  {
     id: 'bluff',
     term: 'bluff',
     link: false,
@@ -1480,7 +1487,7 @@ export const GLOSSARY: GlossaryTerm[] = [
     term: 'wet',
     aliases: ['wet board', 'wet boards'],
     short: 'A board with many straight and flush draws.',
-    lesson: 'postflop/multiway/multiway-cbet',
+    lesson: 'postflop/textures/texture-classes',
   },
   {
     id: 'rainbow',

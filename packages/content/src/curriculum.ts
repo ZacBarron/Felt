@@ -274,6 +274,7 @@ export const CURRICULUM: Track[] = [
           lesson('cbet-ip', 'C-betting in position', ['spot-action', 'frequency']),
           lesson('cbet-oop', 'C-betting out of position', ['spot-action', 'frequency']),
           lesson('sizing', 'Small range bets vs big polar bets', ['concept', 'spot-action']),
+          lesson('thick-thin', 'Thick and thin value', ['concept', 'equity-estimate']),
         ],
       },
       {

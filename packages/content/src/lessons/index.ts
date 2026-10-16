@@ -11,6 +11,7 @@ import { MINDSET_LESSONS } from './mindset';
 import { POSTFLOP_MORE_LESSONS } from './postflop-more';
 import { POSTFLOP_READING_LESSONS } from './postflop-reading';
 import { POSTFLOP_RIVER_LESSONS } from './postflop-river';
+import { POSTFLOP_VALUE_LESSONS } from './postflop-value';
 import { PREFLOP_LIVE_LESSONS } from './preflop-live';
 import { PREFLOP_MORE_LESSONS } from './preflop-more';
 import { PREFLOP_RAKE_LESSONS } from './preflop-rake';
@@ -38,6 +39,7 @@ const ALL: LessonContent[] = [
   ...POSTFLOP_LESSONS,
   ...POSTFLOP_MORE_LESSONS,
   ...POSTFLOP_RIVER_LESSONS,
+  ...POSTFLOP_VALUE_LESSONS,
   ...POSTFLOP_READING_LESSONS,
   ...EXPLOIT_LESSONS,
   ...EXPLOIT_MORE_LESSONS,
