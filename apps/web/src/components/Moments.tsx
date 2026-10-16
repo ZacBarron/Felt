@@ -7,6 +7,7 @@ import { track } from '../state/events';
 import { ratingSnapshot, streakNow } from '../state/rating';
 import { BrandMark } from '../ui/Brand';
 import { useCountUp } from '../ui/useCountUp';
+import './tiers.css';
 
 const KEY = 'felt.moments';
 const STREAK_MILESTONES = [3, 7, 14, 30, 50, 100, 200, 365];
@@ -18,7 +19,7 @@ interface Seen {
   streak: number;
 }
 
-type Moment = { kind: 'tier'; tier: string; rating: number; next?: { name: string; min: number } } | { kind: 'streak'; days: number };
+type Moment = { kind: 'tier'; tier: string; thinks: string; rating: number; next?: { name: string; min: number } } | { kind: 'streak'; days: number };
 
 function readSeen(): Seen | undefined {
   try {
@@ -63,7 +64,7 @@ export function Moments() {
     if (tierIndex > seen.tier) {
       writeSeen({ ...seen, tier: tierIndex });
       const next = nextTier(state.overall.rating);
-      setMoment({ kind: 'tier', tier: TIERS[tierIndex].name, rating: Math.round(state.overall.rating), next: next && { name: next.name, min: next.min } });
+      setMoment({ kind: 'tier', tier: TIERS[tierIndex].name, thinks: TIERS[tierIndex].thinks, rating: Math.round(state.overall.rating), next: next && { name: next.name, min: next.min } });
       track('moment_shown', { kind: 'tier', tier: TIERS[tierIndex].name });
     } else if (milestone > seen.streak) {
       writeSeen({ ...seen, streak: milestone });
@@ -116,6 +117,7 @@ function MomentView({ moment, onClose }: { moment: Moment; onClose: () => void }
             <span> Felt Rating</span>
           </div>
         )}
+        {moment.kind === 'tier' && <p className="moment-thinks">Players here ask “{moment.thinks}”</p>}
         <p className="moment-sub">
           {moment.kind === 'tier'
             ? moment.next

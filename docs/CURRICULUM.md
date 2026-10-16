@@ -16,6 +16,10 @@ Suggested order: Poker basics for new players, then Foundations math, then Prefl
 
 The Tournaments track covers antes, push or fold, reshoves, ICM, the bubble and final tables, then two formats: bounty events (the bounty priced as part of the pot, a labelled chip model) and satellites (ICM at its most extreme, since every seat pays the same).
 
+## Topic intros
+
+Every topic opens with an intro in `curriculum.ts`. It says why the topic matters and when it comes up at the table. Then it lists 2 or 3 things the player will be able to do. The Learn page shows the why under each topic title. The full intro opens in a sheet, and it shows once before the first lesson of a topic the player has not started. Each track also says in one sentence why it matters. Intros promise only what the topic's lessons teach, and `intros.test.ts` checks them against VOICE.md.
+
 ## Where lessons live
 
 Lesson content is in [`packages/content/src/lessons/`](../packages/content/src/lessons/), one file per track, keyed `track/module/lesson` to match the curriculum. Lessons added later to fill topic gaps live in `gaps-*.ts` files, appended to the end of their topic. Step kinds: `intro`, `text`, `formula`, `table`, `chart`, `hand`, `board`, `visual` (a drawn illustration: ring, bars, table, streets, ladder, chips, tree, curve, paths, cards or chart), `callout` (tip, exploit or theory), `quiz` (with optional cards, board and card faces per choice) and `takeaway`. Covers use the same illustrations. Each lesson is `core` or `advanced`.

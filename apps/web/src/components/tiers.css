@@ -1,0 +1,112 @@
+/* Your tier card and the tier ladder sheet (TierCard.tsx). */
+
+.tier-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  padding: 1rem 1rem 0.9rem;
+}
+
+.tier-card-name {
+  font-size: 1.9rem;
+  line-height: 1.05;
+  color: var(--label);
+}
+
+.tier-card-thinks {
+  margin: 0;
+  font-size: 1.02rem;
+  font-weight: 600;
+  color: var(--label);
+}
+
+.tier-card-line {
+  margin: 0;
+  color: var(--label-2);
+  font-size: 0.92rem;
+}
+
+.tier-card-progress {
+  display: grid;
+  gap: 0.35rem;
+  margin-top: 0.35rem;
+}
+
+.tier-card-progress .row {
+  flex-wrap: nowrap;
+}
+
+.tier-card-bar {
+  display: block;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--fill-2);
+  overflow: hidden;
+}
+
+.tier-card-bar span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--tint-fill);
+  transform-origin: left;
+  animation: tier-bar-grow 700ms var(--ease) backwards;
+}
+
+@keyframes tier-bar-grow {
+  from {
+    transform: scaleX(0);
+  }
+}
+
+.ladder-intro {
+  margin: 0;
+}
+
+.ladder-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ladder-row {
+  align-items: flex-start;
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+}
+
+.ladder-row.here {
+  background: color-mix(in srgb, var(--tint) 12%, var(--surface));
+  box-shadow: inset 3px 0 0 var(--tint-fill);
+}
+
+.ladder-name {
+  font-weight: 650;
+}
+
+.ladder-thinks {
+  display: block;
+  margin-top: 0.2rem;
+  color: var(--label);
+}
+
+.ladder-skills {
+  display: block;
+  margin-top: 0.15rem;
+}
+
+.ladder-next {
+  background: transparent;
+  color: var(--tint);
+  box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--tint) 55%, transparent);
+}
+
+/* The new tier's question in the tier moment, on the felt. */
+.moment-thinks {
+  margin: 0.1rem 0 0;
+  max-width: 30ch;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--on-felt-accent);
+  animation: rise 500ms var(--ease) 1380ms backwards;
+}

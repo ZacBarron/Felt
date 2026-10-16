@@ -6,7 +6,6 @@ import {
   formatAmount,
   handsForPrecision,
   isProvisional,
-  nextTier,
   ratingInterval,
   SKILL_DOMAINS,
   type SkillRating,
@@ -27,6 +26,7 @@ import { useSettings } from '../state/settings';
 import { signed } from '../ui/format';
 import { ChevronRightIcon, TargetIcon, LeagueIcon } from '../ui/icons';
 import { AvatarPicker } from '../ui/Avatar';
+import { TierCard } from '../components/TierCard';
 import { PageHeader } from '../ui/PageHeader';
 import { Section } from '../ui/Section';
 import { useCountUp } from '../ui/useCountUp';
@@ -139,7 +139,6 @@ export function YouPage() {
   const [lo, hi] = ratingInterval(overall);
   const rated = overall.games > 0;
   const provisional = isProvisional(overall);
-  const next = provisional ? undefined : nextTier(overall.rating);
   // Personal best counts only settled ratings, so early swings do not set a record.
   const bestRating = Math.max(0, ...snap.history.filter((p) => p.rd <= 110).map((p) => p.rating));
 
@@ -191,22 +190,9 @@ export function YouPage() {
           {!rated
             ? 'A daily challenge rates you in five decisions.'
             : provisional
-              ? 'Your rating is still settling. You get a tier after a few dozen answers.'
+              ? 'Your rating is still settling. Each answer makes it more certain.'
               : `We are 95% sure your rating is between ${Math.round(lo)} and ${Math.round(hi)}.`}
         </div>
-        {next && (
-          <div className="tier-progress">
-            <div className="row between">
-              <span className="footnote on-felt">{tierLabel(overall)}</span>
-              <span className="footnote on-felt num">
-                {next.pointsAway} points to {next.name}
-              </span>
-            </div>
-            <span className="tier-bar" role="progressbar" aria-label={`Progress to ${next.name}`} aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(next.progress * 100)}>
-              <span style={{ width: `${next.progress * 100}%` }} />
-            </span>
-          </div>
-        )}
         <Sparkline points={snap.history} />
         <div className="row" style={{ gap: '0.5rem', marginTop: '0.4rem' }}>
           {overall.games > 0 && (
@@ -226,6 +212,8 @@ export function YouPage() {
           </Link>
         )}
       </section>
+
+      <TierCard rating={overall} />
 
       <div className="more-tiles">
         <Link to="/practice" className="more-tile">

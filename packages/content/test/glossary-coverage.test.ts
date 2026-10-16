@@ -103,6 +103,12 @@ const covered = (text: string, start: number, end: number) =>
 describe('glossary coverage', () => {
   it('scans the whole content package', () => {
     expect(SOURCES.length).toBeGreaterThan(5000);
+    // Topic and track intros are words the Learn page shows, so they are scanned too.
+    const scanned = new Set(SOURCES.map(([, s]) => s));
+    for (const t of CURRICULUM) {
+      expect(scanned, `${t.id} intro`).toContain(t.intro.why);
+      for (const m of t.modules) for (const s of [m.intro.why, m.intro.when, ...m.intro.youWill]) expect(scanned, `${t.id}/${m.id} intro`).toContain(s);
+    }
   });
 
   it('explains every abbreviation the content uses', () => {

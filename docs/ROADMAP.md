@@ -36,6 +36,7 @@ Ordered for the main game (live 1/3 cash, 9-handed, on a phone) and so the core 
 - [x] 29 lessons across foundations (EV and indifference, implied odds, SPR and geometric sizing, range vs range, range and nut advantage, range shapes), postflop (textures, c-betting in position, sizing, defending c-bets, check raising, turn cards, bluff selection, bluff catching) and exploitation (node locking, stations, nits, sizing tells)
 - [x] Accuracy pass: every lesson claim labelled exact math, solver pattern (approximate) or pool tendency; every math number recomputed in tests; range numbers computed from Felt's charts
 - [x] Full curriculum: 70 lessons across foundations and game theory, preflop (including live preflop), postflop (river play, 3bet pots, multiway), exploitation, mental game and study, and tournaments; every lesson has at least two quiz questions
+- [x] Topic intros: why each topic matters and when it comes up at the table, on Learn and once before a topic's first lesson
 - [ ] Chart editor: enter or paste any chart (range notation) as a `custom` source
 
 ## Product: onboarding, placement and Felt Pro (done)
@@ -59,6 +60,7 @@ See [MONETIZATION.md](MONETIZATION.md).
 - [x] Streaks with freezes: one to start, one earned every seven days in a row
 - [x] Research brief with verified sources (docs/research/sources.md)
 - [x] Tiers every 150 points (nine tiers, Newcomer to Elite, none while provisional) with progress to the next
+- [x] Levels of thinking: each tier names the question its players ask and what Felt rates there; Your tier card on You with points and right answers to the next tier (from the update rule), the full ladder in a sheet, and the question in the tier moment
 - [x] Imports: hand histories (PokerStars format, GGPoker header, tracker exports) and live session CSVs; stats by seat, opening leaks against the charts, results feeding the win rate
 - [x] Practice at your level (about 80% expected success, weaker areas first, interleaved); study cue at onboarding
 - [x] More preflop charts: BB vs CO and UTG, SB vs BTN, BTN vs CO, BTN and UTG facing a 3bet (with reach, so only opened hands are drilled), BTN vs two limpers

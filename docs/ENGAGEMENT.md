@@ -18,6 +18,31 @@ How Felt measures a player's ability, turns it into money at their stake, and ke
 
 **Tiers.** Nine tiers, one every 150 points: Newcomer, Beginner (900), Developing (1050), Solid (1200), Sharp (1350), Regular (1500), Strong regular (1650), Expert (1800), Elite (1950). Players start at 1200 but see no tier until the rating settles. The ladder stops at 1950 because the hardest items are rated about 1600: a rating far above every item cannot be measured, so tiers named "Pro" or "World class" would be claims Felt cannot back. Names describe skill, not status, and avoid "Pro", which is the paid plan. Chess classes are 200 points wide (USCF). 150 keeps each step meaningful, since a player one tier up is expected to win about 70% of decisions against the tier below, and puts the next milestone close enough to pull effort forward: people speed up as a goal gets near (Kivetz, Urminsky and Zheng 2006). The You page shows the points to the next tier.
 
+**What each tier thinks about.** Each tier carries a question (`thinks`) and a line on what Felt rates near it (`skills`), in `TIERS` in `rating.ts`. The ladder follows the "levels of thinking" idea common in poker teaching: first what do I have, then what do they have, then what do they think I have. Thinking in ranges is the modern step past reading a single hand, and play close to equilibrium sits at the top. The skills lines come from the difficulty priors, so a tier names material players at that rating get right about half the time or better.
+
+| Tier | From | Thinks | Rated near this band |
+| --- | --- | --- | --- |
+| Newcomer | below 900 | How does a hand play out? | Hand rankings and the order of betting |
+| Beginner | 900 | What do I have? | Which starting hands to play and how strong your hand is |
+| Developing | 1050 | Where am I sitting, and what does it cost to call? | Position and pot odds |
+| Solid | 1200 | What might they have? | Core lessons (1300) and math facts (1250) |
+| Sharp | 1350 | What range of hands could they have? | Close calls on charts (1350) |
+| Regular | 1500 | How do I mix my plays so I stay hard to read? | Solver spots (1450) and river decisions (1500) |
+| Strong regular | 1650 | What is this player doing wrong, and how do I profit? | Advanced lessons and painting charts (1600) |
+| Expert | 1800 | What do they think I have? | Advanced questions right about 3 times in 4 (expected score 0.76) |
+| Elite | 1950 | Does my whole strategy hold up against anyone? | The hardest questions right nearly 9 times in 10 (0.88) |
+
+Felt measures answers, not thoughts. The rating is the measurement and the question is a guide, and the You page says so.
+
+**How close is the next tier.** `tierProgress` in `rating.ts` (unit tested) returns the tier, the next tier, the points away, the progress through the tier and an estimate in answers, all from the Glicko update itself:
+
+- One answer against an item you get right with probability E moves the rating by `step x (score - E)`, where `step = q g / (1/rd^2 + q^2 g^2 E (1 - E))`, `q = ln 10 / 400` and `g` is the item's uncertainty factor (item rd 60, g about 0.98).
+- **At your level** (E = 0.5) a right answer adds `step / 2` and a miss takes the same away. So the climb is counted in right answers beyond misses. Felt replays a run of right answers through `updateRating`, against items at the current rating, until the rating reaches the next tier. Rd shrinks answer by answer exactly as it would for real. A random run with misses mixed in lands within 10% of the count in tests.
+- **In practice** (E = 0.8, the `pickAdaptive` target) a right answer adds `0.2 step` and a miss costs `0.8 step`, four times as much. A player who answers exactly as expected stays put on average, at any difficulty. The rating climbs only when you beat what it expects.
+- Worked example: a settled rating of 1420 with rd 45 is 80 points from Regular. Here `step` is about 11.3, so a right answer at your level adds about 5.6 points. 80 / 5.6 is 14.2, and the replay (with rd held at its floor of 45) says 15 right answers. In practice the same player gains about 2.3 per right answer and loses about 9.1 per miss. After a week away rd widens to about 103, so a right answer counts for more (about 28 points) and the count drops to 4.
+- **Still settling.** A rating with rd above 110 has no tier and no estimate. Felt replays answers until rd drops to 110 and says how many that takes: from a new rating, 10 answers at your level or 15 on easier practice questions (they tell the rating less), so the page says "about 10 to 15 more answers".
+- The count is labelled as our estimate, since it depends on the questions you get.
+
 ## 2. What the rating is worth at the table
 
 Code: `packages/core/src/winrate.ts`. Shown on the You page.

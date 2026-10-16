@@ -513,3 +513,24 @@ export function DeviceIcon(p: IconProps) {
     </Svg>
   );
 }
+
+/** Help: a question mark in a circle, for "how this screen works". */
+export function HelpIcon(p: IconProps) {
+  return (
+    <Svg {...p}>
+      <circle cx="12" cy="12" r="8.5" {...fillProps(p.filled)} />
+      <path d="M9.6 9.6a2.45 2.45 0 0 1 4.75.8c0 1.6-2.35 2.1-2.35 3.6" />
+      <circle cx="12" cy="16.9" r="0.6" fill="currentColor" strokeWidth={1.2} />
+    </Svg>
+  );
+}
+
+/** Paint: a brush laying down a stroke, for painting a chart from memory. */
+export function BrushIcon(p: IconProps) {
+  return (
+    <Svg {...p}>
+      <path d="M19.25 4.75 11.5 12.5" />
+      <path d="M11.9 12.1a2.6 2.6 0 0 0-3.7 0c-1 1-.7 2.4-1.45 3.4-.5.7-1.3 1-2 1.1 1 1.5 3.3 2.2 5.2 1.4 1.4-.6 2.6-1.9 2.6-3.6 0-.9-.3-1.7-.65-2.3Z" {...fillProps(p.filled)} />
+    </Svg>
+  );
+}

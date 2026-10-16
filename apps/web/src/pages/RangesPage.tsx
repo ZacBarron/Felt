@@ -16,6 +16,7 @@ import { actionColor, sortActions } from '../components/actionColors';
 import { ChartPicker } from '../components/ChartPicker';
 import { GameChip, GameSheet } from '../components/GameSheet';
 import { MixBar } from '../components/MixBar';
+import { hasDefaultGame, RangesIntro, rangesIntroSeen } from '../components/RangesIntro';
 import { RangeGrid } from '../components/RangeGrid';
 import { SeatStrip } from '../components/SeatStrip';
 import { DrillRunner } from '../drills/DrillRunner';
@@ -23,7 +24,7 @@ import { actionLabels, spotLine } from '../drills/labels';
 import { paintRule } from '../drills/PaintDrill';
 import { chartsForGame, getChart } from '../state/charts';
 import { useSettings } from '../state/settings';
-import { FlameIcon, InfoIcon } from '../ui/icons';
+import { FlameIcon, HelpIcon, InfoIcon } from '../ui/icons';
 import { PageHeader } from '../ui/PageHeader';
 import { Segmented } from '../ui/Segmented';
 import './ranges.css';
@@ -47,6 +48,9 @@ export function RangesPage() {
   const [chartId, setChartId] = useState<string | undefined>(linked ?? undefined);
   const [mode, setModeState] = useState<Mode>(asMode(params.get('mode')));
   const [sheet, setSheet] = useState(false);
+  // First visit: explain charts once, and ask which game to match if the player never chose one.
+  const [intro, setIntro] = useState(() => !rangesIntroSeen());
+  const [askGame, setAskGame] = useState(() => !rangesIntroSeen() && hasDefaultGame(settings.game));
   const chart = charts.find((c) => c.spec.id === chartId) ?? charts[0];
 
   const setMode = (m: Mode) => {
@@ -61,8 +65,29 @@ export function RangesPage() {
 
   return (
     <div className="stack">
-      <PageHeader title="Ranges" trailing={<GameChip onOpen={() => setSheet(true)} />} />
+      <PageHeader
+        title="Ranges"
+        trailing={
+          <div className="ranges-head-actions">
+            <button
+              type="button"
+              className="ranges-help-btn"
+              aria-label="How charts work"
+              aria-haspopup="dialog"
+              data-haptic="select"
+              onClick={() => {
+                setAskGame(false);
+                setIntro(true);
+              }}
+            >
+              <HelpIcon size={22} />
+            </button>
+            <GameChip onOpen={() => setSheet(true)} />
+          </div>
+        }
+      />
       <GameSheet open={sheet} onClose={() => setSheet(false)} />
+      <RangesIntro open={intro} askGame={askGame} onClose={() => setIntro(false)} />
 
       <div className="ranges-top">
         <ChartPicker charts={charts} value={chart} onChange={setChartId} />
@@ -73,8 +98,8 @@ export function RangesPage() {
           onChange={setMode}
           options={[
             { value: 'chart', label: 'Chart' },
-            { value: 'paint', label: 'Paint' },
             { value: 'quick', label: 'Quiz' },
+            { value: 'paint', label: 'Paint' },
           ]}
         />
         <ChartAbout chart={chart} exact={fit.exact} mode={mode} />

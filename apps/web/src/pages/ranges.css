@@ -122,3 +122,285 @@
   text-transform: none;
   letter-spacing: 0;
 }
+
+/* Header: a quiet help button beside the game chip. */
+.ranges-head-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.15rem;
+  flex: none;
+}
+
+.ranges-help-btn {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  min-width: 44px;
+  height: 44px;
+  padding: 0;
+  border: none;
+  border-radius: 999px;
+  color: var(--label-2);
+  background: transparent;
+}
+
+/* First visit intro: a tall sheet, one idea per step, the button in the thumb zone. */
+.sheet.ranges-intro {
+  height: min(calc(100dvh - 2.5rem), 820px);
+  max-height: min(calc(100dvh - 2.5rem), 820px);
+}
+
+.intro-body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  padding-bottom: 0;
+}
+
+.intro-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 44px;
+  margin: 0.2rem -0.5rem 0;
+}
+
+.intro-step {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  flex: 1;
+  padding-bottom: 1rem;
+}
+
+.intro-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 2rem;
+  line-height: 1.05;
+  letter-spacing: -0.005em;
+}
+
+.intro-title:focus {
+  outline: none;
+}
+
+.intro-lead {
+  margin: -0.25rem 0 0;
+  font-size: 1.05rem;
+  line-height: 1.35;
+  color: var(--label-2);
+}
+
+.intro-text {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.4;
+  color: var(--label-2);
+}
+
+.intro-foot {
+  position: sticky;
+  bottom: 0;
+  display: grid;
+  gap: 0.75rem;
+  margin: auto -1rem 0;
+  padding: 0.5rem 1rem calc(1rem + env(safe-area-inset-bottom, 0px));
+  background: linear-gradient(180deg, transparent, var(--bg) 0.75rem);
+}
+
+.intro-foot .value-dots {
+  margin-top: 0;
+}
+
+/* Step 1: the grid with the three regions named on it. */
+.intro-figure {
+  display: grid;
+  gap: 0.4rem;
+  margin: 0;
+}
+
+.intro-grid {
+  position: relative;
+}
+
+.intro-grid .range-cell[data-hand='AA'],
+.intro-grid .range-cell[data-hand='AKs'],
+.intro-grid .range-cell[data-hand='AKo'] {
+  z-index: 1;
+  box-shadow:
+    0 0 0 1.5px var(--bg),
+    0 0 0 3.5px var(--tint);
+}
+
+.intro-tag {
+  position: absolute;
+  z-index: 2;
+  padding: 0.25rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 650;
+  color: var(--label);
+  background: var(--surface);
+  box-shadow:
+    0 0 0 0.5px var(--separator),
+    0 4px 14px rgba(0, 0, 0, 0.16);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.intro-tag-suited {
+  left: 72%;
+  top: 22%;
+}
+
+.intro-tag-offsuit {
+  left: 28%;
+  top: 78%;
+}
+
+/* Sits on the diagonal and follows it. */
+.intro-tag-pairs {
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+
+.intro-keys {
+  display: grid;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.intro-keys li {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  font-size: 0.95rem;
+}
+
+.intro-cell {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 44px;
+  height: 28px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 650;
+  color: var(--tint);
+  background: var(--surface);
+  box-shadow: inset 0 0 0 2px var(--tint);
+}
+
+/* Step 2: legend, one cell against a split cell, then the mix bar. */
+.intro-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.intro-legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 32px;
+  padding: 0 0.75rem 0 0.55rem;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  background: var(--surface);
+}
+
+.intro-swatch {
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+}
+
+.intro-pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6rem;
+}
+
+.intro-pair-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.9rem 0.6rem 0.75rem;
+  border-radius: var(--r-card);
+  background: var(--surface);
+  text-align: center;
+}
+
+.intro-big-cell {
+  position: relative;
+  display: flex;
+  width: 76px;
+  height: 76px;
+  margin-bottom: 0.3rem;
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--fill);
+}
+
+.intro-big-label {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: #fff;
+  text-shadow:
+    0 0 3px rgba(0, 0, 0, 0.45),
+    0 1px 1px rgba(0, 0, 0, 0.3);
+}
+
+.intro-pair-name {
+  font-weight: 650;
+}
+
+.intro-mix {
+  display: grid;
+  gap: 0.6rem;
+  padding: 0.85rem 1rem;
+  border-radius: var(--r-card);
+  background: var(--surface);
+}
+
+/* Step 3: the three modes and the Basics lessons. */
+.intro-icon {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  color: var(--tint);
+  background: var(--fill);
+}
+
+.intro-list {
+  --sep-inset: 3.9rem;
+}
+
+.intro-row-title {
+  display: block;
+  font-weight: 600;
+}
+
+.intro-step .intro-section {
+  margin: 0.5rem 0 -0.35rem;
+  padding: 0 1rem;
+}

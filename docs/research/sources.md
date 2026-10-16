@@ -48,6 +48,8 @@ Compiled October 2026 to ground Felt's rating, scheduling, motivation and moneti
 - **Meyer, G., von Meduna, M., Brosowski, T., Hayer, T. (2013, online 2012).** "Is poker a game of skill or chance? A quasi-experimental study." *Journal of Gambling Studies*. doi:10.1007/s10899-012-9327-8. With card quality fixed, experts did not beat average players over 60 hands but lost less with bad cards. Short samples are noise.
 - **Rake.** Fiedler, I. C., Wilcke, A.-C. (2012). "The market for online poker." *UNLV Gaming Research & Review Journal* 16(1): about 6 million players paid US$3.61 billion in rake in 2010. The popular "about 10% of players win after rake" claim has no confirmed primary source (*not verified*).
 
+- **Levels of thinking.** A common way poker is taught: level 1 asks what do I have, level 2 what do they have, level 3 what do they think I have, and so on. It is usually credited to David Sklansky. Felt uses it only as a descriptive ladder for the tiers, not as a measured construct (origin *not verified*; no source was checked).
+
 **For Felt.** Treat results under about 1,500 hands as mostly noise and show confidence intervals on bb/100. Rake can turn a skilled top decile negative, so include it in every EV and win rate.
 
 ---
@@ -72,7 +74,8 @@ Compiled October 2026 to ground Felt's rating, scheduling, motivation and moneti
 
 - **Self determination theory.** Ryan, R. M., Deci, E. L. (2000). *American Psychologist* 55(1), 68-78. Competence, autonomy and relatedness drive lasting motivation.
 - **Goal setting.** Locke, E. A., Latham, G. P. (2002). *American Psychologist* 57(9), 705-717. Specific, hard goals with feedback beat "do your best".
-- **Implementation intentions.** Gollwitzer, P. M. (1999). "Implementation intentions: Strong effects of simple plans." *American Psychologist* 54(7), 493-503. If-then plans tied to a cue make the action automatic.
+- **Implementation intentions.** Gollwitzer, P. M., Sheeran, P. (2006). "Implementation intentions and goal achievement: A meta-analysis of effects and processes." *Advances in Experimental Social Psychology* 38, 69-119. 94 independent tests: d = 0.65 on goal attainment (*secondary*: confirmed through summaries).
+- **Implementation intentions (origin).** Gollwitzer, P. M. (1999). "Implementation intentions: Strong effects of simple plans." *American Psychologist* 54(7), 493-503. If-then plans tied to a cue make the action automatic.
 - **Habits.** Lally, P., van Jaarsveld, C. H. M., Potts, H. W. W., Wardle, J. (2010). *European Journal of Social Psychology* 40, 998-1009. Time to 95% of peak automaticity: 18 to 254 days (median about 66, from 39 well fitting participants). Missing one opportunity did not materially affect habit formation.
 - **Gamification.** Hamari, J., Koivisto, J., Sarsa, H. (2014). "Does gamification work?" *HICSS 2014*, 3025-3034: mostly positive, strongly context and user dependent. Sailer, M., Homner, L. (2020). "The gamification of learning: a meta-analysis." *Educational Psychology Review* 32, 77-112: cognitive g = 0.49, motivational g = 0.36, behavioral g = 0.25; only the cognitive effect held in rigorous studies.
 - **Leaderboards.** Landers, R. N., Bauer, K. N., Callan, R. C. (2017). *Computers in Human Behavior*: a leaderboard lifted performance to the level of difficult or impossible assigned goals, acting through goal setting. Hanus, M. D., Fox, J. (2015). *Computers & Education* 80, 152-161: a semester of mandatory badges and a leaderboard lowered intrinsic motivation, satisfaction and final exam scores.
@@ -103,7 +106,7 @@ Compiled October 2026 to ground Felt's rating, scheduling, motivation and moneti
 
 **GTO Wizard** (*company source*, gtowizard.com and its blog, 2026). Free tier with limited daily trainer hands; Starter from $39/month; Premium and Elite raised $10 to $20/month for new subscribers in March 2026 (new totals *not verified*); Ultra $359/month or $289/month annual. Plans split into Cash and Tournament.
 
-**Conversion benchmarks** (*industry report*, RevenueCat State of Subscription Apps). 2026: hard paywall apps convert about 10.7% of downloads to paid by day 35 versus 2.1% for freemium, with nearly equal one year retention; 55% of 3 day trial cancellations happen on day 0; Education leans to annual plans. 2025 (*secondary* summaries): median download to trial 6.2%; trials of 17 to 32 days convert at 42.5% versus 25.5% under 4 days.
+**Conversion benchmarks** (*industry report*, RevenueCat State of Subscription Apps). 2025: 82% of trial starts happen on the day of install (revenuecat.com/state-of-subscription-apps-2025). 2026: hard paywall apps convert about 10.7% of downloads to paid by day 35 versus 2.1% for freemium, with nearly equal one year retention; 55% of 3 day trial cancellations happen on day 0; Education leans to annual plans. 2025 (*secondary* summaries): median download to trial 6.2%; trials of 17 to 32 days convert at 42.5% versus 25.5% under 4 days.
 
 ---
 

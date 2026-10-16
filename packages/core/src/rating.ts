@@ -134,17 +134,40 @@ export function isProvisional(r: SkillRating): boolean {
  * Zheng 2006). The ladder stops at Elite: Felt's hardest items sit near 1700,
  * so higher tiers could not be measured honestly. While a rating is
  * provisional it has no tier (see `tierLabel`).
+ *
+ * Each tier also names a way of thinking about a hand. This follows the
+ * "levels of thinking" ladder common in poker teaching: first what do I
+ * have, then what do they have, then what do they think I have. Thinking in
+ * ranges is the modern step past reading one hand, and balanced, mixed play
+ * near equilibrium sits at the top. `skills` says what Felt actually rates
+ * near each band, from `DIFFICULTY`: core lessons and math facts near 1250
+ * to 1300, close calls on charts at 1350, solver and river spots at 1450 to
+ * 1500, advanced lessons and painting whole charts at 1600.
+ *
+ * Be honest about what this is: Felt measures answers, not thoughts. The
+ * rating is the measurement. The thinking line is a guide to what players
+ * at that rating tend to get right, not a claim about how any one player
+ * thinks.
  */
-export const TIERS: { min: number; name: string }[] = [
-  { min: -Infinity, name: 'Newcomer' },
-  { min: 900, name: 'Beginner' },
-  { min: 1050, name: 'Developing' },
-  { min: 1200, name: 'Solid' },
-  { min: 1350, name: 'Sharp' },
-  { min: 1500, name: 'Regular' },
-  { min: 1650, name: 'Strong regular' },
-  { min: 1800, name: 'Expert' },
-  { min: 1950, name: 'Elite' },
+export interface Tier {
+  min: number;
+  name: string;
+  /** The question a player at this tier asks at the table. */
+  thinks: string;
+  /** What Felt rates near this band, in plain words. */
+  skills: string;
+}
+
+export const TIERS: Tier[] = [
+  { min: -Infinity, name: 'Newcomer', thinks: 'How does a hand play out?', skills: 'Hand rankings and the order of betting.' },
+  { min: 900, name: 'Beginner', thinks: 'What do I have?', skills: 'Which starting hands to play and how strong your hand is.' },
+  { min: 1050, name: 'Developing', thinks: 'Where am I sitting, and what does it cost to call?', skills: 'Position and pot odds.' },
+  { min: 1200, name: 'Solid', thinks: 'What might they have?', skills: 'Core lessons and the price of common bets.' },
+  { min: 1350, name: 'Sharp', thinks: 'What range of hands could they have?', skills: 'Close calls on the opening and defending charts.' },
+  { min: 1500, name: 'Regular', thinks: 'How do I mix my plays so I stay hard to read?', skills: 'Solver spots and river decisions.' },
+  { min: 1650, name: 'Strong regular', thinks: 'What is this player doing wrong, and how do I profit?', skills: 'Advanced lessons and painting whole charts.' },
+  { min: 1800, name: 'Expert', thinks: 'What do they think I have?', skills: 'Advanced questions, right about 3 times in 4.' },
+  { min: 1950, name: 'Elite', thinks: 'Does my whole strategy hold up against anyone?', skills: 'The hardest questions, right nearly 9 times in 10.' },
 ];
 
 /** The tier to show: none until the rating has settled. */
@@ -153,7 +176,7 @@ export function tierLabel(r: SkillRating): string {
 }
 
 export function tierFor(rating: number): string {
-  return [...TIERS].reverse().find((t) => rating >= t.min)!.name;
+  return tierAt(rating).name;
 }
 
 /** The next tier up and how far away it is, or undefined at the top. */
@@ -163,6 +186,105 @@ export function nextTier(rating: number): { name: string; min: number; pointsAwa
   const next = TIERS[i];
   const floor = i > 1 ? TIERS[i - 1].min : next.min - 150;
   return { name: next.name, min: next.min, pointsAway: Math.ceil(next.min - rating), progress: Math.max(0, Math.min(1, (rating - floor) / (next.min - floor))) };
+}
+
+/** The tier a rating falls in. */
+export function tierAt(rating: number): Tier {
+  return [...TIERS].reverse().find((t) => rating >= t.min)!;
+}
+
+// How close is the next tier ---------------------------------------------
+
+/** Rating points one answer moves, per unit of surprise (score minus expected), from the Glicko update. */
+export function stepSize(rd: number, expected: number, itemRd = ITEM_RD): number {
+  const gj = g(itemRd);
+  return (Q * gj) / (1 / (rd * rd) + Q * Q * gj * gj * expected * (1 - expected));
+}
+
+/**
+ * Expected rating change per answer against items you get right with
+ * probability `expected`, when you actually get `accuracy` of them right.
+ * A right answer adds `step x (1 - expected)` and a miss takes away
+ * `step x expected`, so at `accuracy = expected` the average is zero: the
+ * rating only climbs when you do better than it expects.
+ */
+export function gainPerAnswer(rd: number, expected: number, accuracy = expected): number {
+  return stepSize(rd, expected) * (accuracy - expected);
+}
+
+/** The item difficulty a player of `rating` gets right with probability `expected`. */
+export function difficultyFor(rating: number, expected: number, itemRd = ITEM_RD): number {
+  return rating - (400 / g(itemRd)) * Math.log10(expected / (1 - expected));
+}
+
+/** Practice picks items near this expected success rate (`pickAdaptive`). */
+export const PRACTICE_TARGET = 0.8;
+
+export interface TierProgress {
+  /** The tier the rating falls in. Shown only once the rating has settled. */
+  tier: Tier;
+  /** No tier yet: too few answers to trust the number. */
+  settling: boolean;
+  /** Answers until the rating settles: on questions at your level, and on practice questions. Settling ratings only. */
+  answersToSettle?: { atLevel: number; inPractice: number };
+  /** Undefined at the top tier. */
+  next?: Tier;
+  pointsAway?: number;
+  /** 0 to 1 through the current tier. */
+  progress?: number;
+  /**
+   * Our estimate of how many more right answers than misses it takes, on
+   * questions at your level (half right expected), to reach the next tier.
+   * Exact for a run of right answers; with misses mixed in it is close.
+   */
+  rightAnswers?: number;
+  /** At your level a right answer adds this many points and a miss takes the same away. */
+  perRight: number;
+  /** On practice questions (about 80% expected) a right answer adds less and a miss costs more. */
+  practice: { expected: number; perRight: number; perMiss: number };
+}
+
+const MAX_STEPS = 10_000;
+
+/** Replays answers through the real update rule against items at a fixed expected score. */
+function simulate(r: SkillRating, expected: number, score: number, done: (r: SkillRating, n: number) => boolean): number {
+  let cur: SkillRating = { rating: r.rating, rd: r.rd, games: r.games };
+  for (let n = 0; n < MAX_STEPS; n++) {
+    if (done(cur, n)) return n;
+    cur = updateRating(cur, difficultyFor(cur.rating, expected), score, 0);
+  }
+  return MAX_STEPS;
+}
+
+/**
+ * How close a rating is to the next tier, in points and in answers. Pass the
+ * rating as it stands now (`currentRating`), since time away widens rd and a
+ * wider rd moves faster. The answer counts replay the Glicko update itself,
+ * so they shrink rd answer by answer as the real rating would. They are
+ * estimates: the real count depends on which questions you get.
+ */
+export function tierProgress(r: SkillRating): TierProgress {
+  const settling = r.games === 0 || isProvisional(r);
+  const tier = tierAt(r.rating);
+  const perRight = gainPerAnswer(r.rd, 0.5, 1);
+  const practice = {
+    expected: PRACTICE_TARGET,
+    perRight: gainPerAnswer(r.rd, PRACTICE_TARGET, 1),
+    perMiss: -gainPerAnswer(r.rd, PRACTICE_TARGET, 0),
+  };
+  if (settling) {
+    const settled = (x: SkillRating, n: number) => n > 0 && !isProvisional(x);
+    const answersToSettle = {
+      atLevel: Math.max(1, simulate(r, 0.5, 1, settled)),
+      inPractice: Math.max(1, simulate(r, PRACTICE_TARGET, 1, settled)),
+    };
+    return { tier, settling, answersToSettle, perRight, practice };
+  }
+  const next = TIERS.find((t) => t.min > r.rating);
+  if (!next) return { tier, settling, perRight, practice };
+  const step = nextTier(r.rating)!;
+  const rightAnswers = simulate(r, 0.5, 1, (x) => x.rating >= next.min);
+  return { tier, settling, next, pointsAway: step.pointsAway, progress: step.progress, rightAnswers, perRight, practice };
 }
 
 /** 95% interval for the true rating. */
@@ -223,7 +345,7 @@ export interface PracticeItem {
 export function pickAdaptive<T extends PracticeItem>(
   items: readonly T[],
   ratingFor: (domain: SkillDomain) => number,
-  { n = 10, target = 0.8, rand = Math.random, exclude = new Set<string>() }: { n?: number; target?: number; rand?: () => number; exclude?: ReadonlySet<string> } = {},
+  { n = 10, target = PRACTICE_TARGET, rand = Math.random, exclude = new Set<string>() }: { n?: number; target?: number; rand?: () => number; exclude?: ReadonlySet<string> } = {},
 ): T[] {
   const pool = items.filter((i) => !exclude.has(i.id));
   // Score every item by how far its expected success is from the target, with a little noise to vary sessions.

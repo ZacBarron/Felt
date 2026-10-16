@@ -1,8 +1,10 @@
-import { useMemo } from 'react';
+import { type MouseEvent, useMemo, useState } from 'react';
 import { CURRICULUM } from '@felt/content';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { Link } from 'react-router-dom';
 import { LessonCover } from '../lesson/LessonCover';
+import { TopicIntroSheet } from '../lesson/TopicIntroSheet';
+import '../lesson/topic-intro.css';
 import { isComplete, LESSON_ENTRIES, type LessonEntry, lessonPath, lessonProgress, pickNextLesson } from '../state/lessons';
 import type { StoredLesson } from '../state/db';
 import { canOpenLesson, FREE_MODULES, isPro } from '../state/access';
@@ -11,10 +13,21 @@ import { useSettings } from '../state/settings';
 import { CheckIcon, ChevronRightIcon, LockIcon, TargetIcon } from '../ui/icons';
 import { PageHeader } from '../ui/PageHeader';
 import { loadPlacement } from '../state/placementProgress';
+import { moduleKeyOf, shouldShowModuleIntro } from '../state/moduleIntros';
+
+const NO_PROGRESS = new Map<string, StoredLesson>();
 
 export function LearnPage() {
   const placementSaved = useMemo(() => !!loadPlacement(), []);
-  const progress = useLiveQuery(lessonProgress, [], new Map<string, StoredLesson>());
+  const loaded = useLiveQuery(lessonProgress, []);
+  const progress = loaded ?? NO_PROGRESS;
+  const [intro, setIntro] = useState<{ moduleKey: string; lessonKey?: string }>();
+  /** The first lesson opened in an untouched topic shows the topic's intro first, once. */
+  const openLesson = (e: MouseEvent, key: string) => {
+    if (!loaded || !shouldShowModuleIntro(key, progress)) return;
+    e.preventDefault();
+    setIntro({ moduleKey: moduleKeyOf(key), lessonKey: key });
+  };
   const { settings } = useSettings();
   const pro = isPro(settings.access);
   const playable = LESSON_ENTRIES.filter((e) => e.content);
@@ -27,7 +40,7 @@ export function LearnPage() {
       <PageHeader title="Learn" subtitle={`${done} of ${playable.length} lessons done`} />
 
       {next?.content && (
-        <Link to={lessonPath(next.key)} className="hero learn-hero">
+        <Link to={lessonPath(next.key)} className="hero learn-hero" onClick={(e) => openLesson(e, next.key)}>
           <div className="learn-hero-body">
             <div style={{ minWidth: 0 }}>
               <div className="hero-label">{nextState?.status === 'started' ? 'Continue' : 'Up next'}</div>
@@ -74,7 +87,7 @@ export function LearnPage() {
               </span>
             </div>
             <div className="section-footer" style={{ paddingTop: 0, paddingBottom: '0.6rem' }}>
-              {track.summary}
+              {track.summary} {track.intro.why}
             </div>
             {track.modules.map((m) => {
               const lessons = entries.filter((e) => e.key.startsWith(`${track.id}/${m.id}/`));
@@ -98,10 +111,31 @@ export function LearnPage() {
                       </span>
                     )}
                   </div>
+                  <button
+                    type="button"
+                    className="module-why"
+                    aria-haspopup="dialog"
+                    onClick={() => setIntro({ moduleKey: `${track.id}/${m.id}` })}
+                  >
+                    {m.intro.why}{' '}
+                    <span className="module-why-more">
+                      About this topic
+                      <ChevronRightIcon size={12} />
+                    </span>
+                  </button>
                   <div className="lesson-rail">
-                    {lessons.map((e) => (
-                      <LessonCard key={e.key} entry={e} state={progress.get(e.key)} locked={!canOpenLesson(e.key, settings.access)} />
-                    ))}
+                    {lessons.map((e) => {
+                      const locked = !canOpenLesson(e.key, settings.access);
+                      return (
+                        <LessonCard
+                          key={e.key}
+                          entry={e}
+                          state={progress.get(e.key)}
+                          locked={locked}
+                          onOpen={locked ? undefined : (ev) => openLesson(ev, e.key)}
+                        />
+                      );
+                    })}
                   </div>
                 </div>
               );
@@ -109,11 +143,25 @@ export function LearnPage() {
           </section>
         );
       })}
+
+      {intro && (
+        <TopicIntroSheet moduleKey={intro.moduleKey} lessonKey={intro.lessonKey} progress={progress} onClose={() => setIntro(undefined)} />
+      )}
     </div>
   );
 }
 
-function LessonCard({ entry, state, locked }: { entry: LessonEntry; state?: StoredLesson; locked?: boolean }) {
+function LessonCard({
+  entry,
+  state,
+  locked,
+  onOpen,
+}: {
+  entry: LessonEntry;
+  state?: StoredLesson;
+  locked?: boolean;
+  onOpen?: (e: MouseEvent) => void;
+}) {
   const content = entry.content;
   const body = (
     <>
@@ -149,7 +197,7 @@ function LessonCard({ entry, state, locked }: { entry: LessonEntry; state?: Stor
     </>
   );
   return content ? (
-    <Link to={locked ? '/pro?from=lesson' : lessonPath(entry.key)} className={`lesson-card${locked ? ' locked' : ''}`}>
+    <Link to={locked ? '/pro?from=lesson' : lessonPath(entry.key)} className={`lesson-card${locked ? ' locked' : ''}`} onClick={onOpen}>
       {body}
     </Link>
   ) : (
