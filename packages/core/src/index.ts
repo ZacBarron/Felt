@@ -20,3 +20,4 @@ export * from './calendar';
 export * from './mathdeck';
 export * from './weekly';
 export * from './memory';
+export * from './behind';

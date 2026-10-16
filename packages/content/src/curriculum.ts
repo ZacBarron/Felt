@@ -439,6 +439,34 @@ export const CURRICULUM: Track[] = [
           lesson('hu-one-opponent', 'Adjusting to one opponent', ['math', 'concept']),
         ],
       },
+      {
+        id: 'short-handed',
+        title: 'Short handed (6-max)',
+        intro: {
+          why: 'With fewer players behind you, every seat opens more hands. The blinds also come around faster and cost more.',
+          when: 'It comes up at online 6-max tables and live tables with empty seats. It matters most in late seats and the blinds.',
+          youWill: ['Open the right range for the players behind you', 'Steal and defend the blinds more often', 'Adjust your c-bets to wider ranges after the flop'],
+        },
+        lessons: [
+          lesson('fewer-players', 'Fewer players, wider ranges', ['concept', 'math', 'range-recall']),
+          lesson('blind-battles', 'More 3bets and blind battles', ['math', 'spot-action']),
+          lesson('postflop-6max', 'Postflop at 6-max', ['concept', 'equity-estimate']),
+        ],
+      },
+      {
+        id: 'deep-stacks',
+        title: 'Deep stacks',
+        intro: {
+          why: 'At 200bb the pot can grow twice as large as at 100bb. Hands that make the nuts gain and one pair hands lose.',
+          when: 'It comes up at live tables where stacks run deep. It also comes up once you double your stack.',
+          youWill: ['Plan a hand with SPR at 200bb', 'Keep one pair hands out of huge pots', 'Pick 3bet and 4bet hands that play well deep'],
+        },
+        lessons: [
+          lesson('deep-changes', 'What changes deep', ['math', 'concept']),
+          lesson('one-pair-deep', 'One pair hands deep', ['math', 'equity-estimate']),
+          lesson('preflop-deep', 'Preflop deep', ['math', 'concept']),
+        ],
+      },
     ],
   },
   {
