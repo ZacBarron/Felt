@@ -106,6 +106,8 @@ Compiled October 2026 to ground Felt's rating, scheduling, motivation and moneti
 
 **GTO Wizard** (*company source*, gtowizard.com and its blog, 2026). Free tier with limited daily trainer hands; Starter from $39/month; Premium and Elite raised $10 to $20/month for new subscribers in March 2026 (new totals *not verified*); Ultra $359/month or $289/month annual. Plans split into Cash and Tournament.
 
+**Trial timeline** (*secondary*: a case study by Blinkist's product team on UX Planet, and later summaries). Blinkist replaced a feature list with a timeline of the free trial (today, a reminder, the charge date) after "forgot to cancel" became its top complaint. Reported: trial starts up 23% and fewer complaints. Felt shows the same timeline without promising a reminder it cannot send.
+
 **Conversion benchmarks** (*industry report*, RevenueCat State of Subscription Apps). 2025: 82% of trial starts happen on the day of install (revenuecat.com/state-of-subscription-apps-2025). 2026: hard paywall apps convert about 10.7% of downloads to paid by day 35 versus 2.1% for freemium, with nearly equal one year retention; 55% of 3 day trial cancellations happen on day 0; Education leans to annual plans. 2025 (*secondary* summaries): median download to trial 6.2%; trials of 17 to 32 days convert at 42.5% versus 25.5% under 4 days.
 
 ---

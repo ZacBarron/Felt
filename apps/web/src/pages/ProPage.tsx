@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { type CSSProperties, useEffect, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { haptic } from '../haptics';
 import { RestoreSheet } from '../components/RestoreSheet';
@@ -26,7 +26,8 @@ import { trialReminder } from '../state/reminders';
 import { type Access, type Profile, useSettings } from '../state/settings';
 import { BrandMark, HeroPattern } from '../ui/Brand';
 import { BottomBar } from '../ui/BottomBar';
-import { AccountIcon, BellIcon, CheckIcon, ChevronDownIcon, ChevronRightIcon, CloseIcon, CoachIcon, LearnIcon, LockIcon, MedalIcon, SolverIcon } from '../ui/icons';
+import { LessonCover } from '../lesson/LessonCover';
+import { AccountIcon, BellIcon, CheckIcon, ChevronRightIcon, CloseIcon, CoachIcon, LockIcon, MedalIcon, SolverIcon } from '../ui/icons';
 import { useBodyClass } from '../ui/useBodyClass';
 import { onRadioKeys } from '../ui/radioKeys';
 import './pro.css';
@@ -58,23 +59,49 @@ const FIRST_RUN_FROM = new Set(['onboarding', 'first-lesson']);
 /** The perk a paywall reason is about, shown first. */
 const LEAD_PERK: Record<string, ProPerkId> = { lesson: 'lessons', check: 'lessons', solver: 'solver', coach: 'coach', weekly: 'weekly' };
 
-const PERK_ICONS: Record<ProPerkId, typeof LearnIcon> = {
-  lessons: LearnIcon,
-  coach: CoachIcon,
-  weekly: MedalIcon,
-  solver: SolverIcon,
-  support: AccountIcon,
-};
+interface CompareRow {
+  id: string;
+  title: string;
+  free: boolean;
+  live: boolean;
+}
 
-/** At most 4 perks: live ones first, the reason for the visit on top. */
-function orderPerks(coach: boolean, lead: ProPerkId | undefined) {
-  const all = proPerks({ proLessons: PRO_LESSONS, coach });
+/**
+ * Free and Pro side by side. The first row shows what stays free, so the
+ * table is honest about both columns. Then up to 4 Pro perks: live ones
+ * first, the reason for the visit on top.
+ */
+function compareRows(coach: boolean, lead: ProPerkId | undefined): CompareRow[] {
+  const all = proPerks({ proLessons: PRO_LESSONS, coach }).filter((p) => p.id !== 'support');
   const rank = (id: ProPerkId) => (id === lead ? 0 : 1);
-  return [...all.filter((p) => p.live), ...all.filter((p) => !p.live)]
+  const perks = all
     .map((p, i) => ({ p, i }))
     .sort((a, b) => Number(!a.p.live) - Number(!b.p.live) || rank(a.p.id) - rank(b.p.id) || a.i - b.i)
     .map(({ p }) => p)
     .slice(0, 4);
+  return [
+    { id: 'free', title: 'Basics, review and drills', free: true, live: true },
+    ...perks.map((p) => ({ id: p.id, title: p.title, free: false, live: p.live })),
+  ];
+}
+
+/**
+ * Three Pro lessons for the hero, drawn with their real covers: from the
+ * player's plan first, one per topic, then the first Pro lessons in order.
+ */
+function heroLessons(profile: Profile, access: Access) {
+  const modules = new Set(pathPrefs(profile).focus);
+  const locked = WRITTEN.filter((e) => !canOpenLesson(e.key, access));
+  const topic = (key: string) => key.split('/').slice(0, 2).join('/');
+  const picked: typeof locked = [];
+  const seen = new Set<string>();
+  for (const e of [...locked.filter((e) => modules.has(topic(e.key))), ...locked]) {
+    if (picked.length === 3) break;
+    if (seen.has(topic(e.key))) continue;
+    seen.add(topic(e.key));
+    picked.push(e);
+  }
+  return picked;
 }
 
 /**
@@ -94,7 +121,6 @@ export function ProPage() {
   const [message, setMessage] = useState<{ text: string; bad?: boolean }>();
   // Back from signing in to restore: the sheet opens again on its own.
   const [restoring, setRestoring] = useState(params.get('restore') === '1');
-  const [billingOpen, setBillingOpen] = useState(false);
   const coachLive = !!useCoachAvailable();
   const plan = PLANS.find((p) => p.id === planId)!;
   const firstRun = FIRST_RUN_FROM.has(from);
@@ -220,39 +246,68 @@ export function ProPage() {
   const open = purchasesOpen(features, settings.access);
   const inPlan = planProLessons(settings.profile, settings.access);
   const charge = dateIn(plan.trialDays);
-  const perks = orderPerks(coachLive, LEAD_PERK[from]);
+  const rows = compareRows(coachLive, LEAD_PERK[from]);
+  const covers = heroLessons(settings.profile, settings.access);
   const decline = firstRun ? 'Continue with the free plan' : 'Not now';
+  const timeline = open === true && plan.trialDays > 0;
 
   return (
     <div className="pw focus-column">
-      <div className="pw-top">
-        <button className="icon-btn btn glass" aria-label="Close" onClick={close} data-haptic="off">
-          <CloseIcon size={18} />
-        </button>
-      </div>
-
-      <header className="pw-head">
-        <div className="pw-eyebrow">
-          <BrandMark size={20} /> Felt Pro
+      <header className="pw-hero">
+        <HeroPattern />
+        <div className="pw-top">
+          <button className="icon-btn btn pw-close" aria-label="Close" onClick={close} data-haptic="off">
+            <CloseIcon size={18} />
+          </button>
+          <div className="pw-eyebrow">
+            <BrandMark size={20} /> Felt Pro
+          </div>
         </div>
         <h1 className="display pw-title">{HEADLINES[from] ?? 'Train every spot you play'}</h1>
+        {covers.length === 3 && (
+          <div className="pw-fan" aria-hidden="true">
+            {covers.map((e, i) => (
+              <div key={e.key} className="pw-fan-card" style={{ '--i': i } as CSSProperties}>
+                <LessonCover cover={e.content!.cover} size="sm" />
+              </div>
+            ))}
+          </div>
+        )}
       </header>
 
-      <ul className="pw-perks" aria-label="What Felt Pro adds">
-        {perks.map((p) => {
-          const Icon = PERK_ICONS[p.id];
-          return (
-            <li key={p.id} className="pw-perk">
-              <span className="pw-perk-icon" aria-hidden="true">
-                <Icon size={18} />
-              </span>
-              <span className="pw-perk-title">{p.title}</span>
-              {p.id === 'lessons' && inPlan > 0 && <span className="pw-perk-note">{inPlan} in your plan</span>}
-              {!p.live && <span className="pw-soon">Coming soon</span>}
-            </li>
-          );
-        })}
-      </ul>
+      <div className="pw-compare" role="table" aria-label="Free and Felt Pro compared">
+        <div className="pw-row pw-row-head" role="row">
+          <span role="columnheader" className="pw-row-label">
+            <span className="sr-only">Feature</span>
+          </span>
+          <span role="columnheader" className="pw-col">
+            Free
+          </span>
+          <span role="columnheader" className="pw-col pw-col-pro">
+            <span className="pw-pro-chip">Pro</span>
+          </span>
+        </div>
+        {rows.map((r, n) => (
+          <div key={r.id} className="pw-row" role="row" style={{ '--n': n } as CSSProperties}>
+            <span role="cell" className="pw-row-label">
+              {r.title}
+              {r.id === 'lessons' && inPlan > 0 && <span className="pw-row-note">{inPlan} in your plan</span>}
+            </span>
+            <span role="cell" className="pw-col">
+              {r.free ? <CheckIcon size={16} strokeWidth={2.4} aria-label="Included" /> : <span className="pw-none" aria-label="Not included" />}
+            </span>
+            <span role="cell" className="pw-col pw-col-pro">
+              {r.live ? (
+                <span className="pw-yes">
+                  <CheckIcon size={13} strokeWidth={3} aria-label="Included" />
+                </span>
+              ) : (
+                <span className="pw-soon">Soon</span>
+              )}
+            </span>
+          </div>
+        ))}
+      </div>
 
       <div className="pw-plans" role="radiogroup" onKeyDown={onRadioKeys} aria-label="Choose a plan">
         {PLANS.map((p) => (
@@ -275,44 +330,32 @@ export function ProPage() {
         ))}
       </div>
 
-      <div className="pw-fine">
-        <div className="pw-links">
-          <button className="link-btn" onClick={() => setRestoring(true)} data-haptic="select">
-            Restore purchases
-          </button>
-          <Link to="/terms" className="link-btn">
-            Terms
-          </Link>
-          <Link to="/privacy" className="link-btn">
-            Privacy
-          </Link>
-        </div>
-        <div className="pw-links">
-          <button
-            className="link-btn pw-billing-toggle"
-            aria-expanded={billingOpen}
-            aria-controls="pw-billing"
-            onClick={() => {
-              setBillingOpen((o) => !o);
-              // Bring the answer into view above the bar.
-              requestAnimationFrame(() => document.getElementById('pw-billing')?.scrollIntoView({ block: 'nearest', behavior: 'smooth' }));
-            }}
-            data-haptic="select"
-          >
-            How billing works <ChevronDownIcon size={14} />
-          </button>
-        </div>
-        {billingOpen && (
-          <div id="pw-billing" className="pw-details-body">
-            {plan.trialDays > 0 && (
-              <p>
-                Today everything unlocks for free. On {charge} you pay {formatPrice(plan.price)}. Cancel before then and you pay nothing.
-              </p>
-            )}
-            <p>Felt Pro renews until you cancel. Cancel any time in Account.</p>
-            <p>Review, drills and the daily challenge stay free. So do placement and the first topic of every track.</p>
-          </div>
-        )}
+      {timeline && (
+        <ol className="pw-timeline" aria-label="How the free week works">
+          <li>
+            <span className="pw-dot" aria-hidden="true" />
+            <strong>Today</strong>
+            <span>Everything in Pro unlocks. You pay nothing.</span>
+          </li>
+          <li>
+            <span className="pw-dot" aria-hidden="true" />
+            <strong>{charge}</strong>
+            <span>You pay {formatPrice(plan.price)} for the year. Cancel before then and pay nothing.</span>
+          </li>
+          <li className="pw-renews">It renews each year until you cancel in Account.</li>
+        </ol>
+      )}
+
+      <div className="pw-links">
+        <button className="link-btn" onClick={() => setRestoring(true)} data-haptic="select">
+          Restore purchases
+        </button>
+        <Link to="/terms" className="link-btn">
+          Terms
+        </Link>
+        <Link to="/privacy" className="link-btn">
+          Privacy
+        </Link>
       </div>
 
       <BottomBar>

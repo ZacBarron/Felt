@@ -67,14 +67,15 @@ Set in `PLANS` in `state/access.ts`. Current placeholders: yearly $79.99 with a 
 
 ### Paywall layout
 
-One phone screen at 390 by 844 with no scrolling. Code in `ProPage.tsx` and `pages/pro.css`.
+Everything that decides a purchase fits above the bottom bar at 390 by 844. Code in `ProPage.tsx` and `pages/pro.css`. The layout follows the patterns the strongest subscription paywalls share (reviewed on Mobbin: Speak, Lifesum, Insight Timer, AllTrails and Cleo for the compare table; Strava, Copilot, Mesh and Vocabulary for the trial timeline).
 
-1. Close button, always visible, on glass. From onboarding or the first lesson offer (`from=onboarding`, `from=first-lesson`) it goes on to Today.
-2. "Felt Pro" eyebrow and a short serif headline that names why the player arrived ("This lesson is in Felt Pro", "Get a coach in your pocket", "Keep the momentum").
-3. Up to 4 perks from `proPerks()` in `state/access.ts`, one line each with an icon. The perk that brought the player here comes first. Live perks come before any that is not, and only a perk this build cannot deliver says "Coming soon". Priority support is hidden until a support address is set.
-4. Two plan tiles. Yearly is preselected and shows its saving, computed rather than typed. The billed price is the largest number on each tile. The monthly equivalent sits under it.
-5. Fine print in one compact block: Restore purchases, Terms and Privacy, then a "How billing works" disclosure with the trial dates, renewal, how to cancel and what stays free.
-6. The bottom bar holds the charge line ("Free until Oct 23. Then $79.99 a year."), the buy button and a decline button of the same size ("Not now", or "Continue with the free plan" at the end of a first run).
+1. A felt hero, full bleed at the top: the close button, the "Felt Pro" eyebrow and a one line serif headline that names why the player arrived ("This lesson is in Felt Pro", "Get a coach in your pocket", "Keep the momentum"). From onboarding or the first lesson offer (`from=onboarding`, `from=first-lesson`) close goes on to Today.
+2. Three real Pro lessons dealt like cards, drawn with their own covers. They come from the player's plan first, one per topic (`heroLessons()`). The product is the picture, not an icon.
+3. Free and Pro side by side with the Pro column tinted. The first row shows what stays free (basics, review and drills), so the table is honest about both columns. Then up to 4 perks from `proPerks()`: live ones first, the reason for the visit on top. A perk this build cannot deliver says "Soon". The lessons row notes how many Pro lessons are in the player's plan.
+4. Two plan tiles. Yearly is preselected and shows its saving, computed rather than typed. The billed price is the largest number on each tile.
+5. When the yearly trial can start: a timeline of the free week. Today everything unlocks; on the charge date the player pays, unless they cancel first; it renews each year until cancelled. Blinkist reported a 23% lift in trial starts and fewer complaints from this pattern (*secondary*, see sources).
+6. Restore purchases, Terms and Privacy.
+7. The bottom bar holds the charge line ("Free until Oct 23. Then $79.99 a year."), the buy button and a decline button of the same size ("Not now", or "Continue with the free plan" at the end of a first run).
 
 When purchases are not open (no billing on the server and not a developer device, see `purchasesOpen()`), a calm "Purchases are not open yet" sits in the buy button's place and the charge line says nothing is charged. The tap never fails after the fact.
 
