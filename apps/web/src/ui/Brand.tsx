@@ -3,21 +3,38 @@ import { type CSSProperties, useId } from 'react';
 import { WORDMARK_PATH, WORDMARK_VIEWBOX } from './wordmark';
 
 /**
- * The mark is the suited half of a range chart, on a 6x6 grid. In every
- * range chart suited hands sit above the diagonal and pairs sit on it, so
- * the lit triangle is the name drawn in the language of the game.
+ * The mark is a real 13x13 range chart with an S painted into it. "#" cells
+ * are fully in the range (brass), "+" cells are mixed hands drawn as split
+ * cells, the way a range chart shows them, and they round the curves of the S.
  */
-export type MarkCell = 'suited' | 'pair' | 'off';
+const S_ROWS = [
+  '.............',
+  '....+####+...',
+  '..+#######+..',
+  '..##.....##..',
+  '..##.........',
+  '..+####+.....',
+  '...+######+..',
+  '.......+###..',
+  '..##.....##..',
+  '..+#######+..',
+  '....+####+...',
+  '.............',
+  '.............',
+];
+
+export const MARK_GRID = 13;
+
+export type MarkCell = 'full' | 'mix' | 'off';
 export function markCell(r: number, c: number): MarkCell {
-  return c > r ? 'suited' : c === r ? 'pair' : 'off';
+  const ch = S_ROWS[r]?.[c];
+  return ch === '#' ? 'full' : ch === '+' ? 'mix' : 'off';
 }
 
-export const MARK_GRID = 6;
-
 /**
- * The Suited mark: the suited half of a range chart, painted the way a
- * solver paints a range. Suited cells are brass, the pairs on the diagonal
- * are a soft line, and the offsuit half stays faintly visible.
+ * The Suited mark: an S painted into a real range chart, the way a solver
+ * paints a range. Lit cells are brass, mixed cells are split, and the rest
+ * of the chart stays faintly visible.
  *
  * - `tile`: the app icon form, brass on the spruce felt gradient.
  * - `glyph`: the grid alone in the current color, for use on other surfaces.
@@ -30,7 +47,7 @@ export function BrandMark({
 }: {
   size?: number;
   variant?: 'tile' | 'glyph';
-  /** Assemble along the diagonal, then light the suited half, like a solver painting a range. */
+  /** Assemble along the diagonal, then light the S, like a solver painting a range. */
   animate?: boolean;
   /** Follow the active theme. Off for places that must show the master brand. */
   themed?: boolean;
@@ -38,8 +55,8 @@ export function BrandMark({
   const id = useId();
   const n = MARK_GRID;
   const tile = variant === 'tile';
-  const pad = tile ? 17 : 3;
-  const gap = tile ? 3.2 : 4;
+  const pad = tile ? 14 : 2;
+  const gap = tile ? 1.3 : 1.6;
   const cell = (100 - 2 * pad - (n - 1) * gap) / n;
   return (
     <svg
@@ -66,21 +83,35 @@ export function BrandMark({
         const r = Math.floor(i / n);
         const c = i % n;
         const kind = markCell(r, c);
-        const lit = kind === 'suited';
+        const x = pad + c * (cell + gap);
+        const y = pad + r * (cell + gap);
+        const rx = cell * 0.22;
+        const brass = tile ? (themed ? 'var(--accent)' : '#e9b866') : 'currentColor';
+        const dim = tile ? 'rgba(255,255,255,.07)' : 'currentColor';
+        const anim = animate ? { className: kind === 'off' ? 'cell' : 'cell lit', style: { '--d': (r + c) / 2 } as CSSProperties } : {};
+        if (kind === 'mix') {
+          // A mixed hand: part of the cell in the range, like a split cell in a chart.
+          const clip = `${id}-c${i}`;
+          return (
+            <g key={i} {...anim}>
+              <clipPath id={clip}>
+                <rect x={x} y={y} width={cell} height={cell} rx={rx} />
+              </clipPath>
+              <rect x={x} y={y} width={cell} height={cell} rx={rx} style={{ fill: tile ? 'rgba(255,255,255,.1)' : 'currentColor', fillOpacity: tile ? 1 : 0.14 }} />
+              <rect x={x} y={y} width={cell * 0.55} height={cell} clipPath={`url(#${clip})`} style={{ fill: brass }} />
+            </g>
+          );
+        }
         return (
           <rect
             key={i}
-            x={pad + c * (cell + gap)}
-            y={pad + r * (cell + gap)}
+            x={x}
+            y={y}
             width={cell}
             height={cell}
-            rx={cell * 0.26}
-            className={animate ? (lit ? 'cell lit' : 'cell') : undefined}
-            style={{
-              ...(animate ? ({ '--d': r + c } as CSSProperties) : null),
-              fill: tile ? (lit ? (themed ? 'var(--accent)' : '#e9b866') : kind === 'pair' ? 'rgba(255,255,255,.24)' : 'rgba(255,255,255,.08)') : 'currentColor',
-              fillOpacity: tile ? 1 : lit ? 1 : kind === 'pair' ? 0.4 : 0.14,
-            }}
+            rx={rx}
+            {...anim}
+            style={{ ...anim.style, fill: kind === 'full' ? brass : dim, fillOpacity: tile ? 1 : kind === 'full' ? 1 : 0.12 }}
           />
         );
       })}
@@ -107,7 +138,7 @@ export function Lockup({ size = 30 }: { size?: number }) {
   );
 }
 
-export const TAGLINE = 'Instinct, trained.';
+export const TAGLINE = 'Poker, suited to you.';
 
 /** Quiet sign off at the bottom of More and Settings. */
 export function BrandFooter() {

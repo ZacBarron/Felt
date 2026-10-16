@@ -44,7 +44,7 @@ export default defineConfig({
       manifest: {
         name: 'Suited',
         short_name: 'Suited',
-        description: 'Instinct, trained. GTO ranges, spaced review and drills for serious poker players.',
+        description: 'Poker, suited to you. Short lessons, honest answers and a plan built around your game.',
         theme_color: '#0b2421',
         background_color: '#0b2421',
         display: 'standalone',

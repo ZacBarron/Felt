@@ -13,6 +13,7 @@ import { studyReminder, trialReminder } from '../state/reminders';
 import { chartsForGame } from '../state/charts';
 import { type Access, type Appearance, useSettings } from '../state/settings';
 import { BrandFooter, BrandMark } from '../ui/Brand';
+import { actionColor } from '../components/actionColors';
 import {
   AccountIcon,
   AppearanceIcon,
@@ -443,7 +444,7 @@ function AppearancePage() {
 
   return (
     <SubPage title="Appearance and feel">
-      <Section title="Look" info={<p>Themes change the table and accent colors. Action colors like raise and fold never change.</p>}>
+      <Section title="Look" info={<p>Themes change the table and accent colors. Action colors like raise and fold stay the same in every theme.</p>}>
         <div className="list">
           <Row label="Appearance">
             <Segmented<Appearance>
@@ -459,6 +460,25 @@ function AppearancePage() {
           </Row>
           <div className="settings-theme">
             <ThemePicker value={settings.ui.palette} onChange={(palette) => update({ ...settings, ui: { ...settings.ui, palette } })} />
+          </div>
+        </div>
+      </Section>
+
+      <Section title="Action colors" footer="Raise, call and fold then differ in brightness as well as color. It helps with red-green color blindness.">
+        <div className="list">
+          <Row label="Color blind friendly">
+            <Toggle
+              label="Color blind friendly"
+              checked={!!settings.ui.colorblind}
+              onChange={(colorblind) => update({ ...settings, ui: { ...settings.ui, colorblind } })}
+            />
+          </Row>
+          <div className="settings-actions-preview" aria-hidden="true">
+            {(['raise', '3bet', 'call', 'fold'] as const).map((a) => (
+              <span key={a} style={{ background: actionColor(a) }}>
+                {a === '3bet' ? '3bet' : a[0].toUpperCase() + a.slice(1)}
+              </span>
+            ))}
           </div>
         </div>
       </Section>

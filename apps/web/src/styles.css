@@ -87,14 +87,12 @@
   --on-action: #fff;
   --action-sheen: rgba(255, 255, 255, 0.14);
 
-  /* Solver action colors. Fold stays neutral. */
-  /* Actions differ in lightness as well as hue, so raise, call and fold stay apart with red-green
-     color blindness (about 1 in 12 men). See docs/BRAND.md, Action colors. */
-  --act-raise: #ee6a2a;
+  /* Solver action colors. Fold stays neutral. Color blind friendly colors live under [data-colors='cvd']. */
+  --act-raise: var(--red);
   --act-3bet: var(--purple);
-  --act-call: #0f7b6c;
-  --act-check: #0f7b6c;
-  --act-fold: #b5afa4;
+  --act-call: var(--green);
+  --act-check: var(--green);
+  --act-fold: var(--gray);
 
   /* Four color deck on white faces */
   --suit-s: #1c1c1e;
@@ -163,10 +161,8 @@
     --action-mix: 100%;
     --on-action: var(--base-950);
     --action-sheen: rgba(255, 255, 255, 0.2);
-    --act-raise: #ff7a45;
-    --act-call: #20b39c;
-    --act-check: #20b39c;
-    --act-fold: #4a4843;
+    --act-call: #24a157;
+    --act-check: #24a157;
     --glass-bg: rgba(26, 33, 30, 0.6);
     --glass-edge: rgba(255, 255, 255, 0.16);
     --glass-sheen: rgba(255, 255, 255, 0.06);
@@ -204,10 +200,8 @@
   --action-mix: 100%;
   --on-action: var(--base-950);
   --action-sheen: rgba(255, 255, 255, 0.2);
-  --act-raise: #ff7a45;
-  --act-call: #20b39c;
-  --act-check: #20b39c;
-  --act-fold: #4a4843;
+  --act-call: #24a157;
+  --act-check: #24a157;
   --gray: #8f8b83;
   --glass-bg: rgba(26, 33, 30, 0.6);
   --glass-edge: rgba(255, 255, 255, 0.16);
@@ -216,6 +210,31 @@
   --glass-shadow: 0 10px 34px rgba(0, 0, 0, 0.55), 0 1px 3px rgba(0, 0, 0, 0.3);
   --pressed: rgba(255, 255, 255, 0.07);
   color-scheme: dark;
+}
+
+/* Color blind friendly action colors (Settings, Appearance). Raise, call and fold differ in
+   lightness as well as hue, so they stay apart with red-green color blindness. See docs/BRAND.md. */
+:root[data-colors='cvd'] {
+  --act-raise: #ee6a2a;
+  --act-call: #0f7b6c;
+  --act-check: #0f7b6c;
+  --act-fold: #b5afa4;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root[data-colors='cvd']:not([data-theme='light']) {
+    --act-raise: #ff7a45;
+    --act-call: #20b39c;
+    --act-check: #20b39c;
+    --act-fold: #4a4843;
+  }
+}
+
+:root[data-colors='cvd'][data-theme='dark'] {
+  --act-raise: #ff7a45;
+  --act-call: #20b39c;
+  --act-check: #20b39c;
+  --act-fold: #4a4843;
 }
 
 * {
@@ -5178,23 +5197,7 @@ a.card.more-me,
   color: rgba(255, 255, 255, 0.82);
 }
 
-.onb-levels {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem;
-  margin: 0.35rem 0 0;
-  padding: 0;
-  list-style: none;
-}
 
-.onb-levels li {
-  padding: 0.28rem 0.62rem;
-  border-radius: 999px;
-  font-size: 0.78rem;
-  font-weight: 600;
-  color: #fff;
-  background: rgba(255, 255, 255, 0.14);
-}
 
 .onb-welcome .onb-intro-copy {
   gap: 0.8rem;

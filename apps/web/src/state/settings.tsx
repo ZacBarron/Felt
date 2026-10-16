@@ -40,6 +40,8 @@ export interface UiSettings {
   haptics: boolean;
   appearance: Appearance;
   palette: Palette;
+  /** Action colors that stay apart with red-green color blindness. */
+  colorblind?: boolean;
 }
 
 export type Goal = 'learn' | 'home-games' | 'casino' | 'climb' | 'win-live' | 'move-up' | 'go-pro' | 'master-gto' | 'tournaments';
@@ -176,6 +178,12 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     if (settings.ui.palette === 'card-room') delete root.dataset.palette;
     else root.dataset.palette = settings.ui.palette;
   }, [settings.ui.palette]);
+
+  useEffect(() => {
+    const root = document.documentElement;
+    if (settings.ui.colorblind) root.dataset.colors = 'cvd';
+    else delete root.dataset.colors;
+  }, [settings.ui.colorblind]);
 
   // What syncs: everything but access, which the server reports itself.
   const synced = JSON.stringify({ ...settings, access: undefined });

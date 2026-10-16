@@ -1,6 +1,6 @@
 # Suited
 
-*Instinct, trained.*
+*Poker, suited to you.*
 
 A personal poker training system for reaching an elite level in No Limit Hold'em: GTO fundamentals, solver charts, spaced repetition, scenario testing, exploitation, session logging, and stats that show real progress.
 

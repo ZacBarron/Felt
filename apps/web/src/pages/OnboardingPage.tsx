@@ -244,11 +244,6 @@ function Welcome({ heading, onStart }: { heading: React.RefObject<HTMLHeadingEle
         <p className="onb-welcome-sub reveal" style={{ animationDelay: '650ms' }}>
           Poker training in a few minutes a day.
         </p>
-        <ul className="onb-levels reveal" style={{ animationDelay: '800ms' }} aria-label="Built for every level">
-          <li>New to poker</li>
-          <li>Play for fun</li>
-          <li>Play for money</li>
-        </ul>
       </div>
       <div className="onb-intro-copy stack">
         <ValueCarousel />

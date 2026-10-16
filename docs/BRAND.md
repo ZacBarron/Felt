@@ -2,9 +2,9 @@
 
 ## Idea
 
-**Instinct, trained.**
+**Poker, suited to you.**
 
-Great players do not calculate every decision at the table. They studied until the right play became instinct. Suited is where that studying happens: precise like a solver, calm like a good card room. The brand sits between the two worlds it serves, rigorous data and the feel of the game.
+Suited is poker training that fits the player: their game, their stakes, their leaks and a few minutes a day. It is precise like a solver and calm like a good card room, and every answer says how sure it is. The line plays on the name: suited cards, and a plan suited to you.
 
 What Suited is not: a casino, a trading app, a crypto product. No neon, no chips raining down, no slot machine rewards. Progress is shown plainly and honestly.
 
@@ -18,7 +18,7 @@ Suited sounds like a good coach sitting next to you: calm, direct and warm. The 
 
 ## Logo
 
-**The mark** is the suited half of a range chart, on a 6x6 grid. In every range chart, suited hands sit above the diagonal and pairs sit on it. The cells above the diagonal are brass, the pairs on the diagonal are a soft neutral line, and the offsuit half stays faintly visible. It is the name drawn in the language of the game: a player reads it as a range chart, anyone else as a clean triangle.
+**The mark** is a real 13x13 range chart with an S painted into it, the way a solver paints a range. Cells in the S are brass. Cells on its curves are mixed hands, drawn as split cells the way a range chart shows them, which also round the letter. The rest of the chart stays faintly visible. A player reads it as a range chart, anyone else as an S.
 
 **The wordmark** is "Suited" drawn from Instrument Serif with tracking of -10 units per letter, kept as outlines (`apps/web/src/ui/wordmark.ts`) so it never depends on a font loading. Regenerate it from the font with opentype.js rather than editing the path by hand.
 
@@ -29,7 +29,7 @@ Files: `docs/brand/suited-lockup.svg`, `suited-wordmark.svg`, `suited-mark.svg`,
 Usage:
 - Clear space around the mark: one grid cell on every side.
 - Minimum size: 20px for the tile, 14px tall for the wordmark.
-- Do not change which cells are lit, recolor the suited half, rotate or mirror the grid (the suited half is always top right), add effects, or redraw the wordmark in a live font.
+- Do not change which cells are lit, recolor the S, rotate or mirror the grid, add effects, or redraw the wordmark in a live font.
 
 ## Color
 
@@ -62,7 +62,7 @@ Themes only change the felt and accent tokens (`--base-*`, `--felt-*`, `--accent
 
 ### Action colors
 
-Solver colors are a convention players know: raise is red, call is green, fold is gray, 3bet is purple. About 1 in 12 men has red-green color blindness, and in a deuteranopia simulation the old raise and call differed by only 21 points of CIELAB difference (110 with normal vision). The actions now differ in lightness as well as hue:
+Solver colors are a convention players know: raise is red, call is green, fold is gray, 3bet is purple. They are the default. About 1 in 12 men has red-green color blindness: in a deuteranopia simulation, raise and call differ by only 21 points of CIELAB difference (110 with normal vision). So Settings, Appearance and feel has **Color blind friendly** action colors, which differ in lightness as well as hue (`data-colors="cvd"` on the root):
 
 | Action | Light | Dark |
 | --- | --- | --- |
@@ -71,7 +71,7 @@ Solver colors are a convention players know: raise is red, call is green, fold i
 | Fold | Warm gray `#B5AFA4` | `#4A4843` |
 | 3bet and 4bet | Purple (unchanged) | Purple (unchanged) |
 
-With deuteranopia, raise and call now differ by 66 (light) and every action pair stays apart in both themes. Bet sizes are shades of the raise color. The general red and green for right and wrong answers are separate tokens and always come with an icon or words.
+With it on and deuteranopia, raise and call differ by 66 (light) and every action pair stays apart in both themes. Bet sizes are always shades of the raise color. The general red and green for right and wrong answers are separate tokens and always come with an icon or words.
 
 Everything else uses the system palette so the app still feels native. Playing cards use a four color deck on white faces; card backs are spruce with a brass lattice.
 
@@ -94,7 +94,7 @@ Motion explains what happened; it never decorates.
 - **Ink:** painted cells fill from the left like a brush stroke.
 - **Liquid selection:** the tab pill stretches as it slides between tabs.
 - **Count up:** headline numbers roll to their value; rings fill.
-- **The mark assembles:** on the welcome screen and in moments, the grid pops in along the diagonal and the suited half lights in a brass sweep.
+- **The mark assembles:** on the welcome screen and in moments, the grid pops in along the diagonal and the S lights in a brass sweep.
 - **Verdicts land:** the badge pops, a soft ring leaves it, and the check draws itself. Mix bars grow from the left.
 - **Moments:** a new tier or a streak milestone gets one short full screen moment on the felt, once, and only on a calm screen (never mid question). The title wipes in like ink. Nothing else earns a takeover.
 - Springs for things you touch, ease out for things that appear. Everything respects Reduce Motion.

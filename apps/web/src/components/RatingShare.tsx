@@ -111,15 +111,26 @@ export async function drawRatingCard(d: RatingCardData): Promise<Blob> {
   ctx.fillStyle = 'rgba(255,255,255,0.08)';
   roundRect(ctx, mx, my, ms, ms, ms * 0.23);
   ctx.fill();
-  const pad = ms * 0.17;
-  const g = ms * 0.032;
+  const pad = ms * 0.14;
+  const g = ms * 0.013;
   const cs = (ms - 2 * pad - (MARK_GRID - 1) * g) / MARK_GRID;
   for (let r = 0; r < MARK_GRID; r++)
     for (let c = 0; c < MARK_GRID; c++) {
       const kind = markCell(r, c);
-      ctx.fillStyle = kind === 'suited' ? BRAND.brass : kind === 'pair' ? 'rgba(255,255,255,0.26)' : 'rgba(255,255,255,0.12)';
-      roundRect(ctx, mx + pad + c * (cs + g), my + pad + r * (cs + g), cs, cs, cs * 0.22);
+      const x = mx + pad + c * (cs + g);
+      const y = my + pad + r * (cs + g);
+      ctx.fillStyle = kind === 'full' ? BRAND.brass : 'rgba(255,255,255,0.1)';
+      roundRect(ctx, x, y, cs, cs, cs * 0.22);
       ctx.fill();
+      if (kind === 'mix') {
+        // A mixed hand: the left part of the cell in brass, as a range chart splits it.
+        ctx.save();
+        roundRect(ctx, x, y, cs, cs, cs * 0.22);
+        ctx.clip();
+        ctx.fillStyle = BRAND.brass;
+        ctx.fillRect(x, y, cs * 0.55, cs);
+        ctx.restore();
+      }
     }
   const [vx, vy, , vh] = WORDMARK_VIEWBOX.split(' ').map(Number);
   const wh = 60;
