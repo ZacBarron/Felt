@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { type Card, FULL_DECK, parseCards } from './cards';
 import { seededRng } from './equity';
-import { act, type HandState, legalActions, potSize, seatPositions, shuffledDeck, startHand, startHandWithDeck } from './play';
+import { act, type HandState, legalActions, potSize, seatPositions, shuffledDeck, stacksAfter, startHand, startHandWithDeck } from './play';
 
 /** A deck that deals `holes` (one hand per seat, dealt from the small blind) and then `board`. */
 function deckFor(seats: number, button: number, holes: string[], board: string): Card[] {
@@ -208,6 +208,7 @@ describe('random play', () => {
         expect(total(s)).toBeCloseTo(chips, 9);
       }
       const res = s.result!;
+      expect(stacksAfter(s).reduce((a, b) => a + b, 0)).toBeCloseTo(stacks.reduce((a, b) => a + b, 0), 6);
       expect(res.won.reduce((a, b) => a + b, 0)).toBeCloseTo(potSize(s), 9);
       expect(res.net.reduce((a, b) => a + b, 0)).toBeCloseTo(0, 9);
       for (const p of s.players) expect(p.stack).toBeGreaterThanOrEqual(0);

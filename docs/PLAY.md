@@ -4,12 +4,16 @@ Play is a full table against bots. You play whole hands, from the deal to showdo
 
 Drills train one decision at a time. Play trains the same decisions in the order a real hand brings them, with the stack, the pot and the players left in the hand all changing as you go.
 
-## Setup
+## The table
 
-- **Table size**: 2 to 9 seats.
-- **Stack depth**: 20 to 200bb, the same choices as game settings.
-- **Opponents**: pick each seat's bot, or a table preset that mixes bots (for example "Soft home game" or "Tough online").
-- **Skip clear folds**: deal only hands worth a decision. A hand is skipped only when the chart folds it 100% from your seat in that spot. A hand the chart plays even 1% of the time is always dealt. The recap counts how many hands were skipped.
+Play works like sitting down in an online cash game.
+
+- **Lobby**: pick a table (full ring, home game, online 6 max, deep 6 max or heads up) and a buy in.
+- **Continuous play**: hands are dealt one after another. Stacks carry over. Bots that get short top up and bots that bust rebuy, as online. If you bust you choose to add chips.
+- **Controls**: Fold, Check or Call, and Bet or Raise with Min, pot shares (multiples of the blind preflop) and All in, plus a slider. While waiting you can tick Check/fold, Check or Call any, as in an online client.
+- **Quiet grading**: the table never stops for a recap. Last hand opens the hand history and its grades, and its dot marks a mistake. Grades after each hand is an opt in.
+- **Skip clear folds**: a hand is folded for you only when the chart folds it 100% from your seat in that spot. It still plays out, so the blinds you lose count. A hand the chart plays even 1% of the time is always dealt.
+- **The session** survives switching tabs. Stacks and totals are saved on the device, so a reload sits you back down. A hand in progress restarts, like a reconnect.
 
 ## Bots
 

@@ -98,7 +98,7 @@ See [PLAY.md](PLAY.md).
 - [x] Coach where questions come up: on a missed chart decision, on a missed lesson question (as an editable draft), on Today and on every Play hand
 - [x] Play engine in `@felt/core` (`play.ts`): blinds and antes, the big blind's option, minimum raises, short all ins, side pots, split pots, seeded dealing, fuzz tested
 - [x] Bots (`bots.ts`): mixes over legal actions, charts preflop through the app's advisor, a measured hand strength order elsewhere (`preflopStrength.ts`), rule based postflop. Ten characters from the Exploits player types with drawn portraits and a Bot tag on every seat
-- [x] Play tab: 2 to 9 players, 50 to 200bb, three table presets, skip clear folds (only hands the chart folds every time)
+- [x] Play tab as a cash table: a lobby of tables (full ring, home game, online 6 max, deep 6 max, heads up) with a buy in, hands dealt one after another with stacks that carry over, bots that top up and rebuy, think time rings, chips that slide to the pot and the winner, pre actions (Check/fold, Check, Call any), Min, pot share and All in sizes with a slider, a table menu (top up, sit out, fast bots, grades after each hand, leave), a Last hand sheet with the hand history, and a session that survives switching tabs and reloads. Skip clear folds plays out hands the chart folds every time at once
 - [x] Recap: preflop graded by the chart where it matches the spot, calls and folds graded against the bots' real ranges (exact on the river heads up), coaching notes, decision quality first, mistakes to Review, Ask the coach
 - [ ] River grading with the live solver, then turn grading in the recap
 - [ ] Bot ratings measured by self play on the Suited Rating scale

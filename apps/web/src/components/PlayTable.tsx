@@ -1,34 +1,85 @@
-import { type HandState, streetBets } from '@felt/core';
+import { describeHand, type HandState } from '@felt/core';
+import { type CSSProperties, useEffect, useRef, useState } from 'react';
 import { HERO, type PlaySeat } from '../state/play';
 import { BotPortrait } from '../ui/BotPortrait';
 import { PlayingCard } from './PlayingCard';
 
 interface Props {
+  /** Changes every hand, so animations never carry over between hands. */
+  handId: string;
   state: HandState;
   seats: readonly PlaySeat[];
   /** Last action per seat on this street, e.g. "Raise to 2.5". */
   said: Record<number, string>;
-  /** Seats whose cards are face up: showdown, or always the player. */
-  shown: ReadonlySet<number>;
-  winners?: ReadonlySet<number>;
+  /** The bot thinking now and for how long, for its timer ring. */
+  thinking?: { seat: number; ms: number };
+  /** Words in the middle of the table at the end of a hand. */
+  banner?: string;
 }
 
 /** Seat anchors around an ellipse, the player at the bottom, clockwise like the action. */
 function anchors(count: number): [number, number][] {
   return Array.from({ length: count }, (_, i) => {
     const angle = Math.PI / 2 + (i * 2 * Math.PI) / count;
-    return [50 + 40 * Math.cos(angle), 50 + 41 * Math.sin(angle)];
+    return [50 + 37 * Math.cos(angle), 50 + 41 * Math.sin(angle)];
   });
 }
 
-const toward = ([x, y]: [number, number], t: number): [number, number] => [x + (50 - x) * t, y + (50 - y) * t];
+const CENTER: [number, number] = [50, 47];
+const toward = ([x, y]: [number, number], t: number): [number, number] => [x + (CENTER[0] - x) * t, y + (CENTER[1] - y) * t];
 const fmt = (n: number) => (Number.isInteger(n) ? String(n) : n.toFixed(1));
 
-/** The table for Play: bots around the felt, the board and pot in the middle, the player at the bottom. */
-export function PlayTable({ state, seats, said, shown, winners }: Props) {
+interface Flight {
+  key: string;
+  from: [number, number];
+  to: [number, number];
+  amount: number;
+  delay: number;
+}
+
+/** A poker client style table: bots around the felt, the board and pot in the middle, the player at the bottom. */
+export function PlayTable({ handId, state, seats, said, thinking, banner }: Props) {
   const n = state.players.length;
   const points = anchors(n);
-  const middle = state.players.reduce((s, p) => s + p.total, 0) - streetBets(state);
+  const at = (seat: number) => points[(seat - HERO + n) % n];
+  const betAt = (seat: number) => toward(at(seat), 0.46);
+  const over = !!state.result;
+
+  // Chips slide into the pot when a street closes, and to the winners when the hand ends.
+  const [flights, setFlights] = useState<Flight[]>([]);
+  const prev = useRef<{ handId: string; street: string; bets: { seat: number; amount: number }[]; over: boolean }>();
+  useEffect(() => {
+    const p = prev.current;
+    const bets = state.players.filter((pl) => pl.street > 0).map((pl) => ({ seat: pl.seat, amount: pl.street }));
+    const add: Flight[] = [];
+    if (p && p.handId === handId) {
+      const streetClosed = p.street !== state.street;
+      const ended = over && !p.over;
+      if (streetClosed || ended) {
+        const closing = ended && !streetClosed ? bets : p.bets;
+        closing.forEach((b, i) => add.push({ key: `${handId}-${p.street}-${b.seat}-in`, from: betAt(b.seat), to: CENTER, amount: b.amount, delay: i * 30 }));
+      }
+      if (ended) {
+        state.result!.won.forEach((w, seat) => {
+          if (w > 0) add.push({ key: `${handId}-win-${seat}`, from: CENTER, to: toward(at(seat), 0.12), amount: w, delay: 420 });
+        });
+      }
+    }
+    prev.current = { handId, street: state.street, bets, over };
+    if (add.length) {
+      setFlights((f) => [...f, ...add]);
+      const t = window.setTimeout(() => setFlights((f) => f.filter((x) => !add.includes(x))), 1300);
+      return () => window.clearTimeout(t);
+    }
+    // Positions depend only on the seat count, which a hand never changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state, handId]);
+  useEffect(() => setFlights([]), [handId]);
+
+  const inMiddle = state.players.reduce((s, p) => s + p.total - (over ? 0 : p.street), 0);
+  const me = state.players[HERO];
+  const myHand = state.board.length >= 3 && !me.folded ? describeHand([...me.cards, ...state.board]) : undefined;
+
   return (
     <div className={`play-table seats-${n}`}>
       <div className="play-felt" />
@@ -38,56 +89,81 @@ export function PlayTable({ state, seats, said, shown, winners }: Props) {
             <PlayingCard key={c} card={c} size="sm" deal delayMs={i >= 3 ? 0 : i * 70} />
           ))}
         </div>
-        <div className="play-pot num">{middle > 0 ? `Pot ${fmt(middle)}` : ' '}</div>
+        {banner ? (
+          <div className="play-banner" role="status">
+            {banner}
+          </div>
+        ) : (
+          <div className="play-pot num">{inMiddle > 0 ? `Pot ${fmt(inMiddle)}` : ' '}</div>
+        )}
       </div>
-      {state.players.map((p, i) => {
-        const at = points[(i - HERO + n) % n];
-        const [bx, by] = toward(at, 0.46);
+
+      {state.players.map((p) => {
+        const point = at(p.seat);
         const hero = p.seat === HERO;
         const bot = seats[p.seat]?.bot;
         const acting = state.toAct === p.seat;
-        const won = winners?.has(p.seat);
+        const won = over && state.result!.net[p.seat] > 0;
+        const showCards = hero || (over && state.result!.showdown && !p.folded);
+        const think = thinking?.seat === p.seat ? thinking.ms : undefined;
         return (
           <div key={p.seat}>
             <div
               className={`play-seat${hero ? ' me' : ''}${p.folded ? ' folded' : ''}${acting ? ' acting' : ''}${won ? ' won' : ''}`}
-              style={{ left: `${at[0]}%`, top: `${at[1]}%` }}
+              style={{ left: `${point[0]}%`, top: `${point[1]}%` }}
             >
               <div className="play-hole">
                 {!p.folded &&
-                  (hero || shown.has(p.seat)
+                  (showCards
                     ? p.cards.map((c) => <PlayingCard key={c} card={c} size={hero ? 'md' : 'sm'} />)
                     : [0, 1].map((k) => <PlayingCard key={k} size="sm" />))}
               </div>
               <div className="play-plate">
-                {bot && <BotPortrait look={bot.look} size={hero ? 0 : 30} active={acting} />}
+                {bot && (
+                  <span className={`play-avatar${think ? ' thinking' : ''}`} style={think ? ({ '--think': `${think}ms` } as CSSProperties) : undefined}>
+                    <BotPortrait look={bot.look} size={30} active={acting} />
+                  </span>
+                )}
                 <span className="play-plate-text">
                   <span className="play-name">
                     {hero ? 'You' : (bot?.name ?? 'Seat')}
                     {!hero && <span className="play-bot-tag">Bot</span>}
                   </span>
                   <span className="play-stack num">
-                    {p.allIn ? 'All in' : fmt(p.stack)}
+                    {p.allIn && !over ? 'All in' : fmt(p.stack)}
                     <span className="play-pos">{p.position}</span>
                   </span>
                 </span>
               </div>
-              {said[p.seat] && <span className="play-said">{said[p.seat]}</span>}
+              {hero && myHand && <span className="play-myhand">{myHand}</span>}
+              {said[p.seat] && !hero && <span className="play-said">{said[p.seat]}</span>}
             </div>
-            {p.street > 0 && (
-              <div className="play-bet num" style={{ left: `${bx}%`, top: `${by}%` }}>
+            {p.street > 0 && !over && (
+              <div className="play-bet num" style={{ left: `${betAt(p.seat)[0]}%`, top: `${betAt(p.seat)[1]}%` }}>
                 <span className="play-chip" />
                 {fmt(p.street)}
               </div>
             )}
             {state.button === p.seat && (
-              <span className="play-dealer" style={{ left: `${toward(at, 0.2)[0] + (at[0] < 50 ? 6 : -6)}%`, top: `${toward(at, 0.2)[1]}%` }} aria-label="Dealer button">
+              <span className="play-dealer" style={{ left: `${toward(point, 0.2)[0] + (point[0] < 50 ? 6 : -6)}%`, top: `${toward(point, 0.2)[1]}%` }} aria-label="Dealer button">
                 D
               </span>
             )}
           </div>
         );
       })}
+
+      {flights.map((f) => (
+        <span
+          key={f.key}
+          className="play-fly num"
+          aria-hidden="true"
+          style={{ '--x0': `${f.from[0]}%`, '--y0': `${f.from[1]}%`, '--x1': `${f.to[0]}%`, '--y1': `${f.to[1]}%`, animationDelay: `${f.delay}ms` } as CSSProperties}
+        >
+          <span className="play-chip" />
+          {fmt(Math.round(f.amount * 10) / 10)}
+        </span>
+      ))}
     </div>
   );
 }

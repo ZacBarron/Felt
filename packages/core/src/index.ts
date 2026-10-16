@@ -25,3 +25,4 @@ export * from './behind';
 export * from './play';
 export * from './preflopStrength';
 export * from './bots';
+export * from './handName';

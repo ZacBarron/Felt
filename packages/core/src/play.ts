@@ -387,3 +387,9 @@ function finish(state: HandState): HandState {
 export function streetBets(state: HandState): number {
   return state.players.reduce((s, p) => s + p.street, 0);
 }
+
+/** Each seat's stack once a finished hand is paid out: what was behind plus what came back. */
+export function stacksAfter(state: HandState): number[] {
+  if (!state.result) throw new Error('The hand is not over');
+  return state.players.map((p, i) => p.stack + state.result!.won[i]);
+}
