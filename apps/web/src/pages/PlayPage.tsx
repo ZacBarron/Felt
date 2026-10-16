@@ -26,6 +26,7 @@ import { useCanAskCoach } from '../state/coach';
 import { actionText, chartAdvisor, gradeHand, handNotes, HERO, isClearFold, type PlayGrade, type PlaySeat, rateHand } from '../state/play';
 import {
   getSession,
+  lastSeat,
   type HandRecord,
   LOBBY,
   type LobbyTable,
@@ -40,6 +41,7 @@ import {
 } from '../state/playTable';
 import { addHandsToReview } from '../state/review';
 import { BotPortrait } from '../ui/BotPortrait';
+import { HeroPattern } from '../ui/Brand';
 import { ChevronLeftIcon, ChevronRightIcon, CoachIcon, MoreIcon } from '../ui/icons';
 import { PageHeader } from '../ui/PageHeader';
 import { Segmented } from '../ui/Segmented';
@@ -65,7 +67,8 @@ function Lobby() {
   const [picking, setPicking] = useState<LobbyTable>();
   return (
     <div className="stack" style={{ gap: '1.5rem' }}>
-      <PageHeader title="Play" subtitle="Sit down at a cash table. Every other seat is a bot." />
+      <PageHeader title="Play" />
+      <QuickSeat />
       {last && <SessionSummary stats={last} />}
       <section>
         <h2 className="section-title">Tables</h2>
@@ -100,6 +103,35 @@ function Lobby() {
       </section>
       <BuyInSheet table={picking} onClose={() => setPicking(undefined)} />
     </div>
+  );
+}
+
+/** The main card, as on Today and Learn: one tap to sit at the table you played last. */
+function QuickSeat() {
+  const { table, buyIn } = lastSeat();
+  const preset = TABLE_PRESETS.find((p) => p.id === table.preset) ?? TABLE_PRESETS[0];
+  const bots = preset.bots.slice(0, table.seats - 1).map((id) => botById(id)!);
+  return (
+    <section className="hero learn-hero play-hero">
+      <HeroPattern />
+      <div className="learn-hero-body">
+        <div style={{ minWidth: 0 }}>
+          <div className="hero-label">Cash game</div>
+          <div className="display learn-hero-title">{table.name}</div>
+          <div className="hero-sub">
+            {table.seats} seats, {buyIn}bb buy in. Every other seat is a bot.
+          </div>
+          <div className="play-hero-faces" aria-hidden="true">
+            {bots.slice(0, 8).map((b) => (
+              <BotPortrait key={b.id} look={b.look} size={30} />
+            ))}
+          </div>
+        </div>
+      </div>
+      <button className="btn btn-lg btn-block btn-hero" onClick={() => sitDown(table, buyIn)}>
+        Play now
+      </button>
+    </section>
   );
 }
 
@@ -199,13 +231,21 @@ function fastForward(state: HandState, history: PlayDecision[], seats: readonly 
   return state;
 }
 
-/** How long a bot thinks: longer for bigger decisions, as people do. */
-function thinkMs(state: HandState, fast: boolean): number {
-  if (reduced()) return 250;
-  const legal = legalActions(state);
-  const big = legal.call > potSize(state) * 0.4 ? 600 : 0;
-  const base = 650 + Math.random() * 700 + big + (state.street === 'river' ? 300 : 0);
-  return Math.round(fast ? base * 0.35 : base);
+/** How long a bot takes over an action: folds are quick, big decisions take longer. */
+function thinkMs(state: HandState, action: PlayAction, speed: TableSession['settings']['speed']): number {
+  if (speed === 'instant' || reduced()) return 110;
+  const big = legalActions(state).call > potSize(state) * 0.4;
+  const natural = speed === 'natural';
+  if (action.kind === 'fold') return natural ? 450 + Math.random() * 300 : 170;
+  if (action.kind === 'check') return natural ? 600 + Math.random() * 400 : 280;
+  const base = natural ? 800 + Math.random() * 700 + (big ? 700 : 0) : 420 + (big ? 250 : 0);
+  return Math.round(base);
+}
+
+/** The pause on a finished hand before the next deal. Shorter when you were not in it at the end. */
+function resultMs(state: HandState, speed: TableSession['settings']['speed']): number {
+  const base = speed === 'instant' ? 900 : speed === 'quick' ? 1600 : 2600;
+  return state.players[HERO].folded ? base * 0.6 : base;
 }
 
 /** Books a finished hand: stacks, session totals and the hand record. */
@@ -233,7 +273,7 @@ function TableScreen({ session }: { session: TableSession }) {
   const [toast, setToast] = useState<string>();
   const [leaving, setLeaving] = useState(false);
   const live = session.live;
-  const fast = session.settings.speed === 'fast';
+  const speed = session.settings.speed;
   const busted = !live && session.stacks[HERO] + session.pendingChips <= 0;
 
   /** Deals the next hand, folding clear folds at once when asked. */
@@ -287,16 +327,17 @@ function TableScreen({ session }: { session: TableSession }) {
     }
     const { state } = live;
     if (state.result) {
-      const t = window.setTimeout(() => setSession((s) => ({ ...s, live: undefined })), fast ? 1400 : 2600);
+      const t = window.setTimeout(() => setSession((s) => ({ ...s, live: undefined })), resultMs(state, speed));
       return () => window.clearTimeout(t);
     }
     if (state.toAct !== HERO) {
       const seat = state.toAct!;
-      const ms = thinkMs(state, fast);
-      setThinking({ seat, ms });
+      const action = sampleAction(botMix(state, state.players[seat].cards, seats[seat].bot!.profile, chartAdvisor), rng.current);
+      const ms = thinkMs(state, action, speed);
+      setThinking(ms >= 400 ? { seat, ms } : undefined);
       const t = window.setTimeout(() => {
         setThinking(undefined);
-        advance(sampleAction(botMix(state, state.players[seat].cards, seats[seat].bot!.profile, chartAdvisor), rng.current));
+        advance(action);
       }, ms);
       return () => window.clearTimeout(t);
     }
@@ -592,10 +633,19 @@ function MenuSheet({ open, onClose, session, onLeave }: { open: boolean; onClose
           </span>
           <Toggle label="Skip clear folds" checked={session.settings.skipFolds} onChange={(skipFolds) => set({ skipFolds })} />
         </label>
-        <label className="list-row">
-          <span className="grow">Fast bots</span>
-          <Toggle label="Fast bots" checked={session.settings.speed === 'fast'} onChange={(on) => set({ speed: on ? 'fast' : 'normal' })} />
-        </label>
+        <div className="list-row">
+          <span className="grow">Bot speed</span>
+          <Segmented
+            ariaLabel="Bot speed"
+            value={session.settings.speed}
+            options={[
+              { value: 'instant', label: 'Instant' },
+              { value: 'quick', label: 'Quick' },
+              { value: 'natural', label: 'Natural' },
+            ]}
+            onChange={(speed) => set({ speed })}
+          />
+        </div>
         <label className="list-row">
           <span className="grow">
             <span style={{ display: 'block' }}>Grades after each hand</span>
@@ -642,7 +692,7 @@ function MenuSheet({ open, onClose, session, onLeave }: { open: boolean; onClose
 
 const GRADE_WORDS = { best: 'Best', correct: 'Good', inaccuracy: 'Inaccuracy', mistake: 'Mistake', blunder: 'Blunder' } as const;
 const STREET_WORDS = { preflop: 'Preflop', flop: 'Flop', turn: 'Turn', river: 'River' } as const;
-const TIER_WORDS = { chart: 'Chart', bot: 'Against this bot', none: 'Not graded' } as const;
+const TIER_WORDS = { chart: 'Chart', approx: 'Approximate range, not rated', bot: 'Against this bot', none: 'Not graded' } as const;
 
 function resultLine(state: HandState, seats: readonly PlaySeat[]): string {
   const r = state.result!;

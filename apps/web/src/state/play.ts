@@ -9,6 +9,8 @@ import {
   DIFFICULTY,
   gradeCall,
   gradeDecision,
+  HAND_STRENGTH_ORDER,
+  type HandMix,
   handClassOf,
   type HandState,
   legalActions,
@@ -98,10 +100,137 @@ function chartWidth(chart: Chart): number {
   return w;
 }
 
+// Approximate preflop ranges --------------------------------------------------------
+
+const RFI_SEATS = ['UTG', 'UTG+1', 'UTG+2', 'LJ', 'HJ', 'CO', 'BTN', 'SB'];
+
+/**
+ * Hands in the order Suited's opening charts add them: what UTG opens first,
+ * then what each later seat adds, then the rest by equity against a random
+ * hand. Approximate ranges for spots with no chart take the top of this order.
+ */
+export const PLAY_ORDER: string[] = (() => {
+  const tier = (h: string) => {
+    const i = RFI_SEATS.findIndex((pos) => {
+      const spec = NINE_CHARTS.find((c) => c.spot === 'rfi' && c.hero === pos);
+      const m = spec ? getChart(spec.id)?.mixes.get(h) : undefined;
+      return !!m && 1 - (m.fold ?? 0) >= 0.5;
+    });
+    return i === -1 ? RFI_SEATS.length : i;
+  };
+  const eq = new Map(HAND_STRENGTH_ORDER.map((x) => [x.hand as string, x.equity]));
+  return [...ALL_HAND_CLASSES].sort((a, b) => tier(a) - tier(b) || eq.get(b)! - eq.get(a)!);
+})();
+
+const ORDER_ABOVE = new Map<string, number>();
+{
+  let seen = 0;
+  for (const h of PLAY_ORDER) {
+    ORDER_ABOVE.set(h, seen / 1326);
+    seen += comboCount(h);
+  }
+}
+
+/** Share of combos ahead of this hand in `PLAY_ORDER`: 0 for AA. */
+export const playPercentile = (hand: string) => ORDER_ABOVE.get(hand) ?? 1;
+
+/** Share of combos a seat opens, from its 9-handed chart. */
+function openWidth(position: string | undefined, tableSize: number): number {
+  if (tableSize === 2) return 0.8;
+  const seat = position ? chartPosition(position, tableSize) : undefined;
+  const spec = NINE_CHARTS.find((c) => c.spot === 'rfi' && c.hero === seat);
+  const chart = spec ? getChart(spec.id) : undefined;
+  return chart ? chartWidth(chart) : 0.12;
+}
+
+/** Edges are soft: hands within this share of a boundary count either way. */
+const EDGE = 0.012;
+
+/** A pure mix from thresholds: the first band raises, the second calls, the rest folds (or checks). */
+function bands(p: number, raiseTo: number, callTo: number): HandMix {
+  const near = (edge: number) => Math.abs(p - edge) < EDGE;
+  if (near(raiseTo) && raiseTo > 0) return callTo > raiseTo ? { raise: 0.5, call: 0.5 } : { raise: 0.5, fold: 0.5 };
+  if (p < raiseTo) return { raise: 1 };
+  if (near(callTo) && callTo > raiseTo) return { call: 0.5, fold: 0.5 };
+  if (p < callTo) return { call: 1 };
+  return { fold: 1 };
+}
+
+export interface ApproxRange {
+  mix: HandMix;
+  /** Share of combos that continue. */
+  width: number;
+  /** What the range is, in a short sentence. */
+  what: string;
+}
+
+const pct = (x: number) => `${Math.round(x * 100)}%`;
+
+/**
+ * An approximate range for a preflop spot no chart covers, built from
+ * Suited's own opening charts: a defense takes the top of the opener's range,
+ * a 3bet answer the top of your own. Rules of thumb, so the app labels them
+ * approximate and they never feed the rating.
+ */
+export function approxRange(spot: PreflopSpot, hand: string): ApproxRange {
+  const p = playPercentile(hand);
+  const late = spot.position === 'CO' || spot.position === 'BTN';
+  const crowd = 0.75 ** (spot.callers + (spot.kind === 'raised' ? spot.limpers : 0));
+  let raise = 0;
+  let call = 0;
+  let what = '';
+  switch (spot.kind) {
+    case 'open': {
+      raise = spot.tableSize === 2 ? 0.8 : openWidth(spot.position, spot.tableSize);
+      what = `An open from the ${spot.position} plays about ${pct(raise)} of hands.`;
+      break;
+    }
+    case 'limped': {
+      if (spot.position === 'BB') [raise, call] = [0.1, 1];
+      else if (spot.position === 'SB') [raise, call] = [0.08, 0.3];
+      else [raise, call] = late ? [0.12, 0.22] : [0.08, 0.08];
+      what = `Against limpers, raise about the top ${pct(raise)} of hands${call > raise && spot.position !== 'BB' ? ' and limp behind with some more' : ''}.`;
+      break;
+    }
+    case 'raised': {
+      const w = openWidth(spot.raisers[0], spot.tableSize);
+      if (spot.position === 'BB') [raise, call] = [w * 0.22 * crowd, Math.min(0.55, w * 1.6) * crowd];
+      else if (spot.position === 'SB') [raise, call] = [w * 0.25 * crowd, w * 0.25 * crowd];
+      else [raise, call] = [w * 0.15 * crowd, w * 0.4 * crowd];
+      what = `Against a ${spot.raisers[0]} open of about ${pct(w)}, this range 3bets the top ${pct(raise)} and continues with ${pct(call)}.`;
+      break;
+    }
+    case '3bet': {
+      if (spot.reraised) {
+        const w = openWidth(spot.position, spot.tableSize);
+        const ip = spot.position !== 'SB' && spot.position !== 'BB';
+        [raise, call] = [w * 0.12, w * (ip ? 0.45 : 0.35)];
+        what = `After opening about ${pct(w)}, keep the top ${pct(call)} against a 3bet and 4bet the best ${pct(raise)}.`;
+      } else {
+        [raise, call] = [0.02, 0.03];
+        what = 'Facing a 3bet you have not put money into, play only the top 3% of hands.';
+      }
+      break;
+    }
+    case '4bet': {
+      [raise, call] = [0.02, 0.03];
+      what = 'Facing a 4bet, continue only with the top 3% of hands.';
+      break;
+    }
+  }
+  raise = Math.min(raise, 1);
+  call = Math.min(Math.max(call, raise), 1);
+  return { mix: bands(p, raise, call), width: call, what };
+}
+
 /** The bots' preflop baseline: Suited's chart wherever one covers the spot. */
 export const chartAdvisor: PreflopAdvisor = (spot, hand): PreflopAdvice | undefined => {
   const found = chartForSpot(spot);
-  if (!found) return undefined;
+  if (!found) {
+    // No chart: the same approximate range the player is graded by.
+    const a = approxRange(spot, hand);
+    return { mix: a.mix, width: a.width };
+  }
   const mix = found.chart.mixes.get(hand);
   if (!mix) return undefined;
   return { mix, width: chartWidth(found.chart) };
@@ -120,7 +249,7 @@ export function seatsFor(tableSize: number, botIds: readonly string[]): PlaySeat
 
 // Grades -----------------------------------------------------------------------------
 
-export type GradeTier = 'chart' | 'bot' | 'none';
+export type GradeTier = 'chart' | 'approx' | 'bot' | 'none';
 
 export interface PlayGrade {
   tier: GradeTier;
@@ -176,6 +305,14 @@ const mixWords = (chart: Chart, hand: string) =>
     .map(([id, f]) => `${id === 'fold' ? 'Fold' : (chart.spec.actions.find((a) => a.id === id)?.label ?? id)} ${Math.round(f * 100)}%`)
     .join(', ');
 
+const approxActionId = (action: PlayAction) => (action.kind === 'fold' ? 'fold' : action.kind === 'call' || action.kind === 'check' ? 'call' : 'raise');
+
+function approxWords(mix: HandMix): string {
+  const parts = Object.entries(mix).filter(([, f]) => f > 0);
+  const word = (id: string) => (id === 'raise' ? 'raises' : id === 'call' ? 'calls' : 'folds');
+  return parts.length === 1 ? `${word(parts[0][0])} here` : `sits on the edge, so ${word(parts[0][0])} and ${word(parts[1][0])} both count`;
+}
+
 function gradeOfScore(score: number): DecisionGrade {
   return score >= 1 ? 'best' : score > 0 ? 'inaccuracy' : 'mistake';
 }
@@ -198,12 +335,23 @@ export function gradeHand(history: readonly PlayDecision[], seats: readonly Play
       const spot = preflopSpot(state, HERO);
       const found = chartForSpot(spot);
       const hand = handClassOf(me.cards[0], me.cards[1]);
-      if (!found) {
-        grades.push({ ...base, tier: 'none', detail: 'No chart covers this spot yet.', rated: false });
+      if (!found || !reaches(found.chart, hand) || (!found.exact && spot.callers + spot.limpers > 0)) {
+        // No chart fits: grade by the approximate range, never toward the rating.
+        const a = approxRange(spot, hand);
+        const score = scoreRecall(a.mix, approxActionId(action));
+        grades.push({ ...base, tier: 'approx', grade: gradeOfScore(score), detail: `${a.what} ${hand} ${approxWords(a.mix)}.`, rated: false });
         return;
       }
-      if (!found.exact || !reaches(found.chart, hand)) {
-        grades.push({ ...base, tier: 'none', detail: found.why ?? 'The chart does not cover this hand here.', rated: false });
+      if (!found.exact) {
+        const mix = found.chart.mixes.get(hand) ?? { fold: 1 };
+        const score = scoreRecall(mix, chartActionId(found.chart, action));
+        grades.push({
+          ...base,
+          tier: 'approx',
+          grade: gradeOfScore(score),
+          detail: `${found.why} Graded by ${found.chart.spec.title}, which plays ${hand} as ${mixWords(found.chart, hand)}.`,
+          rated: false,
+        });
         return;
       }
       const mix = found.chart.mixes.get(hand) ?? { fold: 1 };

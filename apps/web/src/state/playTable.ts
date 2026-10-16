@@ -32,7 +32,8 @@ export const LOBBY: LobbyTable[] = [
 export interface TableSettings {
   /** Fold hands the chart always folds and deal the next one at once. */
   skipFolds: boolean;
-  speed: 'normal' | 'fast';
+  /** How long bots take: Instant, Quick or Natural, which thinks like a person. */
+  speed: 'instant' | 'quick' | 'natural';
   /** Show a short line of grades after each hand. Off keeps the table quiet. */
   showGrades: boolean;
 }
@@ -79,7 +80,11 @@ export interface TableSession {
 
 const KEY = 'felt.play.table.v1';
 const SETTINGS_KEY = 'felt.play.settings.v1';
-const DEFAULT_SETTINGS: TableSettings = { skipFolds: true, speed: 'normal', showGrades: false };
+const DEFAULT_SETTINGS: TableSettings = { skipFolds: true, speed: 'quick', showGrades: false };
+
+/** Older saves had normal and fast. Both move up a step: waiting on bots is no fun. */
+const SPEEDS: Record<string, TableSettings['speed']> = { normal: 'quick', fast: 'instant', instant: 'instant', quick: 'quick', natural: 'natural' };
+const withSpeed = (t: TableSettings): TableSettings => ({ ...t, speed: SPEEDS[t.speed] ?? 'quick' });
 export const NO_STATS: SessionStats = { hands: 0, skipped: 0, net: 0, graded: 0, good: 0, evLost: 0, bought: 0 };
 
 function read<T>(key: string): T | undefined {
@@ -101,14 +106,14 @@ function write(key: string, value: unknown) {
 }
 
 export function savedSettings(): TableSettings {
-  return { ...DEFAULT_SETTINGS, ...read<TableSettings>(SETTINGS_KEY) };
+  return withSpeed({ ...DEFAULT_SETTINGS, ...read<TableSettings>(SETTINGS_KEY) });
 }
 
 function load(): TableSession | undefined {
   const saved = read<Omit<TableSession, 'hands' | 'live'>>(KEY);
   if (!saved?.table || !Array.isArray(saved.stacks)) return undefined;
   const table = LOBBY.find((t) => t.id === saved.table.id) ?? saved.table;
-  return { ...saved, table, settings: { ...DEFAULT_SETTINGS, ...saved.settings }, hands: [] };
+  return { ...saved, table, settings: withSpeed({ ...DEFAULT_SETTINGS, ...saved.settings }), hands: [] };
 }
 
 let session: TableSession | undefined = load();
@@ -175,8 +180,18 @@ export function sitDown(table: LobbyTable, buyIn: number) {
     hands: [],
   };
   lastStats = undefined;
+  write(LAST_KEY, { id: table.id, buyIn });
   persist();
   emit();
+}
+
+const LAST_KEY = 'felt.play.last.v1';
+
+/** The table and buy in the player last sat down with, for Play now. */
+export function lastSeat(): { table: LobbyTable; buyIn: number } {
+  const saved = read<{ id: string; buyIn: number }>(LAST_KEY);
+  const table = LOBBY.find((t) => t.id === saved?.id) ?? LOBBY[0];
+  return { table, buyIn: saved && table.buyIns.includes(saved.buyIn) ? saved.buyIn : table.buyIns[1] };
 }
 
 export function leaveTable() {

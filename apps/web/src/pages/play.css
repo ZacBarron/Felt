@@ -826,3 +826,22 @@
   font-weight: 650;
   letter-spacing: 0.02em;
 }
+
+/* Play now: the lobby's main card, built like the ones on Today and Learn. */
+.play-hero-faces {
+  display: flex;
+  margin-top: 0.8rem;
+}
+
+.play-hero-faces svg {
+  border-radius: 50%;
+  box-shadow: 0 0 0 2px var(--base-700);
+}
+
+.play-hero-faces svg + svg {
+  margin-left: -7px;
+}
+
+.play-hero .btn-hero {
+  margin-top: 1rem;
+}
