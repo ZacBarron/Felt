@@ -30,6 +30,23 @@ function Svg({ size = 24, filled: _filled, children, ...rest }: IconProps & { ch
   );
 }
 
+/**
+ * Path data shared with canvas drawings (the share cards), so an icon drawn
+ * on an image matches the one in the interface. Strokes are on the 24pt grid.
+ */
+export const GLYPHS = {
+  check: 'm5 12.5 4.5 4.5L19 7.5',
+  close: 'M6.5 6.5l11 11M17.5 6.5l-11 11',
+  minus: 'M6 12h12',
+  flame: 'M12 3s5.75 4.4 5.75 10.5a5.75 5.75 0 0 1-11.5 0c0-3 2-5 2-5 0 2.5 1.6 3.6 1.6 3.6C9.85 8 12 3 12 3Z',
+  freeze: [
+    'M12 3.5v17M4.65 7.75l14.7 8.5M4.65 16.25l14.7-8.5',
+    'm9.75 4.75 2.25 2 2.25-2M9.75 19.25l2.25-2 2.25 2',
+    'm4.4 10.6 3 .65.95-2.9M19.6 13.4l-3-.65-.95 2.9',
+    'm4.4 13.4 3-.65.95 2.9M19.6 10.6l-3 .65-.95-2.9',
+  ],
+} as const;
+
 const fillProps = (filled?: boolean) => (filled ? { fill: 'currentColor', fillOpacity: 0.22 } : {});
 
 /** Today: an activity style ring, three quarters closed. */
@@ -202,7 +219,7 @@ export function SettingsIcon(p: IconProps) {
 export function CloseIcon(p: IconProps) {
   return (
     <Svg {...p} strokeWidth={2.25}>
-      <path d="M6.5 6.5l11 11M17.5 6.5l-11 11" />
+      <path d={GLYPHS.close} />
     </Svg>
   );
 }
@@ -210,7 +227,7 @@ export function CloseIcon(p: IconProps) {
 export function CheckIcon(p: IconProps) {
   return (
     <Svg {...p} strokeWidth={2.5}>
-      <path d="m5 12.5 4.5 4.5L19 7.5" />
+      <path d={GLYPHS.check} />
     </Svg>
   );
 }
@@ -218,7 +235,7 @@ export function CheckIcon(p: IconProps) {
 export function MinusIcon(p: IconProps) {
   return (
     <Svg {...p} strokeWidth={2.25}>
-      <path d="M6 12h12" />
+      <path d={GLYPHS.minus} />
     </Svg>
   );
 }
@@ -279,7 +296,7 @@ export function FlameIcon(p: IconProps) {
   return (
     <Svg {...p} strokeWidth={1.6}>
       <path
-        d="M12 3s5.75 4.4 5.75 10.5a5.75 5.75 0 0 1-11.5 0c0-3 2-5 2-5 0 2.5 1.6 3.6 1.6 3.6C9.85 8 12 3 12 3Z"
+        d={GLYPHS.flame}
         fill="currentColor"
         fillOpacity={0.9}
       />
@@ -550,10 +567,19 @@ export function ShareIcon(p: IconProps) {
 export function FreezeIcon(p: IconProps) {
   return (
     <Svg {...p}>
-      <path d="M12 3.5v17M4.65 7.75l14.7 8.5M4.65 16.25l14.7-8.5" />
-      <path d="m9.75 4.75 2.25 2 2.25-2M9.75 19.25l2.25-2 2.25 2" />
-      <path d="m4.4 10.6 3 .65.95-2.9M19.6 13.4l-3-.65-.95 2.9" />
-      <path d="m4.4 13.4 3-.65.95 2.9M19.6 10.6l-3 .65-.95-2.9" />
+      {GLYPHS.freeze.map((d) => (
+        <path key={d} d={d} />
+      ))}
+    </Svg>
+  );
+}
+
+/** Link: two chain links at an angle, for copying a link. */
+export function LinkIcon(p: IconProps) {
+  return (
+    <Svg {...p}>
+      <path d="M10.25 13.75a3.75 3.75 0 0 0 5.3 0l3.2-3.2a3.75 3.75 0 0 0-5.3-5.3l-1.2 1.2" />
+      <path d="M13.75 10.25a3.75 3.75 0 0 0-5.3 0l-3.2 3.2a3.75 3.75 0 0 0 5.3 5.3l1.2-1.2" />
     </Svg>
   );
 }

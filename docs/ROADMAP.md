@@ -63,6 +63,7 @@ See [MONETIZATION.md](MONETIZATION.md).
 - [x] Daily challenge: five decisions, the same for everyone, harder as it goes, saved after every answer, rated, a decision list that adds misses to review, and a shareable spoiler free grid
 - [x] Weekly Pro challenge: 10 harder decisions per ISO week, the same for every Pro player, balanced across math, mixed hands, close calls, solver graded rivers and advanced questions, harder as it goes, mixes graded by mix distance, one attempt, rated, personal bests against earlier weeks, misses to review, a share grid, a card on Today for Pro players
 - [x] Streaks with freezes: one to start, one earned every seven days in a row
+- [x] Share cards: a sheet with a swipeable carousel of 1080x1350 cards (rating, streak and daily challenge, on felt or paper) and page dots, then Share (the image with its text where the browser can), Copy and Save image. A rating still settling shows as "About 1180". The daily challenge also shares a spoiler free text result (`Suited Daily #312 4/5` and five squares). Every link carries the invite code
 - [x] Research brief with verified sources (docs/research/sources.md)
 - [x] Tiers every 150 points (nine tiers, Newcomer to Elite, none while provisional) with progress to the next
 - [x] Levels of thinking: each tier names the question its players ask and what Suited rates there; Your tier card on You with points and right answers to the next tier (from the update rule), the full ladder in a sheet, and the question in the tier moment

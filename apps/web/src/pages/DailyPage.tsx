@@ -1,5 +1,5 @@
 import { STARTER_CHARTS } from '@felt/content';
-import { boundaryHands, challengeNumber, chartItemDifficulty, DIFFICULTY, dailyPicks, shareGrid, isProvisional, type SkillRating, tierLabel } from '@felt/core';
+import { boundaryHands, challengeNumber, chartItemDifficulty, DIFFICULTY, dailyPicks, isProvisional } from '@felt/core';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
@@ -17,7 +17,9 @@ import { plural } from '../ui/format';
 import { CheckIcon, ChevronRightIcon, CloseIcon, LearnIcon, MinusIcon, RangesIcon } from '../ui/icons';
 import { ProgressRing } from '../ui/ProgressRing';
 import { useBodyClass } from '../ui/useBodyClass';
+import { ShareSheet } from '../components/ShareSheet';
 import { StreakWeek, useStreakWeek } from '../components/StreakWeek';
+import type { ShareKind } from '../state/share';
 import { useSettings } from '../state/settings';
 import { weeklyAvailable } from '../state/weekly';
 import { WeeklyTodayCard } from './WeeklyPage';
@@ -67,12 +69,6 @@ function timeToTomorrow(now = new Date()) {
   return h > 0 ? `${plural(h, 'hour')} ${plural(mins % 60, 'minute')}` : plural(mins % 60, 'minute');
 }
 
-export function shareText(number: number, scores: number[], rating: SkillRating) {
-  const right = scores.filter((s) => s >= 1).length;
-  const tier = isProvisional(rating) ? 'still settling' : tierLabel(rating);
-  return `Suited Daily #${number}: ${right} of ${scores.length}\n${shareGrid(scores)}\nSuited Rating ${Math.round(rating.rating)}, ${tier}`;
-}
-
 interface Crowd {
   players: number;
   distribution: number[];
@@ -117,7 +113,7 @@ function describe(d: Decision) {
 const verdict = (s: number) => (s >= 1 ? 'Correct' : s > 0 ? 'Part of the mix' : 'Not quite');
 
 function Result({ number, items, scores, before, after }: { number: number; items: Decision[]; scores: number[]; before: number; after: number }) {
-  const [copied, setCopied] = useState(false);
+  const [sharing, setSharing] = useState<ShareKind>();
   const [added, setAdded] = useState(false);
   const week = useStreakWeek();
   const { settings } = useSettings();
@@ -127,19 +123,6 @@ function Result({ number, items, scores, before, after }: { number: number; item
   const delta = Math.round(after - before);
   const crowd = useDailyCrowd(number, scores);
   const missedHands = items.flatMap((d, i) => (d.kind === 'chart' && scores[i] < 1 ? [{ chartId: d.chartId, hand: d.hand }] : []));
-  const share = async () => {
-    const text = shareText(number, scores, (await ratingSnapshot()).overall);
-    try {
-      if (navigator.share) await navigator.share({ text: `${text}\n${location.origin}${import.meta.env.BASE_URL}daily` });
-      else {
-        await navigator.clipboard.writeText(`${text}\n${location.origin}${import.meta.env.BASE_URL}daily`);
-        setCopied(true);
-      }
-      haptic('success');
-    } catch {
-      // The share sheet was dismissed.
-    }
-  };
   const addMissed = async () => {
     await addHandsToReview(missedHands);
     setAdded(true);
@@ -184,7 +167,7 @@ function Result({ number, items, scores, before, after }: { number: number; item
 
       {week && (
         <div className="card reveal">
-          <StreakWeek data={week} />
+          <StreakWeek data={week} onShare={() => setSharing('streak')} />
         </div>
       )}
 
@@ -260,11 +243,13 @@ function Result({ number, items, scores, before, after }: { number: number; item
           <Link to="/" className="btn btn-lg glass">
             Done
           </Link>
-          <button className="btn btn-primary btn-lg" onClick={() => void share()} data-haptic="off">
-            {copied ? 'Copied' : 'Share result'}
+          <button className="btn btn-primary btn-lg" onClick={() => setSharing('daily')}>
+            Share result
           </button>
         </div>
       </BottomBar>
+
+      <ShareSheet open={!!sharing} first={sharing ?? 'daily'} onClose={() => setSharing(undefined)} />
     </div>
   );
 }

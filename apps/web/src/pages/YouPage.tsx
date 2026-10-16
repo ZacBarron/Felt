@@ -14,9 +14,7 @@ import {
   skillEdge,
   stakesLabel,
   type TableAssumptions,
-  tierFor,
   tierLabel,
-  TIERS,
 } from "@felt/core";
 import { useLiveQuery } from "dexie-react-hooks";
 import { useEffect, useState } from "react";
@@ -34,7 +32,8 @@ import { ChevronRightIcon, FlameIcon, SettingsIcon, ShareIcon } from "../ui/icon
 import { BrandFooter } from "../ui/Brand";
 import { AccountRows, GameRows, ProCard } from "../components/YouLinks";
 import { AvatarPicker } from "../ui/Avatar";
-import { RatingShareSheet } from "../components/RatingShare";
+import { ShareSheet } from "../components/ShareSheet";
+import { bestSettled, type ShareKind } from "../state/share";
 import { TierCard } from "../components/TierCard";
 import { PageHeader } from "../ui/PageHeader";
 import { Section } from "../ui/Section";
@@ -161,7 +160,7 @@ export function YouPage() {
     return { lessons, dailies, first };
   }, []);
   const [showAssumptions, setShowAssumptions] = useState(false);
-  const [sharing, setSharing] = useState(false);
+  const [sharing, setSharing] = useState<ShareKind>();
   // Arriving from the tier moment's "Share my rating": open the card once.
   const [params, setParams] = useSearchParams();
   const wantsShare = params.get("share") === "1";
@@ -170,7 +169,7 @@ export function YouPage() {
   const shown = Math.round(useCountUp(overall?.rating ?? 0));
   useEffect(() => {
     if (!wantsShare || !overall) return;
-    if (overall.games > 0) setSharing(true);
+    if (overall.games > 0) setSharing("rating");
     setParams(
       (p) => {
         const next = new URLSearchParams(p);
@@ -249,10 +248,7 @@ export function YouPage() {
   const rated = overall.games > 0;
   const provisional = isProvisional(overall);
   // Personal best counts only settled ratings, so early swings do not set a record.
-  const bestRating = Math.max(
-    0,
-    ...snap.history.filter((p) => p.rd <= 110).map((p) => p.rating),
-  );
+  const bestRating = bestSettled(snap.history);
 
   const setAssumption = (key: keyof TableAssumptions, value: number) =>
     update({
@@ -260,19 +256,6 @@ export function YouPage() {
       assumptions: { ...settings.assumptions, [key]: value },
     });
 
-  const tierName = provisional ? undefined : tierFor(overall.rating);
-  // The share card: real numbers only, from this device's answers.
-  const card = {
-    name: settings.profile.name?.trim() || undefined,
-    rating: overall.rating,
-    settling: provisional,
-    tier: tierName,
-    thinks: TIERS.find((t) => t.name === tierName)?.thinks,
-    answers: overall.games,
-    streak: streak?.streak ?? 0,
-    best: bestRating,
-    history: snap.history.map((p) => p.rating),
-  };
   const since = overview?.first?.toLocaleDateString("en-US", {
     month: "short",
     year: "numeric",
@@ -376,7 +359,7 @@ export function YouPage() {
         {rated ? (
           <button
             className="btn btn-lg btn-block btn-hero you-share"
-            onClick={() => setSharing(true)}
+            onClick={() => setSharing("rating")}
           >
             <ShareIcon size={20} />
             Share my rating
@@ -388,15 +371,26 @@ export function YouPage() {
         )}
       </section>
 
-      {rated && (
-        <RatingShareSheet
-          open={sharing}
-          onClose={() => setSharing(false)}
-          data={card}
-        />
-      )}
+      <ShareSheet
+        open={!!sharing}
+        first={sharing ?? "rating"}
+        onClose={() => setSharing(undefined)}
+      />
 
-      <Section title="Overview">
+      <Section
+        title="Overview"
+        trailing={
+          streak && streak.streak > 0 ? (
+            <button
+              className="btn btn-plain you-share-streak"
+              onClick={() => setSharing("streak")}
+            >
+              <ShareIcon size={18} />
+              Share streak
+            </button>
+          ) : undefined
+        }
+      >
         <div className="you-stats">
           <div className="you-stat">
             <span className="you-stat-value num">

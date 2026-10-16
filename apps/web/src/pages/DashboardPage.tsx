@@ -21,6 +21,7 @@ import { ImportCard } from '../ui/ImportCard';
 import { StudyTimeCard } from '../ui/StudyTimeCard';
 import { InstallCard } from '../ui/InstallCard';
 import { AccountCard } from '../ui/AccountCard';
+import { InviteCard } from '../components/InviteCard';
 import { WeeklyTodayCard } from './WeeklyPage';
 import { HeroPattern } from '../ui/Brand';
 import { plural } from '../ui/format';
@@ -247,6 +248,7 @@ export function DashboardPage() {
 
       {/* After the plan: saving progress never competes with studying. */}
       <AccountCard />
+      <InviteCard lessonsDone={[...progress.values()].filter((l) => l.status === 'done').length} />
 
       {rating && rating.games > 0 && <TierCard rating={rating} />}
 

@@ -1,6 +1,7 @@
 import 'fake-indexeddb/auto';
 import { beforeEach, describe, expect, it } from 'vitest';
-import { dailyItems, shareText } from '../src/pages/DailyPage';
+import { dailyItems } from '../src/pages/DailyPage';
+import { dailyResultText } from '../src/state/share';
 import { db } from '../src/state/db';
 import { domainForLesson, ratingSnapshot, recordLessonQuiz, recordRated, streakNow } from '../src/state/rating';
 import { CEILING_MARGIN, chartItemDifficulty, DIFFICULTY, START_RATING } from '@felt/core';
@@ -87,7 +88,6 @@ describe('daily challenge', () => {
   });
 
   it('shares a spoiler free result', () => {
-    expect(shareText(285, [1, 1, 0.5, 0, 1], { rating: 1432, rd: 80, games: 120 })).toBe('Suited Daily #285: 3 of 5\n🟩🟩🟨🟥🟩\nSuited Rating 1432, Sharp');
-    expect(shareText(285, [1], { rating: 1250, rd: 250, games: 4 })).toContain('Suited Rating 1250, still settling');
+    expect(dailyResultText(285, [1, 1, 0.5, 0, 1])).toBe('Suited Daily #285 3/5\n🟩🟩🟨⬛🟩');
   });
 });

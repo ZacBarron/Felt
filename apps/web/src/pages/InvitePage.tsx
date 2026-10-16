@@ -39,8 +39,8 @@ export function InvitePage() {
         <div className="card invite-signin">
           <span>{features?.accounts === false ? 'Invites need an account, and accounts are not on here yet.' : 'Make an account to get your invite link.'}</span>
           {features?.accounts !== false && (
-            <Link to="/account?next=/invite" className="btn btn-primary">
-              Make an account
+            <Link to="/account?next=/invite" className="btn btn-primary invite-signup">
+              Sign up
             </Link>
           )}
         </div>
@@ -65,7 +65,7 @@ export function InvitePage() {
           <li className="list-row">
             <span className="invite-step-n">3</span>
             <span className="grow">
-              After {QUALIFY_ANSWERS} graded answers you get a month too. Up to {MAX_REFERRAL_MONTHS} a year.
+              Once they give {QUALIFY_ANSWERS} graded answers you get a month too. Up to {MAX_REFERRAL_MONTHS} a year.
             </span>
           </li>
         </ol>
