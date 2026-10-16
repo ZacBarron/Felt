@@ -15,6 +15,7 @@ import { buildQueue, masteryForCharts, todayStats } from '../state/review';
 import { useSettings } from '../state/settings';
 import { Avatar } from '../ui/Avatar';
 import { ImportCard } from '../ui/ImportCard';
+import { StudyTimeCard } from '../ui/StudyTimeCard';
 import { InstallCard } from '../ui/InstallCard';
 import { AccountCard } from '../ui/AccountCard';
 import { WeeklyTodayCard } from './WeeklyPage';
@@ -167,6 +168,7 @@ export function DashboardPage() {
       )}
 
       <InstallCard />
+      <StudyTimeCard />
       <ImportCard />
 
       <WeeklyTodayCard />

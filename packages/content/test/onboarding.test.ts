@@ -8,7 +8,10 @@ describe('onboarding content', () => {
     const r = exactEquity(parseCards(hero) as [number, number], parseCards(villain) as [number, number], []);
     expect(Math.round(r.win * 100)).toBe(winPct);
     expect(FIRST_HAND_NEW.explain).toContain(`${winPct}%`);
-    expect(FIRST_HAND_NEW.choiceCards?.[FIRST_HAND_NEW.answer]).toBe(hero);
+    expect(FIRST_HAND_NEW.cards).toBe(hero);
+    expect(FIRST_HAND_NEW.choices[FIRST_HAND_NEW.answer]).toContain(`${winPct}%`);
+    // "Loses about 1 time in 8": aces lose 12.4% of the time.
+    expect(Math.abs(r.lose - 1 / 8)).toBeLessThan(0.005);
   }, 60_000);
 
   it('finds the first hand for players who know the rules', () => {

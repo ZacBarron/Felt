@@ -10,33 +10,23 @@ How Felt turns a first open into a daily habit and a paid subscription, and why 
 
 ## Onboarding flow
 
-| Screen | What it does | Why it works |
+Short on purpose: about five screens, then the first lesson. Every question changes the plan; a question that only matters in one place is asked there, at the moment it matters.
+
+| Screen | What it does | Why |
 | --- | --- | --- |
-| Welcome | Two aces dealt on the felt, "From your first hand to Elite", the rating ladder climbing, and real counts of lessons, questions and charts. "I have an account" appears only when a server answers and opens sign in (passkey first, email code as the fallback). Signing in there skips onboarding and shows "Welcome back" with the Felt Rating, lessons and streak that came back | Names the whole journey for a beginner and a regular alike. The proof is depth that can be checked, not claims |
-| Level | New to pro, with a one line reply to the answer | Each answer is heard (the reply), and it decides basics first or placement |
-| Target | Pick a tier to aim for: Solid, Regular, Expert or Elite, with what each means and its rating | A specific, hard goal beats "do your best" (Locke and Latham 2002); Elite is the cap because higher tiers could not be measured honestly |
-| Goal | Beginners (new, or play for fun) see goals in their words: learn the game, home games, a casino, get really good, tournaments. Regular and pro players see win live, move up, go pro, master GTO, tournaments | The goal is quoted back in the plan and on Today. Changing level drops goals the new level does not offer |
-| Game | Beginners: home games, a casino or card room, online, tournaments, not sure yet. Players: live 1/3, live 2/5+, online, tournaments, each with what the label means | Sets the game preset, so the first hand and every chart match |
-| Focus | Asked only of people who can answer it. New players skip it: they cannot name a leak yet. People who play for fun get an optional "What feels hardest right now?" in plain words. Regular and pro players get "What costs you the most money?" with a note on each area, including bankroll and swings | Moves those modules up the path |
-| Opponents | Regular and pro players only: loose and casual, a mix, or strong regulars | Brings exploits or theory forward, and moves the pool rating assumption one tier (150 points) down or up from the game default. The player sees and can change it with the other win rate assumptions |
-| Hands to import | Regular and pro players only: hand histories, a session log, or not yet | Real hands beat guesses about leaks. Today then shows one card that leads to the import, until something is imported or the card is closed |
-| First hand | New players pick the better of two starting hands; people who know the rules answer a hand ranking question from the rankings lesson; players get a real button open from their game, untimed, graded with its mix | Value before the ask. It is winnable on purpose: an early success is the strongest source of self efficacy (Bandura 1977). Letting people try before signing up is how Duolingo onboards (secondary reports of a large lift) |
-| Why it works | Sources on every answer, recall over rereading (61% vs 40% a week later), a rating built on Elo and Glicko | Real, cited reasons in place of invented social proof |
-| Daily goal | 5, 10, 15 or 20 minutes | A specific, small, chosen target |
-| Study cue | When they will study | Implementation intention (Gollwitzer 1999) |
-| Find where you start | Placement or start from the basics. Skipped for new players | Nobody repeats what they know |
-| Plan | Pledge, the climb to their target, and the first week starting with a done "Set up your plan" row, then hold to commit | The labor of building is shown (Buell and Norton 2011). A step already done is honest endowed progress (Nunes and Drèze 2006) |
-| Day 1 | A short moment: "Your plan is set" | Marks the commitment the player just made |
-| Save your progress | Only when the server offers accounts and the player is a guest. A calm screen: what an account gives (no password, your plan, rating and streak on any device, safe if the phone is lost), "Create a passkey", "Skip for now" at the same size, and "Use email instead". Asked once. Events: `account_prompt_viewed`, `account_created`, `account_skipped` | Deferred sign up: the ask comes after the player has a plan worth keeping, not before any value. Duolingo lets people finish a lesson before asking for an account and reports more daily users from moving sign up later (secondary source, see research/sources.md). Passkeys make it one tap with nothing to remember. Skipping costs nothing, so the choice stays honest |
-| Paywall | Felt Pro, personalized headline | Shown at peak intent, right after commitment |
+| Welcome | The promise, who it is for at every level, and three swipeable cards that show the app (a lesson question, a range chart, the rating climb) | Show, not tell. Proof is real content counts, never invented users or reviews |
+| Level | New to poker, play for fun, play regularly, poker is my job, with a one line reply | Decides basics first, the wording of every later question and whether placement is offered |
+| Goals | In the player's words for their level (multi select) | Orders the first topics; quoted back in the plan |
+| What costs you money | Regular players: the leak question. Players who play for fun: an optional "what feels hardest". New players: skipped | Only asked of people who can answer it |
+| A quick guess / Try one hand | New and casual players guess how often aces beat 7 2 (87%: even the best hand loses 1 time in 8). Regular players face a real chart spot | Value before any ask, and the core idea of the app (judge decisions, not results) on screen one |
+| Daily time | 5 to 20 minutes | A small, specific, chosen target |
+| Find where you start | Placement quiz, or start from the basics (casual) or skip the quiz (regulars start at Foundations). Not shown to new players | Nobody repeats what they know |
+| Plan | One card: the first lesson, what comes next, daily review. One button: Start my first lesson | No pledge ritual, no paywall in the way of the first win |
+| First lesson | Starts right away | Activation: the first lesson is the product |
+| First lesson done | A Day 1 moment with what they just did, then "Keep your progress" (a passkey account, skippable, once), then the Felt Pro offer once, then Today | Offers come after the first real value. The Pro offer stays on day one because most trials start on install day (82% in RevenueCat's 2025 report) |
+| Today, after the first lesson | One card: "When will you do tomorrow's lesson?" with an optional calendar reminder | An if-then plan works best tied to a real moment (Gollwitzer and Sheeran 2006, d = 0.65 across 94 tests); asked when useful, not during setup |
 
-New players always start with the basics, whatever their goals; so does a casual player who skips placement (`pathPrefs` in `state/goals.ts`). After onboarding, review deals chart cards only once the lesson that introduces charts is done (or any preflop lesson), and math cards only after the odds or a math lesson (`chartsTaught` and `mathTaught` in `state/decks.ts`). Today hides the daily challenge until then, so a beginner is never sent to a range chart they have not learned.
-
-**Social proof.** Felt shows only proof that is true: counts read from the content, cited research and, once real players give them, quotes in `TESTIMONIALS` (`packages/content/src/onboarding.ts`). Social proof persuades most when it describes people like the reader (Goldstein, Cialdini and Griskevicius 2008), and invented numbers or reviews would break the trust the product depends on. The section stays hidden while the list is empty.
-
-The progress bar at the top of every step keeps the end in sight.
-
-**Later, for guests.** When accounts exist, Today shows one card after real progress worth protecting (3 lessons done or a 3 day streak): "Save your progress to an account. Use Felt on any device." It shows for a day at most once a week, waits 3 days after the onboarding ask, and never returns after two dismissals. No loss framing beyond the plain fact. Rules in `state/accountPrompt.ts` (unit tested).
+Moved out of onboarding: the game charts should match (asked on the first visit to Ranges), who you play against and hands to import (regular players see an import card on Today), and the target tier (the level system on You shows the next tier and how close it is).
 
 ## Placement and test outs
 

@@ -91,6 +91,15 @@ describe('several goals', () => {
     expect(pathPrefs({ ...base, focus: [], opponents: 'mixed' }).focus).toEqual([]);
   });
 
+  it('puts the rules last for regular players who skip placement', async () => {
+    const { pathPrefs } = await import('../src/state/goals');
+    const progress = await lessonProgress();
+    const prefs = pathPrefs({ onboarded: true, experience: 'winning', goals: [], focus: [], dailyMinutes: 10 });
+    const path = recommendedLessons(progress, prefs);
+    expect(path[0].key.startsWith('basics/')).toBe(false);
+    expect(path.findIndex((e) => e.key.startsWith('basics/'))).toBeGreaterThan(path.findIndex((e) => e.key.startsWith('foundations/')));
+  });
+
   it('reads saves from before goals were a list', async () => {
     const { pathPrefs } = await import('../src/state/goals');
     const old = { onboarded: true, goal: 'master-gto', focus: [], dailyMinutes: 10 } as unknown as Parameters<typeof pathPrefs>[0];

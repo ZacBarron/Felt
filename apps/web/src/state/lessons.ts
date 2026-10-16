@@ -85,6 +85,8 @@ export interface PathPrefs {
   placedAt?: string;
   /** Modules the player asked to focus on, as `track/module`. */
   focus?: readonly string[];
+  /** Regular and pro players: the rules track goes to the end of the path instead of the start. */
+  basicsLast?: boolean;
 }
 
 const moduleOf = (key: string) => key.split('/').slice(0, 2).join('/');
@@ -105,8 +107,9 @@ export function recommendedLessons(
   const placed = open.filter((e) => moduleOf(e.key) === prefs.placedAt);
   // Focus modules in the order given: the player's own picks first, then their goal's.
   const focus = (prefs.focus ?? []).flatMap((m) => open.filter((e) => moduleOf(e.key) === m));
+  const rest = prefs.basicsLast ? [...open.filter((e) => !e.key.startsWith('basics/')), ...open.filter((e) => e.key.startsWith('basics/'))] : open;
   const seen = new Set<string>();
-  return [...started, ...placed, ...focus, ...open].filter((e) => !seen.has(e.key) && seen.add(e.key));
+  return [...started, ...placed, ...focus, ...rest].filter((e) => !seen.has(e.key) && seen.add(e.key));
 }
 
 /** Continue the lesson in progress, else the next lesson on the path, else the first lesson. */

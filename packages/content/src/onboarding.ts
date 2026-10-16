@@ -4,18 +4,19 @@ import type { LessonStep } from './lessons/types';
 type Quiz = Extract<LessonStep, { kind: 'quiz' }>;
 
 /**
- * The first hand someone plays during setup, before they have learned
- * anything. It is meant to be winnable: an early success is the strongest
- * source of belief that you can learn a skill (Bandura 1977). The chance is
- * exact and checked by the content tests.
+ * The first question in setup, for new and casual players. Not a test of
+ * knowledge: a guess with a surprising answer that teaches the idea the
+ * whole app rests on. Even the best hand loses often, so poker is judged by
+ * decisions over many hands, not by single results. The chances are exact
+ * and checked by the content tests.
  */
 export const FIRST_HAND_NEW: Quiz = {
   kind: 'quiz',
-  question: 'Which starting hand would you rather hold?',
-  choiceCards: ['AsAh', '7c2d'],
-  choices: ['Two aces', 'A seven and a two'],
-  answer: 0,
-  explain: 'Two aces is the best starting hand in poker. It beats 7 2 about 87% of the time. Felt teaches you which hands to play and when.',
+  question: 'Aces against 7 2. How often do the aces win?',
+  cards: 'AsAh',
+  choices: ['About 99% of the time', 'About 87% of the time', 'About 70% of the time'],
+  answer: 1,
+  explain: 'About 87%. Even the best starting hand loses about 1 time in 8. So good players judge decisions, not single results. Felt trains those decisions.',
 };
 
 /**

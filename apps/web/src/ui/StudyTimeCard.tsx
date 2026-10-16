@@ -1,0 +1,94 @@
+import { useState } from 'react';
+import { track } from '../state/events';
+import { CUES, cueCopy } from '../state/goals';
+import { studyReminder } from '../state/reminders';
+import { useSettings } from '../state/settings';
+import { CloseIcon } from './icons';
+
+const KEY = 'felt.studyTimeDismissed';
+
+function dismissedBefore() {
+  try {
+    return localStorage.getItem(KEY) === '1';
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * After the first lesson, one card asks when tomorrow's lesson happens. Tying
+ * practice to a moment you already have is among the best tested habit tools
+ * (implementation intentions, Gollwitzer and Sheeran 2006), so it is asked
+ * once, at the moment it is useful, instead of during setup.
+ */
+export function StudyTimeCard() {
+  const { settings, update } = useSettings();
+  const profile = settings.profile;
+  const [hidden, setHidden] = useState(dismissedBefore);
+  const [picked, setPicked] = useState<string>();
+  if (hidden || !profile.firstLessonAt || (profile.cue && !picked)) return null;
+
+  const close = () => {
+    setHidden(true);
+    try {
+      localStorage.setItem(KEY, '1');
+    } catch {
+      /* Storage blocked: it may show again, which is harmless. */
+    }
+  };
+
+  if (picked) {
+    const cue = cueCopy(picked);
+    return (
+      <div className="card study-card reveal">
+        <div className="study-card-title">
+          When you {cue?.phrase}, you study for {profile.dailyMinutes} minutes.
+        </div>
+        <div className="row" style={{ gap: 8 }}>
+          <button
+            className="btn btn-tinted"
+            onClick={() => {
+              studyReminder(picked, profile.dailyMinutes);
+              track('reminder_added', { kind: 'study', cue: picked, from: 'today' });
+              close();
+            }}
+          >
+            Add to my calendar
+          </button>
+          <button className="btn btn-plain" onClick={close}>
+            Done
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="card study-card reveal">
+      <div className="row between" style={{ alignItems: 'flex-start' }}>
+        <div className="study-card-title">When will you do tomorrow's lesson?</div>
+        <button className="icon-btn install-close" aria-label="Not now" onClick={close}>
+          <CloseIcon size={14} />
+        </button>
+      </div>
+      <div className="study-card-chips" role="radiogroup" aria-label="Study time">
+        {CUES.map((c) => (
+          <button
+            key={c.id}
+            className="chip"
+            role="radio"
+            aria-checked={false}
+            data-haptic="select"
+            onClick={() => {
+              setPicked(c.id);
+              update({ ...settings, profile: { ...profile, cue: c.id } });
+              track('study_cue_set', { cue: c.id, from: 'today' });
+            }}
+          >
+            {c.label}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}

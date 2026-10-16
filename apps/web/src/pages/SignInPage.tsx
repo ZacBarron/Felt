@@ -200,9 +200,9 @@ function AfterSignIn({ flow, next, savedCopy }: { flow: ReturnType<typeof useAft
 }
 
 const PERKS = [
-  { Icon: PasskeyIcon, title: 'No password', body: 'Sign in with Face ID, a fingerprint or your PIN.' },
-  { Icon: CloudIcon, title: 'On any device', body: 'Your plan, Felt Rating and streak come with you.' },
-  { Icon: DeviceIcon, title: 'Safe if you lose your phone', body: 'Felt saves your progress as you study.' },
+  { Icon: CloudIcon, title: 'Your plan, rating and streak on any device', body: '' },
+  { Icon: DeviceIcon, title: 'Safe if you lose your phone', body: '' },
+  { Icon: PasskeyIcon, title: 'Saves on its own as you study', body: '' },
 ];
 
 /**
@@ -289,29 +289,26 @@ export function SaveProgress({ from, features, onContinue, onSkip }: { from: 'on
     );
 
   return (
-    <div className="stack auth-screen" style={{ gap: '1.25rem' }}>
-      <div className="auth-art reveal" aria-hidden="true">
-        <BrandMark size={56} />
-        <span className="auth-art-key">
-          <PasskeyIcon size={26} />
+    <div className="stack auth-screen save-screen" style={{ gap: '1.4rem' }}>
+      <div className="save-hero reveal" aria-hidden="true">
+        <span className="save-hero-mark">
+          <BrandMark size={52} />
+        </span>
+        <span className="save-hero-key">
+          <PasskeyIcon size={24} />
         </span>
       </div>
-      <div>
+      <div className="save-copy">
         <h1 ref={heading} tabIndex={-1} className="display onb-title">
-          Save your progress
+          Keep your progress
         </h1>
-        <p className="muted auth-lead">Make a free account. It keeps your plan safe and on every device.</p>
+        <p className="muted auth-lead">Save it to a free account. {passkeys ? 'Sign in with Face ID or a fingerprint. No password.' : 'Sign in with a code we email you.'}</p>
       </div>
-      <ul className="list auth-perks">
-        {PERKS.filter((p) => passkeys || p.Icon !== PasskeyIcon).map(({ Icon, title, body }, i) => (
-          <li key={title} className="list-row reveal" style={{ animationDelay: `${80 + i * 90}ms` }}>
-            <span className="onb-why-icon" aria-hidden="true">
-              <Icon size={20} />
-            </span>
-            <span className="grow">
-              <span className="onb-why-title">{title}</span>
-              <span className="footnote">{body}</span>
-            </span>
+      <ul className="save-perks">
+        {PERKS.filter((p) => passkeys || p.Icon !== PasskeyIcon).map(({ title }, i) => (
+          <li key={title} className="reveal" style={{ animationDelay: `${80 + i * 90}ms` }}>
+            <CheckIcon size={16} />
+            {title}
           </li>
         ))}
       </ul>
@@ -323,7 +320,7 @@ export function SaveProgress({ from, features, onContinue, onSkip }: { from: 'on
       <BottomBar>
         {passkeys ? (
           <button className="btn btn-primary btn-lg btn-block" disabled={busy} onClick={() => void create()} data-haptic="off">
-            <PasskeyIcon size={20} /> {busy ? 'Waiting for your passkey…' : 'Create a passkey'}
+            <PasskeyIcon size={20} /> {busy ? 'Waiting for your passkey…' : 'Save with a passkey'}
           </button>
         ) : (
           <button className="btn btn-primary btn-lg btn-block" onClick={() => setMode('email')}>

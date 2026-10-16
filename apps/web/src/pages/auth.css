@@ -463,3 +463,65 @@
   color: var(--orange-text);
   background: color-mix(in srgb, var(--orange) 14%, transparent);
 }
+
+/* Keep your progress: a calm mark, a short promise, a checklist, the buttons. */
+.save-screen {
+  padding-top: calc(env(safe-area-inset-top, 0px) + 2.5rem);
+}
+
+.save-hero {
+  position: relative;
+  align-self: flex-start;
+  width: 84px;
+  height: 84px;
+}
+
+.save-hero-mark {
+  display: grid;
+  place-items: center;
+  width: 84px;
+  height: 84px;
+  border-radius: 24px;
+  background: var(--brand-gradient);
+  box-shadow: 0 12px 28px color-mix(in srgb, var(--base-500, #0f3d33) 35%, transparent);
+}
+
+.save-hero-key {
+  position: absolute;
+  right: -10px;
+  bottom: -10px;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--surface);
+  color: var(--tint);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.14);
+}
+
+.save-copy .auth-lead {
+  margin-top: 0.5rem;
+}
+
+.save-perks {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 1.02rem;
+  font-weight: 560;
+}
+
+.save-perks li {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.save-perks svg {
+  flex: none;
+  color: var(--green-text);
+}

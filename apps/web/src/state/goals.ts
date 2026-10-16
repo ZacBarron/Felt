@@ -153,5 +153,6 @@ export function pathPrefs(profile: Profile) {
   return {
     placedAt: profile.placedAt && profile.placedAt !== 'all' ? profile.placedAt : undefined,
     focus: [...new Set(modules)],
+    basicsLast: profile.experience === 'winning' || profile.experience === 'pro',
   };
 }

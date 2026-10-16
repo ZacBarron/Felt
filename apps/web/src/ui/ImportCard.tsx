@@ -20,7 +20,9 @@ function dismissedBefore() {
  * card that points at the import, until something is imported or they close it.
  */
 export function ImportCard() {
-  const source = useSettings().settings.profile.handSource;
+  const profile = useSettings().settings.profile;
+  // Regular and pro players have hands worth reading; anyone who said they keep hands or sessions too.
+  const source = profile.handSource ?? (profile.experience === 'winning' || profile.experience === 'pro' ? 'online' : undefined);
   const [hidden, setHidden] = useState(dismissedBefore);
   const imported = useLiveQuery(async () => (await db.hands.count()) + (await db.sessions.count()), []);
   if (hidden || imported !== 0 || (source !== 'online' && source !== 'tracked')) return null;

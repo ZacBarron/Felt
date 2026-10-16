@@ -5,6 +5,7 @@ import { Link, Navigate, useNavigate, useParams, useSearchParams } from 'react-r
 import { haptic } from '../haptics';
 import { LessonCover } from '../lesson/LessonCover';
 import { termsForStep, TermScope } from '../lesson/rich';
+import { FirstWin } from './FirstWin';
 import { StepView } from '../lesson/StepView';
 import { canOpenLesson } from '../state/access';
 import { getChart } from '../state/charts';
@@ -125,6 +126,11 @@ function Lesson({ lessonKey: key }: { lessonKey: string }) {
   }
 
   if (!canOpenLesson(key, settings.access)) return <Navigate to="/pro?from=lesson" replace />;
+
+  if (finished && search.get('first') === '1') {
+    const quizzes = steps.filter((s) => s.kind === 'quiz');
+    return <FirstWin correct={steps.filter((s, n) => s.kind === 'quiz' && answers[n] === s.answer).length} total={quizzes.length} minutes={content.minutes} />;
+  }
 
   if (finished) {
     const quizCount = steps.filter((s) => s.kind === 'quiz').length;

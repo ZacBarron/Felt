@@ -67,6 +67,8 @@ export interface Profile {
   cue?: string;
   /** ISO date the player committed to their plan. */
   committedAt?: string;
+  /** When the first lesson was finished: the celebration, account and Pro offers show once, after it. */
+  firstLessonAt?: string;
   /** Module placement started at, or 'all' when it cleared everything. */
   placedAt?: string;
   /** Name shown on your avatar. Optional. */

@@ -5728,3 +5728,109 @@ a.card.more-me,
   margin: 0;
   text-align: center;
 }
+
+/* The first lesson's win: three small stats on the felt. */
+.first-win-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+  width: min(100%, 340px);
+  margin: 0.4rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.first-win-stats li {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 0.7rem 0.4rem;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  font-size: 0.78rem;
+  text-align: center;
+  line-height: 1.2;
+}
+
+.first-win-stats .num {
+  font-family: var(--font-display);
+  font-size: 1.7rem;
+  line-height: 1;
+}
+
+/* The plan: one card for the first lesson and a short list of what comes next. */
+.plan-first {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+}
+
+.plan-first-cover {
+  flex: none;
+  width: 76px;
+  height: 76px;
+  overflow: hidden;
+  border-radius: 16px;
+}
+
+.plan-first-cover > * {
+  width: 100%;
+  height: 100%;
+}
+
+.plan-first-title {
+  font-weight: 650;
+  font-size: 1.1rem;
+  line-height: 1.25;
+  margin: 2px 0;
+}
+
+.plan-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  margin: 0;
+  padding: 0 0.25rem;
+  list-style: none;
+  color: var(--label-2);
+}
+
+.plan-steps li::before {
+  content: '';
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-right: 0.6rem;
+  border-radius: 50%;
+  background: var(--tint-fill);
+  vertical-align: middle;
+}
+
+.plan-steps li.done {
+  color: var(--green-text);
+}
+
+.plan-steps li.done::before {
+  display: none;
+}
+
+/* Tomorrow's study time, asked once after the first lesson. */
+.study-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.study-card-title {
+  font-weight: 650;
+  font-size: 1.05rem;
+  line-height: 1.3;
+}
+
+.study-card-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
