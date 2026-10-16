@@ -637,7 +637,7 @@ export function WeeklyPage() {
 // Entry points ----------------------------------------------------------------
 
 /** This week's record, for the entry points. */
-function useThisWeek() {
+export function useThisWeek() {
   return useLiveQuery(() => getWeekly(isoWeek(new Date()).id), [], null);
 }
 
