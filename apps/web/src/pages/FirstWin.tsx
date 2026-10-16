@@ -5,10 +5,13 @@ import { isPro } from '../state/access';
 import { useServerFeatures, useSession } from '../state/api';
 import { useClaudeCloud } from '../state/cloud';
 import { track } from '../state/events';
+import type { LessonEntry } from '../state/lessons';
 import { useSettings } from '../state/settings';
 import { BrandMark } from '../ui/Brand';
+import { CheckIcon } from '../ui/icons';
 import { useBodyClass } from '../ui/useBodyClass';
 import { SaveProgress } from './SignInPage';
+import './learn.css';
 
 /**
  * The end of the very first lesson: the moment Felt has given something
@@ -17,7 +20,7 @@ import { SaveProgress } from './SignInPage';
  * (most trials still start on the first day, so the Pro offer stays on day
  * one, just after the lesson instead of before it).
  */
-export function FirstWin({ correct, total, minutes }: { correct: number; total: number; minutes: number }) {
+export function FirstWin({ correct, total, minutes, next: upNext }: { correct: number; total: number; minutes: number; next?: LessonEntry }) {
   useBodyClass('focus-mode');
   const navigate = useNavigate();
   const { settings, update } = useSettings();
@@ -73,11 +76,38 @@ export function FirstWin({ correct, total, minutes }: { correct: number; total: 
             <span>minutes</span>
           </li>
         </ul>
+        <WeekStrip />
         <p className="moment-sub">That is how every day works. A few minutes, and it adds up.</p>
+        {upNext?.content && (
+          <p className="first-win-next">
+            Your next lesson is <strong>{upNext.title}</strong>.
+          </p>
+        )}
       </div>
       <button ref={button} className="btn btn-lg btn-block btn-hero moment-cta" data-haptic="off" onClick={next}>
         Continue
       </button>
     </div>
+  );
+}
+
+/**
+ * Today and the six days after it, with today checked: the week ahead the
+ * habit is built in. It shows a plan, not a debt, so no day is ever marked
+ * as missed here.
+ */
+function WeekStrip() {
+  const today = new Date();
+  const days = Array.from({ length: 7 }, (_, n) => new Date(today.getFullYear(), today.getMonth(), today.getDate() + n));
+  const fmt = new Intl.DateTimeFormat(undefined, { weekday: 'short' });
+  return (
+    <ol className="first-win-week" aria-label="Day 1 of your week. Today is done.">
+      {days.map((d, n) => (
+        <li key={n} className={n === 0 ? 'on' : undefined} aria-hidden="true">
+          <span className="first-win-day">{n === 0 ? 'Today' : fmt.format(d)}</span>
+          <span className="first-win-dot">{n === 0 && <CheckIcon size={14} />}</span>
+        </li>
+      ))}
+    </ol>
   );
 }

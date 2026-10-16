@@ -2,9 +2,10 @@ import { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { canOpenLesson } from '../state/access';
 import type { StoredLesson } from '../state/db';
-import { isComplete, lessonPath, moduleEntries } from '../state/lessons';
+import { entryFor, isComplete, lessonPath, moduleEntries } from '../state/lessons';
 import { markModuleIntroSeen, topicInfo, topicTarget, type TopicAction } from '../state/moduleIntros';
 import { useSettings } from '../state/settings';
+import { LockIcon } from '../ui/icons';
 import { LessonCover } from './LessonCover';
 import './topic-intro.css';
 
@@ -125,6 +126,95 @@ export function TopicIntroSheet({
             </button>
           </div>
         )}
+      </div>
+    </dialog>
+  );
+}
+
+/** The screens a lesson walks through, by title, for a look inside before it opens. */
+function outline(steps: readonly { kind: string; title?: string }[]): string[] {
+  return steps.flatMap((s) => (s.kind !== 'quiz' && s.kind !== 'takeaway' && s.kind !== 'intro' && s.title ? [s.title] : []));
+}
+
+/**
+ * A Felt Pro lesson, shown before the paywall: its cover, its length and
+ * what it walks through, by screen title. It shows what is inside without
+ * teaching it, so the paywall comes after real interest, not instead of it.
+ */
+export function LockedLessonSheet({ lessonKey, proLessons, onClose }: { lessonKey: string; proLessons?: number; onClose: () => void }) {
+  const ref = useRef<HTMLDialogElement>(null);
+  const navigate = useNavigate();
+  const entry = entryFor(lessonKey);
+
+  useEffect(() => {
+    ref.current?.showModal();
+  }, []);
+
+  const content = entry?.content;
+  if (!entry || !content) return null;
+  const titles = outline(content.steps);
+  const shown = titles.slice(0, 6);
+  const questions = content.steps.filter((s) => s.kind === 'quiz').length;
+  const titleId = `locked-${lessonKey.replace(/\W/g, '-')}`;
+
+  return (
+    <dialog
+      ref={ref}
+      className="sheet topic-intro locked-lesson"
+      aria-labelledby={titleId}
+      onClose={onClose}
+      onClick={(e) => {
+        if (e.target === ref.current) onClose();
+      }}
+    >
+      <div className="sheet-body stack" style={{ gap: '1.25rem' }}>
+        <div className="sheet-grabber" aria-hidden="true" />
+        <div className="row between" style={{ alignItems: 'flex-start', gap: '0.8rem', flexWrap: 'nowrap' }}>
+          <div style={{ minWidth: 0 }}>
+            <div className="footnote locked-lesson-kicker">
+              <LockIcon size={12} /> Felt Pro, {entry.moduleTitle}
+            </div>
+            <h2 id={titleId} className="topic-intro-title">
+              {entry.title}
+            </h2>
+            <div className="footnote num topic-intro-meta">
+              <span>{content.minutes} min</span>
+              <span>{content.steps.length} screens</span>
+              {questions > 0 && <span>{questions} questions</span>}
+            </div>
+          </div>
+          <button className="btn btn-plain" onClick={onClose}>
+            Done
+          </button>
+        </div>
+
+        <div className="locked-lesson-cover">
+          <LessonCover cover={content.cover} size="md" />
+        </div>
+
+        <div className="topic-intro-card">
+          <section>
+            <h3 className="topic-intro-label">Inside this lesson</h3>
+            <ol className="locked-outline">
+              {shown.map((t) => (
+                <li key={t}>{t}</li>
+              ))}
+              {titles.length > shown.length && <li className="locked-outline-more">{titles.length - shown.length === 1 ? '1 more screen' : `${titles.length - shown.length} more screens`}</li>}
+              {questions > 0 && <li className="locked-outline-quiz">{questions} questions to check yourself</li>}
+            </ol>
+          </section>
+        </div>
+
+        <div className="topic-intro-cta">
+          {proLessons !== undefined && proLessons > 1 && (
+            <p className="locked-lesson-more">
+              This lesson and {proLessons - 1} more come with Felt Pro.
+            </p>
+          )}
+          <button className="btn btn-primary btn-lg btn-block" onClick={() => navigate('/pro?from=lesson')}>
+            See Felt Pro
+          </button>
+        </div>
       </div>
     </dialog>
   );

@@ -60,7 +60,8 @@ export function Moments() {
     const seen = readSeen();
     // First visit with this feature: remember where you are without a fanfare.
     if (!seen) return writeSeen({ tier: tierIndex, streak: milestone });
-    if (!CALM.includes('/' + location.pathname.split('/')[1])) return;
+    // A lesson lives under /learn, but it is never a calm screen.
+    if (!CALM.includes('/' + location.pathname.split('/')[1]) || /^\/learn\/./.test(location.pathname)) return;
     if (tierIndex > seen.tier) {
       writeSeen({ ...seen, tier: tierIndex });
       const next = nextTier(state.overall.rating);

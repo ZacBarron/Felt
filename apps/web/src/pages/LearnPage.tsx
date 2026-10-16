@@ -1,10 +1,11 @@
-import { type MouseEvent, useMemo, useState } from 'react';
+import { type MouseEvent, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { CURRICULUM } from '@felt/content';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { Link } from 'react-router-dom';
 import { LessonCover } from '../lesson/LessonCover';
-import { TopicIntroSheet } from '../lesson/TopicIntroSheet';
+import { LockedLessonSheet, TopicIntroSheet } from '../lesson/TopicIntroSheet';
 import '../lesson/topic-intro.css';
+import './learn.css';
 import { isComplete, LESSON_ENTRIES, type LessonEntry, lessonPath, lessonProgress, pickNextLesson } from '../state/lessons';
 import type { StoredLesson } from '../state/db';
 import { canOpenLesson, FREE_MODULES, isPro } from '../state/access';
@@ -22,6 +23,19 @@ export function LearnPage() {
   const loaded = useLiveQuery(lessonProgress, []);
   const progress = loaded ?? NO_PROGRESS;
   const [intro, setIntro] = useState<{ moduleKey: string; lessonKey?: string }>();
+  const [peek, setPeek] = useState<string>();
+  /** Each topic's rail opens on its next lesson, not its first, once progress has loaded. */
+  const page = useRef<HTMLDivElement>(null);
+  const railsPlaced = useRef(false);
+  useLayoutEffect(() => {
+    if (!loaded || railsPlaced.current || !page.current) return;
+    railsPlaced.current = true;
+    for (const rail of page.current.querySelectorAll<HTMLElement>('.lesson-rail')) {
+      const card = rail.querySelector<HTMLElement>('.lesson-card.current');
+      if (!card || card === rail.firstElementChild) continue;
+      rail.scrollLeft = card.offsetLeft - parseFloat(getComputedStyle(rail).paddingLeft);
+    }
+  }, [loaded]);
   /** The first lesson opened in an untouched topic shows the topic's intro first, once. */
   const openLesson = (e: MouseEvent, key: string) => {
     if (!loaded || !shouldShowModuleIntro(key, progress)) return;
@@ -36,7 +50,7 @@ export function LearnPage() {
   const nextState = next ? progress.get(next.key) : undefined;
 
   return (
-    <div className="stack" style={{ gap: '1.6rem' }}>
+    <div ref={page} className="stack" style={{ gap: '1.6rem' }}>
       <PageHeader title="Learn" subtitle={`${done} of ${playable.length} lessons done`} />
 
       {next?.content && (
@@ -93,12 +107,16 @@ export function LearnPage() {
               const lessons = entries.filter((e) => e.key.startsWith(`${track.id}/${m.id}/`));
               const open = lessons.filter((e) => !isComplete(progress.get(e.key)));
               const free = FREE_MODULES.has(`${track.id}/${m.id}`);
+              const locked = !free && !pro;
+              const topicDone = lessons.length - open.length;
+              // In a topic already begun, the lesson to take next: the one in progress, else the first not done.
+              const current = open.find((e) => progress.get(e.key)?.status === 'started') ?? (topicDone > 0 ? open[0] : undefined);
               return (
                 <div key={m.id} className="module-block">
                   <div className="module-head">
                     <span className="module-title">
                       {m.title}
-                      {!free && !pro && <LockIcon size={13} className="muted" />}
+                      {locked && <LockIcon size={13} className="muted" />}
                     </span>
                     {open.length > 0 ? (
                       <Link to={`/check/${track.id}/${m.id}`} className="skip-link" data-haptic="select" aria-label={`Skip ahead in ${m.title} with a quick quiz`}>
@@ -123,16 +141,40 @@ export function LearnPage() {
                       <ChevronRightIcon size={12} />
                     </span>
                   </button>
+                  {lessons.length > 0 && (topicDone === 0 ? (
+                    <div className="topic-meter">
+                      <span className="topic-meter-label num">
+                        {lessons.length} lessons, about {lessons.reduce((n, e) => n + (e.content?.minutes ?? 0), 0)} min
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="topic-meter" role="img" aria-label={`${topicDone} of ${lessons.length} lessons done`}>
+                      <span className="topic-meter-bar" aria-hidden="true">
+                        <span style={{ width: `${(topicDone / lessons.length) * 100}%` }} />
+                      </span>
+                      <span className="topic-meter-label num" aria-hidden="true">
+                        {topicDone} of {lessons.length}
+                      </span>
+                    </div>
+                  ))}
                   <div className="lesson-rail">
                     {lessons.map((e) => {
-                      const locked = !canOpenLesson(e.key, settings.access);
+                      const closed = !canOpenLesson(e.key, settings.access);
                       return (
                         <LessonCard
                           key={e.key}
                           entry={e}
                           state={progress.get(e.key)}
-                          locked={locked}
-                          onOpen={locked ? undefined : (ev) => openLesson(ev, e.key)}
+                          locked={closed}
+                          current={!closed && e === current}
+                          onOpen={
+                            closed
+                              ? (ev) => {
+                                  ev.preventDefault();
+                                  setPeek(e.key);
+                                }
+                              : (ev) => openLesson(ev, e.key)
+                          }
                         />
                       );
                     })}
@@ -143,6 +185,14 @@ export function LearnPage() {
           </section>
         );
       })}
+
+      {peek && (
+        <LockedLessonSheet
+          lessonKey={peek}
+          proLessons={playable.filter((e) => !canOpenLesson(e.key, settings.access)).length}
+          onClose={() => setPeek(undefined)}
+        />
+      )}
 
       {intro && (
         <TopicIntroSheet moduleKey={intro.moduleKey} lessonKey={intro.lessonKey} progress={progress} onClose={() => setIntro(undefined)} />
@@ -155,11 +205,14 @@ function LessonCard({
   entry,
   state,
   locked,
+  current,
   onOpen,
 }: {
   entry: LessonEntry;
   state?: StoredLesson;
   locked?: boolean;
+  /** The next lesson to take in its topic. */
+  current?: boolean;
   onOpen?: (e: MouseEvent) => void;
 }) {
   const content = entry.content;
@@ -167,7 +220,7 @@ function LessonCard({
     <>
       {content ? <LessonCover cover={content.cover} /> : <div className="cover cover-md cover-soon" />}
       <div className="lesson-card-body">
-        <div className="caption">{entry.moduleTitle}</div>
+        <div className={current ? 'caption lesson-card-next' : 'caption'}>{current ? (state?.status === 'started' ? 'Continue' : 'Up next') : entry.moduleTitle}</div>
         <div className="lesson-card-title">{entry.title}</div>
         <div className="lesson-card-meta">
           {!content ? (
@@ -193,11 +246,21 @@ function LessonCard({
           )}
           {content?.level === 'advanced' && !isComplete(state) && <span className="pill">Advanced</span>}
         </div>
+        {content && state?.status === 'started' && !locked && (
+          <span className="lesson-card-progress" aria-hidden="true">
+            <span style={{ width: `${Math.min(1, state.step / content.steps.length) * 100}%` }} />
+          </span>
+        )}
       </div>
     </>
   );
   return content ? (
-    <Link to={locked ? '/pro?from=lesson' : lessonPath(entry.key)} className={`lesson-card${locked ? ' locked' : ''}`} onClick={onOpen}>
+    <Link
+      to={locked ? '/pro?from=lesson' : lessonPath(entry.key)}
+      className={`lesson-card${locked ? ' locked' : ''}${current ? ' current' : ''}`}
+      aria-haspopup={locked ? 'dialog' : undefined}
+      onClick={onOpen}
+    >
       {body}
     </Link>
   ) : (

@@ -1,10 +1,10 @@
-import { lessonPoints } from '@felt/content';
+import { type LessonStep, lessonPoints } from '@felt/content';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { useEffect, useRef, useState } from 'react';
 import { Link, Navigate, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { haptic } from '../haptics';
 import { LessonCover } from '../lesson/LessonCover';
-import { termsForStep, TermScope } from '../lesson/rich';
+import { Rich, termsForStep, TermScope } from '../lesson/rich';
 import { FirstWin } from './FirstWin';
 import { StepView } from '../lesson/StepView';
 import { canOpenLesson } from '../state/access';
@@ -12,17 +12,42 @@ import { getChart } from '../state/charts';
 import { recordLessonQuiz } from '../state/rating';
 import { lessonStepId, saveLessonStep, unsave } from '../state/saved';
 import { useSettings } from '../state/settings';
-import { db } from '../state/db';
-import { entryFor, lessonPath, nextLesson, saveLesson } from '../state/lessons';
+import { db, type StoredLesson } from '../state/db';
+import { entryFor, isComplete, type LessonEntry, lessonPath, lessonProgress, moduleEntries, nextLesson, saveLesson } from '../state/lessons';
 import { BottomBar } from '../ui/BottomBar';
-import { BookmarkIcon, CheckIcon, ChevronRightIcon, CloseIcon } from '../ui/icons';
+import { BookmarkIcon, CheckIcon, ChevronRightIcon, CloseIcon, LockIcon, ReviewIcon, UndoIcon } from '../ui/icons';
 import { ProgressRing } from '../ui/ProgressRing';
 import { useBodyClass } from '../ui/useBodyClass';
+import './learn.css';
+
+type QuizStep = Extract<LessonStep, { kind: 'quiz' }>;
 
 /** Keyed by lesson, so moving to the next lesson starts it fresh. */
 export function LessonPage() {
   const key = useParams()['*'] ?? '';
   return <Lesson key={key} lessonKey={key} />;
+}
+
+/**
+ * The verdict, pinned above the button in the thumb zone the moment a
+ * question is answered, so it never sits below the fold. The reason stays in
+ * the card on the page. Screen readers hear the verdict from the question
+ * itself, so this copy is hidden from them.
+ */
+function AnswerBanner({ right, answer }: { right: boolean; answer: string }) {
+  return (
+    <div className={`answer-banner ${right ? 'good' : 'bad'}`} aria-hidden="true">
+      <span className="answer-banner-icon">{right ? <CheckIcon size={16} /> : <CloseIcon size={14} />}</span>
+      <span className="answer-banner-text">
+        <strong>{right ? 'Correct' : 'Not quite'}</strong>
+        {!right && (
+          <span>
+            The answer is <Rich text={answer.replace(/\.$/, '')} terms={false} />.
+          </span>
+        )}
+      </span>
+    </div>
+  );
 }
 
 function Lesson({ lessonKey: key }: { lessonKey: string }) {
@@ -34,11 +59,17 @@ function Lesson({ lessonKey: key }: { lessonKey: string }) {
   const [search] = useSearchParams();
   const jumpTo = search.get('step');
   const saved = useLiveQuery(() => db.lessons.get(key), [key], null);
+  const progress = useLiveQuery(lessonProgress, []);
   const [toast, setToast] = useState<string>();
   const [index, setIndex] = useState<number>();
   const [dir, setDir] = useState<1 | -1>(1);
   const [answers, setAnswers] = useState<Record<number, number>>({});
   const [finished, setFinished] = useState(false);
+  /** Where a half finished lesson picked up, so the player can see it and start over. */
+  const [resumedAt, setResumedAt] = useState<number>();
+  /** A second try at the questions missed, after the lesson. It never touches the rating. */
+  const [retry, setRetry] = useState<{ steps: number[]; pos: number; answers: Record<number, number> }>();
+  const [fixed, setFixed] = useState<ReadonlySet<number>>(new Set());
   const touch = useRef<{ x: number; y: number }>();
   useBodyClass('focus-mode');
 
@@ -50,10 +81,15 @@ function Lesson({ lessonKey: key }: { lessonKey: string }) {
       : saved && saved.status === 'started' ? Math.min(saved.step, content.steps.length - 1)
       : 0;
     setIndex(resume);
+    if (jumpTo === null && resume > 0) setResumedAt(resume);
     if (!saved) void saveLesson(key, { step: 0 });
   }, [saved, content, index, key, jumpTo]);
 
   const steps = content?.steps ?? [];
+  const quizIdx = steps.flatMap((s, n) => (s.kind === 'quiz' ? [n] : []));
+  const missed = quizIdx.filter((n) => answers[n] !== (steps[n] as QuizStep).answer);
+  const missedIds = missed.map((n) => lessonStepId(key, n));
+  const missedSaved = useLiveQuery(async () => (await db.saved.bulkGet(missedIds)).every(Boolean), [finished, missedIds.join()]);
   const i = index ?? 0;
   const stepSaved = useLiveQuery(() => db.saved.get(lessonStepId(key, i)), [key, i]);
   const toggleSave = async () => {
@@ -73,11 +109,11 @@ function Lesson({ lessonKey: key }: { lessonKey: string }) {
   const last = i === steps.length - 1;
 
   const finish = () => {
-    const quizzes = steps.map((s, n) => [s, n] as const).filter(([s]) => s.kind === 'quiz');
-    const correct = quizzes.filter(([s, n]) => s.kind === 'quiz' && answers[n] === s.answer).length;
-    void saveLesson(key, { status: 'done', step: steps.length, correct, answered: quizzes.length });
+    const correct = quizIdx.filter((n) => answers[n] === (steps[n] as QuizStep).answer).length;
+    void saveLesson(key, { status: 'done', step: steps.length, correct, answered: quizIdx.length });
     haptic('success');
     setFinished(true);
+    window.scrollTo({ top: 0 });
   };
 
   const next = () => {
@@ -93,6 +129,13 @@ function Lesson({ lessonKey: key }: { lessonKey: string }) {
     if (i === 0) return;
     setDir(-1);
     setIndex(i - 1);
+    window.scrollTo({ top: 0 });
+  };
+
+  const startOver = () => {
+    setResumedAt(undefined);
+    setDir(-1);
+    setIndex(0);
     window.scrollTo({ top: 0 });
   };
 
@@ -127,16 +170,93 @@ function Lesson({ lessonKey: key }: { lessonKey: string }) {
 
   if (!canOpenLesson(key, settings.access)) return <Navigate to="/pro?from=lesson" replace />;
 
+  const following = nextLesson(key);
+
   if (finished && search.get('first') === '1') {
-    const quizzes = steps.filter((s) => s.kind === 'quiz');
-    return <FirstWin correct={steps.filter((s, n) => s.kind === 'quiz' && answers[n] === s.answer).length} total={quizzes.length} minutes={content.minutes} />;
+    return (
+      <FirstWin
+        correct={quizIdx.length - missed.length}
+        total={quizIdx.length}
+        minutes={content.minutes}
+        next={following && canOpenLesson(following.key, settings.access) ? following : undefined}
+      />
+    );
+  }
+
+  if (finished && retry) {
+    const n = retry.steps[retry.pos];
+    const q = steps[n] as QuizStep;
+    const answered = retry.answers[n];
+    const lastRetry = retry.pos === retry.steps.length - 1;
+    const advance = () => {
+      if (answered === undefined) return;
+      if (lastRetry) {
+        setRetry(undefined);
+        window.scrollTo({ top: 0 });
+        return;
+      }
+      setRetry({ ...retry, pos: retry.pos + 1 });
+      window.scrollTo({ top: 0 });
+    };
+    return (
+      <div className="stack focus-column">
+        <div className="focus-top">
+          <button className="icon-btn glass" aria-label="Back to your results" onClick={() => setRetry(undefined)}>
+            <CloseIcon size={18} />
+          </button>
+          <div
+            className="segments"
+            role="progressbar"
+            aria-label="Second try"
+            aria-valuemin={1}
+            aria-valuemax={retry.steps.length}
+            aria-valuenow={retry.pos + 1}
+            aria-valuetext={`Question ${retry.pos + 1} of ${retry.steps.length}`}
+          >
+            {retry.steps.map((s, p) => (
+              <span key={s} className={p < retry.pos ? 'done' : p === retry.pos ? 'current' : undefined} />
+            ))}
+          </div>
+          <span className="focus-top-spacer" aria-hidden="true" />
+        </div>
+        <div key={`retry:${n}`} className="lesson-stage from-right">
+          <div className="lesson-kicker check-source retry-kicker">
+            <UndoIcon size={15} />
+            Second try, {retry.pos + 1} of {retry.steps.length}
+          </div>
+          <TermScope.Provider value={termsForStep(content.steps, n)}>
+            <StepView
+              step={q}
+              points={points}
+              answered={answered}
+              verdictInBar
+              onAnswer={(choice) => {
+                setRetry((r) => r && { ...r, answers: { ...r.answers, [n]: choice } });
+                if (choice === q.answer) setFixed((f) => new Set(f).add(n));
+              }}
+            />
+          </TermScope.Provider>
+        </div>
+        <BottomBar>
+          {answered !== undefined && <AnswerBanner key={n} right={answered === q.answer} answer={q.choices[q.answer]} />}
+          <button className="btn btn-primary btn-lg btn-block" onClick={advance} disabled={answered === undefined}>
+            {answered === undefined ? 'Choose an answer' : lastRetry ? 'See your results' : 'Continue'}
+          </button>
+        </BottomBar>
+      </div>
+    );
   }
 
   if (finished) {
-    const quizCount = steps.filter((s) => s.kind === 'quiz').length;
-    const correct = steps.filter((s, n) => s.kind === 'quiz' && answers[n] === s.answer).length;
-    const following = nextLesson(key);
+    const quizCount = quizIdx.length;
+    const correct = quizCount - missed.length;
     const practice = content.practice?.[0];
+    const nextOpen = following && canOpenLesson(following.key, settings.access);
+    const toFix = missed.filter((n) => !fixed.has(n));
+    const addToReview = async () => {
+      for (const n of missed) await saveLessonStep(key, n);
+      haptic('success');
+    };
     return (
       <div className="stack focus-column lesson-done">
         <div className="card stack reveal" style={{ alignItems: 'center', textAlign: 'center', padding: '2.2rem 1.25rem', gap: '1rem' }}>
@@ -144,19 +264,72 @@ function Lesson({ lessonKey: key }: { lessonKey: string }) {
             <CheckIcon size={44} style={{ color: 'var(--tint)' }} />
           </ProgressRing>
           <div>
-            <div className="done-kicker">{entry.moduleTitle}</div>
+            <div className="done-kicker">Lesson done</div>
             <h1 className="display" style={{ fontSize: '2.4rem', fontWeight: 400, lineHeight: 1.05 }}>
               {entry.title}
             </h1>
           </div>
           {quizCount > 0 && (
-            <div className="pill pill-good num">
-              {correct} of {quizCount} questions right
+            <div className={`pill num ${missed.length === 0 ? 'pill-good' : 'pill-tint'}`}>
+              {missed.length === 0 ? `All ${quizCount} questions right` : `${correct} of ${quizCount} questions right`}
             </div>
           )}
         </div>
-        <div className="list with-icons">
-          {practice && (
+
+        {progress && <TopicProgress entry={entry} progress={progress} />}
+
+        {missed.length > 0 && (
+          <section className="section missed reveal">
+            <div className="section-head">
+              <h2 className="section-title">{missed.length === 1 ? 'The one you missed' : `The ${missed.length} you missed`}</h2>
+            </div>
+            <div className="list">
+              {missed.map((n) => {
+                const q = steps[n] as QuizStep;
+                return (
+                  <div key={n} className="list-row missed-row">
+                    <span className="grow">
+                      <span className="row-title">
+                        <Rich text={q.question} terms={false} />
+                      </span>
+                      <span className="row-sub">
+                        Answer: <Rich text={q.choices[q.answer]} terms={false} />
+                      </span>
+                    </span>
+                    {fixed.has(n) && (
+                      <span className="pill pill-good">
+                        <CheckIcon size={12} /> Got it
+                      </span>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+            <div className="missed-actions">
+              {toFix.length > 0 && (
+                <button
+                  className="btn btn-tinted"
+                  data-haptic="select"
+                  onClick={() => {
+                    setRetry({ steps: toFix, pos: 0, answers: {} });
+                    window.scrollTo({ top: 0 });
+                  }}
+                >
+                  <UndoIcon size={17} />
+                  {toFix.length === 1 ? 'Try it again' : 'Try them again'}
+                </button>
+              )}
+              <button className="btn btn-tinted" data-haptic="off" disabled={missedSaved} onClick={() => void addToReview()}>
+                {missedSaved ? <CheckIcon size={17} /> : <ReviewIcon size={17} />}
+                {missedSaved ? 'Added to review' : 'Add to review'}
+              </button>
+            </div>
+            <div className="section-footer">Questions you add come back in your review.</div>
+          </section>
+        )}
+
+        {practice && (
+          <div className="list">
             <Link to={`/ranges?chart=${practice}&mode=quick`} className="list-row">
               <span className="grow">
                 <span className="row-title">Practice this chart</span>
@@ -164,10 +337,27 @@ function Lesson({ lessonKey: key }: { lessonKey: string }) {
               </span>
               <ChevronRightIcon size={16} className="chev" />
             </Link>
-          )}
-        </div>
+          </div>
+        )}
+
+        {following?.content && !nextOpen && (
+          <Link to="/pro?from=lesson" className="card next-locked">
+            <LessonCover cover={following.content.cover} size="sm" />
+            <span className="grow">
+              <span className="next-locked-kicker">
+                <LockIcon size={12} /> Next in Felt Pro
+              </span>
+              <span className="next-locked-title">{following.title}</span>
+              <span className="footnote">
+                {following.moduleTitle}, {following.content.minutes} min
+              </span>
+            </span>
+            <ChevronRightIcon size={16} className="chev" />
+          </Link>
+        )}
+
         <BottomBar>
-          {following && canOpenLesson(following.key, settings.access) ? (
+          {following && nextOpen ? (
             <>
               <Link to={lessonPath(following.key)} className="btn btn-primary btn-lg btn-block swap-in next-lesson-btn">
                 <span className="next-lesson-label">
@@ -189,6 +379,8 @@ function Lesson({ lessonKey: key }: { lessonKey: string }) {
       </div>
     );
   }
+
+  const answered = answers[i];
 
   return (
     <div className="stack focus-column">
@@ -216,6 +408,17 @@ function Lesson({ lessonKey: key }: { lessonKey: string }) {
           {toast}
         </div>
       )}
+      {resumedAt !== undefined && resumedAt === i && (
+        <div className="resume-note reveal" role="status">
+          <span>
+            Picked up at step {i + 1} of {steps.length}.
+          </span>
+          <button className="resume-restart" data-haptic="select" onClick={startOver}>
+            <UndoIcon size={15} />
+            Start over
+          </button>
+        </div>
+      )}
 
       <div
         key={`${key}:${i}`}
@@ -241,7 +444,8 @@ function Lesson({ lessonKey: key }: { lessonKey: string }) {
             <StepView
               step={step}
               points={points}
-              answered={answers[i]}
+              answered={answered}
+              verdictInBar
               onAnswer={(choice) => {
                 setAnswers((a) => ({ ...a, [i]: choice }));
                 if (step.kind === 'quiz') void recordLessonQuiz(key, i, choice === step.answer, 'lesson');
@@ -257,6 +461,7 @@ function Lesson({ lessonKey: key }: { lessonKey: string }) {
       </div>
 
       <BottomBar>
+        {step?.kind === 'quiz' && answered !== undefined && <AnswerBanner key={i} right={answered === step.answer} answer={step.choices[step.answer]} />}
         <div style={{ display: 'grid', gridTemplateColumns: i > 0 ? 'auto 1fr' : '1fr', gap: 10 }}>
           {i > 0 && (
             <button className="btn btn-lg glass" onClick={back} aria-label="Previous step" style={{ minWidth: 56 }}>
@@ -268,6 +473,28 @@ function Lesson({ lessonKey: key }: { lessonKey: string }) {
           </button>
         </div>
       </BottomBar>
+    </div>
+  );
+}
+
+/** Where this lesson leaves its topic: one segment per lesson, this one just filled. */
+function TopicProgress({ entry, progress }: { entry: LessonEntry; progress: ReadonlyMap<string, StoredLesson> }) {
+  const [trackId, moduleId] = entry.key.split('/');
+  const lessons = moduleEntries(trackId, moduleId).filter((e) => e.content);
+  const isDone = (e: LessonEntry) => e.key === entry.key || isComplete(progress.get(e.key));
+  const done = lessons.filter(isDone).length;
+  const all = done === lessons.length;
+  return (
+    <div className="card topic-progress-card reveal">
+      <div className="topic-progress-head">
+        <span className="topic-progress-title">{entry.moduleTitle}</span>
+        <span className="footnote num">{all ? 'Topic done' : `${done} of ${lessons.length} lessons`}</span>
+      </div>
+      <div className="topic-steps" role="img" aria-label={`${done} of ${lessons.length} lessons done in ${entry.moduleTitle}`}>
+        {lessons.map((e) => (
+          <span key={e.key} className={e.key === entry.key ? 'done now' : isDone(e) ? 'done' : undefined} />
+        ))}
+      </div>
     </div>
   );
 }

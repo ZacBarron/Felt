@@ -1,0 +1,447 @@
+/*
+ * Learn tab and the lesson player: answer banner, resume note, second try,
+ * the lesson done screen, topic meters on Learn and the Day 1 week.
+ *
+ * Like lesson.css this file loads before styles.css, so a rule that refines
+ * a base class is scoped one class deeper than the base rule.
+ */
+
+/* Answer banner ------------------------------------------------------------ */
+
+/* The verdict sits above the button in the thumb zone, tinted by the result. */
+.bottom-bar .answer-banner {
+  --banner-c: var(--green);
+  --banner-text: var(--green-text);
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.7rem 0.95rem;
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--banner-c) 14%, var(--surface));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--banner-c) 30%, transparent);
+  animation: banner-in 320ms var(--spring, var(--ease)) backwards;
+}
+
+.bottom-bar .answer-banner.bad {
+  --banner-c: var(--red);
+  --banner-text: var(--red-text);
+}
+
+.answer-banner-icon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  color: #fff;
+  background: var(--banner-c);
+  animation: pop 360ms var(--spring, var(--ease)) 80ms backwards;
+}
+
+.answer-banner-icon svg :is(path, polyline, line) {
+  stroke-dasharray: 40;
+  animation: draw 420ms var(--ease) 200ms backwards;
+}
+
+.answer-banner-text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+  font-size: 0.92rem;
+  line-height: 1.3;
+  color: var(--label);
+}
+
+.answer-banner-text strong {
+  font-size: 1.06rem;
+  font-weight: 700;
+  color: var(--banner-text);
+}
+
+.answer-banner-text > span {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+@keyframes banner-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
+
+/* With the verdict in the bar, the card on the page leads with the reason. */
+.lesson-step .explain.verdict-in-bar {
+  scroll-margin-bottom: calc(var(--bottombar-h, 84px) + var(--tabbar-h, 0px) + 1.25rem);
+  scroll-margin-top: 5rem;
+}
+
+.explain.verdict-in-bar .explain-label {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--label-2);
+}
+
+/* Resume ------------------------------------------------------------------- */
+
+/* A half finished lesson says where it picked up, with a way back to the start. */
+.focus-column .resume-note {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  margin-top: 0.7rem;
+  padding: 0.2rem 0.3rem 0.2rem 1rem;
+  border-radius: 999px;
+  background: var(--surface);
+  font-size: 0.9rem;
+  color: var(--label-2);
+}
+
+.resume-note .resume-restart {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  min-height: 40px;
+  padding: 0 0.85rem;
+  border: 0;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--tint) 13%, transparent);
+  color: var(--tint);
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 650;
+  white-space: nowrap;
+}
+
+/* Second try --------------------------------------------------------------- */
+
+.focus-top .focus-top-spacer {
+  flex: none;
+  width: 44px;
+}
+
+.lesson-stage > .retry-kicker {
+  color: var(--tint);
+  font-weight: 600;
+  margin-top: 1.2rem;
+  margin-bottom: 0.4rem;
+}
+
+/* Lesson done -------------------------------------------------------------- */
+
+.lesson-done .topic-progress-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  padding: 1rem 1.1rem 1.1rem;
+}
+
+.topic-progress-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.8rem;
+}
+
+.topic-progress-title {
+  font-weight: 650;
+  min-width: 0;
+}
+
+.topic-steps {
+  display: flex;
+  gap: 4px;
+}
+
+.topic-steps span {
+  flex: 1;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--fill-2);
+}
+
+.topic-steps span.done {
+  background: var(--tint-fill);
+}
+
+/* The lesson just finished fills last, from the left. */
+.topic-steps span.now {
+  transform-origin: left;
+  animation: bar-grow 600ms var(--ease) 450ms backwards;
+}
+
+.lesson-done .missed .section-head {
+  padding-top: 0.2rem;
+}
+
+.lesson-done .missed-row {
+  align-items: flex-start;
+  gap: 0.8rem;
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+}
+
+.lesson-done .missed-row .row-title {
+  display: block;
+  font-weight: 600;
+  line-height: 1.35;
+  text-wrap: pretty;
+}
+
+.lesson-done .missed-row .row-sub {
+  display: block;
+  margin-top: 0.2rem;
+  font-size: 0.88rem;
+  color: var(--green-text);
+  font-weight: 550;
+}
+
+.lesson-done .missed-row .pill {
+  flex: none;
+  margin-top: 0.1rem;
+}
+
+.missed-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding: 0.7rem 0 0;
+}
+
+.missed-actions .btn {
+  flex: 1 1 auto;
+  padding: 0 0.95rem;
+  font-size: 0.94rem;
+  white-space: nowrap;
+}
+
+/* Added to review is a state, not a dead button: it keeps full color. */
+.missed-actions .btn:disabled {
+  opacity: 1;
+  color: var(--green-text);
+  background: color-mix(in srgb, var(--green) 13%, transparent);
+}
+
+/* The next lesson when it is in Felt Pro: a look at it, one tap from the offer. */
+.lesson-done a.next-locked {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 0.7rem 1rem 0.7rem 0.7rem;
+  color: var(--label);
+  text-decoration: none;
+}
+
+.next-locked .cover.cover-sm {
+  width: 76px;
+  height: 76px;
+  border-radius: 14px;
+}
+
+.next-locked .grow {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.next-locked-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.76rem;
+  font-weight: 650;
+  color: var(--tint);
+}
+
+.next-locked-title {
+  font-weight: 650;
+  line-height: 1.25;
+}
+
+/* Learn: topic meters and the next card ----------------------------------- */
+
+/* Each topic says how far along it is, under its title. */
+.module-block .topic-meter {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0 1rem 0.65rem;
+}
+
+.topic-meter-bar {
+  flex: 1;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--fill-2);
+  overflow: hidden;
+}
+
+.topic-meter-bar > span {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--tint-fill);
+  transform-origin: left;
+  animation: bar-grow 700ms var(--ease) 200ms backwards;
+}
+
+.topic-meter-label {
+  flex: none;
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: var(--label-2);
+}
+
+/* The next lesson in a topic already begun wears a brass rim. */
+.lesson-rail .lesson-card.current {
+  box-shadow: inset 0 0 0 2px var(--tint-fill);
+}
+
+.lesson-card .lesson-card-progress {
+  display: block;
+  height: 4px;
+  margin-top: 0.55rem;
+  border-radius: 999px;
+  background: var(--fill-2);
+  overflow: hidden;
+}
+
+.lesson-card-progress > span {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--tint-fill);
+}
+
+/* Locked lesson sheet ------------------------------------------------------ */
+
+.locked-lesson-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  color: var(--tint);
+  font-weight: 600;
+}
+
+.locked-lesson-cover .cover.cover-md {
+  aspect-ratio: 16 / 9;
+  border-radius: 22px;
+}
+
+.locked-outline {
+  display: flex;
+  flex-direction: column;
+  margin: 0.2rem 0 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: outline;
+}
+
+.locked-outline li {
+  display: flex;
+  gap: 0.75rem;
+  padding: 0.55rem 0;
+  line-height: 1.35;
+  border-top: 0.5px solid var(--separator);
+}
+
+.locked-outline li:first-child {
+  border-top: 0;
+  padding-top: 0.2rem;
+}
+
+.locked-outline li:not(.locked-outline-more, .locked-outline-quiz)::before {
+  counter-increment: outline;
+  content: counter(outline);
+  flex: none;
+  width: 1.2rem;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+  color: var(--label-2);
+}
+
+.locked-outline :is(.locked-outline-more, .locked-outline-quiz) {
+  padding-left: 1.95rem;
+  color: var(--label-2);
+}
+
+/* Day 1: the week ahead -------------------------------------------------- */
+
+.moment .first-win-week {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 0.3rem;
+  width: min(100%, 340px);
+  margin: 0.9rem 0 0.3rem;
+  padding: 0;
+  list-style: none;
+  animation: rise 500ms var(--ease) 1350ms backwards;
+}
+
+.first-win-week li {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.first-win-day {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.62);
+  white-space: nowrap;
+}
+
+.first-win-week li.on .first-win-day {
+  color: var(--on-felt-accent);
+}
+
+.first-win-dot {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+}
+
+.first-win-week li.on .first-win-dot {
+  background: var(--accent);
+  color: var(--on-accent);
+  box-shadow: none;
+  animation: pop 420ms var(--spring, var(--ease)) 1700ms backwards;
+}
+
+.moment .first-win-next {
+  margin: 0.3rem 0 0;
+  font-size: 0.95rem;
+  opacity: 0.9;
+  animation: rise 500ms var(--ease) 1550ms backwards;
+}
+
+.first-win-next strong {
+  font-weight: 650;
+}
+
+.lesson-card .lesson-card-next {
+  color: var(--tint);
+  font-weight: 650;
+}
+
+.topic-intro-cta .locked-lesson-more {
+  margin: 0 0 0.55rem;
+  text-align: center;
+  font-size: 0.84rem;
+  color: var(--label-2);
+}

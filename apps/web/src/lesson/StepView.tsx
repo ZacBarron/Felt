@@ -1,6 +1,6 @@
 import type { Evidence, LessonStep } from '@felt/content';
 import { parseCards } from '@felt/core';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { PlayingCard } from '../components/PlayingCard';
 import { RangeGrid } from '../components/RangeGrid';
 import { SeatStrip } from '../components/SeatStrip';
@@ -19,6 +19,11 @@ interface Props {
   answered?: number;
   /** The lesson's points to remember: listed on the intro, and the one a question tests shown after it. */
   points?: string[];
+  /**
+   * The page shows the verdict in its bottom bar (the lesson player). The
+   * reason then leads the feedback card and scrolls into view on an answer.
+   */
+  verdictInBar?: boolean;
 }
 
 /**
@@ -62,7 +67,7 @@ function isNumeric(cell: string): boolean {
 
 const CALLOUT_LABEL = { tip: 'Tip', exploit: 'Exploit', theory: 'Theory' } as const;
 
-export function StepView({ step, onAnswer, answered, points }: Props) {
+export function StepView({ step, onAnswer, answered, points, verdictInBar }: Props) {
   switch (step.kind) {
     case 'intro':
       return (
@@ -237,7 +242,15 @@ export function StepView({ step, onAnswer, answered, points }: Props) {
         </div>
       );
     case 'quiz':
-      return <Quiz step={step} onAnswer={onAnswer} initial={answered} remember={step.point !== undefined ? points?.[step.point] : undefined} />;
+      return (
+        <Quiz
+          step={step}
+          onAnswer={onAnswer}
+          initial={answered}
+          remember={step.point !== undefined ? points?.[step.point] : undefined}
+          verdictInBar={verdictInBar}
+        />
+      );
     case 'takeaway':
       return (
         <div className="lesson-step">
@@ -299,19 +312,31 @@ function Quiz({
   onAnswer,
   initial,
   remember,
+  verdictInBar,
 }: {
   step: Extract<LessonStep, { kind: 'quiz' }>;
   onAnswer?: (choice: number) => void;
   initial?: number;
   /** The lesson point this question reinforces, shown once it is answered. */
   remember?: string;
+  verdictInBar?: boolean;
 }) {
   const [chosen, setChosen] = useState<number | undefined>(initial);
   const done = chosen !== undefined;
   const right = chosen === step.answer;
+  // A fresh answer brings the reason into view above the bottom bar. A revisited one stays put.
+  const explainRef = useRef<HTMLDivElement>(null);
+  const fresh = useRef(false);
+  useEffect(() => {
+    if (!verdictInBar || !done || !fresh.current) return;
+    const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    const t = window.setTimeout(() => explainRef.current?.scrollIntoView({ block: 'nearest', behavior: reduce ? 'auto' : 'smooth' }), 120);
+    return () => window.clearTimeout(t);
+  }, [done, verdictInBar]);
 
   const choose = (i: number) => {
     if (done) return;
+    fresh.current = true;
     setChosen(i);
     haptic(i === step.answer ? 'success' : 'error');
     onAnswer?.(i);
@@ -353,13 +378,17 @@ function Quiz({
         {done ? (right ? 'Correct.' : `Not quite. The answer is ${step.choices[step.answer]}.`) : ''}
       </div>
       {done && (
-        <div className={`explain reveal ${right ? 'good' : 'bad'}`}>
-          <strong className="explain-verdict">
-            <span className="explain-icon" aria-hidden="true">
-              {right ? <CheckIcon size={14} /> : <CloseIcon size={12} />}
-            </span>
-            {right ? 'Correct.' : 'Not quite.'}
-          </strong>{' '}
+        <div ref={explainRef} className={`explain reveal ${right ? 'good' : 'bad'}${verdictInBar ? ' verdict-in-bar' : ''}`}>
+          {verdictInBar ? (
+            <span className="explain-label">Why</span>
+          ) : (
+            <strong className="explain-verdict">
+              <span className="explain-icon" aria-hidden="true">
+                {right ? <CheckIcon size={14} /> : <CloseIcon size={12} />}
+              </span>
+              {right ? 'Correct.' : 'Not quite.'}
+            </strong>
+          )}{' '}
           <span className="explain-body">
             <Rich text={step.explain} />
           </span>
