@@ -115,6 +115,17 @@ export function TopicIntroSheet({
             <button className="btn btn-primary btn-lg btn-block" onClick={go}>
               {BUTTON[target.action]}
             </button>
+            {done < lessons.length && (
+              <button
+                className="btn btn-plain btn-block"
+                onClick={() => {
+                  onClose();
+                  navigate(`/check/${trackId}/${moduleId}`);
+                }}
+              >
+                Skip ahead with a quick quiz
+              </button>
+            )}
           </div>
         )}
       </div>

@@ -1,26 +1,54 @@
 /* Topic intros: the why line on the Learn page and the intro sheet. */
 
-/* Beside a topic title on Learn: a small way into the full intro. */
-.module-actions {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.6rem;
-  flex: none;
+/* A topic row on Learn: the title opens its intro, progress sits quietly on the right. */
+.module-head .module-title {
+  min-height: 36px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--label);
+  font: inherit;
+  font-weight: 650;
+  font-size: 0.95rem;
+  text-align: left;
 }
 
-.module-about {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-  min-height: 32px;
-  padding: 0 0.6rem;
-  border: 0;
-  border-radius: 999px;
-  font: inherit;
+.module-title-chev {
+  flex: none;
+  color: var(--label-3, var(--label-2));
+}
+
+.module-progress {
+  flex: none;
   font-size: 0.8rem;
-  font-weight: 600;
   color: var(--label-2);
+}
+
+.module-done {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  color: var(--green);
+  background: color-mix(in srgb, var(--green) 14%, transparent);
+}
+
+.module-bar {
+  display: block;
+  height: 3px;
+  margin: -0.15rem 1rem 0.65rem;
+  border-radius: 999px;
   background: var(--fill);
+  overflow: hidden;
+}
+
+.module-bar > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--tint-fill);
 }
 
 /* What is finished folds away: one row per track for its done topics, one per finished track. */

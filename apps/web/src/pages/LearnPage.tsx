@@ -14,7 +14,7 @@ import type { StoredLesson } from '../state/db';
 import { canOpenLesson, FREE_MODULES, isPro } from '../state/access';
 import { pathPrefs } from '../state/goals';
 import { useSettings } from '../state/settings';
-import { CheckIcon, ChevronDownIcon, ChevronRightIcon, GlossaryIcon, InfoIcon, LockIcon, TargetIcon } from '../ui/icons';
+import { CheckIcon, ChevronDownIcon, ChevronRightIcon, GlossaryIcon, LockIcon, TargetIcon } from '../ui/icons';
 import { PageHeader } from '../ui/PageHeader';
 import { loadPlacement } from '../state/placementProgress';
 import { moduleKeyOf, shouldShowModuleIntro } from '../state/moduleIntros';
@@ -35,8 +35,10 @@ export function LearnPage() {
     railsPlaced.current = true;
     for (const rail of page.current.querySelectorAll<HTMLElement>('.lesson-rail')) {
       const card = rail.querySelector<HTMLElement>('.lesson-card.current');
-      if (!card || card === rail.firstElementChild) continue;
-      rail.scrollLeft = card.offsetLeft - parseFloat(getComputedStyle(rail).paddingLeft);
+      if (!card) continue;
+      // Measured against the rail itself: offsetLeft counts from the nearest positioned parent.
+      const shift = card.getBoundingClientRect().left - rail.getBoundingClientRect().left - parseFloat(getComputedStyle(rail).paddingLeft);
+      if (shift > 1) rail.scrollLeft += shift;
     }
   }, [loaded]);
   /** The first lesson opened in an untouched topic shows the topic's intro first, once. */
@@ -122,44 +124,26 @@ export function LearnPage() {
           return (
             <div key={m.id} className="module-block">
               <div className="module-head">
-                <span className="module-title">
+                <button type="button" className="module-title" aria-haspopup="dialog" onClick={() => setIntro({ moduleKey: `${track.id}/${m.id}` })}>
                   {m.title}
                   {locked && <LockIcon size={13} className="muted" />}
-                </span>
-                <span className="module-actions">
-                  <button type="button" className="module-about" aria-haspopup="dialog" aria-label={`About ${m.title}`} onClick={() => setIntro({ moduleKey: `${track.id}/${m.id}` })}>
-                    <InfoIcon size={15} />
-                    About
-                  </button>
-                  {open.length > 0 ? (
-                    <Link to={`/check/${track.id}/${m.id}`} className="skip-link" data-haptic="select" aria-label={`Skip ahead in ${m.title} with a quick quiz`}>
-                      Skip ahead
-                      <ChevronRightIcon size={13} />
-                    </Link>
-                  ) : (
-                    <span className="pill pill-good">
-                      <CheckIcon size={12} /> Done
-                    </span>
-                  )}
-                </span>
-              </div>
-              {lessons.length > 0 &&
-                (topicDone === 0 ? (
-                  <div className="topic-meter">
-                    <span className="topic-meter-label num">
-                      {lessons.length} lessons, about {lessons.reduce((n, e) => n + (e.content?.minutes ?? 0), 0)} min
-                    </span>
-                  </div>
+                  <ChevronRightIcon size={14} className="module-title-chev" />
+                </button>
+                {open.length === 0 ? (
+                  <span className="module-done" aria-label="Topic done">
+                    <CheckIcon size={14} />
+                  </span>
                 ) : (
-                  <div className="topic-meter" role="img" aria-label={`${topicDone} of ${lessons.length} lessons done`}>
-                    <span className="topic-meter-bar" aria-hidden="true">
-                      <span style={{ width: `${(topicDone / lessons.length) * 100}%` }} />
-                    </span>
-                    <span className="topic-meter-label num" aria-hidden="true">
-                      {topicDone} of {lessons.length}
-                    </span>
-                  </div>
-                ))}
+                  <span className="module-progress num">
+                    {topicDone === 0 ? `${lessons.reduce((n, e) => n + (e.content?.minutes ?? 0), 0)} min` : `${topicDone} of ${lessons.length}`}
+                  </span>
+                )}
+              </div>
+              {topicDone > 0 && open.length > 0 && (
+                <span className="module-bar" role="img" aria-label={`${topicDone} of ${lessons.length} lessons done`}>
+                  <span style={{ width: `${(topicDone / lessons.length) * 100}%` }} />
+                </span>
+              )}
               <div className="lesson-rail">
                 {ordered.map((e) => {
                   const closed = !canOpenLesson(e.key, settings.access);
