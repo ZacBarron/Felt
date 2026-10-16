@@ -44,6 +44,8 @@ export interface ServerUser {
   reminders: boolean;
   /** A push 2 days before a free trial ends. Older servers leave it out. */
   trialReminder?: boolean;
+  /** What the daily reminder says is waiting. Older servers leave it out. */
+  reminderBody?: string | null;
   leagues: boolean;
   lastStudyDay: string | null;
   access: ServerAccess;
@@ -188,7 +190,7 @@ export async function refreshMe(): Promise<ServerUser | null> {
   return user;
 }
 
-export async function updateMe(patch: Partial<Pick<ServerUser, 'handle' | 'tz' | 'cueMinutes' | 'reminders' | 'trialReminder' | 'leagues' | 'lastStudyDay'>>) {
+export async function updateMe(patch: Partial<Pick<ServerUser, 'handle' | 'tz' | 'cueMinutes' | 'reminders' | 'trialReminder' | 'reminderBody' | 'leagues' | 'lastStudyDay'>>) {
   const token = session?.token;
   const { user } = await api<{ user: ServerUser }>('/me', { method: 'PATCH', body: patch });
   if (token) updateSessionUser(token, user);

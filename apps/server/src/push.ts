@@ -35,6 +35,9 @@ export const REMINDER = {
   url: '/',
 };
 
+/** The daily reminder, naming what is waiting when the device said so. */
+export const reminderFor = (body: string | null) => (body ? { ...REMINDER, body } : REMINDER);
+
 /**
  * Sends today's study reminders that are due. Run every few minutes; each
  * player gets at most one a day, at their own study time.
@@ -42,9 +45,9 @@ export const REMINDER = {
 export async function runReminders(db: Db, send: PushSender, now = new Date()): Promise<number> {
   const users = db
     .prepare(
-      'SELECT id, tz, cue_minutes, last_study_day FROM users WHERE reminders = 1 AND tz IS NOT NULL AND cue_minutes IS NOT NULL AND EXISTS (SELECT 1 FROM push_subs p WHERE p.user_id = users.id)',
+      'SELECT id, tz, cue_minutes, last_study_day, reminder_body FROM users WHERE reminders = 1 AND tz IS NOT NULL AND cue_minutes IS NOT NULL AND EXISTS (SELECT 1 FROM push_subs p WHERE p.user_id = users.id)',
     )
-    .all() as { id: string; tz: string; cue_minutes: number; last_study_day: string | null }[];
+    .all() as { id: string; tz: string; cue_minutes: number; last_study_day: string | null; reminder_body: string | null }[];
   let sent = 0;
   for (const u of users) {
     const sentSinceStudy = (
@@ -56,7 +59,7 @@ export async function runReminders(db: Db, send: PushSender, now = new Date()): 
     const subs = db.prepare('SELECT endpoint, p256dh, auth FROM push_subs WHERE user_id = ?').all(u.id) as unknown as PushSub[];
     for (const sub of subs) {
       try {
-        if ((await send(sub, JSON.stringify(REMINDER))) === 'gone') db.prepare('DELETE FROM push_subs WHERE endpoint = ?').run(sub.endpoint);
+        if ((await send(sub, JSON.stringify(reminderFor(u.reminder_body)))) === 'gone') db.prepare('DELETE FROM push_subs WHERE endpoint = ?').run(sub.endpoint);
         else sent++;
       } catch (e) {
         console.error('Push failed', e);

@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { createApp } from '../src/app.ts';
 import { loadConfig } from '../src/config.ts';
 import { type Db, openDb } from '../src/db.ts';
-import { runReminders, runTrialNotices, trialEndingNotice } from '../src/push.ts';
+import { REMINDER, runReminders, runTrialNotices, trialEndingNotice } from '../src/push.ts';
 import type { StripeCall } from '../src/services.ts';
 
 let db: Db;
@@ -338,5 +338,26 @@ describe('trial reminders', () => {
     const me = await (await call('PATCH', '/api/me', { trialReminder: false }, token)).json();
     expect(me.user.trialReminder).toBe(false);
     expect(await runTrialNotices(db, sender, clock)).toBe(0);
+  });
+});
+
+describe('what the daily reminder says', () => {
+  it('names what is waiting when the device said so, and falls back to the plain line', async () => {
+    const { token } = await signIn();
+    await call('PATCH', '/api/me', { tz: 'America/New_York', cueMinutes: 11 * 60, reminders: true }, token);
+    await call('POST', '/api/push/subscribe', { endpoint: 'https://push.example/1', keys: { p256dh: 'k', auth: 'a' } }, token);
+    const sent: { title: string; body: string }[] = [];
+    const sender = async (_sub: unknown, payload: string) => {
+      sent.push(JSON.parse(payload));
+      return 'ok' as const;
+    };
+    const me = await (await call('PATCH', '/api/me', { reminderBody: '  Hand rankings is next.\nIt takes 6 min.  ' }, token)).json();
+    expect(me.user.reminderBody).toBe('Hand rankings is next. It takes 6 min.');
+    await runReminders(db, sender, clock);
+    expect(sent[0]).toEqual({ ...REMINDER, body: 'Hand rankings is next. It takes 6 min.' });
+
+    await call('PATCH', '/api/me', { reminderBody: null }, token);
+    await runReminders(db, sender, new Date(clock.getTime() + 86_400_000));
+    expect(sent[1]).toEqual(REMINDER);
   });
 });

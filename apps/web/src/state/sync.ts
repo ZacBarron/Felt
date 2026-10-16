@@ -345,6 +345,13 @@ async function afterSync() {
 
   if (studiedToday && session.user.lastStudyDay !== today) tasks.push(updateMe({ lastStudyDay: today }));
 
+  // The daily reminder names the lesson that is actually waiting. Sent only when it changes.
+  if (session.user.reminders) {
+    // Loaded here: nudge reads settings, which import this module.
+    const line = (await import('./nudge').then((m) => m.currentReminderLine()).catch(() => undefined)) ?? null;
+    if (line !== (session.user.reminderBody ?? null)) tasks.push(updateMe({ reminderBody: line }));
+  }
+
   const fresh = before.filter(({ answer }) => (answer.id ?? 0) > (meta.answersSent ?? 0)).slice(0, 5000);
   if (fresh.length) {
     tasks.push(

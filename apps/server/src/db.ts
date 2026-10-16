@@ -158,6 +158,9 @@ const MIGRATIONS: string[] = [
     PRIMARY KEY (user_id, kind, key)
   );
   `,
+  `
+  ALTER TABLE users ADD COLUMN reminder_body TEXT;
+  `,
 ];
 
 export function openDb(path: string): Db {

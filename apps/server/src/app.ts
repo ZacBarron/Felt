@@ -55,6 +55,8 @@ interface UserRow {
   stripe_customer: string | null;
   /** 1 when the player wants a push 2 days before a free trial ends. */
   trial_reminder: number;
+  /** What the daily reminder says is waiting, written by the player's device. */
+  reminder_body: string | null;
 }
 
 type Env = { Variables: { user: UserRow; token: string } };
@@ -90,6 +92,7 @@ export function publicUser(u: UserRow, now: Date, passkeys = 0, proForEveryone =
     cueMinutes: u.cue_minutes,
     reminders: !!u.reminders,
     trialReminder: u.trial_reminder !== 0,
+    reminderBody: u.reminder_body,
     leagues: !!u.leagues,
     lastStudyDay: u.last_study_day,
     access: { pro, until, plan: u.plan, trialing: paid && !!u.trialing },
@@ -282,6 +285,7 @@ export function createApp({ db, config, mailer, stripe, coach, webauthn = simple
       cueMinutes: number | null;
       reminders: boolean;
       trialReminder: boolean;
+      reminderBody: string | null;
       leagues: boolean;
       lastStudyDay: string;
     }>(c);
@@ -308,6 +312,11 @@ export function createApp({ db, config, mailer, stripe, coach, webauthn = simple
     }
     if (body.reminders !== undefined) set.reminders = body.reminders ? 1 : 0;
     if (body.trialReminder !== undefined) set.trial_reminder = body.trialReminder ? 1 : 0;
+    if (body.reminderBody !== undefined) {
+      // Plain text for a notification: one line, no control characters, short.
+      const line = typeof body.reminderBody === 'string' ? body.reminderBody.replace(/[\u0000-\u001f\u007f]/g, ' ').trim().slice(0, 140) : '';
+      set.reminder_body = line || null;
+    }
     if (body.leagues !== undefined) set.leagues = body.leagues ? 1 : 0;
     if (body.lastStudyDay !== undefined) {
       if (!/^\d{4}-\d{2}-\d{2}$/.test(body.lastStudyDay)) return c.json({ error: 'Bad date.' }, 400);
