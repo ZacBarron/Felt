@@ -19,6 +19,7 @@ import { EmptyState, Section } from '../ui/Section';
 import { Toggle } from '../ui/Toggle';
 import './screens.css';
 import './auth.css';
+import './you.css';
 
 function ago(iso?: string) {
   if (!iso) return 'never';
@@ -28,8 +29,11 @@ function ago(iso?: string) {
   if (mins < 60) return `${mins} min ago`;
   const hours = Math.round(mins / 60);
   if (hours < 24) return `${hours} ${hours === 1 ? 'hour' : 'hours'} ago`;
-  return new Date(iso).toLocaleDateString();
+  return shortDate(iso);
 }
+
+/** Dates as the voice guide writes them: Oct 21. */
+const shortDate = (iso: string) => new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 
 const toTime = (m: number) => `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
 const fromTime = (t: string) => {
@@ -134,6 +138,41 @@ function SignedIn({ user, features }: { user: ServerUser; features: ServerFeatur
           {passkeys > 0 ? 'Signed in with a passkey' : 'Signed in with an email code'}
         </div>
       </section>
+
+      {features.billing && (
+        <Section>
+          <div className="card account-plan">
+            <span className="grow">
+              <span className="account-plan-name">{user.access.pro ? (user.access.trialing ? 'Felt Pro trial' : 'Felt Pro') : 'Free plan'}</span>
+              <span className="footnote">
+                {user.access.pro && user.access.until
+                  ? `${user.access.trialing ? 'Trial ends' : 'Renews'} ${shortDate(user.access.until)}`
+                  : user.access.pro
+                    ? 'Active'
+                    : 'Every track has free lessons.'}
+              </span>
+            </span>
+            {user.access.until ? (
+              <button
+                className="btn btn-tinted"
+                disabled={busy}
+                onClick={() =>
+                  void run(async () => {
+                    const err = await manageSubscription();
+                    if (err) throw new Error(err);
+                  })
+                }
+              >
+                Manage or cancel
+              </button>
+            ) : !user.access.pro ? (
+              <Link to="/pro?from=account" className="btn btn-primary">
+                See Felt Pro
+              </Link>
+            ) : null}
+          </div>
+        </Section>
+      )}
 
       <SyncSection busy={busy} run={run} message={message} />
 
@@ -303,45 +342,6 @@ function SignedIn({ user, features }: { user: ServerUser; features: ServerFeatur
           )}
         </div>
       </Section>
-
-      {features.billing && (
-        <Section title="Felt Pro">
-          <div className="list">
-            <div className="list-row">
-              <span className="grow">
-                <span style={{ display: 'block' }}>{user.access.pro ? (user.access.trialing ? 'Free trial' : 'Active') : 'Free plan'}</span>
-                {user.access.until && user.access.pro && (
-                  <span className="footnote">
-                    {user.access.trialing ? 'Trial ends on' : 'Renews on'} {new Date(user.access.until).toLocaleDateString()}
-                  </span>
-                )}
-              </span>
-            </div>
-            {user.access.until ? (
-              <button
-                className="list-row"
-                disabled={busy}
-                onClick={() =>
-                  void run(async () => {
-                    const err = await manageSubscription();
-                    if (err) throw new Error(err);
-                  })
-                }
-              >
-                <span className="grow" style={{ color: 'var(--tint)' }}>
-                  Manage or cancel subscription
-                </span>
-              </button>
-            ) : (
-              <Link to="/pro?from=account" className="list-row">
-                <span className="grow" style={{ color: 'var(--tint)' }}>
-                  See Felt Pro
-                </span>
-              </Link>
-            )}
-          </div>
-        </Section>
-      )}
 
       <Section>
         <div className="list with-icons">

@@ -1,0 +1,179 @@
+/* You: profile, overview stats and the rating share card (YouPage.tsx, RatingShare.tsx). */
+
+.you-id {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.1rem;
+}
+
+.you-id-name {
+  font-size: 1.45rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  overflow-wrap: anywhere;
+}
+
+.btn.you-id-edit {
+  min-height: 32px;
+  margin-top: 0.15rem;
+  padding: 0;
+  font-size: 0.92rem;
+}
+
+.you-share {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+/* Overview: four plain numbers, two by two. */
+.you-stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.6rem;
+}
+
+.you-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  padding: 0.85rem 1rem 0.8rem;
+  border-radius: var(--r-card, 22px);
+  background: var(--surface);
+}
+
+.you-stat-value {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 1.65rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  color: var(--label);
+}
+
+.you-stat-flame {
+  color: var(--tint);
+}
+
+.you-stat-label {
+  font-size: 0.88rem;
+  color: var(--label-2);
+}
+
+.you-stat-sub {
+  font-size: 0.78rem;
+  color: var(--tint);
+  font-weight: 600;
+}
+
+.you-row-title {
+  display: block;
+  font-weight: 600;
+}
+
+/* Share sheet: the card image, then two actions. */
+.share-preview {
+  display: grid;
+  place-items: center;
+}
+
+.share-preview img,
+.share-preview-wait {
+  display: block;
+  width: min(100%, 46vh * 0.8, 380px);
+  aspect-ratio: 4 / 5;
+  border-radius: 18px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.22);
+}
+
+.share-preview-wait {
+  background: var(--brand-gradient);
+  opacity: 0.6;
+}
+
+.share-note {
+  margin: 0;
+  text-align: center;
+}
+
+.share-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6rem;
+}
+
+.share-actions .btn {
+  min-width: 0;
+  padding-left: 0.8rem;
+  padding-right: 0.8rem;
+  white-space: nowrap;
+  font-size: 1rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+}
+
+/* More: the plan card for free players. One line on what Pro adds, one way in. */
+a.card.more-pro,
+.more-pro {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 0.95rem 1rem;
+  color: var(--label);
+  text-decoration: none;
+}
+
+.more-pro-title {
+  display: block;
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.more-pro-sub {
+  display: block;
+  margin-top: 1px;
+  font-size: 0.88rem;
+  color: var(--label-2);
+}
+
+.more-pro-cta {
+  flex: none;
+  padding: 0.45rem 0.95rem;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  font-weight: 650;
+  color: var(--on-tint);
+  background: var(--tint-fill);
+}
+
+/* Account: the plan as a card near the top, with its one action. */
+.account-plan {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+}
+
+.account-plan-name {
+  display: block;
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+}
+
+.account-plan .btn {
+  flex: none;
+  min-height: 38px;
+  padding: 0 1rem;
+  font-size: 0.92rem;
+}

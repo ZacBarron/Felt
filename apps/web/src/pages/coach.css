@@ -12,18 +12,53 @@
   padding-bottom: 0.8rem;
 }
 
-.coach-prompts {
+/* Empty chat: a greeting up top, starter questions down by the composer where the thumb is. */
+.coach-empty {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 1.6rem;
+  min-height: calc(100dvh - 210px - var(--tabbar-h) - var(--bottombar-h) - env(safe-area-inset-bottom, 0px));
 }
 
-.coach-prompts .chip {
-  min-height: 40px;
-  border-radius: 999px;
+.coach-empty.with-spot {
+  min-height: 0;
+}
+
+.coach-hello {
+  padding-top: 0.6rem;
+}
+
+.coach-hello-title {
+  margin: 0;
+  font-size: 1.6rem;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  line-height: 1.2;
+}
+
+.coach-hello-sub {
+  margin: 0.4rem 0 0;
+  color: var(--label-2);
+}
+
+.coach-ask {
+  width: 100%;
+  font-weight: 500;
+  min-height: 52px;
   text-align: left;
-  line-height: 1.25;
-  padding: 0.5rem 0.95rem;
+  line-height: 1.3;
+  color: var(--label);
+}
+
+.coach-ask-icon {
+  flex: none;
+  color: var(--tint);
+}
+
+.coach-signin {
+  margin: 0;
+  text-align: center;
 }
 
 .coach-spot-title {

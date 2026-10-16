@@ -14,22 +14,25 @@ import {
   skillEdge,
   stakesLabel,
   type TableAssumptions,
+  tierFor,
   tierLabel,
+  TIERS,
 } from '@felt/core';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { haptic } from '../haptics';
 import { db } from '../state/db';
-import { DOMAIN_LABELS, ratingSnapshot, streakNow } from '../state/rating';
+import { activityDates, DOMAIN_LABELS, ratingSnapshot, streakNow } from '../state/rating';
 import { useSettings } from '../state/settings';
 import { signed } from '../ui/format';
-import { ChevronRightIcon, TargetIcon, LeagueIcon } from '../ui/icons';
+import { ChevronRightIcon, FlameIcon, ShareIcon } from '../ui/icons';
 import { AvatarPicker } from '../ui/Avatar';
+import { RatingShareSheet } from '../components/RatingShare';
 import { TierCard } from '../components/TierCard';
 import { PageHeader } from '../ui/PageHeader';
 import { Section } from '../ui/Section';
 import { useCountUp } from '../ui/useCountUp';
+import './you.css';
 
 function Sparkline({ points }: { points: { rating: number; rd: number }[] }) {
   if (points.length < 2) return null;
@@ -99,7 +102,18 @@ export function YouPage() {
     return { cash, sessions };
   }, []);
   const streak = useLiveQuery(() => streakNow(), []);
+  const overview = useLiveQuery(async () => {
+    const [lessons, dailies, dates] = await Promise.all([
+      db.lessons.where('status').anyOf('done', 'tested').count(),
+      db.daily.filter((d) => d.finished !== false).count(),
+      activityDates(),
+    ]);
+    const first = dates.length ? new Date(Math.min(...dates.map((d) => d.getTime()))) : undefined;
+    return { lessons, dailies, first };
+  }, []);
   const [showAssumptions, setShowAssumptions] = useState(false);
+  const [sharing, setSharing] = useState(false);
+  const [editingName, setEditingName] = useState(false);
   const overall = snap ? currentRating(snap.overall) : undefined;
   const shown = Math.round(useCountUp(overall?.rating ?? 0));
 
@@ -145,16 +159,20 @@ export function YouPage() {
   const setAssumption = (key: keyof TableAssumptions, value: number) =>
     update({ ...settings, assumptions: { ...settings.assumptions, [key]: value } });
 
-  const share = async () => {
-    const text = `My Felt Rating is ${Math.round(overall.rating)}${provisional ? ' and still settling' : `. My tier is ${tierLabel(overall)}`}.${streak?.streak ? ` I'm on a ${streak.streak} day streak.` : ''}`;
-    try {
-      if (navigator.share) await navigator.share({ text: `${text}\n${location.origin}${import.meta.env.BASE_URL}` });
-      else await navigator.clipboard.writeText(`${text}\n${location.origin}${import.meta.env.BASE_URL}`);
-      haptic('success');
-    } catch {
-      // Share dismissed.
-    }
+  const tierName = provisional ? undefined : tierFor(overall.rating);
+  // The share card: real numbers only, from this device's answers.
+  const card = {
+    name: settings.profile.name?.trim() || undefined,
+    rating: overall.rating,
+    settling: provisional,
+    tier: tierName,
+    thinks: TIERS.find((t) => t.name === tierName)?.thinks,
+    answers: overall.games,
+    streak: streak?.streak ?? 0,
+    best: bestRating,
+    history: snap.history.map((p) => p.rating),
   };
+  const since = overview?.first?.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
 
   return (
     <div className="stack" style={{ gap: '1.5rem' }}>
@@ -162,16 +180,30 @@ export function YouPage() {
 
       <section className="you-profile">
         <AvatarPicker name={settings.profile.name} photo={settings.profile.photo} onPhoto={(photo) => update({ ...settings, profile: { ...settings.profile, photo } })} />
-        <label className="you-name">
-          <span className="footnote">Your name</span>
-          <input
-            value={settings.profile.name ?? ''}
-            placeholder="Optional"
-            maxLength={40}
-            autoComplete="nickname"
-            onChange={(e) => update({ ...settings, profile: { ...settings.profile, name: e.target.value || undefined } })}
-          />
-        </label>
+        {editingName ? (
+          <label className="you-name">
+            <span className="footnote">Your name</span>
+            <input
+              autoFocus
+              value={settings.profile.name ?? ''}
+              placeholder="Optional"
+              maxLength={40}
+              autoComplete="nickname"
+              enterKeyHint="done"
+              onChange={(e) => update({ ...settings, profile: { ...settings.profile, name: e.target.value || undefined } })}
+              onBlur={() => setEditingName(false)}
+              onKeyDown={(e) => e.key === 'Enter' && setEditingName(false)}
+            />
+          </label>
+        ) : (
+          <span className="you-id">
+            <span className="you-id-name">{settings.profile.name || 'You'}</span>
+            {since && <span className="footnote">Studying since {since}</span>}
+            <button className="btn btn-plain you-id-edit" onClick={() => setEditingName(true)}>
+              {settings.profile.name ? 'Edit name' : 'Add your name'}
+            </button>
+          </span>
+        )}
       </section>
 
       <section className="hero you-hero">
@@ -203,7 +235,8 @@ export function YouPage() {
           {bestRating > 0 && <span className="pill pill-on-felt num">Best ever {Math.round(bestRating)}</span>}
         </div>
         {rated ? (
-          <button className="btn btn-lg btn-block btn-hero" onClick={() => void share()} data-haptic="off">
+          <button className="btn btn-lg btn-block btn-hero you-share" onClick={() => setSharing(true)}>
+            <ShareIcon size={20} />
             Share my rating
           </button>
         ) : (
@@ -213,20 +246,49 @@ export function YouPage() {
         )}
       </section>
 
+      {rated && <RatingShareSheet open={sharing} onClose={() => setSharing(false)} data={card} />}
+
+      <Section title="Overview">
+        <div className="you-stats">
+          <div className="you-stat">
+            <span className="you-stat-value num">
+              {streak?.streak ? <FlameIcon size={20} className="you-stat-flame" /> : null}
+              {streak?.streak ?? 0}
+            </span>
+            <span className="you-stat-label">Day streak</span>
+            {streak && streak.bank > 0 && <span className="you-stat-sub">{streak.bank === 1 ? '1 streak freeze saved' : `${streak.bank} streak freezes saved`}</span>}
+          </div>
+          <div className="you-stat">
+            <span className="you-stat-value num">{streak?.best ?? 0}</span>
+            <span className="you-stat-label">Longest streak</span>
+          </div>
+          <div className="you-stat">
+            <span className="you-stat-value num">{overview?.lessons ?? 0}</span>
+            <span className="you-stat-label">Lessons done</span>
+          </div>
+          <div className="you-stat">
+            <span className="you-stat-value num">{overview?.dailies ?? 0}</span>
+            <span className="you-stat-label">Daily challenges</span>
+          </div>
+        </div>
+      </Section>
+
       <TierCard rating={overall} />
 
-      <div className="more-tiles">
-        <Link to="/practice" className="more-tile">
-          <span className="more-tile-icon">
-            <TargetIcon size={22} />
+      <div className="list">
+        <Link to="/practice" className="list-row">
+          <span className="grow">
+            <span className="you-row-title">Practice at your level</span>
+            <span className="footnote">10 decisions picked for your level</span>
           </span>
-          <span className="more-tile-label">Practice at your level</span>
+          <ChevronRightIcon size={16} className="chev" />
         </Link>
-        <Link to="/league" className="more-tile">
-          <span className="more-tile-icon">
-            <LeagueIcon size={22} />
+        <Link to="/league" className="list-row">
+          <span className="grow">
+            <span className="you-row-title">Weekly league</span>
+            <span className="footnote">Real players near your rating</span>
           </span>
-          <span className="more-tile-label">Weekly league</span>
+          <ChevronRightIcon size={16} className="chev" />
         </Link>
       </div>
 
@@ -242,6 +304,14 @@ export function YouPage() {
         <h2 className="section-title">
           Win rate at {stakesLabel(g.stakes)} {g.venue}
         </h2>
+        {!rated ? (
+          <div className="card winrate-card">
+            <p style={{ margin: 0 }}>Your estimate needs a Felt Rating first. The daily challenge gives you one.</p>
+            <p className="footnote" style={{ margin: 0 }}>
+              Then Felt turns your rating into bb per 100 hands at your stakes.
+            </p>
+          </div>
+        ) : (
         <div className="card winrate-card">
           <div className="row between" style={{ alignItems: 'flex-end' }}>
             <div>
@@ -294,6 +364,7 @@ export function YouPage() {
             {blended && ` Right now they count for ${Math.round(blended.weightOnResults * 100)}%.`} bb/100 means big blinds won per 100 hands.
           </p>
         </div>
+        )}
       </section>
 
       <section>

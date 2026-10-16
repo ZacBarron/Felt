@@ -81,16 +81,7 @@ export function CoachPage() {
       ) : !session ? (
         <>
           <PageHeader title="Coach" back={{ to: '/more', label: 'More' }} />
-          <EmptyState
-            art={<Art />}
-            title="Sign in to ask the coach"
-            body="The coach works with your Felt account. It is part of Felt Pro."
-            action={
-              <Link to="/account?next=/coach" className="btn btn-primary" style={{ marginTop: '0.4rem' }}>
-                Sign in
-              </Link>
-            }
-          />
+          <Pitch signIn />
         </>
       ) : !pro ? (
         <>
@@ -118,11 +109,33 @@ const PITCH = [
   { title: 'Honest about numbers', body: 'It uses Felt’s charts when it has them. Anything else it labels as an estimate.' },
 ];
 
-/** For players without Felt Pro: what the coach does, then one way in. */
-function Pitch() {
+/**
+ * For players without Felt Pro: what the coach does, the questions it would
+ * start with for this player (from their own misses and weakest area), then
+ * one way in. Guests also get a way to sign in, for when they already have Pro.
+ */
+function Pitch({ signIn = false }: { signIn?: boolean }) {
+  const { settings } = useSettings();
+  const [context, setContext] = useState<CoachContext>();
+  useEffect(() => {
+    void buildCoachContext(settings).then(setContext);
+    // Once per visit.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  const prompts = starterPrompts(context, undefined, settings.profile.experience).slice(0, 3);
   return (
     <>
       <EmptyState art={<Art />} title="Your own poker coach" body="Ask about any hand or chart. Answers fit your level and your game." />
+      <Section title="You could ask">
+        <div className="list coach-asks">
+          {prompts.map((p) => (
+            <Link key={p} to="/pro?from=coach" className="list-row coach-ask">
+              <span className="grow">{p}</span>
+              <span className="pill">Pro</span>
+            </Link>
+          ))}
+        </div>
+      </Section>
       <div className="list coach-pitch">
         {PITCH.map((p) => (
           <div key={p.title} className="list-row">
@@ -135,6 +148,11 @@ function Pitch() {
           </div>
         ))}
       </div>
+      {signIn && (
+        <p className="coach-signin footnote">
+          Have Felt Pro already? <Link to="/account?next=/coach">Sign in to use it</Link>
+        </p>
+      )}
       <BottomBar>
         <Link to="/pro?from=coach" className="btn btn-primary btn-lg btn-block">
           See Felt Pro
@@ -262,23 +280,32 @@ function Conversation({ incoming, limit, remaining, onRemaining, onLostPro }: Co
       {chat.spot && <SpotCard spot={chat.spot} />}
 
       {chat.messages.length === 0 && (
-        <Section
-          title="Ask about your game"
-          info={
-            <p>
-              The coach uses Claude, an AI model made by Anthropic. Each question goes to it with a short summary of your study. The summary holds your Felt Rating, goals, game settings and recent misses.
-            </p>
-          }
-          footer="The coach can be wrong. Check big decisions against your charts."
-        >
-          <div className="coach-prompts" role="group" aria-label="Starter questions">
-            {prompts.map((p) => (
-              <button key={p} type="button" className="chip" data-haptic="select" onClick={() => send(p)} disabled={busy || outOfMessages}>
-                {p}
-              </button>
-            ))}
-          </div>
-        </Section>
+        <div className={`coach-empty${chat.spot ? ' with-spot' : ''}`}>
+          {!chat.spot && (
+            <div className="coach-hello">
+              <h2 className="coach-hello-title">{settings.profile.name?.trim() ? `Hi ${settings.profile.name.trim()}.` : 'Hi.'} What should we work on?</h2>
+              <p className="coach-hello-sub">The coach knows your Felt Rating and your recent misses.</p>
+            </div>
+          )}
+          <Section
+            title="Try asking"
+            info={
+              <p>
+                The coach uses Claude, an AI model made by Anthropic. Each question goes to it with a short summary of your study. The summary holds your Felt Rating, goals, game settings and recent misses.
+              </p>
+            }
+            footer="The coach can be wrong. Check big decisions against your charts."
+          >
+            <div className="list coach-asks" role="group" aria-label="Starter questions">
+              {prompts.map((p) => (
+                <button key={p} type="button" className="list-row coach-ask" data-haptic="select" onClick={() => send(p)} disabled={busy || outOfMessages}>
+                  <span className="grow">{p}</span>
+                  <SendIcon size={16} className="coach-ask-icon" />
+                </button>
+              ))}
+            </div>
+          </Section>
+        </div>
       )}
 
       {chat.messages.length > 0 && (
