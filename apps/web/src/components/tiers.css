@@ -110,3 +110,18 @@
   color: var(--on-felt-accent);
   animation: rise 500ms var(--ease) 1380ms backwards;
 }
+
+/* The tier moment: Continue, with sharing the new tier just under it. */
+.moment-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.moment .moment-share {
+  max-width: 420px;
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+}

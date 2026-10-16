@@ -1,25 +1,39 @@
-import { currentRating, isProvisional, nextTier, TIERS, tierFor } from '@felt/core';
-import { useLiveQuery } from 'dexie-react-hooks';
-import { useEffect, useRef, useState } from 'react';
-import { useLocation } from 'react-router-dom';
-import { haptic } from '../haptics';
-import { track } from '../state/events';
-import { ratingSnapshot, streakNow } from '../state/rating';
-import { BrandMark } from '../ui/Brand';
-import { useCountUp } from '../ui/useCountUp';
-import './tiers.css';
+import {
+  currentRating,
+  isProvisional,
+  nextTier,
+  TIERS,
+  tierFor,
+} from "@felt/core";
+import { useLiveQuery } from "dexie-react-hooks";
+import { useEffect, useRef, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { haptic } from "../haptics";
+import { track } from "../state/events";
+import { ratingSnapshot, streakNow } from "../state/rating";
+import { BrandMark } from "../ui/Brand";
+import { useCountUp } from "../ui/useCountUp";
+import "./tiers.css";
 
-const KEY = 'felt.moments';
+const KEY = "felt.moments";
 const STREAK_MILESTONES = [3, 7, 14, 30, 50, 100, 200, 365];
 /** Moments wait for a calm screen, never interrupting a question. */
-const CALM = ['/', '/you', '/more', '/learn'];
+const CALM = ["/", "/you", "/more", "/learn"];
 
 interface Seen {
   tier: number;
   streak: number;
 }
 
-type Moment = { kind: 'tier'; tier: string; thinks: string; rating: number; next?: { name: string; min: number } } | { kind: 'streak'; days: number };
+type Moment =
+  | {
+      kind: "tier";
+      tier: string;
+      thinks: string;
+      rating: number;
+      next?: { name: string; min: number };
+    }
+  | { kind: "streak"; days: number };
 
 function readSeen(): Seen | undefined {
   try {
@@ -55,25 +69,41 @@ export function Moments() {
   useEffect(() => {
     if (!state || moment) return;
     const settled = state.overall.games > 0 && !isProvisional(state.overall);
-    const tierIndex = settled ? TIERS.findIndex((t) => t.name === tierFor(state.overall.rating)) : -1;
-    const milestone = [...STREAK_MILESTONES].reverse().find((m) => state.streak >= m) ?? 0;
+    const tierIndex = settled
+      ? TIERS.findIndex((t) => t.name === tierFor(state.overall.rating))
+      : -1;
+    const milestone =
+      [...STREAK_MILESTONES].reverse().find((m) => state.streak >= m) ?? 0;
     const seen = readSeen();
     // First visit with this feature: remember where you are without a fanfare.
     if (!seen) return writeSeen({ tier: tierIndex, streak: milestone });
     // A lesson lives under /learn, but it is never a calm screen.
-    if (!CALM.includes('/' + location.pathname.split('/')[1]) || /^\/learn\/./.test(location.pathname)) return;
+    if (
+      !CALM.includes("/" + location.pathname.split("/")[1]) ||
+      /^\/learn\/./.test(location.pathname)
+    )
+      return;
     if (tierIndex > seen.tier) {
       writeSeen({ ...seen, tier: tierIndex });
       const next = nextTier(state.overall.rating);
-      setMoment({ kind: 'tier', tier: TIERS[tierIndex].name, thinks: TIERS[tierIndex].thinks, rating: Math.round(state.overall.rating), next: next && { name: next.name, min: next.min } });
-      track('moment_shown', { kind: 'tier', tier: TIERS[tierIndex].name });
+      setMoment({
+        kind: "tier",
+        tier: TIERS[tierIndex].name,
+        thinks: TIERS[tierIndex].thinks,
+        rating: Math.round(state.overall.rating),
+        next: next && { name: next.name, min: next.min },
+      });
+      track("moment_shown", { kind: "tier", tier: TIERS[tierIndex].name });
     } else if (milestone > seen.streak) {
       writeSeen({ ...seen, streak: milestone });
-      setMoment({ kind: 'streak', days: milestone });
-      track('moment_shown', { kind: 'streak', days: milestone });
+      setMoment({ kind: "streak", days: milestone });
+      track("moment_shown", { kind: "streak", days: milestone });
     } else if (tierIndex < seen.tier || milestone < seen.streak) {
       // Dropping back is not news; just lower the bar so the next climb counts.
-      writeSeen({ tier: Math.min(seen.tier, tierIndex), streak: Math.min(seen.streak, milestone) });
+      writeSeen({
+        tier: Math.min(seen.tier, tierIndex),
+        streak: Math.min(seen.streak, milestone),
+      });
     }
   }, [state, location.pathname, moment]);
 
@@ -81,30 +111,47 @@ export function Moments() {
   return <MomentView moment={moment} onClose={() => setMoment(undefined)} />;
 }
 
-function MomentView({ moment, onClose }: { moment: Moment; onClose: () => void }) {
+function MomentView({
+  moment,
+  onClose,
+}: {
+  moment: Moment;
+  onClose: () => void;
+}) {
   const button = useRef<HTMLButtonElement>(null);
-  const shown = Math.round(useCountUp(moment.kind === 'tier' ? moment.rating : moment.days, 1200));
+  const navigate = useNavigate();
+  const shown = Math.round(
+    useCountUp(moment.kind === "tier" ? moment.rating : moment.days, 1200),
+  );
 
   useEffect(() => {
-    haptic('success');
+    haptic("success");
     const t = setTimeout(() => button.current?.focus(), 50);
-    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
-    window.addEventListener('keydown', onKey);
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
+    window.addEventListener("keydown", onKey);
     return () => {
       clearTimeout(t);
-      window.removeEventListener('keydown', onKey);
+      window.removeEventListener("keydown", onKey);
     };
   }, [onClose]);
 
-  const title = moment.kind === 'tier' ? moment.tier : `${moment.days} day streak`;
+  const title =
+    moment.kind === "tier" ? moment.tier : `${moment.days} day streak`;
   return (
-    <div className="moment" role="dialog" aria-modal="true" aria-labelledby="moment-title">
+    <div
+      className="moment"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="moment-title"
+    >
       <div className="moment-rays" aria-hidden="true" />
       <div className="moment-body">
         <BrandMark size={92} animate />
-        <div className="moment-kicker">{moment.kind === 'tier' ? 'New tier' : 'Streak'}</div>
+        <div className="moment-kicker">
+          {moment.kind === "tier" ? "New tier" : "Streak"}
+        </div>
         <h1 id="moment-title" className="display moment-title">
-          {moment.kind === 'streak' ? (
+          {moment.kind === "streak" ? (
             <>
               <span className="num">{shown}</span> day streak
             </>
@@ -112,24 +159,46 @@ function MomentView({ moment, onClose }: { moment: Moment; onClose: () => void }
             title
           )}
         </h1>
-        {moment.kind === 'tier' && (
+        {moment.kind === "tier" && (
           <div className="moment-number num" aria-hidden="true">
             {shown}
             <span> Felt Rating</span>
           </div>
         )}
-        {moment.kind === 'tier' && <p className="moment-thinks">Players here ask “{moment.thinks}”</p>}
+        {moment.kind === "tier" && (
+          <p className="moment-thinks">Players here ask “{moment.thinks}”</p>
+        )}
         <p className="moment-sub">
-          {moment.kind === 'tier'
+          {moment.kind === "tier"
             ? moment.next
               ? `Your answers put you here. ${moment.next.name} starts at ${moment.next.min}.`
-              : 'Your answers put you in the top tier.'
+              : "Your answers put you in the top tier."
             : `You studied ${moment.days} days in a row. Small sessions add up.`}
         </p>
       </div>
-      <button ref={button} className="btn btn-lg btn-block btn-hero moment-cta" data-haptic="off" onClick={onClose}>
-        Continue
-      </button>
+      <div className="moment-actions">
+        <button
+          ref={button}
+          className="btn btn-lg btn-block btn-hero moment-cta"
+          data-haptic="off"
+          onClick={onClose}
+        >
+          Continue
+        </button>
+        {moment.kind === "tier" && (
+          // The proudest moment is the best one to share: open the rating card on You.
+          <button
+            className="btn btn-block btn-hero-ghost moment-cta moment-share"
+            onClick={() => {
+              track("moment_share_tapped", { tier: moment.tier });
+              onClose();
+              navigate("/you?share=1");
+            }}
+          >
+            Share my rating
+          </button>
+        )}
+      </div>
     </div>
   );
 }
