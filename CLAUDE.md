@@ -28,7 +28,7 @@ Personal poker training app. Read docs/CONCEPT.md and docs/ROADMAP.md before sta
 
 - Brand rules (logo, color, type, motion, voice) live in docs/BRAND.md. Display serif is for titles and hero numbers only; the felt gradient appears at most once per screen.
 
-- Design language is iOS 26 Liquid Glass: system font, the Card room palette (spruce felt, brass tint, warm neutrals; no neon), light and dark from the system or the Appearance setting, inset grouped lists, capsule controls, and the `.glass` material only for things that float (tab bar, sidebar, nav bar, toolbars). Content itself sits on plain grouped surfaces.
+- Design language is iOS 26 Liquid Glass: system font, the Card room palette (spruce felt, brass tint, warm neutrals; no neon) plus the chip set (cobalt and gold, for feature cards and icon tiles only, never a poker meaning; see BRAND.md), light and dark from the system or the Appearance setting, inset grouped lists, capsule controls, and the `.glass` material only for things that float (tab bar, sidebar, nav bar, toolbars). Content itself sits on plain grouped surfaces.
 - Colors come from the CSS tokens in `styles.css` (`--tint` for text and icons, `--tint-fill` with `--on-tint` for filled buttons, `--green`, `--red`, `--label-2`, `--surface`, ...). Never hard code a color in a component unless it is a playing card or the felt.
 - Icons come from `src/ui/icons.tsx`, drawn for this app on a 24pt grid. Do not add an icon library.
 - Glass rims use box-shadow only. A masked pseudo element rim disables the backdrop blur in Chromium. When screenshotting with Playwright, launch with `--use-angle=swiftshader --enable-unsafe-swiftshader` or blur will not render.

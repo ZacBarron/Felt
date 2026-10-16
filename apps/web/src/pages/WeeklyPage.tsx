@@ -38,6 +38,7 @@ import { useBodyClass } from '../ui/useBodyClass';
 import { actionText, Board, GRADE_TEXT, lineText, RiverResultView } from './ScenariosPage';
 import './screens.css';
 import './weekly.css';
+import { MedalArt } from '../ui/FeatureArt';
 
 const KIND_ICONS: Record<WeeklyKind, IconComponent> = {
   math: PercentIcon,
@@ -650,16 +651,14 @@ export function WeeklyTodayCard() {
   const right = record?.scores.filter((s) => s >= 1).length ?? 0;
   const detail = done ? `${right} of ${record!.scores.length} right, ${pct(weeklyAccuracy(record!.scores))}` : record ? `${record.scores.length} of ${record.items.length} done` : '10 harder decisions';
   return (
-    <Link to="/weekly" className={`card wk-today reveal${done ? ' done' : ''}`}>
-      <span className="wk-today-icon" aria-hidden="true">
-        {done ? <CheckIcon size={20} /> : <MedalIcon size={22} />}
+    <Link to="/weekly" className="feature-card gold reveal">
+      <MedalArt />
+      <span className="feature-copy">
+        <span className="feature-kicker">Pro event</span>
+        <span className="feature-title">{done ? 'Weekly Pro challenge done' : 'Weekly Pro challenge'}</span>
+        <span className="feature-sub num">{detail}</span>
+        {!done && <span className="feature-cta">{record ? 'Keep going' : 'Start the set'}</span>}
       </span>
-      <span className="grow" style={{ minWidth: 0 }}>
-        <span className="wk-today-kicker">Pro event</span>
-        <span className="wk-today-title">{done ? 'Weekly Pro challenge done' : 'Weekly Pro challenge'}</span>
-        <span className="footnote num">{detail}</span>
-      </span>
-      <ChevronRightIcon size={16} className="chev" />
     </Link>
   );
 }

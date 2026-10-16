@@ -53,6 +53,18 @@
   --felt-1: #2a7461;
   --felt-2: #165244;
   --felt-3: #0b2421;
+  /*
+   * The chip set: ancillary colors for feature cards and marketing, from the
+   * chips on a card room table. Cobalt for social and growth, gold for Pro and
+   * challenges. They never take a poker meaning: red, green, purple and gray
+   * stay with the actions. The same in both themes, like a printed chip.
+   */
+  --chip-cobalt: #2f5fe0;
+  --chip-cobalt-deep: #14296f;
+  --chip-gold: #a8721f;
+  --feature-cobalt: linear-gradient(140deg, #4272f2 0%, #2448b9 46%, #132667 100%);
+  --feature-gold: linear-gradient(140deg, #f8dc9b 0%, #e6b764 46%, #b47a24 100%);
+  --feature-gold-ink: #1d1505;
   --brand-gradient: radial-gradient(120% 140% at 0% 0%, var(--felt-1) 0%, var(--felt-2) 38%, var(--felt-3) 100%);
   /* Text and fills that sit on the felt. */
   --on-felt-accent: var(--accent);
@@ -5493,4 +5505,102 @@ a.card.more-me,
   font-weight: 600;
   color: var(--on-tint);
   background: var(--tint-fill);
+}
+
+/* Feature cards: a chip colored card with a drawn chip or medal, for the few things worth a nudge. */
+.feature-card {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  min-height: 112px;
+  padding: 1.05rem 1.1rem;
+  border-radius: var(--r-card, 22px);
+  overflow: hidden;
+  isolation: isolate;
+  color: #fff;
+  text-decoration: none;
+  box-shadow: 0 12px 28px rgba(10, 20, 40, 0.22);
+}
+
+.feature-card.cobalt {
+  background: var(--feature-cobalt);
+}
+
+.feature-card.gold {
+  color: var(--feature-gold-ink);
+  background: var(--feature-gold);
+  box-shadow: 0 12px 28px rgba(120, 80, 20, 0.25);
+}
+
+.feature-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+  flex: 1;
+  padding-right: 5.5rem;
+}
+
+.feature-kicker {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  opacity: 0.85;
+}
+
+.feature-title {
+  font-size: 1.18rem;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+
+.feature-sub {
+  font-size: 0.88rem;
+  line-height: 1.35;
+  opacity: 0.86;
+}
+
+.feature-cta {
+  align-self: flex-start;
+  margin-top: 0.55rem;
+  padding: 0.38rem 0.9rem;
+  border-radius: 999px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--chip-cobalt-deep);
+  background: #fff;
+}
+
+.feature-card.gold .feature-cta {
+  color: #fff;
+  background: var(--feature-gold-ink);
+}
+
+.feature-art {
+  position: absolute;
+  right: -18px;
+  top: 50%;
+  z-index: -1;
+  width: 128px;
+  height: 128px;
+  transform: translateY(-50%) rotate(-14deg);
+  opacity: 0.95;
+}
+
+.feature-close {
+  position: absolute;
+  top: 0.55rem;
+  right: 0.55rem;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: 999px;
+  color: inherit;
+  background: rgba(255, 255, 255, 0.18);
 }

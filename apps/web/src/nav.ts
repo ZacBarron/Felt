@@ -31,6 +31,9 @@ export interface NavItem {
 }
 
 const tint = 'var(--base-500)';
+/** Challenges wear gold and social things cobalt, from the chip set (see BRAND.md). Study stays spruce. */
+const gold = 'var(--chip-gold)';
+const cobalt = 'var(--chip-cobalt)';
 
 /** The tabs on a phone and the top of the sidebar. */
 export const TABS: NavItem[] = [
@@ -48,18 +51,18 @@ export const NAV_SECTIONS: { section: string; tab: string; items: NavItem[] }[] 
     tab: '/train',
     items: [
       { to: '/review', label: 'Review', icon: ReviewIcon, color: tint },
-      { to: '/daily', label: 'Daily challenge', icon: TrophyIcon, color: tint },
+      { to: '/daily', label: 'Daily challenge', icon: TrophyIcon, color: gold },
       { to: '/ranges', label: 'Ranges', icon: RangesIcon, color: tint },
-      { to: '/scenarios', label: 'Scenarios', icon: ScenariosIcon, color: tint },
+      { to: '/scenarios', label: 'Scenarios', icon: ScenariosIcon, color: cobalt },
       { to: '/practice', label: 'At your level', icon: DrillsIcon, color: tint },
-      { to: '/weekly', label: 'Weekly challenge', icon: MedalIcon, color: tint },
+      { to: '/weekly', label: 'Weekly challenge', icon: MedalIcon, color: gold },
     ],
   },
   {
     section: 'Study tools',
     tab: '/learn',
     items: [
-      { to: '/coach', label: 'Coach', icon: CoachIcon, color: tint },
+      { to: '/coach', label: 'Coach', icon: CoachIcon, color: cobalt },
       { to: '/solver', label: 'Solver', icon: SolverIcon, color: tint },
       { to: '/lab', label: 'Spot Lab', icon: LabIcon, color: tint },
       { to: '/exploit', label: 'Exploits', icon: ExploitsIcon, color: tint },
@@ -72,7 +75,7 @@ export const NAV_SECTIONS: { section: string; tab: string; items: NavItem[] }[] 
     items: [
       { to: '/log', label: 'Log', icon: LogIcon, color: tint },
       { to: '/import', label: 'Import', icon: ImportIcon, color: tint },
-      { to: '/league', label: 'League', icon: LeagueIcon, color: tint },
+      { to: '/league', label: 'League', icon: LeagueIcon, color: cobalt },
       { to: '/saved', label: 'Saved', icon: BookmarkIcon, color: tint },
       { to: '/settings', label: 'Settings', icon: SettingsIcon, color: tint },
     ],

@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useSession } from '../state/api';
-import { CloseIcon, ShareIcon } from '../ui/icons';
+import { ChipArt } from '../ui/FeatureArt';
+import { CloseIcon } from '../ui/icons';
 
 const DISMISS_KEY = 'felt.invite.dismissed.v1';
 /** Days a dismissed invite card stays away. */
@@ -25,18 +26,16 @@ export function InviteCard({ lessonsDone }: { lessonsDone: number }) {
   const [hidden, setHidden] = useState(dismissedRecently);
   if (!session || lessonsDone < 1 || hidden) return null;
   return (
-    <div className="card invite-card reveal">
-      <Link to="/invite" className="invite-card-main">
-        <span className="invite-card-icon" aria-hidden="true">
-          <ShareIcon size={20} />
-        </span>
-        <span className="grow" style={{ minWidth: 0 }}>
-          <span className="invite-card-title">Give a month, get a month</span>
-          <span className="footnote">Invite a friend who plays. You both get a month of Pro.</span>
-        </span>
+    <div className="feature-card cobalt reveal">
+      <ChipArt />
+      <Link to="/invite" className="feature-copy invite-feature-link">
+        <span className="feature-kicker">Give a month, get a month</span>
+        <span className="feature-title">Invite a friend who plays</span>
+        <span className="feature-sub">You both get a month of Suited Pro.</span>
+        <span className="feature-cta">Invite a friend</span>
       </Link>
       <button
-        className="invite-card-close"
+        className="feature-close"
         aria-label="Hide for a month"
         onClick={() => {
           try {

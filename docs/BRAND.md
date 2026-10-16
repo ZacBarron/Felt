@@ -47,6 +47,22 @@ Color theory notes:
 - Filled brass buttons use spruce black text, not white, for contrast.
 - The felt gradient appears at most once per screen.
 
+### The chip set (ancillary)
+
+Card room alone made every secondary card look the same: a dark surface, a small brass icon and gray text. The chip set adds two colors from the chips on a card room table, for the few things worth a nudge and for marketing.
+
+| Chip | Color | Use |
+| --- | --- | --- |
+| Cobalt | `#2F5FE0` to `#14296F` | Social and growth: invites, the league, the coach, scenarios |
+| Gold | `#F8DC9B` to `#B47A24`, ink `#1D1505` | Pro and challenges: the weekly Pro challenge, the daily challenge |
+
+Rules:
+- **Feature cards** (`.feature-card.cobalt`, `.feature-card.gold` with `ChipArt` or `MedalArt`) are for at most two nudges per screen. Content stays on plain grouped surfaces.
+- **Icon tiles** in lists take the color of what they open: gold for challenges, cobalt for social things, spruce for study.
+- **Never a poker meaning.** Red, green, purple and gray belong to the actions (raise, call, 3bet, fold). The chip set has no red, green or purple, so a decoration can never be read as an action.
+- The chip colors are the same in light and dark, like a printed chip.
+- **Marketing** uses Card room plus the chip set: spruce and brass lead, cobalt and gold for callouts, stickers and social cards.
+
 ### Themes
 
 Card room is the brand: it is what goes on the app icon, the splash screen and every marketing surface. People can pick an alternate theme in Settings for the app itself:

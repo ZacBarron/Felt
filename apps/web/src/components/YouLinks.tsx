@@ -37,7 +37,7 @@ export function GameRows() {
     <section>
       <h2 className="section-title">Your game</h2>
       <div className="list with-icons">
-        <NavRow to="/invite" icon={ShareIcon} color="var(--base-500)" title="Invite friends" subtitle="Give a month of Pro, get a month" />
+        <NavRow to="/invite" icon={ShareIcon} color="var(--chip-cobalt)" title="Invite friends" subtitle="Give a month of Pro, get a month" />
         {row('/log', 'Sessions you played', counts?.sessions ? String(counts.sessions) : undefined)}
         {row('/import', 'Hand histories from your poker site')}
         {row('/saved', 'Hands you kept for later', counts?.saved ? String(counts.saved) : undefined)}
