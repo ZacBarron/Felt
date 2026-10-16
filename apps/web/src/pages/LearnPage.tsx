@@ -5,6 +5,9 @@ import { Link } from 'react-router-dom';
 import { LessonCover } from '../lesson/LessonCover';
 import { LockedLessonSheet, TopicIntroSheet } from '../lesson/TopicIntroSheet';
 import '../lesson/topic-intro.css';
+import { navItem } from '../nav';
+import { useCoachAvailable } from '../state/coach';
+import { NavRow } from '../ui/NavRow';
 import './learn.css';
 import { isComplete, LESSON_ENTRIES, type LessonEntry, lessonPath, lessonProgress, pickNextLesson } from '../state/lessons';
 import type { StoredLesson } from '../state/db';
@@ -194,6 +197,8 @@ export function LearnPage() {
         );
       })}
 
+      <StudyTools />
+
       {peek && (
         <LockedLessonSheet
           lessonKey={peek}
@@ -275,5 +280,31 @@ function LessonCard({
     <div className="lesson-card soon" aria-disabled="true">
       {body}
     </div>
+  );
+}
+
+/** Tools for working through a spot yourself, after the lessons. */
+function StudyTools() {
+  const coach = useCoachAvailable();
+  const { settings } = useSettings();
+  const pro = isPro(settings.access);
+  const tools: [string, string][] = [
+    ['/coach', 'Ask about any hand or answer'],
+    ['/solver', 'Solve a heads up spot'],
+    ['/lab', 'See what one change does'],
+    ['/exploit', 'How to beat common player types'],
+  ];
+  return (
+    <section>
+      <h2 className="section-title">Study tools</h2>
+      <div className="list with-icons">
+        {tools
+          .filter(([to]) => to !== '/coach' || coach !== false)
+          .map(([to, subtitle]) => {
+            const i = navItem(to);
+            return <NavRow key={to} to={to} icon={i.icon} color={i.color} title={i.label} subtitle={subtitle} detail={to === '/coach' && !pro ? 'Pro' : undefined} />;
+          })}
+      </div>
+    </section>
   );
 }

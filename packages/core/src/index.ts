@@ -22,3 +22,6 @@ export * from './weekly';
 export * from './memory';
 export * from './icm';
 export * from './behind';
+export * from './play';
+export * from './preflopStrength';
+export * from './bots';

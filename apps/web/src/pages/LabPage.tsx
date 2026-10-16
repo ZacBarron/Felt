@@ -91,7 +91,7 @@ export function LabPage() {
 
   return (
     <div className="stack">
-      <PageHeader title="Spot Lab" back={{ to: '/train', label: 'Train' }} kicker="Single raised pot, flop" subtitle="BTN opens. BB calls and checks." />
+      <PageHeader title="Spot Lab" back={{ to: '/learn', label: 'Learn' }} kicker="Single raised pot, flop" subtitle="BTN opens. BB calls and checks." />
 
       <div className="card" style={{ padding: '0.5rem' }}>
         <PokerTable

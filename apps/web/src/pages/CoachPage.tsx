@@ -68,10 +68,10 @@ export function CoachPage() {
   return (
     <div className="stack coach-page" style={{ gap: '1.2rem' }}>
       {available === undefined ? (
-        <PageHeader title="Coach" back={{ to: '/train', label: 'Train' }} />
+        <PageHeader title="Coach" back={{ to: '/learn', label: 'Learn' }} />
       ) : !available ? (
         <>
-          <PageHeader title="Coach" back={{ to: '/train', label: 'Train' }} />
+          <PageHeader title="Coach" back={{ to: '/learn', label: 'Learn' }} />
           <EmptyState
             art={<Art />}
             title="No coach here yet"
@@ -80,12 +80,12 @@ export function CoachPage() {
         </>
       ) : !session ? (
         <>
-          <PageHeader title="Coach" back={{ to: '/train', label: 'Train' }} />
+          <PageHeader title="Coach" back={{ to: '/learn', label: 'Learn' }} />
           <Pitch signIn />
         </>
       ) : !pro ? (
         <>
-          <PageHeader title="Coach" back={{ to: '/train', label: 'Train' }} />
+          <PageHeader title="Coach" back={{ to: '/learn', label: 'Learn' }} />
           <Pitch />
         </>
       ) : (
@@ -269,7 +269,7 @@ function Conversation({ incoming, limit, remaining, onRemaining, onLostPro }: Co
     <>
       <PageHeader
         title="Coach"
-        back={{ to: '/train', label: 'Train' }}
+        back={{ to: '/learn', label: 'Learn' }}
         trailing={
           (chat.messages.length > 0 || chat.spot) && (
             <button type="button" className="btn btn-tinted coach-new" onClick={newChat} disabled={busy}>

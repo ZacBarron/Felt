@@ -11,6 +11,7 @@ import {
   LabIcon,
   LearnIcon,
   LogIcon,
+  MedalIcon,
   RangesIcon,
   ReviewIcon,
   ScenariosIcon,
@@ -45,21 +46,22 @@ export const NAV_SECTIONS: { section: string; tab: string; items: NavItem[] }[] 
     tab: '/train',
     items: [
       { to: '/review', label: 'Review', icon: ReviewIcon, color: tint },
-      { to: '/practice', label: 'Practice', icon: DrillsIcon, color: tint },
       { to: '/daily', label: 'Daily challenge', icon: TrophyIcon, color: tint },
       { to: '/ranges', label: 'Ranges', icon: RangesIcon, color: tint },
       { to: '/scenarios', label: 'Scenarios', icon: ScenariosIcon, color: tint },
+      { to: '/practice', label: 'At your level', icon: DrillsIcon, color: tint },
+      { to: '/weekly', label: 'Weekly challenge', icon: MedalIcon, color: tint },
     ],
   },
   {
-    section: 'Tools',
-    tab: '/train',
+    section: 'Study tools',
+    tab: '/learn',
     items: [
       { to: '/coach', label: 'Coach', icon: CoachIcon, color: tint },
       { to: '/solver', label: 'Solver', icon: SolverIcon, color: tint },
       { to: '/lab', label: 'Spot Lab', icon: LabIcon, color: tint },
       { to: '/exploit', label: 'Exploits', icon: ExploitsIcon, color: tint },
-      { to: '/saved', label: 'Saved', icon: BookmarkIcon, color: tint },
+      { to: '/glossary', label: 'Glossary', icon: GlossaryIcon, color: tint },
     ],
   },
   {
@@ -69,22 +71,21 @@ export const NAV_SECTIONS: { section: string; tab: string; items: NavItem[] }[] 
       { to: '/log', label: 'Log', icon: LogIcon, color: tint },
       { to: '/import', label: 'Import', icon: ImportIcon, color: tint },
       { to: '/league', label: 'League', icon: LeagueIcon, color: tint },
+      { to: '/saved', label: 'Saved', icon: BookmarkIcon, color: tint },
       { to: '/settings', label: 'Settings', icon: SettingsIcon, color: tint },
     ],
   },
 ];
 
-export const NAV_ITEMS: NavItem[] = [...TABS, ...NAV_SECTIONS.flatMap((s) => s.items), { to: '/glossary', label: 'Glossary', icon: GlossaryIcon, color: tint }];
+export const NAV_ITEMS: NavItem[] = [...TABS, ...NAV_SECTIONS.flatMap((s) => s.items)];
 
 export const navItem = (to: string) => NAV_ITEMS.find((i) => i.to === to)!;
 
 /** Pages that are not in a section but still belong to a tab. */
 const EXTRA: Record<string, string> = {
   '/drills': '/train',
-  '/weekly': '/train',
   '/check': '/learn',
   '/placement': '/learn',
-  '/glossary': '/learn',
   '/stats': '/you',
   '/more': '/you',
   '/account': '/you',

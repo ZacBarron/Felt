@@ -360,7 +360,7 @@ export function SolverPage() {
 
   return (
     <div className="stack" style={{ gap: '1.4rem' }}>
-      <PageHeader title="Solver" back={{ to: '/train', label: 'Train' }} />
+      <PageHeader title="Solver" back={{ to: '/learn', label: 'Learn' }} />
 
       <Section
         title="Spot"

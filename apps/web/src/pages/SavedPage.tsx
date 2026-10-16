@@ -88,7 +88,7 @@ export function SavedPage() {
 
   return (
     <div className="stack" style={{ gap: '1.4rem' }}>
-      <PageHeader title="Saved" back={{ to: '/train', label: 'Train' }} subtitle={items.length ? `${items.length} saved, ${due} ready to review` : undefined} />
+      <PageHeader title="Saved" back={{ to: '/you', label: 'You' }} subtitle={items.length ? `${items.length} saved, ${due} ready to review` : undefined} />
 
       {items.length === 0 ? (
         <EmptyState

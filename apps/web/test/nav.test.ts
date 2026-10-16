@@ -10,7 +10,8 @@ describe('tabFor', () => {
     expect(tabFor('/review')).toBe('/train');
     expect(tabFor('/ranges')).toBe('/train');
     expect(tabFor('/scenarios/srp-btn-bb')).toBe('/train');
-    expect(tabFor('/coach')).toBe('/train');
+    expect(tabFor('/coach')).toBe('/learn');
+    expect(tabFor('/saved')).toBe('/you');
     expect(tabFor('/learn/postflop/cbet/sizing')).toBe('/learn');
     expect(tabFor('/glossary')).toBe('/learn');
     expect(tabFor('/settings/appearance')).toBe('/you');

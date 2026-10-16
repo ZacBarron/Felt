@@ -26,9 +26,9 @@ export function ProCard() {
   );
 }
 
-/** Your own hands and how you compare: the log, imports and the league. */
+/** Your own hands and how you compare: the log, imports, saved hands and the league. */
 export function GameRows() {
-  const sessions = useLiveQuery(() => db.sessions.count(), []);
+  const counts = useLiveQuery(async () => ({ sessions: await db.sessions.count(), saved: await db.saved.count() }), []);
   const row = (to: string, subtitle: string, detail?: string) => {
     const i = navItem(to);
     return <NavRow key={to} to={to} icon={i.icon} color={i.color} title={i.label} subtitle={subtitle} detail={detail} />;
@@ -37,8 +37,9 @@ export function GameRows() {
     <section>
       <h2 className="section-title">Your game</h2>
       <div className="list with-icons">
-        {row('/log', 'Sessions you played', sessions ? String(sessions) : undefined)}
+        {row('/log', 'Sessions you played', counts?.sessions ? String(counts.sessions) : undefined)}
         {row('/import', 'Hand histories from your poker site')}
+        {row('/saved', 'Hands you kept for later', counts?.saved ? String(counts.saved) : undefined)}
         {row('/league', 'Real players near your rating')}
       </div>
     </section>
