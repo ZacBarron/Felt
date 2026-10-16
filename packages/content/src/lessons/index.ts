@@ -7,6 +7,7 @@ import { GAPS_MINDSET_LESSONS } from './gaps-mindset';
 import { GAPS_STRATEGY_LESSONS } from './gaps-strategy';
 import { GAPS_TOURNAMENT_LESSONS } from './gaps-tournaments';
 import { EXPLOIT_MORE_LESSONS } from './exploit-more';
+import { FORMATS_HEADS_UP_LESSONS } from './formats-heads-up';
 import { MINDSET_LESSONS } from './mindset';
 import { POSTFLOP_MORE_LESSONS } from './postflop-more';
 import { POSTFLOP_READING_LESSONS } from './postflop-reading';
@@ -43,6 +44,7 @@ const ALL: LessonContent[] = [
   ...POSTFLOP_READING_LESSONS,
   ...EXPLOIT_LESSONS,
   ...EXPLOIT_MORE_LESSONS,
+  ...FORMATS_HEADS_UP_LESSONS,
   ...MINDSET_LESSONS,
   ...RESULTS_LESSONS,
   ...TOURNAMENT_LESSONS,

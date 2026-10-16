@@ -418,6 +418,30 @@ export const CURRICULUM: Track[] = [
     ],
   },
   {
+    id: 'formats',
+    title: 'Other formats',
+    summary: 'Games with fewer players or deeper stacks than a full ring.',
+    intro: { why: 'Fewer players widen every range, so habits from full tables need new numbers.' },
+    modules: [
+      {
+        id: 'heads-up',
+        title: 'Heads up and blind vs blind',
+        intro: {
+          why: 'Heads up, you post a blind every hand and ranges get very wide. The same math explains blind vs blind at any table.',
+          when: 'It comes up in heads up games and when 2 players are left. It also comes up each time it folds to the blinds.',
+          youWill: ['Price raises and defense with only 2 players', 'Play the small blind against the big blind', 'Adjust your play to one opponent'],
+        },
+        lessons: [
+          lesson('hu-preflop', 'Heads up preflop: the button opens most hands', ['math', 'concept']),
+          lesson('hu-bb-defense', 'Defending the big blind heads up', ['math', 'equity-estimate']),
+          lesson('bvb-full-ring', 'Blind vs blind in a full ring', ['math', 'concept']),
+          lesson('hu-postflop', 'Postflop heads up', ['equity-estimate', 'concept']),
+          lesson('hu-one-opponent', 'Adjusting to one opponent', ['math', 'concept']),
+        ],
+      },
+    ],
+  },
+  {
     id: 'mindset',
     title: 'Mental game and bankroll',
     summary: 'Stay at A game, manage variance, study efficiently.',

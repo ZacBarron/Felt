@@ -720,7 +720,7 @@ export const GLOSSARY: GlossaryTerm[] = [
     link: false,
     aliases: ['heads-up'],
     short: 'A pot or game with only 2 players.',
-    lesson: 'postflop/multiway/multiway',
+    lesson: 'formats/heads-up/hu-preflop',
   },
   {
     id: 'multiway',

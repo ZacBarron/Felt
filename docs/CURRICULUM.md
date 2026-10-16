@@ -16,6 +16,8 @@ Suggested order: Poker basics for new players, then Foundations math, then Prefl
 
 The Tournaments track covers antes, push or fold, reshoves, ICM, the bubble and final tables, then two formats: bounty events (the bounty priced as part of the pot, a labelled chip model) and satellites (ICM at its most extreme, since every seat pays the same).
 
+The Other formats track sits after Exploitation. Its heads up topic covers heads up cash and blind vs blind: the button as the small blind, the price and MDF against small raises, big blind defense and realization, blind vs blind in a full ring, wide range postflop play, and adjusting to one opponent. Felt has no 2-handed charts, so it teaches with exact math, qualitative solver patterns and one wide button range labelled as an illustration (`HU_ILLUSTRATION_RANGE` in `lessons/formats-heads-up.ts`). Every number is recomputed in `formats-heads-up.test.ts`.
+
 ## Topic intros
 
 Every topic opens with an intro in `curriculum.ts`. It says why the topic matters and when it comes up at the table. Then it lists 2 or 3 things the player will be able to do. The Learn page shows the why under each topic title. The full intro opens in a sheet, and it shows once before the first lesson of a topic the player has not started. Each track also says in one sentence why it matters. Intros promise only what the topic's lessons teach, and `intros.test.ts` checks them against VOICE.md.
