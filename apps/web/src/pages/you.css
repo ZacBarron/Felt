@@ -203,33 +203,58 @@ a.hero.train-hero {
   margin-top: 1rem;
 }
 
-.train-pair {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.75rem;
-}
-
-a.card.train-challenge {
+/* Ranges get their own card: the chart you are learning, how much of it you know, and two ways in. */
+.card.train-ranges {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  gap: 0.35rem;
+  gap: 0.9rem;
   padding: 1rem;
+}
+
+.train-ranges-main {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
   color: var(--label);
   text-decoration: none;
 }
 
-.train-challenge .progress-ring-inner,
-.train-challenge svg {
-  color: var(--tint);
+.train-ranges-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+  flex: 1;
 }
 
-.train-challenge-title {
-  margin-top: 0.4rem;
-  font-size: 1.02rem;
+.train-ranges-kicker {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--label-2);
+}
+
+.train-ranges-title {
+  font-size: 1.12rem;
   font-weight: 650;
-  letter-spacing: -0.01em;
   line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+
+.train-ranges-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.train-ranges-actions .btn {
+  padding: 0.45rem 1rem;
+  font-size: 0.95rem;
+}
+
+.train-ranges-actions .btn-plain {
+  margin-left: auto;
+  padding-right: 0.2rem;
 }
 
 .train-bar {

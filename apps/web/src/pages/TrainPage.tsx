@@ -5,19 +5,20 @@ import { Link } from 'react-router-dom';
 import { navItem } from '../nav';
 import { chartsForGame } from '../state/charts';
 import { db } from '../state/db';
+import { masteryForCharts } from '../state/review';
+import { MasteryGrid } from '../components/MasteryGrid';
 import { reviewTotal } from '../state/decks';
 import { useSettings } from '../state/settings';
 import { weeklyAvailable } from '../state/weekly';
 import { HeroPattern } from '../ui/Brand';
-import { ChevronRightIcon, LockIcon, MedalIcon, TrophyIcon } from '../ui/icons';
+import { ChevronRightIcon } from '../ui/icons';
 import { PageHeader } from '../ui/PageHeader';
-import { ProgressRing } from '../ui/ProgressRing';
 import { useThisWeek } from './WeeklyPage';
 import './you.css';
 
 /**
  * Short ways to train, in three levels: the one thing to do next on the felt,
- * the two challenges side by side, then the drills you pick yourself.
+ * the range you are learning, then the challenges and drills as rows.
  */
 export function TrainPage() {
   const { settings } = useSettings();
@@ -28,6 +29,11 @@ export function TrainPage() {
     return { daily, played };
   }, []);
   const week = useThisWeek();
+  const charts = chartsForGame(g).charts;
+  const mastery = useLiveQuery(() => masteryForCharts(charts), [g.tableSize, g.format]);
+  const touched = mastery?.filter((m) => m.solid + m.learning > 0) ?? [];
+  // The chart you are working on, or the first one with something left to learn.
+  const focus = touched.find((m) => m.solid < m.total) ?? mastery?.find((m) => m.solid < m.total) ?? mastery?.[0];
   const pro = weeklyAvailable(settings.access);
   const reviewing = !!due;
   const minutes = Math.max(1, Math.round(((due ?? 0) * 6) / 60));
@@ -61,27 +67,54 @@ export function TrainPage() {
         <span className="btn btn-lg btn-block btn-hero">{reviewing ? 'Start review' : 'Start practice'}</span>
       </Link>
 
-      <div className="train-pair">
-        <Link to="/daily" className="card train-challenge">
-          <ProgressRing value={dailyDone ? 1 : (daily?.scores.length ?? 0) / 5} size={48} stroke={5} label={dailyDone ? 'Done' : undefined}>
-            <TrophyIcon size={20} />
-          </ProgressRing>
-          <span className="train-challenge-title">Daily challenge</span>
-          <span className="footnote num">{!stats ? ' ' : !daily ? '5 decisions, new today' : dailyDone ? `${dailyRight} of 5 right` : `${daily.scores.length} of 5 done`}</span>
-        </Link>
-        <Link to="/weekly" className="card train-challenge">
-          <ProgressRing value={!pro ? 0 : weekDone ? 1 : week ? week.scores.length / week.items.length : 0} size={48} stroke={5}>
-            {pro ? <MedalIcon size={20} /> : <LockIcon size={18} />}
-          </ProgressRing>
-          <span className="train-challenge-title">Weekly challenge</span>
-          <span className="footnote num">{!pro ? 'With Suited Pro' : weekDone ? 'Done this week' : week ? `${week.scores.length} of ${week.items.length} done` : '10 harder decisions'}</span>
-        </Link>
-      </div>
+      {focus && (
+        <section>
+          <h2 className="section-title">Ranges</h2>
+          <div className="card train-ranges">
+            <Link to={`/ranges?chart=${focus.chart.spec.id}`} className="train-ranges-main">
+              <MasteryGrid chart={focus.chart} hands={focus.hands} size={112} />
+              <span className="train-ranges-copy">
+                <span className="train-ranges-kicker">{touched.length ? 'Now learning' : 'Start with'}</span>
+                <span className="train-ranges-title">{focus.chart.spec.title}</span>
+                <span className="footnote num">
+                  You know {focus.solid} of {focus.total} close calls
+                </span>
+                <span className="chart-bar">
+                  <span className="touched" style={{ width: `${((focus.solid + focus.learning) / Math.max(1, focus.total)) * 100}%` }} />
+                  <span className="solid" style={{ width: `${(focus.solid / Math.max(1, focus.total)) * 100}%` }} />
+                </span>
+              </span>
+            </Link>
+            <div className="train-ranges-actions">
+              <Link to={`/ranges?chart=${focus.chart.spec.id}&mode=quick`} className="btn btn-tinted">
+                Quiz
+              </Link>
+              <Link to={`/ranges?chart=${focus.chart.spec.id}&mode=paint`} className="btn btn-tinted">
+                Paint
+              </Link>
+              <Link to="/ranges" className="btn btn-plain">
+                All {mastery?.length} charts
+              </Link>
+            </div>
+          </div>
+        </section>
+      )}
 
       <section>
-        <h2 className="section-title">Drills</h2>
+        <h2 className="section-title">More training</h2>
         <div className="list with-icons">
-          <DrillRow to="/ranges" title="Ranges" subtitle="Learn and paint preflop charts" />
+          <DrillRow
+            to="/daily"
+            title="Daily challenge"
+            subtitle={!stats ? ' ' : !daily ? '5 decisions, new today' : dailyDone ? `${dailyRight} of 5 right` : `${daily.scores.length} of 5 done`}
+            detail={dailyDone ? 'Done' : undefined}
+          />
+          <DrillRow
+            to="/weekly"
+            title="Weekly challenge"
+            subtitle={!pro ? '10 harder decisions' : weekDone ? 'Done this week' : week ? `${week.scores.length} of ${week.items.length} done` : '10 harder decisions'}
+            detail={!pro ? 'Pro' : weekDone ? 'Done' : undefined}
+          />
           <DrillRow to="/scenarios" title="Scenarios" subtitle={`${played} of ${SCENARIOS.length} hands played`} progress={played / SCENARIOS.length} />
           {reviewing ? (
             <DrillRow to="/practice" title="At your level" subtitle="10 decisions from your weaker areas" />
@@ -94,7 +127,7 @@ export function TrainPage() {
   );
 }
 
-function DrillRow({ to, title, subtitle, progress }: { to: string; title: string; subtitle: string; progress?: number }) {
+function DrillRow({ to, title, subtitle, progress, detail }: { to: string; title: string; subtitle: string; progress?: number; detail?: string }) {
   const { icon: Icon, color } = navItem(to);
   return (
     <Link to={to} className="list-row">
@@ -112,6 +145,7 @@ function DrillRow({ to, title, subtitle, progress }: { to: string; title: string
           </span>
         )}
       </span>
+      {detail && <span className="detail">{detail}</span>}
       <ChevronRightIcon size={16} className="chev" />
     </Link>
   );
