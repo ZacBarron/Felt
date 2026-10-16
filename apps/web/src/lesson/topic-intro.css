@@ -1,37 +1,98 @@
 /* Topic intros: the why line on the Learn page and the intro sheet. */
 
-/* Under a topic title on Learn: why it matters, with a way into the full intro. */
-.module-why {
-  display: block;
-  width: 100%;
-  min-height: 0;
-  margin: -0.35rem 0 0.55rem;
-  padding: 0 1rem;
-  border-radius: 0;
-  background: none;
-  color: var(--label-2);
-  font-size: 0.8rem;
-  font-weight: 400;
-  line-height: 1.4;
-  letter-spacing: 0;
-  text-align: left;
-  text-wrap: pretty;
-}
-
-.module-why:active:not(:disabled) {
-  transform: none;
-  filter: none;
-  opacity: 0.6;
-}
-
-.module-why-more {
+/* Beside a topic title on Learn: a small way into the full intro. */
+.module-actions {
   display: inline-flex;
   align-items: center;
-  gap: 0.1rem;
-  color: var(--tint);
+  gap: 0.6rem;
+  flex: none;
+}
+
+.module-about {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  min-height: 32px;
+  padding: 0 0.6rem;
+  border: 0;
+  border-radius: 999px;
+  font: inherit;
+  font-size: 0.8rem;
   font-weight: 600;
-  white-space: nowrap;
-  vertical-align: bottom;
+  color: var(--label-2);
+  background: var(--fill);
+}
+
+/* What is finished folds away: one row per track for its done topics, one per finished track. */
+.done-fold {
+  margin: 0.8rem 1rem 0;
+}
+
+.done-fold > summary {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 44px;
+  padding: 0 0.9rem;
+  border-radius: 14px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--label-2);
+  background: var(--fill);
+  list-style: none;
+  cursor: pointer;
+}
+
+.done-fold > summary::-webkit-details-marker {
+  display: none;
+}
+
+.done-fold > summary svg:first-child {
+  color: var(--green);
+}
+
+.done-fold-chev {
+  margin-left: auto;
+  transition: transform 200ms var(--ease, ease);
+}
+
+.done-fold[open] > .done-fold-chev,
+.done-fold[open] > summary .done-fold-chev {
+  transform: rotate(180deg);
+}
+
+.done-fold[open] > summary {
+  margin-bottom: 0.6rem;
+}
+
+.done-fold > .module-block {
+  margin-left: -1rem;
+  margin-right: -1rem;
+}
+
+.done-track + .done-track {
+  margin-top: 0.5rem;
+}
+
+.done-track > summary .grow {
+  color: var(--label);
+}
+
+.done-track > summary .footnote {
+  margin-left: auto;
+}
+
+.done-track > summary .done-fold-chev {
+  margin-left: 0.3rem;
+}
+
+.track-summary {
+  padding-top: 0;
+  padding-bottom: 0.6rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .topic-intro-title {
@@ -116,4 +177,37 @@
   margin: 0 -1rem calc(-1.2rem - env(safe-area-inset-bottom, 0px));
   padding: 0.6rem 1rem calc(1.2rem + env(safe-area-inset-bottom, 0px));
   background: linear-gradient(180deg, transparent, var(--bg) 0.6rem);
+}
+
+/* The intro sheet leads with what you will be able to do, then one paragraph on why. */
+.topic-intro-checks {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  margin: 0;
+  padding: 0.9rem 1rem;
+  list-style: none;
+  border-radius: 16px;
+  background: var(--surface);
+}
+
+.topic-intro-checks li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+  font-weight: 550;
+  line-height: 1.35;
+}
+
+.topic-intro-checks svg {
+  flex: none;
+  margin-top: 0.2rem;
+  color: var(--green);
+}
+
+.topic-intro-why {
+  margin: 0;
+  color: var(--label-2);
+  font-size: 0.92rem;
+  line-height: 1.45;
 }

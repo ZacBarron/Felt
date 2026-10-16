@@ -5,7 +5,7 @@ import type { StoredLesson } from '../state/db';
 import { entryFor, isComplete, lessonPath, moduleEntries } from '../state/lessons';
 import { markModuleIntroSeen, topicInfo, topicTarget, type TopicAction } from '../state/moduleIntros';
 import { useSettings } from '../state/settings';
-import { LockIcon } from '../ui/icons';
+import { CheckIcon, LockIcon } from '../ui/icons';
 import { LessonCover } from './LessonCover';
 import './topic-intro.css';
 
@@ -90,24 +90,15 @@ export function TopicIntroSheet({
           </button>
         </div>
 
-        <div className="topic-intro-card">
-          <section>
-            <h3 className="topic-intro-label">Why this matters</h3>
-            <p>{topic.intro.why}</p>
-          </section>
-          <section>
-            <h3 className="topic-intro-label">When it comes up</h3>
-            <p>{topic.intro.when}</p>
-          </section>
-          <section>
-            <h3 className="topic-intro-label">You will</h3>
-            <ul className="topic-intro-list">
-              {topic.intro.youWill.map((item) => (
-                <li key={item}>{item}</li>
-              ))}
-            </ul>
-          </section>
-        </div>
+        <ul className="topic-intro-checks">
+          {topic.intro.youWill.map((item) => (
+            <li key={item}>
+              <CheckIcon size={14} />
+              <span>{item}</span>
+            </li>
+          ))}
+        </ul>
+        <p className="topic-intro-why">{topic.intro.why}</p>
 
         {target?.entry.content && (
           <div className="topic-intro-next">

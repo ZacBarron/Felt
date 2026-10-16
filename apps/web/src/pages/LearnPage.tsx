@@ -14,7 +14,7 @@ import type { StoredLesson } from '../state/db';
 import { canOpenLesson, FREE_MODULES, isPro } from '../state/access';
 import { pathPrefs } from '../state/goals';
 import { useSettings } from '../state/settings';
-import { CheckIcon, ChevronRightIcon, GlossaryIcon, LockIcon, TargetIcon } from '../ui/icons';
+import { CheckIcon, ChevronDownIcon, ChevronRightIcon, GlossaryIcon, InfoIcon, LockIcon, TargetIcon } from '../ui/icons';
 import { PageHeader } from '../ui/PageHeader';
 import { loadPlacement } from '../state/placementProgress';
 import { moduleKeyOf, shouldShowModuleIntro } from '../state/moduleIntros';
@@ -100,102 +100,142 @@ export function LearnPage() {
         </Link>
       )}
 
-      {CURRICULUM.map((track) => {
-        const entries = LESSON_ENTRIES.filter((e) => e.trackId === track.id && e.content);
-        const trackDone = entries.filter((e) => isComplete(progress.get(e.key))).length;
-        return (
-          <section key={track.id} className="track-section">
-            <div className="row between" style={{ padding: '0 1rem 0.2rem', flexWrap: 'nowrap' }}>
-              <h2 className="display track-title">{track.title}</h2>
-              <span className="footnote num">
-                {trackDone} of {entries.length}
-              </span>
-            </div>
-            <div className="section-footer" style={{ paddingTop: 0, paddingBottom: '0.6rem' }}>
-              {track.summary} {track.intro.why}
-            </div>
-            {track.modules.map((m) => {
-              const lessons = entries.filter((e) => e.key.startsWith(`${track.id}/${m.id}/`));
-              const open = lessons.filter((e) => !isComplete(progress.get(e.key)));
-              const free = FREE_MODULES.has(`${track.id}/${m.id}`);
-              const locked = !free && !pro;
-              const topicDone = lessons.length - open.length;
-              // In a topic already begun, the lesson to take next: the one in progress, else the first not done.
-              const current = open.find((e) => progress.get(e.key)?.status === 'started') ?? (topicDone > 0 ? open[0] : undefined);
-              return (
-                <div key={m.id} className="module-block">
-                  <div className="module-head">
-                    <span className="module-title">
-                      {m.title}
-                      {locked && <LockIcon size={13} className="muted" />}
-                    </span>
-                    {open.length > 0 ? (
-                      <Link to={`/check/${track.id}/${m.id}`} className="skip-link" data-haptic="select" aria-label={`Skip ahead in ${m.title} with a quick quiz`}>
-                        Skip ahead
-                        <ChevronRightIcon size={13} />
-                      </Link>
-                    ) : (
-                      <span className="pill pill-good">
-                        <CheckIcon size={12} /> Done
-                      </span>
-                    )}
-                  </div>
-                  <button
-                    type="button"
-                    className="module-why"
-                    aria-haspopup="dialog"
-                    onClick={() => setIntro({ moduleKey: `${track.id}/${m.id}` })}
-                  >
-                    {m.intro.why}{' '}
-                    <span className="module-why-more">
-                      About this topic
-                      <ChevronRightIcon size={12} />
-                    </span>
+      {(() => {
+        const tracks = CURRICULUM.map((track) => {
+          const entries = LESSON_ENTRIES.filter((e) => e.trackId === track.id && e.content);
+          const trackDone = entries.filter((e) => isComplete(progress.get(e.key))).length;
+          return { track, entries, trackDone, finished: entries.length > 0 && trackDone === entries.length };
+        });
+        // Finished tracks move to the end, folded, so what is left to learn stays on top.
+        const active = tracks.filter((t) => !t.finished);
+        const finished = tracks.filter((t) => t.finished);
+        const moduleBlock = (track: (typeof CURRICULUM)[number], m: (typeof CURRICULUM)[number]['modules'][number], entries: typeof LESSON_ENTRIES) => {
+          const lessons = entries.filter((e) => e.key.startsWith(`${track.id}/${m.id}/`));
+          const open = lessons.filter((e) => !isComplete(progress.get(e.key)));
+          const free = FREE_MODULES.has(`${track.id}/${m.id}`);
+          const locked = !free && !pro;
+          const topicDone = lessons.length - open.length;
+          // In a topic already begun, the lesson to take next: the one in progress, else the first not done.
+          const current = open.find((e) => progress.get(e.key)?.status === 'started') ?? (topicDone > 0 ? open[0] : undefined);
+          // Lessons still to do come first; finished ones fall to the back of the row.
+          const ordered = [...open, ...lessons.filter((e) => isComplete(progress.get(e.key)))];
+          return (
+            <div key={m.id} className="module-block">
+              <div className="module-head">
+                <span className="module-title">
+                  {m.title}
+                  {locked && <LockIcon size={13} className="muted" />}
+                </span>
+                <span className="module-actions">
+                  <button type="button" className="module-about" aria-haspopup="dialog" aria-label={`About ${m.title}`} onClick={() => setIntro({ moduleKey: `${track.id}/${m.id}` })}>
+                    <InfoIcon size={15} />
+                    About
                   </button>
-                  {lessons.length > 0 && (topicDone === 0 ? (
-                    <div className="topic-meter">
-                      <span className="topic-meter-label num">
-                        {lessons.length} lessons, about {lessons.reduce((n, e) => n + (e.content?.minutes ?? 0), 0)} min
-                      </span>
-                    </div>
+                  {open.length > 0 ? (
+                    <Link to={`/check/${track.id}/${m.id}`} className="skip-link" data-haptic="select" aria-label={`Skip ahead in ${m.title} with a quick quiz`}>
+                      Skip ahead
+                      <ChevronRightIcon size={13} />
+                    </Link>
                   ) : (
-                    <div className="topic-meter" role="img" aria-label={`${topicDone} of ${lessons.length} lessons done`}>
-                      <span className="topic-meter-bar" aria-hidden="true">
-                        <span style={{ width: `${(topicDone / lessons.length) * 100}%` }} />
-                      </span>
-                      <span className="topic-meter-label num" aria-hidden="true">
-                        {topicDone} of {lessons.length}
-                      </span>
-                    </div>
-                  ))}
-                  <div className="lesson-rail">
-                    {lessons.map((e) => {
-                      const closed = !canOpenLesson(e.key, settings.access);
-                      return (
-                        <LessonCard
-                          key={e.key}
-                          entry={e}
-                          state={progress.get(e.key)}
-                          locked={closed}
-                          current={!closed && e === current}
-                          onOpen={
-                            closed
-                              ? (ev) => {
-                                  ev.preventDefault();
-                                  setPeek(e.key);
-                                }
-                              : (ev) => openLesson(ev, e.key)
-                          }
-                        />
-                      );
-                    })}
+                    <span className="pill pill-good">
+                      <CheckIcon size={12} /> Done
+                    </span>
+                  )}
+                </span>
+              </div>
+              {lessons.length > 0 &&
+                (topicDone === 0 ? (
+                  <div className="topic-meter">
+                    <span className="topic-meter-label num">
+                      {lessons.length} lessons, about {lessons.reduce((n, e) => n + (e.content?.minutes ?? 0), 0)} min
+                    </span>
                   </div>
-                </div>
+                ) : (
+                  <div className="topic-meter" role="img" aria-label={`${topicDone} of ${lessons.length} lessons done`}>
+                    <span className="topic-meter-bar" aria-hidden="true">
+                      <span style={{ width: `${(topicDone / lessons.length) * 100}%` }} />
+                    </span>
+                    <span className="topic-meter-label num" aria-hidden="true">
+                      {topicDone} of {lessons.length}
+                    </span>
+                  </div>
+                ))}
+              <div className="lesson-rail">
+                {ordered.map((e) => {
+                  const closed = !canOpenLesson(e.key, settings.access);
+                  return (
+                    <LessonCard
+                      key={e.key}
+                      entry={e}
+                      state={progress.get(e.key)}
+                      locked={closed}
+                      current={!closed && e === current}
+                      onOpen={
+                        closed
+                          ? (ev) => {
+                              ev.preventDefault();
+                              setPeek(e.key);
+                            }
+                          : (ev) => openLesson(ev, e.key)
+                      }
+                    />
+                  );
+                })}
+              </div>
+            </div>
+          );
+        };
+        const doneOf = (track: (typeof CURRICULUM)[number], entries: typeof LESSON_ENTRIES, m: (typeof CURRICULUM)[number]['modules'][number]) => {
+          const lessons = entries.filter((e) => e.key.startsWith(`${track.id}/${m.id}/`));
+          return lessons.length > 0 && lessons.every((e) => isComplete(progress.get(e.key)));
+        };
+        return (
+          <>
+            {active.map(({ track, entries, trackDone }) => {
+              const doneModules = track.modules.filter((m) => doneOf(track, entries, m));
+              const openModules = track.modules.filter((m) => !doneOf(track, entries, m));
+              return (
+                <section key={track.id} className="track-section">
+                  <div className="row between" style={{ padding: '0 1rem 0.2rem', flexWrap: 'nowrap' }}>
+                    <h2 className="display track-title">{track.title}</h2>
+                    <span className="footnote num">
+                      {trackDone} of {entries.length}
+                    </span>
+                  </div>
+                  <div className="section-footer track-summary">{track.summary}</div>
+                  {openModules.map((m) => moduleBlock(track, m, entries))}
+                  {doneModules.length > 0 && (
+                    <details className="done-fold">
+                      <summary>
+                        <CheckIcon size={14} />
+                        {doneModules.length === 1 ? '1 topic done' : `${doneModules.length} topics done`}
+                        <ChevronDownIcon size={14} className="done-fold-chev" />
+                      </summary>
+                      {doneModules.map((m) => moduleBlock(track, m, entries))}
+                    </details>
+                  )}
+                </section>
               );
             })}
-          </section>
+            {finished.length > 0 && (
+              <section className="track-section">
+                <h2 className="section-title">Completed</h2>
+                {finished.map(({ track, entries }) => (
+                  <details key={track.id} className="done-fold done-track">
+                    <summary>
+                      <CheckIcon size={14} />
+                      <span className="grow">{track.title}</span>
+                      <span className="footnote num">{entries.length} lessons</span>
+                      <ChevronDownIcon size={14} className="done-fold-chev" />
+                    </summary>
+                    {track.modules.map((m) => moduleBlock(track, m, entries))}
+                  </details>
+                ))}
+              </section>
+            )}
+          </>
         );
-      })}
+      })()}
 
       <StudyTools />
 
