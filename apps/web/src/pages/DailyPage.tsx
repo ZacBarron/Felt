@@ -10,13 +10,18 @@ import { db } from '../state/db';
 import { api, currentSession, serverFeatures } from '../state/api';
 import { track } from '../state/events';
 import { LESSON_ENTRIES, lessonPath, quizSteps } from '../state/lessons';
-import { ratingSnapshot, streakNow } from '../state/rating';
+import { ratingSnapshot } from '../state/rating';
 import { addHandsToReview } from '../state/review';
 import { BottomBar } from '../ui/BottomBar';
 import { plural } from '../ui/format';
-import { CheckIcon, ChevronRightIcon, CloseIcon, FlameIcon, LearnIcon, MinusIcon, RangesIcon } from '../ui/icons';
+import { CheckIcon, ChevronRightIcon, CloseIcon, LearnIcon, MinusIcon, RangesIcon } from '../ui/icons';
 import { ProgressRing } from '../ui/ProgressRing';
 import { useBodyClass } from '../ui/useBodyClass';
+import { StreakWeek, useStreakWeek } from '../components/StreakWeek';
+import { useSettings } from '../state/settings';
+import { weeklyAvailable } from '../state/weekly';
+import { WeeklyTodayCard } from './WeeklyPage';
+import './today.css';
 import './screens.css';
 
 type ChartDecision = Extract<Decision, { kind: 'chart' }> & { difficulty: number };
@@ -114,7 +119,9 @@ const verdict = (s: number) => (s >= 1 ? 'Correct' : s > 0 ? 'Part of the mix' :
 function Result({ number, items, scores, before, after }: { number: number; items: Decision[]; scores: number[]; before: number; after: number }) {
   const [copied, setCopied] = useState(false);
   const [added, setAdded] = useState(false);
-  const streak = useLiveQuery(() => streakNow(), []);
+  const week = useStreakWeek();
+  const { settings } = useSettings();
+  const pro = weeklyAvailable(settings.access);
   const snapshot = useLiveQuery(() => ratingSnapshot(), []);
   const right = scores.filter((s) => s >= 1).length;
   const delta = Math.round(after - before);
@@ -172,13 +179,14 @@ function Result({ number, items, scores, before, after }: { number: number; item
             Felt Rating {Math.round(after)}, {delta === 0 ? 'no change' : delta > 0 ? `up ${delta}` : `down ${-delta}`}
             {provisional && <span className="sr-only">, still settling</span>}
           </span>
-          {!!streak?.streak && (
-            <span className="pill pill-tint">
-              <FlameIcon size={12} /> {plural(streak.streak, 'day')}
-            </span>
-          )}
         </div>
       </div>
+
+      {week && (
+        <div className="card reveal">
+          <StreakWeek data={week} />
+        </div>
+      )}
 
       <section>
         <h2 className="section-title">Your decisions</h2>
@@ -216,6 +224,35 @@ function Result({ number, items, scores, before, after }: { number: number; item
           </button>
         )}
         <div className="section-footer">Everyone gets the same five decisions today. The next challenge is in {timeToTomorrow()}.</div>
+      </section>
+
+      {/* What to do next, as daily puzzle apps offer more puzzles after the daily one. */}
+      <section className="daily-next">
+        <h2 className="section-title">Keep going</h2>
+        <div className="list">
+          <Link to="/practice" className="list-row">
+            <span className="grow">
+              <span className="daily-next-title">Practice at your level</span>
+              <span className="footnote">10 decisions picked for your rating</span>
+            </span>
+            <ChevronRightIcon size={16} className="chev" />
+          </Link>
+          {!pro && (
+            <Link to="/weekly" className="list-row">
+              <span className="grow">
+                <span className="daily-next-title">Weekly Pro challenge</span>
+                <span className="footnote">10 harder decisions each week</span>
+              </span>
+              <span className="pill">Pro</span>
+              <ChevronRightIcon size={16} className="chev" />
+            </Link>
+          )}
+        </div>
+        {pro && (
+          <div style={{ marginTop: '0.75rem' }}>
+            <WeeklyTodayCard />
+          </div>
+        )}
       </section>
 
       <BottomBar>

@@ -534,3 +534,26 @@ export function BrushIcon(p: IconProps) {
     </Svg>
   );
 }
+
+/** Share: a tray with an arrow leaving it, as in the system share sheet. */
+export function ShareIcon(p: IconProps) {
+  return (
+    <Svg {...p}>
+      <path d="M12 14.5V3.75" />
+      <path d="m8.25 7.25 3.75-3.5 3.75 3.5" />
+      <path d="M8.5 10.5H7.25a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h9.5a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2H15.5" />
+    </Svg>
+  );
+}
+
+/** Streak freeze: a six armed snowflake, for a missed day a freeze covered. */
+export function FreezeIcon(p: IconProps) {
+  return (
+    <Svg {...p}>
+      <path d="M12 3.5v17M4.65 7.75l14.7 8.5M4.65 16.25l14.7-8.5" />
+      <path d="m9.75 4.75 2.25 2 2.25-2M9.75 19.25l2.25-2 2.25 2" />
+      <path d="m4.4 10.6 3 .65.95-2.9M19.6 13.4l-3-.65-.95 2.9" />
+      <path d="m4.4 13.4 3-.65.95 2.9M19.6 10.6l-3 .65-.95-2.9" />
+    </Svg>
+  );
+}

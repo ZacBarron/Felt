@@ -1,0 +1,120 @@
+/* Today and the daily loop. */
+
+/* Streak card: count, week strip and what comes next. */
+.streak-week {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.streak-week-head {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.streak-flame {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--fill);
+  color: var(--label-3);
+  transition: color 240ms var(--ease), background 240ms var(--ease);
+}
+
+/* The flame lights once today counts, as Duolingo's does. */
+.streak-flame.lit {
+  background: color-mix(in srgb, var(--tint-fill) 22%, transparent);
+  color: var(--tint);
+}
+
+.streak-count {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: baseline;
+  gap: 0.35rem;
+  font-weight: 650;
+  font-size: 1.05rem;
+  white-space: nowrap;
+}
+
+.streak-num {
+  font-size: 2.1rem;
+  line-height: 1;
+  text-wrap: nowrap;
+}
+
+.streak-bank {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  flex: none;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  background: var(--fill);
+  white-space: nowrap;
+}
+
+/* A day a streak freeze covered: spruce, never brass, so it never reads as studied. */
+.streak-days .dot.frozen {
+  background: color-mix(in srgb, var(--base-500) 16%, transparent);
+  color: var(--base-500);
+  box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--base-500) 45%, transparent);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .streak-days .dot.frozen {
+    background: color-mix(in srgb, var(--felt-1) 30%, transparent);
+    color: color-mix(in srgb, var(--felt-1) 45%, var(--label));
+    box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--felt-1) 70%, transparent);
+  }
+}
+
+:root[data-theme='dark'] .streak-days .dot.frozen {
+  background: color-mix(in srgb, var(--felt-1) 30%, transparent);
+  color: color-mix(in srgb, var(--felt-1) 45%, var(--label));
+  box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--felt-1) 70%, transparent);
+}
+
+.streak-line {
+  margin: 0;
+  font-size: 0.92rem;
+  color: var(--label-2);
+}
+
+/* The next lesson in the plan when it is in Felt Pro: one quiet row, not counted as a task. */
+.quest.quest-pro {
+  color: var(--label);
+}
+
+.quest-pro .quest-check {
+  box-shadow: none;
+  background: var(--fill);
+  color: var(--label-2);
+}
+
+.quest-pro-title {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.quest-pro .footnote {
+  display: block;
+}
+
+/* After the daily challenge: what to do next. */
+.daily-next .list-row {
+  gap: 0.75rem;
+}
+
+.daily-next-title {
+  display: block;
+  font-weight: 600;
+}

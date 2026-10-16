@@ -3,13 +3,15 @@ import { actionRange, challengeNumber, currentRating, handClassCombos, isProvisi
 import { useLiveQuery } from 'dexie-react-hooks';
 import { Link } from 'react-router-dom';
 import { MasteryGrid } from '../components/MasteryGrid';
+import { StreakWeek, useStreakWeek } from '../components/StreakWeek';
+import { TierCard } from '../components/TierCard';
 import { PlayingCard } from '../components/PlayingCard';
 import { canOpenLesson } from '../state/access';
 import { chartsForGame, getChart } from '../state/charts';
 import { db, type StoredLesson } from '../state/db';
 import { cueCopy, goalCopy, pathPrefs } from '../state/goals';
-import { lessonPath, lessonProgress, pickNextLesson } from '../state/lessons';
-import { ratingSnapshot, streakNow } from '../state/rating';
+import { lessonPath, lessonProgress, recommendedLessons } from '../state/lessons';
+import { ratingSnapshot } from '../state/rating';
 import { chartsTaught, reviewTotal } from '../state/decks';
 import { buildQueue, masteryForCharts, todayStats } from '../state/review';
 import { useSettings } from '../state/settings';
@@ -21,11 +23,12 @@ import { AccountCard } from '../ui/AccountCard';
 import { WeeklyTodayCard } from './WeeklyPage';
 import { HeroPattern } from '../ui/Brand';
 import { plural } from '../ui/format';
-import { CheckIcon, ChevronRightIcon, FlameIcon } from '../ui/icons';
+import { CheckIcon, ChevronRightIcon, LockIcon } from '../ui/icons';
 import { PageHeader } from '../ui/PageHeader';
 import { Section } from '../ui/Section';
 import { ProgressRing } from '../ui/ProgressRing';
 import { useCountUp } from '../ui/useCountUp';
+import './today.css';
 
 /** A stable combo for a hand class, so the preview does not reshuffle on every render. */
 function previewCombo(id: string, hand: string) {
@@ -47,9 +50,13 @@ export function DashboardPage() {
   }, deps);
   const mastery = useLiveQuery(() => masteryForCharts(charts), deps);
   const progress = useLiveQuery(lessonProgress, [], new Map<string, StoredLesson>());
-  const nextLesson = pickNextLesson(progress, (key) => canOpenLesson(key, settings.access), pathPrefs(settings.profile));
+  const prefs = pathPrefs(settings.profile);
+  // The next lesson you can open. When a free plan has run out of open lessons, the path's next one is in Felt Pro.
+  const nextLesson = recommendedLessons(progress, prefs, (key) => canOpenLesson(key, settings.access))[0];
+  const pathNext = recommendedLessons(progress, prefs)[0];
+  const proNext = !nextLesson && pathNext?.content && !canOpenLesson(pathNext.key, settings.access) ? pathNext : undefined;
   const dailyDone = useLiveQuery(() => db.daily.get(challengeNumber(new Date())), []);
-  const streak = useLiveQuery(() => streakNow(), []);
+  const week = useStreakWeek();
   const rating = useLiveQuery(async () => currentRating((await ratingSnapshot()).overall), []);
 
   const total = useLiveQuery(() => reviewTotal(charts, settings.study), [...deps, JSON.stringify(settings.study)]);
@@ -66,11 +73,11 @@ export function DashboardPage() {
   // Until a player has learned what a range chart is, Today does not send them to chart questions.
   const taught = chartsTaught(progress);
   const tasks = [
-    nextLesson && {
+    (nextLesson || lessonToday) && {
       done: lessonToday,
       label: lessonToday ? 'Lesson done' : 'Finish a lesson',
-      to: lessonPath(nextLesson.key),
-      detail: lessonToday ? '' : `${nextLesson.content?.minutes ?? 5} min`,
+      to: nextLesson ? lessonPath(nextLesson.key) : '/learn',
+      detail: lessonToday || !nextLesson ? '' : `${nextLesson.content?.minutes ?? 5} min`,
     },
     (taught || remaining > 0) && {
       done: reviewDone,
@@ -97,7 +104,8 @@ export function DashboardPage() {
               size={50}
               progress={rating && rating.games > 0 && !isProvisional(rating) ? nextTier(rating.rating)?.progress : undefined}
             />
-            <span className="today-me-rating num">{rating && rating.games > 0 ? Math.round(rating.rating) : 'Get rated'}</span>
+            {/* A rating still settling shows words, not a number that looks firmer than it is. */}
+            <span className="today-me-rating num">{!rating || rating.games === 0 ? 'Get rated' : isProvisional(rating) ? 'Settling' : Math.round(rating.rating)}</span>
           </Link>
         }
       />
@@ -167,12 +175,7 @@ export function DashboardPage() {
         </section>
       )}
 
-      <InstallCard />
-      <StudyTimeCard />
-      <ImportCard />
-
-      <WeeklyTodayCard />
-
+      {/* The plan sits right under the hero, so the first screen says what to do today. */}
       <section className="card quests reveal" aria-labelledby="today-plan">
         <div className="quests-head">
           <ProgressRing value={tasks.length ? tasksDone / tasks.length : 1} size={52} stroke={6} label={`${tasksDone} of ${tasks.length} done`}>
@@ -190,11 +193,6 @@ export function DashboardPage() {
               {tasksDone === tasks.length ? 'Done for today' : "Today's plan"}
             </div>
           </div>
-          {!!streak?.streak && (
-            <span className="pill pill-tint" aria-label={`${streak.streak} day streak`}>
-              <FlameIcon size={12} /> {streak.streak}
-            </span>
-          )}
         </div>
         {tasks.map((t) => (
           <Link key={t.label} to={t.to} className={`quest${t.done ? ' done' : ''}`}>
@@ -207,11 +205,47 @@ export function DashboardPage() {
             <ChevronRightIcon size={14} className="chev" />
           </Link>
         ))}
+        {/* The free lessons are done: the path goes on in Pro. One quiet row that is not a task, so the plan can still be finished for free. */}
+        {proNext && (
+          <Link to="/pro?from=lesson" className="quest quest-pro">
+            <span className="quest-check" aria-hidden="true">
+              <LockIcon size={13} />
+            </span>
+            <span className="grow" style={{ minWidth: 0 }}>
+              <span className="quest-pro-title">{proNext.title}</span>
+              <span className="footnote">Next lesson in your plan</span>
+            </span>
+            <span className="pill pill-tint">Pro</span>
+            <ChevronRightIcon size={14} className="chev" />
+          </Link>
+        )}
       </section>
 
+      {week && (
+        <Section
+          title="Your streak"
+          info={
+            week.streak.bank > 0
+              ? `You have ${plural(week.streak.bank, 'streak freeze')}. Each one covers a missed day. Study 7 days in a row to earn another.`
+              : 'Study 7 days in a row to earn a streak freeze. Each one covers a missed day.'
+          }
+          trailing={week.streak.best > week.streak.streak ? <span className="footnote num">Best {plural(week.streak.best, 'day')}</span> : undefined}
+        >
+          <div className="card reveal">
+            <StreakWeek data={week} />
+          </div>
+        </Section>
+      )}
+
+      <StudyTimeCard />
+      <WeeklyTodayCard />
+      <ImportCard />
+      <InstallCard />
 
       {/* After the plan: saving progress never competes with studying. */}
       <AccountCard />
+
+      {rating && rating.games > 0 && <TierCard rating={rating} />}
 
       {stats && stats.reviewedToday > 0 && (
         <section className="reveal">
@@ -251,32 +285,6 @@ export function DashboardPage() {
           </Link>
         </section>
       )}
-
-      <Section
-        title="Last 7 days"
-        trailing={!!streak?.best && streak.best > streak.streak ? <span className="footnote num">Best {plural(streak.best, 'day')}</span> : undefined}
-        info={
-          streak && streak.bank > 0
-            ? `You have ${plural(streak.bank, 'streak freeze')}. Each one covers a missed day. Study 7 days in a row to earn another.`
-            : 'Study 7 days in a row to earn a streak freeze. Each one covers a missed day.'
-        }
-      >
-        <div className="card">
-          <ul className="week" aria-label={`Studied on ${(stats?.week ?? []).filter((d) => d.done).length} of the last 7 days`}>
-            {(stats?.week ?? []).map((d, i) => (
-              <li key={i} className={`day${d.today ? ' today' : ''}`}>
-                <span className={`dot${d.done ? ' done' : ''}`} style={{ animationDelay: `${i * 40}ms` }} aria-hidden="true">
-                  <CheckIcon size={15} />
-                </span>
-                <span aria-hidden="true">{d.label}</span>
-                <span className="sr-only">
-                  {d.today ? 'Today' : d.label}, {d.done ? 'studied' : 'not studied'}
-                </span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </Section>
 
       <section>
         <div className="section-title">Key idea</div>
