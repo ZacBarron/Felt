@@ -4,7 +4,7 @@ export const POSTFLOP_MORE_LESSONS: LessonContent[] = [
   {
     key: 'postflop/textures/who-it-favors',
     level: 'advanced',
-    minutes: 7,
+    minutes: 8,
     cover: { kind: 'cards', cards: '', board: '8s8d3c' },
     practice: ['9max-100-rfi-btn', '9max-100-bb-vs-btn'],
     steps: [
@@ -97,6 +97,23 @@ export const POSTFLOP_MORE_LESSONS: LessonContent[] = [
         evidence: 'solver',
       },
       {
+        kind: 'visual',
+        title: 'Wet is not the reason',
+        art: {
+          kind: 'bars',
+          unit: '%',
+          bars: [
+            { label: '732: UTG', value: 2.1 },
+            { label: '732: BB', value: 4.1, tone: 'green' },
+            { label: '754: UTG', value: 3.4 },
+            { label: '754: BB', value: 7.7, tone: 'green' },
+          ],
+        },
+        caption:
+          'UTG opens and BB calls. The bars show two pair or better. On 7♦5♣4♠, BB holds more than twice as much. On 7♦3♣2♠ the gap is small, and UTG holds most overpairs. So UTG can bet bigger on 732 and bets less on 754. Both flops are low. The nut edge decided it, not how wet the board is.',
+        evidence: 'solver',
+      },
+      {
         kind: 'quiz',
         question: 'With Felt’s charts, BTN opens and BB calls. On 8♠8♦3♣, who holds more trips or better?',
         board: '8s8d3c',
@@ -117,10 +134,21 @@ export const POSTFLOP_MORE_LESSONS: LessonContent[] = [
         point: 0,
       },
       {
+        kind: 'quiz',
+        question: 'UTG opens and BB calls. On which flop can UTG bet bigger?',
+        choiceCards: ['7d5c4s', '7d3c2s'],
+        choices: ['7♦5♣4♠', '7♦3♣2♠'],
+        answer: 1,
+        explain:
+          'Like the 732 and 754 bars showed, BB holds 7.7% two pair or better on 754 against UTG’s 3.4%. On 732 the gap is small, and UTG holds most overpairs. Bet size follows the nut edge.',
+        point: 2,
+      },
+      {
         kind: 'takeaway',
         points: [
           'Range advantage sets how often you bet. On 765 the big blind has more equity.',
           'Nut advantage sets how big you bet. On 883 BTN has more equity, but BB has more trips.',
+          'A wet board does not decide the size. Count who holds the nuts, as on 732 and 754.',
         ],
       },
     ],

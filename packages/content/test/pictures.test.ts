@@ -507,6 +507,24 @@ describe('picture pass: postflop', () => {
     ]);
   });
 
+  it('two pair or better on 7♦3♣2♠ and 7♦5♣4♠, UTG against BB', () => {
+    const shareOn = (b: string, id: string, action: string) => {
+      const board = parseCards(b);
+      let all = 0;
+      let hit = 0;
+      for (const c of rangeToCombos(actionRange(chart(id), action), board)) {
+        all += c.weight;
+        if (categoryOf(evaluate([...c.cards, ...board])) >= HandCategory.TwoPair) hit += c.weight;
+      }
+      return r1((hit / all) * 100);
+    };
+    const values = ['7d3c2s', '7d5c4s'].flatMap((b) => [shareOn(b, '9max-100-rfi-utg', 'raise'), shareOn(b, '9max-100-bb-vs-utg', 'call')]);
+    expect(bars(art('postflop/textures/who-it-favors', 'Wet is not the reason'))).toEqual(values);
+    // The caller's nut edge is much bigger on the connected board.
+    expect(values[3] / values[2]).toBeGreaterThan(2);
+    expect(values[1] - values[0]).toBeLessThan(values[3] - values[2]);
+  });
+
   it('top pair against one random hand, exact', () => {
     const hero = parseCards('KsQd') as [Card, Card];
     const board = parseCards('Kh8c4d');
