@@ -36,7 +36,6 @@ jobs:
         run: pnpm --filter @felt/web build
         env:
           FELT_BASE: /Felt/
-          # Empty when the variable is unset: the app then works on its own.
           # The Felt server on Render. A FELT_API_URL repository variable overrides it.
           VITE_API_URL: ${{ vars.FELT_API_URL || 'https://felt-4g8a.onrender.com' }}
       # Pages has no rewrites: a copy of the app at 404.html serves deep links.
