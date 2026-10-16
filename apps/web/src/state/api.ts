@@ -7,6 +7,7 @@ import { useEffect, useState, useSyncExternalStore } from 'react';
  */
 
 const BASE = (import.meta.env.VITE_API_URL ?? '').replace(/\/$/, '');
+export const apiBase = () => BASE;
 const SESSION_KEY = 'felt.session.v1';
 
 export interface ServerFeatures {
@@ -68,13 +69,28 @@ const listeners = new Set<() => void>();
 
 function readSession(): Session | null {
   try {
-    return JSON.parse(localStorage.getItem(SESSION_KEY) ?? 'null') as Session | null;
+    const saved = JSON.parse(localStorage.getItem(SESSION_KEY) ?? 'null') as Session | null;
+    // A session without a token is not a session: an older build could leave one behind after logging out.
+    return isSession(saved) ? saved : null;
   } catch {
     return null;
   }
 }
 
+export const isSession = (s: unknown): s is Session =>
+  !!s && typeof (s as Session).token === 'string' && !!(s as Session).token && !!(s as Session).user;
+
+/**
+ * Updates the signed in user, but only while the same session is still
+ * current. A request that returns after logging out (or after switching
+ * account) must never bring the old session back.
+ */
+export function updateSessionUser(token: string, user: ServerUser) {
+  if (session?.token === token) setSession({ ...session, user });
+}
+
 export function setSession(next: Session | null) {
+  if (next && !isSession(next)) next = null;
   session = next;
   try {
     if (next) localStorage.setItem(SESSION_KEY, JSON.stringify(next));
@@ -102,18 +118,20 @@ export function useSession(): Session | null {
 export async function api<T = Record<string, unknown>>(path: string, init: { method?: string; body?: unknown; timeoutMs?: number } = {}): Promise<T> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), init.timeoutMs ?? 20_000);
+  const sentToken = session?.token;
   try {
     const res = await fetch(`${BASE}/api${path}`, {
       method: init.method ?? (init.body === undefined ? 'GET' : 'POST'),
       headers: {
         ...(init.body === undefined ? {} : { 'Content-Type': 'application/json' }),
-        ...(session ? { Authorization: `Bearer ${session.token}` } : {}),
+        ...(sentToken ? { Authorization: `Bearer ${sentToken}` } : {}),
       },
       body: init.body === undefined ? undefined : JSON.stringify(init.body),
       signal: controller.signal,
     });
     const body = (await res.json().catch(() => ({}))) as Record<string, unknown>;
-    if (res.status === 401 && session) setSession(null);
+    // Only the session that sent this request can be ended by its 401.
+    if (res.status === 401 && session && sentToken && session.token === sentToken) setSession(null);
     if (!res.ok) throw new ApiError(typeof body.error === 'string' ? body.error : `The server answered ${res.status}.`, res.status, body);
     return body as T;
   } catch (e) {
@@ -160,13 +178,15 @@ export function useServerFeatures(): ServerFeatures | null | undefined {
 
 export async function refreshMe(): Promise<ServerUser | null> {
   if (!session) return null;
+  const { token } = session;
   const { user } = await api<{ user: ServerUser }>('/me');
-  setSession({ ...session, user });
+  updateSessionUser(token, user);
   return user;
 }
 
 export async function updateMe(patch: Partial<Pick<ServerUser, 'handle' | 'tz' | 'cueMinutes' | 'reminders' | 'leagues' | 'lastStudyDay'>>) {
+  const token = session?.token;
   const { user } = await api<{ user: ServerUser }>('/me', { method: 'PATCH', body: patch });
-  if (session) setSession({ ...session, user });
+  if (token) updateSessionUser(token, user);
   return user;
 }

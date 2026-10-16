@@ -525,3 +525,29 @@
   flex: none;
   color: var(--green-text);
 }
+
+/* Starting a new player clears this browser's copy, so it asks first. */
+.auth-fresh {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding: 1rem;
+  border-radius: var(--r-card);
+  background: var(--surface);
+}
+
+.auth-fresh-title {
+  margin: 0;
+  font-weight: 650;
+}
+
+.auth-fresh .footnote {
+  margin: 0;
+  line-height: 1.4;
+}
+
+.auth-fresh-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}

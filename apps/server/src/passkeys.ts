@@ -131,8 +131,10 @@ export function mountPasskeys(app: Hono<any>, ctx: PasskeyContext) {
     const signedIn = ctx.userFor(c);
     const { name } = await body<{ name: string }>(c);
     // Shown in the passkey manager next to "Felt". The email when there is one, else the player's name.
-    const label = (signedIn?.email ?? (typeof name === 'string' && name.trim() ? name.trim().slice(0, 64) : 'Felt player')).slice(0, 64);
     const userId = signedIn?.id ?? newId();
+    // Without a name, a short code from the account keeps several accounts apart in the passkey picker.
+    const fallback = `Felt player ${userId.replace(/[^a-zA-Z0-9]/g, '').slice(0, 4).toUpperCase()}`;
+    const label = (signedIn?.email ?? (typeof name === 'string' && name.trim() ? name.trim().slice(0, 64) : fallback)).slice(0, 64);
     const existing = signedIn ? passkeysOf(signedIn.id) : [];
     const options = await lib.generateRegistrationOptions({
       rpName: config.webauthn.rpName,

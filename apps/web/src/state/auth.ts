@@ -9,7 +9,7 @@ import {
   WebAuthnAbortService,
   WebAuthnError,
 } from '@simplewebauthn/browser';
-import { api, ApiError, currentSession, type ServerUser, type Session, setSession } from './api';
+import { api, ApiError, apiBase, currentSession, type ServerUser, type Session, setSession, updateSessionUser } from './api';
 import { clearDeviceData, requestPersistentStorage } from './backup';
 import { track } from './events';
 import { firstSync, rememberAccount, resetSync, saveNow } from './sync';
@@ -84,6 +84,7 @@ export async function createPasskeyAccount(name?: string): Promise<Session> {
 
 /** Adds one more passkey to the signed in account, such as one on a second device. */
 export async function addPasskey(): Promise<ServerUser> {
+  const token = currentSession()?.token;
   const { flowId, options } = await api<{ flowId: string; options: PublicKeyCredentialCreationOptionsJSON }>('/passkey/register/options', { body: {} });
   let response;
   try {
@@ -92,8 +93,7 @@ export async function addPasskey(): Promise<ServerUser> {
     throw passkeyError(e, 'create');
   }
   const { user } = await api<{ user: ServerUser }>('/passkey/register/verify', { body: { flowId, response } });
-  const s = currentSession();
-  if (s) setSession({ ...s, user });
+  if (token) updateSessionUser(token, user);
   return user;
 }
 
@@ -129,9 +129,9 @@ export const verifyEmailCode = (email: string, code: string) => api<Session>('/a
 /** Adds an email to the signed in account: a code first, then the code back. */
 export const sendAddEmailCode = (email: string) => api<{ devCode?: string }>('/me/email/start', { body: { email } });
 export async function verifyAddEmail(email: string, code: string): Promise<ServerUser> {
+  const token = currentSession()?.token;
   const { user } = await api<{ user: ServerUser }>('/me/email/verify', { body: { email, code } });
-  const s = currentSession();
-  if (s) setSession({ ...s, user });
+  if (token) updateSessionUser(token, user);
   return user;
 }
 
@@ -184,11 +184,17 @@ export type SaveResult = Awaited<ReturnType<typeof saveNow>>;
 export async function logOut({ removeLocal = false, saved = false }: { removeLocal?: boolean; saved?: boolean } = {}) {
   if (removeLocal && !saved) throw new Error('Save your progress before removing it from this device.');
   // Ending the session on the server is best effort: offline, the token is simply forgotten here.
-  const userId = currentSession()?.user.id;
-  await api('/auth/logout', { body: {}, timeoutMs: 5000 }).catch(() => undefined);
-  if (userId && !removeLocal) rememberAccount(userId);
+  const s = currentSession();
+  if (s && !removeLocal) rememberAccount(s.user.id);
+  // Forget the session here first, so nothing still running can act as this account.
   setSession(null);
   resetSync();
+  if (s) void endServerSession(s.token);
   track('logged_out', { removeLocal });
   if (removeLocal) await clearDeviceData();
+}
+
+/** Ends a session on the server. Best effort: offline, the token is simply forgotten on this device. */
+async function endServerSession(token: string) {
+  await fetch(`${apiBase()}/api/auth/logout`, { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: '{}' }).catch(() => undefined);
 }

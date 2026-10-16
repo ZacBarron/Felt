@@ -23,7 +23,8 @@ import { calibratedDifficulty } from '../state/calibration';
 import { track } from '../state/events';
 import { useSettings } from '../state/settings';
 import { type ProgressSummary, summarizeDevice } from '../state/summary';
-import { firstSync, keepCopy } from '../state/sync';
+import { firstSync, keepCopy, syncMeta } from '../state/sync';
+import { clearDeviceData } from '../state/backup';
 import { BottomBar } from '../ui/BottomBar';
 import { BrandMark } from '../ui/Brand';
 import { CheckIcon, ChevronLeftIcon, CloudIcon, DeviceIcon, PasskeyIcon } from '../ui/icons';
@@ -355,6 +356,7 @@ export function SignInPage() {
   const [busy, setBusy] = useState(false);
   const [note, setNote] = useState<{ text: string; error?: boolean }>();
   const [autofill, setAutofill] = useState(false);
+  const [fresh, setFresh] = useState(false);
   const heading = useRef<HTMLHeadingElement>(null);
   // Already signed in when the page opened (not by this flow): the account page has everything.
   const signedInBefore = useRef(!!session);
@@ -460,6 +462,27 @@ export function SignInPage() {
 
   const noAccounts = features === null || (features && !features.accounts);
 
+  /**
+   * A new account starts from what this browser holds. A guest's progress
+   * is saved into it. A copy of an account that just logged out belongs to
+   * that account, so Felt clears it (after a confirm) and starts a new player.
+   */
+  const createNew = () => {
+    track('create_account_tapped', { loggedOut: loggedOut ?? 'no' });
+    if (!settings.profile.onboarded) return navigate('/welcome', { replace: true });
+    if (syncMeta().previous) return setFresh(true);
+    navigate(`/signin?mode=create${nextParam ? `&next=${encodeURIComponent(nextParam)}` : ''}`);
+  };
+
+  const startFresh = async () => {
+    setBusy(true);
+    await clearDeviceData();
+    // Everything in memory belonged to the account that left: load the app again from the start.
+    location.assign(`${import.meta.env.BASE_URL}welcome`);
+  };
+
+  const continueHere = () => navigate(settings.profile.onboarded ? '/' : '/welcome', { replace: true });
+
   return (
     <div className="stack focus-column auth-screen" style={{ gap: '1.25rem' }}>
       <div className="focus-top">
@@ -493,13 +516,21 @@ export function SignInPage() {
               {note.text}
             </p>
           )}
-          {!noAccounts && settings.profile.onboarded && (
-            <p className="footnote auth-note">
-              No account yet?{' '}
-              <button className="link-btn auth-link" onClick={() => navigate(`/signin?mode=create${nextParam ? `&next=${encodeURIComponent(nextParam)}` : ''}`)}>
-                Save your progress
-              </button>
-            </p>
+          {fresh && (
+            <div className="auth-fresh reveal" role="alertdialog" aria-labelledby="fresh-title">
+              <p id="fresh-title" className="auth-fresh-title">
+                Start a new player?
+              </p>
+              <p className="footnote">This browser holds the copy of the account you logged out of. Felt clears it and starts fresh. That account keeps all its progress.</p>
+              <div className="auth-fresh-actions">
+                <button className="btn btn-destructive btn-block" disabled={busy} onClick={() => void startFresh()} data-haptic="off">
+                  Clear and start fresh
+                </button>
+                <button className="btn btn-plain btn-block" disabled={busy} onClick={() => setFresh(false)}>
+                  Keep this copy
+                </button>
+              </div>
+            </div>
           )}
           {features && !noAccounts && (
             <BottomBar>
@@ -513,6 +544,12 @@ export function SignInPage() {
                   Use an email code
                 </button>
               )}
+              <button className="btn btn-tinted btn-lg btn-block" disabled={busy} onClick={createNew}>
+                Create a new account
+              </button>
+              <button className="btn btn-plain btn-block auth-alt" disabled={busy} onClick={continueHere}>
+                Continue without an account
+              </button>
             </BottomBar>
           )}
         </>
