@@ -31,7 +31,7 @@ import {
   weeklyVerdict,
 } from '../state/weekly';
 import { BottomBar } from '../ui/BottomBar';
-import { CheckIcon, ChevronRightIcon, CloseIcon, type IconComponent, LearnIcon, MedalIcon, MinusIcon, PercentIcon, RangesIcon, ScenariosIcon, TargetIcon } from '../ui/icons';
+import { CheckIcon, ChevronRightIcon, CloseIcon, type IconComponent, LearnIcon, LockIcon, MedalIcon, MinusIcon, PercentIcon, RangesIcon, ScenariosIcon, TargetIcon } from '../ui/icons';
 import { ProgressRing } from '../ui/ProgressRing';
 import { Section } from '../ui/Section';
 import { useBodyClass } from '../ui/useBodyClass';
@@ -290,6 +290,7 @@ function Intro({ week, items, resumeAt, onStart }: { week: ReturnType<typeof iso
           The set runs {fmtDay(start)} to {fmtDay(end)}. It gets harder as you go.
         </p>
       </div>
+      <YourRecord />
       <Section title="What it covers" footer="Each answer counts toward your Felt Rating. You get one attempt each week. Your place is saved if you leave.">
         <Covers />
       </Section>
@@ -302,9 +303,60 @@ function Intro({ week, items, resumeAt, onStart }: { week: ReturnType<typeof iso
   );
 }
 
-/** For players without Felt Pro: what the event is, and one way to unlock it. */
-function Locked({ week }: { week: ReturnType<typeof isoWeek> }) {
+/**
+ * Your own earlier weeks, so there is a number to beat before you start.
+ * Only your results: there is no leaderboard.
+ */
+function YourRecord() {
+  const weeks = useLiveQuery(() => finishedWeeks(), []);
+  if (!weeks?.length) return null;
+  const scored = weeks.map((w) => ({ number: w.number, accuracy: weeklyAccuracy(w.scores), right: w.scores.filter((x) => x >= 1).length }));
+  const best = scored.reduce((b, w) => (w.accuracy > b.accuracy ? w : b));
+  const last = scored[scored.length - 1];
+  const recent = scored.slice(-8);
+  return (
+    <Section title="Your record" footer={`Beat ${pct(best.accuracy)} to set a new best. Close answers count half.`}>
+      <div className="card wk-record">
+        <div className="wk-record-stats">
+          <div>
+            <span className="wk-record-value num">{pct(best.accuracy)}</span>
+            <span className="wk-record-label">Your best</span>
+          </div>
+          <div>
+            <span className="wk-record-value num">{pct(last.accuracy)}</span>
+            <span className="wk-record-label">Last time</span>
+          </div>
+          <div>
+            <span className="wk-record-value num">{weeks.length}</span>
+            <span className="wk-record-label">{weeks.length === 1 ? 'Week played' : 'Weeks played'}</span>
+          </div>
+        </div>
+        {recent.length > 1 && (
+          <ol className="wk-history" aria-label="Accuracy in your recent weeks">
+            {recent.map((w) => (
+              <li key={w.number} className={w === best ? 'best' : undefined}>
+                <span className="wk-history-bar" style={{ height: `${Math.max(4, Math.round(w.accuracy * 100))}%` }} />
+                <span className="wk-history-week num">
+                  <span className="sr-only">Week </span>
+                  {w.number}
+                  <span className="sr-only">: {pct(w.accuracy)}</span>
+                </span>
+              </li>
+            ))}
+          </ol>
+        )}
+      </div>
+    </Section>
+  );
+}
+
+/**
+ * For players without Felt Pro: this week's real set, locked, and one way to unlock it.
+ * The daily challenge stays one tap away, so this is never a dead end.
+ */
+function Locked({ week, items }: { week: ReturnType<typeof isoWeek>; items: readonly WeeklyDecision[] }) {
   const navigate = useNavigate();
+  const { start, end } = weekRange(new Date());
   useEffect(() => track('weekly_locked_viewed', { week: week.id }), [week.id]);
   return (
     <div className="stack focus-column">
@@ -319,17 +371,23 @@ function Locked({ week }: { week: ReturnType<typeof isoWeek> }) {
           <ProEvent />
         </div>
         <h1 className="display pro-title">A harder set every week.</h1>
+        <Ladder items={items} />
         <p className="pro-sub" style={{ margin: 0 }}>
-          Every Pro player gets the same 10 decisions each week. They come from the hardest spots Felt can grade.
+          This week's 10 decisions are ready. The set runs {fmtDay(start)} to {fmtDay(end)}.
         </p>
       </div>
       <Section title="What it covers" footer="You compare with your own earlier weeks. There is no leaderboard.">
         <Covers />
       </Section>
       <BottomBar>
-        <Link to="/pro?from=weekly" className="btn btn-primary btn-lg btn-block">
-          See Felt Pro
-        </Link>
+        <div className="stack" style={{ gap: 6 }}>
+          <Link to="/pro?from=weekly" className="btn btn-primary btn-lg btn-block">
+            <LockIcon size={18} /> Unlock this week's set
+          </Link>
+          <Link to="/daily" className="btn btn-plain btn-block">
+            Play the free daily challenge
+          </Link>
+        </div>
       </BottomBar>
     </div>
   );
@@ -348,6 +406,10 @@ function Result({ week, items, scores, before, after }: { week: ReturnType<typeo
   const summary = weeklySummary(scores, earlier?.map((w) => weeklyAccuracy(w.scores)) ?? []);
   const delta = Math.round(after - before);
   const misses = weeklyMisses(items, scores);
+  const nextSet = useMemo(() => {
+    const { end } = weekRange(new Date());
+    return new Date(end.getFullYear(), end.getMonth(), end.getDate() + 1).toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' });
+  }, []);
 
   const share = async () => {
     const text = `${shareText(week, scores, (await ratingSnapshot()).overall)}\n${location.origin}${import.meta.env.BASE_URL}weekly`;
@@ -387,9 +449,9 @@ function Result({ week, items, scores, before, after }: { week: ReturnType<typeo
             </span>
           ))}
         </div>
+        {summary.personalBest && <span className="pill pill-good">New personal best</span>}
         <p className="footnote num" style={{ margin: 0 }}>
           Accuracy {pct(summary.accuracy)}. Close answers count half.
-          {summary.personalBest && ' That is your best week.'}
         </p>
         <span className="pill num">
           Felt Rating {Math.round(after)}, {delta === 0 ? 'no change' : delta > 0 ? `up ${delta}` : `down ${-delta}`}
@@ -445,7 +507,7 @@ function Result({ week, items, scores, before, after }: { week: ReturnType<typeo
             {added ? 'Added to your review' : misses.count === 1 ? 'Add the miss to your review' : `Add ${misses.count} misses to your review`}
           </button>
         )}
-        <div className="section-footer">Every Pro player gets the same 10 decisions this week. A new set arrives on Monday.</div>
+        <div className="section-footer">Every Pro player gets the same 10 decisions this week. The next set opens {nextSet}.</div>
       </section>
 
       <BottomBar>
@@ -499,7 +561,7 @@ export function WeeklyPage() {
   if (stored === null || before === undefined) return null;
   // A finished week stays visible, even if Felt Pro has lapsed since.
   if (stored?.finished) return <Result week={week} items={stored.items} scores={stored.scores} before={stored.ratingBefore} after={stored.ratingAfter} />;
-  if (!weeklyAvailable(settings.access)) return <Locked week={week} />;
+  if (!weeklyAvailable(settings.access)) return <Locked week={week} items={fresh} />;
 
   // A run in progress keeps the set it was dealt.
   const items = stored?.items ?? fresh;

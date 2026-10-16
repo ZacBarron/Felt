@@ -1,4 +1,4 @@
-import { actionRange, type HandMix, parseCards, parseComboRange, type PlayerSizes, type StreetSizes } from '@felt/core';
+import { actionRange, type Card, cardsToString, type HandMix, makeCard, parseCards, parseComboRange, type PlayerSizes, RANKS, type StreetSizes, SUIT_SYMBOLS, SUITS } from '@felt/core';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { actionColor } from '../components/actionColors';
@@ -6,15 +6,16 @@ import { PlayingCard } from '../components/PlayingCard';
 import { RangeGrid } from '../components/RangeGrid';
 import { haptic } from '../haptics';
 import { canUse } from '../state/access';
-import { getChart } from '../state/charts';
+import { chartsForGame, getChart } from '../state/charts';
 import { saveSolverSpot } from '../state/saved';
 import { useSettings } from '../state/settings';
 import type { FromWorker, NodeView, RangeInput, SpotInput } from '../solver/protocol';
 import { BottomBar } from '../ui/BottomBar';
-import { BookmarkIcon, LockIcon, SolverIcon } from '../ui/icons';
+import { BookmarkIcon, LockIcon } from '../ui/icons';
 import { PageHeader } from '../ui/PageHeader';
 import { Section } from '../ui/Section';
 import './screens.css';
+import './solver.css';
 
 const chartRange = (id: string, action: string): [string, number][] => {
   const chart = getChart(id);
@@ -77,6 +78,108 @@ const PRESETS: Preset[] = [
 ];
 
 const SIZE_OPTIONS = [33, 50, 75, 125];
+
+/** A chart's action as range text the solver reads, such as "AKs, A5s:0.5". */
+function chartRangeText(id: string, action: string): string {
+  return chartRange(id, action)
+    .filter(([, w]) => w >= 0.005)
+    .map(([hand, w]) => (w >= 0.995 ? hand : `${hand}:${w.toFixed(2).replace(/0$/, '')}`))
+    .join(', ');
+}
+
+/** Reads a board without throwing: whatever cards parse so far. */
+function boardOf(text: string): Card[] {
+  try {
+    return parseCards(text);
+  } catch {
+    return [];
+  }
+}
+
+const RANK_NAMES: Record<string, string> = { A: 'Ace', K: 'King', Q: 'Queen', J: 'Jack', T: 'Ten', '9': 'Nine', '8': 'Eight', '7': 'Seven', '6': 'Six', '5': 'Five', '4': 'Four', '3': 'Three', '2': 'Two' };
+const SUIT_NAMES: Record<string, string> = { c: 'clubs', d: 'diamonds', h: 'hearts', s: 'spades' };
+const STREET_OF_SLOT = ['Flop', 'Flop', 'Flop', 'Turn', 'River'];
+
+/**
+ * Pick the board by tapping cards, like a keypad: a column per suit and a row
+ * per rank. Cards go on in the order you tap them, flop first.
+ */
+function BoardSheet({ open, cards, onChange, onClose }: { open: boolean; cards: Card[]; onChange: (cards: Card[]) => void; onClose: () => void }) {
+  const ref = useRef<HTMLDialogElement>(null);
+  useEffect(() => {
+    const d = ref.current;
+    if (!d) return;
+    if (open && !d.open) d.showModal();
+    if (!open && d.open) d.close();
+  }, [open]);
+  const toggle = (c: Card) => {
+    if (cards.includes(c)) onChange(cards.filter((x) => x !== c));
+    else if (cards.length < 5) onChange([...cards, c]);
+  };
+  const ranks = [...RANKS].reverse();
+
+  return (
+    <dialog
+      ref={ref}
+      className="sheet board-sheet"
+      aria-label="Board"
+      onClose={onClose}
+      onClick={(e) => {
+        if (e.target === ref.current) onClose();
+      }}
+    >
+      <div className="sheet-body stack" style={{ gap: '0.9rem' }}>
+        <div className="sheet-grabber" aria-hidden="true" />
+        <div className="row between" style={{ flexWrap: 'nowrap' }}>
+          <div>
+            <h2 style={{ margin: 0, fontSize: '1.25rem' }}>Board</h2>
+            <div className="footnote num" role="status">
+              {cards.length} of 5 cards. A spot needs 4 or 5.
+            </div>
+          </div>
+          <button className="btn btn-plain" onClick={onClose}>
+            Done
+          </button>
+        </div>
+        <div className="board-slots" aria-hidden="true">
+          {STREET_OF_SLOT.map((street, i) => (
+            <span key={i} className="board-slot">
+              {cards[i] !== undefined ? <PlayingCard card={cards[i]} size="sm" /> : <span className="board-slot-empty sm" />}
+              <span className="board-slot-label">{street}</span>
+            </span>
+          ))}
+        </div>
+        <div className="board-keys" role="group" aria-label="Cards">
+          {ranks.flatMap((r) =>
+            SUITS.map((suit) => {
+              const c = makeCard(r, suit);
+              const on = cards.includes(c);
+              return (
+                <button
+                  key={c}
+                  type="button"
+                  className={`board-key${on ? ' on' : ''}`}
+                  aria-pressed={on}
+                  aria-label={`${RANK_NAMES[r]} of ${SUIT_NAMES[suit]}`}
+                  disabled={!on && cards.length >= 5}
+                  data-haptic="select"
+                  style={{ color: `var(--suit-${suit})` }}
+                  onClick={() => toggle(c)}
+                >
+                  {r}
+                  <span aria-hidden="true">{SUIT_SYMBOLS[suit]}</span>
+                </button>
+              );
+            }),
+          )}
+        </div>
+        <button className="btn btn-plain" disabled={cards.length === 0} onClick={() => onChange([])}>
+          Clear the board
+        </button>
+      </div>
+    </dialog>
+  );
+}
 
 function sizesFor(bets: number[], raise: boolean): Partial<Record<'flop' | 'turn' | 'river', PlayerSizes>> {
   const s: StreetSizes = { bet: bets.map((b) => b / 100), raise: raise ? [0.75] : [] };
@@ -145,8 +248,19 @@ export function SolverPage() {
   const [presetId, setPresetId] = useState(PRESETS[0].id);
   const preset = PRESETS.find((p) => p.id === presetId)!;
   const [board, setBoard] = useState(preset.board);
-  const [pot, setPot] = useState(preset.pot);
-  const [stack, setStack] = useState(preset.stack);
+  // Kept as typed, so "5." survives on the way to "5.5".
+  const [pot, setPot] = useState(String(preset.pot));
+  const [stack, setStack] = useState(String(preset.stack));
+  const potBb = Number(pot);
+  const stackBb = Number(stack);
+  const [picking, setPicking] = useState(false);
+  const fills = useMemo(
+    () =>
+      chartsForGame(settings.game).charts.flatMap((c) =>
+        c.spec.actions.map((a) => ({ value: `${c.spec.id}|${a.id}`, label: `${c.spec.title}: ${a.label}` })),
+      ),
+    [settings.game],
+  );
   const [rangeText, setRangeText] = useState<[string, string]>(preset.rangeText);
   const [custom, setCustom] = useState(false);
   const [bets, setBets] = useState<number[]>([33, 75]);
@@ -165,8 +279,8 @@ export function SolverPage() {
   const choosePreset = (p: Preset) => {
     setPresetId(p.id);
     setBoard(p.board);
-    setPot(p.pot);
-    setStack(p.stack);
+    setPot(String(p.pot));
+    setStack(String(p.stack));
     setRangeText(p.rangeText);
     setCustom(false);
   };
@@ -190,7 +304,7 @@ export function SolverPage() {
     }
   }, [custom, rangeText]);
 
-  const canSolve = !!boardCards && !rangeError && bets.length > 0 && pot > 0 && stack > 0 && (pro || !custom);
+  const canSolve = !!boardCards && !rangeError && bets.length > 0 && potBb > 0 && stackBb > 0 && (pro || !custom);
 
   const run = () => {
     if (!canSolve) return;
@@ -199,8 +313,8 @@ export function SolverPage() {
     setSelected(undefined);
     solver.solve({
       board,
-      pot,
-      stack,
+      pot: potBb,
+      stack: stackBb,
       ranges: custom ? rangeText : preset.ranges(),
       sizes: sizesFor(bets, raise),
       targetPct: boardCards!.length === 5 ? 0.2 : 0.5,
@@ -266,50 +380,84 @@ export function SolverPage() {
               {p.label}
             </button>
           ))}
-          <button className="chip" aria-pressed={custom} data-haptic="select" onClick={() => (pro ? setCustom(true) : undefined)} disabled={!pro}>
+          <button className="chip" aria-pressed={custom} data-haptic="select" onClick={() => setCustom(true)}>
             {!pro && <LockIcon size={12} />} Custom
           </button>
         </div>
         <div className="sc-solver-note">
-          <span>{custom ? 'Your own board, ranges and sizes.' : preset.short}</span>
+          <span>{custom ? (pro ? 'Your own board, ranges and sizes.' : 'Set up any spot. Solving your own spot needs Felt Pro.') : preset.short}</span>
           {!custom && preset.caveat && <span className="pill pill-warn">{preset.caveat}</span>}
         </div>
       </Section>
 
       <div className="card stack solver-setup" style={{ gap: '0.9rem' }}>
-        <label className="solver-field">
-          <span className="footnote">Board, 4 or 5 cards</span>
-          <input value={board} disabled={!custom} onChange={(e) => setBoard(e.target.value)} spellCheck={false} autoCapitalize="none" />
-        </label>
-        {boardCards && (
-          <div className="row" style={{ gap: 6 }}>
-            {boardCards.map((c) => (
-              <PlayingCard key={c} card={c} size="md" />
-            ))}
-          </div>
-        )}
+        <div className="solver-field">
+          <span className="footnote" id="solver-board-label">
+            Board, 4 or 5 cards
+          </span>
+          <button
+            type="button"
+            className="solver-board"
+            aria-labelledby="solver-board-label"
+            aria-describedby="solver-board-value"
+            aria-haspopup="dialog"
+            disabled={!custom}
+            onClick={() => setPicking(true)}
+          >
+            {STREET_OF_SLOT.map((_, i) => {
+              const c = boardOf(board)[i];
+              return c !== undefined ? <PlayingCard key={i} card={c} size="md" /> : <span key={i} className="board-slot-empty" />;
+            })}
+            {custom && <span className="solver-board-edit">Change</span>}
+            <span id="solver-board-value" className="sr-only">
+              {board || 'No cards yet'}
+            </span>
+          </button>
+        </div>
+        <BoardSheet open={picking} cards={boardOf(board)} onChange={(cards) => setBoard(cardsToString(cards))} onClose={() => setPicking(false)} />
         <div className="solver-row">
           <label className="solver-field">
             <span className="footnote">Pot in big blinds</span>
-            <input type="number" inputMode="decimal" value={pot} disabled={!custom} onChange={(e) => setPot(Number(e.target.value))} />
+            <input inputMode="decimal" value={pot} disabled={!custom} onChange={(e) => setPot(e.target.value.replace(',', '.'))} />
           </label>
           <label className="solver-field">
             <span className="footnote">Stack left, in big blinds</span>
-            <input type="number" inputMode="decimal" value={stack} disabled={!custom} onChange={(e) => setStack(Number(e.target.value))} />
+            <input inputMode="decimal" value={stack} disabled={!custom} onChange={(e) => setStack(e.target.value.replace(',', '.'))} />
           </label>
         </div>
-        {(['Out of position', 'In position'] as const).map((who, i) => (
-          <label key={who} className="solver-field">
-            <span className="footnote">{who} range</span>
-            <textarea
-              rows={2}
-              value={rangeText[i]}
-              disabled={!custom}
-              spellCheck={false}
-              onChange={(e) => setRangeText((r) => (i === 0 ? [e.target.value, r[1]] : [r[0], e.target.value]))}
-            />
-          </label>
-        ))}
+        {(['Out of position', 'In position'] as const).map((who, i) => {
+          const put = (text: string) => setRangeText((r) => (i === 0 ? [text, r[1]] : [r[0], text]));
+          return (
+            <div key={who} className="solver-field">
+              <div className="row between" style={{ flexWrap: 'nowrap', gap: '0.5rem' }}>
+                <label className="footnote" htmlFor={`solver-range-${i}`}>
+                  {who} range
+                </label>
+                {custom && fills.length > 0 && (
+                  <select
+                    className="solver-fill"
+                    value=""
+                    aria-label={`Fill the ${who.toLowerCase()} range from a chart`}
+                    onChange={(e) => {
+                      const [id, action] = e.target.value.split('|');
+                      if (id && action) put(chartRangeText(id, action));
+                    }}
+                  >
+                    <option value="" disabled>
+                      Fill from a chart
+                    </option>
+                    {fills.map((f) => (
+                      <option key={f.value} value={f.value}>
+                        {f.label}
+                      </option>
+                    ))}
+                  </select>
+                )}
+              </div>
+              <textarea id={`solver-range-${i}`} rows={custom ? 3 : 2} value={rangeText[i]} disabled={!custom} spellCheck={false} onChange={(e) => put(e.target.value)} />
+            </div>
+          );
+        })}
         {rangeError && <div className="explain bad">{rangeError}</div>}
         <div>
           <span className="footnote">Bet sizes as a percent of the pot</span>
@@ -334,18 +482,6 @@ export function SolverPage() {
           </div>
         </div>
       </div>
-
-      {!pro && (
-        <Link to="/pro?from=solver" className="card placement-card">
-          <span className="placement-icon">
-            <SolverIcon size={22} />
-          </span>
-          <span className="grow">
-            <span style={{ display: 'block', fontWeight: 650 }}>Solve your own spots with Felt Pro</span>
-            <span className="footnote">The example spots are free. Setting up your own spot needs Felt Pro.</span>
-          </span>
-        </Link>
-      )}
 
       {solver.error && <div className="explain bad">{solver.error}</div>}
 
@@ -478,11 +614,35 @@ export function SolverPage() {
         </section>
       )}
 
+      {!pro && solver.solved && !custom && (
+        <div className="card solver-upsell reveal">
+          <div className="grow stack" style={{ gap: '0.35rem' }}>
+            <strong>Solve the spots you actually play</strong>
+            <span className="footnote">Pick any board. Fill each range from your charts. Felt Pro solves it on your device.</span>
+            <button
+              type="button"
+              className="tint-capsule"
+              style={{ justifySelf: 'start', marginTop: '0.2rem' }}
+              onClick={() => {
+                setCustom(true);
+                window.scrollTo({ top: 0, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+              }}
+            >
+              Set up my own spot
+            </button>
+          </div>
+        </div>
+      )}
+
       <BottomBar>
         {solver.running ? (
           <button className="btn btn-lg btn-block glass" onClick={solver.stop}>
             Stop and show results
           </button>
+        ) : custom && !pro ? (
+          <Link to="/pro?from=solver" className="btn btn-primary btn-lg btn-block">
+            <LockIcon size={18} /> Unlock to solve this spot
+          </Link>
         ) : (
           <button className="btn btn-primary btn-lg btn-block" disabled={!canSolve} onClick={run}>
             {solver.solved ? 'Solve again' : 'Solve'}

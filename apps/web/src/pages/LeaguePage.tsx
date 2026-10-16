@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { api, serverFeatures, useSession } from '../state/api';
 import { signed } from '../ui/format';
 import { LeagueIcon, TrophyIcon } from '../ui/icons';
+import { BottomBar } from '../ui/BottomBar';
 import { PageHeader } from '../ui/PageHeader';
 import { EmptyState, Section } from '../ui/Section';
 import './screens.css';
@@ -50,6 +51,7 @@ export function LeaguePage() {
   }, [session?.user.leagues]);
 
   const you = league?.standings.find((s) => s.you);
+  const chase = you && league ? chaseLine(you, league.standings) : undefined;
 
   return (
     <div className="stack" style={{ gap: '1.4rem' }}>
@@ -62,7 +64,12 @@ export function LeaguePage() {
             </span>
           }
           title="No leagues here yet"
-          body="This version of Felt has no league server."
+          body="This version of Felt has no league server. Practice still moves your Felt Rating."
+          action={
+            <Link to="/practice" className="btn btn-primary" style={{ marginTop: '0.4rem' }}>
+              Start practice
+            </Link>
+          }
         />
       ) : !session || !session.user.leagues ? (
         <EmptyState
@@ -105,7 +112,7 @@ export function LeaguePage() {
           footer={
             league.standings.length === 1
               ? 'You are the first in this league this week. Others near your rating join as they play.'
-              : 'Points are Felt Rating gained since you joined this week.'
+              : 'Points are Felt Rating gained since you joined this week. Your rating climbs when you beat what it expects.'
           }
         >
           {you && (
@@ -121,6 +128,11 @@ export function LeaguePage() {
                 <span className="sc-stat-label">Your points</span>
               </div>
             </div>
+          )}
+          {chase && (
+            <p role="status" style={{ margin: '0 0 0.6rem', padding: '0 0.25rem', fontWeight: 600 }}>
+              {chase}
+            </p>
           )}
           <ol className="list league-table">
             {league.standings.map((s) => (
@@ -141,6 +153,30 @@ export function LeaguePage() {
           </ol>
         </Section>
       )}
+      {league?.joined && (
+        <BottomBar>
+          <Link to="/practice" className="btn btn-primary btn-lg btn-block">
+            Start practice
+          </Link>
+        </BottomBar>
+      )}
     </div>
   );
+}
+
+/**
+ * The one gap that matters this week: points to the player just above you,
+ * or your lead over the player just below. Both are plain subtraction.
+ */
+function chaseLine(you: Standing, standings: Standing[]): string | undefined {
+  const pts = (n: number) => `${n} ${n === 1 ? 'point' : 'points'}`;
+  if (you.rank > 1) {
+    const above = standings[you.rank - 2];
+    const gap = above.gained - you.gained;
+    return gap <= 0 ? `You are level with ${above.handle}.` : `You are ${pts(gap)} behind ${above.handle}.`;
+  }
+  const below = standings[1];
+  if (!below) return undefined;
+  const lead = you.gained - below.gained;
+  return lead <= 0 ? `You are level with ${below.handle} at the top.` : `You lead ${below.handle} by ${pts(lead)}.`;
 }

@@ -1,0 +1,125 @@
+/* Solver: board entry by tapping cards, chart fills for ranges, and the Pro moment after a solve. */
+
+.solver-board {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 72px;
+  padding: 0.45rem 0.6rem;
+  border: none;
+  border-radius: 14px;
+  background: var(--fill);
+  color: var(--label);
+  font: inherit;
+  text-align: left;
+}
+
+.solver-board:disabled {
+  padding-inline: 0;
+  background: transparent;
+  opacity: 1;
+}
+
+.solver-board-edit {
+  margin-left: auto;
+  font-weight: 600;
+  color: var(--tint);
+}
+
+.board-slot-empty {
+  display: block;
+  flex: none;
+  width: 42px;
+  height: 58px;
+  border-radius: 7px;
+  box-shadow: inset 0 0 0 1.5px var(--separator);
+  background: var(--surface);
+}
+
+.board-slot-empty.sm {
+  width: 30px;
+  height: 42px;
+  border-radius: 5px;
+}
+
+.solver-fill {
+  max-width: 58%;
+  min-height: 34px;
+  padding: 0 0.8rem;
+  border: none;
+  border-radius: 999px;
+  font: inherit;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--tint);
+  background: var(--fill);
+  text-overflow: ellipsis;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+/* The board sheet: what you have so far on top, then a keypad of 52 cards. */
+.board-sheet .sheet-body {
+  padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+}
+
+.board-slots {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+
+.board-slot {
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+}
+
+.board-slot:nth-child(3) {
+  margin-right: 8px;
+}
+
+.board-slot-label {
+  font-size: 0.7rem;
+  color: var(--label-2);
+}
+
+.board-keys {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 5px;
+}
+
+/* Playing card faces stay white in both themes, like the cards themselves. */
+.board-key {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2rem;
+  min-height: 38px;
+  padding: 0;
+  border: none;
+  border-radius: 10px;
+  font: inherit;
+  font-size: 1.05rem;
+  font-weight: 700;
+  background: #fff;
+  box-shadow: inset 0 0 0 0.5px rgba(0, 0, 0, 0.18);
+}
+
+.board-key.on {
+  box-shadow:
+    inset 0 0 0 0.5px rgba(0, 0, 0, 0.18),
+    0 0 0 2.5px var(--tint);
+  background: color-mix(in srgb, #fff 80%, var(--tint-fill));
+}
+
+.board-key:disabled {
+  opacity: 0.35;
+}
+
+.solver-upsell {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.9rem;
+}

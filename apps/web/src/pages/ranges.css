@@ -404,3 +404,126 @@
   margin: 0.5rem 0 -0.35rem;
   padding: 0 1rem;
 }
+
+/* Quiz sets: a floating progress capsule, then a result that names the hands to fix. */
+.quiz-anchor {
+  height: 0;
+  scroll-margin-top: calc(52px + env(safe-area-inset-top) + 8px);
+}
+
+.quiz-progress {
+  position: sticky;
+  top: calc(52px + env(safe-area-inset-top) + 8px);
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  min-height: 40px;
+  padding: 0 0.9rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.quiz-progress .check-bar {
+  flex: 1;
+}
+
+.quiz-progress-count {
+  flex: none;
+  color: var(--label-2);
+}
+
+.quiz-run,
+.quiz-right {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  flex: none;
+}
+
+.quiz-run {
+  color: var(--tint);
+}
+
+.quiz-right {
+  color: var(--green-text);
+}
+
+.quiz-result-card {
+  align-items: center;
+  text-align: center;
+  gap: 0.75rem;
+  padding: 1.5rem 1.25rem 1.25rem;
+}
+
+.quiz-result-title {
+  margin: 0;
+  font-size: 1.9rem;
+  font-weight: 400;
+  line-height: 1.05;
+}
+
+.quiz-stats {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  width: 100%;
+  margin-top: 0.25rem;
+  border-top: 0.5px solid var(--separator);
+  padding-top: 0.85rem;
+}
+
+.quiz-stats > div {
+  display: grid;
+  gap: 0.1rem;
+}
+
+.quiz-stat-value {
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.quiz-stat-label {
+  font-size: 0.75rem;
+  color: var(--label-2);
+}
+
+/* A hand as the range grid draws it: the split of actions behind its name. */
+.quiz-cell {
+  position: relative;
+  display: flex;
+  flex: none;
+  width: 52px;
+  height: 34px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--fill);
+}
+
+.quiz-cell b {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #fff;
+  text-shadow:
+    0 0 3px rgba(0, 0, 0, 0.45),
+    0 1px 1px rgba(0, 0, 0, 0.3);
+}
+
+.quiz-fix .list-row {
+  gap: 0.8rem;
+}
+
+.quiz-fix-mix {
+  min-width: 0;
+  font-size: 0.9rem;
+}
+
+.quiz-cell.mostly-fold b {
+  color: var(--label);
+  text-shadow: none;
+}

@@ -193,3 +193,71 @@
   display: block;
   font-weight: 650;
 }
+
+/* Your record on the intro: three numbers, then your recent weeks as bars. */
+.wk-record {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.wk-record-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.wk-record-stats > div {
+  display: grid;
+  gap: 0.1rem;
+}
+
+.wk-record-value {
+  font-size: 1.3rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.wk-record-label {
+  font-size: 0.78rem;
+  color: var(--label-2);
+}
+
+.wk-history {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 36px);
+  justify-content: start;
+  gap: 8px;
+  height: 72px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.wk-history li {
+  display: grid;
+  grid-template-rows: 1fr auto;
+  gap: 4px;
+  min-width: 0;
+}
+
+.wk-history-bar {
+  align-self: end;
+  width: 100%;
+  border-radius: 5px 5px 2px 2px;
+  background: var(--fill-2);
+}
+
+.wk-history li:last-child .wk-history-bar {
+  background: color-mix(in srgb, var(--tint-fill) 45%, var(--fill-2));
+}
+
+.wk-history li.best .wk-history-bar {
+  background: var(--tint-fill);
+}
+
+.wk-history-week {
+  font-size: 0.7rem;
+  text-align: center;
+  color: var(--label-2);
+}
