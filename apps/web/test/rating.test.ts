@@ -79,7 +79,7 @@ describe('daily challenge', () => {
   });
 
   it('shares a spoiler free result', () => {
-    expect(shareText(285, [1, 1, 0.5, 0, 1], { rating: 1432, rd: 80, games: 120 })).toBe('Felt Daily #285: 3 of 5\n🟩🟩🟨🟥🟩\nFelt Rating 1432, Sharp');
-    expect(shareText(285, [1], { rating: 1250, rd: 250, games: 4 })).toContain('Felt Rating 1250, still settling');
+    expect(shareText(285, [1, 1, 0.5, 0, 1], { rating: 1432, rd: 80, games: 120 })).toBe('Suited Daily #285: 3 of 5\n🟩🟩🟨🟥🟩\nSuited Rating 1432, Sharp');
+    expect(shareText(285, [1], { rating: 1250, rd: 250, games: 4 })).toContain('Suited Rating 1250, still settling');
   });
 });

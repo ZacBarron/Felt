@@ -1,6 +1,6 @@
-# Research brief: sources for Felt
+# Research brief: sources for Suited
 
-Compiled October 2026 to ground Felt's rating, scheduling, motivation and monetization decisions.
+Compiled October 2026 to ground Suited's rating, scheduling, motivation and monetization decisions.
 
 **How this was checked.** Each citation was confirmed by web search against a publisher, index (PubMed, RePEc, ACL Anthology, dblp, SEC EDGAR) or author page. Full text fetching was not available, so most numbers come from abstracts or passages quoted in search results. Labels: *abstract level* (in the published abstract), *company source* (shareholder letter, SEC filing, company blog), *industry report* (vendor benchmark), *secondary* (third party report; indicative only), *not verified* (do not quote).
 
@@ -30,7 +30,7 @@ Compiled October 2026 to ground Felt's rating, scheduling, motivation and moneti
 
 **Goal gradient.** Kivetz, R., Urminsky, O., Zheng, Y. (2006). "The goal-gradient hypothesis resurrected: Purchase acceleration, illusionary goal progress, and customer retention." *Journal of Marketing Research* 43(1), 39-58. doi:10.1509/jmkr.43.1.39. People accelerate effort as they near a reward (coffee card and online rating programs), and effort tracks perceived distance to the goal (*abstract level*).
 
-**For Felt.** Rate the player (theta) and every drill spot (b) with Elo on the logistic scale, `K(n) = 1.8 / (1 + 0.05 n)`, displayed on a 1500 based scale. Add Glicko style uncertainty that grows with days away. Show "provisional" while uncertainty is high.
+**For Suited.** Rate the player (theta) and every drill spot (b) with Elo on the logistic scale, `K(n) = 1.8 / (1 + 0.05 n)`, displayed on a 1500 based scale. Add Glicko style uncertainty that grows with days away. Show "provisional" while uncertainty is high.
 
 ---
 
@@ -48,9 +48,9 @@ Compiled October 2026 to ground Felt's rating, scheduling, motivation and moneti
 - **Meyer, G., von Meduna, M., Brosowski, T., Hayer, T. (2013, online 2012).** "Is poker a game of skill or chance? A quasi-experimental study." *Journal of Gambling Studies*. doi:10.1007/s10899-012-9327-8. With card quality fixed, experts did not beat average players over 60 hands but lost less with bad cards. Short samples are noise.
 - **Rake.** Fiedler, I. C., Wilcke, A.-C. (2012). "The market for online poker." *UNLV Gaming Research & Review Journal* 16(1): about 6 million players paid US$3.61 billion in rake in 2010. The popular "about 10% of players win after rake" claim has no confirmed primary source (*not verified*).
 
-- **Levels of thinking.** A common way poker is taught: level 1 asks what do I have, level 2 what do they have, level 3 what do they think I have, and so on. It is usually credited to David Sklansky. Felt uses it only as a descriptive ladder for the tiers, not as a measured construct (origin *not verified*; no source was checked).
+- **Levels of thinking.** A common way poker is taught: level 1 asks what do I have, level 2 what do they have, level 3 what do they think I have, and so on. It is usually credited to David Sklansky. Suited uses it only as a descriptive ladder for the tiers, not as a measured construct (origin *not verified*; no source was checked).
 
-**For Felt.** Treat results under about 1,500 hands as mostly noise and show confidence intervals on bb/100. Rake can turn a skilled top decile negative, so include it in every EV and win rate.
+**For Suited.** Treat results under about 1,500 hands as mostly noise and show confidence intervals on bb/100. Rake can turn a skilled top decile negative, so include it in every EV and win rate.
 
 ---
 
@@ -66,7 +66,7 @@ Compiled October 2026 to ground Felt's rating, scheduling, motivation and moneti
   - Ye, J., Su, J., Cao, Y. (2022). "A stochastic shortest path algorithm for optimizing spaced repetition scheduling." *KDD 2022*, 4381-4390. 220 million MaiMemo memory logs; Markov memory model plus cost minimizing scheduler; 12.6% better than prior methods. Extended in *IEEE TKDE* 35(10), 2023: 64% lower prediction error, 17% lower review cost. These underpin FSRS (difficulty, stability, retrievability; default desired retention 0.9, *secondary*).
 - **Optimal difficulty.** Wilson, R. C., Shenhav, A., Straccia, M., Cohen, J. D. (2019). "The eighty five percent rule for optimal learning." *Nature Communications* 10, 4646. doi:10.1038/s41467-019-12552-4. Optimal error about 15.87% for gradient descent learners on binary tasks; shown in models, not proven in humans. Math Garden's 75% is the human field practice.
 
-**For Felt.** Lessons end in retrieval. Schedule recall cards with a half life or FSRS style model at about 90% retention. Choose drill spots for 75 to 85% expected accuracy. Interleave spot types. Feedback explains the decision, not the person.
+**For Suited.** Lessons end in retrieval. Schedule recall cards with a half life or FSRS style model at about 90% retention. Choose drill spots for 75 to 85% expected accuracy. Interleave spot types. Feedback explains the decision, not the person.
 
 ---
 
@@ -106,13 +106,13 @@ Compiled October 2026 to ground Felt's rating, scheduling, motivation and moneti
 
 **GTO Wizard** (*company source*, gtowizard.com and its blog, 2026). Free tier with limited daily trainer hands; Starter from $39/month; Premium and Elite raised $10 to $20/month for new subscribers in March 2026 (new totals *not verified*); Ultra $359/month or $289/month annual. Plans split into Cash and Tournament.
 
-**Trial timeline** (*secondary*: a case study by Blinkist's product team on UX Planet, and later summaries). Blinkist replaced a feature list with a timeline of the free trial (today, a reminder, the charge date) after "forgot to cancel" became its top complaint. Reported: trial starts up 23% and fewer complaints. Felt shows the same timeline without promising a reminder it cannot send.
+**Trial timeline** (*secondary*: a case study by Blinkist's product team on UX Planet, and later summaries). Blinkist replaced a feature list with a timeline of the free trial (today, a reminder, the charge date) after "forgot to cancel" became its top complaint. Reported: trial starts up 23% and fewer complaints. Suited shows the same timeline without promising a reminder it cannot send.
 
 **Conversion benchmarks** (*industry report*, RevenueCat State of Subscription Apps). 2025: 82% of trial starts happen on the day of install (revenuecat.com/state-of-subscription-apps-2025). 2026: hard paywall apps convert about 10.7% of downloads to paid by day 35 versus 2.1% for freemium, with nearly equal one year retention; 55% of 3 day trial cancellations happen on day 0; Education leans to annual plans. 2025 (*secondary* summaries): median download to trial 6.2%; trials of 17 to 32 days convert at 42.5% versus 25.5% under 4 days.
 
 ---
 
-## 6. Implications for Felt
+## 6. Implications for Suited
 
 1. **One rating engine for player and spots**: Elo on a logistic curve with `K(n) = 1.8 / (1 + 0.05 n)`, provisional while uncertain (Pelánek 2016; Pelánek et al. 2017; Klinkenberg et al. 2011; Lichess).
 2. **Uncertainty grows with rust**, so stale areas re rate fast and rise in the queue (Glickman 1999).

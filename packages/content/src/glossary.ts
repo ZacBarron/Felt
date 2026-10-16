@@ -38,7 +38,7 @@ export const GLOSSARY: GlossaryTerm[] = [
     id: 'nlhe',
     term: 'No Limit Hold’em',
     aliases: ['No Limit', 'Hold’em', 'NLH', 'NLHE'],
-    short: 'The poker game Felt teaches. Each player gets 2 private cards and may bet any amount up to all their chips.',
+    short: 'The poker game Suited teaches. Each player gets 2 private cards and may bet any amount up to all their chips.',
     lesson: 'basics/rules/goal',
   },
   {
@@ -185,7 +185,7 @@ export const GLOSSARY: GlossaryTerm[] = [
   {
     id: 'bb',
     term: 'bb',
-    short: 'Short for big blinds, the unit Felt counts in. A 10bb bet is 10 times the big blind at any stakes.',
+    short: 'Short for big blinds, the unit Suited counts in. A 10bb bet is 10 times the big blind at any stakes.',
     lesson: 'basics/first-strategy/big-blinds',
   },
   {
@@ -793,7 +793,7 @@ export const GLOSSARY: GlossaryTerm[] = [
     term: 'buy in',
     link: false,
     aliases: ['buy ins', 'buy-in', 'buy-ins', 'buyin', 'buyins', 'buying in', 'minimum buy in', 'maximum buy in'],
-    short: 'The money you pay to join a game or tournament. Felt often counts a bankroll in buy ins of 100bb.',
+    short: 'The money you pay to join a game or tournament. Suited often counts a bankroll in buy ins of 100bb.',
     lesson: 'basics/money/stakes',
   },
   {
@@ -801,7 +801,7 @@ export const GLOSSARY: GlossaryTerm[] = [
     term: 'stack',
     link: false,
     aliases: ['stacks'],
-    short: 'All the chips you have on the table. Felt counts it in big blinds.',
+    short: 'All the chips you have on the table. Suited counts it in big blinds.',
     lesson: 'basics/first-strategy/big-blinds',
   },
   {
@@ -1974,7 +1974,7 @@ export const GLOSSARY: GlossaryTerm[] = [
     term: 'win rate',
     link: false,
     aliases: ['win rates', 'winrate', 'WR'],
-    short: 'How much you win on average. Felt measures it in big blinds per 100 hands.',
+    short: 'How much you win on average. Suited measures it in big blinds per 100 hands.',
     lesson: 'results/win-rate/bb-per-100',
   },
   {

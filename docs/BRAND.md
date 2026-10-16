@@ -1,31 +1,35 @@
-# Felt Brand
+# Suited Brand
 
 ## Idea
 
 **Instinct, trained.**
 
-Great players do not calculate every decision at the table. They studied until the right play became instinct. Felt is where that studying happens: precise like a solver, calm like a good card room. The brand sits between the two worlds it serves, rigorous data and the feel of the game.
+Great players do not calculate every decision at the table. They studied until the right play became instinct. Suited is where that studying happens: precise like a solver, calm like a good card room. The brand sits between the two worlds it serves, rigorous data and the feel of the game.
 
-What Felt is not: a casino, a trading app, a crypto product. No neon, no chips raining down, no slot machine rewards. Progress is shown plainly and honestly.
+What Suited is not: a casino, a trading app, a crypto product. No neon, no chips raining down, no slot machine rewards. Progress is shown plainly and honestly.
+
+## Name
+
+The product was called Felt until October 2026. "Felt" conflicted with an existing poker app and a registered FELT mark for mobile apps, so it became **Suited**: suited cards, and a plan suited to your game. The brand review behind the change scored five names; see the Suited brand review artifact. Internal identifiers (storage keys such as `felt.settings.v1`, the `felt` IndexedDB database, the `@felt/*` packages and the repository) keep the old name on purpose: renaming them would wipe players' saved progress.
 
 ## Voice
 
-Felt sounds like a good coach sitting next to you: calm, direct and warm. The full guide, with sentence rules, accessibility, mechanics and the glossary, is [VOICE.md](VOICE.md).
+Suited sounds like a good coach sitting next to you: calm, direct and warm. The full guide, with sentence rules, accessibility, mechanics and the glossary, is [VOICE.md](VOICE.md).
 
 ## Logo
 
-**The mark** is an F painted into a 6x6 grid, the way a solver paints a range: a full stem, a long top arm, a shorter middle arm and one extra cell in the top left corner in brass, with the rest of the grid faintly visible. The corner cell is where a range chart keeps its strongest hands, so the F reads a little more like a real chart. It reads as a letter to anyone and as a range chart to a player.
+**The mark** is the suited half of a range chart, on a 6x6 grid. In every range chart, suited hands sit above the diagonal and pairs sit on it. The cells above the diagonal are brass, the pairs on the diagonal are a soft neutral line, and the offsuit half stays faintly visible. It is the name drawn in the language of the game: a player reads it as a range chart, anyone else as a clean triangle.
 
-**The wordmark** is "Felt" drawn from Instrument Serif with tightened tracking, kept as outlines (`apps/web/src/ui/wordmark.ts`) so it never depends on a font loading.
+**The wordmark** is "Suited" drawn from Instrument Serif with tracking of -10 units per letter, kept as outlines (`apps/web/src/ui/wordmark.ts`) so it never depends on a font loading. Regenerate it from the font with opentype.js rather than editing the path by hand.
 
 **The lockup** pairs the tile mark with the wordmark, spaced at 0.38 of the mark height.
 
-Files: `docs/brand/felt-lockup.svg`, `felt-wordmark.svg`, `felt-mark.svg`, `felt-app-icon.svg`, and the overview `felt-brand-board.png`. In code: `BrandMark`, `Wordmark`, `Lockup`, `isFCell` in `apps/web/src/ui/Brand.tsx`.
+Files: `docs/brand/suited-lockup.svg`, `suited-wordmark.svg`, `suited-mark.svg`, `suited-app-icon.svg`, and the overview `suited-brand-board.png`. App icons in `apps/web/public`: rounded tiles for the favicon and the 192 and 512 icons, a full bleed square for the iPhone home screen, and a maskable icon with the grid inside the safe zone. In code: `BrandMark`, `Wordmark`, `Lockup`, `markCell` in `apps/web/src/ui/Brand.tsx`.
 
 Usage:
 - Clear space around the mark: one grid cell on every side.
 - Minimum size: 20px for the tile, 14px tall for the wordmark.
-- Do not change which cells are lit, recolor the F, rotate the grid, add effects, or redraw the wordmark in a live font.
+- Do not change which cells are lit, recolor the suited half, rotate or mirror the grid (the suited half is always top right), add effects, or redraw the wordmark in a live font.
 
 ## Color
 
@@ -47,7 +51,7 @@ Color theory notes:
 
 Card room is the brand: it is what goes on the app icon, the splash screen and every marketing surface. People can pick an alternate theme in Settings for the app itself:
 
-| Theme | Felt | Accent | Note |
+| Theme | Suited | Accent | Note |
 | --- | --- | --- | --- |
 | Card room (default) | Spruce | Brass | The brand |
 | Ink | Navy | Brass | Quieter, more corporate |
@@ -55,6 +59,19 @@ Card room is the brand: it is what goes on the app icon, the splash screen and e
 | Cobalt | Blue | Ice | The earlier blue direction |
 
 Themes only change the felt and accent tokens (`--base-*`, `--felt-*`, `--accent`, `--tint*`). Poker semantic colors never change.
+
+### Action colors
+
+Solver colors are a convention players know: raise is red, call is green, fold is gray, 3bet is purple. About 1 in 12 men has red-green color blindness, and in a deuteranopia simulation the old raise and call differed by only 21 points of CIELAB difference (110 with normal vision). The actions now differ in lightness as well as hue:
+
+| Action | Light | Dark |
+| --- | --- | --- |
+| Raise and bets | Vermilion `#EE6A2A` | `#FF7A45` |
+| Call and check | Deep teal `#0F7B6C` | `#20B39C` |
+| Fold | Warm gray `#B5AFA4` | `#4A4843` |
+| 3bet and 4bet | Purple (unchanged) | Purple (unchanged) |
+
+With deuteranopia, raise and call now differ by 66 (light) and every action pair stays apart in both themes. Bet sizes are shades of the raise color. The general red and green for right and wrong answers are separate tokens and always come with an icon or words.
 
 Everything else uses the system palette so the app still feels native. Playing cards use a four color deck on white faces; card backs are spruce with a brass lattice.
 
@@ -66,7 +83,7 @@ Everything else uses the system palette so the app still feels native. Playing c
 
 ## Iconography
 
-A small set drawn for Felt on a 24pt grid in `apps/web/src/ui/icons.tsx`: 1.75 stroke, round caps, filled state for selection. Poker specific where it helps (fanned cards for Review, a range grid for Ranges). No third party icon libraries.
+A small set drawn for Suited on a 24pt grid in `apps/web/src/ui/icons.tsx`: 1.75 stroke, round caps, filled state for selection. Poker specific where it helps (fanned cards for Review, a range grid for Ranges). No third party icon libraries.
 
 ## Motion
 
@@ -77,7 +94,7 @@ Motion explains what happened; it never decorates.
 - **Ink:** painted cells fill from the left like a brush stroke.
 - **Liquid selection:** the tab pill stretches as it slides between tabs.
 - **Count up:** headline numbers roll to their value; rings fill.
-- **The mark assembles:** on the welcome screen and in moments, the grid pops in along the diagonal and the F lights in a brass sweep.
+- **The mark assembles:** on the welcome screen and in moments, the grid pops in along the diagonal and the suited half lights in a brass sweep.
 - **Verdicts land:** the badge pops, a soft ring leaves it, and the check draws itself. Mix bars grow from the left.
 - **Moments:** a new tier or a streak milestone gets one short full screen moment on the felt, once, and only on a calm screen (never mid question). The title wipes in like ink. Nothing else earns a takeover.
 - Springs for things you touch, ease out for things that appear. Everything respects Reduce Motion.

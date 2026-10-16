@@ -14,7 +14,7 @@ registerRoute(new NavigationRoute(createHandlerBoundToURL('index.html'), { denyl
 self.skipWaiting();
 clientsClaim();
 
-// Study reminders from the Felt server.
+// Study reminders from the Suited server.
 self.addEventListener('push', (event) => {
   let data: { title?: string; body?: string; url?: string } = {};
   try {
@@ -23,7 +23,7 @@ self.addEventListener('push', (event) => {
     data = { body: event.data?.text() };
   }
   event.waitUntil(
-    self.registration.showNotification(data.title ?? 'Felt', {
+    self.registration.showNotification(data.title ?? 'Suited', {
       body: data.body ?? '',
       icon: '/icon-192.png',
       badge: '/icon-192.png',

@@ -1,7 +1,7 @@
 import { useEffect, useState, useSyncExternalStore } from 'react';
 
 /**
- * The Felt server is optional: the app works fully offline and on a static
+ * The Suited server is optional: the app works fully offline and on a static
  * host. When a server answers on /api (or VITE_API_URL), accounts, sync,
  * purchases, reminders, leagues and daily stats switch on.
  */
@@ -19,9 +19,9 @@ export interface ServerFeatures {
   passkeys?: boolean;
   billing: boolean;
   push: boolean;
-  /** The AI coach for Felt Pro players. Older servers leave it out, which reads as off. */
+  /** The AI coach for Suited Pro players. Older servers leave it out, which reads as off. */
   coach: boolean;
-  /** Testing: the server gives every signed in player Felt Pro (PRO_FOR_EVERYONE). */
+  /** Testing: the server gives every signed in player Suited Pro (PRO_FOR_EVERYONE). */
   proForEveryone?: boolean;
 }
 
@@ -142,7 +142,7 @@ export async function api<T = Record<string, unknown>>(path: string, init: { met
     return body as T;
   } catch (e) {
     if (e instanceof ApiError) throw e;
-    throw new ApiError('Could not reach the Felt server. Check your connection.', 0);
+    throw new ApiError('Could not reach the Suited server. Check your connection.', 0);
   } finally {
     clearTimeout(timer);
   }

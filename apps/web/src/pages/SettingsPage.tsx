@@ -89,7 +89,7 @@ function proSummary(access: Access) {
   return access.trialEndsAt ? `Trial to ${shortDate(access.trialEndsAt)}` : 'Active';
 }
 
-/** Felt Pro's tile: the F grid in ink on brass. */
+/** Suited Pro's tile: the mark in ink on brass. */
 function ProGlyph({ size }: IconProps) {
   return (
     <span className="settings-pro-glyph">
@@ -98,7 +98,7 @@ function ProGlyph({ size }: IconProps) {
   );
 }
 
-/** Asks the browser to keep Felt's data, and reports whether it will. */
+/** Asks the browser to keep Suited's data, and reports whether it will. */
 function usePersisted() {
   const [persisted, setPersisted] = useState<boolean>();
   useEffect(() => {
@@ -175,7 +175,7 @@ function SettingsHome() {
       </Section>
 
       <div className="list with-icons settings-pro">
-        <NavRow to="/settings/pro" icon={ProGlyph} color="var(--tint-fill)" title="Felt Pro" detail={proSummary(access)} />
+        <NavRow to="/settings/pro" icon={ProGlyph} color="var(--tint-fill)" title="Suited Pro" detail={proSummary(access)} />
       </div>
 
       <TestingSection />
@@ -498,11 +498,11 @@ function DataPage() {
     if (!window.confirm('Replace everything on this device with this backup?')) return;
     try {
       await importBackup(await file.text());
-      setDataMessage('Backup restored. Felt will reload now.');
+      setDataMessage('Backup restored. Suited will reload now.');
       haptic('success');
       setTimeout(() => location.reload(), 900);
     } catch (e) {
-      setDataMessage(e instanceof Error ? e.message : 'We could not read that file. Pick a Felt backup file.');
+      setDataMessage(e instanceof Error ? e.message : 'We could not read that file. Pick a Suited backup file.');
       haptic('error');
     }
   };
@@ -565,15 +565,15 @@ function TestingSection() {
         <span className="settings-status">
           {serverOn
             ? session
-              ? 'The server has Felt Pro on for every signed in player. The AI coach works too.'
-              : 'The server has Felt Pro on for signed in players. Sign in to get it everywhere.'
-            : 'For testing only. This unlocks Felt Pro on this device and charges nothing. The AI coach still checks your account.'}
+              ? 'The server has Suited Pro on for every signed in player. The AI coach works too.'
+              : 'The server has Suited Pro on for signed in players. Sign in to get it everywhere.'
+            : 'For testing only. This unlocks Suited Pro on this device and charges nothing. The AI coach still checks your account.'}
         </span>
       }
     >
       <div className="list">
-        <Row label="Unlock Felt Pro for testing" hint={on ? 'On for this device' : 'Only this device'}>
-          <Toggle label="Unlock Felt Pro for testing" checked={on} onChange={(next) => update({ ...settings, access: setTestingPro(settings.access, next) })} />
+        <Row label="Unlock Suited Pro for testing" hint={on ? 'On for this device' : 'Only this device'}>
+          <Toggle label="Unlock Suited Pro for testing" checked={on} onChange={(next) => update({ ...settings, access: setTestingPro(settings.access, next) })} />
         </Row>
       </div>
     </Section>
@@ -593,14 +593,14 @@ function ProSettingsPage() {
   }, []);
 
   return (
-    <SubPage title="Felt Pro">
+    <SubPage title="Suited Pro">
       <Section
         title="Subscription"
-        info={<p>Cancel or change Felt Pro from your account. Your progress stays either way.</p>}
+        info={<p>Cancel or change Suited Pro from your account. Your progress stays either way.</p>}
       >
         <div className="list">
           <Link to="/pro?from=settings" className="list-row">
-            <span className="grow">Felt Pro</span>
+            <span className="grow">Suited Pro</span>
             <span className="detail">
               {!isPro(access) ? 'Free plan' : access.trialEndsAt ? `Free trial until ${shortDate(access.trialEndsAt)}` : 'Active'}
             </span>

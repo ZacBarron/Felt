@@ -47,7 +47,7 @@ export function AccountCard() {
       </span>
       <div className="grow" style={{ minWidth: 0 }}>
         <div className="install-title">Save your progress to an account</div>
-        <div className="footnote">Use Felt on any device. {features?.passkeys ? 'It takes one tap with a passkey.' : 'It takes a minute with your email.'}</div>
+        <div className="footnote">Use Suited on any device. {features?.passkeys ? 'It takes one tap with a passkey.' : 'It takes a minute with your email.'}</div>
         <Link to="/signin?mode=create&from=today" className="btn btn-tinted install-btn">
           Save my progress
         </Link>

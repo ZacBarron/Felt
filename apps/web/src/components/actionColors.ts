@@ -5,17 +5,17 @@ const COLORS: Record<string, string> = {
   call: 'var(--act-call)',
   check: 'var(--act-check)',
   fold: 'var(--act-fold)',
-  allin: 'color-mix(in srgb, var(--red), #000 58%)',
+  allin: 'color-mix(in srgb, var(--act-raise), #000 58%)',
 };
 
-/** Bets are shades of red by size so bigger sizings read as more aggressive. */
+/** Bets are shades of the raise color by size so bigger sizings read as more aggressive. */
 export function actionColor(id: string): string {
   if (COLORS[id]) return COLORS[id];
   if (id.startsWith('bet') || id.startsWith('raise')) {
     const size = Number(id.replace(/\D/g, '')) || 50;
-    // Bigger bets read as deeper reds.
+    // Bigger bets read as deeper shades.
     const mix = Math.min(55, size / 3);
-    return `color-mix(in srgb, var(--red), #000 ${mix}%)`;
+    return `color-mix(in srgb, var(--act-raise), #000 ${mix}%)`;
   }
   return 'var(--gray)';
 }

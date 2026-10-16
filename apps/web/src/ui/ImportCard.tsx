@@ -43,7 +43,7 @@ export function ImportCard() {
       </span>
       <div className="grow" style={{ minWidth: 0 }}>
         <div className="install-title">{source === 'online' ? 'Find your leaks in real hands' : 'Bring in your session log'}</div>
-        <div className="footnote">{source === 'online' ? 'Import your hand histories. Felt compares them with its charts.' : 'Import your sessions to see your real results.'}</div>
+        <div className="footnote">{source === 'online' ? 'Import your hand histories. Suited compares them with its charts.' : 'Import your sessions to see your real results.'}</div>
         <Link to="/import" className="btn btn-tinted install-btn">
           Import {source === 'online' ? 'hands' : 'sessions'}
         </Link>

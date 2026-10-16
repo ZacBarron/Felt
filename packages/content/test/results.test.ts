@@ -203,7 +203,7 @@ describe('what bb/100 means', () => {
     expect(branch(a, 'Hands, estimated')).toBe(`5 hours × ${LIVE_HPH} = ${hands} hands`);
     expect(branch(a, 'Win rate')).toBe(`${bb} ÷ ${hands} × 100 = ${r1((bb / hands) * 100)} bb/100`);
     expect(text(key)).toContain(`Its model uses ${LIVE_HPH} hands an hour`);
-    const q = quiz(key, 'You play 10 hours live and do not count hands. How many hands does Felt’s model estimate?');
+    const q = quiz(key, 'You play 10 hours live and do not count hands. How many hands does Suited’s model estimate?');
     expect(q.choices[q.answer]).toBe(`${10 * LIVE_HPH}`);
     expect(q.choices).toContain(`${10 * ONLINE_HPH}`);
   });
@@ -295,10 +295,10 @@ describe('what the game costs you', () => {
     expect(branch(a, 'Rake')).toBe(`${MINUS}${r1(C13.rakePer100)} bb/100`);
     expect(branch(a, 'Tips')).toBe(`${MINUS}${r1(C13.tipsPer100).toFixed(1)} bb/100`);
     expect(branch(a, 'Win rate after costs')).toBe(`${signed1(12 - COST13)} bb/100`);
-    expect(answer(key, 'You beat the other players by 10 bb/100 at live 1/3. What do you win after costs in Felt’s model?')).toBe(`About ${signed1(10 - COST13)} bb/100`);
+    expect(answer(key, 'You beat the other players by 10 bb/100 at live 1/3. What do you win after costs in Suited’s model?')).toBe(`About ${signed1(10 - COST13)} bb/100`);
     // The distractor forgets the tips.
-    expect(quiz(key, 'You beat the other players by 10 bb/100 at live 1/3. What do you win after costs in Felt’s model?').choices).toContain(`About ${signed1(10 - C13.rakePer100)} bb/100`);
-    expect(answer(key, 'In Felt’s live 1/3 model, what is the win rate of an average player?')).toBe(`About ${MINUS}${r1(COST13)} bb/100`);
+    expect(quiz(key, 'You beat the other players by 10 bb/100 at live 1/3. What do you win after costs in Suited’s model?').choices).toContain(`About ${signed1(10 - C13.rakePer100)} bb/100`);
+    expect(answer(key, 'In Suited’s live 1/3 model, what is the win rate of an average player?')).toBe(`About ${MINUS}${r1(COST13)} bb/100`);
   });
 
   it('compares costs by game, per 100 hands and per hour', () => {
@@ -318,7 +318,7 @@ describe('choosing a good table', () => {
   it('shows the model edge of a 1400 player against three table averages', () => {
     const edges = [1200, 1350, 1500].map((pool) => r1(skillEdge(1400, { ...A13, poolRating: pool })));
     expect(bars(art(key, 'One player, three tables'))).toEqual(edges);
-    expect(caption(key, 'One player, three tables')).toContain('Felt’s model');
+    expect(caption(key, 'One player, three tables')).toContain('Suited’s model');
   });
 
   it('compares a soft 1/3 game with a tougher 2/5 game after costs', () => {
@@ -364,7 +364,7 @@ describe('how rooms take rake', () => {
 
   it('lists the presets with the most a pot can pay', () => {
     const most = (g: typeof LIVE13) => g.rake.cap + g.rake.dropExtra;
-    expect(tableRows(key, 'Felt’s presets').map((r) => r[2])).toEqual([
+    expect(tableRows(key, 'Suited’s presets').map((r) => r[2])).toEqual([
       `$${most(LIVE13)}, which is ${most(LIVE13) / LIVE13.stakes.bb}bb`,
       `$${most(LIVE25)}, which is ${most(LIVE25) / LIVE25.stakes.bb}bb`,
       `$${most(ONLINE).toFixed(2)}, which is ${most(ONLINE) / ONLINE.stakes.bb}bb`,
@@ -426,7 +426,7 @@ describe('what rake costs you', () => {
     const values = [C13, C25, CON].map((c) => r1(c.rakePer100));
     expect(values).toEqual([12.9, 9.2, 5.5]);
     for (const a of [lesson(key).cover, art(key, 'Rake per 100 hands by game')]) expect(bars(a)).toEqual(values);
-    expect(answer(key, 'In Felt’s model, which game costs the most rake per 100 hands?')).toBe('Live $1/$3');
+    expect(answer(key, 'In Suited’s model, which game costs the most rake per 100 hands?')).toBe('Live $1/$3');
   });
 
   it('prices 4 pots at live 1/3', () => {
@@ -498,7 +498,7 @@ describe('how much results swing', () => {
   it('uses the model’s SD for each preset', () => {
     expect([SD_ONLINE, SD_LIVE, A25.sd100]).toEqual([90, 120, 140]);
     expect(defaultAssumptions({ ...LIVE13, stakes: { ...LIVE13.stakes, bb: 10 } }).sd100).toBe(140);
-    expect(bars(art(key, 'SD in Felt’s model'))).toEqual([SD_ONLINE, SD_LIVE, A25.sd100]);
+    expect(bars(art(key, 'SD in Suited’s model'))).toEqual([SD_ONLINE, SD_LIVE, A25.sd100]);
   });
 
   it('states the 68% within 1 SD', () => {
@@ -574,7 +574,7 @@ describe('how many hands you need', () => {
       row(SD_ONLINE, ONLINE_HPH, 10),
       row(SD_ONLINE, ONLINE_HPH, 5),
     ]);
-    // Felt treats results as mostly luck until the range is within 10 bb/100.
+    // Suited treats results as mostly luck until the range is within 10 bb/100.
     expect(Math.round(handsForPrecision(10, SD_LIVE) / 1000)).toBe(55);
     expect(answer(key, 'About how many live hands at SD 120 pin your win rate within 10 bb/100?')).toBe('About 55,000');
   });

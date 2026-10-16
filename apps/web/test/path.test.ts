@@ -37,7 +37,7 @@ describe('the path', () => {
   });
 });
 
-describe('Felt Pro access', () => {
+describe('Suited Pro access', () => {
   it('frees the first module of every track and locks the rest', () => {
     expect(isLessonFree('foundations/math/pot-odds')).toBe(true);
     expect(isLessonFree('preflop/rfi/rfi-ep')).toBe(true);
@@ -49,7 +49,7 @@ describe('Felt Pro access', () => {
   it('lets the developer switch override purchases, and honors trials', () => {
     expect(isPro({ pro: true, devMode: true, devPro: false })).toBe(false);
     expect(isPro({ pro: false, devMode: true, devPro: true })).toBe(true);
-    // The override on is also Settings' "Unlock Felt Pro for testing", which needs no developer mode.
+    // The override on is also Settings' "Unlock Suited Pro for testing", which needs no developer mode.
     expect(isPro({ pro: false, devMode: false, devPro: true })).toBe(true);
     // Forcing Pro off still needs developer mode.
     expect(isPro({ pro: true, devMode: false, devPro: false })).toBe(true);

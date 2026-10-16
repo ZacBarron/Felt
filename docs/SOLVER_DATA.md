@@ -1,6 +1,6 @@
 # Solver Data
 
-GTO answers are only as good as the data behind them. This doc covers where Felt's strategy data comes from, how we get solver quality data without buying a solver, and how it gets into the app.
+GTO answers are only as good as the data behind them. This doc covers where Suited's strategy data comes from, how we get solver quality data without buying a solver, and how it gets into the app.
 
 ## Current state
 
@@ -8,9 +8,9 @@ The starter charts in `packages/content/src/charts.ts` are hand-written approxim
 
 The Spot Lab decision demo uses illustrative numbers and says so.
 
-## Felt Solver (built in)
+## Suited Solver (built in)
 
-Felt has its own postflop solver in `packages/core/src/solver.ts`, written from scratch so Felt owns it outright and can sell it. It runs on the phone in a Web Worker (`apps/web/src/solver/`) and in Node for batch jobs.
+Suited has its own postflop solver in `packages/core/src/solver.ts`, written from scratch so Suited owns it outright and can sell it. It runs on the phone in a Web Worker (`apps/web/src/solver/`) and in Node for batch jobs.
 
 **What it solves.** Heads up postflop spots from the flop, turn or river: any board, any two weighted ranges, pot, effective stack, and bet and raise sizes per street and per player, with an all in option and a raise cap. Every combo is solved separately with exact card removal. Chance nodes deal every remaining card, so a turn solve is solved through all 44 to 48 rivers, not sampled.
 
@@ -41,7 +41,7 @@ Yes, in three ways, from most to least useful.
 
 ### 1. Open source solvers (postflop, reference only)
 
-Felt Solver replaces these for the product. They remain useful as an independent cross check of Felt Solver on the same spot.
+Suited Solver replaces these for the product. They remain useful as an independent cross check of Suited Solver on the same spot.
 
 Free, open source postflop solvers exist and produce real equilibrium strategies:
 
@@ -50,9 +50,9 @@ Free, open source postflop solvers exist and produce real equilibrium strategies
 | [TexasSolver](https://github.com/bupticybee/TexasSolver) | C++, has a console version we can script for batch runs. AGPL-3.0, free for personal use. |
 | [desktop-postflop](https://github.com/dylan-chong/desktop-postflop) on the b-inary postflop-solver engine | Rust. AGPL-3.0. Upstream development stopped in October 2023, but the engine works. |
 
-Plan: a batch runner (in a `tools/` folder, kept separate from the app) solves a library of spots on a laptop or a rented cloud machine, then converts each solution into Felt's node format. The phone only downloads the finished data; it never runs a solve. First pack: single raised pots BTN vs BB and CO vs BB across a representative set of flops, then 3bet pots.
+Plan: a batch runner (in a `tools/` folder, kept separate from the app) solves a library of spots on a laptop or a rented cloud machine, then converts each solution into Suited's node format. The phone only downloads the finished data; it never runs a solve. First pack: single raised pots BTN vs BB and CO vs BB across a representative set of flops, then 3bet pots.
 
-Licensing note: both are AGPL-3.0, which is not compatible with selling Felt as a closed product, and outputs generated with them should not be shipped either without legal review. Felt Solver is our own code and has no such restriction.
+Licensing note: both are AGPL-3.0, which is not compatible with selling Suited as a closed product, and outputs generated with them should not be shipped either without legal review. Suited Solver is our own code and has no such restriction.
 
 ### 2. Build our own preflop solver (preflop)
 

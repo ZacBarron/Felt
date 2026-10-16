@@ -14,8 +14,8 @@ export function withRestore(path: string) {
 
 /**
  * Restore purchases, with an answer every time. The sheet opens at once with
- * "Checking your account", then says what Felt found and what to do next:
- * Pro is back on, sign in first, no purchase on this account, or Felt
+ * "Checking your account", then says what Suited found and what to do next:
+ * Pro is back on, sign in first, no purchase on this account, or Suited
  * could not check.
  */
 export function RestoreSheet({ open, onClose, returnTo }: { open: boolean; onClose: () => void; returnTo: string }) {
@@ -70,7 +70,7 @@ export function RestoreSheet({ open, onClose, returnTo }: { open: boolean; onClo
           <h2 id="restore-title" className="sheet-title">
             {result?.title ?? 'Checking your account'}
           </h2>
-          <p className="restore-message">{result?.message ?? 'Felt is asking the server what this account owns.'}</p>
+          <p className="restore-message">{result?.message ?? 'Suited is asking the server what this account owns.'}</p>
         </div>
 
         <div className="stack" style={{ gap: '0.6rem' }}>

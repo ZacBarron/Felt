@@ -460,7 +460,7 @@ export const MINDSET_LESSONS: LessonContent[] = [
         kind: 'text',
         title: 'Short daily sessions',
         body: [
-          'Felt’s daily plan fits in about 15 minutes on a phone. Short sessions are easy to start, and starting is the hard part.',
+          'Suited’s daily plan fits in about 15 minutes on a phone. Short sessions are easy to start, and starting is the hard part.',
           'Stop while you are still sharp. Drilling while tired trains slow, sloppy recall.',
         ],
       },
@@ -476,11 +476,11 @@ export const MINDSET_LESSONS: LessonContent[] = [
             { label: 'Many times in one sitting', value: 'Cramming. Spacing beats it', tone: 'red' },
           ],
         },
-        caption: 'Felt schedules every drill card this way. It grades drill answers on accuracy and speed, so you never grade yourself. A range you need 8 seconds to recall is not usable at the table.',
+        caption: 'Suited schedules every drill card this way. It grades drill answers on accuracy and speed, so you never grade yourself. A range you need 8 seconds to recall is not usable at the table.',
       },
       {
         kind: 'visual',
-        title: 'The Felt loop',
+        title: 'The Suited loop',
         art: {
           kind: 'tree',
           root: 'One idea, all the way to the table',
@@ -528,7 +528,7 @@ export const MINDSET_LESSONS: LessonContent[] = [
         choices: ['Start the next lesson right away', 'Drill it until recall is automatic', 'Play a long session to test it'],
         answer: 1,
         explain:
-          'Like the Felt loop showed, drill comes right after the lesson. A lesson read once fades fast. Starting the next lesson piles new ideas on ones that have not set yet.',
+          'Like the Suited loop showed, drill comes right after the lesson. A lesson read once fades fast. Starting the next lesson piles new ideas on ones that have not set yet.',
         point: 1,
       },
       {

@@ -29,7 +29,7 @@ interface Props {
   mixAnswers?: boolean;
 }
 
-/** Renders a decision, records it toward the Felt Rating, and reports the score. */
+/** Renders a decision, records it toward the Suited Rating, and reports the score. */
 export function DecisionItem({ decision, source, last, onScore, onNext, mixAnswers }: Props) {
   const [answered, setAnswered] = useState(false);
   // A new decision is read from the top by screen readers.
@@ -66,7 +66,7 @@ export function DecisionItem({ decision, source, last, onScore, onNext, mixAnswe
       <div className="lesson-stage from-right focus-anchor" ref={top} tabIndex={-1}>
         <div className="footnote" style={{ marginBottom: '0.4rem' }}>
           {entry.trackTitle}, {entry.title}
-          {!isLessonFree(entry.key) && <span className="pill pro-pill">Felt Pro lesson</span>}
+          {!isLessonFree(entry.key) && <span className="pill pro-pill">Suited Pro lesson</span>}
         </div>
         <StepView
           step={step}

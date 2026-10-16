@@ -30,7 +30,7 @@ describe('coach context', () => {
     expect(total).toBeGreaterThanOrEqual(99);
     expect(total).toBeLessThanOrEqual(101);
     const spot = chartSpot({ chartId: chart.spec.id, hand: mixed, chose: 'Fold', verdict: 'Close' })!;
-    expect(spot).toMatchObject({ hand: mixed, hero: chart.spec.hero, chose: 'Fold', source: 'Felt starter chart (approximate)', basis: 'baseline' });
+    expect(spot).toMatchObject({ hand: mixed, hero: chart.spec.hero, chose: 'Fold', source: 'Suited starter chart (approximate)', basis: 'baseline' });
     expect(chartSpot({ chartId: 'missing', hand: 'AA' })).toBeUndefined();
   });
 

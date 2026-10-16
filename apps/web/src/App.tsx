@@ -52,7 +52,7 @@ function useReviewCount() {
 /** Pages a player can reach before finishing onboarding. */
 const FIRST_RUN = ['/welcome', '/signin', '/placement', '/pro', '/account', '/terms', '/privacy'];
 
-/** Keeps Felt Pro in step with the account: the server's word wins over this device's. */
+/** Keeps Suited Pro in step with the account: the server's word wins over this device's. */
 function useServerAccess() {
   const session = useSession();
   const { settings, update } = useSettings();
@@ -98,7 +98,7 @@ export function App() {
     <div className="shell">
       <Moments />
       <nav className="nav glass" aria-label="Main">
-        <Link to="/" className="brand" aria-label="Felt home">
+        <Link to="/" className="brand" aria-label="Suited home">
           <Lockup size={30} />
         </Link>
         {NAV_SECTIONS.map(({ section, items }) => (

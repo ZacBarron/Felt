@@ -15,7 +15,7 @@ import { track } from './events';
 import { firstSync, rememberAccount, resetSync, saveNow } from './sync';
 
 /**
- * Accounts on the Felt server: passkeys first (Face ID, a fingerprint or a
+ * Accounts on the Suited server: passkeys first (Face ID, a fingerprint or a
  * device PIN, nothing to remember), an emailed code as the fallback. A
  * passkey account needs no email; one can be added later for recovery and
  * receipts. Pages call these and show the result; nothing here renders.
@@ -54,7 +54,7 @@ function passkeyError(e: unknown, mode: 'create' | 'signin'): Error {
   const name = e instanceof WebAuthnError ? (e.cause as { name?: string } | undefined)?.name ?? e.name : (e as { name?: string } | undefined)?.name;
   if (code === 'ERROR_CEREMONY_ABORTED' || name === 'AbortError') return new Cancelled('Cancelled.');
   if (code === 'ERROR_AUTHENTICATOR_PREVIOUSLY_REGISTERED' || name === 'InvalidStateError')
-    return new Error('This device already has a passkey for your Felt account.');
+    return new Error('This device already has a passkey for your Suited account.');
   if (code === 'ERROR_INVALID_DOMAIN' || code === 'ERROR_INVALID_RP_ID' || name === 'SecurityError')
     return new Error('Passkeys do not work on this address yet. Use an email code instead.');
   if (name === 'NotSupportedError' || code === 'ERROR_AUTHENTICATOR_MISSING_DISCOVERABLE_CREDENTIAL_SUPPORT')
@@ -63,7 +63,7 @@ function passkeyError(e: unknown, mode: 'create' | 'signin'): Error {
     return mode === 'create'
       ? new Cancelled('No passkey was saved.')
       : new Cancelled('No passkey was used.');
-  return new Error(mode === 'create' ? 'Felt could not save a passkey. Try again.' : 'Felt could not sign you in with a passkey. Try again.');
+  return new Error(mode === 'create' ? 'Suited could not save a passkey. Try again.' : 'Suited could not sign you in with a passkey. Try again.');
 }
 
 // Passkeys ------------------------------------------------------------------------
@@ -98,7 +98,7 @@ export async function addPasskey(): Promise<ServerUser> {
 }
 
 /**
- * Signs in with any passkey this device holds for Felt. With `autofill`,
+ * Signs in with any passkey this device holds for Suited. With `autofill`,
  * the request waits quietly for the player to pick a passkey from the
  * browser's suggestions on an email field (conditional mediation).
  */
@@ -179,7 +179,7 @@ export type SaveResult = Awaited<ReturnType<typeof saveNow>>;
 /**
  * Logs this device out. The device keeps its copy and works offline as a
  * guest, unless `removeLocal` is set (for a shared phone), which clears
- * Felt from this device. Clearing is only allowed after a save worked.
+ * Suited from this device. Clearing is only allowed after a save worked.
  */
 export async function logOut({ removeLocal = false, saved = false }: { removeLocal?: boolean; saved?: boolean } = {}) {
   if (removeLocal && !saved) throw new Error('Save your progress before removing it from this device.');

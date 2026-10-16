@@ -3,12 +3,12 @@ import { type Backup, exportBackup, parseBackup } from './backup';
 import type { StoredAnswer, StoredDaily, StoredLesson, StoredReview } from './db';
 
 /**
- * What a copy of Felt's data holds, in the terms a player cares about: their
- * Felt Rating, lessons done and streak. Shown when signing in brings progress
+ * What a copy of Suited's data holds, in the terms a player cares about: their
+ * Suited Rating, lessons done and streak. Shown when signing in brings progress
  * back, and when the player has to choose between this device and the cloud.
  */
 export interface ProgressSummary {
-  /** Overall Felt Rating, once there is at least one graded answer. */
+  /** Overall Suited Rating, once there is at least one graded answer. */
   rating?: number;
   /** "Still settling" or the tier name. */
   tier?: string;

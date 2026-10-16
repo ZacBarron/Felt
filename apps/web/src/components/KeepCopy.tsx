@@ -11,7 +11,7 @@ const day = (d?: Date | string) => (d ? new Date(d).toLocaleDateString(undefined
 
 function Facts({ s }: { s?: ProgressSummary }) {
   if (!s) return <span className="footnote">Checking…</span>;
-  const rating = s.rating === undefined ? 'Not rated yet' : s.settled ? `Felt Rating ${s.rating}` : `Felt Rating about ${s.rating}, still settling`;
+  const rating = s.rating === undefined ? 'Not rated yet' : s.settled ? `Suited Rating ${s.rating}` : `Suited Rating about ${s.rating}, still settling`;
   return (
     <span className="keep-facts">
       <span>{rating}</span>
@@ -23,7 +23,7 @@ function Facts({ s }: { s?: ProgressSummary }) {
 }
 
 /**
- * Both this device and the account have progress, and Felt cannot merge
+ * Both this device and the account have progress, and Suited cannot merge
  * them. The player sees what each copy holds and picks one. Nothing is
  * replaced until they confirm.
  */
@@ -76,7 +76,7 @@ export function KeepCopy({ busy, onKeep, pinned }: { busy: boolean; onKeep: (cho
             <span className="grow">
               <span className="onb-choice-label">{title}</span>
               <span className="footnote">{sub}</span>
-              {id === 'cloud' && cloudError ? <span className="footnote">Felt could not load it. You can still pick it.</span> : <Facts s={s} />}
+              {id === 'cloud' && cloudError ? <span className="footnote">Suited could not load it. You can still pick it.</span> : <Facts s={s} />}
             </span>
             <span className="onb-check" aria-hidden="true">
               {choice === id && <CheckIcon size={14} />}
@@ -89,7 +89,7 @@ export function KeepCopy({ busy, onKeep, pinned }: { busy: boolean; onKeep: (cho
           ? 'This device will show your account’s progress. What is on this device now is replaced.'
           : choice === 'device'
             ? 'Your account will match this device. The copy in your account is replaced.'
-            : 'Felt cannot combine them. The copy you do not pick is replaced.'}
+            : 'Suited cannot combine them. The copy you do not pick is replaced.'}
       </p>
       {pinned ? <BottomBar>{button}</BottomBar> : button}
     </div>

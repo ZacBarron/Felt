@@ -3,7 +3,7 @@ import type { LessonContent } from './types';
 /**
  * Win rate, rake and variance: the math home for results. Every number comes
  * from the same model the You page uses (packages/core winrate.ts and
- * variance.ts): the game presets' rake rules, Felt's default table
+ * variance.ts): the game presets' rake rules, Suited's default table
  * assumptions (27 hands an hour and SD 120 bb/100 at live 1/3, 75 hands an
  * hour and SD 90 online) and the normal model of results. The content test
  * results.test.ts recomputes each one. Rake rules are arithmetic; pot sizes,
@@ -28,7 +28,7 @@ export const RESULTS_LESSONS: LessonContent[] = [
       {
         kind: 'intro',
         title: 'Your win rate in one number',
-        body: 'Your **win rate** is what you win on average. Felt measures it in **bb/100**, the big blinds you win per 100 hands. It works the same at every stake.',
+        body: 'Your **win rate** is what you win on average. Suited measures it in **bb/100**, the big blinds you win per 100 hands. It works the same at every stake.',
       },
       {
         kind: 'formula',
@@ -74,7 +74,7 @@ export const RESULTS_LESSONS: LessonContent[] = [
             { label: 'At 2/5, $ per 100 hands', value: 75, tone: 'green' },
           ],
         },
-        caption: 'Both bars are 15 bb/100. Only the size of the big blind changes. So Felt keeps win rates in big blinds.',
+        caption: 'Both bars are 15 bb/100. Only the size of the big blind changes. So Suited keeps win rates in big blinds.',
         evidence: 'math',
       },
       {
@@ -82,7 +82,7 @@ export const RESULTS_LESSONS: LessonContent[] = [
         title: 'Count hands, not sessions',
         body: [
           'A win rate needs a hand count. Online sites count hands for you.',
-          'Live, few players count hands. Felt estimates them from your hours. Its model uses 27 hands an hour at a live table.',
+          'Live, few players count hands. Suited estimates them from your hours. Its model uses 27 hands an hour at a live table.',
           'Your result already includes the rake. It came out of the pots you won.',
         ],
       },
@@ -98,7 +98,7 @@ export const RESULTS_LESSONS: LessonContent[] = [
             { label: 'Win rate', value: '30 ÷ 135 × 100 = 22.2 bb/100', tone: 'brass' },
           ],
         },
-        caption: 'The hand count is an estimate from Felt’s model. One session is far too short to show skill. The Variance topic shows why.',
+        caption: 'The hand count is an estimate from Suited’s model. One session is far too short to show skill. The Variance topic shows why.',
         evidence: 'math',
       },
       {
@@ -125,7 +125,7 @@ export const RESULTS_LESSONS: LessonContent[] = [
       },
       {
         kind: 'quiz',
-        question: 'Why does Felt measure win rates in big blinds?',
+        question: 'Why does Suited measure win rates in big blinds?',
         choices: ['It lets you compare results across stakes', 'Big blinds leave out the rake', 'Dollars are harder to count'],
         answer: 0,
         explain: 'A big blind means the same thing at every stake. Like the bars showed, 15 bb/100 is $45 at 1/3 and $75 at 2/5. Your results include the rake either way.',
@@ -133,10 +133,10 @@ export const RESULTS_LESSONS: LessonContent[] = [
       },
       {
         kind: 'quiz',
-        question: 'You play 10 hours live and do not count hands. How many hands does Felt’s model estimate?',
+        question: 'You play 10 hours live and do not count hands. How many hands does Suited’s model estimate?',
         choices: ['100', '270', '750'],
         answer: 1,
-        explain: 'Felt’s model uses 27 hands an hour at a live table. 10 × 27 = 270 hands. The 750 answer uses the online pace of 75.',
+        explain: 'Suited’s model uses 27 hands an hour at a live table. 10 × 27 = 270 hands. The 750 answer uses the online pace of 75.',
         point: 2,
       },
       {
@@ -152,7 +152,7 @@ export const RESULTS_LESSONS: LessonContent[] = [
         points: [
           'bb/100 = bb won ÷ hands × 100.',
           'Big blinds let you compare stakes.',
-          'Live, hands are estimated from hours. Felt’s model uses 27 an hour.',
+          'Live, hands are estimated from hours. Suited’s model uses 27 an hour.',
           'Your results already include the rake you paid.',
         ],
       },
@@ -196,7 +196,7 @@ export const RESULTS_LESSONS: LessonContent[] = [
             { label: 'Online, 1 table', value: 75, tone: 'green' },
           ],
         },
-        caption: 'These are Felt’s model values. Live dealing is slow. Shuffles and chip counts take time. Online deals almost 3 times as fast.',
+        caption: 'These are Suited’s model values. Live dealing is slow. Shuffles and chip counts take time. Online deals almost 3 times as fast.',
       },
       {
         kind: 'visual',
@@ -228,7 +228,7 @@ export const RESULTS_LESSONS: LessonContent[] = [
           ['Live $2/$5', '10 bb/100', '2.7bb', '$13.50'],
           ['Online $0.50/$1', '5 bb/100', '3.75bb', '$3.75'],
         ],
-        note: 'Live uses 27 hands an hour. Online uses 75 at one table. These are Felt’s model values. The rest is plain arithmetic.',
+        note: 'Live uses 27 hands an hour. Online uses 75 at one table. These are Suited’s model values. The rest is plain arithmetic.',
         evidence: 'math',
       },
       {
@@ -250,7 +250,7 @@ export const RESULTS_LESSONS: LessonContent[] = [
         kind: 'callout',
         tone: 'theory',
         title: 'Why 27 and not 30',
-        body: 'A live table deals about 30 hands an hour while you sit. Breaks and missed hands lower your count. So Felt’s model uses 27. Change it on the You page if your pace differs.',
+        body: 'A live table deals about 30 hands an hour while you sit. Breaks and missed hands lower your count. So Suited’s model uses 27. Change it on the You page if your pace differs.',
       },
       {
         kind: 'quiz',
@@ -279,7 +279,7 @@ export const RESULTS_LESSONS: LessonContent[] = [
       {
         kind: 'takeaway',
         points: [
-          'bb per hour = bb/100 × hands per hour ÷ 100. Felt uses 27 hands an hour live and 75 online.',
+          'bb per hour = bb/100 × hands per hour ÷ 100. Suited uses 27 hands an hour live and 75 online.',
           'Money per hour = bb per hour × big blind.',
           'Compare games per hour as well as per 100 hands.',
         ],
@@ -330,7 +330,7 @@ export const RESULTS_LESSONS: LessonContent[] = [
             { label: 'Tips per 100 hands', value: 3.0, tone: 'brass' },
           ],
         },
-        caption: 'Felt’s live 1/3 model costs each player about 15.9 bb/100. At 27 hands an hour that is about 4.3bb. In money it is about $12.90 an hour.',
+        caption: 'Suited’s live 1/3 model costs each player about 15.9 bb/100. At 27 hands an hour that is about 4.3bb. In money it is about $12.90 an hour.',
       },
       {
         kind: 'table',
@@ -344,7 +344,7 @@ export const RESULTS_LESSONS: LessonContent[] = [
           ['Average pot with a flop', '20bb', 'Assumption'],
           ['Tip per pot with a flop', '$1', 'Assumption'],
         ],
-        note: 'Settings feed exact arithmetic. Assumptions are Felt’s starting guesses for the game. Change them on the You page. Pots vary around the average, so Felt averages the rake over a spread of sizes.',
+        note: 'Settings feed exact arithmetic. Assumptions are Suited’s starting guesses for the game. Change them on the You page. Pots vary around the average, so Suited averages the rake over a spread of sizes.',
       },
       {
         kind: 'visual',
@@ -358,7 +358,7 @@ export const RESULTS_LESSONS: LessonContent[] = [
             { label: 'Win rate after costs', value: '−3.9 bb/100', tone: 'red' },
           ],
         },
-        caption: 'This player beats the other players by 12 bb/100. The costs are bigger, so they lose. The 12 is an example. The costs come from Felt’s live 1/3 model.',
+        caption: 'This player beats the other players by 12 bb/100. The costs are bigger, so they lose. The 12 is an example. The costs come from Suited’s live 1/3 model.',
         evidence: 'math',
       },
       {
@@ -366,7 +366,7 @@ export const RESULTS_LESSONS: LessonContent[] = [
         title: 'Your edge is a model',
         body: [
           'Your **edge** is how much you win from the other players before costs. Nobody can measure it exactly.',
-          'The You page estimates it from your Felt Rating. That estimate is a model with stated assumptions. Your logged results take over as they grow.',
+          'The You page estimates it from your Suited Rating. That estimate is a model with stated assumptions. Your logged results take over as they grow.',
         ],
       },
       {
@@ -381,7 +381,7 @@ export const RESULTS_LESSONS: LessonContent[] = [
             { label: 'Online 6-max, per 100 hands', value: 5.5, tone: 'green' },
           ],
         },
-        caption: 'These are rake plus tips per player in Felt’s model of each preset. The 2/5 cap is smaller in big blinds. Online games have no tips.',
+        caption: 'These are rake plus tips per player in Suited’s model of each preset. The 2/5 cap is smaller in big blinds. Online games have no tips.',
       },
       {
         kind: 'callout',
@@ -391,7 +391,7 @@ export const RESULTS_LESSONS: LessonContent[] = [
       },
       {
         kind: 'quiz',
-        question: 'In Felt’s live 1/3 model, what is the win rate of an average player?',
+        question: 'In Suited’s live 1/3 model, what is the win rate of an average player?',
         choices: ['About 0 bb/100', 'About −15.9 bb/100', 'About −3.0 bb/100'],
         answer: 1,
         explain: 'Before costs the average player breaks even. Then rake and tips take 15.9 bb/100. The −3.0 answer counts only the tips.',
@@ -399,7 +399,7 @@ export const RESULTS_LESSONS: LessonContent[] = [
       },
       {
         kind: 'quiz',
-        question: 'You beat the other players by 10 bb/100 at live 1/3. What do you win after costs in Felt’s model?',
+        question: 'You beat the other players by 10 bb/100 at live 1/3. What do you win after costs in Suited’s model?',
         choices: ['About +10 bb/100', 'About −2.9 bb/100', 'About −5.9 bb/100'],
         answer: 2,
         explain: 'Like the tree showed, take off rake and tips. 10 − 12.9 − 3.0 = −5.9 bb/100. The −2.9 answer forgets the tips.',
@@ -410,13 +410,13 @@ export const RESULTS_LESSONS: LessonContent[] = [
         question: 'Which input to the cost estimate is an assumption?',
         choices: ['The average pot size', 'Your room’s rake rule', 'The number of players at the table'],
         answer: 0,
-        explain: 'Like the table showed, the rake rule and the players are your settings. Pot sizes vary with the players. So Felt assumes an average you can change.',
+        explain: 'Like the table showed, the rake rule and the players are your settings. Pot sizes vary with the players. So Suited assumes an average you can change.',
         point: 2,
       },
       {
         kind: 'takeaway',
         points: [
-          'The average player loses exactly the rake and tips. In Felt’s live 1/3 model that is about 15.9 bb/100.',
+          'The average player loses exactly the rake and tips. In Suited’s live 1/3 model that is about 15.9 bb/100.',
           'You need an edge bigger than the costs to win.',
           'Rake rules are arithmetic. Pot sizes are assumptions.',
         ],
@@ -446,7 +446,7 @@ export const RESULTS_LESSONS: LessonContent[] = [
             { label: 'Table average 1500', value: -14, tone: 'red' },
           ],
         },
-        caption: 'This is Felt’s model of the edge before costs in bb/100. The player is rated 1400. Only the table’s average rating changes. The size of the edge rests on assumptions. The pattern is the point.',
+        caption: 'This is Suited’s model of the edge before costs in bb/100. The player is rated 1400. Only the table’s average rating changes. The size of the edge rests on assumptions. The pattern is the point.',
       },
       {
         kind: 'visual',
@@ -459,7 +459,7 @@ export const RESULTS_LESSONS: LessonContent[] = [
             { label: 'Live 2/5, table average 1350', value: '−5.2 bb/100 after costs', tone: 'red' },
           ],
         },
-        caption: 'In the model this player wins about $8 an hour at 1/3. At 2/5 the players are better and they lose. The table averages are Felt’s defaults for each stake.',
+        caption: 'In the model this player wins about $8 an hour at 1/3. At 2/5 the players are better and they lose. The table averages are Suited’s defaults for each stake.',
       },
       {
         kind: 'visual',
@@ -507,10 +507,10 @@ export const RESULTS_LESSONS: LessonContent[] = [
       },
       {
         kind: 'quiz',
-        question: 'In Felt’s model, what sets your edge before costs?',
+        question: 'In Suited’s model, what sets your edge before costs?',
         choices: ['Your rating against the table’s average', 'The stake you play', 'How long you play'],
         answer: 0,
-        explain: 'The model compares your Felt Rating with the table’s average rating. Like the bars showed, the same player has a big edge at a weak table. At a strong one they have none.',
+        explain: 'The model compares your Suited Rating with the table’s average rating. Like the bars showed, the same player has a big edge at a weak table. At a strong one they have none.',
         point: 0,
       },
       {
@@ -523,7 +523,7 @@ export const RESULTS_LESSONS: LessonContent[] = [
       },
       {
         kind: 'quiz',
-        question: 'In Felt’s model, a player rated 1400 wins at live 1/3. What happens at 2/5, where the table average is 1350?',
+        question: 'In Suited’s model, a player rated 1400 wins at live 1/3. What happens at 2/5, where the table average is 1350?',
         choices: ['They lose about 5.2 bb/100 after costs', 'They win more, since the stakes are higher', 'Nothing changes'],
         answer: 0,
         explain: 'Like the tree showed, the 2/5 players are better. The edge shrinks below the costs. So a soft game at your stake can beat a tough game above it.',
@@ -582,7 +582,7 @@ export const RESULTS_LESSONS: LessonContent[] = [
             { label: 'Rake taken', value: '$6', tone: 'red' },
           ],
         },
-        caption: 'Most rooms take a **percentage** of the pot up to a **cap**. Many live rooms add a fixed amount for a jackpot. This is Felt’s live $1/$3 preset.',
+        caption: 'Most rooms take a **percentage** of the pot up to a **cap**. Many live rooms add a fixed amount for a jackpot. This is Suited’s live $1/$3 preset.',
         evidence: 'math',
       },
       {
@@ -619,7 +619,7 @@ export const RESULTS_LESSONS: LessonContent[] = [
       },
       {
         kind: 'table',
-        title: 'Felt’s presets',
+        title: 'Suited’s presets',
         columns: ['Game', 'Rule', 'Most a pot pays'],
         rows: [
           ['Live $1/$3', '10% up to $5, plus $1', '$6, which is 2bb'],
@@ -671,7 +671,7 @@ export const RESULTS_LESSONS: LessonContent[] = [
         kind: 'callout',
         tone: 'tip',
         title: 'Ask how your room rakes',
-        body: 'Rules vary from room to room. Ask for the percentage and the cap. Ask about any extra drop too. Then set them in Felt so its numbers match your game.',
+        body: 'Rules vary from room to room. Ask for the percentage and the cap. Ask about any extra drop too. Then set them in Suited so its numbers match your game.',
       },
       {
         kind: 'quiz',
@@ -741,7 +741,7 @@ export const RESULTS_LESSONS: LessonContent[] = [
       {
         kind: 'intro',
         title: 'Rake in bb/100',
-        body: 'Rake is easy to ignore one pot at a time. Over 100 hands it adds up. Felt turns your room’s rule into bb/100. Then you can set it next to your win rate.',
+        body: 'Rake is easy to ignore one pot at a time. Over 100 hands it adds up. Suited turns your room’s rule into bb/100. Then you can set it next to your win rate.',
       },
       {
         kind: 'formula',
@@ -751,7 +751,7 @@ export const RESULTS_LESSONS: LessonContent[] = [
           ['rake per hand', 'what the whole table pays each hand, in bb'],
           ['players', 'seats dealt in'],
         ],
-        example: 'Felt’s live 1/3 model pays about 1.16bb a hand. Then 1.16 × 100 ÷ 9 = **12.9 bb/100** for each player.',
+        example: 'Suited’s live 1/3 model pays about 1.16bb a hand. Then 1.16 × 100 ÷ 9 = **12.9 bb/100** for each player.',
       },
       {
         kind: 'visual',
@@ -780,7 +780,7 @@ export const RESULTS_LESSONS: LessonContent[] = [
             { label: 'Online 6-max', value: 5.5, tone: 'green' },
           ],
         },
-        caption: 'Each bar is rake per player in Felt’s model of each preset. Tips are left out. Live games pay far more per hand than online. The small live game pays the most.',
+        caption: 'Each bar is rake per player in Suited’s model of each preset. Tips are left out. Live games pay far more per hand than online. The small live game pays the most.',
       },
       {
         kind: 'table',
@@ -800,7 +800,7 @@ export const RESULTS_LESSONS: LessonContent[] = [
         title: 'Why small stakes pay more',
         body: [
           'The cap is set in money. At $1/$3 the most a pot pays is 2bb. At $2/$5 it is 1.4bb.',
-          'Felt’s model also assumes smaller pots at 1/3. Pots with a flop average 20bb there and 25bb at 2/5.',
+          'Suited’s model also assumes smaller pots at 1/3. Pots with a flop average 20bb there and 25bb at 2/5.',
         ],
       },
       {
@@ -825,7 +825,7 @@ export const RESULTS_LESSONS: LessonContent[] = [
       },
       {
         kind: 'quiz',
-        question: 'In Felt’s model, which game costs the most rake per 100 hands?',
+        question: 'In Suited’s model, which game costs the most rake per 100 hands?',
         choices: ['Live $2/$5', 'Online 6-max', 'Live $1/$3'],
         answer: 2,
         explain: 'Like the bars showed, live 1/3 pays about 12.9 bb/100. Live 2/5 pays about 9.2 and online 6-max about 5.5.',
@@ -857,7 +857,7 @@ export const RESULTS_LESSONS: LessonContent[] = [
       },
       {
         kind: 'quiz',
-        question: 'Pots in your 1/3 game are much bigger than Felt assumes. What should you do?',
+        question: 'Pots in your 1/3 game are much bigger than Suited assumes. What should you do?',
         choices: ['Set your pot size on the You page', 'Keep the 12.9 bb/100 anyway', 'Leave rake out of your numbers'],
         answer: 0,
         explain: 'The rake rule is exact, but pot sizes are assumptions. Set them to match your game. Then the rake estimate fits it.',
@@ -867,7 +867,7 @@ export const RESULTS_LESSONS: LessonContent[] = [
         kind: 'takeaway',
         points: [
           'Rake in bb/100 = what you pay per hand × 100. Your share per hand is the table’s rake ÷ players.',
-          'Felt’s live 1/3 model puts rake at about 12.9 bb/100.',
+          'Suited’s live 1/3 model puts rake at about 12.9 bb/100.',
           'A cap set in money is bigger in big blinds at small stakes.',
           'Pot sizes are assumptions. Set them for your game on the You page.',
         ],
@@ -936,7 +936,7 @@ export const RESULTS_LESSONS: LessonContent[] = [
         kind: 'chart',
         chartId: '9max-100-bb-vs-btn',
         title: 'Where the cuts come',
-        caption: 'Felt’s starter chart for the big blind against a button open. Its weakest calls are the first to go in a raked game. The Rake lesson in Preflop works through the numbers.',
+        caption: 'Suited’s starter chart for the big blind against a button open. Its weakest calls are the first to go in a raked game. The Rake lesson in Preflop works through the numbers.',
       },
       {
         kind: 'callout',
@@ -1017,7 +1017,7 @@ export const RESULTS_LESSONS: LessonContent[] = [
       },
       {
         kind: 'visual',
-        title: 'SD in Felt’s model',
+        title: 'SD in Suited’s model',
         art: {
           kind: 'bars',
           unit: 'bb',
@@ -1096,7 +1096,7 @@ export const RESULTS_LESSONS: LessonContent[] = [
       {
         kind: 'takeaway',
         points: [
-          'SD measures how much results swing, in bb/100. Felt uses 120 live and 90 online.',
+          'SD measures how much results swing, in bb/100. Suited uses 120 live and 90 online.',
           'The spread of your total grows with the square root of hands.',
           'Over short stretches luck is bigger than skill.',
         ],
@@ -1156,7 +1156,7 @@ export const RESULTS_LESSONS: LessonContent[] = [
           yLabel: 'Range either side, bb/100',
           mark: [10, 23.5],
         },
-        caption: 'This is the range either side of a measured win rate at Felt’s live SD of 120. 10,000 hands still leaves 23.5 bb/100 either side. 100,000 hands leaves 7.4.',
+        caption: 'This is the range either side of a measured win rate at Suited’s live SD of 120. 10,000 hands still leaves 23.5 bb/100 either side. 100,000 hands leaves 7.4.',
         evidence: 'math',
       },
       {
@@ -1183,15 +1183,15 @@ export const RESULTS_LESSONS: LessonContent[] = [
           ['Online, within 10 bb/100', '31,100', '415'],
           ['Online, within 5 bb/100', '124,500', '1,660'],
         ],
-        note: 'Hands and hours are rounded. Live uses SD 120 at 27 hands an hour. Online uses SD 90 at 75 hands an hour on 1 table. These are Felt’s model values.',
+        note: 'Hands and hours are rounded. Live uses SD 120 at 27 hands an hour. Online uses SD 90 at 75 hands an hour on 1 table. These are Suited’s model values.',
         evidence: 'math',
       },
       {
         kind: 'text',
-        title: 'What Felt does with this',
+        title: 'What Suited does with this',
         body: [
-          'Felt calls your results mostly luck until their 95% range is within 10 bb/100. At live SD 120 that takes about 55,000 hands.',
-          'Until then your Felt Rating and the model carry more weight. Your results take over as they grow.',
+          'Suited calls your results mostly luck until their 95% range is within 10 bb/100. At live SD 120 that takes about 55,000 hands.',
+          'Until then your Suited Rating and the model carry more weight. Your results take over as they grow.',
         ],
       },
       {
@@ -1398,7 +1398,7 @@ export const RESULTS_LESSONS: LessonContent[] = [
           yLabel: 'Risk of ruin, %',
           mark: [20, 6.2],
         },
-        caption: 'This is risk of ruin at a true 10 bb/100 and Felt’s live SD of 120. 20 buy ins gives 6.2%. The bankroll lesson used SD 100 and got 1.8%.',
+        caption: 'This is risk of ruin at a true 10 bb/100 and Suited’s live SD of 120. 20 buy ins gives 6.2%. The bankroll lesson used SD 100 and got 1.8%.',
         evidence: 'math',
       },
       {
@@ -1573,9 +1573,9 @@ export const RESULTS_LESSONS: LessonContent[] = [
       },
       {
         kind: 'text',
-        title: 'How Felt measures skill',
+        title: 'How Suited measures skill',
         body: [
-          'Your Felt Rating moves only on answers that can be checked. These are questions and chart decisions. Solver spots count too.',
+          'Your Suited Rating moves only on answers that can be checked. These are questions and chart decisions. Solver spots count too.',
           'Those answers do not depend on the cards that came. So they show your skill far sooner than results do.',
         ],
       },

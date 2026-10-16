@@ -78,7 +78,7 @@ function ScenarioList() {
   const next = SCENARIOS.find((s) => !byId.has(s.id)) ?? SCENARIOS[0];
   return (
     <div className="stack" style={{ gap: '1.4rem' }}>
-      <PageHeader title="Scenarios" subtitle="Graded by Felt Solver" back={{ to: '/more', label: 'More' }} />
+      <PageHeader title="Scenarios" subtitle="Graded by Suited Solver" back={{ to: '/more', label: 'More' }} />
       {SCENARIOS.length === 0 ? (
         <p className="muted">Scenarios are on their way.</p>
       ) : (
@@ -102,7 +102,7 @@ function ScenarioList() {
             title="All scenarios"
             info={
               <p>
-                Play each hand street by street. Felt Solver solves the river on your device for the ranges in the hand. The grade is exact for those ranges.
+                Play each hand street by street. Suited Solver solves the river on your device for the ranges in the hand. The grade is exact for those ranges.
               </p>
             }
           >
@@ -315,7 +315,7 @@ function ScenarioPlayer({ scenario }: { scenario: ScenarioSpec }) {
           <BottomBar>
             {!river && !riverError ? (
               <button className="btn btn-lg btn-block" disabled>
-                Felt Solver is solving the river…
+                Suited Solver is solving the river…
               </button>
             ) : choice === undefined && river ? (
               <div className="stack" style={{ gap: 8 }}>
@@ -390,7 +390,7 @@ export function RiverResultView({
       </div>
       <p style={{ margin: 0 }}>{explain}</p>
       <p className="footnote" style={{ margin: 0 }}>
-        Solved by Felt Solver to {exploitability.toFixed(2)}% of the pot. EV here is what your hand wins from this point on average, for the ranges in this
+        Solved by Suited Solver to {exploitability.toFixed(2)}% of the pot. EV here is what your hand wins from this point on average, for the ranges in this
         hand.
       </p>
     </div>
@@ -405,7 +405,7 @@ function ScenarioDone({ scenario }: { scenario: ScenarioSpec }) {
       <div className="card stack reveal" style={{ gap: '0.6rem', alignItems: 'flex-start' }}>
         <strong style={{ fontSize: '1.2rem' }}>Hand finished</strong>
         <p className="footnote" style={{ margin: 0 }}>
-          Your result is saved. Your river decision counted toward your Felt Rating.
+          Your result is saved. Your river decision counted toward your Suited Rating.
         </p>
       </div>
       <BottomBar>

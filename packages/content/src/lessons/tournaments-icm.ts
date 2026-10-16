@@ -298,7 +298,7 @@ export const TOURNAMENT_ICM_LESSONS: LessonContent[] = [
         kind: 'text',
         title: 'An equilibrium for this spot',
         body: [
-          'Felt checked every hand for both players. B’s best response to A shoving everything is to call with TT or better.',
+          'Suited checked every hand for both players. B’s best response to A shoving everything is to call with TT or better.',
           'Against those calls, every hand A holds gains by shoving. So in this model, A shoves every hand and B calls with TT or better.',
           'The model covers this one hand. It ignores skill and later hands.',
         ],

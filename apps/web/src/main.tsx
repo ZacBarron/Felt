@@ -20,7 +20,7 @@ const Router = import.meta.env.VITE_ROUTER === 'memory' ? MemoryRouter : Browser
  * than a few seconds; offline, the app starts with what is on this device.
  */
 async function boot() {
-  // On a hosted claude.ai page, the viewer's claude.ai sign in is their Felt account.
+  // On a hosted claude.ai page, the viewer's claude.ai sign in is their Suited account.
   const claude = connectClaudeCloud();
   const wait = new Promise((r) => setTimeout(r, 3500));
   if (currentSession()) {

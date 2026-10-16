@@ -230,7 +230,7 @@
   background: color-mix(in srgb, var(--green) 13%, transparent);
 }
 
-/* The next lesson when it is in Felt Pro: a look at it, one tap from the offer. */
+/* The next lesson when it is in Suited Pro: a look at it, one tap from the offer. */
 .lesson-done a.next-locked {
   display: flex;
   align-items: center;

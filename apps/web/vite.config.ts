@@ -18,7 +18,7 @@ export default defineConfig({
   },
   // The solver runs in a module worker so it can import @felt/core.
   worker: { format: 'es' },
-  // During development the Felt server runs on 8787 (pnpm dev:server).
+  // During development the Suited server runs on 8787 (pnpm dev:server).
   server: { proxy: { '/api': 'http://localhost:8787' } },
   plugins: [
     // The hosted test page always shows the phone layout (see scripts/artifact-page.mjs for the frame).
@@ -42,8 +42,8 @@ export default defineConfig({
       injectManifest: { globPatterns: ['**/*.{js,css,html,png,svg,woff2}'] },
       includeAssets: ['favicon.png', 'apple-touch-icon.png'],
       manifest: {
-        name: 'Felt',
-        short_name: 'Felt',
+        name: 'Suited',
+        short_name: 'Suited',
         description: 'Instinct, trained. GTO ranges, spaced review and drills for serious poker players.',
         theme_color: '#0b2421',
         background_color: '#0b2421',

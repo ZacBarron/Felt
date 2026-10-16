@@ -59,7 +59,7 @@ export function StudyTimeCard() {
         close();
       } catch (e) {
         haptic('warning');
-        setNote(e instanceof Error ? e.message : 'Felt could not turn on reminders.');
+        setNote(e instanceof Error ? e.message : 'Suited could not turn on reminders.');
         setBusy(false);
       }
     };

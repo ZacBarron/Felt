@@ -160,7 +160,7 @@ function ChartAbout({ chart, exact, mode }: { chart: Chart; exact: boolean; mode
           </p>
           {approx && (
             <p>
-              <strong>Close to solver.</strong> Felt built this chart by hand to match published solver results. It is close but not exact. The percentages on mixed hands are the least certain.
+              <strong>Close to solver.</strong> Suited built this chart by hand to match published solver results. It is close but not exact. The percentages on mixed hands are the least certain.
             </p>
           )}
           {exploit && <p>This is an exploit chart. It targets a common leak, not a balanced opponent.</p>}

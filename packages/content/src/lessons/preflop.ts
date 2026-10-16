@@ -58,7 +58,7 @@ export const PREFLOP_LESSONS: LessonContent[] = [
           ['UTG+2', '15.3%'],
           ['LJ', '17.9%'],
         ],
-        note: 'Share of all hands in Felt’s starter charts, which are approximate. Solver exact charts will replace them.',
+        note: 'Share of all hands in Suited’s starter charts, which are approximate. Solver exact charts will replace them.',
         evidence: 'solver',
       },
       {

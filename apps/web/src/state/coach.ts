@@ -10,7 +10,7 @@ import { DOMAIN_LABELS, ratingSnapshot } from './rating';
 import type { AppSettings, Experience } from './settings';
 
 /**
- * Felt's AI coach, on the Felt server. The app sends the conversation and a
+ * Suited's AI coach, on the Suited server. The app sends the conversation and a
  * small summary of the player's own study data; the server holds the key,
  * the prompt and the daily limit. The chat lives in this tab's session
  * storage, so it survives a reload and is gone when the tab closes.
@@ -66,8 +66,8 @@ export interface CoachSpotRef {
 }
 
 const SOURCE_LABEL: Record<Chart['spec']['source'], string> = {
-  'starter-approx': 'Felt starter chart (approximate)',
-  'solver-import': 'Felt chart imported from a solver',
+  'starter-approx': 'Suited starter chart (approximate)',
+  'solver-import': 'Suited chart imported from a solver',
   custom: 'Custom chart',
 };
 

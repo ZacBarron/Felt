@@ -18,7 +18,7 @@ function expectVoice(where: string, s: string) {
     expect((sentence.match(/,/g) ?? []).length, `${where}: ${sentence}`).toBeLessThanOrEqual(1);
     expect(sentence.split(/\s+/).length, `${where}: ${sentence}`).toBeLessThan(20);
   }
-  // Lessons teach everything in Felt's own words, and so do intros.
+  // Lessons teach everything in Suited's own words, and so do intros.
   expect(s, where).not.toMatch(/\b(book|books|author|video|videos|website|podcast|course|https?)\b/i);
 }
 

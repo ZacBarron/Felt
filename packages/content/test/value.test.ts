@@ -17,7 +17,7 @@ import { CURRICULUM, LESSON_CONTENT, STARTER_CHARTS, type LessonArt, type Lesson
 
 /**
  * Thick and thin value. Every equity and range share in the lesson is
- * recomputed here exactly, over every turn and river, from Felt's BTN open
+ * recomputed here exactly, over every turn and river, from Suited's BTN open
  * and BB calling charts. The sizing conclusions are solver patterns and stay
  * qualitative.
  */
@@ -128,7 +128,7 @@ describe('thick and thin value: the numbers', () => {
   const wet = lineUp('7d5s4s');
   const dry = lineUp('7d3c2s');
 
-  it('draws the equity curves from Felt’s charts', () => {
+  it('draws the equity curves from Suited’s charts', () => {
     const c754 = pick(art('Line up BB’s hands on 754'), 'curve');
     const c732 = pick(art('The same line on 732'), 'curve');
     expect(c754.points).toEqual(curve(wet));
@@ -151,7 +151,7 @@ describe('thick and thin value: the numbers', () => {
     expect([over754, over732]).toEqual([40.1, 10.3]);
     expect(caption('Line up BB’s hands on 754')).toContain(`**${over754}%** of BB’s calls have more than 25% equity`);
     expect(caption('The same line on 732')).toContain(`Only **${over732}%** of BB’s calls have more than 25%`);
-    const q = quiz('You hold K♥K♣ on 7♦5♠4♠. With Felt’s charts, how much of BB’s calling range has over 25% equity against you?');
+    const q = quiz('You hold K♥K♣ on 7♦5♠4♠. With Suited’s charts, how much of BB’s calling range has over 25% equity against you?');
     expect(q.choices[q.answer]).toBe(`About ${Math.round(over754 / 10) * 10}%`);
     expect(q.explain).toContain(`${over754}% of BB’s calls`);
     expect(q.explain).toContain(`only ${over732}% do`);

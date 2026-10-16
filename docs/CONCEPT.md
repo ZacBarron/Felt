@@ -1,6 +1,6 @@
-# Felt: Product Concept
+# Suited: Product Concept
 
-Felt is a personal training system for getting to an elite, professional level in No Limit Hold'em. It is built for one learner first (Zac), so it optimizes for depth, speed of study, and honest measurement over mass market polish.
+Suited is a personal training system for getting to an elite, professional level in No Limit Hold'em. It is built for one learner first (Zac), so it optimizes for depth, speed of study, and honest measurement over mass market polish.
 
 ## The goal
 
@@ -42,7 +42,7 @@ GTO is the baseline: it is what you fall back on when you know nothing, and it i
 - Under bluffing big river bets and raises, so big bets are weighted to value.
 - Heavy rake relative to pot size, which punishes thin preflop calls.
 
-So for this game the biggest win rate gains come from exploits layered on a solid GTO base. Felt marks every chart and node as `gto` or `exploit`, teaches both, and will measure your pool's actual tendencies from your logged hands.
+So for this game the biggest win rate gains come from exploits layered on a solid GTO base. Suited marks every chart and node as `gto` or `exploit`, teaches both, and will measure your pool's actual tendencies from your logged hands.
 
 ## The training loop
 
@@ -70,7 +70,7 @@ Each lesson has: one idea, a visual, a worked example, a "why the solver does th
 
 ### 2. Spaced repetition
 
-FSRS scheduling (the algorithm modern Anki uses), with one key difference: **no self grading**. Felt grades every review from accuracy and response time, because a range you need eight seconds to recall is not usable at the table. Card types:
+FSRS scheduling (the algorithm modern Anki uses), with one key difference: **no self grading**. Suited grades every review from accuracy and response time, because a range you need eight seconds to recall is not usable at the table. Card types:
 
 - **Range recall**: paint a range on the 13x13 grid, or answer "UTG, 100bb: A9s?"
 - **Spot action**: pick the action and sizing at a solver node.

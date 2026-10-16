@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { haptic } from '../haptics';
 import { track } from '../state/events';
-import { isFCell, MARK_GRID, TAGLINE } from '../ui/Brand';
+import { markCell, MARK_GRID, TAGLINE } from '../ui/Brand';
 import { ImportIcon, ShareIcon } from '../ui/icons';
 import { WORDMARK_PATH, WORDMARK_VIEWBOX } from '../ui/wordmark';
 import '../pages/you.css';
@@ -39,7 +39,7 @@ const W = 1080;
 const H = 1350;
 
 export function shareText(d: RatingCardData) {
-  const rating = `My Felt Rating is ${Math.round(d.rating)}`;
+  const rating = `My Suited Rating is ${Math.round(d.rating)}`;
   const tier = d.settling ? ' and still settling.' : d.tier ? `. My tier is ${d.tier}.` : '.';
   const streak = d.streak > 1 ? ` I'm on a ${d.streak} day streak.` : '';
   return `${rating}${tier}${streak}`;
@@ -116,8 +116,8 @@ export async function drawRatingCard(d: RatingCardData): Promise<Blob> {
   const cs = (ms - 2 * pad - (MARK_GRID - 1) * g) / MARK_GRID;
   for (let r = 0; r < MARK_GRID; r++)
     for (let c = 0; c < MARK_GRID; c++) {
-      const lit = isFCell(r, c);
-      ctx.fillStyle = lit ? BRAND.brass : 'rgba(255,255,255,0.12)';
+      const kind = markCell(r, c);
+      ctx.fillStyle = kind === 'suited' ? BRAND.brass : kind === 'pair' ? 'rgba(255,255,255,0.26)' : 'rgba(255,255,255,0.12)';
       roundRect(ctx, mx + pad + c * (cs + g), my + pad + r * (cs + g), cs, cs, cs * 0.22);
       ctx.fill();
     }
@@ -139,7 +139,7 @@ export async function drawRatingCard(d: RatingCardData): Promise<Blob> {
   ctx.font = `700 30px ${SANS}`;
   spacing(ctx, 5);
   ctx.fillStyle = BRAND.brass;
-  const label = d.name ? `${d.name}'s Felt Rating` : 'Felt Rating';
+  const label = d.name ? `${d.name}'s Suited Rating` : 'Suited Rating';
   ctx.fillText(label.toUpperCase(), left, 350);
   spacing(ctx, 0);
 
@@ -217,11 +217,11 @@ export async function drawRatingCard(d: RatingCardData): Promise<Blob> {
   ctx.fillStyle = BRAND.brass;
   ctx.fillText(TAGLINE, left, 1290);
 
-  return new Promise((resolve, reject) => canvas.toBlob((b) => (b ? resolve(b) : reject(new Error('Felt could not draw the image.'))), 'image/png'));
+  return new Promise((resolve, reject) => canvas.toBlob((b) => (b ? resolve(b) : reject(new Error('Suited could not draw the image.'))), 'image/png'));
 }
 
 /**
- * Share your Felt Rating as an image: a preview first, then the system
+ * Share your Suited Rating as an image: a preview first, then the system
  * share sheet or a saved file. Nothing on the card is made up.
  */
 export function RatingShareSheet({ open, onClose, data }: { open: boolean; onClose: () => void; data: RatingCardData }) {
@@ -248,7 +248,7 @@ export function RatingShareSheet({ open, onClose, data }: { open: boolean; onClo
         url = URL.createObjectURL(blob);
         setImage({ blob, url });
       })
-      .catch(() => live && setNote('Felt could not draw the image. You can still share the text.'));
+      .catch(() => live && setNote('Suited could not draw the image. You can still share the text.'));
     return () => {
       live = false;
       if (url) URL.revokeObjectURL(url);
@@ -313,7 +313,7 @@ export function RatingShareSheet({ open, onClose, data }: { open: boolean; onClo
           </button>
         </div>
         <div className="share-preview">
-          {image ? <img src={image.url} alt={`${text} Felt card.`} /> : <span className="share-preview-wait" aria-label="Drawing the image" />}
+          {image ? <img src={image.url} alt={`${text} Suited card.`} /> : <span className="share-preview-wait" aria-label="Drawing the image" />}
         </div>
         <p className="footnote share-note" role="status">
           {note ?? 'Every number on the card comes from your own answers.'}

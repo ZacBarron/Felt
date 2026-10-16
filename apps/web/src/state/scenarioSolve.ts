@@ -8,7 +8,7 @@ export interface RiverResult {
 }
 
 /**
- * Solves a scenario's river with Felt Solver in a worker, follows the line
+ * Solves a scenario's river with Suited Solver in a worker, follows the line
  * to the hero's decision, and returns the EV of each action for the hero's
  * exact cards. Grades built on this are exact for the stated ranges.
  */

@@ -1,4 +1,4 @@
-# Felt
+# Suited
 
 Personal poker training app. Read docs/CONCEPT.md and docs/ROADMAP.md before starting a feature; tick roadmap boxes as work lands.
 
@@ -21,7 +21,7 @@ Personal poker training app. Read docs/CONCEPT.md and docs/ROADMAP.md before sta
 - Every lesson has at least two quiz steps (they power placement and test outs). Never reference books or outside material in lessons.
 - Free vs Pro, prices and purchase seams live only in `apps/web/src/state/access.ts` (see docs/MONETIZATION.md).
 - The solver (`core/src/solver.ts`) must keep passing its analytic tests; report exploitability with any solver output.
-- Only objective answers feed the Felt Rating (`web/src/state/rating.ts`); self graded flashcards never do. Win rate numbers must label which parts are arithmetic and which are model assumptions (docs/ENGAGEMENT.md).
+- Only objective answers feed the Suited Rating (`web/src/state/rating.ts`); self graded flashcards never do. Win rate numbers must label which parts are arithmetic and which are model assumptions (docs/ENGAGEMENT.md).
 - Engagement features reward demonstrated skill, never time spent; no fake competitors, scarcity or guilt copy. Cite docs/research/sources.md when a design leans on research.
 
 ## UI conventions (apps/web)

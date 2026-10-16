@@ -207,7 +207,7 @@ describe('glossary entries', () => {
     expect(findTerms('The pot is big.', { linkedOnly: false }).map((m) => m.id)).toEqual(['pot']);
   });
 
-  it('writes definitions in the Felt voice', () => {
+  it('writes definitions in the Suited voice', () => {
     for (const t of GLOSSARY) {
       const s = t.short;
       expect(s, t.id).toMatch(/\.$/);

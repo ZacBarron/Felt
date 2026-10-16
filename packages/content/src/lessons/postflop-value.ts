@@ -3,7 +3,7 @@ import type { LessonContent } from './types';
 /**
  * Bet size follows how far ahead your value stays when called, not how wet
  * the board is. Every equity and share here is computed exactly with
- * @felt/core from Felt's BTN open and BB calling charts, and recomputed in
+ * @felt/core from Suited's BTN open and BB calling charts, and recomputed in
  * test/value.test.ts. The sizing conclusions are solver patterns.
  */
 
@@ -98,7 +98,7 @@ export const POSTFLOP_VALUE_LESSONS: LessonContent[] = [
         cards: 'KhKc',
         board: '7d5s4s',
         caption:
-          'BTN opens and BB calls, both from Felt’s charts. You hold K♥K♣ on a low, wet flop. BB holds some sets and straights. It also holds many draws and pairs with draws.',
+          'BTN opens and BB calls, both from Suited’s charts. You hold K♥K♣ on a low, wet flop. BB holds some sets and straights. It also holds many draws and pairs with draws.',
       },
       {
         kind: 'visual',
@@ -125,7 +125,7 @@ export const POSTFLOP_VALUE_LESSONS: LessonContent[] = [
           ['7♦3♣2♠', '86.5%', '82.7%', '77.6%'],
         ],
         note:
-          'K♥K♣ equity against part of BB’s calling range, exact over every turn and river. Felt’s charts, with BTN opening and BB calling. This is a simple model. BB keeps the hands that do best against KK. It keeps 75% against a third pot bet and 50% against a pot sized bet. Those are the MDF (minimum defense frequency) shares. Real defense depends on your whole range, not one hand.',
+          'K♥K♣ equity against part of BB’s calling range, exact over every turn and river. Suited’s charts, with BTN opening and BB calling. This is a simple model. BB keeps the hands that do best against KK. It keeps 75% against a third pot bet and 50% against a pot sized bet. Those are the MDF (minimum defense frequency) shares. Real defense depends on your whole range, not one hand.',
         evidence: 'math',
       },
       {
@@ -193,7 +193,7 @@ export const POSTFLOP_VALUE_LESSONS: LessonContent[] = [
       },
       {
         kind: 'quiz',
-        question: 'You hold K♥K♣ on 7♦5♠4♠. With Felt’s charts, how much of BB’s calling range has over 25% equity against you?',
+        question: 'You hold K♥K♣ on 7♦5♠4♠. With Suited’s charts, how much of BB’s calling range has over 25% equity against you?',
         cards: 'KhKc',
         board: '7d5s4s',
         choices: ['About 10%', 'About 40%', 'About 75%'],

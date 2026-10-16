@@ -34,9 +34,9 @@ describe('backup', () => {
     expect(JSON.parse(store.get('felt.settings.v1')!)).toEqual({ study: { newPerDay: 20 } });
   });
 
-  it('refuses a file that is not a Felt backup without touching data', async () => {
+  it('refuses a file that is not a Suited backup without touching data', async () => {
     await db.daily.put({ number: 1, at: new Date(), scores: [1], ratingBefore: 1200, ratingAfter: 1210 });
-    await expect(importBackup('{"hello":"world"}')).rejects.toThrow('not a Felt backup');
+    await expect(importBackup('{"hello":"world"}')).rejects.toThrow('not a Suited backup');
     expect(await db.daily.count()).toBe(1);
   });
 });

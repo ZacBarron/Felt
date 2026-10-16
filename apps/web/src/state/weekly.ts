@@ -25,8 +25,8 @@ import { saveLessonStep } from './saved';
 import type { Access } from './settings';
 
 /**
- * The weekly challenge, a Felt Pro event: the same 10 harder decisions for
- * every Pro player in an ISO week, drawn from the hardest material Felt can
+ * The weekly challenge, a Suited Pro event: the same 10 harder decisions for
+ * every Pro player in an ISO week, drawn from the hardest material Suited can
  * grade objectively. Range decisions are graded by mix distance with mixed
  * answers offered, so a mixed strategy is never collapsed to one action.
  */
@@ -137,7 +137,7 @@ export function describeWeekly(d: WeeklyDecision): { title: string; note: string
     return { title: f?.prompt ?? 'Math', note: 'Exact answer' };
   }
   const s = SCENARIOS.find((x) => x.id === d.scenarioId);
-  return { title: s?.title ?? 'River decision', note: 'Graded by Felt Solver' };
+  return { title: s?.title ?? 'River decision', note: 'Graded by Suited Solver' };
 }
 
 /** Full credit, partial credit (within about one step of the mix) or a miss. */

@@ -52,7 +52,7 @@ const KIND_COVERS: Record<WeeklyKind, (n: number) => string> = {
   math: (n) => `${n} math ${n === 1 ? 'question' : 'questions'}. The answer is exact.`,
   mixed: (n) => `${n} mixed ${n === 1 ? 'hand' : 'hands'}. Pick the mix, not just one action.`,
   edge: (n) => `${n} close ${n === 1 ? 'call' : 'calls'} facing a raise or a 3bet.`,
-  river: (n) => `${n} river ${n === 1 ? 'decision' : 'decisions'}. Felt Solver grades them on your device.`,
+  river: (n) => `${n} river ${n === 1 ? 'decision' : 'decisions'}. Suited Solver grades them on your device.`,
   lesson: (n) => `${n} ${n === 1 ? 'question' : 'questions'} from advanced lessons.`,
 };
 
@@ -81,7 +81,7 @@ function prefetchRivers(items: readonly WeeklyDecision[]) {
   for (const d of items) if (d.kind === 'river') void solveFor(d.scenarioId)?.catch(() => undefined);
 }
 
-/** A scenario's river on its own: the hand so far, then the decision, graded by EV loss from Felt Solver. */
+/** A scenario's river on its own: the hand so far, then the decision, graded by EV loss from Suited Solver. */
 function RiverDecision({ scenarioId, last, onScore, onNext }: { scenarioId: string; last: boolean; onScore: (s: number) => void; onNext: () => void }) {
   const scenario = SCENARIOS.find((s) => s.id === scenarioId);
   const [river, setRiver] = useState<RiverResult>();
@@ -94,7 +94,7 @@ function RiverDecision({ scenarioId, last, onScore, onNext }: { scenarioId: stri
     let live = true;
     solveFor(scenarioId)
       ?.then((r) => live && setRiver(r))
-      .catch((e) => live && setError(e instanceof Error ? e.message : 'Felt Solver could not finish this spot.'));
+      .catch((e) => live && setError(e instanceof Error ? e.message : 'Suited Solver could not finish this spot.'));
     return () => {
       live = false;
     };
@@ -177,7 +177,7 @@ function RiverDecision({ scenarioId, last, onScore, onNext }: { scenarioId: stri
           </button>
         ) : !river ? (
           <button className="btn btn-lg btn-block" disabled>
-            Felt Solver is solving the river…
+            Suited Solver is solving the river…
           </button>
         ) : choice === undefined ? (
           <div className="stack" style={{ gap: 8 }}>
@@ -203,7 +203,7 @@ function RiverDecision({ scenarioId, last, onScore, onNext }: { scenarioId: stri
   );
 }
 
-/** One weekly decision, rendered by the same pieces the rest of Felt uses and recorded toward the Felt Rating. */
+/** One weekly decision, rendered by the same pieces the rest of Suited uses and recorded toward the Suited Rating. */
 function WeeklyItem({ decision, last, onScore, onNext }: { decision: WeeklyDecision; last: boolean; onScore: (s: number) => void; onNext: () => void }) {
   if (decision.kind === 'chart' || decision.kind === 'quiz')
     return <DecisionItem decision={decision} source="weekly" last={last} mixAnswers onScore={onScore} onNext={onNext} />;
@@ -291,7 +291,7 @@ function Intro({ week, items, resumeAt, onStart }: { week: ReturnType<typeof iso
         </p>
       </div>
       <YourRecord />
-      <Section title="What it covers" footer="Each answer counts toward your Felt Rating. You get one attempt each week. Your place is saved if you leave.">
+      <Section title="What it covers" footer="Each answer counts toward your Suited Rating. You get one attempt each week. Your place is saved if you leave.">
         <Covers />
       </Section>
       <BottomBar>
@@ -351,7 +351,7 @@ function YourRecord() {
 }
 
 /**
- * For players without Felt Pro: this week's real set, locked, and one way to unlock it.
+ * For players without Suited Pro: this week's real set, locked, and one way to unlock it.
  * The daily challenge stays one tap away, so this is never a dead end.
  */
 function Locked({ week, items }: { week: ReturnType<typeof isoWeek>; items: readonly WeeklyDecision[] }) {
@@ -396,7 +396,7 @@ function Locked({ week, items }: { week: ReturnType<typeof isoWeek>; items: read
 function shareText(week: ReturnType<typeof isoWeek>, scores: number[], rating: SkillRating) {
   const right = scores.filter((s) => s >= 1).length;
   const tier = isProvisional(rating) ? 'still settling' : tierLabel(rating);
-  return `Felt Weekly ${week.id}: ${right} of ${scores.length}\n${shareGrid(scores)}\nFelt Rating ${Math.round(rating.rating)}, ${tier}`;
+  return `Suited Weekly ${week.id}: ${right} of ${scores.length}\n${shareGrid(scores)}\nSuited Rating ${Math.round(rating.rating)}, ${tier}`;
 }
 
 function Result({ week, items, scores, before, after }: { week: ReturnType<typeof isoWeek>; items: WeeklyDecision[]; scores: number[]; before: number; after: number }) {
@@ -454,7 +454,7 @@ function Result({ week, items, scores, before, after }: { week: ReturnType<typeo
           Accuracy {pct(summary.accuracy)}. Close answers count half.
         </p>
         <span className="pill num">
-          Felt Rating {Math.round(after)}, {delta === 0 ? 'no change' : delta > 0 ? `up ${delta}` : `down ${-delta}`}
+          Suited Rating {Math.round(after)}, {delta === 0 ? 'no change' : delta > 0 ? `up ${delta}` : `down ${-delta}`}
         </span>
       </div>
 
@@ -555,11 +555,11 @@ export function WeeklyPage() {
   }, []);
 
   useEffect(() => {
-    document.title = 'Weekly Pro challenge · Felt';
+    document.title = 'Weekly Pro challenge · Suited';
   }, []);
 
   if (stored === null || before === undefined) return null;
-  // A finished week stays visible, even if Felt Pro has lapsed since.
+  // A finished week stays visible, even if Suited Pro has lapsed since.
   if (stored?.finished) return <Result week={week} items={stored.items} scores={stored.scores} before={stored.ratingBefore} after={stored.ratingAfter} />;
   if (!weeklyAvailable(settings.access)) return <Locked week={week} items={fresh} />;
 

@@ -15,7 +15,7 @@
 }
 
 /*
- * Felt design system, after iOS 26 Liquid Glass:
+ * Suited design system, after iOS 26 Liquid Glass:
  * system colors and type, inset grouped content, translucent glass for
  * everything that floats (tab bar, nav bar, toolbars), capsule controls.
  * Light is the base; dark overrides follow the system or the Appearance setting.
@@ -88,11 +88,13 @@
   --action-sheen: rgba(255, 255, 255, 0.14);
 
   /* Solver action colors. Fold stays neutral. */
-  --act-raise: var(--red);
+  /* Actions differ in lightness as well as hue, so raise, call and fold stay apart with red-green
+     color blindness (about 1 in 12 men). See docs/BRAND.md, Action colors. */
+  --act-raise: #ee6a2a;
   --act-3bet: var(--purple);
-  --act-call: var(--green);
-  --act-check: var(--green);
-  --act-fold: var(--gray);
+  --act-call: #0f7b6c;
+  --act-check: #0f7b6c;
+  --act-fold: #b5afa4;
 
   /* Four color deck on white faces */
   --suit-s: #1c1c1e;
@@ -161,8 +163,10 @@
     --action-mix: 100%;
     --on-action: var(--base-950);
     --action-sheen: rgba(255, 255, 255, 0.2);
-    --act-call: #24a157;
-    --act-check: #24a157;
+    --act-raise: #ff7a45;
+    --act-call: #20b39c;
+    --act-check: #20b39c;
+    --act-fold: #4a4843;
     --glass-bg: rgba(26, 33, 30, 0.6);
     --glass-edge: rgba(255, 255, 255, 0.16);
     --glass-sheen: rgba(255, 255, 255, 0.06);
@@ -200,8 +204,10 @@
   --action-mix: 100%;
   --on-action: var(--base-950);
   --action-sheen: rgba(255, 255, 255, 0.2);
-  --act-call: #24a157;
-  --act-check: #24a157;
+  --act-raise: #ff7a45;
+  --act-call: #20b39c;
+  --act-check: #20b39c;
+  --act-fold: #4a4843;
   --gray: #8f8b83;
   --glass-bg: rgba(26, 33, 30, 0.6);
   --glass-edge: rgba(255, 255, 255, 0.16);
@@ -1625,7 +1631,7 @@ input:focus:not(:focus-visible) {
 }
 
 .hero::after {
-  /* Felt nap: fine noise over the gradient, so it reads as cloth, not plastic. */
+  /* Suited nap: fine noise over the gradient, so it reads as cloth, not plastic. */
   content: '';
   position: absolute;
   inset: 0;
@@ -4170,7 +4176,7 @@ button.evidence {
   box-shadow: none;
 }
 
-/* The mark assembling: cells pop in along the diagonal, then the F lights in a sweep. */
+/* The mark assembling: cells pop in along the diagonal, then the suited half lights in a sweep. */
 .mark-anim .cell {
   transform-box: fill-box;
   transform-origin: center;
@@ -4756,7 +4762,7 @@ a.card.more-me,
   display: none;
 }
 
-/* Install Felt on the home screen. */
+/* Install Suited on the home screen. */
 .install-card {
   display: flex;
   align-items: flex-start;

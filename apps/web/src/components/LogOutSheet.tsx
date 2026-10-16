@@ -8,10 +8,10 @@ import '../pages/auth.css';
 type Status = 'saving' | SaveResult;
 
 /**
- * Logging out, said plainly. Felt saves first and says whether it worked.
+ * Logging out, said plainly. Suited saves first and says whether it worked.
  * "Log out" keeps this device's copy, which goes on working offline.
  * "Log out and remove from this device" is for a shared phone: it clears
- * Felt from the device, and only after the save worked.
+ * Suited from the device, and only after the save worked.
  */
 export function LogOutSheet({ open, onClose, onLoggedOut }: { open: boolean; onClose: () => void; onLoggedOut: (removed: boolean) => void }) {
   const ref = useRef<HTMLDialogElement>(null);
@@ -47,7 +47,7 @@ export function LogOutSheet({ open, onClose, onLoggedOut }: { open: boolean; onC
       onLoggedOut(removeLocal);
     } catch (e) {
       haptic('error');
-      setError(e instanceof Error ? e.message : 'Felt could not log out. Try again.');
+      setError(e instanceof Error ? e.message : 'Suited could not log out. Try again.');
       setBusy(false);
     }
   };
@@ -60,7 +60,7 @@ export function LogOutSheet({ open, onClose, onLoggedOut }: { open: boolean; onC
         ? { tone: 'warn', text: 'Not saved yet. You are offline.' }
         : failed.reason === 'conflict'
           ? { tone: 'warn', text: 'Not saved yet. This device and your account have different progress. Choose which to keep on the Account page.' }
-          : { tone: 'warn', text: `Not saved yet. ${failed.message ?? 'Felt could not reach your account.'}` };
+          : { tone: 'warn', text: `Not saved yet. ${failed.message ?? 'Suited could not reach your account.'}` };
 
   return (
     <dialog
@@ -76,7 +76,7 @@ export function LogOutSheet({ open, onClose, onLoggedOut }: { open: boolean; onC
       <div className="sheet-body stack" style={{ gap: '1.1rem' }}>
         <div className="sheet-grabber" aria-hidden="true" />
         <h2 id="logout-title" className="sheet-title">
-          Log out of Felt?
+          Log out of Suited?
         </h2>
 
         <div className={`logout-status ${line.tone}`} role="status" aria-live="polite">
@@ -100,7 +100,7 @@ export function LogOutSheet({ open, onClose, onLoggedOut }: { open: boolean; onC
             Log out and remove from this device
           </button>
           <p className="footnote logout-note">
-            {saved ? 'For a shared phone. Felt is cleared from this device. Your account keeps everything.' : 'Felt can remove this copy once everything is saved.'}
+            {saved ? 'For a shared phone. Suited is cleared from this device. Your account keeps everything.' : 'Suited can remove this copy once everything is saved.'}
           </p>
           {error && (
             <p className="field-error" role="alert">

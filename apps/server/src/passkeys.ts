@@ -130,10 +130,10 @@ export function mountPasskeys(app: Hono<any>, ctx: PasskeyContext) {
     if (!passkeysReady(config)) return c.json({ error: UNAVAILABLE }, 503);
     const signedIn = ctx.userFor(c);
     const { name } = await body<{ name: string }>(c);
-    // Shown in the passkey manager next to "Felt". The email when there is one, else the player's name.
+    // Shown in the passkey manager next to "Suited". The email when there is one, else the player's name.
     const userId = signedIn?.id ?? newId();
     // Without a name, a short code from the account keeps several accounts apart in the passkey picker.
-    const fallback = `Felt player ${userId.replace(/[^a-zA-Z0-9]/g, '').slice(0, 4).toUpperCase()}`;
+    const fallback = `Suited player ${userId.replace(/[^a-zA-Z0-9]/g, '').slice(0, 4).toUpperCase()}`;
     const label = (signedIn?.email ?? (typeof name === 'string' && name.trim() ? name.trim().slice(0, 64) : fallback)).slice(0, 64);
     const existing = signedIn ? passkeysOf(signedIn.id) : [];
     const options = await lib.generateRegistrationOptions({
@@ -173,12 +173,12 @@ export function mountPasskeys(app: Hono<any>, ctx: PasskeyContext) {
       });
     } catch (e) {
       console.warn('Passkey registration failed', e);
-      return c.json({ error: 'Felt could not check that passkey. Try again.' }, 400);
+      return c.json({ error: 'Suited could not check that passkey. Try again.' }, 400);
     }
-    if (!verification.verified) return c.json({ error: 'Felt could not check that passkey. Try again.' }, 400);
+    if (!verification.verified) return c.json({ error: 'Suited could not check that passkey. Try again.' }, 400);
     const info = verification.registrationInfo;
     const cred = info.credential;
-    if (db.prepare('SELECT 1 FROM passkeys WHERE id = ?').get(cred.id)) return c.json({ error: 'This passkey is already saved to a Felt account.' }, 409);
+    if (db.prepare('SELECT 1 FROM passkeys WHERE id = ?').get(cred.id)) return c.json({ error: 'This passkey is already saved to a Suited account.' }, 409);
 
     const userId = flow.user_id!;
     tx(db, () => {
@@ -221,7 +221,7 @@ export function mountPasskeys(app: Hono<any>, ctx: PasskeyContext) {
     const row = db.prepare('SELECT * FROM passkeys WHERE id = ?').get(response.id) as PasskeyRow | undefined;
     // The browser can be told to forget a passkey the server no longer knows (unknownCredential).
     if (!row)
-      return c.json({ error: 'This passkey is not linked to a Felt account. It may have been removed.', unknownCredential: true, credentialId: response.id }, 404);
+      return c.json({ error: 'This passkey is not linked to a Suited account. It may have been removed.', unknownCredential: true, credentialId: response.id }, 404);
     const handle = response.response?.userHandle;
     if (handle && handle !== Buffer.from(userHandle(row.user_id)).toString('base64url'))
       return c.json({ error: 'This passkey does not match its account.' }, 400);
@@ -243,9 +243,9 @@ export function mountPasskeys(app: Hono<any>, ctx: PasskeyContext) {
       });
     } catch (e) {
       console.warn('Passkey sign in failed', e);
-      return c.json({ error: 'Felt could not check that passkey. Try again.' }, 400);
+      return c.json({ error: 'Suited could not check that passkey. Try again.' }, 400);
     }
-    if (!verification.verified) return c.json({ error: 'Felt could not check that passkey. Try again.' }, 400);
+    if (!verification.verified) return c.json({ error: 'Suited could not check that passkey. Try again.' }, 400);
     const info = verification.authenticationInfo;
     db.prepare('UPDATE passkeys SET counter = ?, backed_up = ?, device_type = ?, last_used = ? WHERE id = ?').run(
       info.newCounter,

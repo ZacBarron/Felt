@@ -16,7 +16,7 @@ export const FIRST_HAND_NEW: Quiz = {
   cards: 'AsAh',
   choices: ['About 99% of the time', 'About 87% of the time', 'About 70% of the time'],
   answer: 1,
-  explain: 'About 87%. Even the best starting hand loses about 1 time in 8. So good players judge decisions, not single results. Felt trains those decisions.',
+  explain: 'About 87%. Even the best starting hand loses about 1 time in 8. So good players judge decisions, not single results. Suited trains those decisions.',
 };
 
 /**
@@ -31,7 +31,7 @@ export const FIRST_HAND_CASUAL: Quiz = BASICS_LESSONS.find((l) => l.key === 'bas
 export const FIRST_HAND_NEW_MATCHUP = { hero: 'AsAh', villain: '7c2d', winPct: 87 } as const;
 
 /**
- * What players say about Felt. Only real quotes from real players, used with
+ * What players say about Suited. Only real quotes from real players, used with
  * their permission. The welcome screen shows nothing while this is empty, so
  * never fill it with placeholders.
  */

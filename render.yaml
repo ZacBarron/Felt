@@ -1,4 +1,4 @@
-# Render Blueprint for Felt. See docs/DEPLOY.md.
+# Render Blueprint for Suited. See docs/DEPLOY.md.
 # Persistent disks need a paid instance type (Starter or above).
 services:
   - type: web
@@ -45,7 +45,7 @@ services:
         sync: false
       - key: VAPID_SUBJECT
         sync: false
-      # Felt Pro through Stripe. Optional.
+      # Suited Pro through Stripe. Optional.
       - key: STRIPE_SECRET_KEY
         sync: false
       - key: STRIPE_WEBHOOK_SECRET
@@ -54,7 +54,7 @@ services:
         sync: false
       - key: STRIPE_PRICE_MONTHLY
         sync: false
-      # AI coach for Felt Pro players (console.anthropic.com). Optional: off without a key.
+      # AI coach for Suited Pro players (console.anthropic.com). Optional: off without a key.
       - key: ANTHROPIC_API_KEY
         sync: false
       # Optional coach settings. Defaults: claude-opus-5-5, medium, 40 messages a day.
@@ -64,6 +64,6 @@ services:
         sync: false
       - key: COACH_DAILY_LIMIT
         sync: false
-      # Testing only: true gives every signed in player Felt Pro, coach included. Default false.
+      # Testing only: true gives every signed in player Suited Pro, coach included. Default false.
       - key: PRO_FOR_EVERYONE
         sync: false

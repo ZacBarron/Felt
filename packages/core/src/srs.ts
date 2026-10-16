@@ -3,7 +3,7 @@ import { type Card as FsrsCard, createEmptyCard, fsrs, type Grade, Rating, type 
 /**
  * Spaced repetition on top of FSRS (the scheduler modern Anki uses).
  *
- * Felt does not ask the learner to self-grade. A drill answer is graded
+ * Suited does not ask the learner to self-grade. A drill answer is graded
  * from correctness and speed, because at the table a range you need five
  * seconds to recall is not really known yet.
  */

@@ -1,7 +1,7 @@
 import type { HandMix } from './charts';
 import { isMixed, scoreRecall } from './drills';
 /**
- * Felt SkillRating: a Glicko rating for a player, where every graded decision is a
+ * Suited SkillRating: a Glicko rating for a player, where every graded decision is a
  * game against an item with its own difficulty rating.
  *
  * This is how adaptive learning systems use Elo (Pelánek 2016; Klinkenberg
@@ -131,7 +131,7 @@ export function isProvisional(r: SkillRating): boolean {
  * each step meaningful (the higher tier is expected to win about 70% of
  * decisions against the one below) while putting the next milestone close
  * enough to pull effort forward (the goal gradient, Kivetz, Urminsky and
- * Zheng 2006). The ladder stops at Elite: Felt's hardest items sit near 1700,
+ * Zheng 2006). The ladder stops at Elite: Suited's hardest items sit near 1700,
  * so higher tiers could not be measured honestly. While a rating is
  * provisional it has no tier (see `tierLabel`).
  *
@@ -139,12 +139,12 @@ export function isProvisional(r: SkillRating): boolean {
  * "levels of thinking" ladder common in poker teaching: first what do I
  * have, then what do they have, then what do they think I have. Thinking in
  * ranges is the modern step past reading one hand, and balanced, mixed play
- * near equilibrium sits at the top. `skills` says what Felt actually rates
+ * near equilibrium sits at the top. `skills` says what Suited actually rates
  * near each band, from `DIFFICULTY`: core lessons and math facts near 1250
  * to 1300, close calls on charts at 1350, solver and river spots at 1450 to
  * 1500, advanced lessons and painting whole charts at 1600.
  *
- * Be honest about what this is: Felt measures answers, not thoughts. The
+ * Be honest about what this is: Suited measures answers, not thoughts. The
  * rating is the measurement. The thinking line is a guide to what players
  * at that rating tend to get right, not a claim about how any one player
  * thinks.
@@ -154,7 +154,7 @@ export interface Tier {
   name: string;
   /** The question a player at this tier asks at the table. */
   thinks: string;
-  /** What Felt rates near this band, in plain words. */
+  /** What Suited rates near this band, in plain words. */
   skills: string;
 }
 
@@ -311,7 +311,7 @@ export const DIFFICULTY = {
   lessonAdvanced: 1600,
   /** A decision from a saved solver spot: the player chose it after seeing the answer, so it is not rated as the hardest item. */
   solverSpot: 1450,
-  /** A river decision in a scenario, graded by Felt Solver for the hero's exact hand. */
+  /** A river decision in a scenario, graded by Suited Solver for the hero's exact hand. */
   scenarioRiver: 1500,
   /** A math fact from the review deck, like the price of a half pot bet. */
   mathFact: 1250,

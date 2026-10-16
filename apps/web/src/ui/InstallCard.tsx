@@ -22,7 +22,7 @@ function dismissedBefore() {
 }
 
 /**
- * Offers to put Felt on the home screen: one tap where the browser allows
+ * Offers to put Suited on the home screen: one tap where the browser allows
  * it, the Share steps on iPhone. Hidden once installed or dismissed.
  */
 export function InstallCard() {
@@ -58,7 +58,7 @@ export function InstallCard() {
     <div className="card install-card reveal">
       <BrandMark size={44} />
       <div className="grow" style={{ minWidth: 0 }}>
-        <div className="install-title">Put Felt on your home screen</div>
+        <div className="install-title">Put Suited on your home screen</div>
         {prompt ? (
           <div className="footnote">It opens full screen and works offline.</div>
         ) : (
@@ -76,7 +76,7 @@ export function InstallCard() {
               setPrompt(undefined);
             }}
           >
-            Install Felt
+            Install Suited
           </button>
         )}
       </div>

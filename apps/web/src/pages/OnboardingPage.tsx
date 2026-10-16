@@ -27,7 +27,7 @@ import { requestPersistentStorage } from '../state/backup';
 /**
  * First run. Short, personal and honest: about five screens, each question
  * changes the plan, and the first lesson starts right after (value before
- * any ask). The account and Felt Pro offers come once, after that first
+ * any ask). The account and Suited Pro offers come once, after that first
  * lesson (see FirstWin). Questions that only matter in one place are asked
  * there: the game in Ranges, a study time on Today. Proof is real: counts
  * come from the content, and testimonials appear only once real players
@@ -91,7 +91,7 @@ function Choice({ selected, label, note, onClick, multi }: { selected: boolean; 
 function LadderTrack({ to = 'Elite', start, climb }: { to?: string; start?: string; climb?: boolean }) {
   const end = TIERS.findIndex((t) => t.name === to);
   return (
-    <div className={`ladder-track${climb ? ' climb' : ''}`} role="img" aria-label={`The Felt ladder, from ${start ?? TIERS[0].name} to ${to}`}>
+    <div className={`ladder-track${climb ? ' climb' : ''}`} role="img" aria-label={`The Suited ladder, from ${start ?? TIERS[0].name} to ${to}`}>
       <div className="ladder-steps" aria-hidden="true">
         {TIERS.map((t, i) => (
           <span key={t.name} className={`ladder-step${i <= end ? ' on' : ''}${i === end ? ' goal' : ''}`} style={{ '--i': i } as React.CSSProperties} />
@@ -146,7 +146,7 @@ function ValueQuiz() {
 const BTN_OPEN = getChart('9max-100-rfi-btn');
 
 /**
- * What Felt is, shown rather than told: three cards, each a real piece of the
+ * What Suited is, shown rather than told: three cards, each a real piece of the
  * app (a lesson question, a range chart, the rating ladder). Swipe, or let it
  * advance on its own until the player touches it.
  */
@@ -161,7 +161,7 @@ const VALUE = [
   {
     id: 'climb',
     title: 'Watch your skill climb',
-    body: 'Your Felt Rating moves only on real answers. Newcomer to Elite.',
+    body: 'Your Suited Rating moves only on real answers. Newcomer to Elite.',
     Art: () => (
       <div className="value-ladder">
         <div className="value-rating" aria-hidden="true">
@@ -203,7 +203,7 @@ function ValueCarousel() {
         onPointerDown={() => (touched.current = true)}
         onScroll={(e) => setPage(Math.round(e.currentTarget.scrollLeft / e.currentTarget.clientWidth))}
         aria-roledescription="carousel"
-        aria-label="What Felt does"
+        aria-label="What Suited does"
       >
         {VALUE.map(({ id, title, body, Art }, i) => (
           <article key={id} className="value-card" aria-roledescription="slide" aria-label={`${i + 1} of ${VALUE.length}`}>
@@ -334,7 +334,7 @@ export function OnboardingPage() {
   const commit = (firstLesson?: string) => {
     update({ ...settings, profile: { ...profile, onboarded: true, committedAt: new Date().toISOString() } });
     track('plan_committed', { goals: profile.goals.join(','), daily: profile.dailyMinutes, focus: profile.focus.length });
-    // The plan is worth keeping: ask the browser not to clear Felt's data.
+    // The plan is worth keeping: ask the browser not to clear Suited's data.
     void requestPersistentStorage();
     navigate(firstLesson ? `${lessonPath(firstLesson)}?first=1` : '/', { replace: true });
   };
@@ -515,7 +515,7 @@ export function OnboardingPage() {
     },
     level: {
       title: 'How well do you know poker?',
-      sub: 'Felt starts you at the right lesson.',
+      sub: 'Suited starts you at the right lesson.',
       ready: !!profile.experience,
       body: (
         <>

@@ -26,7 +26,7 @@ export function studyReminder(cueId: string | undefined, minutes: number) {
       minutes,
       daily: true,
       alarmMinutes: 0,
-      description: cue ? `When you ${cue.phrase}, open Felt for your plan.` : 'Open Felt for your plan.',
+      description: cue ? `When you ${cue.phrase}, open Suited for your plan.` : 'Open Suited for your plan.',
       url: `${location.origin}${import.meta.env.BASE_URL}`,
     }),
   );
@@ -41,11 +41,11 @@ export function trialReminder(trialEndsAt: string) {
     'felt-trial-ends.ics',
     buildIcs({
       uid: `felt-trial-${end.getTime()}@felt`,
-      title: 'Felt Pro trial ends in 2 days',
+      title: 'Suited Pro trial ends in 2 days',
       start: at,
       minutes: 15,
       alarmMinutes: 0,
-      description: `Your free trial ends on ${end.toLocaleDateString()}. To keep Felt Pro, do nothing. To cancel, open Felt, then Account, then Manage subscription.`,
+      description: `Your free trial ends on ${end.toLocaleDateString()}. To keep Suited Pro, do nothing. To cancel, open Suited, then Account, then Manage subscription.`,
     }),
   );
 }

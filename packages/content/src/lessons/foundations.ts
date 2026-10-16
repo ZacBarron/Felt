@@ -966,7 +966,7 @@ export const FOUNDATIONS_LESSONS: LessonContent[] = [
           ['K♠7♦2♣', '54%', '21 vs 10%', '3.1 vs 3.1%'],
           ['7♥6♥5♣', '49%', '3 vs 6%', '4.7 vs 8.6%'],
         ],
-        note: 'BTN first, then BB. Strong hands means the share of a range with 80% or more equity against the other range. This is our estimate by Monte Carlo from Felt’s starter charts. Those charts are approximate. BTN opens 2.5bb and BB calls.',
+        note: 'BTN first, then BB. Strong hands means the share of a range with 80% or more equity against the other range. This is our estimate by Monte Carlo from Suited’s starter charts. Those charts are approximate. BTN opens 2.5bb and BB calls.',
       },
       {
         kind: 'quiz',

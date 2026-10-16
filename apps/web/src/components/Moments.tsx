@@ -162,7 +162,7 @@ function MomentView({
         {moment.kind === "tier" && (
           <div className="moment-number num" aria-hidden="true">
             {shown}
-            <span> Felt Rating</span>
+            <span> Suited Rating</span>
           </div>
         )}
         {moment.kind === "tier" && (

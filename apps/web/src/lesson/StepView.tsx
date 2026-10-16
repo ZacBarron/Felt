@@ -27,7 +27,7 @@ interface Props {
 }
 
 /**
- * How sure Felt is about what a screen says. It sits at the foot of the
+ * How sure Suited is about what a screen says. It sits at the foot of the
  * screen, after the picture and the words it qualifies, as one plain
  * sentence: a footnote to the claim, never a label competing with the title.
  */

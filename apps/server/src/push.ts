@@ -82,7 +82,7 @@ export function trialEndingNotice(proUntil: string, tz: string | null) {
   } catch {
     date = new Date(proUntil).toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' });
   }
-  return { title: 'Your free week ends in 2 days', body: `Felt Pro starts on ${date}. To cancel, open Account in Felt.`, url: '/account' };
+  return { title: 'Your free week ends in 2 days', body: `Suited Pro starts on ${date}. To cancel, open Account in Suited.`, url: '/account' };
 }
 
 /**

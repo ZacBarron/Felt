@@ -33,7 +33,7 @@ export interface Config {
    */
   allowedOrigins: string[];
   /**
-   * Testing only: every signed in player counts as Felt Pro, so the coach and
+   * Testing only: every signed in player counts as Suited Pro, so the coach and
    * other Pro checks work before purchases are open. Off unless set to true.
    */
   proForEveryone: boolean;
@@ -53,7 +53,7 @@ export function loadConfig(raw: Record<string, string | undefined> = process.env
     webDir: env.WEB_DIR,
     production,
     devCodes: !production && env.DEV_CODES !== '0',
-    email: { resendKey: env.RESEND_API_KEY, from: env.EMAIL_FROM ?? 'Felt <login@example.com>' },
+    email: { resendKey: env.RESEND_API_KEY, from: env.EMAIL_FROM ?? 'Suited <login@example.com>' },
     stripe: {
       secretKey: env.STRIPE_SECRET_KEY,
       webhookSecret: env.STRIPE_WEBHOOK_SECRET,
@@ -71,7 +71,7 @@ export function loadConfig(raw: Record<string, string | undefined> = process.env
     },
     webauthn: {
       rpId: env.WEBAUTHN_RP_ID?.trim().toLowerCase(),
-      rpName: env.WEBAUTHN_RP_NAME?.trim() ?? 'Felt',
+      rpName: env.WEBAUTHN_RP_NAME?.trim() ?? 'Suited',
       origins: originList(env.WEBAUTHN_ORIGINS),
     },
     allowedOrigins: originList(env.ALLOWED_ORIGINS),

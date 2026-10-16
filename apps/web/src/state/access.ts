@@ -3,7 +3,7 @@ import { api, currentSession, refreshMe, serverFeatures, type ServerAccess, type
 import type { Access, AppSettings } from './settings';
 
 /**
- * Felt Pro: what is free, what is paid, and what it costs.
+ * Suited Pro: what is free, what is paid, and what it costs.
  *
  * Everything about the business model lives here so it can be tuned in one
  * place. Purchases are not connected to a store yet: `purchase` is the seam
@@ -58,7 +58,7 @@ export function isPro(access: Access, now = new Date()): boolean {
 }
 
 /**
- * "Unlock Felt Pro for testing" in Settings: the developer Pro override,
+ * "Unlock Suited Pro for testing" in Settings: the developer Pro override,
  * switched on or off without developer mode. It changes this device only.
  */
 export const testingPro = (access: Access) => access.devPro === true;
@@ -67,7 +67,7 @@ export function setTestingPro(access: Access, on: boolean): Access {
   return { ...access, devPro: on ? true : undefined };
 }
 
-/** Access as the Felt server reports it, keeping this device's developer switches. */
+/** Access as the Suited server reports it, keeping this device's developer switches. */
 export function accessFromServer(server: ServerAccess, local: Access): Access {
   return {
     devMode: local.devMode,
@@ -143,14 +143,14 @@ export function purchasesOpen(features: ServerFeatures | null | undefined, acces
 }
 
 /**
- * Starts a purchase. With the Felt server and Stripe set up, this opens
+ * Starts a purchase. With the Suited server and Stripe set up, this opens
  * Stripe Checkout for the signed in player. Otherwise only developer mode
  * can complete one, locally.
  */
 export async function purchase(plan: PlanOption, settings: AppSettings): Promise<PurchaseResult> {
   const features = await serverFeatures();
   if (features?.billing && !(settings.access.devMode && settings.access.devPro !== undefined)) {
-    if (!currentSession()) return { ok: false, reason: 'Sign in first. That way Felt Pro works on all your devices.', needsAccount: true };
+    if (!currentSession()) return { ok: false, reason: 'Sign in first. That way Suited Pro works on all your devices.', needsAccount: true };
     try {
       const { url } = await api<{ url: string }>('/billing/checkout', { body: { plan: plan.id } });
       location.assign(url);
@@ -160,7 +160,7 @@ export async function purchase(plan: PlanOption, settings: AppSettings): Promise
     }
   }
   if (!settings.access.devMode && !import.meta.env.DEV) {
-    return { ok: false, reason: 'You cannot buy Felt Pro yet. Your progress is safe, and free features stay free.' };
+    return { ok: false, reason: 'You cannot buy Suited Pro yet. Your progress is safe, and free features stay free.' };
   }
   const trialEndsAt = plan.trialDays > 0 ? new Date(Date.now() + plan.trialDays * 86_400_000).toISOString() : undefined;
   return { ok: true, access: { ...settings.access, pro: true, plan: plan.id, trialEndsAt } };
@@ -169,10 +169,10 @@ export async function purchase(plan: PlanOption, settings: AppSettings): Promise
 /**
  * What "Restore purchases" found. Every outcome has words to show: a restore
  * never ends silently.
- * - `restored`: the account has Felt Pro, and `access` switches it on here.
+ * - `restored`: the account has Suited Pro, and `access` switches it on here.
  * - `sign-in`: purchases belong to an account, so the player signs in first.
- * - `not-found`: signed in, but this account has no Felt Pro.
- * - `unavailable`: Felt could not check (no server, offline, no accounts).
+ * - `not-found`: signed in, but this account has no Suited Pro.
+ * - `unavailable`: Suited could not check (no server, offline, no accounts).
  */
 export type RestoreResult =
   | { kind: 'restored'; title: string; message: string; access: Access }
@@ -193,29 +193,29 @@ export interface RestoreFacts {
 /** The decision behind "Restore purchases", kept pure so every state is tested. */
 export function decideRestore({ features, signedIn, user, error, local }: RestoreFacts): RestoreResult {
   if (!features)
-    return { kind: 'unavailable', title: 'Felt could not check', message: 'The Felt server did not answer. Check your connection and try again.' };
+    return { kind: 'unavailable', title: 'Suited could not check', message: 'The Suited server did not answer. Check your connection and try again.' };
   if (!features.accounts)
-    return { kind: 'unavailable', title: 'No accounts here yet', message: 'Felt Pro is restored through an account. This server has no accounts yet.' };
+    return { kind: 'unavailable', title: 'No accounts here yet', message: 'Suited Pro is restored through an account. This server has no accounts yet.' };
   if (!signedIn)
-    return { kind: 'sign-in', title: 'Sign in to restore', message: 'Felt Pro belongs to your account. Sign in and Felt checks it for you.' };
-  if (error || !user) return { kind: 'unavailable', title: 'Felt could not check', message: error ?? 'Felt could not reach your account. Try again in a moment.' };
+    return { kind: 'sign-in', title: 'Sign in to restore', message: 'Suited Pro belongs to your account. Sign in and Suited checks it for you.' };
+  if (error || !user) return { kind: 'unavailable', title: 'Suited could not check', message: error ?? 'Suited could not reach your account. Try again in a moment.' };
   const name = user.email ?? 'this account';
   if (user.access.pro || features.proForEveryone) {
     // An older answer from a testing server can still say no Pro; the server's switch wins.
     const server: ServerAccess = user.access.pro ? user.access : { pro: true, until: null, plan: null, trialing: false };
-    return { kind: 'restored', title: 'Felt Pro is back on', message: `Felt Pro is on for ${name}.`, access: accessFromServer(server, local) };
+    return { kind: 'restored', title: 'Suited Pro is back on', message: `Suited Pro is on for ${name}.`, access: accessFromServer(server, local) };
   }
   if (!features.billing)
-    return { kind: 'not-found', title: 'No purchase found', message: `There is no Felt Pro purchase on ${name}. Purchases are not open yet, so there is nothing to restore.` };
+    return { kind: 'not-found', title: 'No purchase found', message: `There is no Suited Pro purchase on ${name}. Purchases are not open yet, so there is nothing to restore.` };
   return {
     kind: 'not-found',
     title: 'No purchase found',
-    message: `There is no Felt Pro purchase on ${name}. If you bought it with another account, log out and sign in with that one.`,
+    message: `There is no Suited Pro purchase on ${name}. If you bought it with another account, log out and sign in with that one.`,
   };
 }
 
 /**
- * Restore purchases: asks the Felt server what this account owns. A host
+ * Restore purchases: asks the Suited server what this account owns. A host
  * waking from sleep can be slow, so health gets longer than usual here.
  */
 export async function restorePurchases(settings: AppSettings): Promise<RestoreResult> {

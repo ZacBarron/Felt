@@ -9,7 +9,7 @@ import './screens.css';
 const sortKey = (t: GlossaryTerm) => t.term.replace(/^[^A-Za-z]+/, '').toLowerCase() || t.term;
 const letterOf = (t: GlossaryTerm) => (/^[0-9]/.test(t.term) ? '#' : sortKey(t)[0].toUpperCase());
 
-/** Every poker term Felt uses, in plain words, searchable. Each one links to the lesson that teaches it. */
+/** Every poker term Suited uses, in plain words, searchable. Each one links to the lesson that teaches it. */
 export function GlossaryPage() {
   const [query, setQuery] = useState('');
   const [reading, setReading] = useState<string>();

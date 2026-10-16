@@ -54,7 +54,7 @@ export const BASICS_MONEY_LESSONS: LessonContent[] = [
           ],
         },
         caption:
-          'Felt counts in big blinds, written bb. Divide money by the big blind to get bb. $300 is 150bb at 1/2. It is 100bb at 1/3 and 60bb at 2/5.',
+          'Suited counts in big blinds, written bb. Divide money by the big blind to get bb. $300 is 150bb at 1/2. It is 100bb at 1/3 and 60bb at 2/5.',
         evidence: 'math',
       },
       {
@@ -73,7 +73,7 @@ export const BASICS_MONEY_LESSONS: LessonContent[] = [
         body: [
           'To join a cash game you swap money for chips. That amount is your **buy in**.',
           'Each room sets a **minimum buy in** and a **maximum buy in** for each game. Your buy in must fall between them. The limits vary by room.',
-          'Your stack in big blinds is how deep you are. Felt’s starter charts assume you are 100bb deep.',
+          'Your stack in big blinds is how deep you are. Suited’s starter charts assume you are 100bb deep.',
         ],
       },
       {
@@ -101,7 +101,7 @@ export const BASICS_MONEY_LESSONS: LessonContent[] = [
             { label: 'Tournament', value: 'Fixed entry. Play until you bust or win', tone: 'brass' },
           ],
         },
-        caption: 'The two formats work in different ways. Felt teaches cash games first. Tournaments get their own track.',
+        caption: 'The two formats work in different ways. Suited teaches cash games first. Tournaments get their own track.',
       },
       {
         kind: 'text',
@@ -114,7 +114,7 @@ export const BASICS_MONEY_LESSONS: LessonContent[] = [
       },
       {
         kind: 'table',
-        title: 'Reading Felt’s game list',
+        title: 'Reading Suited’s game list',
         columns: ['Words', 'What they mean'],
         rows: [
           ['Live cash', 'A cash game in person at a card room'],

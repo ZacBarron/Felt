@@ -30,7 +30,7 @@ export function PageHeader({ title, kicker, subtitle, trailing, back }: Props) {
 
   // Each screen names itself in the browser and to assistive technology.
   useEffect(() => {
-    document.title = `${title} · Felt`;
+    document.title = `${title} · Suited`;
   }, [title]);
 
   return (

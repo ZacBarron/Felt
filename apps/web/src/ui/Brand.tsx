@@ -3,21 +3,23 @@ import { type CSSProperties, useId } from 'react';
 import { WORDMARK_PATH, WORDMARK_VIEWBOX } from './wordmark';
 
 /**
- * The cells of the F, on a 6x6 grid: the stem, a long top arm, a shorter
- * middle arm, and one extra cell in the top left corner, where a range chart
- * keeps its strongest hands.
+ * The mark is the suited half of a range chart, on a 6x6 grid. In every
+ * range chart suited hands sit above the diagonal and pairs sit on it, so
+ * the lit triangle is the name drawn in the language of the game.
  */
-export function isFCell(r: number, c: number): boolean {
-  return c === 0 || (r === 0 && c <= 4) || (r === 1 && c === 1) || (r === 2 && c <= 3);
+export type MarkCell = 'suited' | 'pair' | 'off';
+export function markCell(r: number, c: number): MarkCell {
+  return c > r ? 'suited' : c === r ? 'pair' : 'off';
 }
 
 export const MARK_GRID = 6;
 
 /**
- * The Felt mark: an F painted into a 6x6 grid, the way a solver paints a
- * range. Lit cells are brass; the rest of the grid stays faintly visible.
+ * The Suited mark: the suited half of a range chart, painted the way a
+ * solver paints a range. Suited cells are brass, the pairs on the diagonal
+ * are a soft line, and the offsuit half stays faintly visible.
  *
- * - `tile`: the app icon form, brass F on the spruce felt gradient.
+ * - `tile`: the app icon form, brass on the spruce felt gradient.
  * - `glyph`: the grid alone in the current color, for use on other surfaces.
  */
 export function BrandMark({
@@ -28,7 +30,7 @@ export function BrandMark({
 }: {
   size?: number;
   variant?: 'tile' | 'glyph';
-  /** Assemble along the diagonal, then light the F, like a solver painting a range. */
+  /** Assemble along the diagonal, then light the suited half, like a solver painting a range. */
   animate?: boolean;
   /** Follow the active theme. Off for places that must show the master brand. */
   themed?: boolean;
@@ -63,7 +65,8 @@ export function BrandMark({
       {Array.from({ length: n * n }, (_, i) => {
         const r = Math.floor(i / n);
         const c = i % n;
-        const lit = isFCell(r, c);
+        const kind = markCell(r, c);
+        const lit = kind === 'suited';
         return (
           <rect
             key={i}
@@ -75,8 +78,8 @@ export function BrandMark({
             className={animate ? (lit ? 'cell lit' : 'cell') : undefined}
             style={{
               ...(animate ? ({ '--d': r + c } as CSSProperties) : null),
-              fill: tile ? (lit ? (themed ? 'var(--accent)' : '#e9b866') : 'rgba(255,255,255,.08)') : 'currentColor',
-              fillOpacity: tile ? 1 : lit ? 1 : 0.14,
+              fill: tile ? (lit ? (themed ? 'var(--accent)' : '#e9b866') : kind === 'pair' ? 'rgba(255,255,255,.24)' : 'rgba(255,255,255,.08)') : 'currentColor',
+              fillOpacity: tile ? 1 : lit ? 1 : kind === 'pair' ? 0.4 : 0.14,
             }}
           />
         );
@@ -89,7 +92,7 @@ export function BrandMark({
 export function Wordmark({ height = 22, color = 'currentColor' }: { height?: number; color?: string }) {
   const [, , w, h] = WORDMARK_VIEWBOX.split(' ').map(Number);
   return (
-    <svg height={height} width={(height * w) / h} viewBox={WORDMARK_VIEWBOX} role="img" aria-label="Felt" style={{ display: 'block' }}>
+    <svg height={height} width={(height * w) / h} viewBox={WORDMARK_VIEWBOX} role="img" aria-label="Suited" style={{ display: 'block' }}>
       <path d={WORDMARK_PATH} fill={color} />
     </svg>
   );

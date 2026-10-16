@@ -70,7 +70,7 @@ function timeToTomorrow(now = new Date()) {
 export function shareText(number: number, scores: number[], rating: SkillRating) {
   const right = scores.filter((s) => s >= 1).length;
   const tier = isProvisional(rating) ? 'still settling' : tierLabel(rating);
-  return `Felt Daily #${number}: ${right} of ${scores.length}\n${shareGrid(scores)}\nFelt Rating ${Math.round(rating.rating)}, ${tier}`;
+  return `Suited Daily #${number}: ${right} of ${scores.length}\n${shareGrid(scores)}\nSuited Rating ${Math.round(rating.rating)}, ${tier}`;
 }
 
 interface Crowd {
@@ -81,7 +81,7 @@ interface Crowd {
   signedOut: boolean;
 }
 
-/** How everyone did today, from the Felt server when there is one. Signed in results count once. */
+/** How everyone did today, from the Suited server when there is one. Signed in results count once. */
 function useDailyCrowd(number: number, scores: number[]): Crowd | undefined {
   const [crowd, setCrowd] = useState<Crowd>();
   const right = scores.filter((s) => s >= 1).length;
@@ -176,7 +176,7 @@ function Result({ number, items, scores, before, after }: { number: number; item
         )}
         <div className="row" style={{ justifyContent: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
           <span className="pill num">
-            Felt Rating {Math.round(after)}, {delta === 0 ? 'no change' : delta > 0 ? `up ${delta}` : `down ${-delta}`}
+            Suited Rating {Math.round(after)}, {delta === 0 ? 'no change' : delta > 0 ? `up ${delta}` : `down ${-delta}`}
             {provisional && <span className="sr-only">, still settling</span>}
           </span>
         </div>
@@ -328,7 +328,7 @@ export function DailyPage() {
             })}
           </ol>
           <p className="pro-sub" style={{ margin: 0 }}>
-            Each answer counts toward your Felt Rating.
+            Each answer counts toward your Suited Rating.
           </p>
         </div>
         <BottomBar>

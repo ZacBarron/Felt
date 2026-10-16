@@ -114,7 +114,7 @@ function DomainRow({ label, r }: { label: string; r: SkillRating }) {
 const assumptionFields = (
   currency: string,
 ): { key: keyof TableAssumptions; label: string; step: number }[] => [
-  { key: "poolRating", label: "Average Felt Rating at your table", step: 25 },
+  { key: "poolRating", label: "Average Suited Rating at your table", step: 25 },
   {
     key: "edgeScale",
     label: "Best possible edge before rake, in bb per 100 hands",
@@ -328,7 +328,7 @@ export function YouPage() {
       </section>
 
       <section className="hero you-hero">
-        <div className="hero-label">Felt Rating</div>
+        <div className="hero-label">Suited Rating</div>
         <div className="row" style={{ alignItems: "baseline", gap: "0.6rem" }}>
           {rated ? (
             <span
@@ -461,11 +461,11 @@ export function YouPage() {
         {!rated ? (
           <div className="card winrate-card">
             <p style={{ margin: 0 }}>
-              Your estimate needs a Felt Rating first. The daily challenge gives
+              Your estimate needs a Suited Rating first. The daily challenge gives
               you one.
             </p>
             <p className="footnote" style={{ margin: 0 }}>
-              Then Felt turns your rating into bb per 100 hands at your stakes.
+              Then Suited turns your rating into bb per 100 hands at your stakes.
             </p>
           </div>
         ) : (
@@ -627,7 +627,7 @@ export function YouPage() {
           {(
             Math.round(handsForPrecision(10, sd) / a.handsPerHour / 100) * 100
           ).toLocaleString()}{" "}
-          hours of play. So Felt combines your results with your rating.
+          hours of play. So Suited combines your results with your rating.
         </div>
       </section>
 

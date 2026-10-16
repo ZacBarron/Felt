@@ -66,14 +66,14 @@ const MAX_CODE_ATTEMPTS = 5;
 const MAX_CODES_PER_HOUR = 5;
 /**
  * A session lasts until it goes unused for this long. Every signed in request
- * renews it, so a player who opens Felt now and then stays signed in.
+ * renews it, so a player who opens Suited now and then stays signed in.
  */
 export const SESSION_IDLE_DAYS = 180;
 
 /** Paid through a date still ahead. */
 const paidPro = (u: UserRow, now: Date) => !!u.pro_until && new Date(u.pro_until) > now;
 
-/** Felt Pro for this player: paid, or every signed in player while PRO_FOR_EVERYONE is on. */
+/** Suited Pro for this player: paid, or every signed in player while PRO_FOR_EVERYONE is on. */
 export function userHasPro(u: UserRow, now: Date, proForEveryone = false) {
   return proForEveryone || paidPro(u, now);
 }
@@ -186,7 +186,7 @@ export function createApp({ db, config, mailer, stripe, coach, webauthn = simple
         billing: !!(stripe && config.stripe.priceAnnual && config.stripe.priceMonthly),
         push: !!(config.push.publicKey && config.push.privateKey),
         coach: !!coach,
-        // Testing: every signed in player has Felt Pro.
+        // Testing: every signed in player has Suited Pro.
         proForEveryone: config.proForEveryone,
       },
     }),
@@ -212,7 +212,7 @@ export function createApp({ db, config, mailer, stripe, coach, webauthn = simple
         new Date(now().getTime() + CODE_TTL_MS).toISOString(),
       );
     });
-    await mailer.send(email, `Your Felt code: ${code}`, `Your Felt sign in code is ${code}. It works for 10 minutes.\n\nIf you did not ask for it, ignore this email.`);
+    await mailer.send(email, `Your Suited code: ${code}`, `Your Suited sign in code is ${code}. It works for 10 minutes.\n\nIf you did not ask for it, ignore this email.`);
     return c.json({ ok: true, ...(config.devCodes ? { devCode: code } : {}) });
   };
 
@@ -255,7 +255,7 @@ export function createApp({ db, config, mailer, stripe, coach, webauthn = simple
   app.post('/api/me/email/start', requireUser, async (c) => {
     const email = normalizeEmail((await json<{ email: string }>(c)).email);
     if (email && db.prepare('SELECT 1 FROM users WHERE email = ? AND id != ?').get(email, c.get('user').id))
-      return c.json({ error: 'That email is already used by another Felt account.' }, 409);
+      return c.json({ error: 'That email is already used by another Suited account.' }, 409);
     return sendCode(c, email ?? '');
   });
 
@@ -264,7 +264,7 @@ export function createApp({ db, config, mailer, stripe, coach, webauthn = simple
     if (checked instanceof Response) return checked;
     const u = c.get('user');
     if (db.prepare('SELECT 1 FROM users WHERE email = ? AND id != ?').get(checked.email, u.id))
-      return c.json({ error: 'That email is already used by another Felt account.' }, 409);
+      return c.json({ error: 'That email is already used by another Suited account.' }, 409);
     db.prepare('UPDATE users SET email = ? WHERE id = ?').run(checked.email, u.id);
     return c.json({ user: userJson(freshUser(u.id)) });
   });
@@ -355,7 +355,7 @@ export function createApp({ db, config, mailer, stripe, coach, webauthn = simple
         const parsed = JSON.parse(body.data) as { format?: string };
         if (parsed.format !== 'felt-backup') throw new Error();
       } catch {
-        return c.json({ error: 'That is not Felt data.' }, 400);
+        return c.json({ error: 'That is not Suited data.' }, 400);
       }
       const id = c.get('user').id;
       const data = body.data;
@@ -507,7 +507,7 @@ export function createApp({ db, config, mailer, stripe, coach, webauthn = simple
     async (c) => {
       if (!coach) return c.json({ error: 'The coach is not turned on for this server.' }, 503);
       const u = c.get('user');
-      if (!hasPro(u)) return c.json({ error: 'The coach is part of Felt Pro.', reason: 'pro' }, 403);
+      if (!hasPro(u)) return c.json({ error: 'The coach is part of Suited Pro.', reason: 'pro' }, 403);
       const parsed = parseCoachRequest(await json(c));
       if (!parsed.ok) return c.json({ error: parsed.error }, 400);
 

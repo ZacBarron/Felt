@@ -1,5 +1,5 @@
 /**
- * Felt's own icon set, drawn on a 24pt grid in the spirit of SF Symbols:
+ * Suited's own icon set, drawn on a 24pt grid in the spirit of SF Symbols:
  * 1.75 stroke, round caps and joins, optical centering. `filled` is the
  * selected state (like a .fill symbol) and tints the main shapes.
  */

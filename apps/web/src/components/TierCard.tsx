@@ -26,7 +26,7 @@ export function TierCard({ rating }: { rating: SkillRating }) {
   const info = (
     <>
       <p>
-        Each tier names the question players at that rating tend to ask. Felt measures your answers, not your thoughts. So the questions are a guide
+        Each tier names the question players at that rating tend to ask. Suited measures your answers, not your thoughts. So the questions are a guide
         and the rating is the measurement.
       </p>
       {!p.settling && (
@@ -75,7 +75,7 @@ export function TierCard({ rating }: { rating: SkillRating }) {
                   </p>
                 </div>
               ) : (
-                <p className="tier-card-line">You are in the top tier. Felt cannot measure higher than this yet.</p>
+                <p className="tier-card-line">You are in the top tier. Suited cannot measure higher than this yet.</p>
               )}
             </>
           )}
@@ -129,7 +129,7 @@ export function TierLadderSheet({ open, onClose, progress }: { open: boolean; on
           </button>
         </div>
         <p className="footnote ladder-intro">
-          Each tier asks a deeper question about the hand. Felt measures your answers, not your thoughts. So the questions are a guide.
+          Each tier asks a deeper question about the hand. Suited measures your answers, not your thoughts. So the questions are a guide.
         </p>
         <ol className="list ladder-list">
           {[...TIERS].reverse().map((t) => (

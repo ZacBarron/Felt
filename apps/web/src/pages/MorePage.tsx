@@ -82,7 +82,7 @@ export function MorePage() {
         <Avatar name={settings.profile.name} photo={settings.profile.photo} size={54} progress={progress} />
         <span className="grow">
           <span className="more-me-name">{settings.profile.name || 'You'}</span>
-          <span className="more-me-sub num">{rated ? `${Math.round(rating.rating)} · ${tierLabel(rating)}${streakText}` : 'Get your Felt Rating'}</span>
+          <span className="more-me-sub num">{rated ? `${Math.round(rating.rating)} · ${tierLabel(rating)}${streakText}` : 'Get your Suited Rating'}</span>
         </span>
         <ChevronRightIcon size={16} className="chev" />
       </Link>
@@ -90,7 +90,7 @@ export function MorePage() {
       {!pro && (
         <Link to="/pro?from=more" className="card more-pro">
           <span className="grow">
-            <span className="more-pro-title">Felt Pro</span>
+            <span className="more-pro-title">Suited Pro</span>
             <span className="more-pro-sub">Every lesson, the weekly Pro challenge and the solver</span>
           </span>
           <span className="more-pro-cta">See plans</span>
@@ -127,7 +127,7 @@ export function MorePage() {
 
       <div className="list with-icons">
         <NavRow to="/account" icon={item('/account').icon} color="var(--gray)" title="Account" subtitle={accountLine} />
-        {pro && <NavRow to={session ? '/account' : '/settings'} icon={MedalIcon} color="var(--gray)" title="Felt Pro" detail={proLine} />}
+        {pro && <NavRow to={session ? '/account' : '/settings'} icon={MedalIcon} color="var(--gray)" title="Suited Pro" detail={proLine} />}
         <NavRow to="/settings" icon={item('/settings').icon} color="var(--gray)" title="Settings" />
       </div>
 

@@ -27,7 +27,7 @@ describe('weekly pool', () => {
     expect(new Set(pool.map((p) => p.id)).size).toBe(pool.length);
   });
 
-  it('only holds decisions Felt grades objectively, from real content', () => {
+  it('only holds decisions Suited grades objectively, from real content', () => {
     for (const { decision: d, kind } of weeklyPool()) {
       if (d.kind === 'chart') {
         const chart = getChart(d.chartId)!;
@@ -75,7 +75,7 @@ describe('weekly set', () => {
 });
 
 describe('weekly access and review', () => {
-  it('is for Felt Pro', () => {
+  it('is for Suited Pro', () => {
     expect(weeklyAvailable({ pro: false })).toBe(false);
     expect(weeklyAvailable({ pro: true })).toBe(true);
     expect(weeklyAvailable({ pro: false, devMode: true, devPro: true })).toBe(true);

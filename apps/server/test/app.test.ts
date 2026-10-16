@@ -136,7 +136,7 @@ describe('sync', () => {
     expect(meta.data).toBeUndefined();
   });
 
-  it('only accepts Felt backups', async () => {
+  it('only accepts Suited backups', async () => {
     const { token } = await signIn();
     expect((await call('PUT', '/api/sync', { baseVersion: 0, data: '{"x":1}' }, token)).status).toBe(400);
   });
@@ -326,7 +326,7 @@ describe('trial reminders', () => {
     expect(await runTrialNotices(db, sender, clock)).toBe(1);
     expect(await runTrialNotices(db, sender, new Date(clock.getTime() + 5 * 60_000))).toBe(0);
     expect(JSON.parse(sent[0])).toEqual(trialEndingNotice(until, 'America/New_York'));
-    expect(JSON.parse(sent[0]).body).toBe('Felt Pro starts on Oct 16. To cancel, open Account in Felt.');
+    expect(JSON.parse(sent[0]).body).toBe('Suited Pro starts on Oct 16. To cancel, open Account in Suited.');
   });
 
   it('respects the reminder switch and needs a device to reach', async () => {

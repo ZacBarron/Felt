@@ -12,7 +12,7 @@ describe('config', () => {
 
   it('treats blank values as unset', () => {
     const c = loadConfig({ NODE_ENV: 'production', EMAIL_FROM: '', VAPID_SUBJECT: ' ', RESEND_API_KEY: '', STRIPE_SECRET_KEY: '', PORT: '' });
-    expect(c.email).toEqual({ resendKey: undefined, from: 'Felt <login@example.com>' });
+    expect(c.email).toEqual({ resendKey: undefined, from: 'Suited <login@example.com>' });
     expect(c.push.subject).toBe('mailto:support@example.com');
     expect(c.stripe.secretKey).toBeUndefined();
     expect(c.port).toBe(8787);
@@ -34,13 +34,13 @@ describe('passkey and CORS config', () => {
       WEBAUTHN_ORIGINS: 'https://zacbarron.github.io/Felt/, http://localhost:5173 ,,nonsense',
       ALLOWED_ORIGINS: 'https://zacbarron.github.io',
     });
-    expect(c.webauthn).toEqual({ rpId: 'zacbarron.github.io', rpName: 'Felt', origins: ['https://zacbarron.github.io', 'http://localhost:5173'] });
+    expect(c.webauthn).toEqual({ rpId: 'zacbarron.github.io', rpName: 'Suited', origins: ['https://zacbarron.github.io', 'http://localhost:5173'] });
     expect(c.allowedOrigins).toEqual(['https://zacbarron.github.io']);
   });
 
   it('is off when blank', () => {
-    const c = loadConfig({ WEBAUTHN_RP_ID: '', WEBAUTHN_ORIGINS: ' ', ALLOWED_ORIGINS: '', WEBAUTHN_RP_NAME: 'Felt Poker' });
-    expect(c.webauthn).toEqual({ rpId: undefined, rpName: 'Felt Poker', origins: [] });
+    const c = loadConfig({ WEBAUTHN_RP_ID: '', WEBAUTHN_ORIGINS: ' ', ALLOWED_ORIGINS: '', WEBAUTHN_RP_NAME: 'Suited Poker' });
+    expect(c.webauthn).toEqual({ rpId: undefined, rpName: 'Suited Poker', origins: [] });
     expect(c.allowedOrigins).toEqual([]);
   });
 });

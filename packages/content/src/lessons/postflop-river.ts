@@ -56,7 +56,7 @@ export const POSTFLOP_RIVER_LESSONS: LessonContent[] = [
           ['KT, K7s to K4s', '16', 'Ahead'],
         ],
         note:
-          'This is an assumed calling range. BB 3bet AK before the flop and folded offsuit kings below KT earlier. Combos are exact, with your cards and the board removed. You are ahead of 16 and behind 28. Felt’s BB chart also defends K9o to K5o. Adding them gives 34 ahead and 38 behind, which is still a check.',
+          'This is an assumed calling range. BB 3bet AK before the flop and folded offsuit kings below KT earlier. Combos are exact, with your cards and the board removed. You are ahead of 16 and behind 28. Suited’s BB chart also defends K9o to K5o. Adding them gives 34 ahead and 38 behind, which is still a check.',
         evidence: 'math',
       },
       {

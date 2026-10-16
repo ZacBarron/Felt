@@ -472,7 +472,7 @@ function RatingChange({ from }: { from?: number }) {
   if (!now || now.games === 0 || (from !== undefined && delta === 0)) return null;
   return (
     <div className={`rating-change ${delta > 0 ? 'up' : 'down'}`} role="status">
-      <span className="footnote">{from === undefined ? 'Your first Felt Rating' : 'Felt Rating'}</span>
+      <span className="footnote">{from === undefined ? 'Your first Suited Rating' : 'Suited Rating'}</span>
       <span className="num rating-change-value">{Math.round(now.rating)}</span>
       {from !== undefined && <span className="pill num">{shown > 0 ? `+${shown}` : shown}</span>}
     </div>
@@ -797,7 +797,7 @@ function ReviewLocked() {
           </span>
         }
         title="Review starts after a lesson"
-        body="Each lesson adds cards here. Felt brings each one back before you forget it."
+        body="Each lesson adds cards here. Suited brings each one back before you forget it."
       />
       <BottomBar>
         <Link to="/learn" className="btn btn-primary btn-lg btn-block">

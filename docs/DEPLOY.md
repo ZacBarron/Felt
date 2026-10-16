@@ -1,8 +1,8 @@
-# Testing and deploying Felt
+# Testing and deploying Suited
 
-Felt is a web app that installs on a phone (a PWA). It runs on its own from any static host. Lessons, charts and the solver ship inside the app. Each player's progress is stored in their own browser.
+Suited is a web app that installs on a phone (a PWA). It runs on its own from any static host. Lessons, charts and the solver ship inside the app. Each player's progress is stored in their own browser.
 
-The Felt server adds accounts, sync across devices, study reminders, leagues and Felt Pro billing. One server process hosts both the app and its API. It keeps everything in one SQLite file.
+The Suited server adds accounts, sync across devices, study reminders, leagues and Suited Pro billing. One server process hosts both the app and its API. It keeps everything in one SQLite file.
 
 ## 1. Test
 
@@ -100,7 +100,7 @@ Install the `fly` command line tool and sign in with `fly auth login`. Then:
    ```bash
    fly secrets set \
      RESEND_API_KEY=re_... \
-     EMAIL_FROM="Felt <login@yourdomain.com>" \
+     EMAIL_FROM="Suited <login@yourdomain.com>" \
      VAPID_PUBLIC_KEY=... \
      VAPID_PRIVATE_KEY=... \
      VAPID_SUBJECT=mailto:you@yourdomain.com
@@ -155,20 +155,20 @@ Every setting is an environment variable. `apps/server/.env.example` lists them 
 | `WEB_DIR` | The built app to serve. The image sets `/app/web`. | Set for you |
 | `WEBAUTHN_RP_ID` | The domain the app's pages are on, such as `felt-app.fly.dev` or `zacbarron.github.io`. Passkeys are tied to it. | For passkeys |
 | `WEBAUTHN_ORIGINS` | The exact page origins, comma separated, such as `https://zacbarron.github.io`. | For passkeys |
-| `WEBAUTHN_RP_NAME` | The name in passkey prompts. The default is Felt. | Optional |
+| `WEBAUTHN_RP_NAME` | The name in passkey prompts. The default is Suited. | Optional |
 | `ALLOWED_ORIGINS` | Other sites that may call the API from a browser, comma separated. Empty means only the server's own pages. | For the Pages link |
 | `RESEND_API_KEY` | Sends sign in emails through Resend. | For email codes |
-| `EMAIL_FROM` | The sender, such as `Felt <login@yourdomain.com>`. Use your verified domain. | For accounts |
+| `EMAIL_FROM` | The sender, such as `Suited <login@yourdomain.com>`. Use your verified domain. | For accounts |
 | `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY` | Signs study reminders. | For reminders |
 | `VAPID_SUBJECT` | A `mailto:` address push services can contact. | For reminders |
-| `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` | Takes payments for Felt Pro. | Optional |
+| `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` | Takes payments for Suited Pro. | Optional |
 | `STRIPE_PRICE_ANNUAL`, `STRIPE_PRICE_MONTHLY` | The 2 Stripe price ids. | Optional |
 | `TRIAL_DAYS` | Length of the free trial. The default is 7. | Optional |
-| `ANTHROPIC_API_KEY` | Turns on the AI coach for Felt Pro players. Without it the coach is off. | Optional |
+| `ANTHROPIC_API_KEY` | Turns on the AI coach for Suited Pro players. Without it the coach is off. | Optional |
 | `COACH_MODEL` | The Claude model the coach uses. The default is `claude-opus-5-5`. | Optional |
 | `COACH_EFFORT` | How hard the model thinks: `low`, `medium`, `high`, `xhigh` or `max`. The default is `medium`. | Optional |
 | `COACH_DAILY_LIMIT` | Coach messages each player can send a day. The default is 40. | Optional |
-| `PRO_FOR_EVERYONE` | Testing only. `true` gives every signed in player Felt Pro, including the AI coach. The default is `false`. | Optional |
+| `PRO_FOR_EVERYONE` | Testing only. `true` gives every signed in player Suited Pro, including the AI coach. The default is `false`. | Optional |
 | `VITE_SUPPORT_EMAIL` | Contact address on the legal pages. It is read when the app is built. | Optional |
 
 ### How players sign in
@@ -179,7 +179,7 @@ An emailed code is the fallback. It is on when `RESEND_API_KEY` is set. A passke
 
 The health check lists `passkeys` and `email`. `accounts` is on when either one is.
 
-A sign in lasts until it goes unused for 180 days. Every visit renews it, so a player who opens Felt now and then stays signed in. Logging out ends it on the server.
+A sign in lasts until it goes unused for 180 days. Every visit renews it, so a player who opens Suited now and then stays signed in. Logging out ends it on the server.
 
 ### Without an email key
 
@@ -189,7 +189,7 @@ Development mode does show codes on screen. It is turned off whenever `NODE_ENV`
 
 For real testers, set up Resend. Its free tier is enough.
 
-### Felt Pro payments (optional)
+### Suited Pro payments (optional)
 
 1. In Stripe, create a product with a monthly and an annual price. Copy both price ids.
 2. Add a webhook endpoint at `<APP_URL>/api/billing/webhook`. Send it `checkout.session.completed` and the `customer.subscription` events.
@@ -199,7 +199,7 @@ The health check reports billing as on once all 4 are set. Use test mode keys un
 
 ### The AI coach (optional)
 
-The coach answers questions about a player's own game. It uses Claude from Anthropic. Only signed in Felt Pro players can use it.
+The coach answers questions about a player's own game. It uses Claude from Anthropic. Only signed in Suited Pro players can use it.
 
 1. Create an API key at console.anthropic.com. Set a monthly spend limit there.
 2. Set `ANTHROPIC_API_KEY` and redeploy. On Fly, use `fly secrets set ANTHROPIC_API_KEY=sk-ant-...`.
@@ -207,11 +207,11 @@ The coach answers questions about a player's own game. It uses Claude from Anthr
 
 Each player gets `COACH_DAILY_LIMIT` messages a day, counted on the server. The count resets at midnight in the player's time zone. A failed call does not count. The server never sends the key to the app.
 
-The app sends a short summary with each question. It holds the Felt Rating, goals, game settings and recent misses. Nothing else from the device leaves it.
+The app sends a short summary with each question. It holds the Suited Rating, goals, game settings and recent misses. Nothing else from the device leaves it.
 
-### Felt Pro for testing (optional)
+### Suited Pro for testing (optional)
 
-Before purchases are open, you can give every signed in player Felt Pro. The AI coach and every other server check then treat them as Pro. Nobody is charged.
+Before purchases are open, you can give every signed in player Suited Pro. The AI coach and every other server check then treat them as Pro. Nobody is charged.
 
 On Render:
 
@@ -223,7 +223,7 @@ On Render:
 
 On Fly, run `fly secrets set PRO_FOR_EVERYONE=true`. To turn it off, set it to `false` or delete it, then redeploy.
 
-Players see Felt Pro as on once they sign in. Guests stay on the free plan. To test Pro on one device without an account, use Settings, Testing, Unlock Felt Pro for testing. That switch only changes that device, so the coach still needs this variable or a real subscription.
+Players see Suited Pro as on once they sign in. Guests stay on the free plan. To test Pro on one device without an account, use Settings, Testing, Unlock Suited Pro for testing. That switch only changes that device, so the coach still needs this variable or a real subscription.
 
 Turn it off before you open purchases.
 
@@ -257,7 +257,7 @@ HTTPS is issued automatically. Then set `APP_URL` to the new address and redeplo
 
 ## Accounts on the GitHub Pages link
 
-The copy at https://zacbarron.github.io/Felt/ is static. It can still have accounts, sync and passkeys: it talks to a Felt server deployed somewhere else.
+The copy at https://zacbarron.github.io/Felt/ is static. It can still have accounts, sync and passkeys: it talks to a Suited server deployed somewhere else.
 
 1. Deploy the server with the Render blueprint (`render.yaml`) or on Fly (`fly.toml`), as above.
 2. On the server, set these and redeploy.
@@ -306,15 +306,15 @@ Add the domain in the host's dashboard. Create the DNS record it shows. HTTPS is
 
 ## 4. Updates
 
-The service worker updates itself. After a deploy, players get the new version the next time they open the app. The Felt server and the static configs keep `sw.js` and `index.html` uncached so updates are never stuck.
+The service worker updates itself. After a deploy, players get the new version the next time they open the app. The Suited server and the static configs keep `sw.js` and `index.html` uncached so updates are never stuck.
 
 ## 5. Keeping player data safe
 
 Study data lives in the browser (IndexedDB) on each device. A deploy never touches it. A new domain starts empty. Players who sign in also keep a copy on the server, so it follows them to a new device.
 
-- Felt asks the browser to keep its storage after onboarding and after signing up. Settings, Your data shows whether that was granted.
-- Signed in players get every table and their settings back on a new device. Felt saves a few seconds after studying, when the app goes to the background, when the page closes and when the connection returns.
-- Safari clears site data after about 7 days without a visit. Adding Felt to the home screen prevents this. Ask players to do it.
+- Suited asks the browser to keep its storage after onboarding and after signing up. Settings, Your data shows whether that was granted.
+- Signed in players get every table and their settings back on a new device. Suited saves a few seconds after studying, when the app goes to the background, when the page closes and when the connection returns.
+- Safari clears site data after about 7 days without a visit. Adding Suited to the home screen prevents this. Ask players to do it.
 - Settings, Your data, Save a backup writes one file with everything. Restore from a backup brings it back on any device.
 - Keep the same domain once players use the app. Data is tied to the address.
 

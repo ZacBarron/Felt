@@ -60,7 +60,7 @@ export const TARGETS: { tier: string; note: string }[] = [
   { tier: 'Solid', note: 'Sound basics and few big mistakes' },
   { tier: 'Regular', note: 'The right play in common spots' },
   { tier: 'Expert', note: 'Adjust to each opponent on purpose' },
-  { tier: 'Elite', note: 'Close to perfect in every spot Felt rates' },
+  { tier: 'Elite', note: 'Close to perfect in every spot Suited rates' },
 ];
 
 /**
@@ -75,11 +75,11 @@ export const OPPONENTS: { id: NonNullable<Profile['opponents']>; label: string; 
   { id: 'tough', label: 'Mostly strong regulars', note: 'Tight, aggressive and hard to read', module: 'foundations/theory', poolShift: 150 },
 ];
 
-/** Whether a regular player has data Felt can read. Real hands beat guesses about leaks. */
+/** Whether a regular player has data Suited can read. Real hands beat guesses about leaks. */
 export const HAND_SOURCES: { id: NonNullable<Profile['handSource']>; label: string; note: string }[] = [
   { id: 'online', label: 'Yes, I have hand histories', note: 'From an online site or a tracker' },
   { id: 'tracked', label: 'I log my sessions', note: 'Wins, losses and hours' },
-  { id: 'none', label: 'Not yet', note: 'Felt can help you start' },
+  { id: 'none', label: 'Not yet', note: 'Suited can help you start' },
 ];
 
 /** Each area says what it means in plain words, so the list works for every level. */

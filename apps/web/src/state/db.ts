@@ -51,7 +51,7 @@ export interface SavedItem {
   spot?: SavedSolverSpot;
 }
 
-/** One graded answer, replayed into the Felt Rating. */
+/** One graded answer, replayed into the Suited Rating. */
 export interface StoredAnswer {
   id?: number;
   at: Date;
@@ -98,7 +98,7 @@ export interface StoredHand {
   raw: string;
 }
 
-/** A finished scenario: the river grade from Felt Solver and whether preflop matched the chart. */
+/** A finished scenario: the river grade from Suited Solver and whether preflop matched the chart. */
 export interface StoredScenario {
   id: string;
   at: Date;
@@ -177,7 +177,7 @@ export interface StoredWeekly {
   ratingAfter: number;
 }
 
-/** A weekly decision: a range decision or lesson question, a math fact, or a scenario river solved by Felt Solver. */
+/** A weekly decision: a range decision or lesson question, a math fact, or a scenario river solved by Suited Solver. */
 export type WeeklyDecision =
   | { kind: 'chart'; chartId: string; hand: string }
   | { kind: 'quiz'; key: string; step: number }
