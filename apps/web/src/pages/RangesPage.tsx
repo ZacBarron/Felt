@@ -132,7 +132,12 @@ function ChartAbout({ chart, exact, mode }: { chart: Chart; exact: boolean; mode
     <div className="chart-about">
       <div className="chart-line">
         <span className="chart-line-text">{line}</span>
-        {approx && <span className="pill">Approximate</span>}
+        {approx && (
+          // Says what the chart is close to, and opens the reason on tap.
+          <button type="button" className="pill pill-button" aria-expanded={open} aria-controls={panelId} onClick={() => setOpen((o) => !o)}>
+            Close to solver
+          </button>
+        )}
         {exploit && <span className="pill pill-exploit">Exploit</span>}
         {!exact && <span className="pill pill-warn">Nearest table size</span>}
         {offStack && <span className="pill pill-warn">You play {settings.game.stackBb}bb</span>}
@@ -153,7 +158,11 @@ function ChartAbout({ chart, exact, mode }: { chart: Chart; exact: boolean; mode
           <p>
             <strong>{chart.spec.title}.</strong> Built for {chartFormatLabel(chart.spec)}.
           </p>
-          {approx && <p>This is a starter chart. Its frequencies are approximate.</p>}
+          {approx && (
+            <p>
+              <strong>Close to solver.</strong> Felt built this chart by hand to match published solver results. It is close but not exact. The percentages on mixed hands are the least certain.
+            </p>
+          )}
           {exploit && <p>This is an exploit chart. It targets a common leak, not a balanced opponent.</p>}
           {chart.spec.note && <p>{chart.spec.note}</p>}
           {mode !== 'chart' && <p>Practice here does not change your review schedule.</p>}

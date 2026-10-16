@@ -19,7 +19,7 @@ const DOCS = {
       ],
       [
         'Accuracy',
-        'Felt labels where its numbers come from. Exact math is exact. Starter charts are approximations of published solver results and are marked Approximate. Win rate figures mix arithmetic (rake and tips) with a model, and the app says which is which. Poker results carry a lot of luck. Use your own judgment at the table.',
+        'Felt labels where its numbers come from. Exact math is exact. Starter charts are built by hand to match published solver results and are marked Close to solver. Win rate figures mix arithmetic (rake and tips) with a model, and the app says which is which. Poker results carry a lot of luck. Use your own judgment at the table.',
       ],
       [
         'Your account',

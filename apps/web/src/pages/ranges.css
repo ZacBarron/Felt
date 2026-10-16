@@ -527,3 +527,13 @@
   color: var(--label);
   text-shadow: none;
 }
+
+/* "Close to solver": a pill that opens its own explanation. */
+.chart-line .pill-button {
+  border: 0;
+  font: inherit;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--label);
+  cursor: pointer;
+}
