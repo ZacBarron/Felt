@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { dailyItems, shareText } from '../src/pages/DailyPage';
 import { db } from '../src/state/db';
 import { domainForLesson, ratingSnapshot, recordLessonQuiz, recordRated, streakNow } from '../src/state/rating';
-import { chartItemDifficulty } from '@felt/core';
+import { CEILING_MARGIN, chartItemDifficulty, DIFFICULTY, START_RATING } from '@felt/core';
 import { chartChoices } from '../src/drills/DecisionItem';
 import { getChart } from '../src/state/charts';
 import { addHandsToReview, buildQueue, recordAnswer } from '../src/state/review';
@@ -32,9 +32,17 @@ describe('rated answers', () => {
   it('raise the rating for right answers, by area', async () => {
     await recordLessonQuiz('foundations/math/pot-odds', 5, true, 'lesson');
     const snap = await ratingSnapshot();
-    expect(snap.overall.rating).toBeGreaterThan(1200);
+    expect(snap.overall.rating).toBeGreaterThan(START_RATING);
     expect(snap.domains.math.games).toBe(1);
     expect(snap.domains.preflop.games).toBe(0);
+  });
+
+  it('keep a new player near Beginner after a run of basics answers', async () => {
+    const t0 = Date.now();
+    for (let i = 0; i < 12; i++) await recordRated({ itemId: `quiz:basics/rules/goal#${i}`, domain: 'theory', difficulty: 1300, score: 1, source: 'lesson' }, new Date(t0 + i * 60_000));
+    const snap = await ratingSnapshot();
+    // Saved at the old difficulty, but basics are worked out again as easy items answered inside the lesson.
+    expect(snap.overall.rating).toBeLessThanOrEqual(Math.max(START_RATING, DIFFICULTY.lessonBasics - DIFFICULTY.inLessonEase + CEILING_MARGIN));
   });
 
   it('never rate self graded flashcards', async () => {

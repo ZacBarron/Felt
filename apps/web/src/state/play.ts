@@ -2,6 +2,7 @@ import { botById, type BotCharacter, STARTER_CHARTS } from '@felt/content';
 import {
   ALL_HAND_CLASSES,
   botRange,
+  boundaryHands,
   type Chart,
   chartItemDifficulty,
   comboCount,
@@ -363,7 +364,7 @@ export function gradeHand(history: readonly PlayDecision[], seats: readonly Play
         detail: `${found.chart.spec.title}. The chart plays ${hand} as ${mixWords(found.chart, hand)}.`,
         chart: { id: found.chart.spec.id, hand },
         mix: mixWords(found.chart, hand),
-        rated: chartItemDifficulty(mix, [...found.chart.spec.actions.map((a) => a.id), 'fold']) !== undefined,
+        rated: boundaryHands(found.chart).includes(hand) && chartItemDifficulty(mix, [...found.chart.spec.actions.map((a) => a.id), 'fold']) !== undefined,
       });
       return;
     }
@@ -403,9 +404,11 @@ export async function rateHand(grades: readonly PlayGrade[], history: readonly P
     if (!g.rated || !g.grade) continue;
     const score = g.grade === 'best' || g.grade === 'correct' ? 1 : g.grade === 'inaccuracy' ? 0.5 : 0;
     if (g.tier === 'chart' && g.chart) {
+      // Only close calls count, the same hands the drills rate. Folding 72o proves nothing.
       const chart = getChart(g.chart.id)!;
+      if (!boundaryHands(chart).includes(g.chart.hand)) continue;
       const difficulty = chartItemDifficulty(chart.mixes.get(g.chart.hand) ?? { fold: 1 }, [...chart.spec.actions.map((a) => a.id), 'fold']);
-      if (difficulty !== undefined) await recordRated({ itemId: `play:${handId}:${g.index}`, domain: 'preflop', difficulty, score, source: 'play' });
+      if (difficulty !== undefined) await recordRated({ itemId: `play:edge:${g.chart.id}:${g.chart.hand}:${handId}`, domain: 'preflop', difficulty, score, source: 'play' });
     } else if (g.tier === 'bot' && history[g.index]) {
       await recordRated({ itemId: `play:${handId}:${g.index}`, domain: 'exploit', difficulty: DIFFICULTY.playCall, score, source: 'play' });
     }

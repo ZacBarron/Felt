@@ -1,23 +1,25 @@
 import { describe, expect, it } from 'vitest';
 import {
-  difficultyFor,
+  CEILING_MARGIN,
   DIFFICULTY,
+  difficultyFor,
   expectedScore,
   gainPerAnswer,
-  newRating,
-  type SkillRating,
-  TIERS,
-  tierAt,
-  tierProgress,
   inflateRd,
   isProvisional,
+  newRating,
   nextTier,
   pickAdaptive,
-  tierLabel,
   ratingInterval,
   replayRatings,
+  START_RATING,
   START_RD,
+  tierAt,
   tierFor,
+  tierLabel,
+  tierProgress,
+  TIERS,
+  type SkillRating,
   updateRating,
   updateRatingPeriod,
 } from '../src';
@@ -251,5 +253,34 @@ describe('Tier ladder and progress', () => {
     }
     // A nearly settled rating needs fewer.
     expect(tierProgress({ rating: 1300, rd: 130, games: 12 }).answersToSettle!.atLevel).toBeLessThan(atLevel);
+  });
+});
+
+describe('honest early ratings', () => {
+  const run = (items: [number, number][], domain: 'theory' | 'preflop' = 'theory') =>
+    replayRatings(items.map(([difficulty, score], i) => ({ at: 1_700_000_000_000 + i * 60_000, itemId: `i${i}`, domain, difficulty, score })));
+
+  it('starts a new player near the Beginner tier', () => {
+    expect(START_RATING).toBe(1000);
+    expect(tierFor(START_RATING)).toBe('Beginner');
+  });
+
+  it('cannot rate a perfect run far above the items it was on', () => {
+    const basics = run(Array(20).fill([DIFFICULTY.lessonBasics, 1]));
+    expect(basics.overall.rating).toBeLessThanOrEqual(DIFFICULTY.lessonBasics + CEILING_MARGIN);
+    expect(basics.domains.theory.rating).toBeLessThanOrEqual(DIFFICULTY.lessonBasics + CEILING_MARGIN);
+    expect(Math.max(...basics.history.map((h) => h.rating))).toBeLessThanOrEqual(DIFFICULTY.lessonBasics + CEILING_MARGIN);
+  });
+
+  it('lets the ceiling rise once harder items are answered right', () => {
+    const r = run([...Array(10).fill([DIFFICULTY.lessonBasics, 1]), ...Array(10).fill([DIFFICULTY.chartEdge, 1])], 'preflop');
+    expect(r.overall.rating).toBeGreaterThan(DIFFICULTY.lessonBasics + CEILING_MARGIN);
+    expect(r.overall.rating).toBeLessThanOrEqual(DIFFICULTY.chartEdge + CEILING_MARGIN);
+  });
+
+  it('still settles near the level a player really is', () => {
+    // Half right on close calls means a rating near their difficulty.
+    const r = run(Array.from({ length: 60 }, (_, i) => [DIFFICULTY.chartEdge, i % 2] as [number, number]), 'preflop');
+    expect(Math.abs(r.overall.rating - DIFFICULTY.chartEdge)).toBeLessThan(40);
   });
 });

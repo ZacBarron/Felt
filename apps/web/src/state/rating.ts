@@ -27,9 +27,18 @@ export function domainForLesson(key: string): SkillDomain {
   return 'theory';
 }
 
-export function lessonQuizDifficulty(key: string): number {
-  return entryFor(key)?.content?.level === 'advanced' ? DIFFICULTY.lessonAdvanced : DIFFICULTY.lessonCore;
+/**
+ * How hard a lesson quiz is. Basics are easy items. A quiz answered inside the
+ * lesson, moments after reading the answer, counts as easier than the same
+ * question recalled later in Review, a check or a challenge.
+ */
+export function lessonQuizDifficulty(key: string, source?: StoredAnswer['source']): number {
+  const base = key.startsWith('basics/') ? DIFFICULTY.lessonBasics : entryFor(key)?.content?.level === 'advanced' ? DIFFICULTY.lessonAdvanced : DIFFICULTY.lessonCore;
+  return source === 'lesson' ? base - DIFFICULTY.inLessonEase : base;
 }
+
+/** Play rated every preflop hand at first, trivial folds included. Those answers no longer count. */
+const legacyPlay = (a: StoredAnswer) => a.source === 'play' && a.domain === 'preflop' && !a.itemId.startsWith('play:edge:');
 
 /** The same item answered again this soon is recall from the screen, not from memory: it does not count. */
 const REPEAT_WINDOW_MS = 10 * 60 * 1000;
@@ -45,19 +54,20 @@ export function recordLessonQuiz(key: string, step: number, correct: boolean, so
   return recordRated({
     itemId: `quiz:${key}#${step}`,
     domain: domainForLesson(key),
-    difficulty: lessonQuizDifficulty(key),
+    difficulty: lessonQuizDifficulty(key, source),
     score: correct ? 1 : 0,
     source,
   });
 }
 
 export async function ratingSnapshot(): Promise<RatingSnapshot> {
-  const answers = await db.answers.toArray();
+  const answers = (await db.answers.toArray()).filter((a) => !legacyPlay(a));
   const events: RatingEvent[] = answers.map((a) => ({
     at: a.at.getTime(),
     itemId: a.itemId,
     domain: a.domain,
-    difficulty: calibratedDifficulty(a.itemId, a.difficulty),
+    // Quiz difficulty is worked out again, so answers saved before a change in it count fairly.
+    difficulty: calibratedDifficulty(a.itemId, a.itemId.startsWith('quiz:') ? lessonQuizDifficulty(a.itemId.slice(5).split('#')[0], a.source) : a.difficulty),
     score: a.score,
   }));
   return replayRatings(events);

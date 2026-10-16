@@ -37,14 +37,27 @@ export interface RatingEvent {
   score: number;
 }
 
-export const START_RATING = 1200;
-export const START_RD = 350;
+/**
+ * A new player starts as a beginner, not as a solid player: the prior is
+ * that someone who has shown nothing yet is near the Beginner tier. The
+ * prior spread is narrower than chess's 350 so a handful of answers cannot
+ * fling a rating across the ladder.
+ */
+export const START_RATING = 1000;
+export const START_RD = 250;
+/**
+ * A rating can sit at most this far above the hardest item answered right.
+ * With no misses the rating has no upper bound in the maths, but Suited has
+ * only measured what it asked: ten right answers on basics say nothing about
+ * river play.
+ */
+export const CEILING_MARGIN = 200;
 export const MIN_RD = 45;
 /** Items are fixed opponents with a little uncertainty of their own. */
 export const ITEM_RD = 60;
 /** Rd above this is provisional, the same convention chess sites use. */
 export const PROVISIONAL_RD = 110;
-/** Growth of rd per day without play: from settled (50) back to new (350) in about 100 days. */
+/** Growth of rd per day without play: from settled (50) back to new (250) in about 50 days. */
 export const RD_GROWTH_PER_DAY = 35;
 
 const Q = Math.LN10 / 400;
@@ -96,6 +109,7 @@ export function updateRating(current: SkillRating, difficulty: number, score: nu
 }
 
 export interface RatingSnapshot {
+  /** Capped at the measured ceiling, see `CEILING_MARGIN`. */
   overall: SkillRating;
   domains: Record<SkillDomain, SkillRating>;
   /** Overall rating after each event, for a history chart. */
@@ -108,9 +122,17 @@ export function replayRatings(events: readonly RatingEvent[]): RatingSnapshot {
   let overall = newRating();
   const domains = Object.fromEntries(SKILL_DOMAINS.map((d) => [d, newRating()])) as Record<SkillDomain, SkillRating>;
   const history: RatingSnapshot['history'] = [];
+  // The hardest item answered right, overall and per domain.
+  let best = -Infinity;
+  const bestIn = Object.fromEntries(SKILL_DOMAINS.map((d) => [d, -Infinity])) as Record<SkillDomain, number>;
+  const cap = (r: SkillRating, hardest: number): SkillRating => ({ ...r, rating: Math.min(r.rating, Math.max(START_RATING, hardest + CEILING_MARGIN)) });
   for (const e of sorted) {
-    overall = updateRating(overall, e.difficulty, e.score, e.at);
-    domains[e.domain] = updateRating(domains[e.domain], e.difficulty, e.score, e.at);
+    if (e.score >= 1) {
+      best = Math.max(best, e.difficulty);
+      bestIn[e.domain] = Math.max(bestIn[e.domain], e.difficulty);
+    }
+    overall = cap(updateRating(overall, e.difficulty, e.score, e.at), best);
+    domains[e.domain] = cap(updateRating(domains[e.domain], e.difficulty, e.score, e.at), bestIn[e.domain]);
     history.push({ at: e.at, rating: overall.rating, rd: overall.rd });
   }
   return { overall, domains, history };
@@ -307,6 +329,8 @@ export const DIFFICULTY = {
   chartMixed: 1250,
   /** Painting a whole chart. */
   chartPaint: 1600,
+  /** A quiz from the Poker basics track: the rules and a first strategy. */
+  lessonBasics: 875,
   lessonCore: 1300,
   lessonAdvanced: 1600,
   /** A decision from a saved solver spot: the player chose it after seeing the answer, so it is not rated as the hardest item. */
@@ -317,6 +341,8 @@ export const DIFFICULTY = {
   mathFact: 1250,
   /** A river call or fold in Play, priced exactly against the bot's real range. */
   playCall: 1400,
+  /** Taken off a lesson quiz answered inside the lesson, moments after reading the answer. Recall later in Review gets the full difficulty. */
+  inLessonEase: 200,
 } as const;
 
 /**
