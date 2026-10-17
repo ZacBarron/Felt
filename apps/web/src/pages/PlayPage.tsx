@@ -26,7 +26,8 @@ import { haptic } from '../haptics';
 import { useCanAskCoach } from '../state/coach';
 import { actionText, gradeHand, handNotes, HERO, type PlayGrade, type PlaySeat, rateHand } from '../state/play';
 import { applyAction, botAction, dealNext, liveRng, seatsOf } from '../state/playFlow';
-import { getSession, type HandRecord, leaveTable, setSession, type TableSession, useTableSession } from '../state/playTable';
+import { track } from '../state/events';
+import { getSession, type HandRecord, leaveTable, tableTag, setSession, type TableSession, useTableSession } from '../state/playTable';
 import { addHandsToReview } from '../state/review';
 import { shareUrl } from '../state/referral';
 import { ChevronLeftIcon, ChevronRightIcon, CoachIcon, MinusIcon, MoreIcon, PlusIcon, ShareIcon } from '../ui/icons';
@@ -94,6 +95,7 @@ function TableScreen({ session }: { session: TableSession }) {
     const s = getSession();
     if (s?.live) rng.current = liveRng(s.live.seed);
     const skipped = s?.justSkipped ?? 0;
+    if (s?.live) track('hand_dealt', { table: tableTag(s.table), skipped, speed: s.settings.speed });
     setNote(skipped ? `Skipped ${skipped} clear ${skipped === 1 ? 'fold' : 'folds'}` : undefined);
   }
 
@@ -146,6 +148,7 @@ function TableScreen({ session }: { session: TableSession }) {
         const grades = gradeHand(rec.history, seats, rec.seed);
         void rateHand(grades, rec.history, rec.id);
         const graded = grades.filter((g) => g.grade);
+        for (const g of graded) track('decision_graded', { tier: g.tier, grade: g.grade, street: g.street });
         setSession((s) => ({
           ...s,
           hands: s.hands.map((h) => (h.id === rec.id ? { ...h, grades } : h)),
@@ -437,7 +440,10 @@ function PreActions({ state, value, onChange }: { state: HandState; value?: PreA
 // Table settings ---------------------------------------------------------------------
 
 function MenuSheet({ open, onClose, session, onLeave }: { open: boolean; onClose: () => void; session: TableSession; onLeave: () => void }) {
-  const set = (patch: Partial<TableSession['settings']>) => setSession((s) => ({ ...s, settings: { ...s.settings, ...patch } }));
+  const set = (patch: Partial<TableSession['settings']>) => {
+    for (const [setting, value] of Object.entries(patch)) track('play_setting_changed', { setting, value: String(value) });
+    setSession((s) => ({ ...s, settings: { ...s.settings, ...patch } }));
+  };
   const top = Math.max(0, session.table.buyIns[2] - session.stacks[HERO] - session.pendingChips);
   const { settings } = session;
   return (

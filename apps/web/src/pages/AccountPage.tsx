@@ -153,7 +153,7 @@ function SignedIn({ user, features }: { user: ServerUser; features: ServerFeatur
         </div>
       </section>
 
-      <BillingIssueBanner />
+      <BillingIssueBanner where="account" />
 
       {features.billing && (
         <Section>

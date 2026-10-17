@@ -410,7 +410,10 @@ export function ShareSheet({ open, first, onClose }: { open: boolean; first: Sha
   useEffect(() => {
     const d = ref.current;
     if (!d) return;
-    if (open && !d.open) d.showModal();
+    if (open && !d.open) {
+      d.showModal();
+      track('share_tapped', { what: first });
+    }
     if (!open && d.open) d.close();
   }, [open]);
 

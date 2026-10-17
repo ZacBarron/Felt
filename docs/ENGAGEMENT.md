@@ -139,7 +139,7 @@ Each new account has a chance of `LIFECYCLE_HOLDOUT` (default 0.1) of joining th
 
 ## Measurement
 
-Aced logs events to a local table on the device (`apps/web/src/state/events.ts`): onboarding steps, placement, plan commitment, paywall views, plan choice and purchase results, and daily challenge starts and finishes. Nothing is sent anywhere; developer mode can export the log. Metrics to watch once events can be collected with consent: first lesson within 24 hours, D1, D7 and D30 retention, share of days the plan is done, paywall to trial, trial to paid, day 0 cancellations, and rating gained per active week.
+Aced counts usage anonymously and without cookies (`apps/web/src/state/events.ts`, docs/ANALYTICS.md). Events go to Aced's own server, never to a third party. Global Privacy Control, Do Not Track and the Share anonymous usage switch in Settings each stop it. The device also keeps its local log, which developer mode can export. The operations console (docs/ADMIN.md) shows activation, D1, D7 and D30 retention by week and by source, the funnel from site visit to paid, paywall to trial, cancel reasons and billing recovery. Engagement metrics count demonstrated skill and returns, never minutes spent.
 
 ## 6. Monetization context
 

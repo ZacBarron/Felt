@@ -35,7 +35,9 @@ self.addEventListener('push', (event) => {
 
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
-  const url = (event.notification.data as { url?: string } | undefined)?.url ?? '/';
+  const path = (event.notification.data as { url?: string } | undefined)?.url ?? '/';
+  // Paths from the server are relative to the app, which may live under /app/.
+  const url = new URL(path.replace(/^\//, ''), self.registration.scope).href;
   event.waitUntil(
     self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windows) => {
       const open = windows.find((w) => 'focus' in w);

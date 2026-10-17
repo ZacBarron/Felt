@@ -174,6 +174,7 @@ Every setting is an environment variable. `apps/server/.env.example` lists them 
 | `COACH_EFFORT` | How hard the model thinks: `low`, `medium`, `high`, `xhigh` or `max`. The default is `medium`. | Optional |
 | `COACH_DAILY_LIMIT` | Coach messages each player can send a day. The default is 40. | Optional |
 | `PRO_FOR_EVERYONE` | Testing only. `true` gives every signed in player Aced Pro, including the AI coach. The default is `false`. | Optional |
+| `ADMIN_TOKEN` | Turns on the operations console at `/admin` and its JSON at `/api/admin/metrics`. Use at least 16 random characters. Without it the console is off. Changing it signs every console browser out. See ADMIN.md. | For the console |
 | `VITE_SUPPORT_EMAIL` | Contact address on the legal pages. It is read when the app is built. | Optional |
 
 ### How players sign in
@@ -197,7 +198,7 @@ For real testers, set up Resend. Its free tier is enough.
 ### Aced Pro payments (optional)
 
 1. In Stripe, create a product with a monthly and an annual price. Copy both price ids.
-2. Add a webhook endpoint at `<server>/api/billing/webhook`. Send it `checkout.session.completed`, `checkout.session.expired`, `invoice.paid`, `invoice.payment_failed` and every `customer.subscription` event.
+2. Add a webhook endpoint at `<server>/api/billing/webhook`. Send it `checkout.session.completed`, `checkout.session.expired`, `invoice.paid`, `invoice.payment_failed`, `charge.refunded` and every `customer.subscription` event.
 3. Set the 4 Stripe variables and redeploy.
 
 The health check reports billing as on once all 4 are set. Use test mode keys until you are ready to charge.
@@ -294,7 +295,8 @@ The workflow defaults to the live server at https://felt-4g8a.onrender.com, so t
 Good to know:
 
 - `github.io` is a shared domain. Passkeys for `zacbarron.github.io` work on every Pages site under that name. Only list origins you trust.
-- The server never uses cookies. The app sends a bearer token, so CORS needs no credentials.
+- The API never uses cookies. The app sends a bearer token, so CORS needs no credentials. The only cookie is the console's, on the `/admin` path of the server itself.
+- Analytics events post to `<server>/api/events` as plain text, so they need no CORS setup either. Allow the site's origin in `ALLOWED_ORIGINS` so it can read `/api/config` and the founding count.
 
 ## acedpoker.app: the site and the app on one domain
 
@@ -332,6 +334,15 @@ Create a Pages project from the repo. Use the build command `pnpm install --froz
 ### Your own domain
 
 Add the domain in the host's dashboard. Create the DNS record it shows. HTTPS is issued automatically.
+
+### The operations console
+
+1. Make a token: `node -e "console.log(require('crypto').randomBytes(24).toString('base64url'))"`.
+2. Set it as `ADMIN_TOKEN` (on Fly, `fly secrets set ADMIN_TOKEN=...`; on Render, under Environment) and redeploy.
+3. Open `<server>/admin` and paste the token once. The browser stays signed in for 12 hours.
+4. In Access, add a named admin for each person who helps. The audit log then shows who did what.
+
+Scripts can read every number as JSON: `curl -H "Authorization: Bearer $ADMIN_TOKEN" "<server>/api/admin/metrics?days=30"`. See ADMIN.md for every screen and action, and ANALYTICS.md for the events behind them.
 
 ## 4. Updates
 

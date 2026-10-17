@@ -23,6 +23,7 @@ import { hasDefaultGame, RangesIntro, rangesIntroSeen } from '../components/Rang
 import { RangeGrid } from '../components/RangeGrid';
 import { SeatStrip } from '../components/SeatStrip';
 import { DrillRunner } from '../drills/DrillRunner';
+import { track } from '../state/events';
 import { QuickRecall } from '../drills/QuickRecall';
 import { actionLabels, spotLine } from '../drills/labels';
 import { paintRule } from '../drills/PaintDrill';
@@ -71,6 +72,12 @@ export function RangesPage() {
   useEffect(() => {
     document.title = 'Ranges · Aced';
   }, []);
+  useEffect(() => {
+    if (meta) track('ranges_viewed', { spot: meta.spot, seats: meta.tableSize });
+  }, [meta?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (meta && mode !== 'chart') track('drill_started', { chart: meta.id, kind: mode });
+  }, [meta?.id, mode]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const choose = (next: ChartSelection) => {
     setSel(next);

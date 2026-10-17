@@ -11,7 +11,7 @@ import {
   couponInfo,
   describeCoupon,
   FOUNDING_PRICE,
-  FOUNDING_SEATS,
+
   isCancelReason,
   offerLabel,
   offersByReason,
@@ -24,6 +24,11 @@ import {
   winbackEligible,
 } from './lifecycle.ts';
 import { mountPasskeys, passkeysReady, simpleWebAuthn, type WebAuthnLib } from './passkeys.ts';
+import { parseBatch, validId } from '@felt/core/analytics';
+import { forgetInstall, ingest, linkInstall, RateLimiter, serverEvent, unlinkUser } from './analytics.ts';
+import { createFlags, type Flags } from './flags.ts';
+import { jobRan } from './ops.ts';
+import { mountAdmin, type OpsState } from './admin.ts';
 import {
   CALIBRATION_MIN_ANSWERS,
   dailySummary,
@@ -55,6 +60,8 @@ export interface Deps {
   now?: () => Date;
   /** Random numbers for the lifecycle holdout. Tests pass a fixed one. */
   random?: () => number;
+  /** Feature flags. main.ts passes the instance its scheduler uses too. */
+  flags?: Flags;
 }
 
 interface UserRow {
@@ -182,9 +189,11 @@ async function json<T>(c: Context): Promise<Partial<T>> {
   }
 }
 
-export function createApp({ db, config, mailer, stripe, coach, webauthn = simpleWebAuthn, now = () => new Date(), random = Math.random }: Deps) {
+export function createApp({ db, config, mailer, stripe, coach, webauthn = simpleWebAuthn, now = () => new Date(), random = Math.random, flags = createFlags(db, config) }: Deps) {
   const app = new Hono<Env>();
   const iso = () => now().toISOString();
+  /** Server errors and uptime, in memory, for the console's health screen. */
+  const ops: OpsState = { startedAt: now().toISOString(), errors: [] };
 
   // Browsers on the listed sites (such as the GitHub Pages copy of the app) may call the API.
   // Sign in uses bearer tokens, never cookies, so credentials stay off.
@@ -205,6 +214,8 @@ export function createApp({ db, config, mailer, stripe, coach, webauthn = simple
   // Plain error messages players can act on; details stay in the log.
   app.onError((err, c) => {
     console.error(err);
+    ops.errors.push(now().getTime());
+    if (ops.errors.length > 1000) ops.errors.splice(0, ops.errors.length - 1000);
     return c.json({ error: 'Something went wrong on the server. Try again in a moment.' }, 500);
   });
 
@@ -256,7 +267,7 @@ export function createApp({ db, config, mailer, stripe, coach, webauthn = simple
    * measured against players who never got them.
    */
   const initUser = (id: string) => {
-    db.prepare('UPDATE users SET unsub_token = ?, holdout = ? WHERE id = ?').run(newToken(), random() < config.lifecycle.holdout ? 1 : 0, id);
+    db.prepare('UPDATE users SET unsub_token = ?, holdout = ? WHERE id = ?').run(newToken(), random() < flags.num('lifecycle.holdout') ? 1 : 0, id);
   };
 
   const emailReady = () => !!config.email.resendKey || config.devCodes;
@@ -272,7 +283,7 @@ export function createApp({ db, config, mailer, stripe, coach, webauthn = simple
         passkeys: passkeysReady(config),
         billing: !!(stripe && config.stripe.priceAnnual && config.stripe.priceMonthly),
         push: !!(config.push.publicKey && config.push.privateKey),
-        coach: !!coach,
+        coach: !!coach && flags.bool('coach.enabled'),
         // Testing: every signed in player has Aced Pro.
         proForEveryone: config.proForEveryone,
       },
@@ -424,6 +435,8 @@ export function createApp({ db, config, mailer, stripe, coach, webauthn = simple
 
   /** Deletes the account and everything stored with it. Billing must be cancelled in Stripe separately. */
   app.delete('/api/me', requireUser, (c) => {
+    // Usage counts stay anonymous: the link to this account goes with it.
+    unlinkUser(db, c.get('user').id);
     db.prepare('DELETE FROM users WHERE id = ?').run(c.get('user').id);
     return c.json({ ok: true });
   });
@@ -486,7 +499,8 @@ export function createApp({ db, config, mailer, stripe, coach, webauthn = simple
   // Billing (Stripe) ---------------------------------------------------------
 
   const billingReady = () => !!(stripe && config.stripe.priceAnnual && config.stripe.priceMonthly);
-  const lifetimeReady = () => !!(stripe && config.stripe.priceLifetime);
+  const lifetimeReady = () => !!(stripe && config.stripe.priceLifetime) && flags.bool('founding.open');
+  const foundingSeats = () => flags.num('founding.seats');
   const LIVE = ['active', 'trialing', 'past_due'];
 
   /** The player's Stripe customer, made on their first purchase. */
@@ -643,6 +657,10 @@ export function createApp({ db, config, mailer, stripe, coach, webauthn = simple
       take ? 1 : 0,
       iso(),
     );
+    // The money side of the cancel flow, counted once here (the webhook does not count it again).
+    if (take && offer.kind === 'pause') serverEvent(db, 'subscription_paused', { months: PAUSE_MONTHS.find((m) => m === body.pauseMonths) ?? PAUSE_MONTHS[0] }, { userId: u.id, now: now() });
+    if (take) serverEvent(db, 'retention_offer_taken', { offer: offer.kind, reason: reason ?? 'none' }, { userId: u.id, now: now() });
+    else serverEvent(db, 'subscription_cancelled', { plan: u.plan ?? undefined, reason: reason ?? 'none', offer: offer?.kind }, { userId: u.id, now: now() });
     const after = freshUser(u.id);
     return c.json({ outcome: take ? offer!.kind : 'canceled', subscription: await subscriptionJson(after), user: userJson(after) });
   });
@@ -653,6 +671,7 @@ export function createApp({ db, config, mailer, stripe, coach, webauthn = simple
     const u = c.get('user');
     if (!u.stripe_subscription || !(u.cancel_at_period_end || u.paused_until)) return c.json({ error: 'Aced Pro is not cancelled or paused.' }, 409);
     await resume(db, config, stripe, u.id, now());
+    serverEvent(db, 'subscription_resumed', { from: u.paused_until ? 'pause' : 'cancel' }, { userId: u.id, now: now() });
     const after = freshUser(u.id);
     return c.json({ subscription: await subscriptionJson(after), user: userJson(after) });
   });
@@ -667,8 +686,8 @@ export function createApp({ db, config, mailer, stripe, coach, webauthn = simple
 
   app.get('/api/billing/founding', (c) => {
     const { taken, held } = foundingCounts();
-    const left = seatsLeft(taken, held);
-    return c.json({ price: FOUNDING_PRICE, seats: FOUNDING_SEATS, taken, left, open: lifetimeReady() && left > 0 });
+    const left = seatsLeft(taken, held, foundingSeats());
+    return c.json({ price: FOUNDING_PRICE, seats: foundingSeats(), taken, left, open: lifetimeReady() && left > 0 });
   });
 
   app.post('/api/billing/lifetime', requireUser, async (c) => {
@@ -681,11 +700,11 @@ export function createApp({ db, config, mailer, stripe, coach, webauthn = simple
     const full = tx(db, () => {
       db.prepare('DELETE FROM lifetime_checkouts WHERE user_id = ? AND completed_at IS NULL').run(u.id);
       const { taken, held } = foundingCounts();
-      if (seatsLeft(taken, held) <= 0) return true;
+      if (seatsLeft(taken, held, foundingSeats()) <= 0) return true;
       db.prepare('INSERT INTO lifetime_checkouts (session_id, user_id, created_at, expires_at) VALUES (?, ?, ?, ?)').run(hold, u.id, iso(), expires.toISOString());
       return false;
     });
-    if (full) return c.json({ error: `All ${FOUNDING_SEATS} founding seats are taken. Yearly Pro costs the same and is still open.` }, 409);
+    if (full) return c.json({ error: `All ${foundingSeats()} founding seats are taken. Yearly Pro costs the same and is still open.` }, 409);
     try {
       const customer = await customerFor(u);
       const meta = { kind: 'lifetime', user_id: u.id };
@@ -713,8 +732,10 @@ export function createApp({ db, config, mailer, stripe, coach, webauthn = simple
     const secret = config.stripe.webhookSecret;
     if (!secret) return c.json({ error: 'Webhook not configured.' }, 503);
     const payload = await c.req.text();
-    if (!verifyStripeSignature(payload, c.req.header('Stripe-Signature'), secret, Math.floor(now().getTime() / 1000)))
+    if (!verifyStripeSignature(payload, c.req.header('Stripe-Signature'), secret, Math.floor(now().getTime() / 1000))) {
+      jobRan(db, 'webhook', now(), new Error('Bad signature'));
       return c.json({ error: 'Bad signature.' }, 400);
+    }
     const event = JSON.parse(payload) as { id: string; type: string; data: { object: Record<string, unknown> } };
     // Stripe can deliver an event more than once.
     if (db.prepare('SELECT 1 FROM stripe_events WHERE id = ?').get(event.id)) return c.json({ received: true });
@@ -724,6 +745,8 @@ export function createApp({ db, config, mailer, stripe, coach, webauthn = simple
       typeof customer === 'string' ? (db.prepare('SELECT * FROM users WHERE stripe_customer = ?').get(customer) as UserRow | undefined) : undefined;
     // A subscription left running after a founding purchase is cancelled once the webhook is done.
     let retire: string | undefined;
+    const ev = (name: Parameters<typeof serverEvent>[1], props: Record<string, unknown>, userId?: string) =>
+      serverEvent(db, name, props as never, { userId, now: now() });
     tx(db, () => {
       db.prepare('INSERT INTO stripe_events (id, at) VALUES (?, ?)').run(event.id, iso());
       if (event.type === 'checkout.session.completed' && obj.client_reference_id && obj.customer) {
@@ -739,6 +762,8 @@ export function createApp({ db, config, mailer, stripe, coach, webauthn = simple
           db.prepare(
             "UPDATE users SET lifetime = 1, plan = 'lifetime', pro_until = NULL, trialing = 0, churned_at = NULL, billing_issue = 0, billing_issue_at = NULL, paused_until = NULL, paid_through = NULL, last_paid_at = ? WHERE id = ?",
           ).run(iso(), u.id);
+          if (typeof obj.amount_total === 'number') db.prepare('UPDATE users SET revenue_cents = revenue_cents + ? WHERE id = ?').run(obj.amount_total, u.id);
+          if (!u.lifetime) ev('founding_seat_sold', { amount: typeof obj.amount_total === 'number' ? obj.amount_total / 100 : undefined }, u.id);
           if (u.stripe_subscription && u.sub_status && LIVE.includes(u.sub_status) && !u.cancel_at_period_end) retire = u.stripe_subscription;
         }
       }
@@ -752,11 +777,20 @@ export function createApp({ db, config, mailer, stripe, coach, webauthn = simple
       // A failed renewal: Pro stays on while Stripe retries (the grace period), and Aced asks for a new card.
       if (event.type === 'invoice.payment_failed') {
         const u = byCustomer(obj.customer);
+        // One failure per episode: Stripe's retries are not new failures.
+        if (u && !u.billing_issue) ev('payment_failed', { plan: u.plan ?? undefined }, u.id);
         if (u) db.prepare('UPDATE users SET billing_issue = 1, billing_issue_at = COALESCE(billing_issue_at, ?) WHERE id = ?').run(iso(), u.id);
       }
       if (event.type === 'invoice.paid') {
         const u = byCustomer(obj.customer);
         const paid = typeof obj.amount_paid === 'number' && obj.amount_paid > 0;
+        if (u && u.billing_issue) ev('payment_recovered', { plan: u.plan ?? undefined }, u.id);
+        if (u && paid) {
+          const amount = (obj.amount_paid as number) / 100;
+          db.prepare('UPDATE users SET revenue_cents = revenue_cents + ? WHERE id = ?').run(obj.amount_paid as number, u.id);
+          if (!u.last_paid_at) ev('first_payment', { plan: u.plan ?? undefined, after_trial: !!u.trial_used, amount }, u.id);
+          else ev('subscription_renewed', { plan: u.plan ?? undefined, amount }, u.id);
+        }
         if (u)
           db.prepare('UPDATE users SET billing_issue = 0, billing_issue_at = NULL, last_paid_at = CASE WHEN ? THEN ? ELSE last_paid_at END WHERE id = ?').run(
             paid ? 1 : 0,
@@ -768,8 +802,19 @@ export function createApp({ db, config, mailer, stripe, coach, webauthn = simple
         const user = meta.user_id ? userById(meta.user_id) : byCustomer(obj.customer);
         if (!user) return;
         applySubscription(db, config, user.id, obj, now());
+        const after = userById(user.id)!;
+        if (event.type === 'customer.subscription.created') ev('subscription_started', { plan: after.plan ?? undefined, trial: obj.status === 'trialing' }, user.id);
+        const live = (s: string | null) => !!s && LIVE.includes(s);
+        if (live(user.sub_status) && !live(after.sub_status)) ev('subscription_ended', { plan: user.plan ?? undefined }, user.id);
+      }
+      // A refund issued in Stripe or from the console. Pro is removed by the console action, not here.
+      if (event.type === 'charge.refunded') {
+        const u = byCustomer(obj.customer);
+        if (u && typeof obj.amount_refunded === 'number') db.prepare('UPDATE users SET revenue_cents = MAX(0, revenue_cents - ?) WHERE id = ?').run(obj.amount_refunded, u.id);
+        ev('refund', { amount: typeof obj.amount_refunded === 'number' ? obj.amount_refunded / 100 : undefined }, u?.id);
       }
     });
+    jobRan(db, 'webhook', now());
     if (retire && stripe) {
       try {
         await stripe('POST', `subscriptions/${retire}`, { cancel_at_period_end: true });
@@ -793,7 +838,9 @@ export function createApp({ db, config, mailer, stripe, coach, webauthn = simple
   /** One tap, from the link (GET) or the mail app's unsubscribe button (POST, RFC 8058). */
   const unsubscribe = (c: Context) => {
     const token = c.req.query('token') ?? '';
-    const done = token.length >= 16 && Number(db.prepare('UPDATE users SET email_opt_in = 0 WHERE unsub_token = ?').run(token).changes) > 0;
+    const user = token.length >= 16 ? (db.prepare('SELECT id, email_opt_in FROM users WHERE unsub_token = ?').get(token) as { id: string; email_opt_in: number } | undefined) : undefined;
+    const done = !!user && Number(db.prepare('UPDATE users SET email_opt_in = 0 WHERE unsub_token = ?').run(token).changes) > 0;
+    if (user?.email_opt_in) serverEvent(db, 'email_unsubscribed', { via: c.req.method === 'POST' ? 'header' : 'link' }, { userId: user.id, now: now() });
     return c.html(unsubscribePage(done), done ? 200 : 404);
   };
   app.get('/api/email/unsubscribe', unsubscribe);
@@ -835,10 +882,13 @@ export function createApp({ db, config, mailer, stripe, coach, webauthn = simple
   const coachUsed = (userId: string, day: string) =>
     (db.prepare('SELECT count FROM coach_usage WHERE user_id = ? AND day = ?').get(userId, day) as { count: number } | undefined)?.count ?? 0;
 
+  /** The coach for this player: built in, not switched off in the console, and in the rollout. */
+  const coachOn = (u: UserRow) => !!coach && flags.bool('coach.enabled') && flags.on('coach.rollout', u.id);
+
   app.get('/api/coach', requireUser, (c) => {
     const u = c.get('user');
-    const limit = config.coach.dailyLimit;
-    return c.json({ on: !!coach, pro: hasPro(u), limit, remaining: Math.max(0, limit - coachUsed(u.id, coachDay(u))) });
+    const limit = flags.num('coach.daily_limit');
+    return c.json({ on: coachOn(u), pro: hasPro(u), limit, remaining: Math.max(0, limit - coachUsed(u.id, coachDay(u))) });
   });
 
   app.post(
@@ -846,15 +896,15 @@ export function createApp({ db, config, mailer, stripe, coach, webauthn = simple
     requireUser,
     bodyLimit({ maxSize: 64 * 1024, onError: (c) => c.json({ error: 'This chat is too long. Start a new chat.' }, 413) }),
     async (c) => {
-      if (!coach) return c.json({ error: 'The coach is not turned on for this server.' }, 503);
       const u = c.get('user');
+      if (!coach || !coachOn(u)) return c.json({ error: 'The coach is not turned on for this server.' }, 503);
       if (!hasPro(u)) return c.json({ error: 'The coach is part of Aced Pro.', reason: 'pro' }, 403);
       const parsed = parseCoachRequest(await json(c));
       if (!parsed.ok) return c.json({ error: parsed.error }, 400);
 
       // Reserve today's message before calling, so two requests at once cannot pass the cap.
       const day = coachDay(u);
-      const limit = config.coach.dailyLimit;
+      const limit = flags.num('coach.daily_limit');
       const reserved = tx(db, () => {
         const n = coachUsed(u.id, day);
         if (n >= limit) return undefined;
@@ -866,7 +916,7 @@ export function createApp({ db, config, mailer, stripe, coach, webauthn = simple
       const remaining = Math.max(0, limit - reserved);
 
       try {
-        const result = await askCoach(coach, { model: config.coach.model, effort: config.coach.effort, messages: parsed.messages, context: parsed.context });
+        const result = await askCoach(coach!, { model: config.coach.model, effort: config.coach.effort, messages: parsed.messages, context: parsed.context });
         if (result.kind === 'refusal') return c.json({ reply: REFUSAL_REPLY, refused: true, remaining });
         return c.json({ reply: result.text + (result.truncated ? TRUNCATED_NOTE : ''), remaining });
       } catch (err) {
@@ -1070,6 +1120,61 @@ export function createApp({ db, config, mailer, stripe, coach, webauthn = simple
     db.prepare('INSERT OR IGNORE INTO waitlist (email, list, joined_at, source, platform) VALUES (?, ?, ?, ?, ?)').run(email, list, iso(), tag(body.source), tag(body.platform));
     return c.json({ ok: true });
   });
+
+  // Analytics (docs/ANALYTICS.md) -----------------------------------------------------
+
+  // Cookieless and anonymous. Browsers send text/plain (a simple request, no
+  // preflight) with sendBeacon or fetch in no-cors mode, so the answer is
+  // never read: a bad batch is simply dropped. No IP address is stored; the
+  // address is used only in memory, for the rate limit.
+  const limiter = new RateLimiter();
+  const eventsBody = bodyLimit({ maxSize: 64 * 1024, onError: (c) => c.json({ error: 'Too large.' }, 413) });
+
+  app.post('/api/events', eventsBody, async (c) => {
+    let raw: unknown;
+    try {
+      raw = JSON.parse(await c.req.text());
+    } catch {
+      return c.json({ error: 'Not JSON.' }, 400);
+    }
+    const t = now().getTime();
+    const batch = parseBatch(raw, t);
+    if (!batch) return c.json({ error: 'Not a batch.' }, 400);
+    // Paused from the console: accepted and dropped, so devices do not retry.
+    if (!flags.bool('analytics.enabled')) return c.json({ accepted: 0, rejected: batch.events.length + batch.rejected, paused: true }, 202);
+    if (!limiter.allow(batch.install, clientIp(c), batch.events.length, t)) return c.json({ error: 'Too many events.' }, 429);
+    if (!limiter.fresh(batch.install, batch.batch, t)) return c.json({ accepted: 0, rejected: 0, duplicate: true }, 202);
+    return c.json(ingest(db, batch), 202);
+  });
+
+  // The Settings switch turned off: delete what this install sent.
+  app.post('/api/events/forget', eventsBody, async (c) => {
+    let install: unknown;
+    try {
+      install = (JSON.parse(await c.req.text()) as { install?: unknown }).install;
+    } catch {
+      install = undefined;
+    }
+    if (!validId(install)) return c.json({ error: 'Not an install.' }, 400);
+    if (!limiter.allow(`forget:${clientIp(c)}`, clientIp(c), 1, now().getTime())) return c.json({ error: 'Too many requests.' }, 429);
+    return c.json({ deleted: forgetInstall(db, install) });
+  });
+
+  // After making an account or signing in: tie this install to the account.
+  app.post('/api/events/link', requireUser, async (c) => {
+    const body = await json<{ install: unknown }>(c);
+    if (!validId(body.install)) return c.json({ error: 'Not an install.' }, 400);
+    return c.json({ linked: linkInstall(db, body.install, c.get('user').id, now()) });
+  });
+
+  // Public flags for the site and the app. Cached briefly; both keep a copy and safe defaults.
+  app.get('/api/config', (c) => {
+    c.header('Cache-Control', 'public, max-age=60');
+    return c.json({ v: 1, flags: flags.public() });
+  });
+
+  // The operations console ------------------------------------------------------------
+  mountAdmin(app, { db, config, flags, stripe, mailer, now, ops, random });
 
   // Item calibration -----------------------------------------------------------------
 

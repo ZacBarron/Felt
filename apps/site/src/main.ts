@@ -1,6 +1,9 @@
 import type { HandClass } from '@felt/core';
 import { WORDMARK_PATH, WORDMARK_VIEWBOX } from '../../web/src/ui/wordmark';
 import { bbCallEquity, GRID, pct, raiseOverLimpers, SEATS } from './charts';
+import { cleanTag } from '@felt/core/analytics';
+import { cachedConfig, flag } from '../../web/src/analytics/browser';
+import { abVariants, exposed, startSiteAnalytics, track } from './analytics';
 import { API_URL, APP_URL, CONTENT, FOUNDING, PRICES } from './config';
 import { MARK, MARK_FILL, markSvg } from './mark';
 import { FOUNDER_NOTE, QUOTES, visibleFounderNote, visibleQuotes } from './proof';
@@ -59,11 +62,23 @@ function showFoundingLeft(taken: number | null) {
   for (const el of $$<HTMLElement>('[data-founding-left]')) el.textContent = `${left} of ${FOUNDING.seats} places left. `;
 }
 showFoundingLeft(FOUNDING.taken);
+// What a visitor saw on the founding card: open for checkout or a waitlist, and seats left.
+let founding: { open: boolean; left?: number } = { open: false };
+const foundingCard = $<HTMLElement>('#founding');
+if (foundingCard && 'IntersectionObserver' in window) {
+  const io = new IntersectionObserver((es) => {
+    if (!es.some((e) => e.isIntersecting)) return;
+    io.disconnect();
+    track('founding_status_seen', founding);
+  });
+  io.observe(foundingCard);
+}
 // When checkout is live the card sells directly. Until then it collects emails.
 fetch(`${API_URL}/api/billing/founding`)
   .then((r) => (r.ok ? r.json() : null))
   .then((d: { taken?: unknown; open?: unknown } | null) => {
     if (d && typeof d.taken === 'number') showFoundingLeft(d.taken);
+    founding = { open: d?.open === true, left: d && typeof d.taken === 'number' ? Math.max(0, FOUNDING.seats - d.taken) : undefined };
     if (d?.open === true) {
       for (const el of $$<HTMLElement>('[data-founding-buy]')) el.hidden = false;
       for (const el of $$<HTMLElement>('[data-founding-form]')) el.hidden = true;
@@ -87,17 +102,35 @@ if (document.documentElement.dataset.inapp) {
   const hint = $<HTMLElement>('[data-inapp-hint]');
   const browser = $<HTMLElement>('[data-inapp-browser]');
   if (browser && platform === 'android') browser.textContent = 'Chrome';
-  if (hint) hint.hidden = false;
+  if (hint) {
+    hint.hidden = false;
+    track('inapp_hint_shown', { platform });
+  }
 }
 
-// First touch attribution. Site and app share the origin, so the app can read it.
-// It stays on this device and only rides along with a waitlist sign up.
+// Analytics: cookieless and anonymous, to Aced's own server. It also stores first
+// touch attribution (felt.attribution.v1), which the app reads on the same origin.
 const ATTR_KEY = 'felt.attribution.v1';
-const params = new URLSearchParams(location.search);
-const ATTR_PARAMS = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'src', 'loc', 'ref'];
-if (ATTR_PARAMS.some((k) => params.has(k)) && !store.get(ATTR_KEY)) {
-  const found = Object.fromEntries(ATTR_PARAMS.filter((k) => params.has(k)).map((k) => [k, params.get(k)]));
-  store.set(ATTR_KEY, JSON.stringify({ ...found, landing: location.pathname, at: Date.now() }));
+startSiteAnalytics(API_URL, platform, !!document.documentElement.dataset.inapp);
+
+// A short notice the owner can set in the console (site.notice), from the last visit's copy of the config.
+const siteNotice = flag(
+  cachedConfig(
+    (() => {
+      try {
+        return window.localStorage;
+      } catch {
+        return null;
+      }
+    })(),
+  ),
+  'site.notice',
+  '',
+);
+const noticeEl = $<HTMLElement>('[data-site-notice]');
+if (siteNotice && noticeEl) {
+  noticeEl.textContent = siteNotice;
+  noticeEl.hidden = false;
 }
 function source(): string | undefined {
   try {
@@ -249,6 +282,7 @@ if (move) {
       const mix = spotMix(h.hand);
       const choice = b.dataset.choice as Choice;
       const v = verdict(mix, choice);
+      track('move_answered', { hand: h.hand, choice, verdict: cleanTag(v) });
       actions.classList.add('answered');
       b.classList.add('picked');
       for (const other of $$<HTMLButtonElement>('[data-choice]', actions)) other.disabled = true;
@@ -267,6 +301,7 @@ if (move) {
   );
   $<HTMLButtonElement>('[data-move-again]', move)?.addEventListener('click', () => {
     index = (index + 1) % HANDS.length;
+    track('move_next');
     deal();
     $<HTMLButtonElement>('[data-choice]', actions)?.focus();
   });
@@ -296,7 +331,10 @@ if (seatsSection && seatCanvas) {
     b.type = 'button';
     b.textContent = s.short;
     b.setAttribute('aria-label', s.name);
-    b.addEventListener('click', () => pick(i, true));
+    b.addEventListener('click', () => {
+      track('seat_tab', { seat: cleanTag(s.short) });
+      pick(i, true);
+    });
     rail.append(b);
     return b;
   });
@@ -440,10 +478,19 @@ function updateOpen() {
   }
 }
 openInput?.addEventListener('input', updateOpen);
+// The open size demo, once per visit, with the size the visitor settled on.
+let demoUsed = false;
+const demoUsedOnce = () => {
+  if (demoUsed || !openInput) return;
+  demoUsed = true;
+  track('open_demo_used', { size: Number(openInput.value), limpers });
+};
+openInput?.addEventListener('change', demoUsedOnce);
 for (const b of $$<HTMLButtonElement>('[data-limp]'))
   b.addEventListener('click', () => {
     limpers = Math.max(0, Math.min(3, limpers + Number(b.dataset.limp)));
     updateOpen();
+    demoUsedOnce();
   });
 updateOpen();
 
@@ -496,7 +543,10 @@ for (const form of $$<HTMLFormElement>('[data-waitlist]')) {
     const data = new FormData(form);
     const list = String(data.get('list') ?? form.dataset.waitlist);
     const email = String(data.get('email') ?? '').trim();
-    if (!EMAIL.test(email)) return say('Enter an email like you@example.com.', true);
+    if (!EMAIL.test(email)) {
+      track('waitlist_submit', { list, result: 'invalid' });
+      return say('Enter an email like you@example.com.', true);
+    }
     if (button) {
       button.disabled = true;
       button.textContent = 'Adding you';
@@ -510,8 +560,15 @@ for (const form of $$<HTMLFormElement>('[data-waitlist]')) {
         body: JSON.stringify({ email, list, source: source(), platform, company: String(data.get('company') ?? '') }),
       });
       const body = (await res.json().catch(() => ({}))) as { error?: string };
-      if (res.status === 429) throw new Error('Too many tries. Wait a minute and try again.');
-      if (!res.ok) throw new Error(body.error ?? "That didn't go through. Try again.");
+      if (res.status === 429) {
+        track('waitlist_submit', { list, result: 'rate_limited' });
+        throw new Error('Too many tries. Wait a minute and try again.');
+      }
+      if (!res.ok) {
+        track('waitlist_submit', { list, result: res.status === 400 ? 'invalid' : 'error' });
+        throw new Error(body.error ?? "That didn't go through. Try again.");
+      }
+      track('waitlist_submit', { list, result: 'ok' });
       say(list === 'founding' ? "You're on the list. We'll email you when founding places open." : "You're on the list. We'll send one email on launch day.");
       form.reset();
       if (list !== 'founding') {
@@ -519,6 +576,7 @@ for (const form of $$<HTMLFormElement>('[data-waitlist]')) {
         if (after) after.hidden = false;
       }
     } catch (err) {
+      if (!(err instanceof Error) || err.message === 'Failed to fetch') track('waitlist_submit', { list, result: 'offline' });
       say(err instanceof Error && err.message !== 'Failed to fetch' ? err.message : "We couldn't reach the server. Try again in a minute.", true);
     } finally {
       if (button) {
@@ -543,8 +601,17 @@ if (bar && 'IntersectionObserver' in window) {
   const blockers = $$<HTMLElement>('.hero .cta-row, .move-next, .plans, .founding, .notify, .final, .voices-empty');
   const seen = new Set<Element>();
   let typing = false;
+  // The sticky bar test: both arms are counted at the moment the bar would show.
+  const hidden = abVariants().sticky_bar === 'off';
+  let shown = false;
   const sync = () => {
-    const on = seen.size === 0 && !typing && window.scrollY > 200;
+    const would = seen.size === 0 && !typing && window.scrollY > 200;
+    if (would && !shown && getComputedStyle(bar).display !== 'none') {
+      shown = true;
+      exposed('sticky_bar');
+      if (!hidden) track('sticky_shown', { variant: abVariants().sticky_bar });
+    }
+    const on = would && !hidden;
     bar.classList.toggle('on', on);
     bar.inert = !on;
   };

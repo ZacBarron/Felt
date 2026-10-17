@@ -169,8 +169,9 @@ export function ProPage() {
   const checkout = params.get('checkout');
   useEffect(() => {
     if (checkout === 'cancel') setMessage({ text: 'Checkout cancelled. You were not charged.' });
+    if (checkout === 'cancel') track('checkout_returned', { result: 'cancel', plan: params.get('plan') ?? undefined });
     if (checkout !== 'success') return;
-    track('checkout_returned');
+    track('checkout_returned', { result: 'success', plan: params.get('plan') ?? undefined });
     let tries = 0;
     const check = async () => {
       const user = await refreshMe().catch(() => null);
@@ -250,8 +251,12 @@ export function ProPage() {
     setBusy(true);
     setMessage(undefined);
     const result = await purchaseLifetime();
-    track('purchase_result', { plan: 'founding', ok: String(result.ok) });
-    if (result.ok === 'redirect') return;
+    // Leaving for Stripe: the server records the sale itself when it is paid.
+    if (result.ok === 'redirect') {
+      track('checkout_started', { plan: 'founding', from });
+      return;
+    }
+    track('purchase_result', { plan: 'founding', ok: result.ok, reason: result.ok ? undefined : result.needsAccount ? 'needs_account' : 'failed' });
     setBusy(false);
     if (!result.ok) {
       haptic('warning');
@@ -265,16 +270,19 @@ export function ProPage() {
 
   const buy = async () => {
     if (founder) return buyFounding();
-    track('paywall_cta_tapped', { from, plan: plan.id, remind: String(remindable && remind) });
+    track('paywall_cta_tapped', { from, plan: plan.id, remind: remindable && remind });
     setBusy(true);
     setMessage(undefined);
     // Set the reminder while the tap still counts as the player's, so the browser can ask for permission.
     if (remindable && currentSession()) await setTrialReminder(remind).catch(() => undefined);
     // From the win-back email: the server checks the offer is still open for this account.
     const result = await purchase(plan, settings, params.get('offer') === 'winback' ? { offer: 'winback' } : {});
-    track('purchase_result', { plan: plan.id, ok: String(result.ok) });
     // Leaving for Stripe Checkout: keep the button busy until the page goes.
-    if (result.ok === 'redirect') return;
+    if (result.ok === 'redirect') {
+      track('checkout_started', { plan: plan.id, from });
+      return;
+    }
+    track('purchase_result', { plan: plan.id, ok: result.ok, reason: result.ok ? undefined : result.needsAccount ? 'needs_account' : 'failed' });
     setBusy(false);
     if (!result.ok) {
       haptic('warning');
@@ -366,7 +374,10 @@ export function ProPage() {
             aria-checked={p.id === planId}
             className={`pw-plan${p.id === planId ? ' selected' : ''}`}
             data-haptic="select"
-            onClick={() => setPlanId(p.id)}
+            onClick={() => {
+              setPlanId(p.id);
+              if (p.id !== planId) track('plan_selected', { plan: p.id, from });
+            }}
           >
             {p.id === 'annual' && <span className="pw-badge">Save {annualSavings()}%</span>}
             <span className="pw-check" aria-hidden="true">
@@ -383,7 +394,10 @@ export function ProPage() {
             aria-checked={planId === 'founding'}
             className={`pw-plan pw-plan-founding${planId === 'founding' ? ' selected' : ''}`}
             data-haptic="select"
-            onClick={() => setPlanId('founding')}
+            onClick={() => {
+              setPlanId('founding');
+              if (planId !== 'founding') track('plan_selected', { plan: 'founding', from });
+            }}
           >
             <span className="pw-badge">{seatsLine ?? `First ${founding.seats} players`}</span>
             <span className="pw-check" aria-hidden="true">

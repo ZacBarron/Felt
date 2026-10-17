@@ -278,8 +278,16 @@ export interface EmailContext {
   coupon?: CouponInfo;
 }
 
+/**
+ * Adds n=<channel>.<kind> to a link into the app, so the app can count
+ * opens from a message (notification_opened). It names the message, never the player.
+ */
+export function withTag(url: string, tag: string): string {
+  return `${url}${url.includes('?') ? '&' : '?'}n=${tag}`;
+}
+
 export function emailCopy(kind: EmailKind, key: string, ctx: EmailContext): { subject: string; text: string } {
-  const link = (path: string) => `${ctx.appUrl}${path}`;
+  const link = (path: string) => withTag(`${ctx.appUrl}${path}`, `email.${kind}`);
   switch (kind) {
     case 'trial-ending': {
       const day = ctx.date(key);

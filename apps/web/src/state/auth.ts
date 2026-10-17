@@ -11,7 +11,7 @@ import {
 } from '@simplewebauthn/browser';
 import { api, ApiError, apiBase, currentSession, type ServerUser, type Session, setSession, updateSessionUser } from './api';
 import { clearDeviceData, requestPersistentStorage } from './backup';
-import { track } from './events';
+import { linkInstall, track } from './events';
 import { firstSync, rememberAccount, resetSync, saveNow } from './sync';
 
 /**
@@ -148,6 +148,8 @@ export async function completeSignIn(session: Session, how: 'passkey' | 'email',
   resetSync();
   setSession(session);
   track(created ? 'account_created' : 'signed_in', { method: how });
+  // Tie this install to the account, so a purchase can be traced to the link that brought the player.
+  void linkInstall(created);
   // Progress worth an account is worth keeping: ask the browser not to clear it.
   void requestPersistentStorage();
   try {

@@ -13,6 +13,8 @@ import {
   type WeekStats,
   winbackEligible,
 } from './lifecycle.ts';
+import { serverEvent } from './analytics.ts';
+import type { Flags } from './flags.ts';
 import { lastOpen } from './push.ts';
 import { type Mailer, newToken, safeZone, type StripeCall } from './services.ts';
 
@@ -65,7 +67,8 @@ let warnedNoAddress = false;
  * MAIL_POSTAL_ADDRESS and a player outside the holdout, and carries the one
  * tap unsubscribe link and headers.
  */
-export async function runLifecycleEmails(db: Db, mailer: Mailer, config: Config, now = new Date(), stripe?: StripeCall): Promise<number> {
+export async function runLifecycleEmails(db: Db, mailer: Mailer, config: Config, now = new Date(), stripe?: StripeCall, flags?: Flags): Promise<number> {
+  if (flags && !flags.bool('email.enabled')) return 0;
   const postal = config.lifecycle.postalAddress;
   if (!postal && !warnedNoAddress) {
     warnedNoAddress = true;
@@ -136,6 +139,8 @@ export async function runLifecycleEmails(db: Db, mailer: Mailer, config: Config,
     });
 
     for (const { kind, key } of due) {
+      // A paused program sends nothing and marks nothing as sent.
+      if (flags && !flags.bool(`program.${kind}`)) continue;
       const date = (iso: string) => new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: tz });
       const copy = emailCopy(kind, key, {
         appUrl: config.appUrl,
@@ -160,6 +165,7 @@ export async function runLifecycleEmails(db: Db, mailer: Mailer, config: Config,
       db.prepare('INSERT OR IGNORE INTO notices_sent (user_id, kind, key, at) VALUES (?, ?, ?, ?)').run(u.id, KIND(kind), key, now.toISOString());
       try {
         await mailer.send(u.email, copy.subject, text, headers ? { headers } : undefined);
+        serverEvent(db, 'email_sent', { kind }, { userId: u.id, now });
         sent++;
       } catch (e) {
         console.error(`Email ${kind} failed`, e);

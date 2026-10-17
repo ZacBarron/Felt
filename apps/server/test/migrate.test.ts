@@ -32,7 +32,7 @@ describe('migrations', () => {
     old.close();
 
     const db = openDb(path);
-    expect((db.prepare('PRAGMA user_version').get() as { user_version: number }).user_version).toBe(8);
+    expect((db.prepare('PRAGMA user_version').get() as { user_version: number }).user_version).toBe(10);
     expect(db.prepare('SELECT id, email, handle, pro_until FROM users').all()).toEqual([{ id: 'u1', email: 'a@b.co', handle: 'ace', pro_until: '2027-01-01' }]);
     // Lifecycle (version 8): an unsubscribe token for everyone, the last visit from sessions,
     // email off until the player opts in, and nobody already here put in the holdout.

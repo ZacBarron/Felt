@@ -15,7 +15,7 @@ import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { haptic } from '../haptics';
 import { StepView } from '../lesson/StepView';
 import { canOpenLesson } from '../state/access';
-import { track } from '../state/events';
+import { track, track as logEvent } from '../state/events';
 import { clearPlacement, loadPlacement, savePlacement } from '../state/placementProgress';
 import { recordLessonQuiz } from '../state/rating';
 import { entryFor, freshSeed, LESSON_ENTRIES, lessonPath, markTested, moduleEntries, quizAt, quizSteps } from '../state/lessons';
@@ -196,6 +196,10 @@ export function CheckPage() {
   );
   const [answers, setAnswers] = useState<boolean[]>([]);
   const [result, setResult] = useState<CheckResult>();
+  useEffect(() => {
+    if (moduleDef && questions.length) logEvent('check_started', { module: `${track}/${module}`, lesson });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [track, module, lesson]);
 
   if (!moduleDef || questions.length === 0) {
     return (
@@ -218,6 +222,7 @@ export function CheckPage() {
     if (next.length < questions.length) return;
     const scored = scoreCheckpoint(questions, next);
     void markTested(scored.passed);
+    logEvent('check_finished', { module: `${track}/${module}`, right: next.filter(Boolean).length, asked: next.length, passed: scored.passed.length });
     haptic(scored.failed.length === 0 ? 'success' : 'warning');
     setResult(scored);
   };

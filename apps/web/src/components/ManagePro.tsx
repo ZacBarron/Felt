@@ -25,6 +25,7 @@ import { PageHeader } from '../ui/PageHeader';
 import { ProBadge } from '../ui/ProBadge';
 import { Section } from '../ui/Section';
 import { Segmented } from '../ui/Segmented';
+import { track } from '../state/events';
 import '../pages/manage.css';
 
 export type ManageStep = 'overview' | 'cancel' | 'done';
@@ -55,6 +56,12 @@ export function ManagePro({ step }: { step: ManageStep }) {
       });
   };
   useEffect(load, []);
+  // Once per visit to the plan, with where it stands.
+  useEffect(() => {
+    if (sub && step === 'overview') track('manage_opened', { status: sub.status, plan: sub.plan ?? undefined });
+    if (sub && step === 'cancel') track('cancel_started', { plan: sub.plan ?? undefined });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [!!sub, step]);
 
   // The confirmation needs the answer from the cancel request; after a reload it is gone, so show the plan.
   const shown: ManageStep = step === 'done' && !outcome ? 'overview' : step;
@@ -186,6 +193,12 @@ function CancelStep({ sub, onBack, onDone }: { sub: Subscription; onBack: () => 
   const [message, setMessage] = useState<string>();
   const offer = reason ? sub.offers[reason] : null;
   const copy = offer ? offerCopy(offer, months) : undefined;
+  // The one offer, counted once for each reason it shows for.
+  useEffect(() => {
+    if (reason) track('cancel_reason_picked', { reason });
+    if (reason && offer) track('cancel_offer_shown', { offer: offer.kind, reason });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [reason]);
 
   const send = async (acceptOffer: boolean) => {
     setBusy(true);
@@ -197,6 +210,8 @@ function CancelStep({ sub, onBack, onDone }: { sub: Subscription; onBack: () => 
         ...(acceptOffer ? { acceptOffer: true, pauseMonths: months } : {}),
       });
       haptic(acceptOffer ? 'success' : 'warning');
+      if (acceptOffer && offer) track('cancel_offer_taken', { offer: offer.kind, reason: reason || undefined });
+      else track('cancel_confirmed', { reason: reason || 'none', offer: offer?.kind });
       onDone(res.outcome, res.subscription);
     } catch (e) {
       haptic('error');
@@ -311,6 +326,7 @@ function DoneStep({ outcome, onResumed }: { outcome: { kind: CancelOutcome; sub:
               try {
                 const res = await resumePro();
                 haptic('success');
+                track('cancel_undone');
                 onResumed(res.subscription);
                 navigate(stepPath('overview'), { replace: true });
               } catch (e) {

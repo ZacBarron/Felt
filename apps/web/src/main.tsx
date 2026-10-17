@@ -5,12 +5,15 @@ import { App } from './App';
 import { installGlobalHaptics } from './haptics';
 import { currentSession, refreshMe } from './state/api';
 import { captureReferral } from './state/referral';
+import { startAnalytics } from './state/events';
 import { SettingsProvider } from './state/settings';
 import { connectClaudeCloud } from './state/cloud';
 import { firstSync, pullIfNewer, pushNow, startSync, syncMeta } from './state/sync';
 import './styles.css';
 
 installGlobalHaptics();
+// Anonymous usage counts, unless the player or the browser said no (docs/ANALYTICS.md).
+startAnalytics();
 // A friend's invite link: keep the code for sign up and tidy the address.
 captureReferral();
 

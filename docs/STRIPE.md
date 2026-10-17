@@ -51,6 +51,7 @@ Developers, then Webhooks, then Add endpoint:
   - `customer.subscription.deleted`
   - `invoice.paid`
   - `invoice.payment_failed`
+  - `charge.refunded` (counts refunds for the console, see ADMIN.md)
 - Copy the signing secret (`whsec_...`) into `STRIPE_WEBHOOK_SECRET`.
 
 ## 5. Billing settings

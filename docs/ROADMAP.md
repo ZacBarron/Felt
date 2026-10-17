@@ -92,6 +92,8 @@ See [MONETIZATION.md](MONETIZATION.md).
 - [x] Server: item calibration, real pool ratings per stake, leagues with real players, push reminders, global daily stats
 - [x] Retention: Manage Pro with a reason first cancel flow and one offer per reason (yearly switch, a coupon once a year, or a pause), resume, a billing issue banner with a grace period, and the founding (lifetime) purchase with a 500 seat cap on the server (see MONETIZATION.md)
 - [x] Lifecycle messages: push caps (1 a day, 4 a week), quiet hours, decay and one closing note; trial, billing, weekly digest and win-back email with opt in, one tap unsubscribe, a sunset and a holdout (see ENGAGEMENT.md)
+- [x] Product analytics, cookieless and anonymous: an event dictionary with a typed `track()`, a batched queue with sendBeacon, Global Privacy Control, Do Not Track and a Share anonymous usage switch, server ingestion with an allowlist, rate limits and 13 month retention, install to account linking for revenue by first touch, server side money and message events, and A/B tests on the site (see ANALYTICS.md)
+- [x] Operations console at `/admin`: charts for actives, funnels, retention, sources, revenue and quality, player search with support actions (each with a reason and an audit entry), feature flags and config, lifecycle programs, health, waitlists and CSV exports (see ADMIN.md)
 
 ## Before launch
 
@@ -100,6 +102,9 @@ See [MONETIZATION.md](MONETIZATION.md).
 - [ ] Turn off `PRO_FOR_EVERYONE` and remove the Pro testing switch from Settings
 - [ ] Set up the retention pieces: founding price, retention coupon, portal settings, Smart Retries, the new webhook events and `MAIL_POSTAL_ADDRESS` (see DEPLOY.md)
 - [ ] A founding member buy button on the site or in the app (the seam is `purchaseLifetime()` in `state/access.ts`)
+- [ ] Set `ADMIN_TOKEN` on the server, add `charge.refunded` to the Stripe webhook, and add named admins in the console (see ADMIN.md)
+- [ ] Have the privacy page reviewed for Canada (PIPEDA and Quebec Law 25) and for any EU or UK traffic before running ads there (see ANALYTICS.md, Legal notes)
+- [ ] Run the first two A/B tests for at least 2 full weeks each: hero daily first vs start free first, and the sticky bar on phones
 
 ## Train, Play and You
 

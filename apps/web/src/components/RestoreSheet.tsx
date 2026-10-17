@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { haptic } from '../haptics';
 import { restorePurchases, type RestoreResult } from '../state/access';
+import { track } from '../state/events';
 import { useSettings } from '../state/settings';
 import { AccountIcon, CheckIcon, CloudIcon, InfoIcon } from '../ui/icons';
 import '../pages/auth.css';
@@ -30,6 +31,7 @@ export function RestoreSheet({ open, onClose, returnTo }: { open: boolean; onClo
   const check = useCallback(async () => {
     setResult(undefined);
     const r = await restorePurchases(latest.current);
+    track('restore_tapped', { result: r.kind });
     if (r.kind === 'restored') {
       update({ ...latest.current, access: r.access });
       haptic('success');

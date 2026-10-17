@@ -1,3 +1,4 @@
+import { track } from '../state/events';
 import { type FormEvent, type KeyboardEvent, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { MixBar } from '../components/MixBar';
@@ -64,6 +65,11 @@ export function CoachPage() {
   }, [available, session?.token]);
 
   const pro = status ? status.pro : serverPro(session?.user);
+  useEffect(() => {
+    if (available !== undefined) track('coach_opened', { from: incoming ? 'spot' : 'direct', pro: !!pro });
+    // Once, when the page knows whether the coach is on.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [available === undefined]);
 
   return (
     <div className="stack coach-page" style={{ gap: '1.2rem' }}>
@@ -215,13 +221,16 @@ function Conversation({ incoming, limit, remaining, onRemaining, onLostPro }: Co
     setError(undefined);
     try {
       const context = await buildCoachContext(settings, chat.spot);
+      track('coach_asked', { turn: messages.filter((m) => m.role === 'user').length });
       const res = await askCoach(messages, context);
+      track('coach_answered', { ok: true, refused: !!res.refused });
       setChat((c) => ({ ...c, messages: [...messages, { role: 'assistant', content: res.reply, ...(res.refused ? { refused: true } : {}) }] }));
       onRemaining(res.remaining);
     } catch (e) {
       const status = e instanceof ApiError ? e.status : 0;
       if (status === 429) onRemaining(0);
       if (status === 403) onLostPro();
+      track('coach_answered', { ok: false, refused: false });
       haptic('error');
       setError({
         message: e instanceof Error ? e.message : 'The coach had a problem. Try again in a moment.',

@@ -10,6 +10,7 @@ import { StepView } from '../lesson/StepView';
 import { canOpenLesson } from '../state/access';
 import { getChart } from '../state/charts';
 import { recordLessonQuiz } from '../state/rating';
+import { track } from '../state/events';
 import { lessonStepId, saveLessonStep, unsave } from '../state/saved';
 import { useSettings } from '../state/settings';
 import { db, type StoredLesson } from '../state/db';
@@ -82,6 +83,7 @@ function Lesson({ lessonKey: key }: { lessonKey: string }) {
       : 0;
     setIndex(resume);
     if (jumpTo === null && resume > 0) setResumedAt(resume);
+    track('lesson_started', { lesson: key, track: key.split('/')[0], resumed: resume > 0 });
     if (!saved) void saveLesson(key, { step: 0 });
   }, [saved, content, index, key, jumpTo]);
 
@@ -113,6 +115,7 @@ function Lesson({ lessonKey: key }: { lessonKey: string }) {
   const finish = () => {
     const correct = quizIdx.filter((n) => answers[n] === (steps[n] as QuizStep).answer).length;
     void saveLesson(key, { status: 'done', step: steps.length, correct, answered: quizIdx.length });
+    track('lesson_finished', { lesson: key, track: key.split('/')[0], correct, total: quizIdx.length });
     haptic('success');
     setFinished(true);
     window.scrollTo({ top: 0 });

@@ -1,3 +1,4 @@
+import { track } from '../state/events';
 import { LINEUP_LABELS, LINEUP_TYPES, type LineupType, lineupBots, botById } from '@felt/content';
 import { seededRng } from '@felt/core';
 import { useMemo, useRef, useState } from 'react';
@@ -72,6 +73,7 @@ function TableForm({ initial }: { initial?: CustomTable }) {
       return;
     }
     const saved = saveCustomTable(t);
+    track('custom_table_created', { seats: t.seats, edited: !!initial });
     haptic('success');
     navigate('/play', { replace: true, state: { saved: saved.id } });
   }

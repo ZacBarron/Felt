@@ -1,5 +1,6 @@
 import { boundaryHands, chartItemDifficulty, pickAdaptive, type PracticeItem, type SkillDomain, type SkillRating } from '@felt/core';
 import { useEffect, useState } from 'react';
+import { track } from '../state/events';
 import { Link, useNavigate } from 'react-router-dom';
 import { chartChoices, type Decision, DecisionItem } from '../drills/DecisionItem';
 import { haptic } from '../haptics';
@@ -96,6 +97,14 @@ export function PracticePage() {
       setBefore(snap.overall.rating);
     })();
   }, [settings.game]);
+
+  const done = !!items && before !== undefined && (items.length === 0 || index >= items.length);
+  useEffect(() => {
+    if (items?.length) track('practice_started', {});
+  }, [!!items]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (done && scores.length) track('practice_finished', { right: scores.filter((s) => s >= 1).length, total: scores.length });
+  }, [done]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!items || before === undefined) return null;
   const missedHands = items.slice(0, scores.length).filter((it, i) => it.decision.kind === 'chart' && scores[i] < 1).length;

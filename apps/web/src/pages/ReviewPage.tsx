@@ -15,6 +15,7 @@ import { EmptyState } from '../ui/Section';
 import './review.css';
 import { type QueueItem, recordAnswer, RELEARN_WINDOW_MS, startOfToday } from '../state/review';
 import { ratingSnapshot } from '../state/rating';
+import { track } from '../state/events';
 import { useSettings } from '../state/settings';
 import { BottomBar } from '../ui/BottomBar';
 import { CheckIcon, ChevronRightIcon, CloseIcon, DrillsIcon } from '../ui/icons';
@@ -166,6 +167,7 @@ function ReviewSession({ config, resume, onHome, onStart }: { config: SessionCon
       if (first.length > 0 || config.kind !== 'today') {
         if (first.length === 0) setExhausted(true);
         setQueue(first);
+        track('review_started', { cards: first.length });
         return;
       }
       // Nothing due: go straight to extra practice instead of a dead end.
@@ -174,6 +176,7 @@ function ReviewSession({ config, resume, onHome, onStart }: { config: SessionCon
       const batch = await buildSession(charts, settings.study, { kind: 'extra', decks: config.decks, limit: EXTRA_BATCH }, answered.current);
       if (batch.length === 0) setExhausted(true);
       setQueue(batch);
+      track('review_started', { cards: batch.length });
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -185,6 +188,12 @@ function ReviewSession({ config, resume, onHome, onStart }: { config: SessionCon
 
   const item = phase === 'cleared' ? undefined : queue?.[index];
   useBodyClass('focus-mode', !!item);
+  const ended = !!queue && !item && (phase !== 'extra' || exhausted);
+  useEffect(() => {
+    if (ended && results.length) track('review_finished', { cards: results.length, right: results.filter((r) => r.accuracy >= 1).length });
+    // Once, when the session ends.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ended]);
 
   if (!queue) return <p className="muted">Loading your review…</p>;
 

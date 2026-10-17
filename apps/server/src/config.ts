@@ -53,7 +53,15 @@ export interface Config {
    * other Pro checks work before purchases are open. Off unless set to true.
    */
   proForEveryone: boolean;
+  /**
+   * The operations console at /admin (docs/ADMIN.md). The owner signs in
+   * with ADMIN_TOKEN, at least 16 characters. Without it the console is off.
+   */
+  admin: { token?: string };
 }
+
+/** Shortest ADMIN_TOKEN the console accepts. */
+export const MIN_ADMIN_TOKEN = 16;
 
 export const COACH_EFFORTS = ['low', 'medium', 'high', 'xhigh', 'max'] as const;
 export type CoachEffort = (typeof COACH_EFFORTS)[number];
@@ -100,7 +108,18 @@ export function loadConfig(raw: Record<string, string | undefined> = process.env
     },
     allowedOrigins: originList(env.ALLOWED_ORIGINS),
     proForEveryone: flag(env.PRO_FOR_EVERYONE),
+    admin: { token: adminToken(env.ADMIN_TOKEN) },
   };
+}
+
+function adminToken(raw: string | undefined): string | undefined {
+  const t = raw?.trim();
+  if (!t) return undefined;
+  if (t.length < MIN_ADMIN_TOKEN) {
+    console.warn(`ADMIN_TOKEN is shorter than ${MIN_ADMIN_TOKEN} characters, so the console stays off.`);
+    return undefined;
+  }
+  return t;
 }
 
 /** A comma separated list of origins, each reduced to scheme, host and port. */
