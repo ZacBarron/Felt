@@ -1,3 +1,4 @@
+import { track } from './events';
 import { BOTS, TABLE_PRESETS } from '@felt/content';
 import type { HandState, PlayDecision } from '@felt/core';
 import { useSyncExternalStore } from 'react';
@@ -239,12 +240,16 @@ export function sitDown(table: LobbyTable, buyIn: number, stack?: number) {
     hands: [],
   };
   lastStats = undefined;
+  track('table_sat', { table: tableTag(table), custom: table.preset === 'custom', seats: table.seats });
   write(LAST_KEY, { id: table.id, buyIn });
   persist();
   emit();
 }
 
 const LAST_KEY = 'felt.play.last.v1';
+
+/** A table for analytics: the preset's id, or custom for a table the player built. */
+export const tableTag = (t: LobbyTable) => (t.preset === 'custom' ? 'custom' : t.id);
 
 /** Every table in the lobby: the presets, then the player's own. */
 export function lobbyTables(): LobbyTable[] {
@@ -293,6 +298,7 @@ export function leaveResult(s: TableSession): { stack: number; stats: SessionSta
  * Play now at this table, and the session totals show in the lobby.
  */
 export function leaveTable() {
+  track('table_left', { hands: session?.stats.hands ?? 0 });
   if (session) {
     const { stack, stats } = leaveResult(session);
     lastStats = stats.hands || stats.net ? stats : undefined;

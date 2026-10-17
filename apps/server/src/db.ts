@@ -236,6 +236,137 @@ const MIGRATIONS: string[] = [
   ALTER TABLE waitlist ADD COLUMN source TEXT;
   ALTER TABLE waitlist ADD COLUMN platform TEXT;
   `,
+  // Product analytics (docs/ANALYTICS.md). Anonymous: an install id made on the
+  // device, never an IP address or a user agent. Raw events are deleted after
+  // 13 months. installs, install_days, milestones and exposures are small
+  // rollups kept up to date at ingest, so the dashboard never scans events
+  // for its main numbers. First touch is copied onto the user row when an
+  // account is linked, so revenue can be traced to the link that brought it.
+  `
+  CREATE TABLE installs (
+    install_id TEXT PRIMARY KEY,
+    first_at INTEGER NOT NULL,
+    first_day TEXT NOT NULL,
+    first_session TEXT NOT NULL,
+    first_app TEXT NOT NULL,
+    last_day TEXT NOT NULL,
+    platform TEXT NOT NULL,
+    in_app INTEGER NOT NULL DEFAULT 0,
+    standalone INTEGER NOT NULL DEFAULT 0,
+    source TEXT NOT NULL DEFAULT 'direct',
+    utm_source TEXT, utm_medium TEXT, utm_campaign TEXT, utm_content TEXT,
+    src TEXT, loc TEXT, ref TEXT, referrer TEXT, landing TEXT,
+    user_id TEXT,
+    linked_at TEXT
+  ) WITHOUT ROWID;
+  CREATE INDEX installs_first_day ON installs (first_day);
+  CREATE INDEX installs_last_day ON installs (last_day);
+  CREATE INDEX installs_user ON installs (user_id);
+  CREATE INDEX installs_source ON installs (source, first_day);
+  CREATE TABLE install_days (
+    install_id TEXT NOT NULL,
+    day TEXT NOT NULL,
+    PRIMARY KEY (install_id, day)
+  ) WITHOUT ROWID;
+  CREATE INDEX install_days_day ON install_days (day, install_id);
+  CREATE TABLE milestones (
+    install_id TEXT NOT NULL,
+    kind TEXT NOT NULL,
+    at INTEGER NOT NULL,
+    day TEXT NOT NULL,
+    session_id TEXT,
+    PRIMARY KEY (install_id, kind)
+  ) WITHOUT ROWID;
+  CREATE INDEX milestones_kind_day ON milestones (kind, day);
+  CREATE TABLE exposures (
+    install_id TEXT NOT NULL,
+    exp TEXT NOT NULL,
+    variant TEXT NOT NULL,
+    at INTEGER NOT NULL,
+    day TEXT NOT NULL,
+    PRIMARY KEY (install_id, exp)
+  ) WITHOUT ROWID;
+  CREATE INDEX exposures_exp ON exposures (exp, variant);
+  CREATE TABLE events (
+    id INTEGER PRIMARY KEY,
+    at INTEGER NOT NULL,
+    day TEXT NOT NULL,
+    name TEXT NOT NULL,
+    app TEXT NOT NULL,
+    install_id TEXT,
+    session_id TEXT,
+    platform TEXT,
+    in_app INTEGER,
+    standalone INTEGER,
+    props TEXT
+  );
+  CREATE INDEX events_name_day ON events (name, day);
+  CREATE INDEX events_day ON events (day);
+  CREATE INDEX events_install ON events (install_id, at);
+  ALTER TABLE users ADD COLUMN first_install TEXT;
+  ALTER TABLE users ADD COLUMN first_source TEXT;
+  ALTER TABLE users ADD COLUMN first_utm_source TEXT;
+  ALTER TABLE users ADD COLUMN first_medium TEXT;
+  ALTER TABLE users ADD COLUMN first_campaign TEXT;
+  ALTER TABLE users ADD COLUMN first_loc TEXT;
+  ALTER TABLE users ADD COLUMN first_ref TEXT;
+  ALTER TABLE users ADD COLUMN first_landing TEXT;
+  ALTER TABLE users ADD COLUMN first_seen_at INTEGER;
+  CREATE INDEX users_first_source ON users (first_source);
+  `,
+  // The operations console (docs/ADMIN.md): feature flags and config, an audit
+  // log of every admin action, staff notes on players, named admins with
+  // roles, and the last run of each scheduled job.
+  `
+  CREATE TABLE flags (
+    key TEXT PRIMARY KEY,
+    value TEXT NOT NULL,
+    updated_at TEXT NOT NULL,
+    updated_by TEXT NOT NULL
+  );
+  CREATE TABLE audit_log (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    at TEXT NOT NULL,
+    actor TEXT NOT NULL,
+    role TEXT NOT NULL,
+    action TEXT NOT NULL,
+    target TEXT,
+    reason TEXT,
+    before TEXT,
+    after TEXT
+  );
+  CREATE INDEX audit_log_target ON audit_log (target, at);
+  CREATE INDEX audit_log_at ON audit_log (at);
+  CREATE TABLE staff_notes (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id TEXT NOT NULL REFERENCES users (id) ON DELETE CASCADE,
+    at TEXT NOT NULL,
+    author TEXT NOT NULL,
+    body TEXT NOT NULL
+  );
+  CREATE INDEX staff_notes_user ON staff_notes (user_id, at);
+  CREATE TABLE admins (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL UNIQUE,
+    role TEXT NOT NULL,
+    token_hash TEXT NOT NULL UNIQUE,
+    created_at TEXT NOT NULL,
+    created_by TEXT NOT NULL,
+    last_seen TEXT,
+    disabled INTEGER NOT NULL DEFAULT 0
+  );
+  CREATE TABLE job_runs (
+    job TEXT PRIMARY KEY,
+    last_run TEXT,
+    last_ok TEXT,
+    last_error TEXT,
+    last_error_at TEXT,
+    runs INTEGER NOT NULL DEFAULT 0,
+    failures INTEGER NOT NULL DEFAULT 0
+  );
+  ALTER TABLE users ADD COLUMN comp_reason TEXT;
+  ALTER TABLE users ADD COLUMN revenue_cents INTEGER NOT NULL DEFAULT 0;
+  `,
 ];
 
 export function openDb(path: string): Db {

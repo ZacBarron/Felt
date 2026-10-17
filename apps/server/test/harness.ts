@@ -2,6 +2,7 @@ import { createHmac } from 'node:crypto';
 import { createApp } from '../src/app.ts';
 import { loadConfig } from '../src/config.ts';
 import { type Db, openDb } from '../src/db.ts';
+import { createFlags } from '../src/flags.ts';
 import type { MailOptions, StripeCall } from '../src/services.ts';
 
 /** Responses are read loosely in tests; each assertion checks the shape it needs. */
@@ -31,6 +32,8 @@ const DAY = 86_400;
 export function fakeStripe(clock: () => Date) {
   const calls: { method: string; path: string; params?: Record<string, unknown> }[] = [];
   const subs = new Map<string, Record<string, unknown>>();
+  /** The customer's charges, newest first, for refunds and receipts. */
+  const charges: { id: string; paid: boolean; refunded: boolean; amount: number }[] = [{ id: 'ch_1', paid: true, refunded: false, amount: 7999 }];
   let sessions = 0;
   const call: StripeCall = async (method, path, params) => {
     calls.push({ method, path, params });
@@ -39,10 +42,21 @@ export function fakeStripe(clock: () => Date) {
     if (path === 'billing_portal/sessions') return { url: 'https://billing.stripe.test/p1' };
     if (path.startsWith('coupons/')) return { id: 'RETAIN30', valid: true, percent_off: 30, duration: 'once' };
     if (path.startsWith('subscriptions?')) return { data: [...subs.values()] };
+    if (path.startsWith('charges?')) return { data: charges };
+    if (path === 'refunds') {
+      const ch = charges.find((c) => c.id === params?.charge);
+      if (ch) ch.refunded = true;
+      return { id: 're_1', charge: params?.charge };
+    }
+    if (path.startsWith('charges/')) return { id: path.slice(8), ...params };
     const id = path.match(/^subscriptions\/(.+)$/)?.[1];
     if (id) {
       const sub = subs.get(id);
       if (!sub) throw new Error(`Stripe subscriptions/${id}: No such subscription`);
+      if (method === 'DELETE') {
+        sub.status = 'canceled';
+        return structuredClone(sub);
+      }
       if (method === 'POST' && params) {
         const now = Math.floor(clock().getTime() / 1000);
         if ('cancel_at_period_end' in params) sub.cancel_at_period_end = params.cancel_at_period_end;
@@ -61,7 +75,7 @@ export function fakeStripe(clock: () => Date) {
     }
     return {};
   };
-  return { call, calls, subs };
+  return { call, calls, subs, charges };
 }
 
 export function harness(env: Record<string, string> = {}) {
@@ -75,7 +89,8 @@ export function harness(env: Record<string, string> = {}) {
   const config = loadConfig({ ...ENV, ...env });
   const stripe = fakeStripe(now);
   const mailer = { send: async (to: string, subject: string, text: string, options?: MailOptions) => void state.mail.push({ to, subject, text, options }) };
-  const app = createApp({ db, config, mailer, stripe: stripe.call, now, random: () => state.random });
+  const flags = createFlags(db, config);
+  const app = createApp({ db, config, mailer, stripe: stripe.call, now, random: () => state.random, flags });
 
   const call = (method: string, path: string, body?: unknown, token?: string, headers: Record<string, string> = {}): Promise<Res> =>
     app.request(path, {
@@ -122,5 +137,5 @@ export function harness(env: Record<string, string> = {}) {
     return sub;
   };
 
-  return { state, db, config, stripe, app, call, signIn, webhook, subscribe, mailer };
+  return { state, db, config, stripe, app, call, signIn, webhook, subscribe, mailer, flags };
 }

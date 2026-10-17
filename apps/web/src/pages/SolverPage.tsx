@@ -1,3 +1,4 @@
+import { track } from '../state/events';
 import { actionRange, type Card, cardsToString, type HandMix, makeCard, parseCards, parseComboRange, type PlayerSizes, RANKS, type StreetSizes, SUIT_SYMBOLS, SUITS } from '@felt/core';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
@@ -194,6 +195,8 @@ function useSolverWorker() {
   const [view, setView] = useState<NodeView>();
   const [error, setError] = useState<string>();
   const [running, setRunning] = useState(false);
+  /** What the current solve is, for the solver_run event. */
+  const runMeta = useRef<{ kind: string; street: string; at: number }>();
 
   useEffect(() => () => worker.current?.terminate(), []);
 
@@ -207,6 +210,9 @@ function useSolverWorker() {
         setSolved(m);
         setRunning(false);
         haptic('success');
+        const meta = runMeta.current;
+        if (meta) track('solver_run', { kind: meta.kind, street: meta.street, exploitability: m.exploitability, ms: Math.round(performance.now() - meta.at) });
+        runMeta.current = undefined;
         w.postMessage({ type: 'node', path: [] });
       }
       if (m.type === 'node') setView(m.view);
@@ -225,7 +231,9 @@ function useSolverWorker() {
     view,
     error,
     running,
-    solve(spot: SpotInput) {
+    solve(spot: SpotInput, kind: string) {
+      const cards = (spot.board.match(/[2-9TJQKA][shdc]/gi) ?? []).length;
+      runMeta.current = { kind, street: cards >= 5 ? 'river' : cards === 4 ? 'turn' : 'flop', at: performance.now() };
       setError(undefined);
       setSolved(undefined);
       setView(undefined);
@@ -319,7 +327,7 @@ export function SolverPage() {
       sizes: sizesFor(bets, raise),
       targetPct: boardCards!.length === 5 ? 0.2 : 0.5,
       maxIterations: boardCards!.length === 5 ? 2000 : 400,
-    });
+    }, custom ? 'custom' : 'example');
   };
 
   const go = (nextPath: number[], nextLabels: string[]) => {

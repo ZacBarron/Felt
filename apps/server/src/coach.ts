@@ -213,8 +213,11 @@ export async function askCoach(
 
 /** The model answered with no text, for example when thinking used all the tokens. */
 export class CoachEmptyError extends Error {
-  constructor(readonly stopReason: string) {
+  // A plain field, not a parameter property, so Node's type stripping can run this file in dev.
+  readonly stopReason: string;
+  constructor(stopReason: string) {
     super(`Coach reply had no text (stop reason ${stopReason}).`);
+    this.stopReason = stopReason;
   }
 }
 

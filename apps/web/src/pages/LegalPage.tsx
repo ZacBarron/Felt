@@ -1,7 +1,7 @@
 import { PageHeader } from '../ui/PageHeader';
 import './screens.css';
 
-const UPDATED = 'October 12, 2026';
+const UPDATED = 'October 17, 2026';
 const CONTACT = import.meta.env.VITE_SUPPORT_EMAIL as string | undefined;
 const contact = CONTACT ? `email ${CONTACT}` : 'use the support address listed where you got Aced';
 
@@ -50,20 +50,31 @@ const DOCS = {
     title: 'Privacy',
     sections: [
       [
-        'By default, nothing leaves your device',
-        'Without an account, your progress, ratings, saves and imported hands are stored in your browser on this device. Aced has no ads, sells no data and runs no third party tracking scripts. The usage log in Settings stays on your device unless you export it.',
+        'What stays on your device',
+        'Without an account, your progress and ratings are stored in your browser on this device. So are your saves and imported hands. Aced has no ads and runs no third party trackers.',
       ],
       [
-        'With an account',
+        'Anonymous usage counts',
         [
-          'If you sign in, Aced stores these things.',
-          'Your email address',
-          'A copy of your progress for sync, including any hands and sessions you imported',
-          'Your reminder time and time zone',
-          'Your daily challenge results',
-          'Your league display name and weekly rating change',
-          'Your graded answers with your rating at the time, used to measure how hard each question is',
+          'Aced sends short usage events to its own server. They show us what helps players and what to fix. Each event can carry these things.',
+          'What happened, such as a lesson started or a hand dealt',
+          'A few labels, such as which lesson or whether an answer was right',
+          'A random id made on this device and an id for this visit',
+          'Your kind of device (iPhone, Android or computer)',
+          'Whether Aced runs as an installed app or inside another app',
+          'Your time zone offset, so days count in your own time',
+          'The link that brought you, such as a creator’s tag',
+          'Speed numbers for some page loads',
+          'A short code for an error, never its text',
         ],
+      ],
+      [
+        'What is never sent',
+        'Usage events never hold your email or your name. They never hold text you type or the cards you were dealt. Our server does not store your IP address. It does not store your browser’s details either. Aced uses no tracking cookies.',
+      ],
+      [
+        'Turning it off',
+        'Open Settings and then Your data. Turn off Share anonymous usage. Aced then sends nothing more and deletes what was waiting. It also asks our server to delete what this device sent. If your browser sends Global Privacy Control or Do Not Track, Aced sends nothing at all.',
       ],
       ['What others see', 'Other players see only your league display name and weekly points. Daily challenge stats are shown as totals, never by name.'],
       [
@@ -72,7 +83,11 @@ const DOCS = {
       ],
       [
         'Keeping and deleting',
-        'Account data is kept while your account exists. Account, Delete my account removes your account and everything stored with it right away. Payment records are kept by Stripe as the law requires.',
+        'Account data is kept while your account exists. Account, Delete my account removes your account and everything stored with it right away. Usage events stay, with the link to you removed. Usage events are deleted after 13 months. The random id on your device is replaced after 13 months too. Payment records are kept by Stripe as the law requires.',
+      ],
+      [
+        'No selling',
+        'We never sell or rent your data. We never share usage events with advertisers. They stay on our server.',
       ],
       [
         'Your rights',

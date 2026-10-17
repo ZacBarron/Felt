@@ -2,6 +2,7 @@ import { DIFFICULTY, type RatingEvent, type RatingSnapshot, replayRatings, type 
 import { db, type StoredAnswer } from './db';
 import { entryFor } from './lessons';
 import { calibratedDifficulty } from './calibration';
+import { track } from './events';
 
 /**
  * Records graded answers and turns them into the Aced Rating. Only objective
@@ -47,6 +48,9 @@ export async function recordRated(answer: Omit<StoredAnswer, 'id' | 'at'>, at = 
   const recent = await db.answers.where('itemId').equals(answer.itemId).last();
   if (recent && at.getTime() - recent.at.getTime() < REPEAT_WINDOW_MS) return;
   await db.answers.add({ ...answer, at });
+  // Every objective answer, for activation. Never the question or the answer itself.
+  const lesson = answer.itemId.startsWith('quiz:') ? answer.itemId.slice(5).split('#')[0] : undefined;
+  track('answer_graded', { source: answer.source, domain: answer.domain, correct: answer.score >= 1, score: Math.round(answer.score * 100) / 100, lesson });
 }
 
 /** Quiz step `step` of lesson `key`, answered right or wrong. */

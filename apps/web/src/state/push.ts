@@ -1,4 +1,5 @@
 import { api, currentSession, type ServerFeatures, updateMe } from './api';
+import { track } from './events';
 
 /** Why reminders cannot be turned on here, or undefined when they can. */
 export function pushBlocker(): string | undefined {
@@ -28,10 +29,14 @@ export function canPush(features: ServerFeatures | null | undefined): boolean {
 }
 
 /** Asks permission and subscribes this device to the signed in account's pushes. */
-export async function subscribePush(): Promise<void> {
+export async function subscribePush(from = 'reminders'): Promise<void> {
   const blocker = pushBlocker();
   if (blocker) throw new Error(blocker);
-  if ((await Notification.requestPermission()) !== 'granted') throw new Error('Aced needs permission to show notifications.');
+  const asking = Notification.permission === 'default';
+  if (asking) track('push_permission_asked', { from });
+  const result = await Notification.requestPermission();
+  if (asking) track('push_permission_result', { result, from });
+  if (result !== 'granted') throw new Error('Aced needs permission to show notifications.');
   const { key } = await api<{ key: string }>('/push/key');
   const reg = await navigator.serviceWorker.ready;
   const sub = (await reg.pushManager.getSubscription()) ?? (await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: keyBytes(key).buffer as ArrayBuffer }));
@@ -40,13 +45,13 @@ export async function subscribePush(): Promise<void> {
 
 /** Asks permission, subscribes this device, and sets the daily reminder time. */
 export async function enableReminders(cueMinutes: number): Promise<void> {
-  await subscribePush();
+  await subscribePush('reminders');
   await updateMe({ reminders: true, cueMinutes, tz: Intl.DateTimeFormat().resolvedOptions().timeZone });
 }
 
 /** The trial reminder: on means this device is subscribed and the account wants it. */
 export async function setTrialReminder(on: boolean): Promise<void> {
-  if (on) await subscribePush();
+  if (on) await subscribePush('trial');
   await updateMe({ trialReminder: on, tz: Intl.DateTimeFormat().resolvedOptions().timeZone });
 }
 

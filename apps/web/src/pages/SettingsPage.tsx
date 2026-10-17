@@ -10,7 +10,7 @@ import { useClaudeCloud } from '../state/cloud';
 import { updateMe, useServerFeatures, useSession } from '../state/api';
 import { BillingIssueBanner } from '../components/BillingIssueBanner';
 import { exportBackup, importBackup, requestPersistentStorage } from '../state/backup';
-import { exportEvents } from '../state/events';
+import { exportEvents, setUsageSharing, usageSharing } from '../state/events';
 import { studyReminder, trialReminder } from '../state/reminders';
 import { chartsForGame } from '../state/charts';
 import { type Access, type Appearance, useSettings } from '../state/settings';
@@ -127,7 +127,7 @@ function SettingsHome() {
   return (
     <div className="stack settings" style={{ gap: '1.6rem' }}>
       <PageHeader title="Settings" back={{ to: '/you', label: 'You' }} />
-      <BillingIssueBanner />
+      <BillingIssueBanner where="settings" />
 
       <div className="list with-icons">
         <NavRow
@@ -643,7 +643,52 @@ function DataPage() {
           </label>
         </div>
       </Section>
+      <UsageSection />
     </SubPage>
+  );
+}
+
+/**
+ * Anonymous usage counts, on unless the player turns them off. Global
+ * Privacy Control and Do Not Track turn them off with no switch to flip.
+ * Turning it off deletes what is waiting and asks the server to delete what
+ * this device sent (docs/ANALYTICS.md).
+ */
+function UsageSection() {
+  const [state, setState] = useState(usageSharing);
+  return (
+    <Section
+      title="Usage"
+      footer={
+        state.blocked
+          ? 'Your browser asks sites not to track you. So Aced sends nothing.'
+          : 'Aced sends counts like lesson started, with a random id. Never your email, name or hands.'
+      }
+    >
+      <div className="list">
+        {state.blocked ? (
+          <div className="list-row">
+            <span className="grow">Share anonymous usage</span>
+            <span className="footnote">Off</span>
+          </div>
+        ) : (
+          <Row label="Share anonymous usage">
+            <Toggle
+              label="Share anonymous usage"
+              checked={state.on}
+              onChange={(on) => {
+                setUsageSharing(on);
+                setState(usageSharing());
+              }}
+            />
+          </Row>
+        )}
+        <Link className="list-row" to="/privacy">
+          <span className="grow">See what Aced sends</span>
+          <ChevronRightIcon size={14} className="chev" />
+        </Link>
+      </div>
+    </Section>
   );
 }
 

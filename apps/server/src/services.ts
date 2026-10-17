@@ -62,7 +62,7 @@ export function stripeForm(params: Record<string, unknown>, prefix = ''): string
   return parts.filter(Boolean).join('&');
 }
 
-export type StripeCall = (method: 'GET' | 'POST', path: string, params?: Record<string, unknown>) => Promise<Record<string, unknown>>;
+export type StripeCall = (method: 'GET' | 'POST' | 'DELETE', path: string, params?: Record<string, unknown>) => Promise<Record<string, unknown>>;
 
 export function createStripe(secretKey: string): StripeCall {
   return async (method, path, params) => {
@@ -175,12 +175,18 @@ export function safeZone(tz: string | null | undefined): string {
  * player's local day and PUSH_WEEK_CAP in the last 7 days. Every push counts,
  * transactional ones too.
  */
-export function underPushCaps(sentAt: readonly string[], now: Date, tz: string): boolean {
+export function underPushCaps(sentAt: readonly string[], now: Date, tz: string, caps: PushCaps = { day: PUSH_DAY_CAP, week: PUSH_WEEK_CAP }): boolean {
   const t = now.getTime();
   const recent = sentAt.map((s) => Date.parse(s)).filter((s) => s <= t && s > t - 7 * DAY_MS);
-  if (recent.length >= PUSH_WEEK_CAP) return false;
+  if (recent.length >= caps.week) return false;
   const today = localTime(now, tz).day;
-  return recent.filter((s) => localTime(new Date(s), tz).day === today).length < PUSH_DAY_CAP;
+  return recent.filter((s) => localTime(new Date(s), tz).day === today).length < caps.day;
+}
+
+/** The push caps, as set in the console (push.day_cap and push.week_cap). */
+export interface PushCaps {
+  day: number;
+  week: number;
 }
 
 /** A push at a time the player did not pick (the trial reminder) waits out quiet hours. */
@@ -198,6 +204,8 @@ export interface ReminderCandidate {
   lastOpenAt?: string | null;
   /** When the closing note went out, if it has. */
   closingSentAt?: string | null;
+  /** Caps other than the defaults. */
+  caps?: PushCaps;
 }
 
 export type ReminderDecision =
@@ -225,7 +233,7 @@ export function shouldRemind(c: ReminderCandidate, now: Date): ReminderDecision 
   if (c.closingSentAt && (!c.lastOpenAt || c.closingSentAt >= c.lastOpenAt)) return { send: false, day, why: 'closed' };
   if (c.lastStudyDay === day) return { send: false, day, why: 'studied' };
   if (c.sentSinceStudy.includes(day)) return { send: false, day, why: 'sent' };
-  if (!underPushCaps(c.pushesSent ?? [], now, c.tz)) return { send: false, day, why: 'cap' };
+  if (!underPushCaps(c.pushesSent ?? [], now, c.tz, c.caps)) return { send: false, day, why: 'cap' };
   const ignored = c.sentSinceStudy.length;
   if (ignored > 0 && c.lastOpenAt && now.getTime() - Date.parse(c.lastOpenAt) >= CLOSING_AFTER_DAYS * DAY_MS) return { send: true, day, kind: 'closing' };
   if (ignored >= 7) return { send: false, day, why: 'stopped' };

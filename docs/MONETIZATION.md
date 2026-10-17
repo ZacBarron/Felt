@@ -166,4 +166,6 @@ In Settings, tap the version number seven times to show the Developer section (a
 
 ## Metrics to watch once live
 
+The operations console at `/admin` shows these (docs/ADMIN.md, docs/ANALYTICS.md). Money events come from the server and Stripe, never from the app, so nothing is counted twice.
+
 Onboarding completion by step, placement start and finish rate, lessons skipped per placement, paywall view to trial, trial to paid, day 1, 7 and 30 retention, share of days the daily goal is met. For retention: cancel reasons, offer take rate by reason, paused players who come back, failed payments recovered, and founding seats taken.

@@ -1,6 +1,8 @@
 import webpush from 'web-push';
 import type { Config } from './config.ts';
 import type { Db } from './db.ts';
+import { serverEvent } from './analytics.ts';
+import type { Flags } from './flags.ts';
 import { localTime, outsideQuietHours, safeZone, shouldRemind } from './services.ts';
 
 export interface PushSub {
@@ -32,7 +34,7 @@ export function createPushSender(config: Config): PushSender | undefined {
 export const REMINDER = {
   title: 'Your poker plan is ready',
   body: "Today's lesson, review and daily challenge are waiting.",
-  url: '/',
+  url: '/?n=push.reminder',
 };
 
 /** The daily reminder, naming what is waiting when the device said so. */
@@ -45,7 +47,7 @@ export const reminderFor = (body: string | null) => (body ? { ...REMINDER, body 
 export const CLOSING_NOTE = {
   title: 'Reminders are paused',
   body: "We'll stop reminders here. Your plan is waiting when you're back.",
-  url: '/',
+  url: '/?n=push.closing',
 };
 
 const DAY_MS = 86_400_000;
@@ -83,7 +85,9 @@ export function lastOpen(lastActiveAt: string | null, lastStudyDay: string | nul
  * player gets at most one a day, at their own study time, within the push
  * caps, and the closing note once when reminders stopped working.
  */
-export async function runReminders(db: Db, send: PushSender, now = new Date()): Promise<number> {
+export async function runReminders(db: Db, send: PushSender, now = new Date(), flags?: Flags): Promise<number> {
+  if (flags && !flags.bool('push.enabled')) return 0;
+  const caps = flags ? { day: flags.num('push.day_cap'), week: flags.num('push.week_cap') } : undefined;
   const users = db
     .prepare(
       'SELECT id, tz, cue_minutes, last_study_day, reminder_body, last_active_at FROM users WHERE reminders = 1 AND tz IS NOT NULL AND cue_minutes IS NOT NULL AND EXISTS (SELECT 1 FROM push_subs p WHERE p.user_id = users.id)',
@@ -108,16 +112,21 @@ export async function runReminders(db: Db, send: PushSender, now = new Date()): 
         pushesSent: pushesSince(db, u.id, new Date(now.getTime() - 7 * DAY_MS)),
         lastOpenAt: lastOpen(u.last_active_at, u.last_study_day),
         closingSentAt: closing.at,
+        caps,
       },
       now,
     );
     if (!decision.send) continue;
+    // A paused program sends nothing and records nothing, so it picks up cleanly when resumed.
+    if (flags && !flags.bool(decision.kind === 'closing' ? 'program.push-closing' : 'program.push-reminder')) continue;
     db.prepare('INSERT OR IGNORE INTO reminders_sent (user_id, day) VALUES (?, ?)').run(u.id, decision.day);
     if (decision.kind === 'closing')
       db.prepare("INSERT OR IGNORE INTO notices_sent (user_id, kind, key, at) VALUES (?, 'push-closing', ?, ?)").run(u.id, decision.day, now.toISOString());
     logPush(db, u.id, decision.kind, now);
     const payload = decision.kind === 'closing' ? CLOSING_NOTE : reminderFor(u.reminder_body);
-    sent += await sendToPlayer(db, send, u.id, JSON.stringify(payload));
+    const reached = await sendToPlayer(db, send, u.id, JSON.stringify(payload));
+    if (reached) serverEvent(db, 'push_sent', { kind: decision.kind }, { userId: u.id, now });
+    sent += reached;
   }
   return sent;
 }
@@ -133,7 +142,7 @@ export function trialEndingNotice(proUntil: string, tz: string | null) {
   } catch {
     date = new Date(proUntil).toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' });
   }
-  return { title: 'Your free week ends in 2 days', body: `Aced Pro starts on ${date}. To cancel, open Account in Aced.`, url: '/account' };
+  return { title: 'Your free week ends in 2 days', body: `Aced Pro starts on ${date}. To cancel, open Account in Aced.`, url: '/account?n=push.trial-ending' };
 }
 
 /**
@@ -143,7 +152,8 @@ export function trialEndingNotice(proUntil: string, tz: string | null) {
  * on the paywall, so the caps never hold it back. It still counts toward
  * them, and it waits out quiet hours (the 24 hour window always has room).
  */
-export async function runTrialNotices(db: Db, send: PushSender, now = new Date()): Promise<number> {
+export async function runTrialNotices(db: Db, send: PushSender, now = new Date(), flags?: Flags): Promise<number> {
+  if (flags && (!flags.bool('push.enabled') || !flags.bool('program.push-trial-ending'))) return 0;
   const from = new Date(now.getTime() + 1.5 * DAY_MS).toISOString();
   const to = new Date(now.getTime() + 2.5 * DAY_MS).toISOString();
   const users = db
@@ -159,7 +169,9 @@ export async function runTrialNotices(db: Db, send: PushSender, now = new Date()
     if (!outsideQuietHours(now, safeZone(u.tz))) continue;
     db.prepare("INSERT OR IGNORE INTO notices_sent (user_id, kind, key, at) VALUES (?, 'trial-ending', ?, ?)").run(u.id, u.pro_until, now.toISOString());
     logPush(db, u.id, 'trial-ending', now);
-    sent += await sendToPlayer(db, send, u.id, JSON.stringify(trialEndingNotice(u.pro_until, u.tz)));
+    const reached = await sendToPlayer(db, send, u.id, JSON.stringify(trialEndingNotice(u.pro_until, u.tz)));
+    if (reached) serverEvent(db, 'push_sent', { kind: 'trial-ending' }, { userId: u.id, now });
+    sent += reached;
   }
   return sent;
 }

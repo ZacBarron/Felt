@@ -347,6 +347,7 @@ export function OnboardingPage() {
   const commit = (firstLesson?: string) => {
     update({ ...settings, profile: { ...profile, onboarded: true, committedAt: new Date().toISOString() } });
     track('plan_committed', { goals: profile.goals.join(','), daily: profile.dailyMinutes, focus: profile.focus.length });
+    track('onboarding_completed', { experience: profile.experience, placed: profile.placedAt ?? 'none' });
     // The plan is worth keeping: ask the browser not to clear Aced's data.
     void requestPersistentStorage();
     navigate(firstLesson ? `${lessonPath(firstLesson)}?first=1` : '/', { replace: true });
@@ -603,7 +604,7 @@ export function OnboardingPage() {
   const advance = () => {
     track('onboarding_step_answered', {
       step,
-      value: step === 'goal' ? profile.goals.join(',') : step === 'daily' ? profile.dailyMinutes : step === 'level' ? profile.experience : profile.focus.length,
+      value: String(step === 'goal' ? profile.goals.join(',') : step === 'daily' ? profile.dailyMinutes : step === 'level' ? profile.experience : profile.focus.length),
     });
     forward();
   };

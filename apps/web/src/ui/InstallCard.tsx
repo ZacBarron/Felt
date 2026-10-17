@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { BrandMark } from './Brand';
 import { CloseIcon } from './icons';
+import { track } from '../state/events';
 
 interface InstallPrompt extends Event {
   prompt(): Promise<void>;
@@ -34,7 +35,10 @@ export function InstallCard() {
       e.preventDefault();
       setPrompt(e as InstallPrompt);
     };
-    const onInstalled = () => setHidden(true);
+    const onInstalled = () => {
+      setHidden(true);
+      track('install_prompt_result', { outcome: 'installed' });
+    };
     window.addEventListener('beforeinstallprompt', onPrompt);
     window.addEventListener('appinstalled', onInstalled);
     return () => {
@@ -43,10 +47,16 @@ export function InstallCard() {
     };
   }, []);
 
-  if (hidden || (!prompt && !isIos())) return null;
+  const showing = !(hidden || (!prompt && !isIos()));
+  const kind = prompt ? 'native' : 'ios_help';
+  useEffect(() => {
+    if (showing) track('install_prompt_shown', { kind });
+  }, [showing, kind]);
+  if (!showing) return null;
 
   const dismiss = () => {
     setHidden(true);
+    track('install_prompt_result', { outcome: 'dismissed_card' });
     try {
       localStorage.setItem(KEY, '1');
     } catch {
@@ -72,6 +82,7 @@ export function InstallCard() {
             onClick={async () => {
               await prompt.prompt();
               const choice = await prompt.userChoice.catch(() => undefined);
+              track('install_prompt_result', { outcome: choice?.outcome ?? 'unknown' });
               if (choice?.outcome === 'accepted') setHidden(true);
               setPrompt(undefined);
             }}

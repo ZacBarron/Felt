@@ -10,16 +10,22 @@ import { runPauseResumes } from './billing.ts';
 import { runLifecycleEmails } from './emails.ts';
 import { createPushSender, runReminders, runTrialNotices } from './push.ts';
 import { createMailer, createStripe } from './services.ts';
+import { runAnalyticsRetention } from './analytics.ts';
+import { createFlags } from './flags.ts';
+import { runJob } from './ops.ts';
 
 const config = loadConfig();
 const db = openDb(config.databasePath);
 const mailer = createMailer(config.email.resendKey, config.email.from);
 const stripe = config.stripe.secretKey ? createStripe(config.stripe.secretKey) : undefined;
+// One flags instance for the API and the scheduler, so a change in the console applies to both at once.
+const flags = createFlags(db, config);
 const app = createApp({
   db,
   config,
   mailer,
   stripe,
+  flags,
   coach: config.coach.apiKey ? createCoachClient(config.coach.apiKey) : undefined,
 });
 
@@ -49,14 +55,22 @@ serve({ fetch: app.fetch, port: config.port }, ({ port }) => {
 
 // The scheduler: pushes when VAPID keys are set, lifecycle email always
 // (transactional mail needs no opt in), and pauses that are due to end.
+// Each run is recorded for the console's health screen (job_runs).
 const sender = createPushSender(config);
+const now = () => new Date();
+let lastRetention = 0;
 const tick = () => {
   if (sender) {
-    void runReminders(db, sender).catch((e) => console.error('Reminders failed', e));
-    void runTrialNotices(db, sender).catch((e) => console.error('Trial reminders failed', e));
+    void runJob(db, 'reminders', now, () => runReminders(db, sender, now(), flags));
+    void runJob(db, 'trial_notices', now, () => runTrialNotices(db, sender, now(), flags));
   }
-  void runLifecycleEmails(db, mailer, config, new Date(), stripe).catch((e) => console.error('Lifecycle email failed', e));
-  if (stripe) void runPauseResumes(db, config, stripe).catch((e) => console.error('Resuming pauses failed', e));
+  void runJob(db, 'lifecycle_email', now, () => runLifecycleEmails(db, mailer, config, now(), stripe, flags));
+  if (stripe) void runJob(db, 'pause_resumes', now, () => runPauseResumes(db, config, stripe));
+  // Raw analytics events older than 13 months are deleted once a day.
+  if (Date.now() - lastRetention > 86_400_000) {
+    lastRetention = Date.now();
+    void runJob(db, 'retention', now, () => runAnalyticsRetention(db, now()));
+  }
 };
 setInterval(tick, 5 * 60 * 1000);
 void tick();
