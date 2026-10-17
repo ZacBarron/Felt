@@ -108,19 +108,21 @@ describe('share mode', () => {
 describe('share deck', () => {
   const all = { rating: true, streak: true, daily: true };
 
-  it('opens on the card asked for, in both designs', () => {
+  it('opens on the card asked for, in every design', () => {
     expect(shareDeck('daily', all)).toEqual([
       { kind: 'daily', design: 'felt' },
+      { kind: 'daily', design: 'cobalt' },
       { kind: 'daily', design: 'paper' },
       { kind: 'rating', design: 'felt' },
       { kind: 'streak', design: 'felt' },
     ]);
-    expect(shareDeck('streak', all).map((c) => c.kind)).toEqual(['streak', 'streak', 'daily', 'rating']);
+    expect(shareDeck('streak', all).map((c) => c.kind)).toEqual(['streak', 'streak', 'streak', 'daily', 'rating']);
   });
 
   it('leaves out cards with nothing true to show', () => {
     expect(shareDeck('rating', { rating: true, streak: false, daily: false })).toEqual([
       { kind: 'rating', design: 'felt' },
+      { kind: 'rating', design: 'cobalt' },
       { kind: 'rating', design: 'paper' },
     ]);
     expect(shareDeck('rating', { rating: false, streak: true, daily: false })[0]).toEqual({ kind: 'streak', design: 'felt' });

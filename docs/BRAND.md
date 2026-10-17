@@ -58,7 +58,10 @@ Card room alone made every secondary card look the same: a dark surface, a small
 
 Rules:
 - **Feature cards** (`.feature-card.cobalt`, `.feature-card.gold` with `ChipArt` or `MedalArt`) are for at most two nudges per screen. Content stays on plain grouped surfaces.
-- **Icon tiles** in lists take the color of what they open: gold for challenges, cobalt for social things, spruce for study.
+- **Icon tiles** in lists take the color of what they open: gold for challenges and Pro, cobalt for social things and the coach, spruce for study, gray for account and settings.
+- **Pro is always gold.** Every Pro badge (`ProBadge`, `.pill-pro`), the Pro row in Settings and You, the Pro card on You and the paywall's Pro column, checks and selected plan. A player learns one color for "this is Pro".
+- **Empty state art** takes the same color as the row that leads to it (`.sc-art-tile.cobalt` for the coach and the league).
+- **Share cards** come in felt, cobalt and paper. Felt leads; cobalt is the social card.
 - **Never a poker meaning.** Red, green, purple and gray belong to the actions (raise, call, 3bet, fold). The chip set has no red, green or purple, so a decoration can never be read as an action.
 - The chip colors are the same in light and dark, like a printed chip.
 - **Marketing** uses Card room plus the chip set: spruce and brass lead, cobalt and gold for callouts, stickers and social cards.

@@ -15,7 +15,8 @@ import {
 /**
  * The share images, drawn on a canvas at 1080 by 1350: the 4:5 size that
  * feeds and messages show whole. They are brand surfaces, so they always use
- * the Card room colors from BRAND.md, whatever theme the app itself uses.
+ * the Card room colors from BRAND.md, whatever theme the app itself uses,
+ * plus one cobalt card from the chip set for social posts.
  * That is why this file holds raw colors: an image cannot read CSS tokens.
  */
 export const CARD_W = 1080;
@@ -74,12 +75,33 @@ const LOOKS: Record<CardDesign, Look> = {
     wrong: 'rgba(11,36,33,0.12)',
     onWrong: 'rgba(11,36,33,0.66)',
   },
+  cobalt: {
+    ink: '#ffffff',
+    ink2: 'rgba(255,255,255,0.82)',
+    ink3: 'rgba(255,255,255,0.6)',
+    faint: 'rgba(255,255,255,0.12)',
+    rule: 'rgba(255,255,255,0.18)',
+    accent: '#f8dc9b',
+    brass: '#e6b764',
+    onBrass: '#1d1505',
+    good: '#3ccf72',
+    onGood: '#0b2421',
+    wrong: 'rgba(255,255,255,0.14)',
+    onWrong: 'rgba(255,255,255,0.74)',
+  },
 };
 
 const FELT_STOPS: [number, string][] = [
   [0, '#2a7461'],
   [0.42, '#165244'],
   [1, '#0b2421'],
+];
+
+/** The cobalt chip from BRAND.md, light at the top left. */
+const COBALT_STOPS: [number, string][] = [
+  [0, '#4272f2'],
+  [0.46, '#2448b9'],
+  [1, '#132667'],
 ];
 
 type Ctx = CanvasRenderingContext2D;
@@ -133,16 +155,18 @@ function glyph(ctx: Ctx, paths: string | readonly string[], cx: number, cy: numb
   ctx.restore();
 }
 
-function feltGradient(ctx: Ctx, x: number, y: number, size: number) {
+function feltGradient(ctx: Ctx, x: number, y: number, size: number, stops = FELT_STOPS) {
   const g = ctx.createRadialGradient(x, y, 0, x, y, size);
-  for (const [at, c] of FELT_STOPS) g.addColorStop(at, c);
+  for (const [at, c] of stops) g.addColorStop(at, c);
   return g;
 }
 
 /** Background, range texture and the lockup: the same frame on every card. */
 function frame(ctx: Ctx, design: CardDesign) {
   const look = LOOKS[design];
-  ctx.fillStyle = design === 'felt' ? feltGradient(ctx, 0, 0, Math.hypot(CARD_W, CARD_H) * 1.05) : '#f4f1ea';
+  const dark = design !== 'paper';
+  const reach = Math.hypot(CARD_W, CARD_H) * 1.05;
+  ctx.fillStyle = design === 'paper' ? '#f4f1ea' : feltGradient(ctx, 0, 0, reach, design === 'cobalt' ? COBALT_STOPS : FELT_STOPS);
   ctx.fillRect(0, 0, CARD_W, CARD_H);
 
   // A faint range grid in the top right, as on the app's felt hero.
@@ -154,8 +178,8 @@ function frame(ctx: Ctx, design: CardDesign) {
     for (let c = 0; c < n; c++) {
       const fade = Math.max(0, 1 - Math.hypot(n - 1 - c, r) / (n * 1.05));
       const suited = c >= r;
-      ctx.globalAlpha = design === 'felt' ? 0.02 + fade * (suited ? 0.12 : 0.06) : 0.015 + fade * (suited ? 0.2 : 0.05);
-      ctx.fillStyle = design === 'felt' || suited ? look.brass : look.ink;
+      ctx.globalAlpha = dark ? 0.02 + fade * (suited ? 0.12 : 0.06) : 0.015 + fade * (suited ? 0.2 : 0.05);
+      ctx.fillStyle = dark || suited ? look.brass : look.ink;
       rr(ctx, gx + c * (cell + gap), 40 + r * (cell + gap), cell, cell, 7);
       ctx.fill();
     }
@@ -165,7 +189,7 @@ function frame(ctx: Ctx, design: CardDesign) {
   const mx = LEFT;
   const my = 84;
   const ms = 92;
-  ctx.fillStyle = design === 'felt' ? 'rgba(255,255,255,0.08)' : feltGradient(ctx, mx, my, ms * 1.45);
+  ctx.fillStyle = dark ? 'rgba(255,255,255,0.08)' : feltGradient(ctx, mx, my, ms * 1.45);
   rr(ctx, mx, my, ms, ms, ms * 0.23);
   ctx.fill();
   const pad = ms * 0.17;

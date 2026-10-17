@@ -1,6 +1,7 @@
 import { SCENARIOS } from '@felt/content';
 import { challengeNumber } from '@felt/core';
 import { useLiveQuery } from 'dexie-react-hooks';
+import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { navItem } from '../nav';
 import { chartsForGame } from '../state/charts';
@@ -12,6 +13,7 @@ import { useSettings } from '../state/settings';
 import { weeklyAvailable } from '../state/weekly';
 import { HeroPattern } from '../ui/Brand';
 import { ChevronRightIcon } from '../ui/icons';
+import { ProBadge } from '../ui/ProBadge';
 import { PageHeader } from '../ui/PageHeader';
 import { useThisWeek } from './WeeklyPage';
 import './you.css';
@@ -113,7 +115,7 @@ export function TrainPage() {
             to="/weekly"
             title="Weekly challenge"
             subtitle={!pro ? '10 harder decisions' : weekDone ? 'Done this week' : week ? `${week.scores.length} of ${week.items.length} done` : '10 harder decisions'}
-            detail={!pro ? 'Pro' : weekDone ? 'Done' : undefined}
+            detail={!pro ? <ProBadge /> : weekDone ? 'Done' : undefined}
           />
           <DrillRow to="/scenarios" title="Scenarios" subtitle={`${played} of ${SCENARIOS.length} hands played`} progress={played / SCENARIOS.length} />
           {reviewing ? (
@@ -127,7 +129,7 @@ export function TrainPage() {
   );
 }
 
-function DrillRow({ to, title, subtitle, progress, detail }: { to: string; title: string; subtitle: string; progress?: number; detail?: string }) {
+function DrillRow({ to, title, subtitle, progress, detail }: { to: string; title: string; subtitle: string; progress?: number; detail?: ReactNode }) {
   const { icon: Icon, color } = navItem(to);
   return (
     <Link to={to} className="list-row">

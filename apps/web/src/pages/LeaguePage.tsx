@@ -59,7 +59,7 @@ export function LeaguePage() {
       {server === false ? (
         <EmptyState
           art={
-            <span className="sc-art-tile">
+            <span className="sc-art-tile cobalt">
               <LeagueIcon size={34} />
             </span>
           }
@@ -74,7 +74,7 @@ export function LeaguePage() {
       ) : !session || !session.user.leagues ? (
         <EmptyState
           art={
-            <span className="sc-art-tile">
+            <span className="sc-art-tile cobalt">
               <TrophyIcon size={34} />
             </span>
           }
@@ -93,7 +93,7 @@ export function LeaguePage() {
       ) : !league ? null : !league.joined ? (
         <EmptyState
           art={
-            <span className="sc-art-tile">
+            <span className="sc-art-tile cobalt">
               <TrophyIcon size={34} />
             </span>
           }

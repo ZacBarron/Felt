@@ -97,7 +97,7 @@ export function CoachPage() {
 
 function Art() {
   return (
-    <span className="sc-art-tile">
+    <span className="sc-art-tile cobalt">
       <CoachIcon size={34} />
     </span>
   );
@@ -131,7 +131,7 @@ function Pitch({ signIn = false }: { signIn?: boolean }) {
           {prompts.map((p) => (
             <Link key={p} to="/pro?from=coach" className="list-row coach-ask">
               <span className="grow">{p}</span>
-              <span className="pill">Pro</span>
+              <span className="pill pill-pro">Pro</span>
             </Link>
           ))}
         </div>

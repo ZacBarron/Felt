@@ -176,7 +176,7 @@ function SettingsHome() {
       </Section>
 
       <div className="list with-icons settings-pro">
-        <NavRow to="/settings/pro" icon={ProGlyph} color="var(--tint-fill)" title="Suited Pro" detail={proSummary(access)} />
+        <NavRow to="/settings/pro" icon={ProGlyph} color="var(--chip-gold)" title="Suited Pro" detail={proSummary(access)} />
       </div>
 
       <TestingSection />

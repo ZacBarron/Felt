@@ -79,40 +79,7 @@
 }
 
 /* More: the plan card for free players. One line on what Pro adds, one way in. */
-a.card.more-pro,
-.more-pro {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 0.9rem;
-  padding: 0.95rem 1rem;
-  color: var(--label);
-  text-decoration: none;
-}
 
-.more-pro-title {
-  display: block;
-  font-size: 1.05rem;
-  font-weight: 700;
-  letter-spacing: -0.01em;
-}
-
-.more-pro-sub {
-  display: block;
-  margin-top: 1px;
-  font-size: 0.88rem;
-  color: var(--label-2);
-}
-
-.more-pro-cta {
-  flex: none;
-  padding: 0.45rem 0.95rem;
-  border-radius: 999px;
-  font-size: 0.9rem;
-  font-weight: 650;
-  color: var(--on-tint);
-  background: var(--tint-fill);
-}
 
 /* Account: the plan as a card near the top, with its one action. */
 .account-plan {

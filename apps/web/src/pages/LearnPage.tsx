@@ -8,6 +8,7 @@ import '../lesson/topic-intro.css';
 import { navItem } from '../nav';
 import { useCoachAvailable } from '../state/coach';
 import { NavRow } from '../ui/NavRow';
+import { ProBadge } from '../ui/ProBadge';
 import './learn.css';
 import { isComplete, LESSON_ENTRIES, type LessonEntry, lessonPath, lessonProgress, pickNextLesson } from '../state/lessons';
 import type { StoredLesson } from '../state/db';
@@ -271,7 +272,7 @@ function LessonCard({
               <CheckIcon size={12} /> Passed
             </span>
           ) : locked ? (
-            <span className="pill">
+            <span className="pill pill-pro">
               <LockIcon size={12} /> Suited Pro
             </span>
           ) : state?.status === 'started' ? (
@@ -326,7 +327,7 @@ function StudyTools() {
           .filter(([to]) => to !== '/coach' || coach !== false)
           .map(([to, subtitle]) => {
             const i = navItem(to);
-            return <NavRow key={to} to={to} icon={i.icon} color={i.color} title={i.label} subtitle={subtitle} detail={to === '/coach' && !pro ? 'Pro' : undefined} />;
+            return <NavRow key={to} to={to} icon={i.icon} color={i.color} title={i.label} subtitle={subtitle} detail={to === '/coach' && !pro ? <ProBadge /> : undefined} />;
           })}
       </div>
     </section>

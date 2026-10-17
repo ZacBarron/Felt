@@ -1052,6 +1052,13 @@ label {
   color: var(--orange-text);
 }
 
+/* Pro wears gold from the chip set wherever it is named (BRAND.md). */
+.pill-pro {
+  font-weight: 700;
+  color: var(--feature-gold-ink);
+  background: var(--feature-gold);
+}
+
 .pill-good {
   background: color-mix(in srgb, var(--green) 16%, transparent);
   color: var(--green-text);
@@ -1066,8 +1073,8 @@ label {
   margin-left: 0.4rem;
   padding: 0.05rem 0.45rem;
   font-size: 0.68rem;
-  background: color-mix(in srgb, var(--tint) 14%, transparent);
-  color: var(--tint);
+  background: var(--feature-gold);
+  color: var(--feature-gold-ink);
   vertical-align: 1px;
 }
 

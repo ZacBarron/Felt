@@ -18,6 +18,16 @@
   background: color-mix(in srgb, var(--tint) 13%, var(--surface));
 }
 
+.sc-art-tile.cobalt {
+  color: #fff;
+  background: var(--feature-cobalt);
+}
+
+.sc-art-tile.gold {
+  color: var(--feature-gold-ink);
+  background: var(--feature-gold);
+}
+
 .sc-icon-tile {
   flex: none;
   display: grid;

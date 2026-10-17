@@ -27,6 +27,7 @@ import { HeroPattern } from '../ui/Brand';
 import { plural } from '../ui/format';
 import { CheckIcon, ChevronRightIcon, CoachIcon, LockIcon } from '../ui/icons';
 import { NavRow } from '../ui/NavRow';
+import { ProBadge } from '../ui/ProBadge';
 import { PageHeader } from '../ui/PageHeader';
 import { Section } from '../ui/Section';
 import { ProgressRing } from '../ui/ProgressRing';
@@ -219,7 +220,7 @@ export function DashboardPage() {
               <span className="quest-pro-title">{proNext.title}</span>
               <span className="footnote">Next lesson in your plan</span>
             </span>
-            <span className="pill pill-tint">Pro</span>
+            <ProBadge />
             <ChevronRightIcon size={14} className="chev" />
           </Link>
         )}
@@ -305,7 +306,7 @@ export function DashboardPage() {
 
       {coach !== false && (
         <div className="list with-icons">
-          <NavRow to="/coach" icon={CoachIcon} color="var(--base-500)" title="Ask the coach" subtitle="About a hand you played or anything here" detail={isPro(settings.access) ? undefined : 'Pro'} />
+          <NavRow to="/coach" icon={CoachIcon} color="var(--chip-cobalt)" title="Ask the coach" subtitle="About a hand you played or anything here" detail={isPro(settings.access) ? undefined : <ProBadge />} />
         </div>
       )}
 

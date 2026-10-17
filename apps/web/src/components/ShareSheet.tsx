@@ -101,7 +101,7 @@ function buildCards(first: ShareKind, src: Sources): ShareCard[] {
       id: `${kind}-${design}`,
       kind,
       design,
-      label: design === 'paper' ? `${KIND_LABEL[kind]} on paper` : KIND_LABEL[kind],
+      label: design === 'felt' ? KIND_LABEL[kind] : `${KIND_LABEL[kind]} on ${design}`,
       title: KIND_TITLE[kind],
     };
     if (kind === 'daily') {

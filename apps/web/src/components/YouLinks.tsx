@@ -5,6 +5,7 @@ import { isPro } from '../state/access';
 import { useServerFeatures, useSession } from '../state/api';
 import { useClaudeCloud } from '../state/cloud';
 import { db } from '../state/db';
+import { MedalArt } from '../ui/FeatureArt';
 import { useSettings } from '../state/settings';
 import { MedalIcon, ShareIcon } from '../ui/icons';
 import { NavRow } from '../ui/NavRow';
@@ -16,12 +17,14 @@ export function ProCard() {
   const { settings } = useSettings();
   if (isPro(settings.access)) return null;
   return (
-    <Link to="/pro?from=you" className="card more-pro">
-      <span className="grow">
-        <span className="more-pro-title">Suited Pro</span>
-        <span className="more-pro-sub">Every lesson, the weekly Pro challenge and the solver</span>
+    <Link to="/pro?from=you" className="feature-card gold">
+      <MedalArt />
+      <span className="feature-copy">
+        <span className="feature-kicker">Suited Pro</span>
+        <span className="feature-title">Every spot you play</span>
+        <span className="feature-sub">Every lesson, the weekly challenge and the solver.</span>
+        <span className="feature-cta">See plans</span>
       </span>
-      <span className="more-pro-cta">See plans</span>
     </Link>
   );
 }
@@ -73,7 +76,7 @@ export function AccountRows() {
   return (
     <div className="list with-icons">
       <NavRow to="/account" icon={navItem('/you').icon} color="var(--gray)" title="Account" subtitle={accountLine} />
-      {pro && <NavRow to={session ? '/account' : '/settings'} icon={MedalIcon} color="var(--gray)" title="Suited Pro" detail={proLine} />}
+      {pro && <NavRow to={session ? '/account' : '/settings'} icon={MedalIcon} color="var(--chip-gold)" title="Suited Pro" detail={proLine} />}
       <NavRow to="/settings" icon={navItem('/settings').icon} color="var(--gray)" title="Settings" />
     </div>
   );

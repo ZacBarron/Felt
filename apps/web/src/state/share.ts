@@ -142,11 +142,12 @@ export function shareFileName(kind: ShareKind, daily?: number): string {
   return kind === 'daily' && daily !== undefined ? `suited-daily-${daily}.png` : `suited-${kind}.png`;
 }
 
-export type CardDesign = 'felt' | 'paper';
+/** Felt and paper are Card room. Cobalt is the chip set color for social posts (BRAND.md). */
+export type CardDesign = 'felt' | 'paper' | 'cobalt';
 
 /**
  * The cards in the carousel. The one the player asked for comes first in
- * both designs, then the other cards they have, on the felt. A card only
+ * every design, then the other cards they have, on the felt. A card only
  * shows up when there is something true to put on it.
  */
 export function shareDeck(first: ShareKind, has: Record<ShareKind, boolean>): { kind: ShareKind; design: CardDesign }[] {
@@ -155,6 +156,7 @@ export function shareDeck(first: ShareKind, has: Record<ShareKind, boolean>): { 
     i === 0
       ? [
           { kind, design: 'felt' as const },
+          { kind, design: 'cobalt' as const },
           { kind, design: 'paper' as const },
         ]
       : [{ kind, design: 'felt' as const }],

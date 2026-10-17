@@ -226,7 +226,7 @@ function Result({ number, items, scores, before, after }: { number: number; item
                 <span className="daily-next-title">Weekly Pro challenge</span>
                 <span className="footnote">10 harder decisions each week</span>
               </span>
-              <span className="pill">Pro</span>
+              <span className="pill pill-pro">Pro</span>
               <ChevronRightIcon size={16} className="chev" />
             </Link>
           )}

@@ -672,7 +672,7 @@ export function WeeklyMoreRow() {
   return (
     <div className="list with-icons" style={{ marginTop: '0.75rem' }}>
       <Link to="/weekly" className="list-row">
-        <span className="icon-tile" style={{ background: 'var(--base-500)' }}>
+        <span className="icon-tile" style={{ background: 'var(--chip-gold)' }}>
           <MedalIcon size={19} strokeWidth={2} />
         </span>
         <span className="grow">
