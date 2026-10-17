@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { BOTS, playerTypeOf, TABLE_PRESETS } from './bots';
+import { BOTS, botAtTable, botById, playerTypeOf, TABLE_PRESETS } from './bots';
 
 describe('bots', () => {
   it('each bot is a known player type with a sane profile', () => {
@@ -25,5 +25,15 @@ describe('bots', () => {
       expect(new Set(p.bots).size).toBe(p.bots.length);
       for (const id of p.bots) expect(BOTS.some((b) => b.id === id)).toBe(true);
     }
+  });
+});
+
+describe('bots at a table', () => {
+  it('open to the live size at live presets and keep their own style elsewhere', () => {
+    const live = TABLE_PRESETS.find((p) => p.id === 'casino')!;
+    const online = TABLE_PRESETS.find((p) => p.id === 'tough')!;
+    expect(botAtTable('lou', live)?.profile.style.openTo).toBe(5);
+    expect(botAtTable('lou', online)?.profile.style.openTo).toBeUndefined();
+    expect(botById('lou')?.profile.style.openTo).toBeUndefined();
   });
 });

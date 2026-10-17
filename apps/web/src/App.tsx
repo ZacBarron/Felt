@@ -54,8 +54,11 @@ function useReviewCount() {
   );
 }
 
-/** Pages a player can reach before finishing onboarding. */
-const FIRST_RUN = ['/welcome', '/signin', '/placement', '/pro', '/account', '/terms', '/privacy'];
+/**
+ * Pages a player can reach before finishing onboarding. The daily challenge is
+ * here so a share link or the website can drop a new player straight into it.
+ */
+const FIRST_RUN = ['/welcome', '/signin', '/placement', '/pro', '/account', '/terms', '/privacy', '/daily'];
 
 /** Keeps Aced Pro in step with the account: the server's word wins over this device's. */
 function useServerAccess() {
@@ -120,7 +123,9 @@ export function App() {
     });
   }, [activeTab]);
 
-  if (!settings.profile.onboarded && !FIRST_RUN.includes(location.pathname)) return <Navigate to="/welcome" replace />;
+  // Keep the query string, so a shared ?daily link survives the trip through onboarding.
+  if (!settings.profile.onboarded && !FIRST_RUN.includes(location.pathname))
+    return <Navigate to={{ pathname: '/welcome', search: location.search }} replace />;
 
   return (
     <div className="shell">

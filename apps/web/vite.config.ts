@@ -40,7 +40,7 @@ export default defineConfig({
       srcDir: 'src',
       filename: 'sw.ts',
       injectManifest: { globPatterns: ['**/*.{js,css,html,png,svg,woff2}'] },
-      includeAssets: ['favicon.png', 'apple-touch-icon.png'],
+      includeAssets: ['favicon.svg', 'favicon.png', 'apple-touch-icon.png'],
       manifest: {
         name: 'Aced',
         short_name: 'Aced',

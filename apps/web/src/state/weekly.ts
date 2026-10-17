@@ -94,7 +94,7 @@ export function weeklyPool(): WeeklyCandidateItem[] {
       // Mixed hands where the mix matters: the main action alone is not enough, and an answer on screen is.
       if (isMixed(mix)) {
         const mainOnly = scoreMixAnswer(mix, { [primaryAction(mix)]: 1 }).accuracy;
-        if (mainOnly < 1 && options.some((o) => scoreMixAnswer(mix, o.mix).accuracy === 1)) add('mixed', difficulty, decision);
+        if (mainOnly < 1 && options.some((o) => scoreMixAnswer(mix, o.mix, options.map((x) => x.mix)).accuracy === 1)) add('mixed', difficulty, decision);
       }
       // Pure close calls only when facing a raise or a 3bet.
       else if (spec.spot === 'vs-open' || spec.spot === 'vs-3bet') add('edge', difficulty, decision);

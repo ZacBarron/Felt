@@ -4228,7 +4228,7 @@ button.evidence {
   box-shadow: none;
 }
 
-/* The mark assembling: cells pop in along the diagonal, then the suited half lights in a sweep. */
+/* The mark assembling: cells pop in along the diagonal, then the range lights in a sweep. */
 .mark-anim .cell {
   transform-box: fill-box;
   transform-origin: center;
@@ -4263,7 +4263,7 @@ button.evidence {
 
 @keyframes mark-lit-tile {
   from {
-    fill: rgba(255, 255, 255, 0.08);
+    fill: #1e2a27;
   }
 }
 

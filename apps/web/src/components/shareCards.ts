@@ -1,4 +1,4 @@
-import { markCell, MARK_GRID, TAGLINE } from '../ui/Brand';
+import { MARK_COLORS, markCell, MARK_GRID, TAGLINE } from '../ui/Brand';
 import { GLYPHS } from '../ui/icons';
 import { WORDMARK_PATH, WORDMARK_VIEWBOX } from '../ui/wordmark';
 import {
@@ -67,7 +67,7 @@ const LOOKS: Record<CardDesign, Look> = {
     ink3: 'rgba(11,36,33,0.58)',
     faint: 'rgba(11,36,33,0.07)',
     rule: 'rgba(11,36,33,0.14)',
-    accent: '#9a6a1e',
+    accent: '#8a5c14',
     brass: '#e3b261',
     onBrass: '#0b2421',
     good: '#2f9e57',
@@ -185,21 +185,26 @@ function frame(ctx: Ctx, design: CardDesign) {
     }
   ctx.globalAlpha = 1;
 
-  // The mark: on paper it is the app icon tile, on the felt a quiet glass tile.
+  // The mark: the night tile works on felt, paper and cobalt alike.
   const mx = LEFT;
   const my = 84;
   const ms = 92;
-  ctx.fillStyle = dark ? 'rgba(255,255,255,0.08)' : feltGradient(ctx, mx, my, ms * 1.45);
-  rr(ctx, mx, my, ms, ms, ms * 0.23);
+  const tile = ctx.createRadialGradient(mx, my, 0, mx, my, ms * 1.3);
+  tile.addColorStop(0, MARK_COLORS.tileHi);
+  tile.addColorStop(1, MARK_COLORS.tileLo);
+  ctx.fillStyle = tile;
+  rr(ctx, mx, my, ms, ms, ms * 0.225);
   ctx.fill();
-  const pad = ms * 0.17;
-  const g = ms * 0.032;
+  ctx.strokeStyle = MARK_COLORS.rim;
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+  const pad = (ms * 19) / 120;
+  const g = (ms * 2) / 120;
   const cs = (ms - 2 * pad - (MARK_GRID - 1) * g) / MARK_GRID;
   for (let r = 0; r < MARK_GRID; r++)
     for (let c = 0; c < MARK_GRID; c++) {
-      const kind = markCell(r, c);
-      ctx.fillStyle = kind === 'suited' ? LOOKS.felt.brass : kind === 'pair' ? 'rgba(255,255,255,0.26)' : 'rgba(255,255,255,0.12)';
-      rr(ctx, mx + pad + c * (cs + g), my + pad + r * (cs + g), cs, cs, cs * 0.22);
+      ctx.fillStyle = MARK_COLORS[markCell(r, c)];
+      rr(ctx, mx + pad + c * (cs + g), my + pad + r * (cs + g), cs, cs, cs * 0.24);
       ctx.fill();
     }
 

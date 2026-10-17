@@ -109,13 +109,22 @@ export interface TablePreset {
   blurb: string;
   /** Bot ids in seat priority order: a smaller table takes the first ones. */
   bots: string[];
+  /** The bots' open size in big blinds. Live games open bigger than the 2.5bb online size. */
+  openBb?: number;
 }
 
 export const TABLE_PRESETS: TablePreset[] = [
-  { id: 'home', name: 'Soft home game', blurb: 'Lots of calling and few bluffs.', bots: ['sam', 'lou', 'max', 'rita', 'nora', 'wes', 'ike', 'tess', 'otto'] },
-  { id: 'casino', name: 'Casino 1/2', blurb: 'A mix of regulars and recreational players.', bots: ['lou', 'nora', 'sam', 'tess', 'wes', 'rita', 'ike', 'max', 'otto'] },
+  { id: 'home', name: 'Soft home game', blurb: 'Lots of calling and few bluffs.', bots: ['sam', 'lou', 'max', 'rita', 'nora', 'wes', 'ike', 'tess', 'otto'], openBb: 4 },
+  { id: 'casino', name: 'Live 1/2', blurb: 'A mix of regulars and recreational players.', bots: ['lou', 'nora', 'sam', 'tess', 'wes', 'rita', 'ike', 'max', 'otto'], openBb: 5 },
   { id: 'tough', name: 'Tough online', blurb: 'Mostly regulars who play well.', bots: ['tess', 'leo', 'otto', 'wes', 'nora', 'max', 'ike', 'lou', 'sam'] },
 ];
 
 export const botById = (id: string) => BOTS.find((b) => b.id === id);
+
+/** A bot as it plays at a table: live presets make it open to the table's live size. */
+export function botAtTable(id: string, preset?: TablePreset): BotCharacter | undefined {
+  const bot = botById(id);
+  if (!bot || !preset?.openBb) return bot;
+  return { ...bot, profile: { ...bot.profile, style: { ...bot.profile.style, openTo: preset.openBb } } };
+}
 export const playerTypeOf = (bot: BotCharacter) => PLAYER_TYPES.find((t) => t.id === bot.type);

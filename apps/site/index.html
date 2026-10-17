@@ -3,78 +3,147 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <title>Aced: Poker Trainer for Live and Online Cash</title>
-    <meta name="description" content="Be the toughest player at your table. Short poker lessons, solver ranges and a practice cash game that grades every decision. Free in your browser." />
-    <meta name="theme-color" content="#0b2421" />
-    <meta property="og:title" content="Aced: Ace every spot." />
-    <meta property="og:description" content="Short poker lessons, solver ranges and a practice cash game that grades every decision." />
+    <title>Aced Poker: training for live and online cash games</title>
+    <meta name="description" content="Find your leaks before the table does. Play practice hands and get your decisions graded. Learn the fix in short lessons. Free in your browser." />
+    <meta name="theme-color" content="#0a0e0d" />
+    <link rel="canonical" href="https://acedpoker.app/" />
+    <meta property="og:site_name" content="Aced Poker" />
+    <meta property="og:title" content="Aced Poker: Ace every spot." />
+    <meta property="og:description" content="A practice poker table that grades your decisions. Short lessons show you the fix." />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://acedpoker.app/" />
-    <meta property="og:image" content="https://acedpoker.app/og.png" />
+    <meta property="og:image" content="https://acedpoker.app/og.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="The Aced Poker mark, an under the gun range chart, with the line Ace every spot." />
     <meta name="twitter:card" content="summary_large_image" />
-    <link rel="icon" href="favicon.png" />
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+    <link rel="icon" type="image/png" href="favicon.png" />
     <link rel="apple-touch-icon" href="apple-touch-icon.png" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap" />
+    <link rel="preload" href="fonts/instrument-serif-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin />
+    <script>
+      // Platform and in-app browser, before first paint, so nothing flickers.
+      (function () {
+        var ua = navigator.userAgent, d = document.documentElement;
+        var ios = /iPhone|iPod/.test(ua) || (/iPad|Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+        d.dataset.platform = ios ? 'ios' : /Android/.test(ua) ? 'android' : 'desktop';
+        if (/Instagram|FBAN|FBAV|TikTok|musical_ly|BytedanceWebview|Snapchat|LinkedInApp|Line\//.test(ua)) d.dataset.inapp = '1';
+      })();
+    </script>
   </head>
   <body>
     <a class="skip" href="#main">Skip to content</a>
 
     <header class="nav" data-nav>
       <div class="nav-in">
-        <a class="lockup" href="#top" aria-label="Aced home" data-lockup></a>
+        <a class="lockup" href="#top" aria-label="Aced Poker home" data-lockup></a>
         <nav aria-label="Sections" class="nav-links">
-          <a href="#how">How it works</a>
+          <a href="#features">Features</a>
           <a href="#live">Live play</a>
           <a href="#pricing">Pricing</a>
           <a href="#faq">FAQ</a>
         </nav>
-        <a class="btn btn-brass btn-sm" data-app="">Open the app</a>
+        <a class="btn btn-quiet btn-sm" href="/app/" data-app="" data-cta="open_app" data-pos="nav">Open app</a>
       </div>
     </header>
 
+    <p class="inapp" data-inapp-hint hidden>Open this page in <span data-inapp-browser>Safari</span> to keep your progress. Tap ••• and choose Open in browser.</p>
+
     <main id="main">
       <section class="hero" id="top">
-        <canvas class="hero-grid" aria-hidden="true" data-grid></canvas>
         <div class="hero-in">
           <div class="hero-copy">
-            <p class="eyebrow">Poker training for live and online cash games</p>
-            <h1 class="display">Be the toughest player at your table.</h1>
-            <p class="lede">Short lessons, solver ranges and a practice cash game that grades every decision. Five minutes a day. Built for the game you actually play.</p>
+            <p class="eyebrow">Poker training for cash games</p>
+            <h1 class="display">Find your leaks before the table does.</h1>
+            <p class="lede">Play practice hands against bots that play like your regulars. Aced grades your decisions. Then a short lesson shows you the fix.</p>
             <div class="cta-row">
-              <a class="btn btn-brass btn-lg" data-app="">Start free</a>
-              <a class="btn btn-ghost btn-lg" data-app="daily">Try today's daily challenge</a>
+              <a class="btn btn-brass btn-lg" href="/app/" data-app="" data-cta="start_free" data-pos="hero">Start training free</a>
+              <a class="text-link" href="/app/daily" data-app="daily" data-cta="daily" data-pos="hero">Try today's challenge</a>
             </div>
-            <div class="platforms">
-              <span class="platform-note">Free in your browser today.</span>
-              <a class="pill" href="#apps" data-platform="ios"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16.4 12.6c0-2.3 1.9-3.4 2-3.5-1.1-1.6-2.8-1.8-3.4-1.8-1.4-.1-2.8.9-3.5.9-.7 0-1.8-.8-3-.8-1.5 0-3 .9-3.8 2.3-1.6 2.8-.4 7 1.2 9.3.8 1.1 1.7 2.4 2.9 2.3 1.2 0 1.6-.7 3-.7s1.8.7 3 .7c1.3 0 2.1-1.1 2.8-2.3.9-1.3 1.3-2.6 1.3-2.6s-2.5-1-2.5-3.8zM14.2 5.7c.6-.8 1.1-1.9 1-3-1 0-2.1.7-2.8 1.4-.6.7-1.1 1.8-1 2.9 1.1.1 2.1-.6 2.8-1.3z" fill="currentColor"/></svg>iPhone<span class="soon">Soon</span></a>
-              <a class="pill" href="#apps" data-platform="android"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 9.5h11v7.2a1.3 1.3 0 0 1-1.3 1.3h-.9v2.6a1.2 1.2 0 0 1-2.4 0V18h-1.8v2.6a1.2 1.2 0 0 1-2.4 0V18h-.9a1.3 1.3 0 0 1-1.3-1.3zM4.4 9.5a1.2 1.2 0 0 1 1.2 1.2v4.6a1.2 1.2 0 0 1-2.4 0v-4.6a1.2 1.2 0 0 1 1.2-1.2zm15.2 0a1.2 1.2 0 0 1 1.2 1.2v4.6a1.2 1.2 0 0 1-2.4 0v-4.6a1.2 1.2 0 0 1 1.2-1.2zM8.2 4.1l-.9-1.5a.3.3 0 0 1 .5-.3l.9 1.5A6.4 6.4 0 0 1 12 3.2c1.2 0 2.3.2 3.3.6l.9-1.5a.3.3 0 0 1 .5.3l-.9 1.5a5.5 5.5 0 0 1 2.7 4.4h-13a5.5 5.5 0 0 1 2.7-4.4zM9.6 6.9a.6.6 0 1 0 0-1.2.6.6 0 0 0 0 1.2zm4.8 0a.6.6 0 1 0 0-1.2.6.6 0 0 0 0 1.2z" fill="currentColor"/></svg>Android<span class="soon">Soon</span></a>
-            </div>
+            <p class="hero-note">No card or account needed.</p>
+            <p class="platforms">
+              <span class="glyphs" aria-hidden="true">
+                <svg class="g-apple" viewBox="0 0 24 24"><path d="M16.4 12.6c0-2.3 1.9-3.4 2-3.5-1.1-1.6-2.8-1.8-3.4-1.8-1.4-.1-2.8.9-3.5.9-.7 0-1.8-.8-3-.8-1.5 0-3 .9-3.8 2.3-1.6 2.8-.4 7 1.2 9.3.8 1.1 1.7 2.4 2.9 2.3 1.2 0 1.6-.7 3-.7s1.8.7 3 .7c1.3 0 2.1-1.1 2.8-2.3.9-1.3 1.3-2.6 1.3-2.6s-2.5-1-2.5-3.8zM14.2 5.7c.6-.8 1.1-1.9 1-3-1 0-2.1.7-2.8 1.4-.6.7-1.1 1.8-1 2.9 1.1.1 2.1-.6 2.8-1.3z" fill="currentColor"/></svg>
+                <svg class="g-android" viewBox="0 0 24 24"><path d="M6.5 9.5h11v7.2a1.3 1.3 0 0 1-1.3 1.3h-.9v2.6a1.2 1.2 0 0 1-2.4 0V18h-1.8v2.6a1.2 1.2 0 0 1-2.4 0V18h-.9a1.3 1.3 0 0 1-1.3-1.3zM4.4 9.5a1.2 1.2 0 0 1 1.2 1.2v4.6a1.2 1.2 0 0 1-2.4 0v-4.6a1.2 1.2 0 0 1 1.2-1.2zm15.2 0a1.2 1.2 0 0 1 1.2 1.2v4.6a1.2 1.2 0 0 1-2.4 0v-4.6a1.2 1.2 0 0 1 1.2-1.2zM8.2 4.1l-.9-1.5a.3.3 0 0 1 .5-.3l.9 1.5A6.4 6.4 0 0 1 12 3.2c1.2 0 2.3.2 3.3.6l.9-1.5a.3.3 0 0 1 .5.3l-.9 1.5a5.5 5.5 0 0 1 2.7 4.4h-13a5.5 5.5 0 0 1 2.7-4.4zM9.6 6.9a.6.6 0 1 0 0-1.2.6.6 0 0 0 0 1.2zm4.8 0a.6.6 0 1 0 0-1.2.6.6 0 0 0 0 1.2z" fill="currentColor"/></svg>
+              </span>
+              <span>Free in your browser now. <a href="#apps" data-platform-link>iPhone and Android apps soon</a></span>
+            </p>
           </div>
-          <div class="hero-phones" data-tilt>
-            <figure class="phone phone-back phone-left"><img src="shots/today-dark.webp" alt="Today: your next lesson, today's plan and your streak" width="393" height="806" /></figure>
-            <figure class="phone phone-front"><img src="shots/play-dark.webp" alt="The practice cash game: nine seats, bots and your hand with raise sizes" width="393" height="806" fetchpriority="high" /></figure>
-            <figure class="phone phone-back phone-right"><img src="shots/you-dark.webp" alt="Your Aced Rating of 1747 with a rising chart" width="393" height="806" /></figure>
-            <p class="grid-caption" data-grid-caption>Painting a button open range</p>
+          <div class="stage" data-tilt>
+            <canvas class="hero-grid" aria-hidden="true" data-grid></canvas>
+            <figure class="phone phone-back"><img src="shots/ranges-dark.webp" alt="The under the gun opening chart in Aced" width="393" height="806" decoding="async" /></figure>
+            <figure class="phone phone-front"><img src="shots/play-dark.webp" alt="The practice table: nine seats, bots and your hand with raise sizes" width="393" height="806" fetchpriority="high" /></figure>
+            <a class="sticker" href="/app/daily" data-app="daily" data-cta="daily" data-pos="sticker">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="9" r="5.25" fill="none" stroke="currentColor" stroke-width="1.75"/><path d="M8.6 13.2 7 21l5-2.6 5 2.6-1.6-7.8" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/></svg>
+              <span><b>Daily challenge</b><span>5 decisions. Same for everyone.</span></span>
+            </a>
           </div>
         </div>
       </section>
 
       <section class="facts" aria-label="What is inside">
         <div class="facts-in">
-          <div class="fact"><span class="fact-n" data-count="127">127</span><span class="fact-l">lessons, 3 to 7 minutes each</span></div>
-          <div class="fact"><span class="fact-n" data-count="448">448</span><span class="fact-l">graded questions</span></div>
-          <div class="fact"><span class="fact-n" data-count="27">27</span><span class="fact-l">solver style range charts</span></div>
-          <div class="fact"><span class="fact-n" data-count="8">8</span><span class="fact-l">player types at the table</span></div>
+          <div class="fact"><span class="fact-n" data-content="lessons">127</span><span class="fact-l">lessons of 3 to 7 minutes</span></div>
+          <div class="fact"><span class="fact-n" data-content="questions">448</span><span class="fact-l">questions with a right answer</span></div>
+          <div class="fact"><span class="fact-n" data-content="charts">27</span><span class="fact-l">range charts, close to solver</span></div>
+          <div class="fact"><span class="fact-n" data-content="playerTypes">8</span><span class="fact-l">player types to practice against</span></div>
         </div>
+      </section>
+
+      <section class="move" id="try" aria-labelledby="move-title">
+        <div class="move-in">
+          <div class="move-copy">
+            <p class="eyebrow">Try a spot</p>
+            <h2 class="display" id="move-title">Your move.</h2>
+            <p class="lede">Every 1/2 player faces this spot each week. Pick an action and see what the chart does.</p>
+          </div>
+          <div class="move-card" data-move>
+            <p class="move-table" data-move-table>Live 1/2. 9 handed. $200 stacks.</p>
+            <p class="move-story" data-move-story>UTG limps for $2. It folds to you on the button.</p>
+            <div class="move-hand" data-move-cards></div>
+            <div class="move-actions" role="group" aria-label="Your action" data-move-actions>
+              <button class="act act-fold" type="button" data-choice="fold">Fold</button>
+              <button class="act act-call" type="button" data-choice="call">Call $2</button>
+              <button class="act act-raise" type="button" data-choice="raise">Raise to $10</button>
+            </div>
+            <div class="move-result" data-move-result hidden aria-live="polite">
+              <p class="verdict" data-move-verdict></p>
+              <div class="mixbar" data-move-bar aria-hidden="true"></div>
+              <p data-move-mix></p>
+              <p class="line"><span class="tag tag-read">Read</span> <span data-move-read></span></p>
+              <p class="fine" data-move-source></p>
+              <div class="move-next">
+                <a class="btn btn-brass" href="/app/daily" data-app="daily" data-cta="daily" data-pos="move">Play today's challenge</a>
+                <button class="btn btn-quiet" type="button" data-move-again>Try another hand</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="seats" id="seats" aria-labelledby="seats-title" data-seats>
+        <div class="seats-pin">
+          <div class="seats-in">
+            <div class="seats-copy">
+              <p class="eyebrow">Ranges</p>
+              <h2 class="display" id="seats-title">Your seat changes everything.</h2>
+              <p class="lede" data-seats-lede>Under the gun you open about 12% of hands. On the button you open about 43%.</p>
+              <div class="rail" role="group" aria-label="Seat" data-rail></div>
+              <p class="seat-share"><span class="numeral" data-seat-share>12%</span><span data-seat-name>of hands open under the gun</span></p>
+              <p class="fine">Starter charts from the app. 9 handed, 100bb. Close to solver. A mixed hand fills by how often it opens.</p>
+              <p class="logo-note" data-logo-note><span data-mini-mark></span><span>Our logo is a range chart too. It points to the best hands.</span></p>
+            </div>
+            <canvas class="seats-grid" role="img" aria-label="Opening range chart" data-seat-grid></canvas>
+          </div>
+        </div>
+        <div class="seat-steps" aria-hidden="true"><span data-seat-step="0"></span><span data-seat-step="1"></span><span data-seat-step="2"></span><span data-seat-step="3"></span></div>
       </section>
 
       <section class="story" id="features" aria-labelledby="story-title">
         <div class="story-in">
           <div class="story-head">
-            <p class="eyebrow">Ace every spot</p>
-            <h2 class="display" id="story-title">Everything a winning player studies. On your phone.</h2>
+            <p class="eyebrow">How you get better</p>
+            <h2 class="display" id="story-title">Play a hand. Learn the fix. Make it stick.</h2>
           </div>
           <div class="story-grid">
             <div class="story-phone" aria-hidden="true">
@@ -88,34 +157,34 @@
             </div>
             <ol class="story-steps">
               <li class="step" data-story="play">
-                <span class="step-k">Play</span>
-                <h3>Sit down at a real cash game.</h3>
-                <p>Bots play like the regulars and recreational players you meet. Every decision you make is graded against the chart. See what you got right after each hand.</p>
-                <figure class="phone phone-inline"><img src="shots/play-dark.webp" alt="The practice cash game with nine seats" width="393" height="806" loading="lazy" /></figure>
+                <span class="step-k"><i class="tile tile-spruce" aria-hidden="true"></i>Play</span>
+                <h3>A practice table that grades you.</h3>
+                <p>Bots play like the regs and recs at a typical card room. They limp and call too much the way real players do. When Aced can't grade a decision honestly, it says so.</p>
+                <figure class="phone phone-inline"><img src="shots/play-dark.webp" alt="The practice table with nine seats" width="393" height="806" loading="lazy" /></figure>
               </li>
               <li class="step" data-story="lesson">
-                <span class="step-k">Learn</span>
-                <h3>Lessons that take five minutes.</h3>
-                <p>One idea per screen, each with a picture. Every answer shows why. A short placement quiz skips what you already know.</p>
+                <span class="step-k"><i class="tile tile-spruce" aria-hidden="true"></i>Learn</span>
+                <h3>Lessons that take a few minutes.</h3>
+                <p>Each screen teaches one idea with a picture. Every answer explains why. A short placement quiz lets you skip ahead.</p>
                 <figure class="phone phone-inline"><img src="shots/lesson-dark.webp" alt="A pot odds lesson with a bar chart" width="393" height="806" loading="lazy" /></figure>
               </li>
               <li class="step" data-story="ranges">
-                <span class="step-k">Ranges</span>
-                <h3>Ranges you actually remember.</h3>
-                <p>Solver style charts for every seat. Quiz yourself or paint the chart. Spaced review brings back the hands you miss, right before you forget them.</p>
-                <figure class="phone phone-inline"><img src="shots/ranges-dark.webp" alt="An under the gun opening range chart" width="393" height="806" loading="lazy" /></figure>
+                <span class="step-k"><i class="tile tile-spruce" aria-hidden="true"></i>Ranges</span>
+                <h3>Charts that stick.</h3>
+                <p>Learn a chart for every seat. Quiz yourself or paint it from memory. Review brings back the hands you miss right before you forget them.</p>
+                <figure class="phone phone-inline"><img src="shots/ranges-dark.webp" alt="The under the gun opening chart" width="393" height="806" loading="lazy" /></figure>
               </li>
               <li class="step" data-story="you">
-                <span class="step-k">Rating</span>
-                <h3>Watch your rating climb.</h3>
-                <p>Your Aced Rating moves only on graded answers. No points for showing up. Tiers show where you stand and what comes next.</p>
-                <figure class="phone phone-inline"><img src="shots/you-dark.webp" alt="An Aced Rating of 1747 with a rising chart" width="393" height="806" loading="lazy" /></figure>
+                <span class="step-k"><i class="tile tile-brass" aria-hidden="true"></i>Rating</span>
+                <h3>A rating you earn.</h3>
+                <p>Your Aced Rating moves only on questions with a right answer. Chips won never count, because one session is mostly luck. There are no points for showing up.</p>
+                <figure class="phone phone-inline"><img src="shots/you-dark.webp" alt="Your Aced Rating with a rising chart" width="393" height="806" loading="lazy" /></figure>
               </li>
               <li class="step" data-story="daily">
-                <span class="step-k">Daily</span>
+                <span class="step-k"><i class="tile tile-gold" aria-hidden="true"></i>Daily</span>
                 <h3>One daily challenge. Same for everyone.</h3>
-                <p>Five decisions a day. See how you compare with every player. Share your score without spoiling a single hand.</p>
-                <figure class="phone phone-inline"><img src="shots/daily-dark.webp" alt="A daily challenge result of 3 of 5" width="393" height="806" loading="lazy" /></figure>
+                <p>You get 5 new decisions each day. See how you compare with every player. Share your result without spoiling a hand.</p>
+                <figure class="phone phone-inline"><img src="shots/daily-dark.webp" alt="A daily challenge result" width="393" height="806" loading="lazy" /></figure>
               </li>
             </ol>
           </div>
@@ -127,69 +196,104 @@
           <div class="live-copy">
             <p class="eyebrow">Built for live play</p>
             <h2 class="display" id="live-title">Live games are not solver games.</h2>
-            <p class="lede">Opens are bigger. Pots go multiway. Stacks run deep. Aced teaches the solver baseline first. Then it teaches the adjustments that win at a real table. Every adjustment is labelled, so you know what is math and what is a read.</p>
+            <p class="lede">Opens are bigger. Someone always limps. Someone always straddles. Aced teaches the GTO baseline first. Then it shows you how to adjust. Each tip says if it's math or a read.</p>
           </div>
           <div class="open-demo" aria-labelledby="open-title">
             <p class="demo-k" id="open-title">Set your open size</p>
             <div class="demo-row">
-              <output class="demo-size" data-open-out for="open-size">4.5bb</output>
-              <span class="demo-raise">Raise to <b data-open-raise>$9</b> at 1/2</span>
+              <output class="demo-size" data-open-out for="open-size">5bb</output>
+              <span class="demo-raise" data-open-raise>Raise to <b>$10</b> at 1/2</span>
             </div>
-            <input id="open-size" type="range" min="2" max="8" step="0.5" value="4.5" aria-label="Your open size in big blinds" data-open />
-            <p class="demo-note" data-open-note>Bigger opens win more from players who call too much. Open a little tighter from early seats.</p>
+            <input id="open-size" type="range" min="2.5" max="10" step="0.5" value="5" aria-label="Your open size in big blinds" data-open />
+            <div class="limpers">
+              <span id="limpers-label">Limpers in front</span>
+              <div class="stepper" role="group" aria-labelledby="limpers-label">
+                <button type="button" aria-label="One less limper" data-limp="-1">−</button>
+                <output data-limp-out aria-live="polite">0</output>
+                <button type="button" aria-label="One more limper" data-limp="1">+</button>
+              </div>
+            </div>
+            <div class="demo-lines" aria-live="polite">
+              <p class="line"><span class="tag tag-math">Math</span> <span data-open-math>The big blind needs 38% equity to call.</span></p>
+              <p class="line"><span class="tag tag-read">Read</span> <span data-open-read>Most 1/2 players call anyway. That's why the bigger open earns more.</span></p>
+            </div>
+            <p class="fine">The math is before rake and assumes everyone else folds.</p>
           </div>
           <ul class="live-cards">
-            <li><h3>Your open, your game</h3><p>Set the size you really use. Play offers it first and the charts tell you when they assume something else.</p></li>
-            <li><h3>8 player types</h3><p>Calling stations, nits, maniacs and more. Learn the exploit for each and face them at the practice table.</p></li>
-            <li><h3>Multiway and deep</h3><p>Lessons for the pots solvers skip: three players to the flop and stacks of 200bb or more.</p></li>
+            <li><h3>Limpers and straddles</h3><p>Learn iso raise sizes for one limper or three. Lessons treat the straddle as the new big blind.</p></li>
+            <li><h3>Your open size</h3><p>Set the size you really use at 1/2. The practice table offers it first. Charts tell you when they assume a different size.</p></li>
+            <li><h3>8 player types</h3><p>Stations, nits and maniacs each leak in their own way. Learn the fix for each. Then face them at the practice table.</p></li>
+            <li><h3>Multiway and deep</h3><p>Solvers mostly skip these pots. Aced has lessons for 3 players to the flop. It also covers stacks of 200bb and up.</p></li>
           </ul>
         </div>
       </section>
 
-      <section class="how" id="how" aria-labelledby="how-title">
-        <div class="how-in">
-          <p class="eyebrow">How it works</p>
-          <h2 class="display" id="how-title">Three steps. A few minutes a day.</h2>
-          <ol class="how-steps">
-            <li><span class="how-n">1</span><h3>Find your level</h3><p>Answer a short placement quiz. Aced skips the lessons you already know and builds your plan.</p></li>
-            <li><span class="how-n">2</span><h3>Study in short sessions</h3><p>One lesson and a quick review each day. Your plan picks the next topic for you.</p></li>
-            <li><span class="how-n">3</span><h3>Play and get graded</h3><p>Sit at the practice table. Every decision is graded, and every miss goes into your review.</p></li>
-          </ol>
-        </div>
-      </section>
-
-      <section class="compare" aria-labelledby="compare-title">
-        <div class="compare-in">
-          <p class="eyebrow">Compare</p>
-          <h2 class="display" id="compare-title">Serious training. Phone sized.</h2>
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr><th scope="col"><span class="sr">Feature</span></th><th scope="col" class="us">Aced</th><th scope="col">Solver sites</th><th scope="col">Video courses</th><th scope="col">Chart apps</th></tr>
-              </thead>
-              <tbody>
-                <tr><th scope="row">Made for your phone</th><td class="us yes">Yes</td><td>Web first</td><td>Web first</td><td class="yes">Yes</td></tr>
-                <tr><th scope="row">Lessons for every level</th><td class="us yes">Yes</td><td>No</td><td class="yes">Yes</td><td>No</td></tr>
-                <tr><th scope="row">Graded practice hands</th><td class="us yes">Yes</td><td class="yes">Yes</td><td>No</td><td>Some</td></tr>
-                <tr><th scope="row">Live game adjustments</th><td class="us yes">Yes</td><td>No</td><td>Some</td><td>No</td></tr>
-                <tr><th scope="row">Spaced review</th><td class="us yes">Yes</td><td>No</td><td>No</td><td>Some</td></tr>
-                <tr><th scope="row">Typical price a year</th><td class="us num">$79.99</td><td class="num">$468 and up</td><td class="num">$300 to $1,400</td><td class="num">$60 to $120</td></tr>
-              </tbody>
-            </table>
+      <div class="chapter g-paper">
+        <section class="how" id="how" aria-labelledby="how-title">
+          <div class="how-in">
+            <p class="eyebrow">How it works</p>
+            <h2 class="display" id="how-title">Three steps. A few minutes a day.</h2>
+            <ol class="how-steps">
+              <li><span class="how-n">1</span><h3>Find your level</h3><p>Take a short placement quiz. Aced skips what you know and builds your plan.</p></li>
+              <li><span class="how-n">2</span><h3>Study a little each day</h3><p>Do one lesson and a quick review. Your plan picks what comes next.</p></li>
+              <li><span class="how-n">3</span><h3>Play and get graded</h3><p>Sit at the practice table. Your decisions get graded. Every miss goes into your review.</p></li>
+            </ol>
+            <a class="btn btn-ink" href="/app/placement" data-app="placement" data-cta="placement" data-pos="how">Take the placement quiz</a>
           </div>
-          <p class="fine">Typical published prices for each kind of product in 2026.</p>
-        </div>
-      </section>
+        </section>
+
+        <section class="compare" aria-labelledby="compare-title">
+          <div class="compare-in">
+            <p class="eyebrow">Compare</p>
+            <h2 class="display" id="compare-title">Serious training. Phone sized.</h2>
+            <p class="lede">Each kind of tool is good at something. Here is where Aced fits.</p>
+            <div class="table-wrap">
+              <table>
+                <caption class="sr">How Aced compares with other ways to study poker</caption>
+                <thead>
+                  <tr><th scope="col"><span class="sr">Feature</span></th><th scope="col" class="us">Aced</th><th scope="col">Solver sites</th><th scope="col">Video courses</th><th scope="col">Chart apps</th></tr>
+                </thead>
+                <tbody>
+                  <tr><th scope="row">Made for your phone</th><td class="us yes">Yes</td><td class="has">Some</td><td class="has">Some</td><td class="has">Yes</td></tr>
+                  <tr><th scope="row">Limpers, straddles and big opens</th><td class="us yes">Yes</td><td>Few</td><td class="has">Yes</td><td>No</td></tr>
+                  <tr><th scope="row">Lessons from the basics up</th><td class="us yes">Yes</td><td class="has">Some</td><td class="has">Yes</td><td>No</td></tr>
+                  <tr><th scope="row">Graded practice at a full table</th><td class="us yes">Yes</td><td class="has">Yes</td><td>No</td><td>No</td></tr>
+                  <tr><th scope="row">Spaced review of your misses</th><td class="us yes">Yes</td><td>No</td><td>No</td><td class="has">Some</td></tr>
+                  <tr><th scope="row">Full solved library, every flop</th><td class="us">Not yet</td><td class="has">Yes</td><td>No</td><td>No</td></tr>
+                  <tr><th scope="row">Hours of pro video</th><td class="us">No</td><td class="has">Some</td><td class="has">Yes</td><td>No</td></tr>
+                  <tr><th scope="row">Typical price a year</th><td class="us num" data-compare-price>$0 or $79.99</td><td class="num">$300 and up</td><td class="num">$300 to $1,400</td><td class="num">$60 to $120</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p class="fine swipe-hint" aria-hidden="true">Swipe the table to see more</p>
+            <p class="fine">Typical published prices for each kind of product in October 2026. Plans change, so check each site.</p>
+          </div>
+        </section>
+
+        <section class="sources" aria-labelledby="sources-title">
+          <div class="sources-in">
+            <p class="eyebrow">How we know</p>
+            <h2 class="display" id="sources-title">Where the answers come from.</h2>
+            <dl class="source-list">
+              <div><dt>Preflop charts</dt><dd>Close to published solves. The app labels them as approximate.</dd></div>
+              <div><dt>Turn and river</dt><dd>Solved on your phone by Aced's own solver. Each solve shows how close it got.</dd></div>
+              <div><dt>Exploits</dt><dd>Labelled as reads. Each one names the player type it beats.</dd></div>
+              <div><dt>Math</dt><dd>Pot odds and equity are exact. They are labelled Exact.</dd></div>
+            </dl>
+          </div>
+        </section>
+      </div>
 
       <section class="voices" id="voices" aria-labelledby="voices-title" data-voices>
         <div class="voices-in">
-          <p class="eyebrow eyebrow-dark">From the tables</p>
-          <h2 class="display" id="voices-title">What players say.</h2>
+          <p class="eyebrow" data-voices-head>From the tables</p>
+          <h2 class="display" id="voices-title" data-voices-head>What players say.</h2>
           <div class="quotes" data-quotes></div>
           <div class="voices-empty" data-voices-empty hidden>
+            <p class="eyebrow">Founding members</p>
             <h2 class="display">Help build Aced.</h2>
-            <p>We are looking for our first 500 players. Founding members get Pro for life and a direct line to the people building it.</p>
-            <a class="btn btn-ink btn-lg" href="#founding">Become a founding member</a>
+            <p>We're looking for our first <span data-founding-seats>500</span> players. Founders pay <span data-founding-price>$79.99</span> once and keep Pro for as long as Aced runs. In return you tell us what to fix.</p>
+            <a class="btn btn-cream btn-lg" href="#founding" data-cta="founding" data-pos="voices">See the founding offer</a>
           </div>
         </div>
       </section>
@@ -197,105 +301,137 @@
       <section class="pricing" id="pricing" aria-labelledby="pricing-title">
         <div class="pricing-in">
           <p class="eyebrow">Pricing</p>
-          <h2 class="display" id="pricing-title">Start free. Go Pro when it pays.</h2>
+          <h2 class="display" id="pricing-title">Start free. Unlock every spot with Pro.</h2>
+
+          <article class="founding" id="founding" aria-labelledby="founding-title">
+            <div class="founding-main">
+              <span class="badge badge-gold">Founding member</span>
+              <h3 id="founding-title" class="display">Pay once. Keep Pro.</h3>
+              <p class="price"><span class="amt" data-founding-price>$79.99</span><span class="per">once</span></p>
+              <p class="price-sub">The price of one year of Pro. For our first <span data-founding-seats>500</span> players.</p>
+              <p class="deal">Use Aced and tell us what to fix. In return you never pay for Pro again.</p>
+            </div>
+            <div class="founding-side">
+              <ul class="checks">
+                <li>Every Pro feature for as long as Aced runs</li>
+                <li>Monthly feedback calls during launch, if you want them</li>
+                <li>A private Discord group for founders</li>
+                <li>A swag pack if we hit our first milestone</li>
+              </ul>
+              <form class="mini-form" data-waitlist="founding" novalidate>
+                <label class="field-label" for="founding-email">Email</label>
+                <div class="form-row">
+                  <input id="founding-email" type="email" name="email" autocomplete="email" inputmode="email" autocapitalize="none" autocorrect="off" spellcheck="false" enterkeyhint="send" placeholder="you@example.com" required />
+                  <input type="text" name="company" tabindex="-1" autocomplete="off" class="hp" aria-hidden="true" />
+                  <button class="btn btn-gold" type="submit">Request a founding place</button>
+                </div>
+                <p class="form-note">We email you a checkout link. Pay only if you still want in.</p>
+                <p class="form-msg" role="status" data-msg></p>
+              </form>
+              <p class="fine"><span data-founding-left></span>The offer closes when <span data-founding-seats>500</span> places are filled.</p>
+            </div>
+          </article>
+
           <div class="plans">
             <article class="plan">
               <h3>Free</h3>
               <p class="price"><span class="amt">$0</span></p>
-              <ul>
+              <p class="price-sub">No card needed.</p>
+              <ul class="checks">
                 <li>The full basics track</li>
-                <li>The first module of every track</li>
-                <li>Review, drills and the daily challenge</li>
+                <li>The first topic of every track</li>
+                <li>Daily review and drills</li>
+                <li>The daily challenge</li>
                 <li>Your Aced Rating</li>
               </ul>
-              <a class="btn btn-ghost btn-block" data-app="">Start free</a>
+              <a class="btn btn-quiet btn-block" href="/app/" data-app="" data-cta="start_free" data-pos="pricing">Start training free</a>
             </article>
             <article class="plan plan-pro">
-              <h3>Aced Pro</h3>
+              <div class="plan-top"><h3>Aced Pro</h3><span class="save" data-save>Save 55%</span></div>
               <p class="price"><span class="amt" data-price="yearly">$79.99</span><span class="per">a year</span></p>
-              <p class="price-sub"><span data-trial>7 day free trial.</span> Or <span data-price="monthly">$14.99</span> a month.</p>
-              <ul>
-                <li>Every lesson in every track</li>
+              <p class="price-sub"><span data-trial-line>Free for 7 days. Then $79.99 a year.</span> <span data-monthly-line>That's about $6.67 a month. Or pay $14.99 monthly.</span></p>
+              <ul class="checks">
+                <li>All <span data-content="lessons">127</span> lessons</li>
+                <li>Solve your own heads up spots</li>
                 <li>The weekly Pro challenge</li>
-                <li>The solver for any spot</li>
-                <li>The AI coach when it launches</li>
               </ul>
-              <a class="btn btn-brass btn-block" data-app="pro">Start your free week</a>
-            </article>
-            <article class="plan plan-founding" id="founding">
-              <span class="badge">Founding member</span>
-              <h3>Pro for life</h3>
-              <p class="price"><span class="amt" data-founding-price>$99</span><span class="per">once</span></p>
-              <p class="price-sub">For our first <span data-founding-seats>500</span> players.</p>
-              <ul>
-                <li>Everything in Pro, for good</li>
-                <li>A short feedback call each month</li>
-                <li>Early access to new features</li>
-                <li>Your name in the founders' credits</li>
-              </ul>
-              <form class="mini-form" data-waitlist="founding">
-                <label class="sr" for="founding-email">Email</label>
-                <input id="founding-email" type="email" name="email" autocomplete="email" placeholder="you@example.com" required />
-                <button class="btn btn-brass" type="submit">Apply</button>
-                <p class="form-msg" role="status" data-msg></p>
-              </form>
-              <p class="fine">When the 500 places are filled, the offer ends.</p>
+              <p class="coming"><span class="soon">Coming</span> The AI coach</p>
+              <a class="btn btn-gold btn-block" href="/app/pro" data-app="pro" data-cta="pro_trial" data-pos="pricing">Start my free week</a>
+              <p class="form-note center">Cancel before day 7 and pay nothing.</p>
             </article>
           </div>
           <p class="fine center">Cancel any time. You keep the free plan and all your progress.</p>
         </div>
       </section>
 
-      <section class="apps" id="apps" aria-labelledby="apps-title">
-        <div class="apps-in">
-          <div class="apps-copy">
-            <p class="eyebrow">iPhone and Android</p>
-            <h2 class="display" id="apps-title">In your browser now. In the app stores soon.</h2>
-            <p class="lede">Aced runs in any modern browser and installs to your home screen. It works offline at the table. Native apps for iPhone and Android are on the way. Leave your email and we will send one note on launch day.</p>
-            <form class="notify" data-waitlist="ios">
-              <fieldset class="seg" aria-label="Your phone">
-                <input type="radio" name="list" id="list-ios" value="ios" checked /><label for="list-ios">iPhone</label>
-                <input type="radio" name="list" id="list-android" value="android" /><label for="list-android">Android</label>
-              </fieldset>
-              <div class="notify-row">
-                <label class="sr" for="notify-email">Email</label>
-                <input id="notify-email" type="email" name="email" autocomplete="email" placeholder="you@example.com" required />
-                <button class="btn btn-brass" type="submit">Notify me</button>
+      <div class="chapter g-paper2">
+        <section class="apps" id="apps" aria-labelledby="apps-title">
+          <div class="apps-in">
+            <div class="apps-copy">
+              <p class="eyebrow">iPhone and Android</p>
+              <h2 class="display" id="apps-title">In your browser now. In the app stores soon.</h2>
+              <p class="lede">Aced runs in any modern browser. Add it to your home screen and it works offline. Study on a break or on the way to the game.</p>
+              <form class="notify" data-waitlist="ios" novalidate>
+                <fieldset class="seg" data-seg>
+                  <legend class="sr">Your phone</legend>
+                  <input type="radio" name="list" id="list-ios" value="ios" checked /><label for="list-ios">iPhone</label>
+                  <input type="radio" name="list" id="list-android" value="android" /><label for="list-android">Android</label>
+                </fieldset>
+                <label class="field-label" for="notify-email">Email</label>
+                <div class="form-row">
+                  <input id="notify-email" type="email" name="email" autocomplete="email" inputmode="email" autocapitalize="none" autocorrect="off" spellcheck="false" enterkeyhint="send" placeholder="you@example.com" required />
+                  <input type="text" name="company" tabindex="-1" autocomplete="off" class="hp" aria-hidden="true" />
+                  <button class="btn btn-ink" type="submit">Email me on launch day</button>
+                </div>
+                <p class="form-note" data-notify-note>One email on launch day. Nothing else.</p>
+                <p class="form-msg" role="status" data-msg></p>
+              </form>
+              <div class="after" data-after hidden>
+                <a class="btn btn-ink" href="/app/daily" data-app="daily" data-cta="daily" data-pos="apps">Play today's challenge</a>
               </div>
-              <p class="form-msg" role="status" data-msg></p>
-            </form>
-            <a class="text-link" data-app="">Open the web app now</a>
+              <a class="text-link" href="/app/" data-app="" data-cta="open_app" data-pos="apps">Open Aced in your browser</a>
+            </div>
+            <div class="apps-phones" aria-hidden="true">
+              <figure class="phone phone-light"><img src="shots/learn-light.webp" alt="" width="393" height="806" loading="lazy" /></figure>
+              <figure class="phone phone-light phone-offset"><img src="shots/today-light.webp" alt="" width="393" height="806" loading="lazy" /></figure>
+            </div>
           </div>
-          <div class="apps-phones" aria-hidden="true">
-            <figure class="phone phone-light"><img src="shots/learn-light.webp" alt="" width="393" height="806" loading="lazy" /></figure>
-            <figure class="phone phone-light phone-offset"><img src="shots/today-light.webp" alt="" width="393" height="806" loading="lazy" /></figure>
-          </div>
-        </div>
-      </section>
+        </section>
 
-      <section class="faq" id="faq" aria-labelledby="faq-title">
-        <div class="faq-in">
-          <p class="eyebrow">FAQ</p>
-          <h2 class="display" id="faq-title">Questions players ask.</h2>
-          <div class="faq-list">
-            <details><summary>Is Aced gambling?</summary><p>No. Aced is a training app. There is no real money and nothing to win. You play practice hands against bots to learn better decisions.</p></details>
-            <details><summary>Do I need a solver?</summary><p>No. Aced uses solver style charts and explains them in plain words. You learn the decisions without running any software.</p></details>
-            <details><summary>Is it for live or online poker?</summary><p>Both. Charts and lessons cover live and online cash games. Live players can set their own open size, and lessons cover multiway pots and deep stacks.</p></details>
-            <details><summary>I am a beginner. Can I keep up?</summary><p>Yes. The basics track starts from the rules of the game. Experienced players can take the placement quiz and skip ahead.</p></details>
-            <details><summary>How does the rating work?</summary><p>It moves only on graded answers to questions with a right answer. It works like a chess rating and shows how sure it is while it settles.</p></details>
-            <details><summary>Can I cancel any time?</summary><p>Yes. Cancel in Settings or your app store account. You keep the free plan and your progress.</p></details>
-            <details><summary>Does it work offline?</summary><p>Yes. Once it is open, lessons, review and drills work without a connection.</p></details>
+        <section class="faq" id="faq" aria-labelledby="faq-title">
+          <div class="faq-in">
+            <p class="eyebrow">FAQ</p>
+            <h2 class="display" id="faq-title">Questions players ask.</h2>
+            <div class="faq-list" data-faq>
+              <details><summary>What's free?</summary><p>The full basics track and the first topic of every track are free. So are daily review and drills. The daily challenge and your Aced Rating are free too.</p></details>
+              <details><summary>Will it help my live 1/2 game?</summary><p>Yes. Aced was built for live cash first. You can set the open size you really use. Lessons cover limpers, straddles, multiway pots and deep stacks.</p></details>
+              <details><summary>I'm new to poker. Can I keep up?</summary><p>Yes. The basics track starts with the rules. If you've played for years, take the placement quiz and skip ahead.</p></details>
+              <details><summary>Is this GTO or exploitative?</summary><p>Both. You learn the GTO baseline first. Then you learn when to leave it. Every answer says if it's math or a read.</p></details>
+              <details><summary>Are the charts real solver output?</summary><p>The preflop charts are close approximations of published solves. The app labels them that way. Turn and river grades come from Aced's own solver. Each solve shows how close it got.</p></details>
+              <details><summary>How does the Aced Rating work?</summary><p>It moves only on questions with a right answer. It works like a chess rating. While it's still settling, it tells you so.</p></details>
+              <details><summary>Do I need an account?</summary><p>No. You can play today's challenge and start lessons right away. Your progress saves on this device. Make an account when you want it on more than one device.</p></details>
+              <details><summary>Can I import my hands?</summary><p>Online hands, yes. Aced reads the text format most sites export. For live play, log your sessions and note hands on your break.</p></details>
+              <details><summary>What happens after the free week?</summary><p>You pay for the year unless you cancel first. Cancel in Settings or in your app store account. You keep the free plan and your progress.</p></details>
+              <details><summary>What's a founding member?</summary><p>A founding member is one of our first 500 players. You pay once and keep Pro for as long as Aced runs. In return you tell us what works and what doesn't.</p></details>
+              <details><summary>Can I use it during a hand?</summary><p>No. Most card rooms ban phones in a hand. Use Aced on a break or before you sit down.</p></details>
+              <details><summary>When do the iPhone and Android apps arrive?</summary><p>Soon. You can use Aced in your browser today. Leave your email and we'll send one note on launch day.</p></details>
+              <details><summary>Is Aced gambling?</summary><p>No. Aced is a training app. There's no real money and nothing to win. You play practice hands against bots.</p></details>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      </div>
 
       <section class="final" aria-labelledby="final-title">
         <div class="final-in">
-          <h2 class="display" id="final-title">Ace every spot.</h2>
-          <p class="lede">Start free in your browser. No card needed.</p>
-          <div class="cta-row center">
-            <a class="btn btn-brass btn-lg" data-app="">Start free</a>
-            <a class="btn btn-ghost btn-lg" data-app="daily">Try today's daily challenge</a>
+          <div class="final-mark" data-final-mark aria-hidden="true"></div>
+          <div class="final-copy">
+            <h2 class="display" id="final-title">Ace every spot.</h2>
+            <p class="lede">Your first lesson takes about 5 minutes. No card needed.</p>
+            <div class="cta-row">
+              <a class="btn btn-brass btn-lg" href="/app/" data-app="" data-cta="start_free" data-pos="final">Start training free</a>
+              <a class="text-link" href="/app/daily" data-app="daily" data-cta="daily" data-pos="final">Try today's challenge</a>
+            </div>
+            <p class="fine">Want Pro for good? <a href="#founding">See the founding offer</a>.</p>
           </div>
         </div>
       </section>
@@ -304,19 +440,24 @@
     <footer class="foot">
       <div class="foot-in">
         <div class="foot-brand">
-          <a class="lockup" href="#top" aria-label="Aced home" data-lockup></a>
+          <a class="lockup" href="#top" aria-label="Aced Poker home" data-lockup></a>
           <p>Ace every spot.</p>
         </div>
         <nav class="foot-links" aria-label="Footer">
-          <a data-app="">Open the app</a>
+          <a href="/app/" data-app="" data-cta="open_app" data-pos="footer">Open Aced</a>
           <a href="#pricing">Pricing</a>
           <a href="#faq">FAQ</a>
-          <a data-app="terms">Terms</a>
-          <a data-app="privacy">Privacy</a>
+          <a href="/app/terms" data-app="terms">Terms</a>
+          <a href="/app/privacy" data-app="privacy">Privacy</a>
         </nav>
-        <p class="fine foot-legal">Aced is a poker training app for adults 18 and over. It offers no real money gambling and no prizes. © 2026 Aced.</p>
+        <p class="fine foot-legal">Aced Poker is a poker training app for adults 18 and over. It offers no real money gambling and no prizes. © 2026 Aced Poker.</p>
       </div>
     </footer>
+
+    <div class="mbar" data-mbar inert>
+      <p class="mbar-note">Free in your browser. No card needed.</p>
+      <a class="btn btn-brass btn-block" href="/app/" data-app="" data-cta="start_free" data-pos="sticky">Start training free</a>
+    </div>
 
     <script type="module" src="/src/main.ts"></script>
   </body>

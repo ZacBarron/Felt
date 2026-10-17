@@ -12,7 +12,7 @@ What Aced is not: a casino, a trading app, a crypto product. No neon, no chips r
 
 ## Name
 
-The product was called Felt until October 2026. "Felt" conflicted with an existing poker app and a registered FELT mark for mobile apps, so it became **Suited**. Suited in turn clashed with suitedpoker.com and suited.app, so in October 2026 it became **Aced**, chosen by a simulated panel of 100 target players (see the Aced growth plan artifact). The mark stayed: it is still the suited half of a range chart. Internal identifiers (storage keys such as `felt.settings.v1`, the `felt` IndexedDB database, the `@felt/*` packages and the repository) keep the old name on purpose: renaming them would wipe players' saved progress.
+The product was called Felt until October 2026. "Felt" conflicted with an existing poker app and a registered FELT mark for mobile apps, so it became **Suited**. Suited in turn clashed with suitedpoker.com and suited.app, so in October 2026 it became **Aced**, chosen by a simulated panel of 100 target players (see the Aced growth plan artifact). With the rename the mark changed too: it is now a range chart drawn as an arrow to the best hands. Internal identifiers (storage keys such as `felt.settings.v1`, the `felt` IndexedDB database, the `@felt/*` packages and the repository) keep the old name on purpose: renaming them would wipe players' saved progress.
 
 ## Voice
 
@@ -20,18 +20,20 @@ Aced sounds like a good coach sitting next to you: calm, direct and warm. The fu
 
 ## Logo
 
-**The mark** is the suited half of a range chart, on a 6x6 grid. In every range chart, suited hands sit above the diagonal and pairs sit on it. The cells above the diagonal are brass, the pairs on the diagonal are a soft neutral line, and the offsuit half stays faintly visible. It is the name drawn in the language of the game: a player reads it as a range chart, anyone else as a clean triangle.
+**The mark** is a 7x7 range chart drawn as an arrow to the top left corner, where the strongest hands live. As in every range chart, the top row holds the suited aces, the left column the offsuit aces and the diagonal the pairs. The filled corner holds the premium hands. The shape is mirror symmetric across the diagonal, so it reads as one clean form at 16px: an arrow pointing up and to the left. A player reads it as a range chart. Anyone else reads it as a confident arrow.
+
+The arms and corner are brass `#E3B261` and the pairs on the diagonal are light brass `#F1CD86`, so the diagonal shows through the arrowhead. Empty cells are a whisper `#1E2A27`. The tile is night felt, a radial from `#18332C` at the top left to `#0C1614`, with a 10% cream rim. Night felt keeps the card room family while it stands apart from spruce grounds, so the mark is never green on green. A unit test (`apps/web/test/brandMark.test.ts`) holds the shape and its symmetry.
 
 **The wordmark** is "Aced" drawn from Instrument Serif with tracking of -10 units per letter, kept as outlines (`apps/web/src/ui/wordmark.ts`) so it never depends on a font loading. Regenerate it from the font with opentype.js rather than editing the path by hand.
 
-**The lockup** pairs the tile mark with the wordmark, spaced at 0.38 of the mark height.
+**The lockup** pairs the tile mark with the wordmark, spaced at 0.38 of the mark height. The full brand name is Aced Poker (store listings, legal pages and the first mention in copy). The lockup and the app icon say Aced.
 
-Files: `docs/brand/suited-lockup.svg`, `suited-wordmark.svg`, `suited-mark.svg`, `suited-app-icon.svg`, and the overview `suited-brand-board.png`. App icons in `apps/web/public`: rounded tiles for the favicon and the 192 and 512 icons, a full bleed square for the iPhone home screen, and a maskable icon with the grid inside the safe zone. In code: `BrandMark`, `Wordmark`, `Lockup`, `markCell` in `apps/web/src/ui/Brand.tsx`.
+Files: the master mark is `docs/brand/aced-mark.svg` (viewBox 120, tile `rx` 27, grid from 19 with 10 unit cells and 2 unit gaps). App icons in `apps/web/public` and `apps/site/public` come from `scripts/make-icons.mjs`: `favicon.svg`, rounded tiles for the favicon and the 192 and 512 icons, a full bleed square for the iPhone home screen, and a maskable icon with the grid inside the safe zone. In code: `BrandMark`, `MARK`, `MARK_COLORS`, `markCell` in `apps/web/src/ui/Brand.tsx`, with a copy in `apps/site/src/mark.ts`. The older 6x6 files in `docs/brand/suited-*` are history.
 
 Usage:
-- Clear space around the mark: one grid cell on every side.
+- Clear space around the mark: 19 units of 120 on every side, built into the tile.
 - Minimum size: 20px for the tile, 14px tall for the wordmark.
-- Do not change which cells are lit, recolor the suited half, rotate or mirror the grid (the suited half is always top right), add effects, or redraw the wordmark in a live font.
+- Do not change which cells are lit (the test holds the shape), recolor the cells, rotate the grid, add effects, or redraw the wordmark in a live font.
 
 ## Color
 
@@ -41,7 +43,7 @@ The palette is called **Card room**: the felt of a table at night, lit by warm b
 | --- | --- | --- | --- |
 | Neutrals | 60% | Paper `#F4F1EA` by day, green black `#080C0B` by night | Warm neutrals let the content lead and keep brass from feeling loud |
 | Spruce | 30% | `#0B2421` to `#21604F` | The felt. Cool and low in saturation, so it recedes and gives depth |
-| Brass | 10% | `#E3B261` (fills), `#9A6A1E` (text on paper), `#E9B866` (text at night) | Spruce's warm near complement. Warm hues advance, so brass marks what to do next |
+| Brass | 10% | `#E3B261` (fills), `#8A5C14` (text on paper, 5:1 so it passes AA at small sizes), `#E9B866` (text at night) | Spruce's warm near complement. Warm hues advance, so brass marks what to do next |
 
 Color theory notes:
 - Spruce (blue green) and brass (orange yellow) sit roughly opposite on the color wheel. Opposites make each other look richer, which is why a little brass carries a lot of weight.
@@ -85,7 +87,7 @@ Rules: one small touch per moment, motion under a second and off with reduced mo
 
 ### Themes
 
-Card room is the brand: it is what goes on the app icon, the splash screen and every marketing surface. People can pick an alternate theme in Settings for the app itself:
+Card room is the brand: night felt and brass go on the app icon, and Card room leads the splash screen and every marketing surface. People can pick an alternate theme in Settings for the app itself:
 
 | Theme | Aced | Accent | Note |
 | --- | --- | --- | --- |
@@ -130,7 +132,7 @@ Motion explains what happened; it never decorates.
 - **Ink:** painted cells fill from the left like a brush stroke.
 - **Liquid selection:** the tab pill stretches as it slides between tabs.
 - **Count up:** headline numbers roll to their value; rings fill.
-- **The mark assembles:** on the welcome screen and in moments, the grid pops in along the diagonal and the suited half lights in a brass sweep.
+- **The mark assembles:** on the welcome screen and in moments, the grid pops in along the diagonal and the range lights in a brass sweep.
 - **Verdicts land:** the badge pops, a soft ring leaves it, and the check draws itself. Mix bars grow from the left.
 - **Moments:** a new tier or a streak milestone gets one short full screen moment on the felt, once, and only on a calm screen (never mid question). The title wipes in like ink. Nothing else earns a takeover.
 - Springs for things you touch, ease out for things that appear. Everything respects Reduce Motion.

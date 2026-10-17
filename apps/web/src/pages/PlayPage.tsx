@@ -1,4 +1,4 @@
-import { botById, TABLE_PRESETS } from '@felt/content';
+import { botAtTable, botById, TABLE_PRESETS } from '@felt/content';
 import {
   act,
   botMix,
@@ -220,7 +220,8 @@ const reduced = () => window.matchMedia?.('(prefers-reduced-motion: reduce)').ma
 type PreAction = 'checkfold' | 'check' | 'callany';
 
 function seatsOf(session: TableSession): PlaySeat[] {
-  return session.bots.map((id) => (id ? { bot: botById(id) } : {}));
+  const preset = TABLE_PRESETS.find((p) => p.id === session.table.preset);
+  return session.bots.map((id) => (id ? { bot: botAtTable(id, preset) } : {}));
 }
 
 /** Plays bots without pausing until the player acts or the hand ends. */

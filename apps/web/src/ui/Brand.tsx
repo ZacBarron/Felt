@@ -3,49 +3,65 @@ import { type CSSProperties, useId, useState } from 'react';
 import { WORDMARK_PATH, WORDMARK_VIEWBOX } from './wordmark';
 
 /**
- * The mark is the suited half of a range chart, on a 6x6 grid. In every
- * range chart suited hands sit above the diagonal and pairs sit on it, so
- * the lit triangle is the name drawn in the language of the game.
+ * The mark is a 7x7 range chart drawn as an arrow to the top left corner,
+ * where the strongest hands live. The top row is the suited aces, the left
+ * column the offsuit aces, the diagonal the pairs and the filled corner the
+ * premium hands. It is mirror symmetric across the diagonal, so it reads as
+ * one clean shape at favicon size.
+ *
+ * L is a lit hand, P is a pair on the diagonal, M is a softer mixed cell.
  */
-export type MarkCell = 'suited' | 'pair' | 'off';
+export const MARK = ['PLLLLLL', 'LPL....', 'LLP....', 'L..P...', 'L...P..', 'L....P.', 'L.....P'] as const;
+export const MARK_GRID = 7;
+
+export type MarkCell = 'pair' | 'lit' | 'mixed' | 'off';
+const CELL_KIND = { P: 'pair', L: 'lit', M: 'mixed', '.': 'off' } as const;
 export function markCell(r: number, c: number): MarkCell {
-  return c > r ? 'suited' : c === r ? 'pair' : 'off';
+  return CELL_KIND[MARK[r][c] as keyof typeof CELL_KIND];
 }
 
-export const MARK_GRID = 6;
+/** Master colors of the mark. The tile is night felt, the cells are brass. */
+export const MARK_COLORS = {
+  tileHi: '#18332c',
+  tileLo: '#0c1614',
+  rim: 'rgba(241,237,227,0.1)',
+  pair: '#f1cd86',
+  lit: '#e3b261',
+  mixed: '#9c7438',
+  off: '#1e2a27',
+} as const;
+
+/** Glyph opacity per cell kind, for the one color form. */
+const GLYPH_OPACITY: Record<MarkCell, number> = { pair: 1, lit: 1, mixed: 0.5, off: 0.12 };
 
 /**
- * The Aced mark: the suited half of a range chart, painted the way a
- * solver paints a range. Aced cells are brass, the pairs on the diagonal
- * are a soft line, and the offsuit half stays faintly visible.
+ * The Aced mark: the UTG range on a night felt tile.
  *
- * - `tile`: the app icon form, brass on the spruce felt gradient.
+ * - `tile`: the app icon form, brass cells on night felt with a faint rim.
  * - `glyph`: the grid alone in the current color, for use on other surfaces.
  */
 export function BrandMark({
   size = 32,
   variant = 'tile',
-  themed = true,
   animate = false,
 }: {
   size?: number;
   variant?: 'tile' | 'glyph';
-  /** Assemble along the diagonal, then light the suited half, like a solver painting a range. */
+  /** Assemble along the diagonal, then light the range, like a solver painting a chart. */
   animate?: boolean;
-  /** Follow the active theme. Off for places that must show the master brand. */
-  themed?: boolean;
 }) {
   const id = useId();
   const n = MARK_GRID;
   const tile = variant === 'tile';
-  const pad = tile ? 17 : 3;
-  const gap = tile ? 3.2 : 4;
-  const cell = (100 - 2 * pad - (n - 1) * gap) / n;
+  // Master geometry on a 120 unit tile: grid starts at 19, cells of 10 with gaps of 2.
+  const pad = tile ? 19 : 4;
+  const gap = tile ? 2 : 2.4;
+  const cell = (120 - 2 * pad - (n - 1) * gap) / n;
   return (
     <svg
       width={size}
       height={size}
-      viewBox="0 0 100 100"
+      viewBox="0 0 120 120"
       aria-hidden="true"
       className={animate ? `mark-anim mark-anim-${variant}` : undefined}
       style={{ flex: 'none', display: 'block' }}
@@ -53,20 +69,20 @@ export function BrandMark({
       {tile && (
         <>
           <defs>
-            <radialGradient id={id} cx="0" cy="0" r="1.45" gradientUnits="objectBoundingBox">
-              <stop offset="0" style={{ stopColor: themed ? 'var(--felt-1)' : '#2a7461' }} />
-              <stop offset="0.45" style={{ stopColor: themed ? 'var(--felt-2)' : '#165244' }} />
-              <stop offset="1" style={{ stopColor: themed ? 'var(--felt-3)' : '#0b2421' }} />
+            <radialGradient id={id} cx="0" cy="0" r="1.3" gradientUnits="objectBoundingBox">
+              <stop offset="0" stopColor={MARK_COLORS.tileHi} />
+              <stop offset="1" stopColor={MARK_COLORS.tileLo} />
             </radialGradient>
           </defs>
-          <rect width="100" height="100" rx="23" fill={`url(#${id})`} />
+          <rect width="120" height="120" rx="27" fill={`url(#${id})`} />
+          <rect x=".5" y=".5" width="119" height="119" rx="26.5" fill="none" stroke={MARK_COLORS.rim} />
         </>
       )}
       {Array.from({ length: n * n }, (_, i) => {
         const r = Math.floor(i / n);
         const c = i % n;
         const kind = markCell(r, c);
-        const lit = kind === 'suited';
+        const lit = kind !== 'off';
         return (
           <rect
             key={i}
@@ -74,12 +90,12 @@ export function BrandMark({
             y={pad + r * (cell + gap)}
             width={cell}
             height={cell}
-            rx={cell * 0.26}
+            rx={cell * 0.24}
             className={animate ? (lit ? 'cell lit' : 'cell') : undefined}
             style={{
               ...(animate ? ({ '--d': r + c } as CSSProperties) : null),
-              fill: tile ? (lit ? (themed ? 'var(--accent)' : '#e9b866') : kind === 'pair' ? 'rgba(255,255,255,.24)' : 'rgba(255,255,255,.08)') : 'currentColor',
-              fillOpacity: tile ? 1 : lit ? 1 : kind === 'pair' ? 0.4 : 0.14,
+              fill: tile ? MARK_COLORS[kind] : 'currentColor',
+              fillOpacity: tile ? 1 : GLYPH_OPACITY[kind],
             }}
           />
         );
@@ -128,7 +144,7 @@ export function BrandFooter() {
       <Wordmark height={22} />
       {plays > 0 ? (
         <div className="tagline" role="status" key="secret">
-          The mark is a range chart. Suited hands sit above the pairs.
+          The mark is a range chart. It points to the best hands.
         </div>
       ) : (
         <div className="tagline">{TAGLINE}</div>

@@ -69,7 +69,9 @@ export function QuickRecall({ chart, hand, targetMs, onAnswer, onNext, compact, 
       let kind: keyof typeof VERDICTS;
       if (mixes) {
         const given = answerMix ?? { [choice]: 1 };
-        const scored = scoreMixAnswer(mix, given);
+        // Grade against what the buttons can say: every pure action plus the mixed answers on offer.
+        const offered = [...choices.map((c) => ({ [c]: 1 }) as HandMix), ...mixedOptions.map((o) => o.mix)];
+        const scored = scoreMixAnswer(mix, given, offered);
         accuracy = scored.accuracy;
         // One action of a real mix is a fine play that misses the mix: say so rather than "Close".
         kind = scored.verdict === 'close' && partOfMix(mix, given) ? 'mix' : scored.verdict;
@@ -82,7 +84,7 @@ export function QuickRecall({ chart, hand, targetMs, onAnswer, onNext, compact, 
       setAnswer({ choice, label: label ?? labels[choice], outcome, kind });
       onAnswer(outcome);
     },
-    [answer, mix, targetMs, onAnswer, untimed, mixes, labels],
+    [answer, mix, targetMs, onAnswer, untimed, mixes, labels, choices, mixedOptions],
   );
 
   // Keyboard on laptops: 1, 2, 3 pick an action; Enter or Space moves on.

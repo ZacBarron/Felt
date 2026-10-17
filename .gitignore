@@ -12,3 +12,4 @@ apps/server/data
 *.sqlite
 *.sqlite-*
 dist-domain
+.claude/worktrees/

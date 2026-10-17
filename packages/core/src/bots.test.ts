@@ -107,6 +107,19 @@ describe('botMix', () => {
   });
 });
 
+describe('open size', () => {
+  const raiseTo = (profile: BotProfile) => {
+    const s = startHand({ stacks: [100, 100, 100, 100, 100, 100], button: 0 }, seededRng(4));
+    const raise = botMix(s, two('AsAh'), profile).find((c) => c.action.kind === 'raise');
+    return raise && 'to' in raise.action ? raise.action.to : undefined;
+  };
+
+  it('opens to 2.5bb online and to the table size live', () => {
+    expect(raiseTo(nit)).toBe(2.5);
+    expect(raiseTo({ ...nit, style: { ...nit.style, openTo: 5 } })).toBe(5);
+  });
+});
+
 describe('hand strength', () => {
   it('ranks made hands by how many holdings they beat', () => {
     const board = parseCards('Td7c2h4s3d');

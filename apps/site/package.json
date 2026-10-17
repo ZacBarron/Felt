@@ -16,6 +16,7 @@
     "vitest": "^2.1.9"
   },
   "dependencies": {
-    "@felt/core": "workspace:*"
+    "@felt/core": "workspace:*",
+    "@felt/content": "workspace:*"
   }
 }

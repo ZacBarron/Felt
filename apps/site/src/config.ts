@@ -11,12 +11,14 @@ export const PRICES = {
 };
 
 /**
- * Founding members: lifetime Pro for early players who give feedback. The cap
- * is real and enforced at checkout. `taken` stays null until checkout can
- * report a true count, and the page shows no count until then.
+ * Founding members: Pro for as long as Aced runs, for early players who give
+ * feedback. The price is the same as one year of Pro. The cap is real and
+ * enforced at checkout by the server. `taken` stays null until the server
+ * reports a true count (GET /api/billing/founding), and the page shows no
+ * count until then. Keep in step with apps/web/src/state/access.ts.
  */
 export const FOUNDING = {
-  price: 99,
+  price: 79.99,
   seats: 500,
   taken: null as number | null,
 };

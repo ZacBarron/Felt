@@ -235,10 +235,19 @@ export const CLOSE_TOLERANCE = 0.4;
  * further) is close and earns half credit, so picking the main action of a
  * 60/40 hand still counts for something.
  */
-export function scoreMixAnswer(chartMix: HandMix, answer: HandMix): { accuracy: number; verdict: MixVerdict; distance: number } {
+export function scoreMixAnswer(
+  chartMix: HandMix,
+  answer: HandMix,
+  /** The answers the player could pick. When none comes within MIX_TOLERANCE, the closest ones count as right. */
+  options?: readonly HandMix[],
+): { accuracy: number; verdict: MixVerdict; distance: number } {
   const distance = mixDistance(chartMix, answer);
-  if (distance <= MIX_TOLERANCE + 1e-9) return { accuracy: 1, verdict: 'right', distance };
-  if (distance <= CLOSE_TOLERANCE + 1e-9 || partOfMix(chartMix, answer)) return { accuracy: 0.5, verdict: 'close', distance };
+  // A 25/75 mix sits between the buttons on offer, so never ask for more than the buttons allow.
+  const best = options?.length ? Math.min(...options.map((o) => mixDistance(chartMix, o))) : 0;
+  const right = Math.max(MIX_TOLERANCE, best);
+  const close = Math.max(CLOSE_TOLERANCE, best + (CLOSE_TOLERANCE - MIX_TOLERANCE));
+  if (distance <= right + 1e-9) return { accuracy: 1, verdict: 'right', distance };
+  if (distance <= close + 1e-9 || partOfMix(chartMix, answer)) return { accuracy: 0.5, verdict: 'close', distance };
   return { accuracy: 0, verdict: 'wrong', distance };
 }
 

@@ -22,7 +22,7 @@ export interface LobbyTable {
 }
 
 export const LOBBY: LobbyTable[] = [
-  { id: 'casino-9', name: 'Casino 1/2', preset: 'casino', seats: 9, buyIns: [50, 100, 150], blurb: 'Full ring with regulars and recreational players' },
+  { id: 'casino-9', name: 'Live 1/2', preset: 'casino', seats: 9, buyIns: [50, 100, 150], blurb: 'Full ring with regulars and recreational players' },
   { id: 'home-9', name: 'Home game', preset: 'home', seats: 9, buyIns: [50, 100, 150], blurb: 'Loose and passive with few bluffs' },
   { id: 'online-6', name: 'Online 6 max', preset: 'tough', seats: 6, buyIns: [40, 70, 100], blurb: 'Mostly regulars who play well' },
   { id: 'deep-6', name: 'Deep 6 max', preset: 'casino', seats: 6, buyIns: [100, 150, 200], blurb: 'Big stacks behind every hand' },

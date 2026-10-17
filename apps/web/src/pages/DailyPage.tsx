@@ -118,6 +118,7 @@ function Result({ number, items, scores, before, after }: { number: number; item
   const week = useStreakWeek();
   const { settings } = useSettings();
   const pro = weeklyAvailable(settings.access);
+  const guest = !settings.profile.onboarded;
   const snapshot = useLiveQuery(() => ratingSnapshot(), []);
   const right = scores.filter((s) => s >= 1).length;
   const delta = Math.round(after - before);
@@ -240,14 +241,26 @@ function Result({ number, items, scores, before, after }: { number: number; item
       </section>
 
       <BottomBar>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-          <Link to="/" className="btn btn-lg glass">
-            Done
-          </Link>
-          <button className="btn btn-primary btn-lg" onClick={() => setSharing('daily')}>
-            Share result
-          </button>
-        </div>
+        {guest ? (
+          // A guest came straight from a share link or the website: the next step is their own plan.
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+            <button className="btn btn-lg glass" onClick={() => setSharing('daily')}>
+              Share result
+            </button>
+            <Link to="/welcome" className="btn btn-primary btn-lg">
+              Find your level
+            </Link>
+          </div>
+        ) : (
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+            <Link to="/" className="btn btn-lg glass">
+              Done
+            </Link>
+            <button className="btn btn-primary btn-lg" onClick={() => setSharing('daily')}>
+              Share result
+            </button>
+          </div>
+        )}
       </BottomBar>
 
       <ShareSheet open={!!sharing} first={sharing ?? 'daily'} onClose={() => setSharing(undefined)} />

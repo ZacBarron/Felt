@@ -34,6 +34,8 @@ export interface BotStyle {
   limp: number;
   /** Bet sizes it likes, as shares of the pot, smallest first. */
   sizes: number[];
+  /** Its open size in big blinds. Online it is 2.5 (3 from the small blind); live games open bigger. */
+  openTo?: number;
 }
 
 export interface BotProfile {
@@ -157,11 +159,11 @@ function inPosition(state: HandState, seat: number, spot: PreflopSpot): boolean 
 }
 
 /** The street total a preflop raise goes to, all in when it would commit most of the stack. */
-function preflopRaiseTo(state: HandState, seat: number, spot: PreflopSpot): number {
+function preflopRaiseTo(state: HandState, seat: number, spot: PreflopSpot, style: BotStyle): number {
   const p = state.players[seat];
   const max = p.street + p.stack;
   let to: number;
-  if (spot.kind === 'open') to = spot.position === 'SB' ? 3 : 2.5;
+  if (spot.kind === 'open') to = spot.position === 'SB' ? Math.max(3, style.openTo ?? 3) : (style.openTo ?? 2.5);
   else if (spot.kind === 'limped') to = 4 + spot.limpers;
   else if (spot.kind === 'raised') to = spot.raiseTo * (inPosition(state, seat, spot) ? 3 : 4) + spot.callers * spot.raiseTo;
   else if (spot.kind === '3bet') to = spot.raiseTo * 2.3;
@@ -218,7 +220,7 @@ function preflopMix(state: HandState, seat: number, cards: [Card, Card], profile
     out.push({ action: { kind: 'fold' }, p: foldP });
     out.push({ action: { kind: 'call' }, p: callP });
   }
-  if (legal.raise) out.push({ action: { kind: legal.raise.kind, to: clamp(preflopRaiseTo(state, seat, spot), legal.raise.min, legal.raise.max) }, p: raiseP });
+  if (legal.raise) out.push({ action: { kind: legal.raise.kind, to: clamp(preflopRaiseTo(state, seat, spot, profile.style), legal.raise.min, legal.raise.max) }, p: raiseP });
   else if (legal.check) out[0].p += raiseP;
   else out[1].p += raiseP;
   return normalize(out);

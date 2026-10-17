@@ -51,6 +51,9 @@ importers:
 
   apps/site:
     dependencies:
+      '@felt/content':
+        specifier: workspace:*
+        version: link:../../packages/content
       '@felt/core':
         specifier: workspace:*
         version: link:../../packages/core

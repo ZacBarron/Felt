@@ -17,7 +17,7 @@ Play works like sitting down in an online cash game.
 
 ### Your open size
 
-Settings has **Your open** (Game and stakes, also in the table menu). It defaults to the 2.5bb the charts assume. Live players often set 4 or 5bb. Play offers it as the first raise size before the flop, plus 1bb for each limper. Opening charts show a "You open 4bb" flag and say the chart is approximate for you. Bots still open to 2.5bb. Open size is not graded.
+Settings has **Your open** (Game and stakes, also in the table menu). It defaults to the 2.5bb the charts assume. Live players often set 4 or 5bb. Play offers it as the first raise size before the flop, plus 1bb for each limper. Opening charts show a "You open 4bb" flag and say the chart is approximate for you. Bots open like the room they sit in: 5bb at the Live 1/2 table, 4bb at the home game and 2.5bb at the online tables. Facing a live size open, the defense charts (which assume 2.5bb) do not grade the spot and say why. Open size is not graded.
 
 ## Bots
 
