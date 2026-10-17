@@ -5,6 +5,7 @@ import {
   boundaryHands,
   buildChart,
   type ChartSpec,
+  type HandMix,
   deckForCharts,
   primaryAction,
   mixAnswerOptions,
@@ -248,7 +249,7 @@ describe('extra practice', () => {
 describe('mix answers between the buttons', () => {
   // BB vs a button open: 83s calls 25% and folds 75%. The buttons offer fold, call, 3bet and 50/50 pairs.
   const chartMix = { call: 0.25, fold: 0.75 };
-  const offered = [{ '3bet': 1 }, { call: 1 }, { fold: 1 }, { '3bet': 0.5, call: 0.5 }, { call: 0.5 }];
+  const offered: HandMix[] = [{ '3bet': 1 }, { call: 1 }, { fold: 1 }, { '3bet': 0.5, call: 0.5 }, { call: 0.5 }];
 
   it('counts the closest buttons as right when no button matches the mix', () => {
     expect(scoreMixAnswer(chartMix, { fold: 1 }, offered).verdict).toBe('right');
