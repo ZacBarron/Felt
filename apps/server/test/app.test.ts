@@ -430,3 +430,15 @@ describe('invites', () => {
     expect(mine.friends.filter((f: { qualified: boolean }) => f.qualified)).toHaveLength(13);
   });
 });
+
+describe('waitlist', () => {
+  it('adds an email to a list once and checks what it is given', async () => {
+    const join = (body: unknown) => call('POST', '/api/waitlist', body);
+    expect((await join({ email: 'Amy@Example.com', list: 'ios' })).status).toBe(200);
+    expect((await join({ email: 'amy@example.com', list: 'ios' })).status).toBe(200);
+    expect((await join({ email: 'amy@example.com', list: 'android' })).status).toBe(200);
+    expect((await join({ email: 'not an email', list: 'ios' })).status).toBe(400);
+    expect((await join({ email: 'amy@example.com', list: 'casino' })).status).toBe(400);
+    expect(db.prepare('SELECT COUNT(*) AS n FROM waitlist').get()).toEqual({ n: 2 });
+  });
+});

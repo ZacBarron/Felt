@@ -281,6 +281,20 @@ Good to know:
 - `github.io` is a shared domain. Passkeys for `zacbarron.github.io` work on every Pages site under that name. Only list origins you trust.
 - The server never uses cookies. The app sends a bearer token, so CORS needs no credentials.
 
+## acedpoker.app: the site and the app on one domain
+
+The marketing site (`apps/site`) lives at `https://acedpoker.app/` and the app at `https://acedpoker.app/app/`.
+
+1. Build both into one folder: `VITE_API_URL=https://your-server pnpm build:domain`. The output is `dist-domain/`, with the site at the root, the app in `app/`, a `CNAME` file and a `404.html` that serves app deep links.
+2. Host it. The simplest option is GitHub Pages: deploy `dist-domain/` and set the custom domain to acedpoker.app. Any static host works, such as Cloudflare Pages or Netlify.
+3. DNS at Namecheap. For GitHub Pages, add four A records on `@` (185.199.108.153, 185.199.109.153, 185.199.110.153, 185.199.111.153) and a CNAME on `www` pointing to `<user>.github.io`. Then turn on Enforce HTTPS in the Pages settings. A `.app` domain only works over HTTPS.
+4. On the server, add `https://acedpoker.app` to `ALLOWED_ORIGINS` and to `WEBAUTHN_ORIGINS`, and set `WEBAUTHN_RP_ID=acedpoker.app`. Passkeys are tied to the domain, so players who made a passkey on the GitHub Pages link sign in with an email code once on the new domain.
+5. Players who installed the GitHub Pages app keep it. Their progress lives in that origin's storage, so ask them to sign in to sync before switching.
+
+Until then, every push to the working branch deploys a preview of the site at `https://zacbarron.github.io/Felt/site/`, linking to the app at `/Felt/`.
+
+The site's waitlist form posts to `/api/waitlist` on the server (lists: `ios`, `android`, `founding`). Quotes on the site live in `apps/site/src/proof.ts`: drafts never show in a production build, so set `draft: false` only for a real quote you have permission to use.
+
 ## 3. Deploy the app alone
 
 Without the server, any static host works. Players get everything except accounts, sync, reminders, leagues and payments. The repo has ready configs for Vercel and Netlify. Build with `pnpm build` and publish `apps/web/dist`. Every route must load `index.html`, because the app uses routes such as `/learn`.

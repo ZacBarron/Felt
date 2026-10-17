@@ -8,6 +8,7 @@ Personal poker training app. Read docs/CONCEPT.md and docs/ROADMAP.md before sta
 - `pnpm dev` runs the web app
 - `pnpm check` runs typecheck and tests across all packages (run before every commit)
 - `pnpm build` builds the web app
+- `pnpm dev:site` runs the marketing site (`apps/site`); `pnpm build:domain` builds acedpoker.app with the site at `/` and the app at `/app/` (see docs/DEPLOY.md)
 
 ## Conventions
 

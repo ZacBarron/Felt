@@ -176,6 +176,15 @@ const MIGRATIONS: string[] = [
   );
   CREATE INDEX referrals_referrer ON referrals (referrer_id);
   `,
+  // The marketing site's waitlists: native apps coming soon and founding members.
+  `
+  CREATE TABLE waitlist (
+    email TEXT NOT NULL,
+    list TEXT NOT NULL,
+    joined_at TEXT NOT NULL,
+    PRIMARY KEY (email, list)
+  );
+  `,
 ];
 
 export function openDb(path: string): Db {

@@ -12,7 +12,10 @@
     "preview": "pnpm --filter @felt/web preview",
     "test": "pnpm -r test",
     "typecheck": "pnpm -r typecheck",
-    "check": "pnpm typecheck && pnpm test"
+    "check": "pnpm typecheck && pnpm test",
+    "build:site": "pnpm --filter @felt/site build",
+    "build:domain": "node scripts/build-domain.mjs",
+    "dev:site": "pnpm --filter @felt/site dev"
   },
   "devDependencies": {
     "typescript": "^5.9.3"

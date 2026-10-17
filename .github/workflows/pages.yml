@@ -40,6 +40,13 @@ jobs:
           VITE_API_URL: ${{ vars.FELT_API_URL || 'https://felt-4g8a.onrender.com' }}
       # Pages has no rewrites: a copy of the app at 404.html serves deep links.
       - run: cp apps/web/dist/index.html apps/web/dist/404.html && touch apps/web/dist/.nojekyll
+      # A preview of the acedpoker.app marketing site at /Felt/site/, linking to the app above.
+      - name: Build the site preview for /Felt/site/
+        run: pnpm --filter @felt/site build && cp -r apps/site/dist apps/web/dist/site
+        env:
+          SITE_BASE: /Felt/site/
+          VITE_APP_URL: /Felt/
+          VITE_API_URL: ${{ vars.FELT_API_URL || 'https://felt-4g8a.onrender.com' }}
       - uses: actions/configure-pages@v5
         with:
           enablement: true

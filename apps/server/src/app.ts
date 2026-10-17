@@ -89,6 +89,9 @@ const paidPro = (u: UserRow, now: Date) => !!u.pro_until && new Date(u.pro_until
 /** Free Pro earned from invites, still running. */
 const bonusPro = (u: UserRow, now: Date) => !!u.bonus_until && new Date(u.bonus_until) > now;
 
+/** Lists the site can add an email to. */
+const WAITLISTS = ['ios', 'android', 'founding'];
+
 /** Aced Pro for this player: paid, from invites, or every signed in player while PRO_FOR_EVERYONE is on. */
 export function userHasPro(u: UserRow, now: Date, proForEveryone = false) {
   return proForEveryone || paidPro(u, now) || bonusPro(u, now);
@@ -708,6 +711,19 @@ export function createApp({ db, config, mailer, stripe, coach, webauthn = simple
     });
     qualifyReferral(u.id);
     return c.json({ user: userJson(userById(u.id)!), claimed: true });
+  });
+
+  // Waitlists -------------------------------------------------------------------------
+
+  // The site's "notify me" forms: iPhone, Android and founding members. Joining twice is fine.
+  app.post('/api/waitlist', async (c) => {
+    const body = await json<{ email?: unknown; list?: unknown }>(c);
+    const email = String(body.email ?? '').trim().toLowerCase();
+    const list = String(body.list ?? '');
+    if (!WAITLISTS.includes(list)) return c.json({ error: 'Pick iPhone, Android or founding member.' }, 400);
+    if (email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return c.json({ error: 'Enter a valid email address.' }, 400);
+    db.prepare('INSERT OR IGNORE INTO waitlist (email, list, joined_at) VALUES (?, ?, ?)').run(email, list, iso());
+    return c.json({ ok: true });
   });
 
   // Item calibration -----------------------------------------------------------------
