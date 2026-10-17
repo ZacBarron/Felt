@@ -1,13 +1,13 @@
-import { boundaryHands, chartItemDifficulty, pickAdaptive, type PracticeItem, type SkillDomain, type SkillRating } from '@felt/core';
+import type { SkillDomain, SkillRating } from '@felt/core';
 import { useEffect, useState } from 'react';
 import { track } from '../state/events';
 import { Link, useNavigate } from 'react-router-dom';
-import { chartChoices, type Decision, DecisionItem } from '../drills/DecisionItem';
+import { type Decision, DecisionItem } from '../drills/DecisionItem';
 import { haptic } from '../haptics';
-import { chartsForGame } from '../state/charts';
 import { db } from '../state/db';
-import { isComplete, LESSON_ENTRIES, lessonProgress, quizSteps } from '../state/lessons';
-import { DOMAIN_LABELS, domainForLesson, lessonQuizDifficulty, ratingSnapshot } from '../state/rating';
+import { lessonProgress } from '../state/lessons';
+import { DOMAIN_LABELS, ratingSnapshot } from '../state/rating';
+import { type PracticeCandidate, practiceSession } from '../state/practice';
 import { useSettings } from '../state/settings';
 import { BottomBar } from '../ui/BottomBar';
 import { CheckIcon, CloseIcon, MinusIcon } from '../ui/icons';
@@ -19,7 +19,7 @@ import './review.css';
 import { ProgressRing } from '../ui/ProgressRing';
 import { useBodyClass } from '../ui/useBodyClass';
 
-type Candidate = PracticeItem & { decision: Decision };
+type Candidate = PracticeCandidate;
 
 /** A short name for a decision and where it is from, for the summary list. */
 function decisionLabel(d: Decision): { title: string; sub?: string } {
@@ -61,39 +61,9 @@ export function PracticePage() {
           .above(new Date(Date.now() - RECENT_MS))
           .toArray(),
       ]);
-      const charts = chartsForGame(settings.game).charts;
-      // Rated chart questions only: equilibrium charts, and hands where some answer is wrong.
-      const chartItems: Candidate[] = charts
-        .filter((c) => c.spec.basis === 'gto')
-        .flatMap((chart) =>
-          boundaryHands(chart).flatMap((hand) => {
-            const difficulty = chartItemDifficulty(chart.mixes.get(hand) ?? { fold: 1 }, chartChoices(chart));
-            return difficulty === undefined
-              ? []
-              : [
-                  {
-                    id: `chart:${chart.spec.id}:${hand}`,
-                    domain: 'preflop' as SkillDomain,
-                    difficulty,
-                    decision: { kind: 'chart' as const, chartId: chart.spec.id, hand },
-                  },
-                ];
-          }),
-        );
-      // Questions from lessons you have finished or tested out of; if there are few, the core lessons too.
-      const learned = LESSON_ENTRIES.filter((e) => e.content && isComplete(progress.get(e.key)));
-      const lessons = learned.length >= 5 ? learned : LESSON_ENTRIES.filter((e) => e.content?.level === 'core');
-      const quizItems: Candidate[] = lessons.flatMap((e) =>
-        quizSteps(e).map((step) => ({
-          id: `quiz:${e.key}#${step}`,
-          domain: domainForLesson(e.key),
-          difficulty: lessonQuizDifficulty(e.key),
-          decision: { kind: 'quiz' as const, key: e.key, step },
-        })),
-      );
       const exclude = new Set(recent.map((a) => a.itemId));
       const ratingFor = (d: SkillDomain) => (snap.domains[d].games ? snap.domains[d].rating : snap.overall.rating);
-      setItems(pickAdaptive([...chartItems, ...quizItems], ratingFor, { n: SESSION, exclude }));
+      setItems(practiceSession(settings.game, progress, ratingFor, { n: SESSION, exclude }));
       setBefore(snap.overall.rating);
     })();
   }, [settings.game]);

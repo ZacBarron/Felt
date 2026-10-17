@@ -20,6 +20,7 @@ import { ScenariosPage } from './pages/ScenariosPage';
 import { PracticePage } from './pages/PracticePage';
 import { ProPage } from './pages/ProPage';
 import { RangesPage } from './pages/RangesPage';
+import { SpotQuizPage } from './pages/SpotQuizPage';
 import { ReviewPage } from './pages/ReviewPage';
 import { TrainPage } from './pages/TrainPage';
 import { PlayPage } from './pages/PlayPage';
@@ -174,6 +175,7 @@ export function App() {
             <Route path="/learn" element={<LearnPage />} />
             <Route path="/learn/*" element={<LessonPage />} />
             <Route path="/ranges" element={<RangesPage />} />
+            <Route path="/quiz" element={<SpotQuizPage />} />
             <Route path="/lab" element={<LabPage />} />
             <Route path="/settings" element={<SettingsPage />} />
             <Route path="/settings/:section" element={<SettingsPage />} />

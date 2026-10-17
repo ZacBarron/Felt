@@ -1,0 +1,91 @@
+{
+  "rangesQuiz": {
+    "questions": 100,
+    "distinctItems": 64,
+    "distinctCharts": 1,
+    "distinctSpotTypes": 1,
+    "distinctSeats": 1,
+    "distinctHands": 64,
+    "distinctStacks": 1,
+    "distinctTables": 1,
+    "repeatsWithin20": 18,
+    "sameChartNeighbours": 1,
+    "shareCloseCalls": 0.8
+  },
+  "practice": {
+    "pool": 2360,
+    "poolCharts": 34,
+    "questions": 100,
+    "distinctItems": 98,
+    "distinctCharts": 30,
+    "distinctSpotTypes": 6,
+    "distinctSeats": 8,
+    "distinctHands": 67,
+    "distinctStacks": 1,
+    "distinctTables": 1,
+    "repeatsWithin20": 1,
+    "sameChartNeighbours": 0.02
+  },
+  "review": {
+    "deckCharts": 36,
+    "deckCards": 2746,
+    "questions": 1004,
+    "distinctItems": 450,
+    "distinctCharts": 7,
+    "distinctSpotTypes": 1,
+    "distinctSeats": 7,
+    "distinctHands": 107,
+    "distinctStacks": 1,
+    "distinctTables": 1,
+    "repeatsWithin20": 74,
+    "sameChartNeighbours": 0.858,
+    "distinctCards": 450,
+    "chartsInFirstWeek": 2
+  },
+  "daily": {
+    "questions": 180,
+    "distinctItems": 173,
+    "distinctCharts": 66,
+    "distinctSpotTypes": 7,
+    "distinctSeats": 9,
+    "distinctHands": 83,
+    "distinctStacks": 1,
+    "distinctTables": 1,
+    "repeatsWithin20": 1,
+    "sameChartNeighbours": 0.011,
+    "exactRepeats60": 7,
+    "minGapDays60": 6,
+    "exactRepeatsYear": 194,
+    "repeatsWithin90Year": 101,
+    "minGapDaysYear": 3
+  },
+  "weekly": {
+    "items": 120,
+    "distinct": 108,
+    "repeats": 12,
+    "rivers": 24,
+    "distinctRivers": 12
+  },
+  "scenarios": {
+    "distinctExisting": 12,
+    "played": 30,
+    "distinctPlayed": 12,
+    "repeats": 18,
+    "mostPlayedCount": 19,
+    "boards": 12,
+    "seatPairs": 8,
+    "stacks": 1
+  },
+  "lessons": {
+    "questions": 529,
+    "withVersions": 128,
+    "shareWithVersions": 0.242,
+    "averageVersions": 1.45,
+    "replaySameQuestion": 0.864,
+    "replaySameExact": 0.712,
+    "testOutSameQuestion": 0.813
+  },
+  "drills": {
+    "sameComboAsLastShow": 0.185
+  }
+}

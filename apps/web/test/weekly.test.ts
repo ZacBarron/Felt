@@ -5,6 +5,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { getChart } from '../src/state/charts';
 import { db } from '../src/state/db';
 import { entryFor } from '../src/state/lessons';
+import { findScenario } from '../src/state/scenarios';
 import {
   addWeeklyMissesToReview,
   FACING,
@@ -48,7 +49,10 @@ describe('weekly pool', () => {
       } else if (d.kind === 'math') {
         expect(mathFact(d.factId)).toBeDefined();
       } else {
-        expect(SCENARIOS.some((s) => s.id === d.scenarioId)).toBe(true);
+        // A hand written scenario, or a banked hand from hand written charts.
+        const s = findScenario(d.scenarioId);
+        expect(s, d.scenarioId).toBeDefined();
+        expect(SCENARIOS.some((x) => x.id === d.scenarioId) || s!.generated?.rated === true).toBe(true);
       }
     }
   });

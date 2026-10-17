@@ -18,7 +18,7 @@ import { canOpenLesson } from '../state/access';
 import { track, track as logEvent } from '../state/events';
 import { clearPlacement, loadPlacement, savePlacement } from '../state/placementProgress';
 import { recordLessonQuiz } from '../state/rating';
-import { entryFor, freshSeed, LESSON_ENTRIES, lessonPath, markTested, moduleEntries, quizAt, quizSteps } from '../state/lessons';
+import { dealQuizSeed, entryFor, LESSON_ENTRIES, lessonPath, markTested, moduleEntries, quizAt, quizSteps } from '../state/lessons';
 import { useSettings } from '../state/settings';
 import { BottomBar } from '../ui/BottomBar';
 import { CheckIcon, CloseIcon, LockIcon } from '../ui/icons';
@@ -51,7 +51,8 @@ function QuestionScreen({
   closeLabel?: string;
 }) {
   const [choice, setChoice] = useState<number>();
-  const [seed] = useState(freshSeed);
+  // Another version than last time, so a second try is not the same question.
+  const [seed] = useState(() => dealQuizSeed(question.lessonKey, question.step));
   const quiz = quizFor(question, seed);
   const entry = entryFor(question.lessonKey);
   return (

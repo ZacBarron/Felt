@@ -136,6 +136,16 @@ describe('weekly picks', () => {
     expect(new Set(seen).size).toBe(6);
   });
 
+  it('never repeats an item within half its pool, even where one pass meets the next', () => {
+    // 20 harder mixed hands, three a week: a pass turns over about every 7 weeks.
+    const runs = Array.from({ length: 60 }, (_, w) => weeklyPicks(pool(), w + 1, SLOTS).filter((p) => p.kind === 'mixed').map((p) => p.id)).flat();
+    runs.forEach((id, i) => {
+      const before = runs.slice(Math.max(0, i - 10), i);
+      expect(before, `pick ${i}`).not.toContain(id);
+    });
+    expect(new Set(runs).size).toBe(20);
+  });
+
   it('tops up a short spot type from the others and never repeats within a week', () => {
     const small = pool().filter((p) => p.kind !== 'river' || p.id === 'river:0');
     const picks = weeklyPicks(small, 42, SLOTS);

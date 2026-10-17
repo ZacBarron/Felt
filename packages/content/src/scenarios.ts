@@ -53,6 +53,12 @@ export interface ScenarioSpec {
   };
   streets: ScenarioStreet[];
   river: ScenarioRiver;
+  /**
+   * Set on generated scenarios (see scenarioGen.ts). Only those at 100bb,
+   * from hand written charts, count toward the Aced Rating. The flop and
+   * turn lines of every generated hand are a model, and the app says so.
+   */
+  generated?: { template: string; seed: number; rated: boolean; tableSize: number; stackBb: number; potType: 'srp' | '3bp' };
 }
 
 /**

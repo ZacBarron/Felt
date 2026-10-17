@@ -1,5 +1,18 @@
 import { STARTER_CHARTS } from '@felt/content';
-import { boundaryHands, challengeNumber, chartItemDifficulty, type ChartSpot, DIFFICULTY, dailyPicks, isProvisional } from '@felt/core';
+import {
+  boundaryHands,
+  challengeNumber,
+  chartItemDifficulty,
+  type ChartSpot,
+  comboText,
+  dealCombo,
+  DIFFICULTY,
+  hashString,
+  isProvisional,
+  rotation,
+  rotationAt,
+  seededRandom,
+} from '@felt/core';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
@@ -39,7 +52,7 @@ function dailyPool() {
       return difficulty === undefined ? [] : [{ kind: 'chart' as const, chartId: spec.id, hand, difficulty }];
     });
   });
-  const quizzes: Decision[] = LESSON_ENTRIES.flatMap((e) => quizSteps(e).map((step) => ({ kind: 'quiz' as const, key: e.key, step })));
+  const quizzes = LESSON_ENTRIES.flatMap((e) => quizSteps(e).map((step) => ({ kind: 'quiz' as const, key: e.key, step, track: e.trackId })));
   return { charts, quizzes };
 }
 
@@ -50,8 +63,57 @@ function dailyPool() {
  */
 export const DAILY_FACING: ChartSpot[][] = [['vs-open'], ['vs-3bet'], ['vs-open'], ['vs-4bet', 'vs-squeeze'], ['squeeze'], ['vs-3bet'], ['bvb']];
 
+const mod = (n: number, m: number) => ((n % m) + m) % m;
+
 /** The spot types the day's last range decision comes from. */
-export const dailyFacing = (date: Date) => DAILY_FACING[((challengeNumber(date) % DAILY_FACING.length) + DAILY_FACING.length) % DAILY_FACING.length];
+export const dailyFacing = (date: Date) => DAILY_FACING[mod(challengeNumber(date), DAILY_FACING.length)];
+
+/**
+ * Fixed rotations through the pool, the same for everyone. Each day takes the
+ * next item of each rotation, so an exact decision comes back only after its
+ * whole rotation has gone by (hundreds of days). Mixed hands rotate across
+ * spot types, opening edges across seats, and each spot type of the last
+ * decision across seats and hands.
+ */
+let rotations: ReturnType<typeof buildRotations> | undefined;
+function buildRotations() {
+  const { charts, quizzes } = dailyPool();
+  const spec = (c: ChartDecision) => getChart(c.chartId)!.spec;
+  const key = (c: ChartDecision) => `${c.chartId}:${c.hand}`;
+  const facets = (c: ChartDecision) => [`seat:${spec(c).hero}`, `hand:${c.hand}`, `villain:${(spec(c).villains ?? []).join('/')}`];
+  const mixed = rotation(
+    charts.filter((c) => c.difficulty < DIFFICULTY.chartEdge),
+    { salt: 'daily-mixed', group: (c) => spec(c).spot, key, facets },
+  );
+  const opens = rotation(
+    charts.filter((c) => c.difficulty === DIFFICULTY.chartEdge && spec(c).spot === 'rfi'),
+    { salt: 'daily-open', group: (c) => spec(c).hero, key, facets: (c) => [`hand:${c.hand}`] },
+  );
+  const hard = charts.filter((c) => c.difficulty >= DIFFICULTY.chartEdge && spec(c).spot !== 'rfi');
+  const facing = new Map(
+    DAILY_FACING.map((spots) => {
+      const name = spots.join('+');
+      const pool = hard.filter((c) => spots.includes(spec(c).spot));
+      return [name, rotation(pool.length ? pool : hard, { salt: `daily-${name}`, group: (c) => `${spec(c).spot}|${spec(c).hero}`, key, facets })] as const;
+    }),
+  );
+  const lessons = rotation(quizzes, { salt: 'daily-lessons', group: (q) => q.track, key: (q) => `${q.key}#${q.step}` });
+  return { mixed, opens, facing, lessons };
+}
+
+/** How many days before day `n` used the same last spot type: the place in that spot type's rotation. */
+function facingTurn(n: number): number {
+  const p = mod(n, DAILY_FACING.length);
+  const names = DAILY_FACING.map((s) => s.join('+'));
+  const name = names[p];
+  const perCycle = names.filter((x) => x === name).length;
+  return Math.floor(n / DAILY_FACING.length) * perCycle + names.slice(0, p).filter((x) => x === name).length;
+}
+
+/** The same cards for everyone today: a seeded combo for each range decision. */
+function dailyCards(n: number, i: number, hand: string): string {
+  return comboText(dealCombo(hand, seededRandom(hashString(`daily|${n}|${i}|${hand}`))));
+}
 
 /**
  * Three range decisions that get harder (a mixed hand from any spot, an edge
@@ -59,20 +121,14 @@ export const dailyFacing = (date: Date) => DAILY_FACING[((challengeNumber(date) 
  * squeeze or the other blind), with two lesson questions between them.
  */
 export function dailyItems(date = new Date()): Decision[] {
-  const { charts, quizzes } = dailyPool();
-  const spotOf = (c: ChartDecision) => getChart(c.chartId)?.spec.spot;
-  const facing = dailyFacing(date);
-  const hard = charts.filter((c) => c.difficulty >= DIFFICULTY.chartEdge && spotOf(c) !== 'rfi');
-  const today = hard.filter((c) => facing.includes(spotOf(c)!));
-  const bands = [
-    charts.filter((c) => c.difficulty < DIFFICULTY.chartEdge),
-    charts.filter((c) => c.difficulty === DIFFICULTY.chartEdge && spotOf(c) === 'rfi'),
-    today.length ? today : hard,
-  ];
-  const c = bands.map((band, i) => dailyPicks(band.length ? band : charts, date, 1, 10 + i)[0]);
-  const q = dailyPicks(quizzes, date, 2, 2);
-  const strip = ({ kind, chartId, hand }: ChartDecision): Decision => ({ kind, chartId, hand });
-  return [strip(c[0]), q[0], strip(c[1]), q[1], strip(c[2])];
+  rotations ??= buildRotations();
+  const n = challengeNumber(date);
+  const name = dailyFacing(date).join('+');
+  const c = [rotationAt(rotations.mixed, n)!, rotationAt(rotations.opens, n)!, rotationAt(rotations.facing.get(name)!, facingTurn(n))!];
+  const q = [rotationAt(rotations.lessons, 2 * n)!, rotationAt(rotations.lessons, 2 * n + 1)!];
+  const chart = ({ chartId, hand }: ChartDecision, i: number): Decision => ({ kind: 'chart', chartId, hand, cards: dailyCards(n, i, hand) });
+  const quiz = ({ key, step }: (typeof q)[number]): Decision => ({ kind: 'quiz', key, step });
+  return [chart(c[0], 0), quiz(q[0]), chart(c[1], 1), quiz(q[1]), chart(c[2], 2)];
 }
 
 function timeToTomorrow(now = new Date()) {

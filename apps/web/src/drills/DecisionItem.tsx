@@ -4,13 +4,18 @@ import { StepView } from '../lesson/StepView';
 import { isLessonFree } from '../state/access';
 import { getChart } from '../state/charts';
 import type { StoredAnswer } from '../state/db';
-import { freshSeed, LESSON_ENTRIES, quizAt, sharedSeed } from '../state/lessons';
+import { dealQuizSeed, LESSON_ENTRIES, quizAt, sharedSeed } from '../state/lessons';
 import { recordLessonQuiz, recordRated } from '../state/rating';
+import { markQuizSeen } from '../state/spotQuiz';
 import { BottomBar } from '../ui/BottomBar';
 import { QuickRecall } from './QuickRecall';
 
-/** A single rated decision: a range decision from a chart, or a lesson question. */
-export type Decision = { kind: 'chart'; chartId: string; hand: string } | { kind: 'quiz'; key: string; step: number };
+/**
+ * A single rated decision: a range decision from a chart, or a lesson
+ * question. A chart decision can name exact cards, so a shared challenge
+ * deals everyone the same hand.
+ */
+export type Decision = { kind: 'chart'; chartId: string; hand: string; cards?: string } | { kind: 'quiz'; key: string; step: number };
 
 /** The answers offered for a chart decision: its actions, then fold. */
 export const chartChoices = (chart: Chart) => [...chart.spec.actions.map((a) => a.id), 'fold'];
@@ -38,12 +43,16 @@ export function DecisionItem({ decision, source, last, onScore, onNext, mixAnswe
   // A new decision is read from the top by screen readers.
   const top = useRef<HTMLDivElement>(null);
   useEffect(() => top.current?.focus({ preventScroll: true }), []);
+  // Remember the spot, so practice and quizzes bring other spots next time.
+  useEffect(() => {
+    if (decision.kind === 'chart') markQuizSeen(decision);
+  }, [decision]);
   // Challenges deal the same version of a question to everyone in the same day or week.
   const [seed] = useState(() => {
     if (decision.kind !== 'quiz') return 0;
     if (source === 'daily') return sharedSeed(decision.key, decision.step, localDay(new Date()));
     if (source === 'weekly') return sharedSeed(decision.key, decision.step, isoWeek(new Date()).id);
-    return freshSeed();
+    return dealQuizSeed(decision.key, decision.step);
   });
 
   if (decision.kind === 'chart') {
@@ -56,6 +65,7 @@ export function DecisionItem({ decision, source, last, onScore, onNext, mixAnswe
         hand={decision.hand}
         targetMs={3000}
         mixAnswers={mixAnswers}
+        cards={decision.cards}
         onAnswer={(o: DrillOutcome) => {
           onScore(o.accuracy);
           const difficulty = chartItemDifficulty(chart.mixes.get(decision.hand) ?? { fold: 1 }, chartChoices(chart));

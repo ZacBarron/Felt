@@ -1,4 +1,5 @@
 import { type Chart, type HandMix, reaches } from './charts';
+import { hashString } from './hash';
 import { ALL_HAND_CLASSES, comboCount, type HandClass } from './ranges';
 
 /**
@@ -53,6 +54,25 @@ export function boundaryHands(chart: Chart): HandClass[] {
       }
     }
     return neighbours.some(([r, c]) => primary[r * 13 + c] !== primary[i]);
+  });
+}
+
+/** How a hand sits in a chart: a real mix, a close call next to another action, or a clear play. */
+export type HandRole = 'mixed' | 'close' | 'clear';
+
+/** How much more often each kind of hand is drilled. Clear hands still come up, so the obvious ones stay honest. */
+export const ROLE_WEIGHT: Record<HandRole, number> = { mixed: 4, close: 3, clear: 0.5 };
+
+/**
+ * Every hand that can reach the spot, with its role and a drill weight.
+ * Mixed hands and close calls carry most of the weight, since they decide
+ * what a player really knows.
+ */
+export function drillHands(chart: Chart): { hand: HandClass; role: HandRole; weight: number }[] {
+  const edges = new Set(boundaryHands(chart));
+  return ALL_HAND_CLASSES.filter((h) => reaches(chart, h)).map((hand) => {
+    const role: HandRole = isMixed(chart.mixes.get(hand) ?? { fold: 1 }) ? 'mixed' : edges.has(hand) ? 'close' : 'clear';
+    return { hand, role, weight: ROLE_WEIGHT[role] };
   });
 }
 
@@ -302,6 +322,75 @@ export function deckForCharts(charts: readonly Chart[]): CardSeed[] {
       targetMs: PAINT_TARGET_MS,
     },
   ]);
+}
+
+/** A stable order for a chart's hands that is not the grid order, so a chart's cards do not all start on the top row. */
+function stableMix(chartId: string, hands: readonly HandClass[]): HandClass[] {
+  return [...hands].sort((a, b) => hashString(`${chartId}|${a}`) - hashString(`${chartId}|${b}`) || (a < b ? -1 : 1));
+}
+
+/**
+ * The deck in the order new cards are introduced, mixed together: a few
+ * charts at a time (`active`), taken round robin across spot types, one
+ * close call from each in turn. A chart's painting card follows its last
+ * close call, and the next chart joins as one finishes. Cards in `known`
+ * are skipped and free their place. Interleaving related charts helps
+ * players tell them apart (Rohrer and Taylor 2007).
+ */
+export function mixedDeck(
+  charts: readonly Chart[],
+  { active = 16, known = new Set<string>() }: { active?: number; known?: ReadonlySet<string> } = {},
+): CardSeed[] {
+  const bySpot = new Map<string, Chart[]>();
+  for (const c of charts) {
+    const list = bySpot.get(c.spec.spot);
+    if (list) list.push(c);
+    else bySpot.set(c.spec.spot, [c]);
+  }
+  const lists = [...bySpot.values()];
+  const order: Chart[] = [];
+  for (let i = 0; order.length < charts.length; i++) for (const l of lists) if (i < l.length) order.push(l[i]);
+  const queues = order
+    .map((chart) => {
+      const [paint, ...recall] = [...deckForCharts([chart])].reverse();
+      const hands = new Map(recall.map((s) => [s.hand!, s]));
+      return [...stableMix(chart.spec.id, [...hands.keys()]).map((h) => hands.get(h)!), paint].filter((s) => !known.has(s.id));
+    })
+    .filter((q) => q.length > 0);
+  const out: CardSeed[] = [];
+  const live: CardSeed[][] = [];
+  let next = 0;
+  while (live.length || next < queues.length) {
+    while (live.length < active && next < queues.length) live.push(queues[next++]);
+    for (const q of live) out.push(q.shift()!);
+    for (let i = live.length - 1; i >= 0; i--) if (live[i].length === 0) live.splice(i, 1);
+  }
+  return out;
+}
+
+/**
+ * The charts a review deck holds: its core charts, every extra chart that
+ * already has a card (so saved cards stay in the deck), and one more extra
+ * chart for every `perChart` cards in long term review. The deck grows as
+ * the player does.
+ */
+export function growDeck<T extends { spec: { id: string } }>(
+  core: readonly T[],
+  extra: readonly T[],
+  { mature, started, perChart = 30 }: { mature: number; started: ReadonlySet<string>; perChart?: number },
+): T[] {
+  const coreIds = new Set(core.map((c) => c.spec.id));
+  const rest = extra.filter((c) => !coreIds.has(c.spec.id));
+  let unlocked = Math.floor(Math.max(0, mature) / perChart);
+  const out = [...core];
+  for (const c of rest) {
+    if (started.has(c.spec.id)) out.push(c);
+    else if (unlocked > 0) {
+      out.push(c);
+      unlocked--;
+    }
+  }
+  return out;
 }
 
 export interface ScheduledCard {

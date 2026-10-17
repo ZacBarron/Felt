@@ -42,7 +42,7 @@ The anchors (in `STACK_RULES` and `openSizeRule`) are model choices that follow 
 
 ### Picking a chart
 
-`closestCharts` and `chartFit` in `packages/core/src/chartPick.ts` find the chart nearest a game: the nearest table size, then the nearest stack and open size on a log scale. The fit says plainly which parts are approximate (table size, stack, open size). The review deck uses only the hand written charts marked for review in the player's table size, so it grows by a few dozen charts, not thousands, and saved card ids never change.
+`closestCharts` and `chartFit` in `packages/core/src/chartPick.ts` find the chart nearest a game: the nearest table size, then the nearest stack and open size on a log scale. The fit says plainly which parts are approximate (table size, stack, open size). The review deck starts from the hand written charts marked for review in the player's table size. It adds one more hand written chart for every 30 cards in long term review (`growDeck` in `core/src/drills.ts`), so it grows with the player by dozens of charts, not thousands. Saved card ids never change.
 
 The Spot Lab decision demo uses illustrative numbers and says so.
 
@@ -72,6 +72,22 @@ Aced has its own postflop solver in `packages/core/src/solver.ts`, written from 
 Phones are slower, so the app solves rivers instantly, offers turn solves with a progress bar and a stop button, and leaves flop solves to batch jobs.
 
 **What it does not do yet.** Multiway spots, preflop solving, suit isomorphism (which would make two tone and monotone boards several times faster), and flop solving on the phone. Next steps: isomorphism and typed array storage, a WASM build, a Node batch runner that writes solved flop packs in the normalized format below, then the preflop and push/fold solvers.
+
+## Generated scenarios
+
+Scenarios used to be 12 hands written by hand. Now most hands are generated, and the hand written ones stay as a curated set inside the mix. The code is `packages/core/src/scenarioGen.ts` (pure, tested) and `packages/content/src/scenarioGen.ts` (templates and words).
+
+**Templates.** A template is a heads up preflop line read from the chart library: an open and a call, or an open, a 3bet and a call. Each side's range is the chart action that gets it there, such as the button's opening range against the big blind's calling range. Pots and stacks follow from the sizes in the charts. There are 910 templates: both table sizes, every seat pair with a chart, both pot types, five stack depths and the hero on either side.
+
+**A hand from a seed.** A seed picks a board texture (dry and high, ace high, wet, paired, one suit, low and connected), deals a board of it and plays a line on the flop and turn: a small or big c-bet and a call, a delayed bet, a lead, or checks. Each range is narrowed street by street with stated rules. Strong hands and draws bet and call. Weak hands check and fold. The caller keeps a little more than the minimum defense against the size. This part is a model, and the app says so on the river screen: "The flop and turn are our estimate of how each range plays."
+
+**The river is solved.** Aced Solver solves the river for those ranges on the device with a third pot and three quarters pot for each player. It then picks the hero's decision: a line the villain takes at least 12% of the time, and a hand that reaches it where the best and worst actions differ by at least 3% of the pot, favoring hands in the middle of the range. The grade is exact for the stated ranges, and the exploitability is shown with every grade.
+
+**Honesty.** Templates at 100bb use hand written charts, so their river decision counts toward the Aced Rating like a hand written scenario. Other stacks use derived charts. Those hands show "Estimate" and never count. The explanation states the hero's hand and its exact share of wins at showdown against the villain's river range.
+
+**Bank and fresh hands.** `pnpm bank:scenarios` builds `packages/content/src/scenarioBank.ts`: 190 seeds (150 at 100bb, 40 at other stacks) whose solve reached 0.5% of the pot and whose decision matters, spread across textures. Each entry is 4 short fields, so the bank is about 10 KB of source. `test/scenarioBank.test.ts` replays every entry and re-solves a sample. The weekly challenge draws its rivers from the hand written set and the 150 rated banked hands. "Deal a new hand" on Scenarios makes a fresh one on the device instead: a template, a random seed, a solve and a pick, retried with another seed when no decision matters.
+
+**Speed** (Node on a laptop class CPU): a hand to the river in 3ms at the median, a river solve in 71ms at the median and 325ms at worst, the hero's pick in 7 to 50ms. Phones take a few times longer, so a fresh hand is ready in about a second.
 
 ## Can we replicate a solver or download solutions?
 

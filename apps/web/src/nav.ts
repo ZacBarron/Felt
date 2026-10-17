@@ -53,6 +53,7 @@ export const NAV_SECTIONS: { section: string; tab: string; items: NavItem[] }[] 
       { to: '/review', label: 'Review', icon: ReviewIcon, color: tint },
       { to: '/daily', label: 'Daily challenge', icon: TrophyIcon, color: gold },
       { to: '/ranges', label: 'Ranges', icon: RangesIcon, color: tint },
+      { to: '/quiz', label: 'Range quiz', icon: DrillsIcon, color: tint },
       { to: '/scenarios', label: 'Scenarios', icon: ScenariosIcon, color: cobalt },
       { to: '/practice', label: 'At your level', icon: DrillsIcon, color: tint },
       { to: '/weekly', label: 'Weekly challenge', icon: MedalIcon, color: gold },

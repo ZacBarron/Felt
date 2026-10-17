@@ -1,4 +1,3 @@
-import { SCENARIOS } from '@felt/content';
 import { challengeNumber } from '@felt/core';
 import { useLiveQuery } from 'dexie-react-hooks';
 import type { ReactNode } from 'react';
@@ -13,6 +12,7 @@ import { useSettings } from '../state/settings';
 import { weeklyAvailable } from '../state/weekly';
 import { HeroPattern } from '../ui/Brand';
 import { ChevronRightIcon } from '../ui/icons';
+import { plural } from '../ui/format';
 import { ProBadge } from '../ui/ProBadge';
 import { PageHeader } from '../ui/PageHeader';
 import { useThisWeek } from './WeeklyPage';
@@ -117,7 +117,8 @@ export function TrainPage() {
             subtitle={!pro ? '10 harder decisions' : weekDone ? 'Done this week' : week ? `${week.scores.length} of ${week.items.length} done` : '10 harder decisions'}
             detail={!pro ? <ProBadge /> : weekDone ? 'Done' : undefined}
           />
-          <DrillRow to="/scenarios" title="Scenarios" subtitle={`${played} of ${SCENARIOS.length} hands played`} progress={played / SCENARIOS.length} />
+          <DrillRow to="/quiz" title="Range quiz" subtitle="10 hands from across your game" />
+          <DrillRow to="/scenarios" title="Scenarios" subtitle={played ? `${plural(played, 'hand')} played. New hands every time.` : 'Full hands graded by Aced Solver'} />
           {reviewing ? (
             <DrillRow to="/practice" title="At your level" subtitle="10 decisions from your weaker areas" />
           ) : (

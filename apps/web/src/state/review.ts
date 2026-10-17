@@ -7,7 +7,7 @@ import {
   type Chart,
   createScheduler,
   dayKey,
-  deckForCharts,
+  mixedDeck,
   type DrillOutcome,
   RECALL_TARGET_MS,
   selectExtra,
@@ -79,7 +79,7 @@ export const toItem = (c: Omit<StoredCard, 'fsrs' | 'due' | 'createdAt'>, isNew:
 export async function buildExtra(charts: readonly Chart[], n: number, exclude: ReadonlySet<string>): Promise<QueueItem[]> {
   const chartIds = new Set(charts.map((c) => c.spec.id));
   const known = (await db.cards.toArray()).filter((c) => chartIds.has(c.chartId));
-  return selectExtra(known, deckForCharts(charts), { n, exclude }).map((c) => toItem(c, !('fsrs' in c)));
+  return selectExtra(known, mixedDeck(charts, { known: new Set(known.map((c) => c.id)) }), { n, exclude }).map((c) => toItem(c, !('fsrs' in c)));
 }
 
 /** Today's queue for the charts that match the current game settings. */
@@ -89,7 +89,7 @@ export async function buildQueue(charts: readonly Chart[], newPerDay: number, no
   const newIntroducedToday = (await db.cards.where('createdAt').aboveOrEqual(startOfToday(now)).toArray()).filter((c) =>
     chartIds.has(c.chartId),
   ).length;
-  const { due, fresh } = selectQueue(known, deckForCharts(charts), { now, newPerDay, newIntroducedToday });
+  const { due, fresh } = selectQueue(known, mixedDeck(charts, { known: new Set(known.map((c) => c.id)) }), { now, newPerDay, newIntroducedToday });
   const saved = await savedQueue(now);
   return {
     due: [...due.map((c) => toItem(c, false)), ...saved.due],

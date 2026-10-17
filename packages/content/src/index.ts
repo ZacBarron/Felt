@@ -3,6 +3,7 @@ export * from './curriculum';
 export * from './ideas';
 export * from './lessons/index';
 export * from './scenarios';
+export * from './scenarioGen';
 export * from './exploits';
 export * from './onboarding';
 export * from './glossary';

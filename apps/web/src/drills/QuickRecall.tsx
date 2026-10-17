@@ -1,4 +1,4 @@
-import { type Chart, type DrillOutcome, handClassCombos, type HandMix, mixAnswerOptions, partOfMix, scoreMixAnswer, scoreRecall } from '@felt/core';
+import { type Card, type Chart, comboText, dealCombo, type DrillOutcome, type HandMix, mixAnswerOptions, parseCards, partOfMix, scoreMixAnswer, scoreRecall } from '@felt/core';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { actionColor } from '../components/actionColors';
 import { MixBar } from '../components/MixBar';
@@ -12,6 +12,7 @@ import { Link } from 'react-router-dom';
 import { useCanAskCoach } from '../state/coach';
 import { actionLabels, spotLine } from './labels';
 import { untimedMs, useSettings } from '../state/settings';
+import { dealKey, markSeen, recentCombos } from '../state/seen';
 
 interface Props {
   chart: Chart;
@@ -27,6 +28,8 @@ interface Props {
   nextLabel?: string;
   /** Offer mixed answers and grade by mix distance whatever the setting, so everyone is graded alike. */
   mixAnswers?: boolean;
+  /** Exact cards to deal, like "AhKd", so a shared challenge deals everyone the same hand. Otherwise fresh suits each time. */
+  cards?: string;
 }
 
 /** The clock starts once both cards have flipped face up. */
@@ -40,7 +43,7 @@ const VERDICTS = {
 };
 
 /** "You are UTG+1 with KTo, folded to you. Raise or fold?" Timed, then shows the full mix. */
-export function QuickRecall({ chart, hand, targetMs, onAnswer, onNext, compact, untimed: forceUntimed, nextLabel = 'Next hand', mixAnswers }: Props) {
+export function QuickRecall({ chart, hand, targetMs, onAnswer, onNext, compact, untimed: forceUntimed, nextLabel = 'Next hand', mixAnswers, cards }: Props) {
   const { settings } = useSettings();
   const untimed = !!forceUntimed || !!settings.study.untimed;
   const shortcuts = settings.study.shortcuts !== false;
@@ -51,10 +54,13 @@ export function QuickRecall({ chart, hand, targetMs, onAnswer, onNext, compact, 
   const [answer, setAnswer] = useState<{ choice: string; label: string; outcome: DrillOutcome; kind: keyof typeof VERDICTS }>();
   // Mixed answers are on unless turned off, the same switch as painting mixes.
   const mixes = !!mixAnswers || settings.study.paintMixes !== false;
+  // Fresh suits each time a hand shows, skipping the combos dealt for it lately.
   const combo = useMemo(() => {
-    const combos = handClassCombos(hand);
-    return combos[Math.floor(Math.random() * combos.length)];
-  }, [hand]);
+    if (cards) return parseCards(cards) as [Card, Card];
+    const dealt = dealCombo(hand, Math.random, recentCombos(hand));
+    markSeen([dealKey(hand, comboText(dealt))]);
+    return dealt;
+  }, [hand, cards]);
   const labels = actionLabels(chart);
   const mix = chart.mixes.get(hand) ?? { fold: 1 };
   const choices = [...chart.spec.actions.map((a) => a.id), 'fold'];
@@ -130,7 +136,10 @@ export function QuickRecall({ chart, hand, targetMs, onAnswer, onNext, compact, 
                   </span>
                 </div>
               </div>
-              {chart.spec.basis === 'exploit' && <span className="pill pill-exploit">Exploit</span>}
+              <span className="row" style={{ gap: 6 }}>
+                {chart.spec.source === 'model-approx' && <span className="pill pill-estimate">Estimate</span>}
+                {chart.spec.basis === 'exploit' && <span className="pill pill-exploit">Exploit</span>}
+              </span>
             </div>
             <SeatStrip spec={chart.spec} />
           </>

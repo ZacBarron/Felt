@@ -70,6 +70,7 @@ See [MONETIZATION.md](MONETIZATION.md).
 - [x] Levels of thinking: each tier names the question its players ask and what Aced rates there; Your tier card on You with points and right answers to the next tier (from the update rule), the full ladder in a sheet, and the question in the tier moment
 - [x] Imports: hand histories (PokerStars format, GGPoker header, tracker exports) and live session CSVs; stats by seat, opening leaks against the charts, results feeding the win rate
 - [x] Practice at your level (about 80% expected success, weaker areas first, interleaved); study cue at onboarding
+- [x] Variety pass (see research/variety-audit.md): a seen memory on the device, a novelty sampler in core, a range quiz across spots with pools for my game, all stacks, and 6-max and full ring, practice from every hand written chart, review that mixes 16 charts across spot types and grows with the player, fresh suits on every card, a daily challenge on fixed rotations with no repeat within 90 days and the same cards for everyone, weekly rivers from the scenario bank with no repeats where passes meet, and lesson replays that never repeat a version while another is left. The audit test keeps the floors
 - [x] More preflop charts: BB vs CO and UTG, SB vs BTN, BTN vs CO, BTN and UTG facing a 3bet (with reach, so only opened hands are drilled), BTN vs two limpers
 - [x] Full preflop library (`packages/content/src/charts/`): hand written 100bb charts for every open, every seat against every opener, every opener against every 3bettor, the common 4bet pairings, squeezes and facing a squeeze, blind vs blind limps, and limpers, at 9-handed and 6-max
 - [x] Derived chart variants for 40 to 200bb stacks and 2.5 to 5bb opens by a documented, tested rule (`core/src/chartModel.ts`), labelled "Estimate" and never rated; chart picking for a game with an honest fit (`core/src/chartPick.ts`)
@@ -110,7 +111,7 @@ See [MONETIZATION.md](MONETIZATION.md).
 
 See [PLAY.md](PLAY.md).
 
-- [x] Tabs: Today, Learn, Train, Play and You. Train is six tiles (Review, Daily challenge, Ranges, Scenarios, At your level, Weekly challenge). Study tools (Coach, Solver, Spot Lab, Exploits) sit at the end of Learn, with Glossary in its corner. More became You, with Settings in the corner and Saved under Your game
+- [x] Tabs: Today, Learn, Train, Play and You. Train is six tiles (Review, Daily challenge, Ranges, Scenarios, At your level, Weekly challenge), plus a Range quiz across spots. Study tools (Coach, Solver, Spot Lab, Exploits) sit at the end of Learn, with Glossary in its corner. More became You, with Settings in the corner and Saved under Your game
 - [x] Coach where questions come up: on a missed chart decision, on a missed lesson question (as an editable draft), on Today and on every Play hand
 - [x] Play engine in `@felt/core` (`play.ts`): blinds and antes, the big blind's option, minimum raises, short all ins, side pots, split pots, seeded dealing, fuzz tested
 - [x] Bots (`bots.ts`): mixes over legal actions, charts preflop through the app's advisor, a measured hand strength order elsewhere (`preflopStrength.ts`), rule based postflop. Ten characters from the Exploits player types with drawn portraits and a Bot tag on every seat
@@ -167,6 +168,8 @@ See [SOLVER_DATA.md](SOLVER_DATA.md).
 - [x] Question variety: seeded question versions (`variants` and `shuffleSuits`, picked by `quizVersion`) so a replay or a review card is not the same question twice. 181 questions can be dealt more than one way, with every version checked in `variants.test.ts` and `variety.test.ts`. Challenges seed by day or week so everyone still gets the same question
 - [x] Lesson audit by seat, pot type, street, stack depth and table size, before and after, in `docs/research/lesson-audit.md`, with floors kept by `lesson-audit.test.ts`
 - [ ] More turn and river questions in 3bet and multiway pots, and questions that state table size and depth
+- [x] Generated question versions (`lessons/generated.ts`): 100 versions on 19 questions, from the charts (other hands, every answer of the UTG pair ladder) and the math (other sizes and stakes), each checked in `generated.test.ts`
+- [ ] Versions for the 392 questions that still have one, written by hand where they cannot be generated
 - [x] Mixed answers in hand quizzes (frequencies and splits), graded by mix distance
 - [x] Math facts deck in review: pot odds, MDF, alpha, combos, outs (exact, four choices)
 - [ ] Timed math speed rounds
@@ -178,6 +181,8 @@ See [SOLVER_DATA.md](SOLVER_DATA.md).
 ## Phase 5: Scenarios and challenges
 
 - [x] Scenario engine: walk a hand tree, grade each decision by EV loss (12 river scenarios solved on device)
+- [x] Scenario generator: 910 heads up templates from the chart library (both table sizes, single raised and 3bet pots, 40 to 200bb, either seat), boards of six textures, a modelled flop and turn line, the river solved on the device with the exploitability shown, and a hero decision that matters. A bank of 190 checked seeds, "Deal a new hand" for fresh ones, and the hand written set inside the mix. Derived stacks are labelled estimates and never rated (see SOLVER_DATA.md)
+- [ ] Generated turn decisions, once turn solves are fast enough on a phone
 - [ ] Curated scenario packs per lesson; replay your own logged hands as scenarios
 - [ ] Speed rounds, module boss fights (daily challenge and weekly personal bests done)
 - [ ] Skill stats: EV loss trend, accuracy by position and street, mastery levels

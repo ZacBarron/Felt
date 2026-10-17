@@ -92,6 +92,8 @@ export type LessonStep =
        * answer never changes. Only for questions whose words name no suit.
        */
       shuffleSuits?: boolean;
+      /** Set on versions made by lessons/generated.ts from the charts or the math. */
+      generated?: boolean;
     }
   | { kind: 'takeaway'; points: string[] };
 
@@ -104,6 +106,8 @@ export interface QuizVariant {
   cards?: string;
   board?: string;
   choiceCards?: string[];
+  /** Made by lessons/generated.ts from the charts or the math, not written by hand. */
+  generated?: boolean;
 }
 
 /** The points a lesson asks the player to remember: its takeaway. */

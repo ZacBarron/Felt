@@ -1886,6 +1886,11 @@ input:focus:not(:focus-visible) {
   line-height: 1.45;
 }
 
+/* Derived charts and estimated parts carry a quieter, distinct tag. */
+.pill-estimate {
+  background: color-mix(in srgb, var(--label-2) 14%, transparent);
+}
+
 .pill-exploit {
   background: color-mix(in srgb, var(--tint) 14%, transparent);
   color: var(--tint);

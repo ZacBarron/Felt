@@ -3,7 +3,7 @@ import { lessonPoints, type LessonStep } from '@felt/content';
 import { useRef, useState } from 'react';
 import { StepView } from '../lesson/StepView';
 import { LessonSheet } from '../lesson/LessonSheet';
-import { entryFor, freshSeed, quizAt } from '../state/lessons';
+import { dealQuizSeed, entryFor, quizAt } from '../state/lessons';
 import { untimedMs, useSettings } from '../state/settings';
 import { BottomBar } from '../ui/BottomBar';
 import { LearnIcon, StatsIcon } from '../ui/icons';
@@ -64,7 +64,7 @@ function Question({
 export function LessonQuestionCard({ lessonKey, step: index, ...props }: Props & { lessonKey: string; step: number }) {
   const entry = entryFor(lessonKey);
   // Review deals another version of the question each time the card comes up.
-  const [seed] = useState(freshSeed);
+  const [seed] = useState(() => dealQuizSeed(lessonKey, index));
   const step = quizAt(lessonKey, index, seed);
   if (!entry || !step)
     return (
