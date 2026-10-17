@@ -17,6 +17,13 @@ import { POSTFLOP_VALUE_LESSONS } from './postflop-value';
 import { PREFLOP_LIVE_LESSONS } from './preflop-live';
 import { PREFLOP_MORE_LESSONS } from './preflop-more';
 import { PREFLOP_RAKE_LESSONS } from './preflop-rake';
+import { PREFLOP_DEFENSE_LESSONS } from './preflop-defense';
+import { PREFLOP_3BET_LESSONS } from './preflop-3bets';
+import { PREFLOP_MULTIWAY_LESSONS } from './preflop-multiway';
+import { PREFLOP_LIVE_MORE_LESSONS } from './preflop-live-more';
+import { POSTFLOP_3BP_LESSONS } from './postflop-3bp';
+import { POSTFLOP_MULTIWAY_MORE_LESSONS } from './postflop-multiway-more';
+import { FORMATS_6MAX_DEFENSE_LESSONS } from './formats-6max-defense';
 import { RESULTS_LESSONS } from './results';
 import { THEORY_LESSONS } from './theory';
 import { TOURNAMENT_LESSONS } from './tournaments';
@@ -28,6 +35,7 @@ import { PREFLOP_LESSONS } from './preflop';
 import type { LessonContent } from './types';
 
 export * from './types';
+export * from './variants';
 
 const ALL: LessonContent[] = [
   ...BASICS_LESSONS,
@@ -39,15 +47,22 @@ const ALL: LessonContent[] = [
   ...PREFLOP_MORE_LESSONS,
   ...PREFLOP_LIVE_LESSONS,
   ...PREFLOP_RAKE_LESSONS,
+  ...PREFLOP_DEFENSE_LESSONS,
+  ...PREFLOP_3BET_LESSONS,
+  ...PREFLOP_MULTIWAY_LESSONS,
+  ...PREFLOP_LIVE_MORE_LESSONS,
   ...POSTFLOP_LESSONS,
   ...POSTFLOP_MORE_LESSONS,
   ...POSTFLOP_RIVER_LESSONS,
   ...POSTFLOP_VALUE_LESSONS,
   ...POSTFLOP_READING_LESSONS,
+  ...POSTFLOP_3BP_LESSONS,
+  ...POSTFLOP_MULTIWAY_MORE_LESSONS,
   ...EXPLOIT_LESSONS,
   ...EXPLOIT_MORE_LESSONS,
   ...FORMATS_HEADS_UP_LESSONS,
   ...FORMATS_SHORT_DEEP_LESSONS,
+  ...FORMATS_6MAX_DEFENSE_LESSONS,
   ...MINDSET_LESSONS,
   ...RESULTS_LESSONS,
   ...TOURNAMENT_LESSONS,

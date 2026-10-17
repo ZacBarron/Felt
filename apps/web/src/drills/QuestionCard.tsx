@@ -3,7 +3,7 @@ import { lessonPoints, type LessonStep } from '@felt/content';
 import { useRef, useState } from 'react';
 import { StepView } from '../lesson/StepView';
 import { LessonSheet } from '../lesson/LessonSheet';
-import { entryFor } from '../state/lessons';
+import { entryFor, freshSeed, quizAt } from '../state/lessons';
 import { untimedMs, useSettings } from '../state/settings';
 import { BottomBar } from '../ui/BottomBar';
 import { LearnIcon, StatsIcon } from '../ui/icons';
@@ -63,8 +63,10 @@ function Question({
 /** A quiz question from a finished lesson, graded like the lesson grades it. */
 export function LessonQuestionCard({ lessonKey, step: index, ...props }: Props & { lessonKey: string; step: number }) {
   const entry = entryFor(lessonKey);
-  const step = entry?.content?.steps[index];
-  if (!entry || step?.kind !== 'quiz')
+  // Review deals another version of the question each time the card comes up.
+  const [seed] = useState(freshSeed);
+  const step = quizAt(lessonKey, index, seed);
+  if (!entry || !step)
     return (
       <>
         <p className="muted">This question has changed since you learned it.</p>

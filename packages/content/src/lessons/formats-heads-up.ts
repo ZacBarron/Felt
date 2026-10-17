@@ -262,6 +262,7 @@ export const FORMATS_HEADS_UP_LESSONS: LessonContent[] = [
         answer: 0,
         explain: 'Like the bars showed, 72o has about 32% raw equity. That beats the price. But out of position it gets bet off much of that equity.',
         point: 1,
+        shuffleSuits: true,
       },
       {
         kind: 'quiz',
@@ -271,6 +272,7 @@ export const FORMATS_HEADS_UP_LESSONS: LessonContent[] = [
         answer: 0,
         explain: 'Like the hand showed, 65s flops draws that keep it in the hand. 93o makes few strong hands or draws.',
         point: 1,
+        shuffleSuits: true,
       },
       {
         kind: 'quiz',
@@ -380,6 +382,20 @@ export const FORMATS_HEADS_UP_LESSONS: LessonContent[] = [
         answer: 1,
         explain: 'Like the bars showed, the raise adds 2.5bb to win 1.5bb. 2.5 ÷ 4 = 62.5%.',
         point: 0,
+        variants: [
+          {
+            question: 'You raise to 2.5bb from the small blind as a pure bluff. How often must the big blind fold for it to break even?',
+            choices: ['50%', '57.1%', '62.5%'],
+            answer: 1,
+            explain: 'Like the bars showed, the raise adds 2bb to win 1.5bb. 2 ÷ 3.5 = 57.1%.',
+          },
+          {
+            question: 'You raise to 3.5bb from the small blind as a pure bluff. How often must the big blind fold for it to break even?',
+            choices: ['57.1%', '66.7%', '75%'],
+            answer: 1,
+            explain: 'Like the bars showed, the raise adds 3bb to win 1.5bb. 3 ÷ 4.5 = 66.7%.',
+          },
+        ],
       },
       {
         kind: 'quiz',
@@ -388,6 +404,20 @@ export const FORMATS_HEADS_UP_LESSONS: LessonContent[] = [
         answer: 0,
         explain: 'Like the formula showed, the small blind calls 3bb to make an 8bb pot. 3 ÷ 8 = 37.5%. The 60% is the fold rate a pure bluff raise needs.',
         point: 1,
+        variants: [
+          {
+            question: 'The small blind limps and the big blind raises to 3bb. How much equity does the small blind need to call?',
+            choices: ['33.3%', '30%', '50%'],
+            answer: 0,
+            explain: 'Like the formula showed, the small blind calls 2bb to make a 6bb pot. 2 ÷ 6 = 33.3%. The 50% is the fold rate a pure bluff raise needs.',
+          },
+          {
+            question: 'The small blind limps and the big blind raises to 5bb. How much equity does the small blind need to call?',
+            choices: ['40%', '33.3%', '66.7%'],
+            answer: 0,
+            explain: 'Like the formula showed, the small blind calls 4bb to make a 10bb pot. 4 ÷ 10 = 40%. The 66.7% is the fold rate a pure bluff raise needs.',
+          },
+        ],
       },
       {
         kind: 'quiz',
@@ -522,6 +552,7 @@ export const FORMATS_HEADS_UP_LESSONS: LessonContent[] = [
         answer: 0,
         explain: 'Like the table showed, the heads up range has top pair or better 16.8% of the time. The UTG open has it 28.8% of the time. Wider ranges hold more weak hands.',
         point: 1,
+        shuffleSuits: true,
       },
       {
         kind: 'quiz',
@@ -540,6 +571,7 @@ export const FORMATS_HEADS_UP_LESSONS: LessonContent[] = [
         answer: 0,
         explain: 'Like the solver step said, wide ranges turn middle pairs into bluff catchers. 99 beats the bluffs and loses to kings and better.',
         point: 2,
+        shuffleSuits: true,
       },
       {
         kind: 'takeaway',

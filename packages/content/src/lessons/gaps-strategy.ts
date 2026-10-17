@@ -108,6 +108,7 @@ export const GAPS_STRATEGY_LESSONS: LessonContent[] = [
         answer: 1,
         explain: 'Like the 3 kinds of hands showed, 9♥8♥ has second pair. It beats bluffs but few hands that call. K♠Q♠ has top pair and can often bet for value. 4♥3♥ has nothing.',
         point: 0,
+        shuffleSuits: true,
       },
       {
         kind: 'quiz',

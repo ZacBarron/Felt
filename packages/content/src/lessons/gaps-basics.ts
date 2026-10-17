@@ -193,6 +193,22 @@ export const GAPS_BASICS_LESSONS: LessonContent[] = [
         answer: 2,
         explain: 'Like the three questions showed, 4 hearts on the board let 1 heart make a flush. Your top pair loses to all of them. Judge it against the board.',
         point: 2,
+        variants: [
+          {
+            question: 'The board has 4 spades. You hold top pair with an ace kicker. How strong is it?',
+            cards: 'AhKc',
+            board: 'Ks8s5s2s',
+            choices: ['The nuts', 'Strong, with the best kicker', 'Weak, since any spade makes a flush'],
+            explain: 'Like the three questions showed, 4 spades on the board let 1 spade make a flush. Your top pair loses to all of them. Judge it against the board.',
+          },
+          {
+            question: 'The board has 4 diamonds. You hold top pair with an ace kicker. How strong is it?',
+            cards: 'AcQh',
+            board: 'Qd9d6d3d',
+            choices: ['The nuts', 'Strong, with the best kicker', 'Weak, since any diamond makes a flush'],
+            explain: 'Like the three questions showed, 4 diamonds on the board let 1 diamond make a flush. Your top pair loses to all of them. Judge it against the board.',
+          },
+        ],
       },
       {
         kind: 'quiz',
@@ -202,6 +218,12 @@ export const GAPS_BASICS_LESSONS: LessonContent[] = [
         answer: 0,
         explain: 'Like the paired river showed, a paired board makes full houses possible. A pocket pair that matches the board pair makes four of a kind.',
         point: 1,
+        shuffleSuits: true,
+        variants: [
+          {
+            board: 'Qh7c3dJs3h',
+          },
+        ],
       },
       {
         kind: 'quiz',
@@ -210,8 +232,18 @@ export const GAPS_BASICS_LESSONS: LessonContent[] = [
         choiceCards: ['QcQs', 'Th9h', 'AcQd', 'KsTs'],
         choices: ['Q♣ Q♠', 'T♥ 9♥', 'A♣ Q♦', 'K♠ T♠'],
         answer: 1,
-        explain: 'Ask the 3 questions. The board has no pair and only 2 hearts. Q, J and 8 fit inside one straight. T9 fills it. So that straight is the nuts. Three queens is strong but not the nuts.',
+        explain: 'Ask the 3 questions. The board has no pair and only 2 cards of one suit. Q, J and 8 fit inside one straight. T9 fills it. So that straight is the nuts. Three queens is strong but not the nuts.',
         point: 0,
+        shuffleSuits: true,
+        variants: [
+          {
+            board: 'KhTd7c3s2h',
+            choiceCards: ['AsKd', 'KcKs', 'TcTs', '9h8h'],
+            choices: ['A♠ K♦', 'K♣ K♠', 'T♣ T♠', '9♥ 8♥'],
+            answer: 1,
+            explain: 'Ask the 3 questions. The board has no pair and only 2 cards of one suit. No 3 of its cards fit inside one straight. So the top set of kings is the nuts.',
+          },
+        ],
       },
       {
         kind: 'takeaway',

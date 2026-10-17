@@ -1,10 +1,10 @@
-import { type Chart, chartItemDifficulty, type DrillOutcome } from '@felt/core';
+import { type Chart, chartItemDifficulty, type DrillOutcome, isoWeek } from '@felt/core';
 import { useEffect, useRef, useState } from 'react';
 import { StepView } from '../lesson/StepView';
 import { isLessonFree } from '../state/access';
 import { getChart } from '../state/charts';
 import type { StoredAnswer } from '../state/db';
-import { LESSON_ENTRIES } from '../state/lessons';
+import { freshSeed, LESSON_ENTRIES, quizAt, sharedSeed } from '../state/lessons';
 import { recordLessonQuiz, recordRated } from '../state/rating';
 import { BottomBar } from '../ui/BottomBar';
 import { QuickRecall } from './QuickRecall';
@@ -14,6 +14,9 @@ export type Decision = { kind: 'chart'; chartId: string; hand: string } | { kind
 
 /** The answers offered for a chart decision: its actions, then fold. */
 export const chartChoices = (chart: Chart) => [...chart.spec.actions.map((a) => a.id), 'fold'];
+
+/** The local calendar day, like 2026-10-17. */
+const localDay = (d: Date) => `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
 
 export function decisionId(d: Decision) {
   return d.kind === 'chart' ? `chart:${d.chartId}:${d.hand}` : `quiz:${d.key}#${d.step}`;
@@ -35,6 +38,13 @@ export function DecisionItem({ decision, source, last, onScore, onNext, mixAnswe
   // A new decision is read from the top by screen readers.
   const top = useRef<HTMLDivElement>(null);
   useEffect(() => top.current?.focus({ preventScroll: true }), []);
+  // Challenges deal the same version of a question to everyone in the same day or week.
+  const [seed] = useState(() => {
+    if (decision.kind !== 'quiz') return 0;
+    if (source === 'daily') return sharedSeed(decision.key, decision.step, localDay(new Date()));
+    if (source === 'weekly') return sharedSeed(decision.key, decision.step, isoWeek(new Date()).id);
+    return freshSeed();
+  });
 
   if (decision.kind === 'chart') {
     const chart = getChart(decision.chartId);
@@ -59,8 +69,8 @@ export function DecisionItem({ decision, source, last, onScore, onNext, mixAnswe
   }
 
   const entry = LESSON_ENTRIES.find((e) => e.key === decision.key);
-  const step = entry?.content?.steps[decision.step];
-  if (!entry || step?.kind !== 'quiz') return null;
+  const step = quizAt(decision.key, decision.step, seed);
+  if (!entry || !step) return null;
   return (
     <>
       <div className="lesson-stage from-right focus-anchor" ref={top} tabIndex={-1}>

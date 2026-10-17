@@ -618,6 +618,20 @@ export const POSTFLOP_RIVER_LESSONS: LessonContent[] = [
         answer: 1,
         explain: 'Like the bars showed, SPR is 89 ÷ 22.5 = 3.96. About 18 is the SPR of a single raised pot.',
         point: 0,
+        variants: [
+          {
+            question: 'The pot is 16.5bb on the flop with 92.5bb behind. What is the SPR?',
+            choices: ['About 2', 'About 4', 'About 5.6', 'About 18'],
+            answer: 2,
+            explain: 'Like the bars showed, SPR is 92.5 ÷ 16.5 = 5.6. That is a 3bet to 7.5bb called in position.',
+          },
+          {
+            question: 'The pot is 25bb on the flop with 88bb behind. What is the SPR?',
+            choices: ['About 2', 'About 3.5', 'About 9', 'About 18'],
+            answer: 1,
+            explain: 'Like the bars showed, SPR is 88 ÷ 25 = 3.5. About 18 is the SPR of a single raised pot.',
+          },
+        ],
       },
       {
         kind: 'quiz',
@@ -628,6 +642,21 @@ export const POSTFLOP_RIVER_LESSONS: LessonContent[] = [
         explain:
           'Like the A♠K♦7♣ board showed, high flops favor the 3bettor’s big pairs and AK. Low and middling connected boards hit the caller’s pairs and suited connectors.',
         point: 1,
+        shuffleSuits: true,
+        variants: [
+          {
+            choiceCards: ['8h7h5c', 'KdQs4h', '9c8c6d'],
+            choices: ['8♥ 7♥ 5♣', 'K♦ Q♠ 4♥', '9♣ 8♣ 6♦'],
+            answer: 1,
+            explain: 'Like the A♠K♦7♣ board showed, high flops favor the 3bettor’s big pairs and AK. Low and middling connected boards hit the caller’s pairs and suited connectors.',
+          },
+          {
+            choiceCards: ['AhQc3d', '6s5s4d', '8d7c6c'],
+            choices: ['A♥ Q♣ 3♦', '6♠ 5♠ 4♦', '8♦ 7♣ 6♣'],
+            answer: 0,
+            explain: 'Like the A♠K♦7♣ board showed, high flops favor the 3bettor’s big pairs and AK. Low and middling connected boards hit the caller’s pairs and suited connectors.',
+          },
+        ],
       },
       {
         kind: 'takeaway',
@@ -744,6 +773,20 @@ export const POSTFLOP_RIVER_LESSONS: LessonContent[] = [
         answer: 2,
         explain: 'The size is (√5 − 1) ÷ 2 = 0.618. Each bet grows the pot by 1 + 2 × 0.618 = 2.236. And 2.236² = 5, which is 1 + 2 × SPR.',
         point: 1,
+        variants: [
+          {
+            question: 'SPR 1 on the turn. What pot fraction on the turn and river gets the stacks in?',
+            choices: ['25.0%', '36.6%', '50.0%', '61.8%'],
+            answer: 1,
+            explain: 'The size is (√3 − 1) ÷ 2 = 0.366. Each bet grows the pot by 1 + 2 × 0.366 = 1.732. And 1.732² = 3, which is 1 + 2 × SPR.',
+          },
+          {
+            question: 'SPR 4 on the turn. What pot fraction on the turn and river gets the stacks in?',
+            choices: ['50.0%', '61.8%', '100.0%', '150.0%'],
+            answer: 2,
+            explain: 'The size is (√9 − 1) ÷ 2 = 1. Each bet grows the pot by 1 + 2 × 1 = 3. And 3² = 9, which is 1 + 2 × SPR.',
+          },
+        ],
       },
       {
         kind: 'quiz',
@@ -752,6 +795,20 @@ export const POSTFLOP_RIVER_LESSONS: LessonContent[] = [
         answer: 1,
         explain: 'Like the curve showed, you need SPR ÷ (1 + 2 × SPR). You call 3 to win a final pot of 7, or 42.9%. The 75.0% figure is the folds villain’s shove needs as a bluff.',
         point: 2,
+        variants: [
+          {
+            question: 'Villain shoves 2 times the pot, and you have not bet. What equity do you need to call?',
+            choices: ['33.3%', '40.0%', '50.0%', '66.7%'],
+            answer: 1,
+            explain: 'Like the curve showed, you need SPR ÷ (1 + 2 × SPR). You call 2 to win a final pot of 5, or 40.0%. The 66.7% figure is the folds villain’s shove needs as a bluff.',
+          },
+          {
+            question: 'Villain shoves the size of the pot, and you have not bet. What equity do you need to call?',
+            choices: ['25.0%', '33.3%', '50.0%', '66.7%'],
+            answer: 1,
+            explain: 'Like the curve showed, you need SPR ÷ (1 + 2 × SPR). You call 1 to win a final pot of 3, or 33.3%. The 50.0% figure is the folds villain’s shove needs as a bluff.',
+          },
+        ],
       },
       {
         kind: 'quiz',

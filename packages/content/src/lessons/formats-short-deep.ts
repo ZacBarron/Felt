@@ -114,6 +114,7 @@ export const FORMATS_SHORT_DEEP_LESSONS: LessonContent[] = [
         answer: 1,
         explain: 'Like the bars showed, it is 13.3% with 5 players behind. About 3% is the chance for 1 player. About 21% is the chance with 8 players behind.',
         point: 1,
+        shuffleSuits: true,
       },
       {
         kind: 'quiz',
@@ -260,6 +261,19 @@ export const FORMATS_SHORT_DEEP_LESSONS: LessonContent[] = [
         answer: 0,
         explain: 'Like the small blind chart showed, it 3bets or folds against the button. KQo is a strong hand against a wide open. So it 3bets every time.',
         point: 2,
+        shuffleSuits: true,
+        variants: [
+          {
+            question: 'The button opens 2.5bb. You hold A♦J♣ in the small blind. What does Aced’s chart do?',
+            cards: 'AdJc',
+            explain: 'Like the small blind chart showed, it 3bets or folds against the button. AJo is a strong hand against a wide open. So it 3bets every time.',
+          },
+          {
+            question: 'The button opens 2.5bb. You hold T♠T♥ in the small blind. What does Aced’s chart do?',
+            cards: 'TsTh',
+            explain: 'Like the small blind chart showed, it 3bets or folds against the button. TT is a strong hand against a wide open. So it 3bets every time.',
+          },
+        ],
       },
       {
         kind: 'quiz',
@@ -404,6 +418,7 @@ export const FORMATS_SHORT_DEEP_LESSONS: LessonContent[] = [
         answer: 0,
         explain: 'Like the top pair bars showed, the button has 28.9% top pair or better. The big blind has 18.8%. That edge lets the button bet often and small.',
         point: 1,
+        shuffleSuits: true,
       },
       {
         kind: 'quiz',
@@ -668,6 +683,7 @@ export const FORMATS_SHORT_DEEP_LESSONS: LessonContent[] = [
         answer: 1,
         explain: 'Like the K9 bars showed, it is 43.3%. About 82% is against all the big blind’s calls. About 13% is against two pair or better.',
         point: 0,
+        shuffleSuits: true,
       },
       {
         kind: 'quiz',
@@ -686,6 +702,7 @@ export const FORMATS_SHORT_DEEP_LESSONS: LessonContent[] = [
         answer: 0,
         explain: 'Like the overpair step showed, only 3.1% of its calls beat you. They are sets and two pair. Those are the hands that want to play for 200bb.',
         point: 1,
+        shuffleSuits: true,
       },
       {
         kind: 'quiz',
@@ -841,6 +858,7 @@ export const FORMATS_SHORT_DEEP_LESSONS: LessonContent[] = [
         answer: 0,
         explain: 'Like the equity bars showed, K♠Q♦ has about 21% against QQ+ and AK. It wins big pots mostly with one pair. 8♠7♠ and 5♠5♦ make hidden big hands that deep stacks pay off.',
         point: 2,
+        shuffleSuits: true,
       },
       {
         kind: 'quiz',

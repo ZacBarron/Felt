@@ -8,7 +8,7 @@ import { haptic } from '../haptics';
 import { StepView } from '../lesson/StepView';
 import { db, type SavedItem, type SavedSolverSpot } from '../state/db';
 import { LessonSheet } from '../lesson/LessonSheet';
-import { entryFor } from '../state/lessons';
+import { entryFor, freshSeed, quizAt } from '../state/lessons';
 import { BottomBar } from '../ui/BottomBar';
 import { BookmarkIcon } from '../ui/icons';
 import { untimedMs, useSettings } from '../state/settings';
@@ -47,11 +47,12 @@ function Header({ item, revealed = false }: { item: SavedItem; revealed?: boolea
 
 /** A saved lesson quiz: answered and graded like any quiz. */
 function SavedQuiz({ item, targetMs, onAnswer, onNext }: Props & { item: SavedItem }) {
-  const step = entryFor(item.lessonKey!)!.content!.steps[item.step!];
+  const [seed] = useState(freshSeed);
+  const step = quizAt(item.lessonKey!, item.step!, seed);
   const started = useRef(performance.now());
   const untimed = !!useSettings().settings.study.untimed;
   const [done, setDone] = useState(false);
-  if (step.kind !== 'quiz') return null;
+  if (!step) return null;
   return (
     <div className="stack">
       <Header item={item} revealed={done} />

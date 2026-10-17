@@ -589,6 +589,23 @@ export const THEORY_LESSONS: LessonContent[] = [
         explain:
           'Like the flop table showed, 9♥8♥ holds 55.4%. It has 15 outs with two cards to come. The overpair feels ahead, but 15 outs twice is a lot.',
         point: 3,
+        shuffleSuits: true,
+        variants: [
+          {
+            question: 'The flop is 9♣8♣3♦. 7♣6♣ gets all in against K♠K♥. Who is the favorite?',
+            cards: '7c6c',
+            board: '9c8c3d',
+            choices: ['7♣6♣, with about 56%', 'K♠K♥, with about 65%', 'K♠K♥, with about 80%'],
+            explain: 'Like the flop table showed, 7♣6♣ holds 56.3%. It has 15 outs with two cards to come. The overpair feels ahead, but 15 outs twice is a lot.',
+          },
+          {
+            question: 'The flop is 8♦7♦2♠. 6♦5♦ gets all in against A♥A♣. Who is the favorite?',
+            cards: '6d5d',
+            board: '8d7d2s',
+            choices: ['6♦5♦, with about 56%', 'A♥A♣, with about 65%', 'A♥A♣, with about 80%'],
+            explain: 'Like the flop table showed, 6♦5♦ holds 56.3%. It has 15 outs with two cards to come. The overpair feels ahead, but 15 outs twice is a lot.',
+          },
+        ],
       },
       {
         kind: 'quiz',
@@ -599,6 +616,21 @@ export const THEORY_LESSONS: LessonContent[] = [
         answer: 1,
         explain: 'Like the flop table showed, the flush draw has 39.5%. So top pair holds 60.5%. The 40% answer is the draw’s share, not yours.',
         point: 2,
+        shuffleSuits: true,
+        variants: [
+          {
+            question: 'You hold A♠Q♦ on Q♣6♣2♥ and get all in against J♣T♣. What is your equity closest to?',
+            cards: 'AsQd',
+            board: 'Qc6c2h',
+            explain: 'Like the flop table showed, the flush draw has 39.5%. So top pair holds 60.5%. The 40% answer is the draw’s share, not yours.',
+          },
+          {
+            question: 'You hold K♠J♦ on J♥6♥2♣ and get all in against 9♥8♥. What is your equity closest to?',
+            cards: 'KsJd',
+            board: 'Jh6h2c',
+            explain: 'Like the flop table showed, the flush draw has 39.8%. So top pair holds 60.2%. The 40% answer is the draw’s share, not yours.',
+          },
+        ],
       },
       {
         kind: 'visual',
@@ -625,6 +657,19 @@ export const THEORY_LESSONS: LessonContent[] = [
         answer: 2,
         explain: 'Like the bars showed, AK holds 74.0% against AQ. The shared ace helps neither hand. AQ mostly needs a queen, so domination is brutal.',
         point: 1,
+        shuffleSuits: true,
+        variants: [
+          {
+            question: 'You get all in before the flop with K♠Q♦ against K♥J♣. What is your equity closest to?',
+            cards: 'KsQd',
+            explain: 'Like the bars showed, KQ holds about 73.6% against KJ. The shared king helps neither hand. KJ mostly needs a jack, so domination is brutal.',
+          },
+          {
+            question: 'You get all in before the flop with A♠Q♦ against A♥J♣. What is your equity closest to?',
+            cards: 'AsQd',
+            explain: 'Like the bars showed, AQ holds about 73.6% against AJ. The shared ace helps neither hand. AJ mostly needs a jack, so domination is brutal.',
+          },
+        ],
       },
       {
         kind: 'takeaway',

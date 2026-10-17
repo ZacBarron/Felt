@@ -1,4 +1,4 @@
-import { CURRICULUM, LESSON_CONTENT, type LessonContent, lessonKey } from '@felt/content';
+import { CURRICULUM, LESSON_CONTENT, type LessonContent, lessonKey, quizVersion, type QuizStep, variantSeed } from '@felt/content';
 import { db, type StoredLesson } from './db';
 
 export interface LessonEntry {
@@ -44,6 +44,24 @@ export function moduleEntries(trackId: string, moduleId: string): LessonEntry[] 
 export function quizSteps(entry: LessonEntry): number[] {
   return (entry.content?.steps ?? []).flatMap((s, i) => (s.kind === 'quiz' ? [i] : []));
 }
+
+/**
+ * The lesson question at `step` in the version `seed` picks, or undefined
+ * when that step is not a question any more. Seed 0 is the question as written.
+ */
+export function quizAt(key: string, step: number, seed: number): QuizStep | undefined {
+  const s = entryFor(key)?.content?.steps[step];
+  return s?.kind === 'quiz' ? quizVersion(s, seed) : undefined;
+}
+
+/** A fresh seed, so each visit can show another version of a question. */
+export const freshSeed = () => Math.floor(Math.random() * 0x7fffffff) + 1;
+
+/**
+ * A seed shared by everyone who plays the same challenge: the daily challenge
+ * by local day, the weekly Pro challenge by ISO week id.
+ */
+export const sharedSeed = (key: string, step: number, period: string) => variantSeed(key, step, period);
 
 /** Marks lessons as tested out. Lessons already read stay done. */
 export async function markTested(keys: readonly string[]) {

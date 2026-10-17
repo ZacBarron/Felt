@@ -60,6 +60,21 @@ export const POSTFLOP_LESSONS: LessonContent[] = [
         explain:
           'Like the 765 board showed, low connected flops hit the big blind’s connectors and small pairs. BB makes more of the straights and two pair. Paired high boards like K♥K♦4♣ still favor BTN.',
         point: 1,
+        shuffleSuits: true,
+        variants: [
+          {
+            choiceCards: ['QsQd5c', '7h6h5d', 'Ks9d4c'],
+            choices: ['Q♠ Q♦ 5♣', '7♥ 6♥ 5♦', 'K♠ 9♦ 4♣'],
+            answer: 1,
+            explain: 'Like the 765 board showed, low connected flops hit the big blind’s connectors and small pairs. BB makes more of the straights and two pair. Paired high boards like Q♠Q♦5♣ still favor BTN.',
+          },
+          {
+            choiceCards: ['Ac9d2h', 'JhJc3s', '8d7d6c'],
+            choices: ['A♣ 9♦ 2♥', 'J♥ J♣ 3♠', '8♦ 7♦ 6♣'],
+            answer: 2,
+            explain: 'Like the 765 board showed, low connected flops hit the big blind’s connectors and small pairs. BB makes more of the straights and two pair. Paired high boards like J♥J♣3♠ still favor BTN.',
+          },
+        ],
       },
       {
         kind: 'quiz',
@@ -70,6 +85,17 @@ export const POSTFLOP_LESSONS: LessonContent[] = [
         explain:
           'Like the table showed, high and dry boards get small bets very often. Few hands there are very strong. A 75% bet folds out the weak hands a small bet keeps in.',
         point: 0,
+        shuffleSuits: true,
+        variants: [
+          {
+            question: 'On a dry Q83 rainbow flop, which c-bet size does the raiser tend to use?',
+            board: 'Qh8d3c',
+          },
+          {
+            question: 'On a dry A72 rainbow flop, which c-bet size does the raiser tend to use?',
+            board: 'Ad7s2h',
+          },
+        ],
       },
       {
         kind: 'quiz',
@@ -79,6 +105,21 @@ export const POSTFLOP_LESSONS: LessonContent[] = [
         answer: 1,
         explain: 'Like the static and dynamic step showed, connected boards with a flush draw change on many turns. On K72 rainbow the best hand usually stays best. Neither fact sets the bet size alone. Size follows thick value and the nut edge.',
         point: 2,
+        shuffleSuits: true,
+        variants: [
+          {
+            choiceCards: ['Qs8d3c', 'AhAd6c', '9c8c7d'],
+            choices: ['Q♠ 8♦ 3♣', 'A♥ A♦ 6♣', '9♣ 8♣ 7♦'],
+            answer: 2,
+            explain: 'Like the static and dynamic step showed, connected boards with a flush draw change on many turns. On Q83 rainbow the best hand usually stays best. Neither fact sets the bet size alone. Size follows thick value and the nut edge.',
+          },
+          {
+            choiceCards: ['JdTd9s', 'Kc5h2d', '7s7h2c'],
+            choices: ['J♦ T♦ 9♠', 'K♣ 5♥ 2♦', '7♠ 7♥ 2♣'],
+            answer: 0,
+            explain: 'Like the static and dynamic step showed, connected boards with a flush draw change on many turns. On K52 rainbow the best hand usually stays best. Neither fact sets the bet size alone. Size follows thick value and the nut edge.',
+          },
+        ],
       },
       {
         kind: 'takeaway',
@@ -160,6 +201,18 @@ export const POSTFLOP_LESSONS: LessonContent[] = [
         explain:
           'Like the K72 board showed, BTN bets small with almost everything on dry high flops. It has more aces and more strong hands here. Betting big with only strong hands folds out the weak hands you want calls from.',
         point: 0,
+        shuffleSuits: true,
+        variants: [
+          {
+            question: 'BTN vs BB, flop A♥ 7♣ 2♦. What is the usual BTN strategy?',
+            board: 'Ah7c2d',
+          },
+          {
+            question: 'BTN vs BB, flop K♦ 8♠ 3♥. What is the usual BTN strategy?',
+            board: 'Kd8s3h',
+            explain: 'Like the K72 board showed, BTN bets small with almost everything on dry high flops. It has more kings and more strong hands here. Betting big with only strong hands folds out the weak hands you want calls from.',
+          },
+        ],
       },
       {
         kind: 'quiz',
@@ -410,6 +463,16 @@ export const POSTFLOP_LESSONS: LessonContent[] = [
         explain:
           'Like the tree showed, hands with nothing now and little to draw to fold. Q8o has one overcard and no backdoor flush draw. Q♥J♥ has 2 overcards plus backdoor draws. 6♣5♣ already has middle pair.',
         point: 1,
+        shuffleSuits: true,
+        variants: [
+          {
+            question: 'BB on J♠ 7♦ 3♥ faces a third pot bet. Which hand is the clearest fold?',
+            board: 'Js7d3h',
+            choiceCards: ['Kc6d', 'QsTs', '7c6c'],
+            choices: ['K♣ 6♦', 'Q♠ T♠', '7♣ 6♣'],
+            explain: 'Like the tree showed, hands with nothing now and little to draw to fold. K6o has one overcard and no backdoor flush draw. Q♠T♠ has a backdoor flush draw. 7♣6♣ already has middle pair.',
+          },
+        ],
       },
       {
         kind: 'takeaway',
@@ -479,6 +542,17 @@ export const POSTFLOP_LESSONS: LessonContent[] = [
         explain:
           'Like the tree showed, strong draws raise as semi bluffs. J♥T♥ has an open ender and a flush draw. A♥2♣ has only a backdoor flush draw. K♦6♠ is a weak pair that prefers to call.',
         point: 1,
+        shuffleSuits: true,
+        variants: [
+          {
+            question: 'BB on 8♠ 7♠ 3♦ faces a small c-bet. Which hand is the best check raise semi bluff?',
+            board: '8s7s3d',
+            choiceCards: ['Ad3c', '9s6s', 'KdJh'],
+            choices: ['A♦ 3♣', '9♠ 6♠', 'K♦ J♥'],
+            answer: 1,
+            explain: 'Like the tree showed, strong draws raise as semi bluffs. 9♠6♠ has an open ender and a flush draw. A♦3♣ is a weak pair that prefers to call. K♦J♥ has only overcards.',
+          },
+        ],
       },
       {
         kind: 'quiz',
@@ -561,6 +635,7 @@ export const POSTFLOP_LESSONS: LessonContent[] = [
         answer: 1,
         explain: 'Like the turn table showed, low connecting cards help the caller. The 5 makes straights for hands like 84s and 43s. BB defends both, and BTN opens neither.',
         point: 1,
+        shuffleSuits: true,
       },
       {
         kind: 'quiz',
@@ -571,6 +646,17 @@ export const POSTFLOP_LESSONS: LessonContent[] = [
         answer: 0,
         explain: 'Like the turn ace step showed, BTN holds AK and AA far more often. BB 3bets them before the flop. Low cards like the 6 or 5 help BB’s connected hands more.',
         point: 0,
+        shuffleSuits: true,
+        variants: [
+          {
+            question: 'BTN c-bets Q♦7♣3♥ and BB calls. Which turn usually helps BTN most?',
+            board: 'Qd7c3h',
+            choiceCards: ['6s', 'Ks', '5c'],
+            choices: ['6♠', 'K♠', '5♣'],
+            answer: 1,
+            explain: 'Like the turn ace step showed, high overcards favor BTN. It holds AK, KK and KQ far more often. Low cards like the 6 or 5 help BB’s connected hands more.',
+          },
+        ],
       },
       {
         kind: 'quiz',
@@ -734,8 +820,9 @@ export const POSTFLOP_LESSONS: LessonContent[] = [
         board: 'AhKh7c4h2s',
         choices: ['21', '28', '36', '45'],
         answer: 2,
-        explain: 'Like the bars showed, 9 hearts are left. So 9 × 8 ÷ 2 = 36. You get 45 only when you hold no heart.',
+        explain: 'Like the bars showed, 9 cards of the flush suit are left. So 9 × 8 ÷ 2 = 36. You get 45 only when you hold none of that suit.',
         point: 1,
+        shuffleSuits: true,
       },
       {
         kind: 'quiz',

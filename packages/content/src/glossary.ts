@@ -893,7 +893,7 @@ export const GLOSSARY: GlossaryTerm[] = [
     term: 'limp reraise',
     aliases: ['limp reraises', 'limp raise', 'limp-reraise'],
     short: 'Limping and then reraising when someone raises behind. It usually means a very strong hand.',
-    lesson: 'preflop/live-preflop/limped-pots',
+    lesson: 'preflop/live-preflop/limp-reraise',
   },
   {
     id: 'iso-raise',
@@ -907,7 +907,7 @@ export const GLOSSARY: GlossaryTerm[] = [
     term: 'cold call',
     aliases: ['cold calls', 'cold caller', 'cold callers', 'cold calling', 'calling an open cold'],
     short: 'Calling a raise when you have put no chips in yet this round.',
-    lesson: 'preflop/live-preflop/big-opens',
+    lesson: 'preflop/vs-open/cold-call-ip',
   },
   {
     id: 'flat',
@@ -922,7 +922,7 @@ export const GLOSSARY: GlossaryTerm[] = [
     term: 'overcall',
     aliases: ['overcalls', 'overcalling'],
     short: 'To call after another player has already called.',
-    lesson: 'preflop/stack-depth/rake',
+    lesson: 'preflop/multiway-preflop/overcalls',
   },
   {
     id: 'three-bet',
@@ -948,7 +948,7 @@ export const GLOSSARY: GlossaryTerm[] = [
   {
     id: 'squeeze',
     term: 'squeeze',
-    aliases: ['squeezes', 'squeezed', 'squeezing'],
+    aliases: ['squeezes', 'squeezed', 'squeezing', 'squeezer'],
     short: 'A 3bet after an open and at least 1 call. The calls add dead money to win.',
     lesson: 'preflop/vs-open/squeeze',
   },
@@ -985,7 +985,14 @@ export const GLOSSARY: GlossaryTerm[] = [
     term: '4bet pot',
     aliases: ['4bet pots'],
     short: 'A pot where a 4bet before the flop got called. Little room is left to play after the flop.',
-    lesson: 'postflop/3bet-postflop/low-spr',
+    lesson: 'postflop/3bet-postflop/4bet-pots',
+  },
+  {
+    id: 'cold-four-bet',
+    term: 'cold 4bet',
+    aliases: ['cold 4bets', 'cold 4betting'],
+    short: 'A 4bet from a player who had no chips in yet. It comes over an open and a 3bet, so it is very strong.',
+    lesson: 'preflop/multiway-preflop/cold-4bet',
   },
 
   // Postflop actions

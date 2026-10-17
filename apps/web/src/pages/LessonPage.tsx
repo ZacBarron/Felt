@@ -1,6 +1,6 @@
-import { type LessonStep, lessonPoints } from '@felt/content';
+import { type LessonStep, lessonPoints, stepVersion, variantSeed } from '@felt/content';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, Navigate, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { haptic } from '../haptics';
 import { LessonCover } from '../lesson/LessonCover';
@@ -13,7 +13,7 @@ import { recordLessonQuiz } from '../state/rating';
 import { lessonStepId, saveLessonStep, unsave } from '../state/saved';
 import { useSettings } from '../state/settings';
 import { db, type StoredLesson } from '../state/db';
-import { entryFor, isComplete, type LessonEntry, lessonPath, lessonProgress, moduleEntries, nextLesson, saveLesson } from '../state/lessons';
+import { entryFor, freshSeed, isComplete, type LessonEntry, lessonPath, lessonProgress, moduleEntries, nextLesson, saveLesson } from '../state/lessons';
 import { BottomBar } from '../ui/BottomBar';
 import { BookmarkIcon, CheckIcon, ChevronRightIcon, CloseIcon, LockIcon, ReviewIcon, UndoIcon } from '../ui/icons';
 import { ProgressRing } from '../ui/ProgressRing';
@@ -85,7 +85,9 @@ function Lesson({ lessonKey: key }: { lessonKey: string }) {
     if (!saved) void saveLesson(key, { step: 0 });
   }, [saved, content, index, key, jumpTo]);
 
-  const steps = content?.steps ?? [];
+  // Each visit can deal another version of a question: another seat, hand or board.
+  const [seed] = useState(freshSeed);
+  const steps = useMemo(() => (content?.steps ?? []).map((s, n) => stepVersion(s, variantSeed(seed, n))), [content, seed]);
   const quizIdx = steps.flatMap((s, n) => (s.kind === 'quiz' ? [n] : []));
   const missed = quizIdx.filter((n) => answers[n] !== (steps[n] as QuizStep).answer);
   const missedIds = missed.map((n) => lessonStepId(key, n));
@@ -224,7 +226,7 @@ function Lesson({ lessonKey: key }: { lessonKey: string }) {
             <UndoIcon size={15} />
             Second try, {retry.pos + 1} of {retry.steps.length}
           </div>
-          <TermScope.Provider value={termsForStep(content.steps, n)}>
+          <TermScope.Provider value={termsForStep(steps, n)}>
             <StepView
               step={q}
               points={points}
@@ -440,7 +442,7 @@ function Lesson({ lessonKey: key }: { lessonKey: string }) {
           </div>
         )}
         {step && (
-          <TermScope.Provider value={termsForStep(content.steps, i)}>
+          <TermScope.Provider value={termsForStep(steps, i)}>
             <StepView
               step={step}
               points={points}

@@ -201,6 +201,7 @@ export const POSTFLOP_VALUE_LESSONS: LessonContent[] = [
         explain:
           'Like the 754 line showed, 40.1% of BB’s calls have more than 25% equity. On 7♦3♣2♠ only 10.3% do. So a big bet on 754 keeps many hands that hurt you.',
         point: 1,
+        shuffleSuits: true,
       },
       {
         kind: 'quiz',
@@ -212,6 +213,7 @@ export const POSTFLOP_VALUE_LESSONS: LessonContent[] = [
         explain:
           'Like the bars showed, T♥7♥ and J♥5♥ have 5 outs and 20% equity. A big bet lets BB fold them. A small bet makes them call, and that value is thick. It outweighs the thin value from draws.',
         point: 1,
+        shuffleSuits: true,
       },
       {
         kind: 'quiz',
@@ -223,6 +225,7 @@ export const POSTFLOP_VALUE_LESSONS: LessonContent[] = [
         explain:
           'Like the 732 line showed, KK has 86.5% against BB’s calls. On 7♦5♠4♠ it has 73.2%. On 732 BB holds two pair or better only 2% of the time. So your value stays thick against a big bet.',
         point: 2,
+        shuffleSuits: true,
       },
       {
         kind: 'quiz',
@@ -233,6 +236,7 @@ export const POSTFLOP_VALUE_LESSONS: LessonContent[] = [
         explain:
           'Like the A72 step showed, 7x needs protection from overcards like QJ and QT. It can only bet small. Strong hands and bluffs use the same size to stay balanced.',
         point: 3,
+        shuffleSuits: true,
       },
       {
         kind: 'takeaway',

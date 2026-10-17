@@ -67,6 +67,15 @@ export const POSTFLOP_READING_LESSONS: LessonContent[] = [
         answer: 2,
         explain: 'Like the 4 steps showed, remove what you see. Only Q♠ and Q♦ are left. Four aces times 2 queens is 8 combos. The 12 answer removes only the board’s queen.',
         point: 0,
+        shuffleSuits: true,
+        variants: [
+          {
+            question: 'You hold K♣T♣ on K♥ 8♥ 4♣. How many AK combos can villain have?',
+            cards: 'KcTc',
+            board: 'Kh8h4c',
+            explain: 'Like the 4 steps showed, remove what you see. Only K♠ and K♦ are left. Four aces times 2 kings is 8 combos. The 12 answer removes only the board’s king.',
+          },
+        ],
       },
       {
         kind: 'visual',
@@ -193,6 +202,16 @@ export const POSTFLOP_READING_LESSONS: LessonContent[] = [
         explain:
           'Q♠J♠ has a flush draw and an open ender. Against A♥T♦ it wins 68.9% with 2 cards to come. T♦8♦ has top pair with a weak kicker, so it prefers to call. Q♦8♦ has only a gutshot and one overcard.',
         point: 2,
+        shuffleSuits: true,
+        variants: [
+          {
+            question: 'On 8♦ 7♦ 2♣, which hand makes the best semi bluff raise?',
+            board: '8d7d2c',
+            choiceCards: ['8c5s', 'Td9d', 'Ac2h'],
+            choices: ['8♣ 5♠', 'T♦ 9♦', 'A♣ 2♥'],
+            explain: 'T♦9♦ has a flush draw and an open ender. 8♣5♠ has top pair with a weak kicker, so it prefers to call. A♣2♥ has only bottom pair.',
+          },
+        ],
       },
       {
         kind: 'quiz',
