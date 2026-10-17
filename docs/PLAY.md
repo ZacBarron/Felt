@@ -17,6 +17,20 @@ Play works like sitting down in an online cash game.
 
   The first version skipped only exact chart matches. Against bots that open 4 or 5bb, limp and 3bet, it skipped only about half of the hands a player folds for sure at the live tables, and none heads up. Now it skips about 9 in 10 of them. A test now plays 400 random spots and checks every skipped hand is one the grade calls a best fold.
 - **The session** survives switching tabs. Stacks and totals are saved on the device, so a reload sits you back down. A hand in progress restarts, like a reconnect.
+- **Leaving**: Leave sits top left at all times. With no hand in progress it leaves at once. With cards in a hand it asks first and says what happens: the hand is folded (chips already in the pot count as lost) and your stack is saved. Play now in the lobby then offers that table with the saved stack. The table is its own page (`/play/seat`), so the back gesture leaves it the same way, with the same confirm. The tab bar stays hidden at the table to give the felt room. Tapping Play from anywhere else in the app (after Ask the coach, say) takes you back to your seat.
+- **Bots on the table**: tap a bot's seat to see its card: its portrait, its player type, how it plays and a link to the player types in Exploits.
+
+### Simple and Full
+
+The table has two layouts with the same engine, grades and stats. Simple is the default for players who told onboarding they are new or play for fun (`tableLayout` in `state/playTable.ts`). Regulars start on Full. Table settings, Layout switches between them, and the choice carries over.
+
+- **Simple**: Fold, Check or Call, and one raise at the size a coach reaches for first (your open, three times a raise, or half the pot after the flop, from `simpleSize`). More sizes shows the size chips. There is no slider and no early action boxes. One line says what is happening, such as "Sam raised to 6. It's 5 more to call." (`situationLine`). Your cards and the board are bigger, and the bots' seat labels are hidden.
+- **What would a coach do?** Simple has a quiet hint button before the flop. It stays hidden until asked. Then it shows the chart's whole mix for your hand (or the approximate range, labelled Approximate) and where it comes from. After you act before the flop it shows the same answer for the hand you just played. A decision made after asking keeps its grade, so the stats match Full, but it never counts toward the Aced Rating, because the answer was on screen. After the flop there is no hint: there is no honest answer to give yet.
+- **Full**: every size, the slider, the nudge buttons and the boxes to act early, as in an online client.
+
+### First time at a table
+
+The first time a player sits down, three tips point at the real table: your seat, where your buttons appear and Last hand. The first hand waits until they are closed. A tap anywhere else closes them. Settings, Show the tour again brings them back.
 
 ### Your open size
 
@@ -24,12 +38,13 @@ Settings has **Your open** (Game and stakes, also in the table menu). It default
 
 ### Table settings
 
-The ⋯ button opens Table settings, in four groups:
+The ⋯ button (top right) opens Table settings, in five groups:
 
+- **Layout**: Simple or Full.
 - **Speed**: Bot speed (Instant, Quick or Natural), After you fold (Deal next hand or Watch the hand) and Skip clear folds.
 - **Coaching**: Grades after each hand.
 - **Your open size**: the same setting as in Game and stakes.
-- **Table**: top up, sit out and leave.
+- **Table**: top up, sit out and leave (the same as the Leave button).
 
 Settings carry over to the next table (`felt.play.settings.v1`).
 
@@ -49,9 +64,9 @@ The form checks every field before it saves (`validateTable`). Tables are saved 
 
 ## Bots
 
-Each bot is a character with a name, a drawn portrait, a style and a rating, the way chess apps present their bots. Two rules keep it honest (CLAUDE.md: no fake competitors):
+Each bot is a character with a name, a drawn portrait, a style and a rating, the way chess apps present their bots. The portraits are pre-drawn Notionists faces from DiceBear (see BRAND.md, Bot portraits) on a disc tinted by player type, so a lineup shows its mix at a glance. Stand ins get their own faces. The player type shows on the bot's card at the table, in the lobby's buy in sheet, in Create a table and on the Exploits player types. Two rules keep it honest (CLAUDE.md: no fake competitors):
 
-1. **Always clearly a bot.** A "Bot" tag sits on every seat. No photos, and nothing that suggests a real person or a live table.
+1. **Always clearly a bot.** A "Bot" tag sits on every seat. Drawn faces, never photos, and nothing that suggests a real person or a live table.
 2. **The rating is measured, not set by hand.** Aced grades the bot's own decisions with the same grader the player gets, over many seeded hands. Then it converts the result to the Aced Rating scale. The bot card says how many decisions the rating rests on. The rating is measured again whenever the bot or the grader changes.
 
 A bot is built from two settings:

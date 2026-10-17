@@ -1,6 +1,6 @@
 import { handNickname } from '@felt/content';
 import { describeHand, handClassOf, type HandState } from '@felt/core';
-import { type CSSProperties, useEffect, useRef, useState } from 'react';
+import { type CSSProperties, type ReactNode, useEffect, useRef, useState } from 'react';
 import { HERO, type PlaySeat } from '../state/play';
 import { BotPortrait } from '../ui/BotPortrait';
 import { PlayingCard } from './PlayingCard';
@@ -18,6 +18,10 @@ interface Props {
   banner?: string;
   /** A pot worth a little extra: the banner turns brass. */
   bannerRare?: boolean;
+  /** The Simple layout: bigger cards and fewer labels. */
+  simple?: boolean;
+  /** Tap a bot's seat to see who it is. */
+  onSeat?: (seat: number) => void;
 }
 
 /**
@@ -54,8 +58,18 @@ interface Flight {
   delay: number;
 }
 
+/** A seat's name plate. A bot's plate is a button that opens its card. */
+function Plate({ seat, label, onSeat, children }: { seat: number; label?: string; onSeat?: (seat: number) => void; children: ReactNode }) {
+  if (!onSeat) return <div className="play-plate">{children}</div>;
+  return (
+    <button type="button" className="play-plate" aria-label={label} data-haptic="select" onClick={() => onSeat(seat)}>
+      {children}
+    </button>
+  );
+}
+
 /** A poker client style table: bots around the felt, the board and pot in the middle, the player at the bottom. */
-export function PlayTable({ handId, state, seats, said, thinking, banner, bannerRare }: Props) {
+export function PlayTable({ handId, state, seats, said, thinking, banner, bannerRare, simple = false, onSeat }: Props) {
   const n = state.players.length;
   const points = anchors(n);
   const at = (seat: number) => points[(seat - HERO + n) % n];
@@ -100,12 +114,12 @@ export function PlayTable({ handId, state, seats, said, thinking, banner, banner
   const myHand = me.folded ? undefined : state.board.length >= 3 ? describeHand([...me.cards, ...state.board]) : handNickname(handClassOf(me.cards[0], me.cards[1]));
 
   return (
-    <div className={`play-table seats-${n}`}>
+    <div className={`play-table seats-${n}${simple ? ' simple' : ''}`}>
       <div className="play-felt" />
       <div className="play-center">
         <div className="play-board">
           {state.board.map((c, i) => (
-            <PlayingCard key={c} card={c} size="sm" deal delayMs={i >= 3 ? 0 : i * 70} />
+            <PlayingCard key={c} card={c} size={simple ? 'md' : 'sm'} deal delayMs={i >= 3 ? 0 : i * 70} />
           ))}
         </div>
         {banner ? (
@@ -134,13 +148,13 @@ export function PlayTable({ handId, state, seats, said, thinking, banner, banner
               <div className="play-hole">
                 {!p.folded &&
                   (showCards
-                    ? p.cards.map((c) => <PlayingCard key={c} card={c} size={hero ? 'md' : 'sm'} />)
+                    ? p.cards.map((c) => <PlayingCard key={c} card={c} size={hero ? (simple ? 'table' : 'md') : 'sm'} />)
                     : [0, 1].map((k) => <PlayingCard key={k} size="sm" />))}
               </div>
-              <div className="play-plate">
+              <Plate seat={p.seat} label={bot ? `${bot.name}, bot. Stack ${fmt(p.stack)}` : undefined} onSeat={bot ? onSeat : undefined}>
                 {bot && (
                   <span className={`play-avatar${think ? ' thinking' : ''}`} style={think ? ({ '--think': `${think}ms` } as CSSProperties) : undefined}>
-                    <BotPortrait look={bot.look} size={30} active={acting} />
+                    <BotPortrait bot={bot} size={30} active={acting} />
                   </span>
                 )}
                 <span className="play-plate-text">
@@ -150,10 +164,10 @@ export function PlayTable({ handId, state, seats, said, thinking, banner, banner
                   </span>
                   <span className="play-stack num">
                     {p.allIn && !over ? 'All in' : fmt(p.stack)}
-                    <span className="play-pos">{p.position}</span>
+                    {(hero || !simple) && <span className="play-pos">{p.position}</span>}
                   </span>
                 </span>
-              </div>
+              </Plate>
               {hero && myHand && <span className="play-myhand">{myHand}</span>}
               {said[p.seat] && !hero && !p.folded && <span className="play-said">{said[p.seat]}</span>}
             </div>

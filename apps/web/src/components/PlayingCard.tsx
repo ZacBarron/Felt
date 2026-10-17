@@ -2,7 +2,8 @@ import { type Card, rankOf, SUIT_SYMBOLS, suitOf } from '@felt/core';
 
 interface Props {
   card?: Card;
-  size?: 'sm' | 'md' | 'lg';
+  /** `table` is the player's own cards in Play's Simple layout: bigger than md, smaller than lg. */
+  size?: 'sm' | 'md' | 'table' | 'lg';
   /** Animate the card being dealt in; the delay staggers a hand. */
   deal?: boolean;
   /** Deal face down, then flip face up. */
@@ -13,6 +14,7 @@ interface Props {
 const SIZES = {
   sm: { w: 30, h: 42, rank: 15, suit: 12, radius: 5 },
   md: { w: 42, h: 58, rank: 20, suit: 16, radius: 7 },
+  table: { w: 54, h: 75, rank: 26, suit: 20, radius: 9 },
   lg: { w: 76, h: 106, rank: 38, suit: 28, radius: 11 },
 };
 

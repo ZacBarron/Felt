@@ -18,6 +18,8 @@
     "dev:site": "pnpm --filter @felt/site dev"
   },
   "devDependencies": {
+    "@dicebear/core": "9.4.2",
+    "@dicebear/notionists": "9.4.2",
     "typescript": "^5.9.3"
   },
   "pnpm": {

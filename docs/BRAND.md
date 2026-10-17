@@ -113,6 +113,27 @@ With it on and deuteranopia, raise and call differ by 66 (light) and every actio
 
 Everything else uses the system palette so the app still feels native. Playing cards use a four color deck on white faces; card backs are spruce with a brass lattice.
 
+### Bot portraits
+
+Play's bots wear drawn faces from **Notionists** by Zoish, generated with DiceBear (`@dicebear/core` and `@dicebear/notionists` 9.4.2). The artwork is **CC0 1.0** (public domain), as the package's LICENSE states for its design files, so no attribution is required. DiceBear's code is MIT and is a dev dependency only: `scripts/make-bot-avatars.mjs` draws one SVG per seed into `apps/web/public/bots` and the app never ships the generator. We compared Lorelei, Notionists and Open Peeps (all CC0) on the felt at 22 to 40px. Lorelei read young and Open Peeps loud. Notionists read the most adult and calm.
+
+- **Seeds**: each roster bot by its id, each stand in by its name (`stand-in-ada`). So a bot always has the same face, and a stand in keeps its face whichever bot it stands in for. A test holds one file for every seed and every seat a custom table can fill.
+- **Calm faces**: head and shoulders only, no hand gestures or shirt icons, and only the calm mouths (no tongues, gasps or bared teeth).
+- **Small files**: whole number coordinates, about 9KB each and 180KB for all 20. They load only when shown and are cached for offline play.
+- **Tint by player type**: line art in ink on a pale disc, the same in both themes, never an action color.
+
+| Type | Token | Color |
+| --- | --- | --- |
+| Calling station | `--bot-calling-station` | Sand `#D8C597` |
+| Loose passive | `--bot-loose-passive` | Sage `#BCCBAA` |
+| Nit | `--bot-nit` | Slate `#A9BCCD` |
+| Weak tight regular | `--bot-weak-tight-reg` | Mist `#A8C9C3` |
+| Tight aggressive regular | `--bot-tag-reg` | Lavender `#C6B9DB` |
+| Loose aggressive regular | `--bot-lag-reg` | Apricot `#E0B993` |
+| Maniac | `--bot-maniac` | Clay `#D9A79C` |
+
+Warm tints for loose players and cool ones for tight players. Every seat still says "Bot", and the player type is always one tap away.
+
 ## Type
 
 - **Display:** Instrument Serif (SIL OFL), regular and italic, for large titles, hero numbers and brand moments. Bundled in `apps/web/src/assets/fonts`.
@@ -134,6 +155,7 @@ Motion explains what happened; it never decorates.
 - **Count up:** headline numbers roll to their value; rings fill.
 - **The mark assembles:** on the welcome screen and in moments, the grid pops in along the diagonal and the range lights in a brass sweep.
 - **Verdicts land:** the badge pops, a soft ring leaves it, and the check draws itself. Mix bars grow from the left.
+- **Coach marks:** the first run tour and one time tips dim the screen and light the real control with a brass rim, drawn with box shadows only. The card fades in and the lit window glides to the next control. One sentence and one verb button per step, at most five steps, and a tap outside ends them.
 - **Moments:** a new tier or a streak milestone gets one short full screen moment on the felt, once, and only on a calm screen (never mid question). The title wipes in like ink. Nothing else earns a takeover.
 - Springs for things you touch, ease out for things that appear. Everything respects Reduce Motion.
 

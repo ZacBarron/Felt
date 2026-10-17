@@ -494,6 +494,50 @@ export function gradeHand(history: readonly PlayDecision[], seats: readonly Play
   return grades;
 }
 
+/**
+ * Decisions the player made after asking "What would a coach do?" keep their
+ * grade, so stats match either layout, but never count toward the rating:
+ * the answer was on screen.
+ */
+export function withoutHinted(grades: PlayGrade[], hinted: readonly number[] | undefined): PlayGrade[] {
+  if (!hinted?.length) return grades;
+  return grades.map((g) => (hinted.includes(g.index) && g.rated ? { ...g, rated: false } : g));
+}
+
+export interface CoachAdvice {
+  hand: string;
+  /** The strategy's mix for the hand: chart action ids, or raise, call and fold for an approximate range. */
+  mix: HandMix;
+  labels: Record<string, string>;
+  /** A hand written chart that matches the spot. Anything else is labelled approximate. */
+  exact: boolean;
+  /** Where the answer comes from, in a short sentence. */
+  source: string;
+}
+
+/**
+ * What a coach would do with the player's hand before the flop: the same
+ * chart or approximate range the grade uses, with the whole mix. Only for the
+ * player's own preflop decision. After the flop there is no honest answer yet.
+ */
+export function coachAdvice(state: HandState, opts: SpotChartOptions = {}): CoachAdvice | undefined {
+  if (state.street !== 'preflop' || state.toAct !== HERO) return undefined;
+  const spot = preflopSpot(state, HERO);
+  const me = state.players[HERO];
+  const hand = handClassOf(me.cards[0], me.cards[1]);
+  const found = chartForSpot(spot, opts);
+  if (found && straddleOf(state) === 0 && reaches(found.chart, hand)) {
+    const mix = found.chart.mixes.get(hand) ?? { fold: 1 };
+    const labels: Record<string, string> = { fold: 'Fold' };
+    for (const a of found.chart.spec.actions) labels[a.id] = a.label;
+    const source = found.exact ? `${found.chart.spec.title}.` : `${found.why ?? ''} From ${found.chart.spec.title}.`.trim();
+    return { hand, mix, labels, exact: found.exact, source };
+  }
+  const a = approxRange(spot, hand);
+  const legal = legalActions(state);
+  return { hand, mix: a.mix, labels: { raise: 'Raise', call: legal.check ? 'Check' : 'Call', fold: 'Fold' }, exact: false, source: a.what };
+}
+
 /** Records the rated grades toward the Aced Rating. */
 export async function rateHand(grades: readonly PlayGrade[], history: readonly PlayDecision[], handId: string) {
   for (const g of grades) {

@@ -14,6 +14,7 @@ import { exportEvents } from '../state/events';
 import { studyReminder, trialReminder } from '../state/reminders';
 import { chartsForGame } from '../state/charts';
 import { type Access, type Appearance, useSettings } from '../state/settings';
+import { resetTour } from '../state/tour';
 import { BrandFooter, BrandMark } from '../ui/Brand';
 import { actionColor } from '../components/actionColors';
 import {
@@ -25,6 +26,7 @@ import {
   ChipIcon,
   CodeIcon,
   DataIcon,
+  HelpIcon,
   type IconProps,
   PercentIcon,
   ReviewIcon,
@@ -114,6 +116,7 @@ function usePersisted() {
 
 function SettingsHome() {
   const { settings, update } = useSettings();
+  const navigate = useNavigate();
   const session = useSession();
   const { cloud } = useClaudeCloud();
   const taps = useRef(0);
@@ -175,6 +178,26 @@ function SettingsHome() {
             <NavRow to="/account" icon={BellIcon} color="var(--base-500)" title="Notifications" detail={session.user.reminders ? 'On' : 'Off'} />
           )}
           <NavRow to="/settings/data" icon={DataIcon} color="var(--base-500)" title="Your data" />
+        </div>
+      </Section>
+
+      <Section title="Help" footer="The tour points out each tab. The tips come back the next time you open Play and Ranges.">
+        <div className="list with-icons">
+          <button
+            type="button"
+            className="list-row"
+            onClick={() => {
+              resetTour();
+              navigate('/');
+            }}
+          >
+            <span className="icon-tile" style={{ background: 'var(--base-500)' }} aria-hidden="true">
+              <HelpIcon size={18} />
+            </span>
+            <span className="grow" style={{ color: 'var(--tint)' }}>
+              Show the tour again
+            </span>
+          </button>
         </div>
       </Section>
 

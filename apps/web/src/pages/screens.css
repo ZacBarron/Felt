@@ -163,6 +163,18 @@
   transform: scale(0.97);
 }
 
+.sc-type-faces {
+  display: flex;
+}
+
+.sc-type-faces .bot-portrait + .bot-portrait {
+  margin-left: -6px;
+}
+
+.sc-type-faces .bot-portrait {
+  box-shadow: 0 0 0 2px var(--surface);
+}
+
 .sc-type-name {
   flex: 1;
   font-size: 1rem;

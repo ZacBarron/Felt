@@ -13,27 +13,43 @@ import {
   type Rng,
   seededRng,
   startHand,
-  straddleOf,
 } from '@felt/core';
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { BOTS, PLAYER_TYPES, typeShort } from '@felt/content';
+import { type ReactNode, useEffect, useMemo, useRef, useState } from 'react';
+import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
+import { MixBar } from '../components/MixBar';
 import { OpenSizeRow } from '../components/OpenSizeRow';
-import { GroupLabel, Sheet, SessionSummary, SheetHead } from '../components/PlaySheet';
+import { GroupLabel, Sheet, SheetHead } from '../components/PlaySheet';
 import { PlayingCard } from '../components/PlayingCard';
 import { PlayTable } from '../components/PlayTable';
 import { useSettings } from '../state/settings';
 import { haptic } from '../haptics';
 import { useCanAskCoach } from '../state/coach';
-import { actionText, gradeHand, handNotes, HERO, type PlayGrade, type PlaySeat, rateHand } from '../state/play';
-import { applyAction, botAction, dealNext, liveRng, seatsOf } from '../state/playFlow';
-import { getSession, type HandRecord, leaveTable, setSession, type TableSession, useTableSession } from '../state/playTable';
+import { actionText, type CoachAdvice, coachAdvice, gradeHand, handNotes, HERO, type PlayGrade, type PlaySeat, rateHand, withoutHinted } from '../state/play';
+import { simpleSize, situationLine, sizeOptions } from '../state/playActions';
+import { applyAction, botAction, dealNext, liveRng, markHinted, seatsOf } from '../state/playFlow';
+import {
+  getSession,
+  type HandRecord,
+  handInProgress,
+  leaveResult,
+  leaveTable,
+  setSession,
+  type TableLayout,
+  tableLayout,
+  type TableSession,
+  useTableSession,
+} from '../state/playTable';
+import { getTour, PLAY_TIPS, seeTip, setTour, tipPending } from '../state/tour';
+import { BotPortrait } from '../ui/BotPortrait';
+import { CoachMarks } from '../ui/CoachMarks';
 import { addHandsToReview } from '../state/review';
 import { shareUrl } from '../state/referral';
 import { ChevronLeftIcon, ChevronRightIcon, CoachIcon, MinusIcon, MoreIcon, PlusIcon, ShareIcon } from '../ui/icons';
 import { Segmented } from '../ui/Segmented';
 import { Toggle } from '../ui/Toggle';
 import { useBodyClass } from '../ui/useBodyClass';
-import { Lobby } from './PlayLobby';
+import { Lobby, takePushedSeat } from './PlayLobby';
 import './play.css';
 
 /** Cards as people write them, such as Q♦ 7♠. */
@@ -41,10 +57,42 @@ const pretty = (cards: readonly Card[]) => cards.map((c) => `${rankOf(c)}${SUIT_
 const fmt = (n: number) => (Number.isInteger(n) ? String(n) : n.toFixed(1));
 const signed = (n: number) => `${n >= 0 ? '+' : ''}${n.toFixed(1)}`;
 
-/** A cash table against bots: a lobby to pick a table, then hands dealt one after another. */
+/**
+ * A cash table against bots: a lobby to pick a table, then hands dealt one
+ * after another. The table lives at /play/seat. The back gesture from it
+ * leaves the table, with a confirm when a hand is in progress. The Play tab
+ * takes you back to your seat while a session is open.
+ */
 export function PlayPage() {
   const session = useTableSession();
-  return session ? <TableScreen session={session} /> : <Lobby />;
+  const location = useLocation();
+  const navigate = useNavigate();
+  const seated = location.pathname === '/play/seat';
+  // Back from the table: this page went from the seat to the lobby while still seated.
+  // Only the back gesture does that: Leave ends the session first. Remembered per entry,
+  // so the confirm stays up while the hand plays on behind it.
+  const prev = useRef<string>();
+  const [back, setBack] = useState<{ key: string; ask: boolean }>();
+  const fromSeat = !seated && !!session && prev.current === '/play/seat';
+  const backed = !seated && !!session && (fromSeat || back?.key === location.key);
+  const asks = backed && (back?.key === location.key ? back.ask : handInProgress(session));
+  useEffect(() => {
+    prev.current = location.pathname;
+    if (fromSeat) setBack({ key: location.key, ask: asks });
+    if (backed && !asks) leaveTable();
+  });
+
+  if (!session) return seated ? <Navigate to="/play" replace /> : <Lobby />;
+  if (!seated && !backed) return <Navigate to="/play/seat" replace />;
+  if (backed && !asks) return <Lobby />;
+  const leave = () => {
+    leaveTable();
+    if (!seated) return;
+    // Step back to the lobby the table was opened from, or swap the table for the lobby.
+    if (takePushedSeat()) navigate(-1);
+    else navigate('/play', { replace: true });
+  };
+  return <TableScreen session={session} askLeave={asks} onLeave={leave} onStay={() => (seated ? undefined : navigate('/play/seat'))} />;
 }
 
 // The table --------------------------------------------------------------------------
@@ -71,9 +119,10 @@ function resultMs(state: HandState, speed: TableSession['settings']['speed']): n
   return state.players[HERO].folded ? base * 0.6 : base;
 }
 
-function TableScreen({ session }: { session: TableSession }) {
+function TableScreen({ session, askLeave, onLeave, onStay }: { session: TableSession; askLeave: boolean; onLeave: () => void; onStay: () => void }) {
   useBodyClass('focus-mode');
   useBodyClass('play-room-body');
+  const { settings: appSettings } = useSettings();
   const seats = useMemo(() => seatsOf(session), [session.bots, session.table]);
   const rng = useRef<Rng>(seededRng(randomSeed()));
   const [pre, setPre] = useState<PreAction>();
@@ -83,10 +132,21 @@ function TableScreen({ session }: { session: TableSession }) {
   const [lastOpen, setLastOpen] = useState(false);
   const [toast, setToast] = useState<string>();
   const [note, setNote] = useState<string>();
-  const [leaving, setLeaving] = useState(false);
+  const [leaving, setLeaving] = useState(askLeave);
+  const [botSeat, setBotSeat] = useState<number>();
+  // What a coach does with your last preflop hand, shown after you act until your next decision.
+  const [afterAdvice, setAfterAdvice] = useState<CoachAdvice>();
+  // The first time at a table: three tips, and the first deal waits for them.
+  const [tips, setTips] = useState(() => tipPending(getTour(), 'play'));
   const live = session.live;
   const speed = session.settings.speed;
   const busted = !live && session.stacks[HERO] + session.pendingChips <= 0;
+  const layout = tableLayout(session.settings.layout, appSettings.profile.experience);
+  const simple = layout === 'simple';
+
+  useEffect(() => {
+    if (askLeave) setLeaving(true);
+  }, [askLeave]);
 
   /** Deals the next hand. Clear folds are folded and played out at once when asked. */
   function deal() {
@@ -104,7 +164,7 @@ function TableScreen({ session }: { session: TableSession }) {
   // The table loop: deal, let bots think and act, pause on the result, then deal again.
   useEffect(() => {
     if (!live) {
-      if (session.sittingOut || busted || leaving) return;
+      if (session.sittingOut || busted || leaving || tips) return;
       const t = window.setTimeout(deal, 300);
       return () => window.clearTimeout(t);
     }
@@ -124,17 +184,18 @@ function TableScreen({ session }: { session: TableSession }) {
       }, ms);
       return () => window.clearTimeout(t);
     }
-    // The player's turn: a choice made while waiting plays now.
+    // The player's turn: a choice made while waiting plays now. Simple has no early choices.
     const legal = legalActions(state);
-    if (pre) {
+    if (pre && !simple) {
       setPre(undefined);
       if (pre === 'checkfold') return advance(legal.check ? { kind: 'check' } : { kind: 'fold' });
       if (pre === 'callany') return advance(legal.check ? { kind: 'check' } : { kind: 'call' });
       if (pre === 'check' && legal.check) return advance({ kind: 'check' });
     }
+    setAfterAdvice(undefined);
     haptic('select');
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [live?.state, session.sittingOut, busted, leaving]);
+  }, [live?.state, session.sittingOut, busted, leaving, tips]);
 
   // When hands end: grade them quietly and rate what counts. A fast deal can finish more than one before this runs.
   const lastId = session.hands.at(-1)?.id;
@@ -143,7 +204,8 @@ function TableScreen({ session }: { session: TableSession }) {
     if (!todo.length) return;
     const t = window.setTimeout(() => {
       for (const rec of todo) {
-        const grades = gradeHand(rec.history, seats, rec.seed);
+        // A decision made after asking the coach keeps its grade but is never rated.
+        const grades = withoutHinted(gradeHand(rec.history, seats, rec.seed), rec.hinted);
         void rateHand(grades, rec.history, rec.id);
         const graded = grades.filter((g) => g.grade);
         setSession((s) => ({
@@ -191,12 +253,26 @@ function TableScreen({ session }: { session: TableSession }) {
   const inHand = !!state && !state.result && !me!.folded && !me!.allIn;
   const dealt = session.stats.hands + session.stats.skipped + (state && !state.result ? 1 : 0);
   const stakes = session.table.stakes?.label;
+  const name = (seat: number) => (seat === HERO ? 'You' : (seats[seat]?.bot?.name ?? 'Seat'));
+  const situation = simple && state ? situationLine(state, name) : '';
+  const hintKey = live && state?.toAct === HERO ? `${live.id}:${live.history.length}` : undefined;
+  const hinted = !!live?.hinted?.includes(live.history.length);
+  // The gentle hint, preflop only: the same chart or range the grade uses, hidden until asked.
+  const advice = useMemo(
+    () => (simple && state?.toAct === HERO && state.street === 'preflop' ? coachAdvice(state, { raiseTo: simpleSize(sizeOptions(state, openSize(appSettings.game))) }) : undefined),
+    [simple, state, appSettings.game],
+  );
+  const requestLeave = () => {
+    if (handInProgress(getSession())) setLeaving(true);
+    else onLeave();
+  };
 
   return (
-    <div className="play-room">
+    <div className={`play-room${simple ? ' simple' : ''}`}>
       <header className="play-head">
-        <button className="play-icon-btn" onClick={() => setMenu(true)} aria-label="Table settings">
-          <MoreIcon size={22} />
+        <button className="play-leave-btn" onClick={requestLeave} aria-label="Leave the table">
+          <ChevronLeftIcon size={18} />
+          Leave
         </button>
         <span className="play-head-title">
           <span className="play-head-name">{session.table.name}</span>
@@ -205,16 +281,19 @@ function TableScreen({ session }: { session: TableSession }) {
               {note}
             </span>
           ) : (
-            <span className="play-head-sub num">
-              {stakes ? `${stakes} · ` : ''}Hand {dealt} · {signed(session.stats.net)}bb
-            </span>
+            <span className="play-head-sub num">{simple ? `Hand ${dealt}` : `${stakes ? `${stakes} · ` : ''}Hand ${dealt} · ${signed(session.stats.net)}bb`}</span>
           )}
         </span>
-        <button className="play-last-btn" onClick={() => setLastOpen(true)} disabled={!lastHand}>
-          Last hand
-          {lastMiss && <span className="play-last-dot" aria-label="Has a mistake" />}
+        <button className="play-icon-btn play-menu-btn" onClick={() => setMenu(true)} aria-label="Table settings">
+          <MoreIcon size={22} />
         </button>
       </header>
+
+      {/* Last hand floats over the empty corner of the room, under the menu. */}
+      <button className="play-last-btn" onClick={() => setLastOpen(true)} disabled={!lastHand}>
+        Last hand
+        {lastMiss && <span className="play-last-dot" aria-label="Has a mistake" />}
+      </button>
 
       <div className="play-toasts" aria-live="polite">
         {toast && (
@@ -226,9 +305,19 @@ function TableScreen({ session }: { session: TableSession }) {
 
       <div className="play-stage">
         {state ? (
-          <PlayTable handId={live!.id} state={state} seats={seats} said={live!.said} thinking={thinking} banner={banner} bannerRare={rare} />
+          <PlayTable
+            handId={live!.id}
+            state={state}
+            seats={seats}
+            said={live!.said}
+            thinking={thinking}
+            banner={banner}
+            bannerRare={rare}
+            simple={simple}
+            onSeat={setBotSeat}
+          />
         ) : (
-          <PlayTableIdle session={session} seats={seats} />
+          <PlayTableIdle session={session} seats={seats} simple={simple} onSeat={setBotSeat} />
         )}
       </div>
 
@@ -247,6 +336,36 @@ function TableScreen({ session }: { session: TableSession }) {
               Deal me in
             </button>
           </div>
+        ) : simple ? (
+          <div className="play-dock-col">
+            {afterAdvice && !(state?.toAct === HERO) && <CoachCard advice={afterAdvice} after />}
+            {advice && hinted && <CoachCard advice={advice} />}
+            {situation && (
+              <p className="play-situation" role="status">
+                {situation}
+              </p>
+            )}
+            {state && state.toAct === HERO ? (
+              <SimpleActions
+                key={hintKey}
+                state={state}
+                hint={
+                  advice && !hinted ? (
+                    <button className="btn btn-plain play-coach-btn" onClick={() => setSession(markHinted)}>
+                      <CoachIcon size={18} />
+                      What would a coach do?
+                    </button>
+                  ) : undefined
+                }
+                onAct={(a) => {
+                  if (state.street === 'preflop') setAfterAdvice(coachAdvice(state, a.kind === 'raise' ? { raiseTo: a.to } : { limped: a.kind === 'call' }));
+                  advance(a);
+                }}
+              />
+            ) : (
+              !situation && <p className="play-dock-note">{state?.result ? ' ' : tips ? 'Your first hand comes next.' : 'Dealing'}</p>
+            )}
+          </div>
         ) : state && state.toAct === HERO ? (
           <Actions
             state={state}
@@ -260,7 +379,7 @@ function TableScreen({ session }: { session: TableSession }) {
         ) : inHand ? (
           <PreActions state={state!} value={pre} onChange={setPre} />
         ) : (
-          <p className="play-dock-note">{state?.result ? ' ' : me?.folded ? 'You folded. The next hand comes after this one.' : 'Dealing'}</p>
+          <p className="play-dock-note">{state?.result ? ' ' : me?.folded ? 'You folded. The next hand comes after this one.' : tips ? 'Your first hand comes next.' : 'Dealing'}</p>
         )}
       </div>
 
@@ -268,39 +387,123 @@ function TableScreen({ session }: { session: TableSession }) {
         open={menu}
         onClose={() => setMenu(false)}
         session={session}
+        layout={layout}
         onLeave={() => {
           setMenu(false);
-          setLeaving(true);
+          requestLeave();
         }}
       />
       <LastHandSheet open={lastOpen} onClose={() => setLastOpen(false)} hands={session.hands} seats={seats} />
-      <Sheet open={leaving} onClose={() => setLeaving(false)} label="Leave table">
+      <BotSheet seat={botSeat} seats={seats} onClose={() => setBotSeat(undefined)} />
+      <Sheet
+        open={leaving}
+        onClose={() => {
+          setLeaving(false);
+          onStay();
+        }}
+        label="Leave table"
+      >
         <h2 className="play-sheet-title">Leave the table?</h2>
-        <SessionSummary stats={session.stats} title="This session" />
+        <p className="play-leave-text">
+          Your hand is folded. {(() => {
+            const { stack } = leaveResult(session);
+            return stack > 0 ? `Your stack of ${fmt(Math.round(stack * 10) / 10)}bb is saved for next time.` : 'You have no chips behind.';
+          })()}
+        </p>
         <button
           className="btn btn-primary btn-lg btn-block"
           onClick={() => {
             setLeaving(false);
-            leaveTable();
+            onLeave();
           }}
         >
           Leave table
         </button>
-        <button className="btn btn-tinted btn-lg btn-block" onClick={() => setLeaving(false)}>
+        <button
+          className="btn btn-tinted btn-lg btn-block"
+          onClick={() => {
+            setLeaving(false);
+            onStay();
+          }}
+        >
           Keep playing
         </button>
       </Sheet>
+      {tips && !leaving && (
+        <CoachMarks
+          steps={PLAY_TIPS}
+          label="Play tips"
+          skipLabel="Skip tips"
+          onEnd={() => {
+            setTour(seeTip(getTour(), 'play'));
+            setTips(false);
+          }}
+        />
+      )}
     </div>
   );
 }
 
 /** Between hands or while sitting out: the seats with their stacks and no cards. */
-function PlayTableIdle({ session, seats }: { session: TableSession; seats: PlaySeat[] }) {
+function PlayTableIdle({ session, seats, simple, onSeat }: { session: TableSession; seats: PlaySeat[]; simple: boolean; onSeat: (seat: number) => void }) {
   const state = useMemo(() => {
     const s = startHand({ stacks: session.stacks.map((x) => Math.max(x, 1)), button: session.button }, seededRng(1));
     return { ...s, toAct: null, log: [], players: s.players.map((p, i) => ({ ...p, stack: session.stacks[i], street: 0, total: 0, folded: true })) };
   }, [session.stacks, session.button]);
-  return <PlayTable handId="idle" state={state} seats={seats} said={{}} />;
+  return <PlayTable handId="idle" state={state} seats={seats} said={{}} simple={simple} onSeat={onSeat} />;
+}
+
+/** A bot's card: its face, its player type and how it plays. Tap a seat to open it. */
+function BotSheet({ seat, seats, onClose }: { seat?: number; seats: readonly PlaySeat[]; onClose: () => void }) {
+  const bot = seat === undefined ? undefined : seats[seat]?.bot;
+  const type = bot ? PLAYER_TYPES.find((t) => t.id === bot.type) : undefined;
+  const others = bot ? BOTS.filter((b) => b.type === bot.type && b.name !== bot.name).map((b) => b.name) : [];
+  return (
+    <Sheet open={!!bot} onClose={onClose} label={bot ? `${bot.name}, a bot` : 'Bot'}>
+      {bot && (
+        <>
+          <SheetHead
+            title={
+              <span className="play-bot-card-name">
+                {bot.name}
+                <span className="play-bot-tag">Bot</span>
+              </span>
+            }
+            onClose={onClose}
+          />
+          <div className="play-bot-card">
+            <BotPortrait bot={bot} size={72} />
+            <div className="play-bot-card-text">
+              <span className="footnote">Player type</span>
+              <span className="play-bot-card-type">{type?.name ?? typeShort(bot)}</span>
+            </div>
+          </div>
+          <p style={{ margin: 0 }}>{bot.blurb}</p>
+          {type && <p className="footnote" style={{ margin: 0 }}>{type.spot}</p>}
+          <p className="footnote" style={{ margin: 0 }}>
+            {others.length ? `${others.join(' and ')} ${others.length === 1 ? 'plays' : 'play'} the same type. ` : ''}Bots follow the charts before the flop and rules after it, so their play after the flop is approximate.
+          </p>
+          <Link to="/exploit" className="btn btn-tinted btn-block">
+            Read about player types
+          </Link>
+        </>
+      )}
+    </Sheet>
+  );
+}
+
+/** The chart's answer for your hand, the whole mix, with where it comes from. */
+function CoachCard({ advice, after = false }: { advice: CoachAdvice; after?: boolean }) {
+  return (
+    <section className="play-coach-card" aria-label="What a coach would do">
+      <div className="play-coach-head">
+        <span>{after ? `What a coach does with ${advice.hand}` : `A coach with ${advice.hand}`}</span>
+        <span className={`play-coach-pill${advice.exact ? '' : ' approx'}`}>{advice.exact ? 'Chart' : 'Approximate'}</span>
+      </div>
+      <MixBar mix={advice.mix} labels={advice.labels} />
+      <p className="play-coach-source">{advice.source}</p>
+    </section>
+  );
 }
 
 function gradeLine(graded: PlayGrade[]): string {
@@ -314,50 +517,13 @@ const order = (g: string) => ['best', 'correct', 'inaccuracy', 'mistake', 'blund
 
 const round = (x: number) => Math.round(x * 2) / 2;
 
-/**
- * Raise sizes to offer, like an online client. Unopened before the flop
- * that is your open plus 1bb for each limper (in straddles if there is
- * one), then multiples of the raise, then shares of the pot after the flop.
- */
-export function sizeOptions(state: HandState, open: number): { label: string; to: number; mine?: boolean }[] {
-  const legal = legalActions(state);
-  const r = legal.raise;
-  if (!r) return [];
-  const pot = potSize(state);
-  const clampTo = (to: number) => Math.min(r.max, Math.max(r.min, round(to)));
-  let list: { label: string; to: number; mine?: boolean }[];
-  const preflop = state.log.filter((a) => a.street === 'preflop');
-  if (state.street === 'preflop' && !preflop.some((a) => a.kind === 'raise')) {
-    const unit = Math.max(1, straddleOf(state) / state.bb);
-    const limps = preflop.filter((a) => a.kind === 'call').length;
-    list = [...new Set([2.5, 3, open])].sort((x, y) => x - y).map((x) => ({ label: `${fmt((x + limps) * unit)}bb`, to: (x + limps) * unit, mine: x === open }));
-  } else if (state.street === 'preflop') {
-    list = [3, 4].map((x) => ({ label: `${x}x`, to: state.currentBet * x }));
-  } else {
-    // A pot sized raise calls first, then raises by the pot after the call.
-    const potTo = (f: number) => (r.kind === 'bet' ? pot * f : state.currentBet + (pot + legal.call) * f);
-    list = [
-      { label: '⅓ pot', to: potTo(1 / 3) },
-      { label: '½ pot', to: potTo(0.5) },
-      { label: '¾ pot', to: potTo(0.75) },
-      { label: 'Pot', to: potTo(1) },
-    ];
-  }
-  const seen = new Set<number>();
-  return [{ label: 'Min', to: r.min }, ...list.map((o) => ({ ...o, to: clampTo(o.to) })), { label: 'All in', to: r.max }].filter((o) => {
-    if (seen.has(o.to)) return false;
-    seen.add(o.to);
-    return true;
-  });
-}
-
 function Actions({ state, size, onSize, onAct }: { state: HandState; size?: number; onSize: (n: number | undefined) => void; onAct: (a: PlayAction) => void }) {
   const legal = legalActions(state);
   const { settings } = useSettings();
   const options = sizeOptions(state, openSize(settings.game));
   const r = legal.raise;
   const chosen = r ? (size ?? options.find((o) => o.mine)?.to ?? options.find((o) => o.label !== 'Min')?.to ?? r.min) : undefined;
-  const raiseLabel = !r || chosen === undefined ? '' : chosen >= r.max ? `All in ${fmt(r.max)}` : r.kind === 'bet' ? `Bet ${fmt(chosen)}` : `Raise to ${fmt(chosen)}`;
+  const raiseLabel = !r || chosen === undefined ? '' : raiseWords(r, chosen);
   const step = (d: number) => r && chosen !== undefined && onSize(Math.min(r.max, Math.max(r.min, round(chosen + d))));
   return (
     <div className="play-actions">
@@ -408,6 +574,72 @@ function Actions({ state, size, onSize, onAct }: { state: HandState; size?: numb
   );
 }
 
+/** The words on the raise button for a size. */
+function raiseWords(r: NonNullable<ReturnType<typeof legalActions>['raise']>, to: number): string {
+  return to >= r.max ? `All in ${fmt(r.max)}` : r.kind === 'bet' ? `Bet ${fmt(to)}` : `Raise to ${fmt(to)}`;
+}
+
+/**
+ * The Simple layout's buttons: Fold, Check or Call, and one raise at the size
+ * a coach reaches for first. More sizes shows the other sizes, never the
+ * slider. The actions are the same engine actions as Full, so grades match.
+ */
+function SimpleActions({ state, onAct, hint }: { state: HandState; onAct: (a: PlayAction) => void; hint?: ReactNode }) {
+  const legal = legalActions(state);
+  const { settings } = useSettings();
+  const options = sizeOptions(state, openSize(settings.game));
+  const [more, setMore] = useState(false);
+  const [size, setSize] = useState<number>();
+  const r = legal.raise;
+  const chosen = r ? (size ?? simpleSize(options) ?? r.min) : undefined;
+  return (
+    <div className="play-actions">
+      {r && more && (
+        <div className="play-sizes" role="radiogroup" aria-label="Size">
+          {options.map((o) => (
+            <button key={o.label} role="radio" aria-checked={chosen === o.to} className={`play-size${chosen === o.to ? ' on' : ''}`} data-haptic="select" onClick={() => setSize(o.to)}>
+              {o.label}
+            </button>
+          ))}
+        </div>
+      )}
+      <div className="play-buttons">
+        {legal.fold && (
+          <button className="btn btn-lg play-fold" onClick={() => onAct({ kind: 'fold' })}>
+            Fold
+          </button>
+        )}
+        {legal.check ? (
+          <button className="btn btn-lg play-call" onClick={() => onAct({ kind: 'check' })}>
+            Check
+          </button>
+        ) : (
+          <button className="btn btn-lg play-call" onClick={() => onAct({ kind: 'call' })}>
+            {legal.callAllIn ? `Call ${fmt(legal.call)} all in` : `Call ${fmt(legal.call)}`}
+          </button>
+        )}
+        {r && chosen !== undefined && (
+          <button className="btn btn-lg btn-primary play-raise" onClick={() => onAct({ kind: r.kind, to: chosen })}>
+            {raiseWords(r, chosen)}
+          </button>
+        )}
+      </div>
+      {(hint || (r && options.length > 2)) && (
+        <div className="play-simple-extras">
+          {r && options.length > 2 ? (
+            <button className="btn btn-plain play-more-sizes" aria-expanded={more} data-haptic="select" onClick={() => setMore((m) => !m)}>
+              {more ? 'Hide sizes' : 'More sizes'}
+            </button>
+          ) : (
+            <span />
+          )}
+          {hint}
+        </div>
+      )}
+    </div>
+  );
+}
+
 /** Choices to make before your turn, as in an online client. The one picked plays when the action reaches you. */
 function PreActions({ state, value, onChange }: { state: HandState; value?: PreAction; onChange: (v?: PreAction) => void }) {
   const toCall = Math.max(0, state.currentBet - state.players[HERO].street);
@@ -436,13 +668,34 @@ function PreActions({ state, value, onChange }: { state: HandState; value?: PreA
 
 // Table settings ---------------------------------------------------------------------
 
-function MenuSheet({ open, onClose, session, onLeave }: { open: boolean; onClose: () => void; session: TableSession; onLeave: () => void }) {
+function MenuSheet({ open, onClose, session, layout, onLeave }: { open: boolean; onClose: () => void; session: TableSession; layout: TableLayout; onLeave: () => void }) {
   const set = (patch: Partial<TableSession['settings']>) => setSession((s) => ({ ...s, settings: { ...s.settings, ...patch } }));
   const top = Math.max(0, session.table.buyIns[2] - session.stacks[HERO] - session.pendingChips);
   const { settings } = session;
   return (
     <Sheet open={open} onClose={onClose} label="Table settings">
       <SheetHead title="Table settings" onClose={onClose} />
+
+      <div>
+        <GroupLabel>Layout</GroupLabel>
+        <div className="list">
+          <div className="list-row play-stack-row">
+            <Segmented
+              stretch
+              ariaLabel="Table layout"
+              value={layout}
+              options={[
+                { value: 'simple', label: 'Simple' },
+                { value: 'full', label: 'Full' },
+              ]}
+              onChange={(next) => set({ layout: next })}
+            />
+          </div>
+        </div>
+        <p className="section-footer">
+          {layout === 'simple' ? 'Simple shows three buttons and says what is happening. Grades are the same.' : 'Full shows every size, the slider and the boxes to act early.'}
+        </p>
+      </div>
 
       <div>
         <GroupLabel>Speed</GroupLabel>
@@ -575,24 +828,36 @@ export function rarePot(state: HandState): boolean {
 }
 
 /** The hand street by street, as a hand history reads. */
-function historyLines(rec: HandRecord, seats: readonly PlaySeat[]): { street: HandState['street']; board: string; actions: string[] }[] {
+function historyLines(rec: HandRecord, seats: readonly PlaySeat[]): { street: HandState['street']; board: string; actions: string[]; who: number[] }[] {
   const s0 = rec.history[0]?.state ?? rec.final;
   const name = (s: number) => (s === HERO ? 'You' : (seats[s].bot?.name ?? 'Seat'));
-  const out: { street: HandState['street']; board: string; actions: string[] }[] = [];
+  const out: { street: HandState['street']; board: string; actions: string[]; who: number[] }[] = [];
   for (const d of rec.history) {
-    if (out.at(-1)?.street !== d.state.street) out.push({ street: d.state.street, board: pretty(d.state.board), actions: [] });
+    if (out.at(-1)?.street !== d.state.street) out.push({ street: d.state.street, board: pretty(d.state.board), actions: [], who: [] });
     out.at(-1)!.actions.push(`${name(d.state.toAct!)} (${s0.players[d.state.toAct!].position}) ${actionText(d.state, d.action).toLowerCase()}`);
+    out.at(-1)!.who.push(d.state.toAct!);
   }
   return out;
 }
 
+/** A line of the hand history with the bot's face in front, so the recap reads like the table. */
+function HistLine({ seat, seats, text }: { seat: number; seats: readonly PlaySeat[]; text: string }) {
+  const bot = seat === HERO ? undefined : seats[seat]?.bot;
+  return (
+    <span className={`play-hist-line${seat === HERO ? ' me' : ''}`}>
+      {bot && <BotPortrait bot={bot} size={20} />}
+      {text}
+    </span>
+  );
+}
+
 /** Who showed what at the end of a hand that went to showdown. */
-function showdownLines(rec: HandRecord, seats: readonly PlaySeat[]): string[] {
+function showdownLines(rec: HandRecord, seats: readonly PlaySeat[]): { seat: number; text: string }[] {
   const r = rec.final.result!;
   if (!r.showdown) return [];
   return rec.final.players
     .filter((p) => !p.folded)
-    .map((p) => `${p.seat === HERO ? 'You show' : `${seats[p.seat].bot?.name ?? 'Seat'} shows`} ${pretty(p.cards)}, ${(r.hands[p.seat] ?? '').toLowerCase()}`);
+    .map((p) => ({ seat: p.seat, text: `${p.seat === HERO ? 'You show' : `${seats[p.seat].bot?.name ?? 'Seat'} shows`} ${pretty(p.cards)}, ${(r.hands[p.seat] ?? '').toLowerCase()}` }));
 }
 
 /** A question for the coach about this hand, as a draft. */
@@ -683,9 +948,7 @@ function LastHandSheet({ open, onClose, hands, seats }: { open: boolean; onClose
                   <span className="play-grade-street">{STREET_WORDS[st.street]}</span>
                   {st.board && <span className="play-hist-board num">{st.board}</span>}
                   {st.actions.map((a, i) => (
-                    <span key={i} className={`play-hist-line${a.startsWith('You') ? ' me' : ''}`}>
-                      {a}
-                    </span>
+                    <HistLine key={i} seat={st.who[i]} seats={seats} text={a} />
                   ))}
                 </span>
               </div>
@@ -695,9 +958,7 @@ function LastHandSheet({ open, onClose, hands, seats }: { open: boolean; onClose
                 <span className="grow">
                   <span className="play-grade-street">Showdown</span>
                   {showdownLines(rec, seats).map((a) => (
-                    <span key={a} className={`play-hist-line${a.startsWith('You') ? ' me' : ''}`}>
-                      {a}
-                    </span>
+                    <HistLine key={a.seat} seat={a.seat} seats={seats} text={a.text} />
                   ))}
                 </span>
               </div>

@@ -212,11 +212,6 @@
   padding-right: 7px;
 }
 
-.bot-portrait {
-  flex: none;
-  border-radius: 50%;
-}
-
 /* Actions ------------------------------------------------------------------------- */
 
 .play-actions {
@@ -454,10 +449,40 @@
 
 .play-head {
   display: grid;
-  grid-template-columns: 96px 1fr 96px;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: center;
+  gap: 8px;
   min-height: 48px;
   padding-top: 4px;
+}
+
+/* Leave sits top left at all times, where a back button lives. */
+.play-leave-btn {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  min-height: 40px;
+  padding: 0 0.85rem 0 0.5rem;
+  border: 0;
+  border-radius: 999px;
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 650;
+  color: inherit;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.play-menu-btn {
+  justify-self: end;
+}
+
+/* Last hand floats in the room's top right corner, clear of the seats. */
+.play-room > .play-last-btn {
+  position: absolute;
+  top: calc(env(safe-area-inset-top, 0px) + 58px);
+  right: 10px;
+  z-index: 4;
 }
 
 .play-icon-btn {
@@ -785,11 +810,11 @@
   display: flex;
 }
 
-.play-lobby-faces svg + svg {
+.play-lobby-faces .bot-portrait + .bot-portrait {
   margin-left: -6px;
 }
 
-.play-lobby-faces svg {
+.play-lobby-faces .bot-portrait {
   box-shadow: 0 0 0 2px var(--surface);
   border-radius: 50%;
 }
@@ -825,6 +850,9 @@
 }
 
 .play-hist-line {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
   font-size: 0.9rem;
   color: var(--label-2);
 }
@@ -851,12 +879,12 @@
   margin-top: 0.8rem;
 }
 
-.play-hero-faces svg {
+.play-hero-faces .bot-portrait {
   border-radius: 50%;
   box-shadow: 0 0 0 2px var(--base-700);
 }
 
-.play-hero-faces svg + svg {
+.play-hero-faces .bot-portrait + .bot-portrait {
   margin-left: -7px;
 }
 
@@ -908,7 +936,8 @@
 
 .play-faces-row {
   display: flex;
-  gap: 0.5rem;
+  gap: 0.6rem;
+  list-style: none;
   overflow-x: auto;
   margin: 0 -1rem;
   padding: 0 1rem;
@@ -924,9 +953,21 @@
   flex-direction: column;
   align-items: center;
   gap: 3px;
-  min-width: 46px;
+  width: 64px;
+  flex: none;
+  text-align: center;
   font-size: 0.75rem;
-  font-weight: 600;
+  line-height: 1.15;
+}
+
+.play-face-name {
+  margin-top: 2px;
+  font-weight: 650;
+  color: var(--label);
+}
+
+.play-face-type {
+  font-size: 0.7rem;
   color: var(--label-2);
 }
 
@@ -982,12 +1023,12 @@
   overflow: hidden;
 }
 
-.play-lineup-faces svg {
+.play-lineup-faces .bot-portrait {
   border-radius: 50%;
   box-shadow: 0 0 0 2px var(--bg);
 }
 
-.play-lineup-faces svg + svg {
+.play-lineup-faces .bot-portrait + .bot-portrait {
   margin-left: -6px;
 }
 
@@ -1130,4 +1171,145 @@
     width: 100cqw;
     height: min(100cqh, 158cqw);
   }
+}
+
+/* Bot plates open the bot's card. */
+button.play-plate {
+  border: 0;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.play-leave-text {
+  margin: 0;
+}
+
+.play-bot-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.play-bot-card-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.play-bot-card-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.play-bot-card-name .play-bot-tag {
+  font-size: 0.65rem;
+}
+
+.play-bot-card-type {
+  font-size: 1.1rem;
+  font-weight: 650;
+}
+
+/* Simple layout: one line on what is happening, three buttons, bigger cards. */
+.play-situation {
+  margin: 0;
+  min-height: 1.4em;
+  font-size: 0.98rem;
+  font-weight: 600;
+  line-height: 1.35;
+  text-align: center;
+  text-wrap: balance;
+  animation: play-pop 220ms var(--ease) backwards;
+}
+
+.play-room.simple .play-dock {
+  min-height: 150px;
+}
+
+.play-room.simple .play-dock-col {
+  gap: 0.7rem;
+}
+
+.play-room.simple .play-buttons .btn {
+  min-height: 56px;
+  font-size: 1.05rem;
+}
+
+.btn.play-more-sizes,
+.btn.play-coach-btn {
+  align-self: center;
+  min-height: 36px;
+  padding: 0 0.9rem;
+  font-size: 0.9rem;
+  color: var(--on-felt-accent);
+}
+
+.btn.play-more-sizes {
+  color: inherit;
+  opacity: 0.75;
+}
+
+/* Under the buttons: More sizes on the left, the coach hint on the right. */
+.play-simple-extras {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin: -0.2rem -0.5rem 0;
+}
+
+.play-simple-extras .btn {
+  padding: 0 0.5rem;
+}
+
+.btn.play-coach-btn {
+  gap: 0.4rem;
+}
+
+.play-coach-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.75rem 0.9rem 0.7rem;
+  border-radius: 16px;
+  font-size: 0.88rem;
+  background: rgba(255, 255, 255, 0.08);
+  animation: play-pop 240ms var(--ease) backwards;
+}
+
+.play-coach-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-weight: 650;
+}
+
+.play-coach-pill {
+  flex: none;
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 650;
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.play-coach-pill.approx {
+  color: var(--on-felt-accent);
+}
+
+.play-coach-source {
+  margin: 0;
+  font-size: 0.78rem;
+  line-height: 1.35;
+  opacity: 0.7;
+}
+
+.play-table.simple .play-seat.me .play-hole {
+  min-height: 75px;
+}
+
+.play-table.simple .play-board {
+  min-height: 58px;
 }

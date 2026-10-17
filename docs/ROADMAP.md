@@ -116,6 +116,10 @@ See [PLAY.md](PLAY.md).
 - [x] Create a table: 2 to 9 seats, stakes ($1/$2 to $5/$10 or plain bb), a buy in range, a lineup by player type with Mix, the bots' open size (2.5bb online, 4 or 5bb live) and an optional straddle. Saved on the device (`felt.play.tables.v1`), listed in the lobby with edit and delete. The engine posts the straddle (`TableSetup.straddle`) and bots scale their opens to it
 - [x] Table polish: a taller felt on phones, seats spread at the top and bottom of full tables, the full pot in the middle, finer sizing (a third of the pot, nudge buttons), a recap that leads with your cards, the result and the board, showdowns in the hand history
 - [x] Recap: preflop graded by the chart where it matches the spot, calls and folds graded against the bots' real ranges (exact on the river heads up), coaching notes, decision quality first, mistakes to Review, Ask the coach
+- [x] Bot portraits: pre-drawn Notionists faces (CC0, via DiceBear at build time) seeded by bot id, stand ins with their own faces, tinted by player type, on the table, lobby, buy in sheet, Create a table, Exploits and the Last hand history; tap a seat for the bot's card with its player type
+- [x] Leave the table from a Leave button top left, the back gesture or the menu; a confirm while a hand is in progress (the hand is folded, the stack is saved for Play now); the table is its own page and the Play tab takes you back to your seat
+- [x] Simple table layout for new and casual players: three buttons with one coach size and More sizes, one line on what is happening, bigger cards, fewer labels, and a "What would a coach do?" hint before the flop that never feeds the rating; Full for regulars, switchable in Table settings
+- [x] First run tour: five coach marks on Today's main card and the tabs, skippable, then one time tips the first time at a Play table and on Ranges; Show the tour again in Settings
 - [ ] River grading with the live solver, then turn grading in the recap
 - [ ] Bot ratings measured by self play on the Aced Rating scale
 - [ ] Flop grading from the first postflop pack
