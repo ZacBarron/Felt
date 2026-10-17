@@ -31,7 +31,7 @@ Variants for other stack depths and open sizes, made by a documented rule in `pa
 | Open, Vs open, Vs 3bet | Stacks 40, 60, 100, 150 and 200bb times opens of 2.5, 3, 4 and 5bb |
 | Squeeze, facing a squeeze | Every stack, 2.5bb opens |
 | Vs 4bet | 150 and 200bb (at 60bb and less a 4bet is all in, so the 3bet answer charts cover it) |
-| Straddle | Opens in a straddled pot at 100, 150 and 200bb with opens of 2.5 and 3 straddles, from the opening chart of the seat with the same players behind |
+| Straddle | Opens in a straddled pot at 100, 150 and 200bb with opens of 2.5 and 3 straddles, from the opening chart of the seat with the same players behind. Not the big blind: folded to it, it can complete, which no raise only chart covers, so that spot uses the approximate range |
 
 The rule, in two steps:
 

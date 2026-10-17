@@ -286,7 +286,10 @@ function straddleOrder(tableSize: 6 | 9): Position[] {
 for (const tableSize of [9, 6] as const) {
   const order = straddleOrder(tableSize);
   const normal = tableSize === 9 ? NINE : SIX;
+  // Not the straddler, and not the big blind: folded to it, the big blind can complete for 1bb, and
+  // the raise only chart it would borrow has no complete option. That spot falls back to the approximate range.
   order.slice(0, -1).forEach((hero, i) => {
+    if (hero === 'BB') return;
     const like = normal[i];
     const baseId = rfiIdFor(tableSize, like);
     for (const stack of STRADDLE_STACKS) {
