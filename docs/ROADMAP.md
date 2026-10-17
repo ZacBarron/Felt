@@ -71,6 +71,11 @@ See [MONETIZATION.md](MONETIZATION.md).
 - [x] Imports: hand histories (PokerStars format, GGPoker header, tracker exports) and live session CSVs; stats by seat, opening leaks against the charts, results feeding the win rate
 - [x] Practice at your level (about 80% expected success, weaker areas first, interleaved); study cue at onboarding
 - [x] More preflop charts: BB vs CO and UTG, SB vs BTN, BTN vs CO, BTN and UTG facing a 3bet (with reach, so only opened hands are drilled), BTN vs two limpers
+- [x] Full preflop library (`packages/content/src/charts/`): hand written 100bb charts for every open, every seat against every opener, every opener against every 3bettor, the common 4bet pairings, squeezes and facing a squeeze, blind vs blind limps, and limpers, at 9-handed and 6-max
+- [x] Derived chart variants for 40 to 200bb stacks and 2.5 to 5bb opens by a documented, tested rule (`core/src/chartModel.ts`), labelled "Estimate" and never rated; chart picking for a game with an honest fit (`core/src/chartPick.ts`)
+- [x] Ranges picker by spot type (Open, Vs open, Vs 3bet, Vs 4bet, Squeeze, Blind vs blind, Limpers, Straddle), seat, stack, open size and table, defaulting to your game; a compact header so the grid and the selected hand fit on a phone
+- [x] Play grades preflop against the chart for the open size and stack faced (3bets, 4bets, squeezes and blind battles too); the daily challenge rotates its hardest decision through defense, 3bet, 4bet, squeeze and blind vs blind spots, and the weekly pool takes close calls from every spot that faces action
+- [ ] Replace the derived variants with output from the preflop solver below
 - [x] Untimed drills and a switch for drill keyboard shortcuts; placement with "Not sure" and resume
 - [x] Ranges and Drills in one place: view, paint (with 100/75/50/25% and split brushes, graded by mix distance) or quiz any chart
 - [x] Charts with graded edges in 5% steps, like published solutions
@@ -112,7 +117,8 @@ See [PLAY.md](PLAY.md).
 - [ ] Fast hand entry on a phone: card picker, seat chips, action shorthand parser, money amounts
 - [ ] Hand replayer on the table component; flag a hand to open it in Spot Lab
 - [ ] Results: profit in money and bb, bb/hour, profit graph, variance bands
-- [ ] Live charts: iso raise and overlimp from every seat (BTN vs one and two limpers done), facing large live open sizes, straddled pots, 150 to 200bb stacks
+- [x] Live charts: iso raise and overlimp from CO, BTN and the blinds against 1, 2 and 3 limpers (exploit), facing 3bb, 4bb and 5bb opens, opens in straddled pots, 40 to 200bb stacks (derived charts, labelled as estimates)
+- [ ] Iso raise charts from the earlier seats, and limped pots deeper than 100bb
 - [ ] Live pool exploits track: lessons and drills on limpers, multiway, big river bets
 - [ ] Rake aware preflop: show how the rake setting tightens calling ranges
 

@@ -255,11 +255,11 @@ function ChartSheet({
               : 'A hand written chart close to published solver results.'}
         </p>
         <div className="chart-sheet-actions">
-          <button type="button" className="btn btn-lg" onClick={onEditGame}>
-            Change my game
+          <button type="button" className="btn" onClick={onEditGame}>
+            Change game
           </button>
-          <button type="button" className="btn btn-lg btn-primary" onClick={useMyGame}>
-            Match my game
+          <button type="button" className="btn btn-primary" onClick={useMyGame}>
+            Use my game
           </button>
         </div>
       </div>
