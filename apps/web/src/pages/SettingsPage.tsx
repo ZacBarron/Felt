@@ -90,7 +90,7 @@ function proSummary(access: Access) {
   return access.trialEndsAt ? `Trial to ${shortDate(access.trialEndsAt)}` : 'Active';
 }
 
-/** Suited Pro's tile: the mark in ink on brass. */
+/** Aced Pro's tile: the mark in ink on brass. */
 function ProGlyph({ size }: IconProps) {
   return (
     <span className="settings-pro-glyph">
@@ -99,7 +99,7 @@ function ProGlyph({ size }: IconProps) {
   );
 }
 
-/** Asks the browser to keep Suited's data, and reports whether it will. */
+/** Asks the browser to keep Aced's data, and reports whether it will. */
 function usePersisted() {
   const [persisted, setPersisted] = useState<boolean>();
   useEffect(() => {
@@ -176,7 +176,7 @@ function SettingsHome() {
       </Section>
 
       <div className="list with-icons settings-pro">
-        <NavRow to="/settings/pro" icon={ProGlyph} color="var(--chip-gold)" title="Suited Pro" detail={proSummary(access)} />
+        <NavRow to="/settings/pro" icon={ProGlyph} color="var(--chip-gold)" title="Aced Pro" detail={proSummary(access)} />
       </div>
 
       <TestingSection />
@@ -532,11 +532,11 @@ function DataPage() {
     if (!window.confirm('Replace everything on this device with this backup?')) return;
     try {
       await importBackup(await file.text());
-      setDataMessage('Backup restored. Suited will reload now.');
+      setDataMessage('Backup restored. Aced will reload now.');
       haptic('success');
       setTimeout(() => location.reload(), 900);
     } catch (e) {
-      setDataMessage(e instanceof Error ? e.message : 'We could not read that file. Pick a Suited backup file.');
+      setDataMessage(e instanceof Error ? e.message : 'We could not read that file. Pick a Aced backup file.');
       haptic('error');
     }
   };
@@ -599,15 +599,15 @@ function TestingSection() {
         <span className="settings-status">
           {serverOn
             ? session
-              ? 'The server has Suited Pro on for every signed in player. The AI coach works too.'
-              : 'The server has Suited Pro on for signed in players. Sign in to get it everywhere.'
+              ? 'The server has Aced Pro on for every signed in player. The AI coach works too.'
+              : 'The server has Aced Pro on for signed in players. Sign in to get it everywhere.'
             : 'Nothing is charged. The coach still checks your account.'}
         </span>
       }
     >
       <div className="list">
-        <Row label="Unlock Suited Pro for testing" hint={on ? 'On for this device' : 'Only this device'}>
-          <Toggle label="Unlock Suited Pro for testing" checked={on} onChange={(next) => update({ ...settings, access: setTestingPro(settings.access, next) })} />
+        <Row label="Unlock Aced Pro for testing" hint={on ? 'On for this device' : 'Only this device'}>
+          <Toggle label="Unlock Aced Pro for testing" checked={on} onChange={(next) => update({ ...settings, access: setTestingPro(settings.access, next) })} />
         </Row>
       </div>
     </Section>
@@ -627,14 +627,14 @@ function ProSettingsPage() {
   }, []);
 
   return (
-    <SubPage title="Suited Pro">
+    <SubPage title="Aced Pro">
       <Section
         title="Subscription"
-        info={<p>Cancel or change Suited Pro from your account. Your progress stays either way.</p>}
+        info={<p>Cancel or change Aced Pro from your account. Your progress stays either way.</p>}
       >
         <div className="list">
           <Link to="/pro?from=settings" className="list-row">
-            <span className="grow">Suited Pro</span>
+            <span className="grow">Aced Pro</span>
             <span className="detail">
               {!isPro(access) ? 'Free plan' : access.trialEndsAt ? `Free trial until ${shortDate(access.trialEndsAt)}` : 'Active'}
             </span>

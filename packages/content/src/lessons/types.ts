@@ -6,7 +6,7 @@
  * Accuracy is the product. Steps that state facts can carry `evidence`:
  * - `math`: exact, derived from the rules or arithmetic.
  * - `solver`: how equilibrium strategies tend to play; directional, and
- *   approximate until Suited's own solver packs back each claim with numbers.
+ *   approximate until Aced's own solver packs back each claim with numbers.
  * - `exploit`: an assumption about a player pool, to verify with your logs.
  * Text supports **bold** for emphasis.
  */

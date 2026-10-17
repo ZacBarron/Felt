@@ -24,7 +24,7 @@
   white-space: nowrap;
 }
 
-/* Suited Pro's tile is brass, so its glyph is ink. */
+/* Aced Pro's tile is brass, so its glyph is ink. */
 .settings-pro .icon-tile {
   color: var(--on-tint);
 }

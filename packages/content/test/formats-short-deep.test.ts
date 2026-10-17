@@ -30,7 +30,7 @@ import { CURRICULUM, LESSON_CONTENT, STARTER_CHARTS, type LessonArt, type Lesson
 /**
  * Short handed (6-max) and deep stack lessons. Every chart share, combo
  * count, SPR, price and equity they state is recomputed here with
- * @felt/core. Chart numbers come from Suited's starter charts.
+ * @felt/core. Chart numbers come from Aced's starter charts.
  */
 
 const KEYS = [

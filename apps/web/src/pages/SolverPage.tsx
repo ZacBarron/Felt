@@ -368,7 +368,7 @@ export function SolverPage() {
           <>
             <p>{custom ? 'Enter your own spot. Ranges can use hands like KJ or 98s, or exact cards like QhJh.' : preset.note}</p>
             <p style={{ marginTop: '0.5rem' }}>
-              Suited Solver runs on your device and checks every card combination. It stops when a perfect opponent could gain only a tiny share of the pot. The
+              Aced Solver runs on your device and checks every card combination. It stops when a perfect opponent could gain only a tiny share of the pot. The
               answer is only as good as the ranges and bet sizes you give it.
             </p>
           </>
@@ -385,7 +385,7 @@ export function SolverPage() {
           </button>
         </div>
         <div className="sc-solver-note">
-          <span>{custom ? (pro ? 'Your own board, ranges and sizes.' : 'Set up any spot. Solving your own spot needs Suited Pro.') : preset.short}</span>
+          <span>{custom ? (pro ? 'Your own board, ranges and sizes.' : 'Set up any spot. Solving your own spot needs Aced Pro.') : preset.short}</span>
           {!custom && preset.caveat && <span className="pill pill-warn">{preset.caveat}</span>}
         </div>
       </Section>
@@ -618,7 +618,7 @@ export function SolverPage() {
         <div className="card solver-upsell reveal">
           <div className="grow stack" style={{ gap: '0.35rem' }}>
             <strong>Solve the spots you actually play</strong>
-            <span className="footnote">Pick any board. Fill each range from your charts. Suited Pro solves it on your device.</span>
+            <span className="footnote">Pick any board. Fill each range from your charts. Aced Pro solves it on your device.</span>
             <button
               type="button"
               className="tint-capsule"

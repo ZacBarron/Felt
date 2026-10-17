@@ -15,8 +15,8 @@ export function markCell(r: number, c: number): MarkCell {
 export const MARK_GRID = 6;
 
 /**
- * The Suited mark: the suited half of a range chart, painted the way a
- * solver paints a range. Suited cells are brass, the pairs on the diagonal
+ * The Aced mark: the suited half of a range chart, painted the way a
+ * solver paints a range. Aced cells are brass, the pairs on the diagonal
  * are a soft line, and the offsuit half stays faintly visible.
  *
  * - `tile`: the app icon form, brass on the spruce felt gradient.
@@ -92,7 +92,7 @@ export function BrandMark({
 export function Wordmark({ height = 22, color = 'currentColor' }: { height?: number; color?: string }) {
   const [, , w, h] = WORDMARK_VIEWBOX.split(' ').map(Number);
   return (
-    <svg height={height} width={(height * w) / h} viewBox={WORDMARK_VIEWBOX} role="img" aria-label="Suited" style={{ display: 'block' }}>
+    <svg height={height} width={(height * w) / h} viewBox={WORDMARK_VIEWBOX} role="img" aria-label="Aced" style={{ display: 'block' }}>
       <path d={WORDMARK_PATH} fill={color} />
     </svg>
   );
@@ -107,7 +107,7 @@ export function Lockup({ size = 30 }: { size?: number }) {
   );
 }
 
-export const TAGLINE = 'Poker, suited to you.';
+export const TAGLINE = 'Ace every spot.';
 
 /**
  * Quiet sign off at the bottom of You and Settings. Tapping the mark paints
@@ -119,7 +119,7 @@ export function BrandFooter() {
     <footer className="brand-footer">
       <button
         className="brand-footer-mark"
-        aria-label="Paint the Suited mark"
+        aria-label="Paint the Aced mark"
         data-haptic="select"
         onClick={() => setPlays((n) => n + 1)}
       >

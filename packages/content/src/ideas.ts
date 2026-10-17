@@ -70,7 +70,7 @@ export const IDEAS: Idea[] = [
   {
     id: 'suited',
     topic: 'Theory',
-    title: 'Suited is worth more than it looks',
+    title: 'Aced is worth more than it looks',
     body: 'Being suited adds only a few points of equity. But flush draws make suited hands much easier to play.',
     basis: 'general',
   },

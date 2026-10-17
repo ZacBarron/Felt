@@ -273,7 +273,7 @@ function LessonCard({
             </span>
           ) : locked ? (
             <span className="pill pill-pro">
-              <LockIcon size={12} /> Suited Pro
+              <LockIcon size={12} /> Aced Pro
             </span>
           ) : state?.status === 'started' ? (
             <span className="pill pill-tint num">

@@ -29,18 +29,19 @@ Ordered for the main game (live 1/3 cash, 9-handed, on a phone) and so the core 
 - [x] Phone layout with a bottom tab bar; installable PWA that works offline
 - [x] Liquid Glass redesign: iOS system colors, light and dark modes, glass tab bar and sidebar, large titles with a collapsing nav bar, inset grouped lists, a custom icon set
 - [x] Rebrand to Suited (October 2026): the suited half of a range chart as the mark, "Poker, suited to you.", color blind friendly action colors as an option in Settings
+- [x] Rename to Aced (October 2026): Suited clashed with suitedpoker.com. Tagline "Ace every spot.", domain acedpoker.app, marketing site in `apps/site`
 - [x] Brand identity: F mark painted in a 6x6 range grid, serif wordmark, Card room palette (spruce and brass), guidelines in BRAND.md, app icons, Home with a felt hero, up next hand preview, mastery map, key idea and chart progress, motion (card flip, diagonal grid wave, ink painting, liquid tab pill, count ups)
 - [x] UI pass: press states on every control, haptics (Android vibration, iOS switch tick), thumb zone answer buttons, focus mode for review, animated verdicts and score rings, settings with segmented controls, steppers and toggles, keyboard shortcuts on laptops
 - [x] Lesson player: one idea per screen (text, formulas, tables, charts, hands on felt, callouts, quick checks, takeaways), story style progress, swipe and keyboard navigation, resume where you left off, completion with practice links
 - [x] 11 lessons: pot odds, MDF and alpha, combos and blockers, outs, equity realization, early and late position opens, small blind, big blind defense, live pool tendencies, punishing limpers (quiz answers tested against the charts)
 - [x] Themes: Card room (brand default), Ink, Burgundy, Cobalt
 - [x] 29 lessons across foundations (EV and indifference, implied odds, SPR and geometric sizing, range vs range, range and nut advantage, range shapes), postflop (textures, c-betting in position, sizing, defending c-bets, check raising, turn cards, bluff selection, bluff catching) and exploitation (node locking, stations, nits, sizing tells)
-- [x] Accuracy pass: every lesson claim labelled exact math, solver pattern (approximate) or pool tendency; every math number recomputed in tests; range numbers computed from Suited's charts
+- [x] Accuracy pass: every lesson claim labelled exact math, solver pattern (approximate) or pool tendency; every math number recomputed in tests; range numbers computed from Aced's charts
 - [x] Full curriculum: 70 lessons across foundations and game theory, preflop (including live preflop), postflop (river play, 3bet pots, multiway), exploitation, mental game and study, and tournaments; every lesson has at least two quiz questions
 - [x] Topic intros: why each topic matters and when it comes up at the table, on Learn and once before a topic's first lesson
 - [ ] Chart editor: enter or paste any chart (range notation) as a `custom` source
 
-## Product: onboarding, placement and Suited Pro (done)
+## Product: onboarding, placement and Aced Pro (done)
 
 See [MONETIZATION.md](MONETIZATION.md).
 
@@ -49,24 +50,24 @@ See [MONETIZATION.md](MONETIZATION.md).
 - [x] Test out of any module; a miss expands into the full lesson
 - [x] Path ordering: in progress, then placement module, then focus areas
 - [x] Today leads with the next lesson in the plan and a three task plan (lesson, review, daily challenge)
-- [x] Suited Pro paywall with plan cards, trial timeline and honest fine print; free tier is the first module of every track
-- [x] Onboarding v2: welcome with the Newcomer to Elite ladder and real content counts, a reply to each answer, a target tier, a first hand before any commitment, cited reasons Suited works, basics first for new players, and a Day 1 moment after the pledge
+- [x] Aced Pro paywall with plan cards, trial timeline and honest fine print; free tier is the first module of every track
+- [x] Onboarding v2: welcome with the Newcomer to Elite ladder and real content counts, a reply to each answer, a target tier, a first hand before any commitment, cited reasons Aced works, basics first for new players, and a Day 1 moment after the pledge
 - [ ] Testimonials: add real quotes from test players to `TESTIMONIALS` in `packages/content/src/onboarding.ts` (with permission)
 - [x] Developer switch for Pro, onboarding replay and progress reset
-- [x] Paywall v2 on one phone screen, Restore purchases that always answers (signed out, found, not found, server down), Unlock Suited Pro for testing in Settings and `PRO_FOR_EVERYONE` on the server
+- [x] Paywall v2 on one phone screen, Restore purchases that always answers (signed out, found, not found, server down), Unlock Aced Pro for testing in Settings and `PRO_FOR_EVERYONE` on the server
 - [x] Paywall v3: felt hero with real Pro lessons, Free vs Pro table, trial timeline (patterns from Mobbin)
 - [x] Reminders by push: the daily study reminder from the Today card, and a trial reminder 2 days before a free week ends (switch on the paywall, on by default, sent once)
 - [x] Log out reliably; create a new account or continue without one from the signed out screen
 - [x] Saves: bookmark any lesson screen or solver hand; a Saved page with notes; every save becomes a review card (quizzes graded, other screens as self graded flashcards, solver hands graded against the solver's mix), plus a saved only review session
-- [x] Suited Rating: Glicko rating overall and per area from every graded answer, provisional until settled, tiers, history (see ENGAGEMENT.md)
+- [x] Aced Rating: Glicko rating overall and per area from every graded answer, provisional until settled, tiers, history (see ENGAGEMENT.md)
 - [x] Win rate model: rake and tips per player from the rake rules, skill edge from rating against the table, 95% range, Bayesian blend with entered results
 - [x] Daily challenge: five decisions, the same for everyone, harder as it goes, saved after every answer, rated, a decision list that adds misses to review, and a shareable spoiler free grid
 - [x] Weekly Pro challenge: 10 harder decisions per ISO week, the same for every Pro player, balanced across math, mixed hands, close calls, solver graded rivers and advanced questions, harder as it goes, mixes graded by mix distance, one attempt, rated, personal bests against earlier weeks, misses to review, a share grid, a card on Today for Pro players
 - [x] Streaks with freezes: one to start, one earned every seven days in a row
-- [x] Share cards: a sheet with a swipeable carousel of 1080x1350 cards (rating, streak and daily challenge, on felt or paper) and page dots, then Share (the image with its text where the browser can), Copy and Save image. A rating still settling shows as "About 1180". The daily challenge also shares a spoiler free text result (`Suited Daily #312 4/5` and five squares). Every link carries the invite code
+- [x] Share cards: a sheet with a swipeable carousel of 1080x1350 cards (rating, streak and daily challenge, on felt or paper) and page dots, then Share (the image with its text where the browser can), Copy and Save image. A rating still settling shows as "About 1180". The daily challenge also shares a spoiler free text result (`Aced Daily #312 4/5` and five squares). Every link carries the invite code
 - [x] Research brief with verified sources (docs/research/sources.md)
 - [x] Tiers every 150 points (nine tiers, Newcomer to Elite, none while provisional) with progress to the next
-- [x] Levels of thinking: each tier names the question its players ask and what Suited rates there; Your tier card on You with points and right answers to the next tier (from the update rule), the full ladder in a sheet, and the question in the tier moment
+- [x] Levels of thinking: each tier names the question its players ask and what Aced rates there; Your tier card on You with points and right answers to the next tier (from the update rule), the full ladder in a sheet, and the question in the tier moment
 - [x] Imports: hand histories (PokerStars format, GGPoker header, tracker exports) and live session CSVs; stats by seat, opening leaks against the charts, results feeding the win rate
 - [x] Practice at your level (about 80% expected success, weaker areas first, interleaved); study cue at onboarding
 - [x] More preflop charts: BB vs CO and UTG, SB vs BTN, BTN vs CO, BTN and UTG facing a 3bet (with reach, so only opened hands are drilled), BTN vs two limpers
@@ -102,7 +103,7 @@ See [PLAY.md](PLAY.md).
 - [x] Play tab as a cash table: a lobby of tables (full ring, home game, online 6 max, deep 6 max, heads up) with a buy in, hands dealt one after another with stacks that carry over, bots that top up and rebuy, think time rings, chips that slide to the pot and the winner, pre actions (Check/fold, Check, Call any), Min, pot share and All in sizes with a slider, a table menu (top up, sit out, fast bots, grades after each hand, leave), a Last hand sheet with the hand history, and a session that survives switching tabs and reloads. Skip clear folds plays out hands the chart folds every time at once
 - [x] Recap: preflop graded by the chart where it matches the spot, calls and folds graded against the bots' real ranges (exact on the river heads up), coaching notes, decision quality first, mistakes to Review, Ask the coach
 - [ ] River grading with the live solver, then turn grading in the recap
-- [ ] Bot ratings measured by self play on the Suited Rating scale
+- [ ] Bot ratings measured by self play on the Aced Rating scale
 - [ ] Flop grading from the first postflop pack
 
 ## Phase 2: Live game essentials
@@ -119,12 +120,12 @@ See [PLAY.md](PLAY.md).
 
 See [SOLVER_DATA.md](SOLVER_DATA.md).
 
-- [x] Suited Solver: heads up postflop DCFR solver in `@felt/core`, per combo with exact card removal, measured exploitability, validated against an analytic river game
+- [x] Aced Solver: heads up postflop DCFR solver in `@felt/core`, per combo with exact card removal, measured exploitability, validated against an analytic river game
 - [x] Solver screen: example spots free, custom spots with Pro, runs in a Web Worker, browse the tree with per hand class strategies
 - [ ] Suit isomorphism and a WASM build for faster turn and flop solves
 
 - [ ] Normalized node format and import validator
-- [ ] Batch runner for Suited Solver on a laptop or cloud machine
+- [ ] Batch runner for Aced Solver on a laptop or cloud machine
 - [ ] First postflop pack: single raised pots BTN vs BB and CO vs BB across a representative flop set
 - [ ] Simplified preflop solver in `@felt/core` to regenerate charts for any table size, stack depth, open size and rake
 - [ ] Data packs downloaded into the app, so the phone never runs a solve
@@ -133,10 +134,10 @@ See [SOLVER_DATA.md](SOLVER_DATA.md).
 
 - [x] Gap lessons: hand reading, semi-bluffs, rake, reshoves, the bubble, final tables, live table basics
 - [x] Second gap pass: side pots, reading the board for the nuts, showdown value and pot control, your poker face, how much to trust a tell, bounty tournaments, satellites, knowing when to stop (every number and hand claim recomputed in `gaps2.test.ts`)
-- [x] Thick and thin value: a c-bet lesson on why bet size follows how far ahead you stay when called, not board wetness, with BB's equity curves against KK on 7♦5♠4♠ and 7♦3♣2♠ from Suited's charts (recomputed in `value.test.ts`). Texture, sizing and multiway lessons no longer say wet boards mean big bets
+- [x] Thick and thin value: a c-bet lesson on why bet size follows how far ahead you stay when called, not board wetness, with BB's equity curves against KK on 7♦5♠4♠ and 7♦3♣2♠ from Aced's charts (recomputed in `value.test.ts`). Texture, sizing and multiway lessons no longer say wet boards mean big bets
 - [x] Win rate, rake and variance track: 12 lessons on bb/100 and hourly rates, the true cost of rake and tips, table selection, how rake works and what it costs, raked strategy, SD, sample size, downswings, risk of ruin, and luck and skill. New pure helpers in `core/src/variance.ts` and a seeded `paths` illustration. Every number recomputed in `results.test.ts`
 - [x] Heads up and blind vs blind topic in a new Other formats track: 5 advanced lessons (heads up preflop, big blind defense, blind vs blind in a full ring, postflop with wide ranges, adjusting to one opponent). Exact math and qualitative solver patterns, no invented 2-handed charts; numbers recomputed in `formats-heads-up.test.ts`
-- [x] Short handed (6-max) and Deep stacks topics in Other formats: 6 advanced lessons (fewer players and wider ranges, 3bets and blind battles, postflop at 6-max, what changes deep, one pair hands deep, preflop deep). Numbers come from Suited's 6-max charts and exact math (new `core/src/behind.ts`), with solver patterns kept qualitative; recomputed in `formats-short-deep.test.ts`
+- [x] Short handed (6-max) and Deep stacks topics in Other formats: 6 advanced lessons (fewer players and wider ranges, 3bets and blind battles, postflop at 6-max, what changes deep, one pair hands deep, preflop deep). Numbers come from Aced's 6-max charts and exact math (new `core/src/behind.ts`), with solver patterns kept qualitative; recomputed in `formats-short-deep.test.ts`
 - [x] Picture pass: every lesson has at most 2 text steps in a row, every core lesson at least 2 pictures; hand flow is a street by street walkthrough
 - [x] Mixed answers in hand quizzes (frequencies and splits), graded by mix distance
 - [x] Math facts deck in review: pot odds, MDF, alpha, combos, outs (exact, four choices)
@@ -167,7 +168,7 @@ See [SOLVER_DATA.md](SOLVER_DATA.md).
 - [x] Tournament track lessons (ICM, bubble, short stack play)
 - [x] Advanced tournament play topic: bubble factor and risk premium, the big stack on the bubble (with an exact one hand ICM equilibrium), short and medium stacks, folding into a pay jump and ICM deals (every number from `icm.ts`, recomputed in `tournaments-icm.test.ts`)
 - [ ] AI hand review grounded in solver data and your leak history (Claude API)
-- [x] AI coach chat for Suited Pro, using Suited's charts, your Suited Rating and recent misses (Claude API, `apps/server/src/coach.ts`, `/coach`)
+- [x] AI coach chat for Aced Pro, using Aced's charts, your Aced Rating and recent misses (Claude API, `apps/server/src/coach.ts`, `/coach`)
 - [ ] Voice note hand capture; online hand history import
 - [x] Optional cloud sync and backup
 - [x] Passkey accounts (sign up and sign in with Face ID or a fingerprint, no username), email code as the fallback, an optional email for passkey accounts

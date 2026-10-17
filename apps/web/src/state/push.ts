@@ -5,10 +5,10 @@ export function pushBlocker(): string | undefined {
   if (!('serviceWorker' in navigator) || !('PushManager' in window) || !('Notification' in window)) {
     const ios = /iPhone|iPad/.test(navigator.userAgent);
     return ios
-      ? 'On iPhone, add Suited to your Home Screen first. Tap Share, then Add to Home Screen. Then open Suited from there.'
+      ? 'On iPhone, add Aced to your Home Screen first. Tap Share, then Add to Home Screen. Then open Aced from there.'
       : 'This browser cannot show reminders.';
   }
-  if (Notification.permission === 'denied') return 'Notifications are blocked for Suited. Allow them in your browser or phone settings.';
+  if (Notification.permission === 'denied') return 'Notifications are blocked for Aced. Allow them in your browser or phone settings.';
   return undefined;
 }
 
@@ -19,9 +19,9 @@ function keyBytes(base64url: string): Uint8Array {
 }
 
 /**
- * Whether Suited can send this player a push: the server sends them, the
+ * Whether Aced can send this player a push: the server sends them, the
  * player is signed in (pushes go to an account), and this browser can show
- * them. On iPhone that means Suited was opened from the Home Screen.
+ * them. On iPhone that means Aced was opened from the Home Screen.
  */
 export function canPush(features: ServerFeatures | null | undefined): boolean {
   return !!features?.push && !!currentSession() && !pushBlocker();
@@ -31,7 +31,7 @@ export function canPush(features: ServerFeatures | null | undefined): boolean {
 export async function subscribePush(): Promise<void> {
   const blocker = pushBlocker();
   if (blocker) throw new Error(blocker);
-  if ((await Notification.requestPermission()) !== 'granted') throw new Error('Suited needs permission to show notifications.');
+  if ((await Notification.requestPermission()) !== 'granted') throw new Error('Aced needs permission to show notifications.');
   const { key } = await api<{ key: string }>('/push/key');
   const reg = await navigator.serviceWorker.ready;
   const sub = (await reg.pushManager.getSubscription()) ?? (await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: keyBytes(key).buffer as ArrayBuffer }));

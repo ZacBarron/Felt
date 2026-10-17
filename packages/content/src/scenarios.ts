@@ -1,6 +1,6 @@
 /**
  * Scenarios: full hands played street by street. The preflop decision is
- * graded against a starter chart. The river decision is solved live by Suited
+ * graded against a starter chart. The river decision is solved live by Aced
  * Solver for the ranges below and graded by the EV each action loses, so the
  * grade is exact for the stated ranges. Flop and turn are told as the story
  * of the hand.
@@ -60,7 +60,7 @@ export interface ScenarioSpec {
  * blind), 3bets 11bb out of position and 7.5bb in position. Pots and stacks
  * follow exactly from the sizes in each story. River ranges hold only hands
  * that would take the line both players took, and every hero hand was checked
- * against Suited Solver (under 0.5% of the pot exploitable, and the river
+ * against Aced Solver (under 0.5% of the pot exploitable, and the river
  * decision is worth at least 3% of the pot).
  */
 export const SCENARIOS: ScenarioSpec[] = [
@@ -105,7 +105,7 @@ export const SCENARIOS: ScenarioSpec[] = [
       ],
       raises: [],
       explain:
-        'Suited Solver bets big with this hand almost every time. BB has called twice with lots of one pair kings like KQ and KT. Those hands can call a big bet. They fold to a shove, which gets called mostly by sets and better two pair. A small bet is fine but leaves value behind.',
+        'Aced Solver bets big with this hand almost every time. BB has called twice with lots of one pair kings like KQ and KT. Those hands can call a big bet. They fold to a shove, which gets called mostly by sets and better two pair. A small bet is fine but leaves value behind.',
     },
   },
   {
@@ -149,7 +149,7 @@ export const SCENARIOS: ScenarioSpec[] = [
       ],
       raises: [],
       explain:
-        'Suited Solver calls with this hand every time. BTN checked the turn, so its range is capped. Its big bets include some tens and some thin value with 88. They also include missed straight draws like 98 and J9. Your nines beat or tie everything but a ten. Folding here gives up far too much.',
+        'Aced Solver calls with this hand every time. BTN checked the turn, so its range is capped. Its big bets include some tens and some thin value with 88. They also include missed straight draws like 98 and J9. Your nines beat or tie everything but a ten. Folding here gives up far too much.',
     },
   },
   {
@@ -193,7 +193,7 @@ export const SCENARIOS: ScenarioSpec[] = [
       ],
       raises: [],
       explain:
-        'Suited Solver bets this hand almost every time, mostly with the big size. Jack high rarely wins at showdown. Many BB hands beat you but fold to a big bet. Pairs like TT and 88 are the main ones. Your jack and ten also block QJ and QT, which would call. A small bet is close but folds out fewer of those pairs.',
+        'Aced Solver bets this hand almost every time, mostly with the big size. Jack high rarely wins at showdown. Many BB hands beat you but fold to a big bet. Pairs like TT and 88 are the main ones. Your jack and ten also block QJ and QT, which would call. A small bet is close but folds out fewer of those pairs.',
     },
   },
   {
@@ -237,7 +237,7 @@ export const SCENARIOS: ScenarioSpec[] = [
       ],
       raises: [],
       explain:
-        'Suited Solver checks this hand almost every time. CO checked twice, so it holds lots of ace high and small pairs. Your sixes beat those at showdown. A small bet gets called by some ace high hands. But CO can also check-raise with strong hands and bluffs. Then your sixes have to fold or pay off. A small bet is a close second, so it is not a big mistake.',
+        'Aced Solver checks this hand almost every time. CO checked twice, so it holds lots of ace high and small pairs. Your sixes beat those at showdown. A small bet gets called by some ace high hands. But CO can also check-raise with strong hands and bluffs. Then your sixes have to fold or pay off. A small bet is a close second, so it is not a big mistake.',
     },
   },
   {
@@ -281,7 +281,7 @@ export const SCENARIOS: ScenarioSpec[] = [
       ],
       raises: [],
       explain:
-        'Suited Solver shoves this hand almost every time. BTN called two bets, so it holds lots of kings like KQ and KT. Those hands can call a shove. Aces beat all of them. The 3 makes a straight only for A4, so you are rarely beaten. A smaller bet still makes money but leaves chips behind.',
+        'Aced Solver shoves this hand almost every time. BTN called two bets, so it holds lots of kings like KQ and KT. Those hands can call a shove. Aces beat all of them. The 3 makes a straight only for A4, so you are rarely beaten. A smaller bet still makes money but leaves chips behind.',
     },
   },
   {
@@ -325,7 +325,7 @@ export const SCENARIOS: ScenarioSpec[] = [
       ],
       raises: [],
       explain:
-        'Suited Solver bets small with this hand almost every time. BB has some jacks but many more weaker pairs. Pairs of sixes and eights call a small bet. So do small pocket pairs. Many of them fold to a big one. A third of the pot gets value from those hands and costs little when BB has a jack. Checking gives up that value.',
+        'Aced Solver bets small with this hand almost every time. BB has some jacks but many more weaker pairs. Pairs of sixes and eights call a small bet. So do small pocket pairs. Many of them fold to a big one. A third of the pot gets value from those hands and costs little when BB has a jack. Checking gives up that value.',
     },
   },
   {
@@ -369,7 +369,7 @@ export const SCENARIOS: ScenarioSpec[] = [
       ],
       raises: [],
       explain:
-        'Suited Solver checks this hand back almost every time. A player who calls twice on this board has plenty of two pair and straights. A bet still gets calls from worse jacks like KJ. But the big hands raise, and then you must fold or pay off. Checking beats those same worse jacks at showdown with no risk.',
+        'Aced Solver checks this hand back almost every time. A player who calls twice on this board has plenty of two pair and straights. A bet still gets calls from worse jacks like KJ. But the big hands raise, and then you must fold or pay off. Checking beats those same worse jacks at showdown with no risk.',
     },
   },
   {
@@ -413,7 +413,7 @@ export const SCENARIOS: ScenarioSpec[] = [
       ],
       raises: [],
       explain:
-        'Suited Solver calls with this hand almost every time. The king does help BTN. Hands like AK and KQ just made top pair. But BTN also bets missed draws like 87s and A5s. You need to win a bit under a third of the time for the call to pay. Jacks beat every one of those bluffs.',
+        'Aced Solver calls with this hand almost every time. The king does help BTN. Hands like AK and KQ just made top pair. But BTN also bets missed draws like 87s and A5s. You need to win a bit under a third of the time for the call to pay. Jacks beat every one of those bluffs.',
     },
   },
   {
@@ -457,7 +457,7 @@ export const SCENARIOS: ScenarioSpec[] = [
       ],
       raises: [0.6],
       explain:
-        'Suited Solver raises with this hand every time. Sometimes it raises all in. You have the nut straight, and only another jack ten ties you. BTN bets big with overpairs and sets. So does 76, which makes a lower straight. Many of those hands call a raise. Some of its missed draws bet too, so your check let BTN bluff. Calling leaves a lot of value behind.',
+        'Aced Solver raises with this hand every time. Sometimes it raises all in. You have the nut straight, and only another jack ten ties you. BTN bets big with overpairs and sets. So does 76, which makes a lower straight. Many of those hands call a raise. Some of its missed draws bet too, so your check let BTN bluff. Calling leaves a lot of value behind.',
     },
   },
   {
@@ -501,7 +501,7 @@ export const SCENARIOS: ScenarioSpec[] = [
       ],
       raises: [],
       explain:
-        'Suited Solver bets this hand every time. It mixes a small and a big size, and both do about as well. BB checked the turn and river, so it rarely has a king. Worse nines like T9 call either size. Smaller pairs and sixes call the small size. Checking back gives up all of that value.',
+        'Aced Solver bets this hand every time. It mixes a small and a big size, and both do about as well. BB checked the turn and river, so it rarely has a king. Worse nines like T9 call either size. Smaller pairs and sixes call the small size. Checking back gives up all of that value.',
     },
   },
   {
@@ -545,7 +545,7 @@ export const SCENARIOS: ScenarioSpec[] = [
       ],
       raises: [],
       explain:
-        'Suited Solver calls with this hand every time, but it is close. BB shoves AA and AK for value. It also shoves missed draws like A5s and 64s. Your king blocks AK and KK, so BB has fewer value hands. You hold no hearts, so all of its missed flush draws are still possible. Those details tip a close spot toward a call.',
+        'Aced Solver calls with this hand every time, but it is close. BB shoves AA and AK for value. It also shoves missed draws like A5s and 64s. Your king blocks AK and KK, so BB has fewer value hands. You hold no hearts, so all of its missed flush draws are still possible. Those details tip a close spot toward a call.',
     },
   },
   {
@@ -589,7 +589,7 @@ export const SCENARIOS: ScenarioSpec[] = [
       ],
       raises: [],
       explain:
-        'Suited Solver shoves this hand almost every time. Ace high beats only the missed draws, and those fold anyway. BTN holds mostly one pair after calling twice. A shove folds out pairs like 99 and 88 that beat you. Your queen also blocks some calls, like QQ and KQ. That makes ace queen a strong bluff here.',
+        'Aced Solver shoves this hand almost every time. Ace high beats only the missed draws, and those fold anyway. BTN holds mostly one pair after calling twice. A shove folds out pairs like 99 and 88 that beat you. Your queen also blocks some calls, like QQ and KQ. That makes ace queen a strong bluff here.',
     },
   },
 ];

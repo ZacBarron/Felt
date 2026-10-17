@@ -38,9 +38,9 @@ if (webDir && existsSync(join(webDir, 'index.html'))) {
 }
 
 serve({ fetch: app.fetch, port: config.port }, ({ port }) => {
-  console.log(`Suited server on http://localhost:${port}${webDir ? ` serving ${webDir}` : ''}`);
+  console.log(`Aced server on http://localhost:${port}${webDir ? ` serving ${webDir}` : ''}`);
   if (!config.production && config.devCodes) console.log('Development mode: sign in codes are returned by the API and printed here.');
-  if (config.proForEveryone) console.log('Testing: PRO_FOR_EVERYONE is on, so every signed in player has Suited Pro.');
+  if (config.proForEveryone) console.log('Testing: PRO_FOR_EVERYONE is on, so every signed in player has Aced Pro.');
 });
 
 const sender = createPushSender(config);

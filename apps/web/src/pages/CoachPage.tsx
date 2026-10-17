@@ -42,8 +42,8 @@ function initialChat(incoming?: CoachSpotRef): Chat {
 
 /**
  * The AI coach: questions about the player's own game, answered with their
- * Suited Rating, goals, game and recent misses in view. It needs the Suited
- * server with the coach turned on, a signed in player and Suited Pro.
+ * Aced Rating, goals, game and recent misses in view. It needs the Aced
+ * server with the coach turned on, a signed in player and Aced Pro.
  */
 export function CoachPage() {
   const available = useCoachAvailable();
@@ -105,12 +105,12 @@ function Art() {
 
 const PITCH = [
   { title: 'Ask why', body: 'Get the reason behind any chart answer you missed.' },
-  { title: 'Know where to work', body: 'It reads your Suited Rating and recent misses. Then it picks what to study next.' },
-  { title: 'Honest about numbers', body: 'It uses Suited’s charts when it has them. Anything else it labels as an estimate.' },
+  { title: 'Know where to work', body: 'It reads your Aced Rating and recent misses. Then it picks what to study next.' },
+  { title: 'Honest about numbers', body: 'It uses Aced’s charts when it has them. Anything else it labels as an estimate.' },
 ];
 
 /**
- * For players without Suited Pro: what the coach does, the questions it would
+ * For players without Aced Pro: what the coach does, the questions it would
  * start with for this player (from their own misses and weakest area), then
  * one way in. Guests also get a way to sign in, for when they already have Pro.
  */
@@ -150,12 +150,12 @@ function Pitch({ signIn = false }: { signIn?: boolean }) {
       </div>
       {signIn && (
         <p className="coach-signin footnote">
-          Have Suited Pro already? <Link to="/account?next=/coach">Sign in to use it</Link>
+          Have Aced Pro already? <Link to="/account?next=/coach">Sign in to use it</Link>
         </p>
       )}
       <BottomBar>
         <Link to="/pro?from=coach" className="btn btn-primary btn-lg btn-block">
-          See Suited Pro
+          See Aced Pro
         </Link>
       </BottomBar>
     </>
@@ -286,14 +286,14 @@ function Conversation({ incoming, limit, remaining, onRemaining, onLostPro }: Co
           {!chat.spot && (
             <div className="coach-hello">
               <h2 className="coach-hello-title">{settings.profile.name?.trim() ? `Hi ${settings.profile.name.trim()}.` : 'Hi.'} What should we work on?</h2>
-              <p className="coach-hello-sub">The coach knows your Suited Rating and your recent misses.</p>
+              <p className="coach-hello-sub">The coach knows your Aced Rating and your recent misses.</p>
             </div>
           )}
           <Section
             title="Try asking"
             info={
               <p>
-                The coach uses Claude, an AI model made by Anthropic. Each question goes to it with a short summary of your study. The summary holds your Suited Rating, goals, game settings and recent misses.
+                The coach uses Claude, an AI model made by Anthropic. Each question goes to it with a short summary of your study. The summary holds your Aced Rating, goals, game settings and recent misses.
               </p>
             }
             footer="The coach can be wrong. Check big decisions against your charts."
@@ -322,7 +322,7 @@ function Conversation({ incoming, limit, remaining, onRemaining, onLostPro }: Co
               <div key={i} className="coach-msg coach-msg-coach">
                 <span className="sr-only">Coach: </span>
                 <Reply text={m.content} />
-                {!m.refused && <p className="coach-note">The coach can be wrong. Numbers are estimates unless they come from Suited’s charts.</p>}
+                {!m.refused && <p className="coach-note">The coach can be wrong. Numbers are estimates unless they come from Aced’s charts.</p>}
               </div>
             ),
           )}
@@ -405,7 +405,7 @@ function SpotCard({ spot }: { spot: CoachSpotRef }) {
       <MixBar mix={mix} labels={actionLabels(chart)} />
       <p className="footnote" style={{ margin: 0 }}>
         {spot.chose ? `You chose ${spot.chose}. ` : ''}
-        {chart.spec.source === 'starter-approx' ? 'The mix is from a Suited starter chart. It is approximate.' : 'The mix is from Suited’s chart.'}
+        {chart.spec.source === 'starter-approx' ? 'The mix is from a Aced starter chart. It is approximate.' : 'The mix is from Aced’s chart.'}
       </p>
     </div>
   );

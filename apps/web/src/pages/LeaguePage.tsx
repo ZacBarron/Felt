@@ -64,7 +64,7 @@ export function LeaguePage() {
             </span>
           }
           title="Leagues are coming"
-          body="Until then practice still moves your Suited Rating."
+          body="Until then practice still moves your Aced Rating."
           action={
             <Link to="/practice" className="btn btn-primary" style={{ marginTop: '0.4rem' }}>
               Start practice
@@ -79,7 +79,7 @@ export function LeaguePage() {
             </span>
           }
           title="Weekly leagues"
-          body="Each week you play up to 29 real players near your Suited Rating."
+          body="Each week you play up to 29 real players near your Aced Rating."
           action={
             <Link to={session ? '/account' : '/account?next=/league'} className="btn btn-primary" style={{ marginTop: '0.4rem' }}>
               {session ? 'Join from your account' : 'Sign in to join'}
@@ -108,11 +108,11 @@ export function LeaguePage() {
       ) : (
         <Section
           title="This week"
-          info={<p>Whoever gains the most Suited Rating this week ranks highest. A new league starts every Monday. Other players only see your display name.</p>}
+          info={<p>Whoever gains the most Aced Rating this week ranks highest. A new league starts every Monday. Other players only see your display name.</p>}
           footer={
             league.standings.length === 1
               ? 'You are the first in this league this week. Others near your rating join as they play.'
-              : 'Points are Suited Rating gained since you joined this week. Your rating climbs when you beat what it expects.'
+              : 'Points are Aced Rating gained since you joined this week. Your rating climbs when you beat what it expects.'
           }
         >
           {you && (

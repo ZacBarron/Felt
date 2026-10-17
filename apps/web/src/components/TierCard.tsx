@@ -26,7 +26,7 @@ export function TierCard({ rating }: { rating: SkillRating }) {
   const info = (
     <>
       <p>
-        Each tier names the question players at that rating tend to ask. Suited measures your answers, not your thoughts. So the questions are a guide
+        Each tier names the question players at that rating tend to ask. Aced measures your answers, not your thoughts. So the questions are a guide
         and the rating is the measurement.
       </p>
       {!p.settling && (
@@ -77,7 +77,7 @@ export function TierCard({ rating }: { rating: SkillRating }) {
                   </div>
                 </div>
               ) : (
-                <p className="tier-card-line">The top tier. Suited cannot measure higher yet.</p>
+                <p className="tier-card-line">The top tier. Aced cannot measure higher yet.</p>
               )}
             </>
           )}
@@ -125,7 +125,7 @@ export function TierLadderSheet({ open, onClose, progress }: { open: boolean; on
           </button>
         </div>
         <p className="footnote ladder-intro">
-          Each tier asks a deeper question about the hand. Suited measures your answers, not your thoughts. So the questions are a guide.
+          Each tier asks a deeper question about the hand. Aced measures your answers, not your thoughts. So the questions are a guide.
         </p>
         <ol className="list ladder-list">
           {[...TIERS].reverse().map((t) => (

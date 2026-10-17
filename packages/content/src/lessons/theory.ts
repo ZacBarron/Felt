@@ -500,7 +500,7 @@ export const THEORY_LESSONS: LessonContent[] = [
           ['8♠8♥', 'A♦K♣', '55.6%'],
           ['8♠8♥', 'A♦K♦', '52.3%'],
         ],
-        note: 'Exact. All 1,712,304 boards were enumerated with Suited’s evaluator. Ties count as half. Other suit combinations differ slightly.',
+        note: 'Exact. All 1,712,304 boards were enumerated with Aced’s evaluator. Ties count as half. Other suit combinations differ slightly.',
         evidence: 'math',
       },
       {

@@ -42,7 +42,7 @@ describe('restore purchases', () => {
     const r = decideRestore({ features: features({ billing: true }), signedIn: true, user: user({ pro: true, until: later, plan: 'annual' }), local });
     expect(r.kind).toBe('restored');
     if (r.kind !== 'restored') return;
-    expect(r.message).toBe('Suited Pro is on for ana@example.com.');
+    expect(r.message).toBe('Aced Pro is on for ana@example.com.');
     expect(r.access).toMatchObject({ pro: true, plan: 'annual', until: later, devMode: true });
     expect(isPro(r.access, NOW)).toBe(true);
   });
@@ -68,8 +68,8 @@ describe('restore purchases', () => {
   });
 
   it('reports a failed account check instead of guessing', () => {
-    const r = decideRestore({ features: features(), signedIn: true, error: 'Could not reach the Suited server. Check your connection.', local: free });
-    expect(r).toMatchObject({ kind: 'unavailable', message: 'Could not reach the Suited server. Check your connection.' });
+    const r = decideRestore({ features: features(), signedIn: true, error: 'Could not reach the Aced server. Check your connection.', local: free });
+    expect(r).toMatchObject({ kind: 'unavailable', message: 'Could not reach the Aced server. Check your connection.' });
     expect(decideRestore({ features: features(), signedIn: true, user: null, local: free }).kind).toBe('unavailable');
   });
 

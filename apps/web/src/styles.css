@@ -15,7 +15,7 @@
 }
 
 /*
- * Suited design system, after iOS 26 Liquid Glass:
+ * Aced design system, after iOS 26 Liquid Glass:
  * system colors and type, inset grouped content, translucent glass for
  * everything that floats (tab bar, nav bar, toolbars), capsule controls.
  * Light is the base; dark overrides follow the system or the Appearance setting.
@@ -1683,7 +1683,7 @@ input:focus:not(:focus-visible) {
 }
 
 .hero::after {
-  /* Suited nap: fine noise over the gradient, so it reads as cloth, not plastic. */
+  /* Aced nap: fine noise over the gradient, so it reads as cloth, not plastic. */
   content: '';
   position: absolute;
   inset: 0;
@@ -4814,7 +4814,7 @@ a.card.more-me,
   display: none;
 }
 
-/* Install Suited on the home screen. */
+/* Install Aced on the home screen. */
 .install-card {
   display: flex;
   align-items: flex-start;

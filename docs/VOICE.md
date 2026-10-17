@@ -1,6 +1,6 @@
-# Suited voice and style
+# Aced voice and style
 
-How Suited talks. Every screen, button, notification, email and lesson follows this guide. When this guide and older copy disagree, this guide wins.
+How Aced talks. Every screen, button, notification, email and lesson follows this guide. When this guide and older copy disagree, this guide wins.
 
 ## Who we are talking to
 
@@ -8,7 +8,7 @@ A poker player on their phone, often between hands, on a break or on the way to 
 
 ## How we sound
 
-Suited sounds like a good coach sitting next to you. **Calm, direct and warm.** We say what is true and what to do next.
+Aced sounds like a good coach sitting next to you. **Calm, direct and warm.** We say what is true and what to do next.
 
 | We are | We are not |
 | --- | --- |
@@ -101,9 +101,9 @@ When a newcomer might not know a poker abbreviation, spell it out the first time
 ## Mechanics
 
 - **Sentence case** for everything: titles, buttons, tabs, labels. "Daily challenge", not "Daily Challenge".
-- **Suited** and **Suited Pro** and **Suited Rating** are always capitalized.
+- **Aced** and **Aced Pro** and **Aced Rating** are always capitalized.
 - **Contractions** are welcome when they sound natural: you're, it's, don't.
-- **You and your** for the player. **We** only for Suited as a team, sparingly.
+- **You and your** for the player. **We** only for Aced as a team, sparingly.
 - **Numbers:** 9-handed, 6-max, 100bb, bb/100, 2.5bb. Money with its currency symbol.
 - **Dates:** Oct 19, not 10/19. Times: 7:30 pm.
 - **Periods:** none on buttons, labels, titles or single short fragments in lists. Use them on full sentences.
@@ -116,7 +116,7 @@ Use one name for each thing, everywhere.
 
 | Use | Means | Do not use |
 | --- | --- | --- |
-| Suited Rating | The skill number | score, level, Elo |
+| Aced Rating | The skill number | score, level, Elo |
 | tier | A named band of the rating | rank, league (leagues are different) |
 | still settling | A rating with few answers | provisional, ? |
 | lesson | One short teaching unit | module, class |
@@ -130,8 +130,8 @@ Use one name for each thing, everywhere.
 | card | One item in review | flashcard |
 | drill | Practice on one chart, not scheduled | free practice |
 | practice | 10 decisions at your level | workout |
-| daily challenge | The same 5 decisions for everyone each day | Suited Daily (except in the share text) |
-| weekly Pro challenge | The same 10 harder decisions for every Pro player each week, labelled "Pro event" | Suited Weekly (except in the share text), tournament |
+| daily challenge | The same 5 decisions for everyone each day | Aced Daily (except in the share text) |
+| weekly Pro challenge | The same 10 harder decisions for every Pro player each week, labelled "Pro event" | Aced Weekly (except in the share text), tournament |
 | decision | A rated hand or question | item |
 | chart | One spot's strategy grid | range (for the grid) |
 | range | The hands a player has | |
@@ -141,7 +141,7 @@ Use one name for each thing, everywhere.
 | Today's plan | The three daily tasks | quests |
 | streak freeze | Covers one missed day | |
 | league | A weekly group of real players near your rating | |
-| Suited Pro / free plan | Paid and free access | premium, your plan (for billing) |
+| Aced Pro / free plan | Paid and free access | premium, your plan (for billing) |
 
 ## Before you ship copy
 

@@ -20,7 +20,7 @@ beforeEach(async () => {
   await Promise.all(db.tables.map((t) => t.clear()));
   cloud = { version: 0 };
   puts = 0;
-  // A tiny stand in for the Suited server's sync routes.
+  // A tiny stand in for the Aced server's sync routes.
   vi.stubGlobal('fetch', async (url: string, init?: RequestInit) => {
     const path = String(url);
     let body: unknown = {};

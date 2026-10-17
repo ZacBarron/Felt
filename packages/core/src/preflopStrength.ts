@@ -2,7 +2,7 @@ import { comboCount, type HandClass } from './ranges';
 
 /**
  * Every starting hand's share of the pot against one random hand, all in
- * preflop, best first. Computed with Suited's own evaluator by sampling
+ * preflop, best first. Computed with Aced's own evaluator by sampling
  * 30,000 deals per hand (seed 12345), so each value is within about 0.3
  * points. Play's bots use the order where no chart covers a spot. It is a
  * rough guide to hand strength and is recomputed in preflopStrength.test.ts.

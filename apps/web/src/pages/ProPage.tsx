@@ -48,7 +48,7 @@ function dateIn(days: number) {
 const HEADLINES: Record<string, string> = {
   onboarding: 'Train every spot you play',
   'first-lesson': 'Keep the momentum',
-  lesson: 'This lesson is in Suited Pro',
+  lesson: 'This lesson is in Aced Pro',
   check: 'Unlock the lessons you need',
   solver: 'Solve your own spots',
   coach: 'Get a coach in your pocket',
@@ -107,7 +107,7 @@ function heroLessons(profile: Profile, access: Access) {
 }
 
 /**
- * The Suited Pro paywall. Honest by design: the price and the charge date sit
+ * The Aced Pro paywall. Honest by design: the price and the charge date sit
  * next to the button, declining is a button of the same size, and the perks
  * list only what Pro adds. Fine print waits behind a disclosure.
  */
@@ -159,7 +159,7 @@ export function ProPage() {
     const check = async () => {
       const user = await refreshMe().catch(() => null);
       if (user?.access.pro || ++tries >= 5) {
-        if (!user?.access.pro) setMessage({ text: 'Payment received. Suited Pro switches on within a minute. If it has not, reopen this page.' });
+        if (!user?.access.pro) setMessage({ text: 'Payment received. Aced Pro switches on within a minute. If it has not, reopen this page.' });
         return;
       }
       setTimeout(() => void check(), 2000);
@@ -176,7 +176,7 @@ export function ProPage() {
         <div className="hero pro-hero reveal">
           <HeroPattern />
           <BrandMark size={52} />
-          <h1 className="display pro-title">You have Suited Pro</h1>
+          <h1 className="display pro-title">You have Aced Pro</h1>
           <p className="pro-sub">{trialEnds ? `Your free trial runs until ${new Date(trialEnds).toLocaleDateString()}.` : 'Every lesson and tool is unlocked.'}</p>
         </div>
         {testingPro(settings.access) && (
@@ -199,7 +199,7 @@ export function ProPage() {
               </Link>
             ))}
           {SUPPORT_EMAIL && (
-            <a className="list-row" href={`mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent('Suited Pro support')}`}>
+            <a className="list-row" href={`mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent('Aced Pro support')}`}>
               <AccountIcon size={20} style={{ color: 'var(--tint)' }} />
               <span className="grow">
                 Priority support
@@ -272,7 +272,7 @@ export function ProPage() {
             <CloseIcon size={18} />
           </button>
           <div className="pw-eyebrow">
-            <BrandMark size={20} /> Suited Pro
+            <BrandMark size={20} /> Aced Pro
           </div>
         </div>
         <h1 className="display pw-title">{HEADLINES[from] ?? 'Train every spot you play'}</h1>
@@ -287,7 +287,7 @@ export function ProPage() {
         )}
       </header>
 
-      <div className="pw-compare" role="table" aria-label="Free and Suited Pro compared">
+      <div className="pw-compare" role="table" aria-label="Free and Aced Pro compared">
         <div className="pw-row pw-row-head" role="row">
           <span role="columnheader" className="pw-row-label">
             <span className="sr-only">Feature</span>

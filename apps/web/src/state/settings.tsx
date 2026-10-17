@@ -60,7 +60,7 @@ export interface Profile {
   target?: string;
   /** Who a regular player usually faces. Sets the pool assumption and which lessons come first. */
   opponents?: 'soft' | 'mixed' | 'tough';
-  /** Whether a regular player has hands or sessions Suited could import. */
+  /** Whether a regular player has hands or sessions Aced could import. */
   handSource?: 'online' | 'tracked' | 'none';
   focus: Focus[];
   /** Daily study target in minutes. */
@@ -80,7 +80,7 @@ export interface Profile {
 }
 
 /**
- * Access to Suited Pro. `pro` is what purchases set; `devPro` is a switch for
+ * Access to Aced Pro. `pro` is what purchases set; `devPro` is a switch for
  * the developer to test either side of the paywall.
  */
 export interface Access {
@@ -90,7 +90,7 @@ export interface Access {
   /** ISO date a trial ends, when on a trial. */
   trialEndsAt?: string;
   plan?: string;
-  /** Paid through this date, as reported by the Suited server. */
+  /** Paid through this date, as reported by the Aced server. */
   until?: string;
 }
 

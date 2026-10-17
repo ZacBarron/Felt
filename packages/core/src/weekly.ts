@@ -55,7 +55,7 @@ export interface WeeklyCandidate {
   id: string;
   /** Spot type, such as a mixed hand or a river decision. Picks are balanced across types. */
   kind: string;
-  /** Item difficulty on the Suited Rating scale. */
+  /** Item difficulty on the Aced Rating scale. */
   difficulty: number;
 }
 

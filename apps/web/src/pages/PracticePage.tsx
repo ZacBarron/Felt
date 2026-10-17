@@ -116,7 +116,7 @@ export function PracticePage() {
           </h1>
           {after !== undefined && (
             <span className="pill num">
-              Suited Rating {Math.round(after.rating)},{' '}
+              Aced Rating {Math.round(after.rating)},{' '}
               {Math.round(after.rating - before) === 0
                 ? 'no change'
                 : after.rating > before

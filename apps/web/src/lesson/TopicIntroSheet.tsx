@@ -13,7 +13,7 @@ const BUTTON: Record<TopicAction, string> = {
   start: 'Start lesson',
   continue: 'Continue lesson',
   again: 'Read the lesson again',
-  locked: 'See Suited Pro',
+  locked: 'See Aced Pro',
 };
 
 /**
@@ -139,7 +139,7 @@ function outline(steps: readonly { kind: string; title?: string }[]): string[] {
 }
 
 /**
- * A Suited Pro lesson, shown before the paywall: its cover, its length and
+ * A Aced Pro lesson, shown before the paywall: its cover, its length and
  * what it walks through, by screen title. It shows what is inside without
  * teaching it, so the paywall comes after real interest, not instead of it.
  */
@@ -174,7 +174,7 @@ export function LockedLessonSheet({ lessonKey, proLessons, onClose }: { lessonKe
         <div className="row between" style={{ alignItems: 'flex-start', gap: '0.8rem', flexWrap: 'nowrap' }}>
           <div style={{ minWidth: 0 }}>
             <div className="footnote locked-lesson-kicker">
-              <LockIcon size={12} /> Suited Pro, {entry.moduleTitle}
+              <LockIcon size={12} /> Aced Pro, {entry.moduleTitle}
             </div>
             <h2 id={titleId} className="topic-intro-title">
               {entry.title}
@@ -210,11 +210,11 @@ export function LockedLessonSheet({ lessonKey, proLessons, onClose }: { lessonKe
         <div className="topic-intro-cta">
           {proLessons !== undefined && proLessons > 1 && (
             <p className="locked-lesson-more">
-              This lesson and {proLessons - 1} more come with Suited Pro.
+              This lesson and {proLessons - 1} more come with Aced Pro.
             </p>
           )}
           <button className="btn btn-primary btn-lg btn-block" onClick={() => navigate('/pro?from=lesson')}>
-            See Suited Pro
+            See Aced Pro
           </button>
         </div>
       </div>

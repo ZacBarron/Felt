@@ -5,17 +5,17 @@ const base: RatingCardData = { rating: 1622.4, settling: false, tier: 'Regular',
 
 describe('rating share text', () => {
   it('states the rounded rating and the tier, nothing more', () => {
-    expect(ratingShareText(base)).toBe('My Suited Rating is 1622. My tier is Regular.');
+    expect(ratingShareText(base)).toBe('My Aced Rating is 1622. My tier is Regular.');
   });
 
   it('says a settling rating is rough and names no tier', () => {
-    expect(ratingShareText({ ...base, rating: 1264, settling: true, tier: undefined })).toBe('My Suited Rating is about 1260. It is still settling.');
+    expect(ratingShareText({ ...base, rating: 1264, settling: true, tier: undefined })).toBe('My Aced Rating is about 1260. It is still settling.');
     expect(ratingShareText({ ...base, rating: 1264, settling: true, tier: 'Regular' })).not.toContain('Regular');
   });
 
   it('mentions a streak only when there is one worth naming', () => {
     expect(ratingShareText({ ...base, streak: 1 })).not.toContain('streak');
-    expect(ratingShareText({ ...base, streak: 9 })).toBe("My Suited Rating is 1622. My tier is Regular. I'm on a 9 day streak.");
+    expect(ratingShareText({ ...base, streak: 9 })).toBe("My Aced Rating is 1622. My tier is Regular. I'm on a 9 day streak.");
   });
 });
 

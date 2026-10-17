@@ -145,7 +145,7 @@ function AfterSignIn({ flow, next, savedCopy }: { flow: ReturnType<typeof useAft
         <h1 ref={heading} tabIndex={-1} className="display onb-title">
           You are signed in
         </h1>
-        <p className="muted auth-lead">Suited could not reach your account to bring in your progress. Check your connection and try again.</p>
+        <p className="muted auth-lead">Aced could not reach your account to bring in your progress. Check your connection and try again.</p>
         <BottomBar>
           <button className="btn btn-primary btn-lg btn-block" onClick={() => void flow.retry()}>
             Try again
@@ -166,7 +166,7 @@ function AfterSignIn({ flow, next, savedCopy }: { flow: ReturnType<typeof useAft
           You are signed in
         </h1>
         <p className="muted auth-lead">
-          {settings.profile.onboarded ? 'Your account now holds the progress on this device.' : 'Your account has no saved progress yet. Set up your plan and Suited saves it as you go.'}
+          {settings.profile.onboarded ? 'Your account now holds the progress on this device.' : 'Your account has no saved progress yet. Set up your plan and Aced saves it as you go.'}
         </p>
         <BottomBar>
           {settings.profile.onboarded ? (
@@ -234,7 +234,7 @@ export function SaveProgress({ from, features, onContinue, onSkip }: { from: 'on
         next={onContinue}
         savedCopy={{
           title: 'Your progress is saved',
-          body: flow.method === 'passkey' ? 'Sign in with your passkey on any device. Suited saves as you study.' : 'Sign in with an email code on any device. Suited saves as you study.',
+          body: flow.method === 'passkey' ? 'Sign in with your passkey on any device. Aced saves as you study.' : 'Sign in with an email code on any device. Aced saves as you study.',
         }}
       />
     );
@@ -249,7 +249,7 @@ export function SaveProgress({ from, features, onContinue, onSkip }: { from: 'on
       if (e instanceof Cancelled) setNote({ text: `${e.message} You can try again${email ? ' or use your email' : ''}.` });
       else {
         haptic('error');
-        setNote({ text: errorText(e, 'Suited could not save a passkey. Try again.'), error: true });
+        setNote({ text: errorText(e, 'Aced could not save a passkey. Try again.'), error: true });
       }
     }
     setBusy(false);
@@ -367,7 +367,7 @@ export function SignInPage() {
   const email = emailOn(features);
 
   useEffect(() => {
-    document.title = 'Sign in · Suited';
+    document.title = 'Sign in · Aced';
     void passkeyAutofillSupported().then(setAutofill);
   }, []);
   useEffect(() => heading.current?.focus(), [mode]);
@@ -394,7 +394,7 @@ export function SignInPage() {
         if (live) void finishSession(s, 'passkey');
       })
       .catch((e) => {
-        if (live && !(e instanceof Cancelled)) setNote({ text: errorText(e, 'Suited could not sign you in with that passkey.'), error: true });
+        if (live && !(e instanceof Cancelled)) setNote({ text: errorText(e, 'Aced could not sign you in with that passkey.'), error: true });
       });
     return () => {
       live = false;
@@ -432,7 +432,7 @@ export function SignInPage() {
   if (flow.phase !== 'form')
     return (
       <div className="stack focus-column auth-screen">
-        <AfterSignIn flow={flow} next={goNext} savedCopy={{ title: 'You are signed in', body: 'Your account now matches this device. Suited saves as you study.' }} />
+        <AfterSignIn flow={flow} next={goNext} savedCopy={{ title: 'You are signed in', body: 'Your account now matches this device. Aced saves as you study.' }} />
       </div>
     );
 
@@ -454,7 +454,7 @@ export function SignInPage() {
       if (e instanceof Cancelled) setNote({ text: `${e.message} Try again${email ? ' or use an email code' : ''}.` });
       else {
         haptic('error');
-        setNote({ text: errorText(e, 'Suited could not sign you in with a passkey. Try again.'), error: true });
+        setNote({ text: errorText(e, 'Aced could not sign you in with a passkey. Try again.'), error: true });
       }
     }
     setBusy(false);
@@ -465,7 +465,7 @@ export function SignInPage() {
   /**
    * A new account starts from what this browser holds. A guest's progress
    * is saved into it. A copy of an account that just logged out belongs to
-   * that account, so Suited clears it (after a confirm) and starts a new player.
+   * that account, so Aced clears it (after a confirm) and starts a new player.
    */
   const createNew = () => {
     track('create_account_tapped', { loggedOut: loggedOut ?? 'no' });
@@ -494,7 +494,7 @@ export function SignInPage() {
       {loggedOut && (
         <div className="auth-notice reveal" role="status">
           <CheckIcon size={16} />
-          <span>{loggedOut === 'removed' ? 'You are logged out. Suited was removed from this device.' : 'You are logged out. Your progress is still on this device.'}</span>
+          <span>{loggedOut === 'removed' ? 'You are logged out. Aced was removed from this device.' : 'You are logged out. Your progress is still on this device.'}</span>
         </div>
       )}
 
@@ -505,10 +505,10 @@ export function SignInPage() {
           </div>
           <div>
             <h1 ref={heading} tabIndex={-1} className="display onb-title">
-              {loggedOut ? 'Sign in again' : 'Sign in to Suited'}
+              {loggedOut ? 'Sign in again' : 'Sign in to Aced'}
             </h1>
             <p className="muted auth-lead">
-              {noAccounts ? 'This copy of Suited has no accounts. Your progress stays on this device.' : 'Your plan, Suited Rating and streak come with you.'}
+              {noAccounts ? 'This copy of Aced has no accounts. Your progress stays on this device.' : 'Your plan, Aced Rating and streak come with you.'}
             </p>
           </div>
           {note && (
@@ -521,7 +521,7 @@ export function SignInPage() {
               <p id="fresh-title" className="auth-fresh-title">
                 Start a new player?
               </p>
-              <p className="footnote">This browser holds the copy of the account you logged out of. Suited clears it and starts fresh. That account keeps all its progress.</p>
+              <p className="footnote">This browser holds the copy of the account you logged out of. Aced clears it and starts fresh. That account keeps all its progress.</p>
               <div className="auth-fresh-actions">
                 <button className="btn btn-destructive btn-block" disabled={busy} onClick={() => void startFresh()} data-haptic="off">
                   Clear and start fresh

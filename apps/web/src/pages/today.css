@@ -87,7 +87,7 @@
   color: var(--label-2);
 }
 
-/* The next lesson in the plan when it is in Suited Pro: one quiet row, not counted as a task. */
+/* The next lesson in the plan when it is in Aced Pro: one quiet row, not counted as a task. */
 .quest.quest-pro {
   color: var(--label);
 }

@@ -31,7 +31,7 @@ export function InviteCard({ lessonsDone }: { lessonsDone: number }) {
       <Link to="/invite" className="feature-copy invite-feature-link">
         <span className="feature-kicker">Give a month, get a month</span>
         <span className="feature-title">Invite a friend who plays</span>
-        <span className="feature-sub">You both get a month of Suited Pro.</span>
+        <span className="feature-sub">You both get a month of Aced Pro.</span>
         <span className="feature-cta">Invite a friend</span>
       </Link>
       <button

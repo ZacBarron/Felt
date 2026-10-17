@@ -1,7 +1,7 @@
 import { db } from './db';
 
 /**
- * Everything Suited knows lives in this browser: IndexedDB for study and
+ * Everything Aced knows lives in this browser: IndexedDB for study and
  * imports, localStorage for settings. A backup file is the player's copy,
  * so a cleared browser or a new phone does not cost months of review.
  */
@@ -47,20 +47,20 @@ export interface RestoreSummary {
   settings: boolean;
 }
 
-/** Reads a backup without applying it. Throws on anything that is not a Suited backup. */
+/** Reads a backup without applying it. Throws on anything that is not a Aced backup. */
 export function parseBackup(text: string): Backup {
   let backup: Backup;
   try {
     backup = JSON.parse(text, reviver) as Backup;
   } catch {
-    throw new Error('This file is not a Suited backup.');
+    throw new Error('This file is not a Aced backup.');
   }
   if (backup?.format !== FORMAT || backup.version !== 1 || typeof backup.tables !== 'object' || backup.tables === null)
-    throw new Error('This file is not a Suited backup.');
+    throw new Error('This file is not a Aced backup.');
   return backup;
 }
 
-/** Replaces this device's data with a backup. Throws on a file that is not a Suited backup, before touching anything. */
+/** Replaces this device's data with a backup. Throws on a file that is not a Aced backup, before touching anything. */
 export async function importBackup(text: string): Promise<RestoreSummary> {
   const backup = parseBackup(text);
   let rows = 0;
@@ -86,14 +86,14 @@ export async function importBackup(text: string): Promise<RestoreSummary> {
 }
 
 /**
- * Removes everything Suited keeps on this device: every table and every saved
+ * Removes everything Aced keeps on this device: every table and every saved
  * setting. Used when logging out of a shared phone, after a successful save.
  */
 export async function clearDeviceData(): Promise<void> {
   await db.transaction('rw', TABLES.map((t) => db.table(t)), async () => {
     for (const name of TABLES) await db.table(name).clear();
   });
-  // Only Suited's own keys: on a shared host (like github.io) other apps live on the same origin.
+  // Only Aced's own keys: on a shared host (like github.io) other apps live on the same origin.
   for (const store of [globalThis.localStorage, globalThis.sessionStorage]) {
     try {
       const keys: string[] = [];
@@ -109,7 +109,7 @@ export async function clearDeviceData(): Promise<void> {
 }
 
 /**
- * Asks the browser not to clear Suited's storage under pressure. Safari also
+ * Asks the browser not to clear Aced's storage under pressure. Safari also
  * clears site data after 7 days without a visit unless the app is added to
  * the home screen, which is why the backup exists too.
  */

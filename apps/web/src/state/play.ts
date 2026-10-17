@@ -31,7 +31,7 @@ import { getChart } from './charts';
 import { recordRated } from './rating';
 
 /**
- * Play on the app side: Suited's charts as the bots' preflop advisor, and the
+ * Play on the app side: Aced's charts as the bots' preflop advisor, and the
  * grades for the player's decisions. See docs/PLAY.md for what each grade
  * tier means and what it leaves out.
  */
@@ -42,7 +42,7 @@ export const HERO = 0;
 const NINE = positionsFor(9);
 
 /**
- * The 9-handed seat with the same number of players behind. Suited's charts
+ * The 9-handed seat with the same number of players behind. Aced's charts
  * follow the players behind you, so a 7-handed UTG plays like a 9-handed UTG+2.
  */
 export function chartPosition(position: string, tableSize: number): string | undefined {
@@ -106,7 +106,7 @@ function chartWidth(chart: Chart): number {
 const RFI_SEATS = ['UTG', 'UTG+1', 'UTG+2', 'LJ', 'HJ', 'CO', 'BTN', 'SB'];
 
 /**
- * Hands in the order Suited's opening charts add them: what UTG opens first,
+ * Hands in the order Aced's opening charts add them: what UTG opens first,
  * then what each later seat adds, then the rest by equity against a random
  * hand. Approximate ranges for spots with no chart take the top of this order.
  */
@@ -169,7 +169,7 @@ const pct = (x: number) => `${Math.round(x * 100)}%`;
 
 /**
  * An approximate range for a preflop spot no chart covers, built from
- * Suited's own opening charts: a defense takes the top of the opener's range,
+ * Aced's own opening charts: a defense takes the top of the opener's range,
  * a 3bet answer the top of your own. Rules of thumb, so the app labels them
  * approximate and they never feed the rating.
  */
@@ -224,7 +224,7 @@ export function approxRange(spot: PreflopSpot, hand: string): ApproxRange {
   return { mix: bands(p, raise, call), width: call, what };
 }
 
-/** The bots' preflop baseline: Suited's chart wherever one covers the spot. */
+/** The bots' preflop baseline: Aced's chart wherever one covers the spot. */
 export const chartAdvisor: PreflopAdvisor = (spot, hand): PreflopAdvice | undefined => {
   const found = chartForSpot(spot);
   if (!found) {
@@ -268,7 +268,7 @@ export interface PlayGrade {
   chart?: { id: string; hand: string };
   /** For a chart grade: the chart's mix for the hand, in words. */
   mix?: string;
-  /** Rated toward the Suited Rating. */
+  /** Rated toward the Aced Rating. */
   rated: boolean;
 }
 
@@ -398,7 +398,7 @@ export function gradeHand(history: readonly PlayDecision[], seats: readonly Play
   return grades;
 }
 
-/** Records the rated grades toward the Suited Rating. */
+/** Records the rated grades toward the Aced Rating. */
 export async function rateHand(grades: readonly PlayGrade[], history: readonly PlayDecision[], handId: string) {
   for (const g of grades) {
     if (!g.rated || !g.grade) continue;

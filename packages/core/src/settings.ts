@@ -47,7 +47,7 @@ export interface GameSettings {
   openBb?: number;
 }
 
-/** The open size Suited's preflop charts assume. */
+/** The open size Aced's preflop charts assume. */
 export const CHART_OPEN_BB = 2.5;
 export const MIN_OPEN_BB = 2;
 export const MAX_OPEN_BB = 8;
@@ -117,6 +117,18 @@ export function stakesLabel(stakes: Stakes): string {
 }
 
 export const PRESETS: Record<string, { label: string; settings: GameSettings }> = {
+  'live-1-2': {
+    label: 'Live 1/2, 9-handed',
+    settings: {
+      format: 'cash',
+      venue: 'live',
+      tableSize: 9,
+      stakes: { sb: 1, bb: 2, currency: 'USD' },
+      stackBb: 100,
+      rake: { percent: 0.1, cap: 5, dropExtra: 1, noFlopNoDrop: true },
+      units: 'money',
+    },
+  },
   'live-1-3': {
     label: 'Live 1/3, 9-handed',
     settings: {
@@ -167,4 +179,4 @@ export const PRESETS: Record<string, { label: string; settings: GameSettings }> 
   },
 };
 
-export const DEFAULT_SETTINGS: GameSettings = PRESETS['live-1-3'].settings;
+export const DEFAULT_SETTINGS: GameSettings = PRESETS['live-1-2'].settings;

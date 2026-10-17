@@ -26,7 +26,7 @@ export function WelcomeBack({ summary, onContinue }: { summary: ProgressSummary;
   }, []);
   const stats: { label: string; value: string; note?: string }[] = [
     {
-      label: 'Suited Rating',
+      label: 'Aced Rating',
       value: summary.rating === undefined ? 'Not yet' : String(summary.settled ? rating : `~${rating}`),
       // "~" alone would carry meaning in a symbol: the words say it too.
       note: summary.rating === undefined ? undefined : summary.settled ? summary.tier : 'Still settling',

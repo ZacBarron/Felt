@@ -87,7 +87,7 @@ export function resetSync() {
 export const DATA_REPLACED = 'felt:data-replaced';
 const notifyReplaced = () => window.dispatchEvent(new Event(DATA_REPLACED));
 
-/** A cloud to sync with: the Suited server account, or the claude.ai artifact store. */
+/** A cloud to sync with: the Aced server account, or the claude.ai artifact store. */
 export const cloudReady = () => !!currentSession() || !!claudeCloud();
 
 // Change tracking --------------------------------------------------------------
@@ -164,7 +164,7 @@ async function hasLocalProgress() {
   return answers + lessons + reviews > 0;
 }
 
-// The Suited server account wins when both exist: it also carries leagues and Pro.
+// The Aced server account wins when both exist: it also carries leagues and Pro.
 const remoteMeta = (timeoutMs?: number): Promise<CloudMeta> => {
   const c = claudeCloud();
   if (!currentSession() && c) return cloudMeta(c);
@@ -197,7 +197,7 @@ async function upload(baseVersion: number) {
       write({ conflict: cloud, error: undefined });
       return;
     }
-    write({ error: e instanceof Error ? e.message : 'Sync did not work. Suited will try again soon.' });
+    write({ error: e instanceof Error ? e.message : 'Sync did not work. Aced will try again soon.' });
     throw e;
   } finally {
     if (meta.saving) write({ saving: false });

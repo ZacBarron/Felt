@@ -1,5 +1,5 @@
 /**
- * When Suited suggests saving progress to an account. Sign up is deferred
+ * When Aced suggests saving progress to an account. Sign up is deferred
  * until after the player has something worth keeping (Duolingo asks after
  * the first lesson; see docs/MONETIZATION.md). It is asked once at the end
  * of onboarding, then at most one gentle card later: only after real

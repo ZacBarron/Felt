@@ -89,7 +89,7 @@ describe('backup coverage', () => {
     expect(loaded.assumptions).toEqual(settings.assumptions);
   });
 
-  it('clears only Suited’s own keys from shared storage', async () => {
+  it('clears only Aced’s own keys from shared storage', async () => {
     await seedPlayer();
     store.set('felt.session.v1', '{}');
     store.set('other-app.token', 'keep me');
@@ -99,8 +99,8 @@ describe('backup coverage', () => {
   });
 
   it('refuses anything that is not a backup', () => {
-    expect(() => parseBackup('not json')).toThrow('not a Suited backup');
-    expect(() => parseBackup('{"format":"felt-backup","version":1,"tables":null}')).toThrow('not a Suited backup');
+    expect(() => parseBackup('not json')).toThrow('not a Aced backup');
+    expect(() => parseBackup('{"format":"felt-backup","version":1,"tables":null}')).toThrow('not a Aced backup');
   });
 });
 

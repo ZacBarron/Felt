@@ -20,7 +20,7 @@ export function ProCard() {
     <Link to="/pro?from=you" className="feature-card gold">
       <MedalArt />
       <span className="feature-copy">
-        <span className="feature-kicker">Suited Pro</span>
+        <span className="feature-kicker">Aced Pro</span>
         <span className="feature-title">Every spot you play</span>
         <span className="feature-sub">Every lesson, the weekly challenge and the solver.</span>
         <span className="feature-cta">See plans</span>
@@ -76,7 +76,7 @@ export function MoreRows() {
       <NavRow to="/invite" icon={ShareIcon} color="var(--chip-cobalt)" title="Invite friends" subtitle="Give a month of Pro, get a month" />
       <NavRow to="/league" icon={navItem('/league').icon} color={navItem('/league').color} title="League" subtitle="Real players near your rating" />
       <NavRow to="/account" icon={navItem('/you').icon} color="var(--gray)" title="Account" subtitle={accountLine} />
-      {pro && <NavRow to={session ? '/account' : '/settings'} icon={MedalIcon} color="var(--chip-gold)" title="Suited Pro" detail={proLine} />}
+      {pro && <NavRow to={session ? '/account' : '/settings'} icon={MedalIcon} color="var(--chip-gold)" title="Aced Pro" detail={proLine} />}
       <NavRow to="/settings" icon={navItem('/settings').icon} color="var(--gray)" title="Settings" />
     </div>
   );

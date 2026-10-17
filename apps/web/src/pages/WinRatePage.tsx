@@ -11,7 +11,7 @@ import { gameSummary, rakeSummary } from './SettingsPage';
 import './you.css';
 
 const assumptionFields = (currency: string): { key: keyof TableAssumptions; label: string; step: number }[] => [
-  { key: 'poolRating', label: 'Average Suited Rating at your table', step: 25 },
+  { key: 'poolRating', label: 'Average Aced Rating at your table', step: 25 },
   { key: 'edgeScale', label: 'Best possible edge before rake, in bb per 100 hands', step: 5 },
   { key: 'flopShare', label: 'Share of hands that see a flop', step: 0.05 },
   { key: 'flopPotBb', label: 'Average pot after the flop, in big blinds', step: 1 },
@@ -65,7 +65,7 @@ export function WinRatePage() {
       >
         {!rated ? (
           <div className="card winrate-card">
-            <p style={{ margin: 0 }}>Your estimate needs a Suited Rating first.</p>
+            <p style={{ margin: 0 }}>Your estimate needs a Aced Rating first.</p>
             <Link to="/daily" className="btn btn-primary" style={{ alignSelf: 'flex-start' }}>
               Play the daily challenge
             </Link>
@@ -126,7 +126,7 @@ export function WinRatePage() {
           <p>
             {source && resultsAreNoise(source.hands, sd) ? 'You do not have enough results yet to show if you are winning. For now, the estimate leans on your rating. ' : ''}
             Results alone need about {(Math.round(handsForPrecision(10, sd) / 1000) * 1000).toLocaleString()} hands to pin down your win rate. That is
-            roughly {(Math.round(handsForPrecision(10, sd) / a.handsPerHour / 100) * 100).toLocaleString()} hours of play. So Suited combines your
+            roughly {(Math.round(handsForPrecision(10, sd) / a.handsPerHour / 100) * 100).toLocaleString()} hours of play. So Aced combines your
             results with your rating.
           </p>
         }

@@ -1,6 +1,6 @@
-# Onboarding, retention and Suited Pro
+# Onboarding, retention and Aced Pro
 
-How Suited turns a first open into a daily habit and a paid subscription, and why each piece is built the way it is. Code lives in `apps/web/src/pages/OnboardingPage.tsx`, `CheckPage.tsx` (placement and test outs), `ProPage.tsx` (paywall) and `state/access.ts` (plans, prices and gating).
+How Aced turns a first open into a daily habit and a paid subscription, and why each piece is built the way it is. Code lives in `apps/web/src/pages/OnboardingPage.tsx`, `CheckPage.tsx` (placement and test outs), `ProPage.tsx` (paywall) and `state/access.ts` (plans, prices and gating).
 
 ## Principles
 
@@ -23,7 +23,7 @@ Short on purpose: about five screens, then the first lesson. Every question chan
 | Find where you start | Placement quiz, or start from the basics (casual) or skip the quiz (regulars start at Foundations). Not shown to new players | Nobody repeats what they know |
 | Plan | One card: the first lesson, what comes next, daily review. One button: Start my first lesson | No pledge ritual, no paywall in the way of the first win |
 | First lesson | Starts right away | Activation: the first lesson is the product |
-| First lesson done | A Day 1 moment with what they just did, then "Keep your progress" (a passkey account, skippable, once), then the Suited Pro offer once, then Today | Offers come after the first real value. The Pro offer stays on day one because most trials start on install day (82% in RevenueCat's 2025 report) |
+| First lesson done | A Day 1 moment with what they just did, then "Keep your progress" (a passkey account, skippable, once), then the Aced Pro offer once, then Today | Offers come after the first real value. The Pro offer stays on day one because most trials start on install day (82% in RevenueCat's 2025 report) |
 | Today, after the first lesson | One card: "When will you do tomorrow's lesson?" with an optional calendar reminder | An if-then plan works best tied to a real moment (Gollwitzer and Sheeran 2006, d = 0.65 across 94 tests); asked when useful, not during setup |
 
 Moved out of onboarding: the game charts should match (asked on the first visit to Ranges), who you play against and hands to import (regular players see an import card on Today), and the target tier (the level system on You shows the next tier and how close it is).
@@ -47,7 +47,7 @@ Skipped lessons show as "Skipped" and count as complete. The plan and Today both
 - Shipped: streak freezes (one to start, one earned every seven days), calendar reminders for the study time and the trial end, and a local event log.
 - Next: push reminders at a chosen time and a weekly summary.
 
-## Suited Pro
+## Aced Pro
 
 | | Free | Pro |
 | --- | --- | --- |
@@ -69,11 +69,11 @@ Set in `PLANS` in `state/access.ts`. Current placeholders: yearly $79.99 with a 
 
 Everything that decides a purchase fits above the bottom bar at 390 by 844. Code in `ProPage.tsx` and `pages/pro.css`. The layout follows the patterns the strongest subscription paywalls share (reviewed on Mobbin: Speak, Lifesum, Insight Timer, AllTrails and Cleo for the compare table; Strava, Copilot, Mesh and Vocabulary for the trial timeline).
 
-1. A felt hero, full bleed at the top: the close button, the "Suited Pro" eyebrow and a one line serif headline that names why the player arrived ("This lesson is in Suited Pro", "Get a coach in your pocket", "Keep the momentum"). From onboarding or the first lesson offer (`from=onboarding`, `from=first-lesson`) close goes on to Today.
+1. A felt hero, full bleed at the top: the close button, the "Aced Pro" eyebrow and a one line serif headline that names why the player arrived ("This lesson is in Aced Pro", "Get a coach in your pocket", "Keep the momentum"). From onboarding or the first lesson offer (`from=onboarding`, `from=first-lesson`) close goes on to Today.
 2. Three real Pro lessons dealt like cards, drawn with their own covers. They come from the player's plan first, one per topic (`heroLessons()`). The product is the picture, not an icon.
 3. Free and Pro side by side with the Pro column tinted. The first row shows what stays free (basics, review and drills), so the table is honest about both columns. Then up to 4 perks from `proPerks()`: live ones first, the reason for the visit on top. A perk this build cannot deliver says "Soon". The lessons row notes how many Pro lessons are in the player's plan.
 4. Two plan tiles. Yearly is preselected and shows its saving, computed rather than typed. The billed price is the largest number on each tile.
-5. When the yearly trial can start: a timeline of the free week. Today everything unlocks; on the charge date the player pays, unless they cancel first; it renews each year until cancelled. Blinkist reported a 23% lift in trial starts and fewer complaints from this pattern (*secondary*, see sources). Where a push can arrive (the server sends them and this browser can show them), a "Remind me before I pay" switch sits under it, on by default as on Vocabulary's paywall, and adds a reminder step 2 days before the charge. The server sends that push once (`runTrialNotices`). Elsewhere, the Pro screen offers a calendar reminder instead, so Suited never promises a push that cannot arrive.
+5. When the yearly trial can start: a timeline of the free week. Today everything unlocks; on the charge date the player pays, unless they cancel first; it renews each year until cancelled. Blinkist reported a 23% lift in trial starts and fewer complaints from this pattern (*secondary*, see sources). Where a push can arrive (the server sends them and this browser can show them), a "Remind me before I pay" switch sits under it, on by default as on Vocabulary's paywall, and adds a reminder step 2 days before the charge. The server sends that push once (`runTrialNotices`). Elsewhere, the Pro screen offers a calendar reminder instead, so Aced never promises a push that cannot arrive.
 6. Restore purchases, Terms and Privacy.
 7. The bottom bar holds the charge line ("Free until Oct 23. Then $79.99 a year."), the buy button and a decline button of the same size ("Not now", or "Continue with the free plan" at the end of a first run).
 
@@ -87,11 +87,11 @@ The skill to winnings estimate is not on the paywall. It did not fit in one shor
 
 | State | What the player sees |
 | --- | --- |
-| Server did not answer | "Suited could not check" and Try again |
+| Server did not answer | "Aced could not check" and Try again |
 | Server has no accounts | "No accounts here yet" |
 | Signed out | "Sign in to restore" and Sign in. After signing in, the page reopens with `restore=1` and checks again on its own |
-| Account has Suited Pro (or the server has `PRO_FOR_EVERYONE` on) | "Suited Pro is back on", and Pro switches on |
-| Account has no Suited Pro | "No purchase found", naming the account. With billing off it says purchases are not open yet. With billing on it suggests signing in with the account that bought it |
+| Account has Aced Pro (or the server has `PRO_FOR_EVERYONE` on) | "Aced Pro is back on", and Pro switches on |
+| Account has no Aced Pro | "No purchase found", naming the account. With billing off it says purchases are not open yet. With billing on it suggests signing in with the account that bought it |
 
 Health gets 15 seconds here, so a host waking from sleep is not mistaken for no server.
 
@@ -103,8 +103,8 @@ Health gets 15 seconds here, so a host waking from sleep is not mistaken for no 
 
 Two switches, for the time before purchases open.
 
-- **Settings, Testing, Unlock Suited Pro for testing.** Always visible. It sets the developer Pro override (`access.devPro`) through `setTestingPro()`, without developer mode. It unlocks Suited Pro on this device only and charges nothing. Settings then shows Suited Pro as "On for testing", and the Pro screen says so. The AI coach still checks Pro on the server.
-- **`PRO_FOR_EVERYONE=true` on the server.** Every signed in player has Suited Pro, the coach included. `/api/health` reports `proForEveryone: true`, and `/api/me` reports Pro with no end date. See DEPLOY.md for the Render steps. Turn it off before purchases open.
+- **Settings, Testing, Unlock Aced Pro for testing.** Always visible. It sets the developer Pro override (`access.devPro`) through `setTestingPro()`, without developer mode. It unlocks Aced Pro on this device only and charges nothing. Settings then shows Aced Pro as "On for testing", and the Pro screen says so. The AI coach still checks Pro on the server.
+- **`PRO_FOR_EVERYONE=true` on the server.** Every signed in player has Aced Pro, the coach included. `/api/health` reports `proForEveryone: true`, and `/api/me` reports Pro with no end date. See DEPLOY.md for the Render steps. Turn it off before purchases open.
 
 ### Developer switch
 

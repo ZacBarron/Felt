@@ -25,7 +25,7 @@ export interface TableAssumptions {
   noFlopPotBb: number;
   /** Tip per pot won, in money (live). */
   tipPerPot: number;
-  /** Average Suited Rating of the players in this game. */
+  /** Average Aced Rating of the players in this game. */
   poolRating: number;
   /** Win rate in bb/100 before costs of a player who would win every decision against the pool. */
   edgeScale: number;
@@ -38,7 +38,7 @@ export interface TableAssumptions {
 
 /**
  * Starting assumptions by game, from the reviews of live and online players
- * behind Suited. Labelled as assumptions in the app and editable, until Suited
+ * behind Aced. Labelled as assumptions in the app and editable, until Aced
  * has player data to fit them. Live results swing more than online ones
  * (deep, multiway pots), and live tables deal about 27 hands an hour once
  * breaks and missed hands are counted.

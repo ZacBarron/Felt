@@ -2,7 +2,7 @@ import type { LessonContent } from './types';
 
 /**
  * Heads up cash and blind vs blind. Every number here is recomputed in
- * test/formats-heads-up.test.ts. Suited has no 2-handed charts, so the lessons
+ * test/formats-heads-up.test.ts. Aced has no 2-handed charts, so the lessons
  * teach with exact math, an illustration range that says it is one, and
  * solver patterns kept qualitative.
  */
@@ -338,7 +338,7 @@ export const FORMATS_HEADS_UP_LESSONS: LessonContent[] = [
       {
         kind: 'chart',
         chartId: '9max-100-rfi-sb',
-        title: 'Suited’s chart raises or folds',
+        title: 'Aced’s chart raises or folds',
         caption: 'This starter chart raises about 42% of hands to 3bb. It leaves out limps to stay simple. So it approximates a strategy that really mixes.',
       },
       {
@@ -362,7 +362,7 @@ export const FORMATS_HEADS_UP_LESSONS: LessonContent[] = [
             { label: 'Full ring small blind', value: 'Acts first, raises about 42%', tone: 'brass' },
           ],
         },
-        caption: 'The pot and the blinds are the same. Position is what changes, and it sets how wide you can play. The 42% comes from Suited’s raise only chart.',
+        caption: 'The pot and the blinds are the same. Position is what changes, and it sets how wide you can play. The 42% comes from Aced’s raise only chart.',
         evidence: 'solver',
       },
       {
@@ -394,7 +394,7 @@ export const FORMATS_HEADS_UP_LESSONS: LessonContent[] = [
         question: 'What do solvers do in the small blind when it folds to them?',
         choices: ['Mix limps and raises', 'Raise every hand they play', 'Limp every hand they play'],
         answer: 0,
-        explain: 'Like the solver step said, small blind strategies mix limps and raises. Suited’s chart raises or folds to stay simple.',
+        explain: 'Like the solver step said, small blind strategies mix limps and raises. Aced’s chart raises or folds to stay simple.',
         point: 2,
       },
       {
@@ -463,7 +463,7 @@ export const FORMATS_HEADS_UP_LESSONS: LessonContent[] = [
           ['Button open, 9-handed', '20.9%', '40.0%'],
           ['Heads up button', '16.8%', '38.9%'],
         ],
-        note: 'Combos are counted after the board cards are removed, with each chart’s mixes as weights. The 9-handed ranges are Suited’s starter charts. The heads up range is an illustration that opens about 78% of hands. Top pair or better counts any king or AA. It also counts two pair and sets.',
+        note: 'Combos are counted after the board cards are removed, with each chart’s mixes as weights. The 9-handed ranges are Aced’s starter charts. The heads up range is an illustration that opens about 78% of hands. Top pair or better counts any king or AA. It also counts two pair and sets.',
         evidence: 'math',
       },
       {

@@ -51,7 +51,7 @@ export function buildIcs(event: CalendarEvent, now = new Date()): string {
   const lines = [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
-    'PRODID:-//Suited//Study reminders//EN',
+    'PRODID:-//Aced//Study reminders//EN',
     'CALSCALE:GREGORIAN',
     'BEGIN:VEVENT',
     `UID:${event.uid}`,

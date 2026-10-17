@@ -55,7 +55,7 @@ export function DashboardPage() {
   const mastery = useLiveQuery(() => masteryForCharts(charts), deps);
   const progress = useLiveQuery(lessonProgress, [], new Map<string, StoredLesson>());
   const prefs = pathPrefs(settings.profile);
-  // The next lesson you can open. When a free plan has run out of open lessons, the path's next one is in Suited Pro.
+  // The next lesson you can open. When a free plan has run out of open lessons, the path's next one is in Aced Pro.
   const nextLesson = recommendedLessons(progress, prefs, (key) => canOpenLesson(key, settings.access))[0];
   const pathNext = recommendedLessons(progress, prefs)[0];
   const proNext = !nextLesson && pathNext?.content && !canOpenLesson(pathNext.key, settings.access) ? pathNext : undefined;
@@ -102,7 +102,7 @@ export function DashboardPage() {
         title="Today"
         kicker={date}
         trailing={
-          <Link to="/you" className="today-me" aria-label={rating && rating.games > 0 ? `Suited Rating ${Math.round(rating.rating)}, ${tierLabel(rating)}` : 'You'}>
+          <Link to="/you" className="today-me" aria-label={rating && rating.games > 0 ? `Aced Rating ${Math.round(rating.rating)}, ${tierLabel(rating)}` : 'You'}>
             <Avatar
               name={settings.profile.name}
               photo={settings.profile.photo}

@@ -2,7 +2,7 @@ import type { LessonContent } from './types';
 
 /**
  * Short handed (6-max) and deep stack lessons in the Other formats track.
- * Chart numbers come from Suited's starter charts, which are approximate.
+ * Chart numbers come from Aced's starter charts, which are approximate.
  * Every number is recomputed in test/formats-short-deep.test.ts.
  */
 export const FORMATS_SHORT_DEEP_LESSONS: LessonContent[] = [
@@ -41,7 +41,7 @@ export const FORMATS_SHORT_DEEP_LESSONS: LessonContent[] = [
           ['2', 'BTN', 'BTN', '42.7%'],
           ['1', 'SB', 'SB', '42.2%'],
         ],
-        note: 'Share of all hands that open in Suited’s starter charts, which are approximate. A 6-max seat uses the same chart as the 9-handed seat with the same players behind. The small blind opens a little less than the button. It plays out of position after the flop.',
+        note: 'Share of all hands that open in Aced’s starter charts, which are approximate. A 6-max seat uses the same chart as the 9-handed seat with the same players behind. The small blind opens a little less than the button. It plays out of position after the flop.',
         evidence: 'math',
       },
       {
@@ -103,7 +103,7 @@ export const FORMATS_SHORT_DEEP_LESSONS: LessonContent[] = [
         question: 'At 6-max it folds to you UTG. Which 9-handed seat has the same players behind it?',
         choices: ['UTG', 'LJ', 'CO'],
         answer: 1,
-        explain: 'Like the table showed, 6-max UTG has 5 players behind. So does the 9-handed LJ. That is why Suited uses the same chart for both.',
+        explain: 'Like the table showed, 6-max UTG has 5 players behind. So does the 9-handed LJ. That is why Aced uses the same chart for both.',
         point: 0,
       },
       {
@@ -117,7 +117,7 @@ export const FORMATS_SHORT_DEEP_LESSONS: LessonContent[] = [
       },
       {
         kind: 'quiz',
-        question: 'Folded to you UTG at 6-max. About how often does Suited’s chart open?',
+        question: 'Folded to you UTG at 6-max. About how often does Aced’s chart open?',
         choices: ['About 12%', 'About 18%', 'About 28%', 'About 43%'],
         answer: 1,
         explain: 'Like the first seat bars showed, 6-max UTG opens 17.9% of hands. About 12% is the 9-handed UTG. About 28% is the cutoff and about 43% is the button.',
@@ -183,7 +183,7 @@ export const FORMATS_SHORT_DEEP_LESSONS: LessonContent[] = [
           ['Button', '46.0%', '29.9%'],
           ['Small blind', '26.3%', '17.1%'],
         ],
-        note: 'Our estimate from Suited’s starter charts. Each seat opens at its chart rate when all before it folded. This simple model treats seats as independent. It ignores card removal.',
+        note: 'Our estimate from Aced’s starter charts. Each seat opens at its chart rate when all before it folded. This simple model treats seats as independent. It ignores card removal.',
         evidence: 'math',
       },
       {
@@ -209,7 +209,7 @@ export const FORMATS_SHORT_DEEP_LESSONS: LessonContent[] = [
           ],
         },
         caption:
-          'Share of all hands that 3bet in Suited’s starter charts. Later openers have wider ranges, so they face more 3bets. At 6-max more of the opens you face come from late seats.',
+          'Share of all hands that 3bet in Aced’s starter charts. Later openers have wider ranges, so they face more 3bets. At 6-max more of the opens you face come from late seats.',
         evidence: 'solver',
       },
       {
@@ -217,7 +217,7 @@ export const FORMATS_SHORT_DEEP_LESSONS: LessonContent[] = [
         chartId: '6max-100-sb-vs-btn',
         title: 'Small blind against the button',
         caption:
-          'Suited’s chart 3bets **17.4%** of hands and never calls. A call out of position invites the big blind to squeeze. So the small blind mostly 3bets or folds.',
+          'Aced’s chart 3bets **17.4%** of hands and never calls. A call out of position invites the big blind to squeeze. So the small blind mostly 3bets or folds.',
       },
       {
         kind: 'text',
@@ -233,7 +233,7 @@ export const FORMATS_SHORT_DEEP_LESSONS: LessonContent[] = [
         title: 'The button folds half its opens',
         art: { kind: 'ring', value: 0.475, label: 'Button opens that continue', caption: 'Facing a 3bet to 11bb' },
         caption:
-          'Suited’s chart 4bets or calls with **47.5%** of the hands the button opened. It folds the rest. A wide range has many hands that must fold to a 3bet.',
+          'Aced’s chart 4bets or calls with **47.5%** of the hands the button opened. It folds the rest. A wide range has many hands that must fold to a 3bet.',
         evidence: 'solver',
       },
       {
@@ -254,7 +254,7 @@ export const FORMATS_SHORT_DEEP_LESSONS: LessonContent[] = [
       },
       {
         kind: 'quiz',
-        question: 'The button opens 2.5bb. You hold K♠Q♦ in the small blind. What does Suited’s chart do?',
+        question: 'The button opens 2.5bb. You hold K♠Q♦ in the small blind. What does Aced’s chart do?',
         cards: 'KsQd',
         choices: ['3bet', 'Call', 'Fold'],
         answer: 0,
@@ -263,7 +263,7 @@ export const FORMATS_SHORT_DEEP_LESSONS: LessonContent[] = [
       },
       {
         kind: 'quiz',
-        question: 'Which open faces a 3bet most often in Suited’s charts?',
+        question: 'Which open faces a 3bet most often in Aced’s charts?',
         choices: ['UTG at 9-handed', 'The cutoff', 'The button'],
         answer: 2,
         explain: 'Like the 3bet bars showed, the blinds 3bet the button most. The small blind 3bets 17.4% and the big blind 10.2%. The big blind 3bets UTG only 3.0% of the time.',
@@ -333,7 +333,7 @@ export const FORMATS_SHORT_DEEP_LESSONS: LessonContent[] = [
           ],
         },
         caption:
-          'Share of each range with top pair or better, exact from Suited’s starter charts. Wider ranges hit this flop less often. The button still has a much larger share of top pairs. The big blind 3bets many of its best aces.',
+          'Share of each range with top pair or better, exact from Aced’s starter charts. Wider ranges hit this flop less often. The button still has a much larger share of top pairs. The big blind 3bets many of its best aces.',
         evidence: 'math',
       },
       {
@@ -362,7 +362,7 @@ export const FORMATS_SHORT_DEEP_LESSONS: LessonContent[] = [
             { label: 'BB calls vs BTN', value: 8.5, tone: 'green' },
           ],
         },
-        caption: 'Strong hands here are straights, sets and two pair. Shares are exact from Suited’s starter charts. The big blind has nearly twice the button’s share of strong hands here.',
+        caption: 'Strong hands here are straights, sets and two pair. Shares are exact from Aced’s starter charts. The big blind has nearly twice the button’s share of strong hands here.',
         evidence: 'math',
       },
       {
@@ -599,7 +599,7 @@ export const FORMATS_SHORT_DEEP_LESSONS: LessonContent[] = [
           ['K7 to K2', '26.4', 'Behind'],
           ['Everything else', '425.3', 'Behind'],
         ],
-        note: 'Combos from the big blind’s calls in Suited’s 6-max chart against a button open. Each is weighted by how often the chart calls. Your cards and the board are removed. Two pair or better here means 88 and 44 or two pair with K8, K4 and 84s.',
+        note: 'Combos from the big blind’s calls in Aced’s 6-max chart against a button open. Each is weighted by how often the chart calls. Your cards and the board are removed. Two pair or better here means 88 and 44 or two pair with K8, K4 and 84s.',
         evidence: 'math',
       },
       {

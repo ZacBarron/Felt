@@ -13,7 +13,7 @@ import type { Position } from './settings';
  * That makes it possible to work out a bot's real range after any history:
  * weigh every holding by how likely the bot was to take the actions it took.
  *
- * Preflop the baseline is Suited's chart for the spot when one exists
+ * Preflop the baseline is Aced's chart for the spot when one exists
  * (through an advisor the app supplies) and a hand strength order elsewhere.
  * Postflop the baseline is a rule based policy on how strong the hand is now
  * against all possible holdings, draws, the price and the number of players.
@@ -69,7 +69,7 @@ export interface PreflopAdvice {
   width: number;
 }
 
-/** Suited's chart advice for a spot and hand, when a chart covers it. Supplied by the app. */
+/** Aced's chart advice for a spot and hand, when a chart covers it. Supplied by the app. */
 export type PreflopAdvisor = (spot: PreflopSpot, hand: HandClass) => PreflopAdvice | undefined;
 
 export interface ActionChance {

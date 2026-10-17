@@ -275,9 +275,9 @@ export function paintRating(ctx: Ctx, d: RatingCardData, design: CardDesign) {
   const look = LOOKS[design];
   frame(ctx, design);
   ctx.font = `700 30px ${SANS}`;
-  const named = d.name ? `${d.name}'s Suited Rating` : 'Suited Rating';
+  const named = d.name ? `${d.name}'s Aced Rating` : 'Aced Rating';
   // A long name falls back to the plain label rather than running off the card.
-  label(ctx, look, ctx.measureText(named.toUpperCase()).width + named.length * 5 > RIGHT - LEFT ? 'Suited Rating' : named, 330);
+  label(ctx, look, ctx.measureText(named.toUpperCase()).width + named.length * 5 > RIGHT - LEFT ? 'Aced Rating' : named, 330);
 
   const fig = ratingFigure(d.rating, d.settling);
   let y: number;
@@ -414,7 +414,7 @@ export async function drawCard(paint: (ctx: Ctx) => void): Promise<Blob> {
   canvas.width = CARD_W;
   canvas.height = CARD_H;
   const ctx = canvas.getContext('2d');
-  if (!ctx) throw new Error('Suited could not draw the image.');
+  if (!ctx) throw new Error('Aced could not draw the image.');
   paint(ctx);
-  return new Promise((resolve, reject) => canvas.toBlob((b) => (b ? resolve(b) : reject(new Error('Suited could not draw the image.'))), 'image/png'));
+  return new Promise((resolve, reject) => canvas.toBlob((b) => (b ? resolve(b) : reject(new Error('Aced could not draw the image.'))), 'image/png'));
 }

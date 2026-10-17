@@ -11,7 +11,7 @@ import './you.css';
 const day = (iso: string) => new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 
 /** The words that go with an invite link when it is shared. */
-export const INVITE_TEXT = 'I am learning poker with Suited. Join with my link and your first month of Suited Pro is free.';
+export const INVITE_TEXT = 'I am learning poker with Aced. Join with my link and your first month of Aced Pro is free.';
 
 /**
  * Invite friends: a month of Pro for them when they make an account, and a
@@ -45,7 +45,7 @@ export function InvitePage() {
           )}
         </div>
       ) : error ? (
-        <p className="footnote">Suited could not load your invites. {error}</p>
+        <p className="footnote">Aced could not load your invites. {error}</p>
       ) : status ? (
         <Progress status={status} />
       ) : (
@@ -90,7 +90,7 @@ function ShareButtons({ status }: { status: ReferralStatus }) {
   return (
     <div className="invite-share">
       {canShare && (
-        <button className="btn btn-lg btn-block btn-hero" data-haptic="off" onClick={() => void navigator.share({ title: 'Suited', text: INVITE_TEXT, url }).catch(() => undefined)}>
+        <button className="btn btn-lg btn-block btn-hero" data-haptic="off" onClick={() => void navigator.share({ title: 'Aced', text: INVITE_TEXT, url }).catch(() => undefined)}>
           <ShareIcon size={20} />
           Share your link
         </button>

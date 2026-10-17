@@ -1,6 +1,6 @@
 # Play
 
-Play is a full table against bots. You play whole hands, from the deal to showdown. Afterwards a recap grades every decision Suited can grade honestly and says which ones it cannot. It has its own tab between Train and You.
+Play is a full table against bots. You play whole hands, from the deal to showdown. Afterwards a recap grades every decision Aced can grade honestly and says which ones it cannot. It has its own tab between Train and You.
 
 Drills train one decision at a time. Play trains the same decisions in the order a real hand brings them, with the stack, the pot and the players left in the hand all changing as you go.
 
@@ -24,7 +24,7 @@ Settings has **Your open** (Game and stakes, also in the table menu). It default
 Each bot is a character with a name, a drawn portrait, a style and a rating, the way chess apps present their bots. Two rules keep it honest (CLAUDE.md: no fake competitors):
 
 1. **Always clearly a bot.** A "Bot" tag sits on every seat. No photos, and nothing that suggests a real person or a live table.
-2. **The rating is measured, not set by hand.** Suited grades the bot's own decisions with the same grader the player gets, over many seeded hands. Then it converts the result to the Suited Rating scale. The bot card says how many decisions the rating rests on. The rating is measured again whenever the bot or the grader changes.
+2. **The rating is measured, not set by hand.** Aced grades the bot's own decisions with the same grader the player gets, over many seeded hands. Then it converts the result to the Aced Rating scale. The bot card says how many decisions the rating rests on. The rating is measured again whenever the bot or the grader changes.
 
 A bot is built from two settings:
 
@@ -39,7 +39,7 @@ Every decision lands in one of three tiers. The recap shows the tier next to eac
 
 ### 1. Solver graded (heads up)
 
-Grades come from Suited Solver (`core/src/solver.ts`), with exploitability reported on every solve as the solver rules require.
+Grades come from Aced Solver (`core/src/solver.ts`), with exploitability reported on every solve as the solver rules require.
 
 | Street | How | Measured cost |
 | --- | --- | --- |
@@ -54,7 +54,7 @@ The ranges for each solve come from the hand's own action: the charts preflop, t
 
 ### 2. Graded against this bot
 
-In Play, Suited knows each bot's exact strategy. So it knows the bot's real range at every point of the hand.
+In Play, Aced knows each bot's exact strategy. So it knows the bot's real range at every point of the hand.
 
 - **River calls and folds**: exact. EV of a call is your equity against the hands this bot bets with here, times the final pot, minus the price.
 - **Earlier calls and folds**: equity based. EV of a call is your equity against the bot's range now, times the pot after the call, minus the price. The recap says this leaves out how the rest of the hand would play.
@@ -73,7 +73,7 @@ Some feedback has no exact answer in the model. It shows as a tip, never as a gr
 
 ### What feeds the rating
 
-Only tiers 1 and 2 feed the Suited Rating, in the rating's postflop area. Tier 3 never does. Chips won never do, because a session's result is mostly luck (see the variance lessons).
+Only tiers 1 and 2 feed the Aced Rating, in the rating's postflop area. Tier 3 never does. Chips won never do, because a session's result is mostly luck (see the variance lessons).
 
 ## Recap
 

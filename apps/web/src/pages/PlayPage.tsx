@@ -773,7 +773,7 @@ export function shareHandText(rec: HandRecord, seats: readonly PlaySeat[], link:
     lines.push(`${name(d.state.toAct!)} ${actionText(d.state, d.action).toLowerCase()}`);
   }
   if (lines.at(-1) !== 'What do I do?') lines.push('How would you have played it?');
-  return [`${s0.players.length} handed, ${fmt(me.stack + me.total)}bb. I have ${pretty(me.cards)} in the ${me.position}.`, ...lines, `Play it on Suited: ${link}`].join('\n');
+  return [`${s0.players.length} handed, ${fmt(me.stack + me.total)}bb. I have ${pretty(me.cards)} in the ${me.position}.`, ...lines, `Play it on Aced: ${link}`].join('\n');
 }
 
 function LastHandSheet({ open, onClose, hands, seats }: { open: boolean; onClose: () => void; hands: HandRecord[]; seats: readonly PlaySeat[] }) {

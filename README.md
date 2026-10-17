@@ -1,6 +1,6 @@
-# Suited
+# Aced
 
-*Poker, suited to you.*
+*Ace every spot.*
 
 A personal poker training system for reaching an elite level in No Limit Hold'em: GTO fundamentals, solver charts, spaced repetition, scenario testing, exploitation, session logging, and stats that show real progress.
 

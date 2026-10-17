@@ -3,7 +3,7 @@ import { api, currentSession, useSession } from './api';
 
 /**
  * Invites: every account has a code, and a link with it brings a friend in.
- * The friend gets a month of Suited Pro when they make an account. You get a
+ * The friend gets a month of Aced Pro when they make an account. You get a
  * month when they have answered 10 graded questions, so the reward follows
  * real study, not a sign up. See docs/ENGAGEMENT.md.
  */

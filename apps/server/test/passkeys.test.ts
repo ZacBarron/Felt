@@ -130,7 +130,7 @@ describe('passkey sign up', () => {
   it('offers discoverable, user verifying options for this site', async () => {
     const { flowId, options } = await (await call('POST', '/api/passkey/register/options', { name: 'Ana' })).json();
     expect(typeof flowId).toBe('string');
-    expect(options.rp).toEqual({ name: 'Suited', id: 'felt.example' });
+    expect(options.rp).toEqual({ name: 'Aced', id: 'felt.example' });
     expect(options.user.name).toBe('Ana');
     expect(options.authenticatorSelection).toMatchObject({ residentKey: 'required', requireResidentKey: true, userVerification: 'preferred' });
     expect(options.attestation).toBe('none');

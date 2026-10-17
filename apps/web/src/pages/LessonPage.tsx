@@ -345,7 +345,7 @@ function Lesson({ lessonKey: key }: { lessonKey: string }) {
             <LessonCover cover={following.content.cover} size="sm" />
             <span className="grow">
               <span className="next-locked-kicker">
-                <LockIcon size={12} /> Next in Suited Pro
+                <LockIcon size={12} /> Next in Aced Pro
               </span>
               <span className="next-locked-title">{following.title}</span>
               <span className="footnote">

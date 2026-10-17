@@ -176,7 +176,7 @@ describe('blind vs blind in a full ring', () => {
 
   it('quotes the raise only small blind chart at about 42%', () => {
     expect(Math.round(rangePercent(chartRange('9max-100-rfi-sb')) * 100)).toBe(42);
-    const chart = step(key, 'Suited’s chart raises or folds');
+    const chart = step(key, 'Aced’s chart raises or folds');
     expect(chart.kind === 'chart' && chart.chartId).toBe('9max-100-rfi-sb');
     expect(STARTER_CHARTS.find((c) => c.id === '9max-100-rfi-sb')!.source).toBe('starter-approx');
   });

@@ -132,7 +132,7 @@ function buildCards(first: ShareKind, src: Sources): ShareCard[] {
     const fig = ratingFigure(d.rating, d.settling);
     return {
       ...base,
-      alt: `Suited Rating ${fig.about ? `about ${fig.value}, still settling` : `${fig.value}${d.tier ? `, ${d.tier}` : ''}`}.`,
+      alt: `Aced Rating ${fig.about ? `about ${fig.value}, still settling` : `${fig.value}${d.tier ? `, ${d.tier}` : ''}`}.`,
       text: ratingShareText(d),
       link: shareUrl(),
       copy: 'link' as const,
@@ -271,7 +271,7 @@ function ShareBody({ first, onClose }: { first: ShareKind; onClose: () => void }
       }
       done(mode);
     } catch (e) {
-      if ((e as Error)?.name !== 'AbortError') setNote('Suited could not share that. Try copying instead.');
+      if ((e as Error)?.name !== 'AbortError') setNote('Aced could not share that. Try copying instead.');
     }
   };
 
@@ -282,7 +282,7 @@ function ShareBody({ first, onClose }: { first: ShareKind; onClose: () => void }
       setNote(copyWhat === 'result' ? 'Result copied. Paste it anywhere.' : 'Link copied. Paste it anywhere.');
       done(copyWhat === 'result' ? 'copy-result' : 'copy-link');
     } catch {
-      setNote(`Suited could not copy. Your link is ${card.link}`);
+      setNote(`Aced could not copy. Your link is ${card.link}`);
     }
   };
 
@@ -373,7 +373,7 @@ function ShareBody({ first, onClose }: { first: ShareKind; onClose: () => void }
       )}
 
       <p className="footnote share-note" role="status">
-        {note ?? (failed ? 'Suited could not draw the image. You can still share the text.' : noteFor(card, src))}
+        {note ?? (failed ? 'Aced could not draw the image. You can still share the text.' : noteFor(card, src))}
       </p>
 
       <div className="share-actions">

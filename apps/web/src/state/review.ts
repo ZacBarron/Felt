@@ -156,7 +156,7 @@ export async function recordAnswer(item: QueueItem, outcome: DrillOutcome, now =
   return card.due;
 }
 
-/** Objective review answers also count toward the Suited Rating. */
+/** Objective review answers also count toward the Aced Rating. */
 async function rateReview(item: QueueItem, score: number, at: Date) {
   if (item.mode === 'quiz') {
     if (item.lessonKey !== undefined && item.step !== undefined) await recordLessonQuiz(item.lessonKey, item.step, score >= 1, 'review');

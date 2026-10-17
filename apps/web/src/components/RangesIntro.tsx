@@ -42,7 +42,7 @@ export function hasDefaultGame(game: GameSettings): boolean {
 
 /** Plain names for the presets. The preset settings stay in @felt/core. */
 export const GAME_CHOICES: { id: string; title: string }[] = [
-  { id: 'live-1-3', title: 'Small live game' },
+  { id: 'live-1-2', title: 'Small live game' },
   { id: 'live-2-5', title: 'Bigger live game' },
   { id: 'online-6max', title: 'Online 6-max' },
   { id: 'mtt-9max', title: 'Tournaments' },
@@ -179,7 +179,7 @@ function ChartStep() {
           <div className="intro-grid" {...({ inert: '' } as object)}>
             <RangeGrid mixes={open.mixes} reach={open.reach} />
             <span className="intro-tag intro-tag-suited" aria-hidden="true">
-              Suited
+              Aced
             </span>
             <span className="intro-tag intro-tag-pairs" aria-hidden="true">
               Pairs

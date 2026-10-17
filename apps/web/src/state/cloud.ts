@@ -1,13 +1,13 @@
 import { useSyncExternalStore } from 'react';
 
 /**
- * Cloud saves through the claude.ai artifact platform: when Suited runs as a
+ * Cloud saves through the claude.ai artifact platform: when Aced runs as a
  * hosted artifact, the viewer is signed in to claude.ai and each person has
- * a private place to store data that only they can read. Suited keeps its
+ * a private place to store data that only they can read. Aced keeps its
  * usual snapshot there, split into parts small enough for one document.
  *
  * Outside claude.ai (the app on its own domain), none of this exists and
- * Suited uses its own server account instead (see api.ts).
+ * Aced uses its own server account instead (see api.ts).
  */
 
 interface DocSnap {
@@ -55,7 +55,7 @@ const unchecked = { cloud: null, checked: false };
 const noCloud = { cloud: null, checked: true };
 let cloudState: { cloud: ClaudeCloud | null; checked: boolean } = noCloud;
 
-/** Connects to the artifact platform's store and identity, if Suited is running there. */
+/** Connects to the artifact platform's store and identity, if Aced is running there. */
 export async function connectClaudeCloud(): Promise<ClaudeCloud | null> {
   if (checked) return cloud;
   const host = (globalThis as { claude?: ClaudeHost }).claude;
@@ -111,7 +111,7 @@ export async function cloudGet(c: ClaudeCloud): Promise<CloudManifest & { data?:
   for (let i = 0; i < meta.parts; i++) {
     const snap = await partRef(c, meta.version, i).get();
     const chunk = snap.exists ? snap.data()?.chunk : undefined;
-    if (typeof chunk !== 'string') throw new Error('Your cloud copy is incomplete. Suited will try again.');
+    if (typeof chunk !== 'string') throw new Error('Your cloud copy is incomplete. Aced will try again.');
     parts.push(chunk);
   }
   return { ...meta, data: parts.join('') };

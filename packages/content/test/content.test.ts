@@ -90,7 +90,7 @@ describe('starter charts', () => {
           }
         }
       }
-      // Suited never opens less often than offsuit.
+      // Aced never opens less often than offsuit.
       for (const [hand, mix] of c.mixes) if (hand.endsWith('o')) expect(mix.raise ?? 0, hand).toBeLessThanOrEqual(raise(c, hand.slice(0, 2) + 's'));
     }
   });

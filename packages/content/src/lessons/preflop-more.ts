@@ -75,7 +75,7 @@ export const PREFLOP_MORE_LESSONS: LessonContent[] = [
           ['In position', 'About 3x', '7.5bb'],
           ['Out of position', 'About 4x', '10bb, often up to 11 or 12bb'],
         ],
-        note: 'Common sizes in line with solver outputs. Suited’s starter charts 3bet to 11 or 12bb from the blinds.',
+        note: 'Common sizes in line with solver outputs. Aced’s starter charts 3bet to 11 or 12bb from the blinds.',
         evidence: 'solver',
       },
       {
@@ -165,7 +165,7 @@ export const PREFLOP_MORE_LESSONS: LessonContent[] = [
         chartId: '9max-100-btn-vs-co',
         title: 'Where calling is allowed',
         caption:
-          'Suited’s button chart against a cutoff open calls about 11% of hands. It 3bets about 8%. In the cutoff and earlier, players behind can squeeze or join. So calling ranges there shrink to a few hands. In the small blind, calling is rare.',
+          'Aced’s button chart against a cutoff open calls about 11% of hands. It 3bets about 8%. In the cutoff and earlier, players behind can squeeze or join. So calling ranges there shrink to a few hands. In the small blind, calling is rare.',
       },
       {
         kind: 'table',
@@ -312,7 +312,7 @@ export const PREFLOP_MORE_LESSONS: LessonContent[] = [
         kind: 'chart',
         chartId: '9max-100-sb-vs-btn',
         title: 'Small blind against a button open',
-        caption: 'Suited’s starter chart never calls here. It 3bets about 17% and folds the rest. Suited’s starter charts are approximate.',
+        caption: 'Aced’s starter chart never calls here. It 3bets about 17% and folds the rest. Aced’s starter charts are approximate.',
       },
       {
         kind: 'text',
@@ -349,7 +349,7 @@ export const PREFLOP_MORE_LESSONS: LessonContent[] = [
         question: 'The button opens 2.5bb. What is a typical small blind 3bet size?',
         choices: ['11bb', '7.5bb', '6bb'],
         answer: 0,
-        explain: 'Like the sizing step showed, the small blind 3bets about 4 to 5 times the open. That is 10 to 12bb. Suited’s starter chart uses 11bb. 7.5bb is an in position size.',
+        explain: 'Like the sizing step showed, the small blind 3bets about 4 to 5 times the open. That is 10 to 12bb. Aced’s starter chart uses 11bb. 7.5bb is an in position size.',
         point: 2,
       },
       {
@@ -586,7 +586,7 @@ export const PREFLOP_MORE_LESSONS: LessonContent[] = [
             { label: '9-handed button', value: 6, tone: 'gray' },
           ],
         },
-        caption: 'Each bar is the share of an opening range that is QQ+ or AK, in Suited’s starter charts. Most of a button range was fine to open but cannot stand a 3bet. So early openers continue with a larger share.',
+        caption: 'Each bar is the share of an opening range that is QQ+ or AK, in Aced’s starter charts. Most of a button range was fine to open but cannot stand a 3bet. So early openers continue with a larger share.',
         evidence: 'solver',
       },
       {
@@ -613,11 +613,11 @@ export const PREFLOP_MORE_LESSONS: LessonContent[] = [
       },
       {
         kind: 'quiz',
-        question: 'You open K♣9♦ on the button and the big blind 3bets to 11bb. What does Suited’s chart do?',
+        question: 'You open K♣9♦ on the button and the big blind 3bets to 11bb. What does Aced’s chart do?',
         cards: 'Kc9d',
         choices: ['Call', '4bet', 'Fold'],
         answer: 2,
-        explain: 'Like the options table showed, weak offsuit hands like K9o fold. AK and KQ dominate it, and it has no blocker value worth a 4bet. Suited’s chart folds it every time.',
+        explain: 'Like the options table showed, weak offsuit hands like K9o fold. AK and KQ dominate it, and it has no blocker value worth a 4bet. Aced’s chart folds it every time.',
         point: 2,
       },
       {
@@ -699,7 +699,7 @@ export const PREFLOP_MORE_LESSONS: LessonContent[] = [
           ['In position', 'About 2.2 to 2.5x the 3bet', '11bb 3bet: 4bet to about 25bb'],
           ['Out of position', 'Larger, often near 3x', '7.5bb 3bet: 4bet to about 22bb'],
         ],
-        note: 'Common sizes in line with solver outputs. Suited’s starter charts use 24bb in position and 22bb out of position.',
+        note: 'Common sizes in line with solver outputs. Aced’s starter charts use 24bb in position and 22bb out of position.',
         evidence: 'solver',
       },
       {
@@ -787,7 +787,7 @@ export const PREFLOP_MORE_LESSONS: LessonContent[] = [
         kind: 'chart',
         chartId: '9max-100-rfi-sb',
         title: 'Small blind raise only, about 42%',
-        caption: 'Suited’s starter chart raises to 3bb and folds the rest. It leaves out limping, which solvers also use.',
+        caption: 'Aced’s starter chart raises to 3bb and folds the rest. It leaves out limping, which solvers also use.',
       },
       {
         kind: 'text',

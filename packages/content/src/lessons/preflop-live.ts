@@ -223,7 +223,7 @@ export const PREFLOP_LIVE_LESSONS: LessonContent[] = [
             { label: 'Opener needs vs 11bb', value: 37.8, tone: 'brass' },
           ],
         },
-        caption: 'In position, 3bets are often about 3 times the open. Out of position they are about 4 times or more. Suited’s big blind chart 3bets a 2.5bb open to 11bb. The bigger size charges the opener more and leaves a lower SPR (stack to pot ratio).',
+        caption: 'In position, 3bets are often about 3 times the open. Out of position they are about 4 times or more. Aced’s big blind chart 3bets a 2.5bb open to 11bb. The bigger size charges the opener more and leaves a lower SPR (stack to pot ratio).',
         evidence: 'solver',
       },
       {

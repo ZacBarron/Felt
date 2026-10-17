@@ -14,9 +14,9 @@ import { SaveProgress } from './SignInPage';
 import './learn.css';
 
 /**
- * The end of the very first lesson: the moment Suited has given something
+ * The end of the very first lesson: the moment Aced has given something
  * real. It celebrates the win, then offers to keep it (an account, once),
- * then shows Suited Pro once, then Today. Offers come after value, not before
+ * then shows Aced Pro once, then Today. Offers come after value, not before
  * (most trials still start on the first day, so the Pro offer stays on day
  * one, just after the lesson instead of before it).
  */

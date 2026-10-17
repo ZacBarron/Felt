@@ -46,7 +46,7 @@ export const POSTFLOP_MORE_LESSONS: LessonContent[] = [
           ['7♥6♥5♣', '48.9%', '4.7%', '8.6%'],
         ],
         note:
-          'Computed exactly with Suited’s core over every turn and river. BTN uses its opening chart. BB uses its calling chart, with 3bets removed. These starter charts are approximations. Strong means two pair or better. On 8♠8♦3♣ every pocket pair makes two pair, so there it means trips or better. Equity here is raw equity, before position.',
+          'Computed exactly with Aced’s core over every turn and river. BTN uses its opening chart. BB uses its calling chart, with 3bets removed. These starter charts are approximations. Strong means two pair or better. On 8♠8♦3♣ every pocket pair makes two pair, so there it means trips or better. Equity here is raw equity, before position.',
         evidence: 'math',
       },
       {
@@ -115,7 +115,7 @@ export const POSTFLOP_MORE_LESSONS: LessonContent[] = [
       },
       {
         kind: 'quiz',
-        question: 'With Suited’s charts, BTN opens and BB calls. On 8♠8♦3♣, who holds more trips or better?',
+        question: 'With Aced’s charts, BTN opens and BB calls. On 8♠8♦3♣, who holds more trips or better?',
         board: '8s8d3c',
         choices: ['BTN, because it has more equity', 'BB, because it defends more eights', 'Both hold about the same'],
         answer: 1,

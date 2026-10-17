@@ -5,7 +5,7 @@
  * answers, and nothing here gives away a daily challenge answer.
  */
 
-/** The Suited Rating card. */
+/** The Aced Rating card. */
 export interface RatingCardData {
   name?: string;
   rating: number;
@@ -62,7 +62,7 @@ export const dailyRight = (scores: readonly number[]) => scores.filter((s) => da
  * and spoiler free, so it can go anywhere.
  */
 export function dailyResultText(number: number, scores: readonly number[], link?: string): string {
-  const lines = [`Suited Daily #${number} ${dailyRight(scores)}/${scores.length}`, dailyGrid(scores)];
+  const lines = [`Aced Daily #${number} ${dailyRight(scores)}/${scores.length}`, dailyGrid(scores)];
   if (link) lines.push(link);
   return lines.join('\n');
 }
@@ -85,16 +85,16 @@ export function ratingFigure(rating: number, settling: boolean): { about: boolea
 
 export function ratingShareText(d: RatingCardData): string {
   const { about, value } = ratingFigure(d.rating, d.settling);
-  const first = about ? `My Suited Rating is about ${value}. It is still settling.` : `My Suited Rating is ${value}.`;
+  const first = about ? `My Aced Rating is about ${value}. It is still settling.` : `My Aced Rating is ${value}.`;
   const tier = !d.settling && d.tier ? ` My tier is ${d.tier}.` : '';
   const streak = d.streak > 1 ? ` I'm on a ${d.streak} day streak.` : '';
   return `${first}${tier}${streak}`;
 }
 
 export function streakShareText(d: StreakCardData): string {
-  if (d.streak <= 0) return 'I study poker with Suited.';
-  if (d.streak === 1) return 'I started a poker study streak on Suited.';
-  return `I've studied poker on Suited ${d.streak} days in a row.`;
+  if (d.streak <= 0) return 'I study poker with Aced.';
+  if (d.streak === 1) return 'I started a poker study streak on Aced.';
+  return `I've studied poker on Aced ${d.streak} days in a row.`;
 }
 
 /** Days studied in the week strip. */

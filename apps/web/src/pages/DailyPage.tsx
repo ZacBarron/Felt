@@ -77,7 +77,7 @@ interface Crowd {
   signedOut: boolean;
 }
 
-/** How everyone did today, from the Suited server when there is one. Signed in results count once. */
+/** How everyone did today, from the Aced server when there is one. Signed in results count once. */
 function useDailyCrowd(number: number, scores: number[]): Crowd | undefined {
   const [crowd, setCrowd] = useState<Crowd>();
   const right = scores.filter((s) => s >= 1).length;
@@ -160,7 +160,7 @@ function Result({ number, items, scores, before, after }: { number: number; item
         )}
         <div className="row" style={{ justifyContent: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
           <span className="pill num">
-            Suited Rating {Math.round(after)}, {delta === 0 ? 'no change' : delta > 0 ? `up ${delta}` : `down ${-delta}`}
+            Aced Rating {Math.round(after)}, {delta === 0 ? 'no change' : delta > 0 ? `up ${delta}` : `down ${-delta}`}
             {provisional && <span className="sr-only">, still settling</span>}
           </span>
         </div>
@@ -314,7 +314,7 @@ export function DailyPage() {
             })}
           </ol>
           <p className="pro-sub" style={{ margin: 0 }}>
-            Each answer counts toward your Suited Rating.
+            Each answer counts toward your Aced Rating.
           </p>
         </div>
         <BottomBar>

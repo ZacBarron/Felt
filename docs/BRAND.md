@@ -1,26 +1,28 @@
-# Suited Brand
+# Aced Brand
 
 ## Idea
 
-**Poker, suited to you.**
+**Ace every spot.**
 
-Suited is poker training that fits the player: their game, their stakes, their leaks and a few minutes a day. It is precise like a solver and calm like a good card room, and every answer says how sure it is. The line plays on the name: suited cards, and a plan suited to you.
+Aced is poker training for players who want to be the toughest player at their table. It fits their game, their stakes, their leaks and a few minutes a day. It is precise like a solver and calm like a good card room, and every answer says how sure it is. The name is the promise: you ace it. A spot is the poker word for a decision, so the line says exactly what the app trains.
 
-What Suited is not: a casino, a trading app, a crypto product. No neon, no chips raining down, no slot machine rewards. Progress is shown plainly and honestly.
+Always write the brand as **Aced**. "Poker" is a descriptor ("Aced: Poker Trainer & GTO"), never part of the name, because "Aced Poker" was the name of a real money card room. The domain is acedpoker.app.
+
+What Aced is not: a casino, a trading app, a crypto product. No neon, no chips raining down, no slot machine rewards. Progress is shown plainly and honestly.
 
 ## Name
 
-The product was called Felt until October 2026. "Felt" conflicted with an existing poker app and a registered FELT mark for mobile apps, so it became **Suited**: suited cards, and a plan suited to your game. The brand review behind the change scored five names; see the Suited brand review artifact. Internal identifiers (storage keys such as `felt.settings.v1`, the `felt` IndexedDB database, the `@felt/*` packages and the repository) keep the old name on purpose: renaming them would wipe players' saved progress.
+The product was called Felt until October 2026. "Felt" conflicted with an existing poker app and a registered FELT mark for mobile apps, so it became **Suited**. Suited in turn clashed with suitedpoker.com and suited.app, so in October 2026 it became **Aced**, chosen by a simulated panel of 100 target players (see the Aced growth plan artifact). The mark stayed: it is still the suited half of a range chart. Internal identifiers (storage keys such as `felt.settings.v1`, the `felt` IndexedDB database, the `@felt/*` packages and the repository) keep the old name on purpose: renaming them would wipe players' saved progress.
 
 ## Voice
 
-Suited sounds like a good coach sitting next to you: calm, direct and warm. The full guide, with sentence rules, accessibility, mechanics and the glossary, is [VOICE.md](VOICE.md).
+Aced sounds like a good coach sitting next to you: calm, direct and warm. The full guide, with sentence rules, accessibility, mechanics and the glossary, is [VOICE.md](VOICE.md).
 
 ## Logo
 
 **The mark** is the suited half of a range chart, on a 6x6 grid. In every range chart, suited hands sit above the diagonal and pairs sit on it. The cells above the diagonal are brass, the pairs on the diagonal are a soft neutral line, and the offsuit half stays faintly visible. It is the name drawn in the language of the game: a player reads it as a range chart, anyone else as a clean triangle.
 
-**The wordmark** is "Suited" drawn from Instrument Serif with tracking of -10 units per letter, kept as outlines (`apps/web/src/ui/wordmark.ts`) so it never depends on a font loading. Regenerate it from the font with opentype.js rather than editing the path by hand.
+**The wordmark** is "Aced" drawn from Instrument Serif with tracking of -10 units per letter, kept as outlines (`apps/web/src/ui/wordmark.ts`) so it never depends on a font loading. Regenerate it from the font with opentype.js rather than editing the path by hand.
 
 **The lockup** pairs the tile mark with the wordmark, spaced at 0.38 of the mark height.
 
@@ -68,7 +70,7 @@ Rules:
 
 ### Personality and easter eggs
 
-Suited's personality comes from the game itself: table talk, card counts and the craft of the mark. It is never a joke at the player's expense, never a reward for time spent, and never in the way of a question.
+Aced's personality comes from the game itself: table talk, card counts and the craft of the mark. It is never a joke at the player's expense, never a reward for time spent, and never in the way of a question.
 
 | Where | What |
 | --- | --- |
@@ -85,7 +87,7 @@ Rules: one small touch per moment, motion under a second and off with reduced mo
 
 Card room is the brand: it is what goes on the app icon, the splash screen and every marketing surface. People can pick an alternate theme in Settings for the app itself:
 
-| Theme | Suited | Accent | Note |
+| Theme | Aced | Accent | Note |
 | --- | --- | --- | --- |
 | Card room (default) | Spruce | Brass | The brand |
 | Ink | Navy | Brass | Quieter, more corporate |
@@ -117,7 +119,7 @@ Everything else uses the system palette so the app still feels native. Playing c
 
 ## Iconography
 
-A small set drawn for Suited on a 24pt grid in `apps/web/src/ui/icons.tsx`: 1.75 stroke, round caps, filled state for selection. Poker specific where it helps (fanned cards for Review, a range grid for Ranges). No third party icon libraries.
+A small set drawn for Aced on a 24pt grid in `apps/web/src/ui/icons.tsx`: 1.75 stroke, round caps, filled state for selection. Poker specific where it helps (fanned cards for Review, a range grid for Ranges). No third party icon libraries.
 
 ## Motion
 

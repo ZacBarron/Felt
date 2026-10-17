@@ -18,7 +18,7 @@ export default defineConfig({
   },
   // The solver runs in a module worker so it can import @felt/core.
   worker: { format: 'es' },
-  // During development the Suited server runs on 8787 (pnpm dev:server).
+  // During development the Aced server runs on 8787 (pnpm dev:server).
   server: { proxy: { '/api': 'http://localhost:8787' } },
   plugins: [
     // The hosted test page always shows the phone layout (see scripts/artifact-page.mjs for the frame).
@@ -42,9 +42,9 @@ export default defineConfig({
       injectManifest: { globPatterns: ['**/*.{js,css,html,png,svg,woff2}'] },
       includeAssets: ['favicon.png', 'apple-touch-icon.png'],
       manifest: {
-        name: 'Suited',
-        short_name: 'Suited',
-        description: 'Poker, suited to you. Short lessons, honest answers and a plan built around your game.',
+        name: 'Aced',
+        short_name: 'Aced',
+        description: 'Ace every spot. Short lessons, solver ranges and a practice table that grades every decision.',
         theme_color: '#0b2421',
         background_color: '#0b2421',
         display: 'standalone',

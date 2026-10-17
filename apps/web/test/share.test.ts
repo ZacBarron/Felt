@@ -29,17 +29,17 @@ describe('daily text result', () => {
 
   it('builds a short Wordle style result with the link last', () => {
     const link = 'https://example.com/Felt/?ref=ABCD&daily=312';
-    expect(dailyResultText(312, [1, 1, 0.5, 1, 1], link)).toBe(`Suited Daily #312 4/5\n🟩🟩🟨🟩🟩\n${link}`);
+    expect(dailyResultText(312, [1, 1, 0.5, 1, 1], link)).toBe(`Aced Daily #312 4/5\n🟩🟩🟨🟩🟩\n${link}`);
   });
 
   it('counts only full credit as right', () => {
-    expect(dailyResultText(9, [0.5, 0.5, 0, 0, 0])).toBe('Suited Daily #9 0/5\n🟨🟨⬛⬛⬛');
-    expect(dailyResultText(10, [1, 1, 1, 1, 1])).toBe('Suited Daily #10 5/5\n🟩🟩🟩🟩🟩');
+    expect(dailyResultText(9, [0.5, 0.5, 0, 0, 0])).toBe('Aced Daily #9 0/5\n🟨🟨⬛⬛⬛');
+    expect(dailyResultText(10, [1, 1, 1, 1, 1])).toBe('Aced Daily #10 5/5\n🟩🟩🟩🟩🟩');
   });
 
   it('never gives away a hand or an answer', () => {
     const text = dailyResultText(312, [1, 0, 0.5, 1, 0], 'https://example.com/');
-    expect(text).not.toMatch(/[AKQJT2-9][shdc]|fold|call|raise|3bet/i);
+    expect(text).not.toMatch(/\b[AKQJT2-9][shdc]\b|fold|call|raise|3bet/i);
     expect(text.split('\n')).toHaveLength(3);
   });
 
@@ -53,8 +53,8 @@ const week = (done: boolean[], frozen: number[] = []): StreakCardData['days'] =>
 
 describe('streak share', () => {
   it('says how many days in a row', () => {
-    expect(streakShareText({ streak: 12, best: 20, days: week([true, true, true, true, true, true, true]) })).toBe("I've studied poker on Suited 12 days in a row.");
-    expect(streakShareText({ streak: 1, best: 4, days: week([false, false, false, false, false, false, true]) })).toBe('I started a poker study streak on Suited.');
+    expect(streakShareText({ streak: 12, best: 20, days: week([true, true, true, true, true, true, true]) })).toBe("I've studied poker on Aced 12 days in a row.");
+    expect(streakShareText({ streak: 1, best: 4, days: week([false, false, false, false, false, false, true]) })).toBe('I started a poker study streak on Aced.');
   });
 
   it('describes the card in words', () => {
@@ -95,7 +95,7 @@ describe('share mode', () => {
   });
 
   it('puts the link on its own last line', () => {
-    expect(shareMessage('Suited Daily #3 2/5\n🟩🟩⬛⬛⬛', 'https://x.test/')).toBe('Suited Daily #3 2/5\n🟩🟩⬛⬛⬛\nhttps://x.test/');
+    expect(shareMessage('Aced Daily #3 2/5\n🟩🟩⬛⬛⬛', 'https://x.test/')).toBe('Aced Daily #3 2/5\n🟩🟩⬛⬛⬛\nhttps://x.test/');
   });
 
   it('names files for what is on them', () => {

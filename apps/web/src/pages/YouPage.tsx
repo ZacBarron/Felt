@@ -211,7 +211,7 @@ export function YouPage() {
       </section>
 
       <section className="hero you-hero">
-        <div className="hero-label">Suited Rating</div>
+        <div className="hero-label">Aced Rating</div>
         <div className="row" style={{ alignItems: "baseline", gap: "0.6rem" }}>
           {rated ? (
             <span

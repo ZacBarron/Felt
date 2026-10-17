@@ -143,7 +143,7 @@ function SignedIn({ user, features }: { user: ServerUser; features: ServerFeatur
         <Section>
           <div className="card account-plan">
             <span className="grow">
-              <span className="account-plan-name">{user.access.pro ? (user.access.trialing ? 'Suited Pro trial' : 'Suited Pro') : 'Free plan'}</span>
+              <span className="account-plan-name">{user.access.pro ? (user.access.trialing ? 'Aced Pro trial' : 'Aced Pro') : 'Free plan'}</span>
               <span className="footnote">
                 {user.access.pro && user.access.until
                   ? `${user.access.trialing ? 'Trial ends' : user.access.plan === 'invite' ? 'From invites, free until' : 'Renews'} ${shortDate(user.access.until)}`
@@ -167,7 +167,7 @@ function SignedIn({ user, features }: { user: ServerUser; features: ServerFeatur
               </button>
             ) : !user.access.pro ? (
               <Link to="/pro?from=account" className="btn btn-primary">
-                See Suited Pro
+                See Aced Pro
               </Link>
             ) : null}
           </div>
@@ -205,7 +205,7 @@ function SignedIn({ user, features }: { user: ServerUser; features: ServerFeatur
                   setSigninMessage('Passkey added. You can sign in with it on this device.');
                 } catch (e) {
                   if (!(e instanceof Cancelled)) haptic('error');
-                  setSigninMessage(e instanceof Cancelled ? `${e.message} You can try again.` : e instanceof Error ? e.message : 'Suited could not add a passkey. Try again.');
+                  setSigninMessage(e instanceof Cancelled ? `${e.message} You can try again.` : e instanceof Error ? e.message : 'Aced could not add a passkey. Try again.');
                 }
                 setBusy(false);
               }}
@@ -370,11 +370,11 @@ function SignedIn({ user, features }: { user: ServerUser; features: ServerFeatur
                 <span className="grow stack" style={{ gap: '0.4rem', padding: '0.3rem 0' }}>
                   <strong>Delete your account for good?</strong>
                   <span className="footnote" style={{ display: 'block' }}>
-                    Suited deletes your account and its saved progress. Your league results go too. This cannot be undone.
+                    Aced deletes your account and its saved progress. Your league results go too. This cannot be undone.
                   </span>
                   <span className="footnote" style={{ display: 'block' }}>
                     Progress on this device stays as a guest copy.
-                    {user.access.pro && user.access.until ? ' Cancel Suited Pro first so you are not charged again.' : ''}
+                    {user.access.pro && user.access.until ? ' Cancel Aced Pro first so you are not charged again.' : ''}
                   </span>
                 </span>
               </div>
@@ -431,18 +431,18 @@ function SyncSection({ busy, run, message }: { busy: boolean; run: (fn: () => Pr
   const status = sync.saving
     ? { tone: '', title: 'Saving…', sub: 'Sending your latest progress' }
     : !online
-      ? { tone: 'warn', title: sync.dirty ? 'Not saved yet. You are offline.' : 'You are offline', sub: sync.dirty ? 'Suited saves when you are back online.' : `Saved ${ago(sync.syncedAt)}` }
+      ? { tone: 'warn', title: sync.dirty ? 'Not saved yet. You are offline.' : 'You are offline', sub: sync.dirty ? 'Aced saves when you are back online.' : `Saved ${ago(sync.syncedAt)}` }
       : sync.error && sync.dirty
         ? { tone: 'warn', title: 'Not saved yet', sub: sync.error }
         : sync.dirty
           ? { tone: '', title: 'Saving soon', sub: `Last saved ${ago(sync.syncedAt)}` }
           : sync.syncedAt
             ? { tone: 'good', title: `Saved ${ago(sync.syncedAt)}`, sub: 'Your account has everything on this device.' }
-            : { tone: '', title: 'Not saved yet', sub: 'Suited saves a few seconds after you study.' };
+            : { tone: '', title: 'Not saved yet', sub: 'Aced saves a few seconds after you study.' };
   return (
     <Section
       title="Sync"
-      info={<p>Suited saves to your account a few seconds after you study, and when you leave the app. Sign in on another device and your progress is there.</p>}
+      info={<p>Aced saves to your account a few seconds after you study, and when you leave the app. Sign in on another device and your progress is there.</p>}
       footer={message ? <span role="status">{message}</span> : undefined}
     >
       {sync.conflict ? (
@@ -498,7 +498,7 @@ function ClaudeAccount({ name }: { name: string }) {
   };
   return (
     <>
-      <Section title="Signed in" info={<p>Your progress saves to a private space that only you can read. Open Suited on any device where you are signed in to Claude and it is there.</p>}>
+      <Section title="Signed in" info={<p>Your progress saves to a private space that only you can read. Open Aced on any device where you are signed in to Claude and it is there.</p>}>
         <div className="list">
           <div className="list-row">
             <span className="sc-icon-tile" aria-hidden="true">

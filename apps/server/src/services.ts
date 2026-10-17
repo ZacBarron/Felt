@@ -170,7 +170,7 @@ export function weekKey(now: Date): string {
   return d.toISOString().slice(0, 10);
 }
 
-/** Leagues group players by Suited Rating tier (150 points wide from 900), so players compete with similar levels. */
+/** Leagues group players by Aced Rating tier (150 points wide from 900), so players compete with similar levels. */
 export function ratingBand(rating: number): number {
   return Math.max(0, Math.min(8, Math.floor((rating - 900) / 150) + 1));
 }

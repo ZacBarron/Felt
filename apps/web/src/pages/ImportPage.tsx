@@ -127,9 +127,9 @@ export function ImportPage() {
       <Section
         info={
           <>
-            <p>Suited reads hand history files from PokerStars, GGPoker or any site with the same format. It uses your preflop decisions and results.</p>
+            <p>Aced reads hand history files from PokerStars, GGPoker or any site with the same format. It uses your preflop decisions and results.</p>
             <p style={{ marginTop: '0.5rem' }}>
-              <strong>Using PokerTracker 4 or Holdem Manager 3?</strong> Suited cannot open their databases. Export your hands as PokerStars hand histories. Then
+              <strong>Using PokerTracker 4 or Holdem Manager 3?</strong> Aced cannot open their databases. Export your hands as PokerStars hand histories. Then
               import those files here.
             </p>
           </>
@@ -333,7 +333,7 @@ export function ImportPage() {
       {stats && (
         <Section
           title="Hands the chart plays differently"
-          footer="Compared with Suited's approximate starter charts."
+          footer="Compared with Aced's approximate starter charts."
           info={
             <p>
               The starter charts assume a 2.5bb open. We only list clear differences. That means opening a hand the chart never opens, or folding one it always

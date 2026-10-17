@@ -4,7 +4,7 @@ import { entryFor } from './lessons';
 import { calibratedDifficulty } from './calibration';
 
 /**
- * Records graded answers and turns them into the Suited Rating. Only objective
+ * Records graded answers and turns them into the Aced Rating. Only objective
  * answers count: quizzes, chart decisions and solver decisions. Self graded
  * flashcards never move the rating.
  */

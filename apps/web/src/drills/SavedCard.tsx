@@ -174,7 +174,7 @@ export function SolverSpotQuiz({
             <span className="footnote">You chose {labels[choice]}</span>
           </div>
           <MixBar mix={mix} labels={labels} />
-          <div className="footnote">Solved by Suited Solver. Exploitability is {spot.exploitability.toFixed(2)}% of the pot.</div>
+          <div className="footnote">Solved by Aced Solver. Exploitability is {spot.exploitability.toFixed(2)}% of the pot.</div>
         </div>
       )}
       {footer && !choice && (

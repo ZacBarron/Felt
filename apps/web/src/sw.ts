@@ -14,7 +14,7 @@ registerRoute(new NavigationRoute(createHandlerBoundToURL('index.html'), { denyl
 self.skipWaiting();
 clientsClaim();
 
-// Study reminders from the Suited server.
+// Study reminders from the Aced server.
 self.addEventListener('push', (event) => {
   let data: { title?: string; body?: string; url?: string } = {};
   try {
@@ -23,7 +23,7 @@ self.addEventListener('push', (event) => {
     data = { body: event.data?.text() };
   }
   event.waitUntil(
-    self.registration.showNotification(data.title ?? 'Suited', {
+    self.registration.showNotification(data.title ?? 'Aced', {
       body: data.body ?? '',
       icon: '/icon-192.png',
       badge: '/icon-192.png',

@@ -88,6 +88,6 @@ describe('daily challenge', () => {
   });
 
   it('shares a spoiler free result', () => {
-    expect(dailyResultText(285, [1, 1, 0.5, 0, 1])).toBe('Suited Daily #285 3/5\n🟩🟩🟨⬛🟩');
+    expect(dailyResultText(285, [1, 1, 0.5, 0, 1])).toBe('Aced Daily #285 3/5\n🟩🟩🟨⬛🟩');
   });
 });

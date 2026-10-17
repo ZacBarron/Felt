@@ -3,7 +3,7 @@ import type { LessonContent } from './types';
 /**
  * Poker basics: the rules and a first strategy, for someone who has never
  * played. Every count and chance here is exact and checked by the content
- * tests. Chart shares come from Suited's approximate starter charts.
+ * tests. Chart shares come from Aced's approximate starter charts.
  */
 export const BASICS_LESSONS: LessonContent[] = [
   {
@@ -15,7 +15,7 @@ export const BASICS_LESSONS: LessonContent[] = [
       {
         kind: 'intro',
         title: 'Win the pot',
-        body: 'Suited teaches No Limit Hold’em. Players bet chips on who holds the best hand. Every chip bet in a hand goes into the middle. That pile is the **pot**, and winning it is the goal.',
+        body: 'Aced teaches No Limit Hold’em. Players bet chips on who holds the best hand. Every chip bet in a hand goes into the middle. That pile is the **pot**, and winning it is the goal.',
       },
       {
         kind: 'visual',
@@ -29,7 +29,7 @@ export const BASICS_LESSONS: LessonContent[] = [
         title: 'The suits',
         art: { kind: 'cards', cards: '', board: 'KcKdKhKs' },
         caption:
-          'Each rank comes in 4 suits. Here are the 4 kings. The suits are clubs (c) and diamonds (d). Then come hearts (h) and spades (s). Suited writes a card as rank then suit. Ks is the king of spades.',
+          'Each rank comes in 4 suits. Here are the 4 kings. The suits are clubs (c) and diamonds (d). Then come hearts (h) and spades (s). Aced writes a card as rank then suit. Ks is the king of spades.',
       },
       {
         kind: 'visual',
@@ -391,7 +391,7 @@ export const BASICS_LESSONS: LessonContent[] = [
         question: 'Who must put chips in before any cards are dealt?',
         choices: ['The player on the button', 'Everyone at the table', 'The small blind and the big blind'],
         answer: 2,
-        explain: 'Like the first picture showed, only the 2 seats left of the button post blinds. Some games also take a small ante from everyone. Suited’s cash game lessons assume blinds only.',
+        explain: 'Like the first picture showed, only the 2 seats left of the button post blinds. Some games also take a small ante from everyone. Aced’s cash game lessons assume blinds only.',
         point: 0,
       },
       {
@@ -558,7 +558,7 @@ export const BASICS_LESSONS: LessonContent[] = [
       {
         kind: 'intro',
         title: 'Count in big blinds',
-        body: 'Games are played for very different amounts of money. Suited measures everything in big blinds instead. That way the same advice fits any game.',
+        body: 'Games are played for very different amounts of money. Aced measures everything in big blinds instead. That way the same advice fits any game.',
       },
       {
         kind: 'text',
@@ -566,7 +566,7 @@ export const BASICS_LESSONS: LessonContent[] = [
         body: [
           'One big blind is written **1bb**. It is the size of the big blind in your game.',
           'Games are named by their blinds. In a $1/$2 game the blinds are $1 and $2. So 1bb is $2.',
-          'Your **stack** is all the chips you have on the table. Suited’s starter charts assume stacks of 100bb, called **100bb deep**.',
+          'Your **stack** is all the chips you have on the table. Aced’s starter charts assume stacks of 100bb, called **100bb deep**.',
         ],
       },
       {
@@ -648,7 +648,7 @@ export const BASICS_LESSONS: LessonContent[] = [
       {
         kind: 'takeaway',
         points: [
-          'Suited counts in big blinds, written bb. Divide money by the big blind to get bb.',
+          'Aced counts in big blinds, written bb. Divide money by the big blind to get bb.',
           'A game’s second number is the big blind. At $2/$5 it is $5.',
           'Against one opponent the smaller stack sets the most you can win or lose.',
         ],
@@ -820,7 +820,7 @@ export const BASICS_LESSONS: LessonContent[] = [
         chartId: '9max-100-rfi-utg',
         title: 'A first look at a chart',
         caption:
-          'This grid shows all 169 hands. Pairs run along the diagonal. Suited hands sit above it and offsuit hands below. From UTG at a full table this chart opens only about 12% of hands. KTo folds there. From the button about 43% open, and KTo is one of them. Suited’s starter charts are approximate.',
+          'This grid shows all 169 hands. Pairs run along the diagonal. Suited hands sit above it and offsuit hands below. From UTG at a full table this chart opens only about 12% of hands. KTo folds there. From the button about 43% open, and KTo is one of them. Aced’s starter charts are approximate.',
         highlight: ['AA', '77', 'AKo', 'KQs', 'KTo'],
       },
       {
@@ -834,7 +834,7 @@ export const BASICS_LESSONS: LessonContent[] = [
       },
       {
         kind: 'quiz',
-        question: 'It folds to you with KTo. In which seat does Suited’s chart open it?',
+        question: 'It folds to you with KTo. In which seat does Aced’s chart open it?',
         cards: 'KhTd',
         choices: ['UTG only', 'Both UTG and the button', 'Neither seat', 'The button only'],
         answer: 3,
@@ -875,7 +875,7 @@ export const BASICS_LESSONS: LessonContent[] = [
         kind: 'visual',
         title: 'Hero and villain',
         art: { kind: 'table', seats: 9, button: 'BTN', hero: 'BTN', highlight: ['UTG'], note: 'Villain raises from UTG' },
-        caption: 'When players talk through a hand, they call themselves the **hero**. The opponent is the **villain**. There is no judgment in the word. Suited’s lessons use both from here on.',
+        caption: 'When players talk through a hand, they call themselves the **hero**. The opponent is the **villain**. There is no judgment in the word. Aced’s lessons use both from here on.',
       },
       {
         kind: 'text',
@@ -883,7 +883,7 @@ export const BASICS_LESSONS: LessonContent[] = [
         body: [
           'Before anyone acts, villain could hold any of 1,326 combos. A guess of 1 exact hand is almost always wrong.',
           'Each action rules hands out. Players fold weak hands and raise strong ones.',
-          'Say villain follows Suited’s UTG chart. A raise then means they hold about 12% of all hands.',
+          'Say villain follows Aced’s UTG chart. A raise then means they hold about 12% of all hands.',
           'Your job is to ask how your hand does against that whole range.',
         ],
       },
@@ -928,7 +928,7 @@ export const BASICS_LESSONS: LessonContent[] = [
       },
       {
         kind: 'quiz',
-        question: 'Villain follows Suited’s UTG chart and raises. Which hand can they not have?',
+        question: 'Villain follows Aced’s UTG chart and raises. Which hand can they not have?',
         choices: ['AKo', 'QQ', '72o', 'KQs'],
         choiceCards: ['AsKd', 'QhQs', '7c2d', 'KsQs'],
         answer: 2,

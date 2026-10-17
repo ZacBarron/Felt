@@ -57,7 +57,7 @@ function useReviewCount() {
 /** Pages a player can reach before finishing onboarding. */
 const FIRST_RUN = ['/welcome', '/signin', '/placement', '/pro', '/account', '/terms', '/privacy'];
 
-/** Keeps Suited Pro in step with the account: the server's word wins over this device's. */
+/** Keeps Aced Pro in step with the account: the server's word wins over this device's. */
 function useServerAccess() {
   const session = useSession();
   const { settings, update } = useSettings();
@@ -126,7 +126,7 @@ export function App() {
     <div className="shell">
       <Moments />
       <nav className="nav glass" aria-label="Main">
-        <Link to="/" className="brand" aria-label="Suited home">
+        <Link to="/" className="brand" aria-label="Aced home">
           <Lockup size={30} />
         </Link>
         {[{ section: '', items: TABS }, ...NAV_SECTIONS].map(({ section, items }) => (

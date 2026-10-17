@@ -69,7 +69,7 @@ export function EmailCode({ send, verify, passkeyAutofill, inline, extra, onStep
       setTimeout(() => codeRef.current?.focus(), 60);
     } catch (err) {
       haptic('error');
-      setError(message(err, 'Suited could not send a code. Check the address and try again.'));
+      setError(message(err, 'Aced could not send a code. Check the address and try again.'));
     }
     setBusy(false);
   };
