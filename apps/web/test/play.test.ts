@@ -1,5 +1,5 @@
 import { BOTS } from '@felt/content';
-import { act, type Card, FULL_DECK, legalActions, parseCards, type PreflopSpot, preflopSpot, startHandWithDeck } from '@felt/core';
+import { act, type Card, FULL_DECK, type HandState, legalActions, parseCards, type PlayAction, type PreflopSpot, preflopSpot, seededRng, startHand, startHandWithDeck } from '@felt/core';
 import { describe, expect, it } from 'vitest';
 import { approxRange, chartForSpot, chartPosition, gradeHand, HERO, isClearFold, PLAY_ORDER, playPercentile, seatsFor } from '../src/state/play';
 
@@ -51,6 +51,67 @@ describe('isClearFold', () => {
     expect(isClearFold(utgHand('AdKh'))).toBe(false);
     expect(isClearFold(utgHand('7c2d'))).toBe(true);
     expect(isClearFold(utgHand('AsAh'))).toBe(false);
+  });
+
+  /** 9 handed with the player in the CO (button on seat 1) after `before` acts. */
+  const coAfter = (hero: string, before: (s: HandState) => PlayAction, setup: { straddle?: number } = {}) => {
+    let s = startHandWithDeck({ stacks: Array(9).fill(100), button: 1, ...setup }, deckFor(9, 1, [hero, ...others]));
+    while (s.toAct !== HERO) s = act(s, before(s));
+    return s;
+  };
+  const limp = () => ({ kind: 'call' as const });
+  const openTo = (to: number) => (s: HandState) => (s.log.some((a) => a.kind === 'raise') ? { kind: 'fold' as const } : { kind: 'raise' as const, to });
+
+  it('skips trash facing a live size open the chart does not match exactly', () => {
+    const s = coAfter('7c2d', openTo(5));
+    expect(chartForSpot(preflopSpot(s, HERO))?.exact ?? false).toBe(false);
+    expect(isClearFold(s)).toBe(true);
+    expect(isClearFold(coAfter('AsAh', openTo(5)))).toBe(false);
+  });
+
+  it('skips trash in spots no chart covers, like 3 limpers', () => {
+    const s = coAfter('7c2d', limp);
+    expect(preflopSpot(s, HERO).limpers).toBeGreaterThan(2);
+    expect(isClearFold(s)).toBe(true);
+    expect(isClearFold(coAfter('AsAh', limp))).toBe(false);
+  });
+
+  it('skips trash in a straddled pot and heads up', () => {
+    expect(isClearFold(coAfter('7c2d', (s) => (legalActions(s).fold ? { kind: 'fold' } : { kind: 'check' }), { straddle: 2 }))).toBe(true);
+    expect(isClearFold(coAfter('AsAh', (s) => (legalActions(s).fold ? { kind: 'fold' } : { kind: 'check' }), { straddle: 2 }))).toBe(false);
+    // Heads up the player is the big blind facing a raise.
+    const hu = (hero: string) => act(startHandWithDeck({ stacks: [100, 100], button: 1 }, deckFor(2, 1, [hero, 'KdQd'])), { kind: 'raise', to: 2.5 });
+    expect(isClearFold(hu('7c2d'))).toBe(true);
+    expect(isClearFold(hu('AsAh'))).toBe(false);
+    expect(isClearFold(hu('Kc7d'))).toBe(false);
+  });
+
+  it('never skips a hand the big blind can check', () => {
+    // Everyone limps to the player in the big blind (button on seat 7).
+    let s = startHandWithDeck({ stacks: Array(9).fill(100), button: 7 }, deckFor(9, 7, ['7c2d', ...others]));
+    while (s.toAct !== HERO) s = act(s, { kind: 'call' });
+    expect(legalActions(s).check).toBe(true);
+    expect(isClearFold(s)).toBe(false);
+  });
+
+  it('only skips hands the grade would call a best fold', () => {
+    const seats = seatsFor(9, BOTS.map((b) => b.id));
+    let skipped = 0;
+    for (let seed = 1; seed <= 400; seed++) {
+      const rng = seededRng(seed);
+      const n = 2 + (seed % 8);
+      let s = startHand({ stacks: Array.from({ length: n }, () => 40 + Math.floor(rng() * 160)), button: seed % n, straddle: seed % 5 === 0 ? 2 : 0 }, rng);
+      while (s.toAct !== HERO && s.toAct !== null) {
+        const legal = legalActions(s);
+        const r = rng();
+        s = act(s, r < 0.2 && legal.raise ? { kind: 'raise', to: Math.min(legal.raise.max, legal.raise.min + Math.floor(r * 20)) } : r < 0.6 ? (legal.fold ? { kind: 'fold' } : { kind: 'check' }) : legal.check ? { kind: 'check' } : { kind: 'call' });
+      }
+      if (s.toAct !== HERO || !isClearFold(s)) continue;
+      skipped++;
+      const [g] = gradeHand([{ state: s, action: { kind: 'fold' } }], seats, seed);
+      expect(g.grade).toBe('best');
+    }
+    expect(skipped).toBeGreaterThan(100);
   });
 });
 

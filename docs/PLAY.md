@@ -8,16 +8,44 @@ Drills train one decision at a time. Play trains the same decisions in the order
 
 Play works like sitting down in an online cash game.
 
-- **Lobby**: pick a table (full ring, home game, online 6 max, deep 6 max or heads up) and a buy in.
+- **Lobby**: pick a table (full ring, home game, online 6 max, deep 6 max or heads up) and a buy in, or one of your own tables (see Custom tables).
 - **Continuous play**: hands are dealt one after another. Stacks carry over. Bots that get short top up and bots that bust rebuy, as online. If you bust you choose to add chips.
-- **Controls**: Fold, Check or Call, and Bet or Raise with Min, pot shares (multiples of the blind preflop) and All in, plus a slider. While waiting you can tick Check/fold, Check or Call any, as in an online client.
+- **Controls**: Fold, Check or Call, and Bet or Raise with Min, your open (plus 1bb per limper, in straddles when there is one), multiples of the raise, a third, half, three quarters or all of the pot after the flop, and All in. A slider and minus and plus buttons fine tune the size. While waiting you can tick Check/fold, Check or Call any, as in an online client.
 - **Quiet grading**: the table never stops for a recap. Last hand opens the hand history and its grades, and its dot marks a mistake. Grades after each hand is an opt in.
-- **Skip clear folds**: a hand is folded for you only when the chart folds it 100% from your seat in that spot. It still plays out, so the blinds you lose count. A hand the chart plays even 1% of the time is always dealt.
+- **After you fold**: the next hand is dealt at once by default. The rest of the folded hand plays out off screen with the same bots and draws, and is booked in full: your stats, the bots' stacks and Last hand (with the board and any showdown) are the same as if you had watched. Table settings, After you fold, Watch the hand keeps the old way.
+- **Skip clear folds**: a hand is folded for you only when folding it is clearly right. It asks the same question as the grade. An exact chart match skips hands the chart folds 100% of the time. A chart that only roughly fits (a live size open, callers, deep or short stacks) skips hands it folds 100% of the time that are not close calls, since those changes make the spot tighter or barely move its edge. A spot no chart covers (3 or more limpers, a 3bet, heads up, a straddle) skips hands the approximate range folds that sit at least 8% of hands past its edge. A hand the strategy plays even part of the time is always dealt. Skipped hands still play out, so the blinds you lose count, and the header says how many were skipped.
+
+  The first version skipped only exact chart matches. Against bots that open 4 or 5bb, limp and 3bet, it skipped only about half of the hands a player folds for sure at the live tables, and none heads up. Now it skips about 9 in 10 of them. A test now plays 400 random spots and checks every skipped hand is one the grade calls a best fold.
 - **The session** survives switching tabs. Stacks and totals are saved on the device, so a reload sits you back down. A hand in progress restarts, like a reconnect.
 
 ### Your open size
 
-Settings has **Your open** (Game and stakes, also in the table menu). It defaults to the 2.5bb the charts assume. Live players often set 4 or 5bb. Play offers it as the first raise size before the flop, plus 1bb for each limper. Opening charts show a "You open 4bb" flag and say the chart is approximate for you. Bots open like the room they sit in: 5bb at the Live 1/2 table, 4bb at the home game and 2.5bb at the online tables. Facing a live size open, the defense charts (which assume 2.5bb) do not grade the spot and say why. Open size is not graded.
+Settings has **Your open** (Game and stakes, also in the table menu). It defaults to the 2.5bb the charts assume. Live players often set 4 or 5bb. Play offers it as a raise size before the flop, plus 1bb for each limper. Opening charts show a "You open 4bb" flag and say the chart is approximate for you. Bots open like the room they sit in: 5bb at the Live 1/2 table, 4bb at the home game and 2.5bb at the online tables. Facing a live size open, the defense charts (which assume 2.5bb) do not grade the spot and say why. Open size is not graded.
+
+### Table settings
+
+The ⋯ button opens Table settings, in four groups:
+
+- **Speed**: Bot speed (Instant, Quick or Natural), After you fold (Deal next hand or Watch the hand) and Skip clear folds.
+- **Coaching**: Grades after each hand.
+- **Your open size**: the same setting as in Game and stakes.
+- **Table**: top up, sit out and leave.
+
+Settings carry over to the next table (`felt.play.settings.v1`).
+
+### Custom tables
+
+Create a table in the lobby builds a table of your own:
+
+- **Seats**: 2 to 9, you included.
+- **Stakes**: $1/$2, $1/$3, $2/$5, $5/$10 or plain 0.5/1bb. Amounts stay in big blinds. The stakes set the small blind (a third of the big blind at $1/$3) and show buy ins in dollars.
+- **Buy in**: a smallest and a largest from 20 to 400bb. The middle is the default.
+- **Straddle**: the player after the big blind posts 2bb, acts last before the flop and makes the minimum raise 4bb. Not heads up. Preflop grades in a straddled pot use the approximate range and never feed the rating, since no chart assumes a straddle.
+- **Bots**: a count per player type, or Mix for a room like a live game (more loose and passive players than regulars). Each type uses its roster bots first, then stand ins that play exactly like them under their own names (`lineupBots` in `content/src/bots.ts`).
+- **Their open size**: 2.5bb online, or 4 or 5bb live. Bots open to it through `botAtTable`.
+- **Name**: up to 24 characters.
+
+The form checks every field before it saves (`validateTable`). Tables are saved on this device (`felt.play.tables.v1`), up to 20. Tap a table in the lobby to sit down, edit it or delete it.
 
 ## Bots
 

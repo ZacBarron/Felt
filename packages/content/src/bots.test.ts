@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { BOTS, botAtTable, botById, playerTypeOf, TABLE_PRESETS } from './bots';
+import { BOTS, botAtTable, botById, LINEUP_TYPES, lineupBots, playerTypeOf, TABLE_PRESETS } from './bots';
 
 describe('bots', () => {
   it('each bot is a known player type with a sane profile', () => {
@@ -35,5 +35,31 @@ describe('bots at a table', () => {
     expect(botAtTable('lou', live)?.profile.style.openTo).toBe(5);
     expect(botAtTable('lou', online)?.profile.style.openTo).toBeUndefined();
     expect(botById('lou')?.profile.style.openTo).toBeUndefined();
+  });
+});
+
+describe('custom lineups', () => {
+  it('every lineup type has a bot', () => {
+    for (const t of LINEUP_TYPES) expect(BOTS.some((b) => b.type === t)).toBe(true);
+  });
+
+  it('seats roster bots first, then stand ins with their own names', () => {
+    const ids = lineupBots(['nit', 'nit', 'nit', 'maniac', 'nit']);
+    expect(ids.slice(0, 2)).toEqual(['nora', 'ike']);
+    expect(ids[3]).toBe('max');
+    expect(new Set(ids).size).toBe(5);
+    const bots = ids.map((id) => botById(id)!);
+    expect(new Set(bots.map((b) => b.name)).size).toBe(5);
+    expect(bots.every((b) => b.type === 'nit' || b.type === 'maniac')).toBe(true);
+    // A stand in plays exactly like its roster bot.
+    expect(bots[2].profile).toEqual(botById('nora')!.profile);
+    expect(BOTS.some((b) => b.name === bots[2].name)).toBe(false);
+    expect(() => lineupBots(['nobody'])).toThrow();
+    expect(botById('nora.x')).toBeUndefined();
+  });
+
+  it('opens to the chosen size at a custom table', () => {
+    expect(botAtTable('nora.1', { openBb: 4 })?.profile.style.openTo).toBe(4);
+    expect(botAtTable('nora.1', {})?.profile.style.openTo).toBeUndefined();
   });
 });

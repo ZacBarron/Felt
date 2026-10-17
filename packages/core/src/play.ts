@@ -30,6 +30,12 @@ export interface TableSetup {
   bb?: number;
   /** Ante from every seat. Default 0. */
   ante?: number;
+  /**
+   * A live straddle: the seat after the big blind posts this much blind,
+   * usually 2bb. It acts like a third blind, so the action starts after it
+   * and it gets the last word preflop. Needs 3 or more seats. Default 0.
+   */
+  straddle?: number;
 }
 
 export interface PlayerState {
@@ -53,7 +59,7 @@ export type PlayAction = { kind: 'fold' } | { kind: 'check' } | { kind: 'call' }
 export interface ActionRecord {
   seat: number;
   street: PlayStreet;
-  kind: 'ante' | 'sb' | 'bb' | PlayAction['kind'];
+  kind: 'ante' | 'sb' | 'bb' | 'straddle' | PlayAction['kind'];
   /** Chips this action added. */
   amount: number;
   /** The player's total on this street after the action. */
@@ -226,9 +232,17 @@ export function startHandWithDeck(setup: TableSetup, deckIn: readonly Card[]): H
   if (ante > 0) for (let s = 0; s < n; s++) put(state, s, ante, 'ante');
   put(state, sbSeat, sb, 'sb');
   put(state, bbSeat, bb, 'bb');
+  let lastBlind = bbSeat;
+  const straddle = n >= 3 ? (setup.straddle ?? 0) : 0;
+  if (straddle > bb) {
+    lastBlind = (bbSeat + 1) % n;
+    put(state, lastBlind, straddle, 'straddle');
+    // A straddle is a full raise of the big blind: the next raise goes to twice the straddle.
+    state.lastRaise = straddle;
+  }
   state.currentBet = Math.max(...state.players.map((p) => p.street));
   state.pending = state.players.filter(canAct).map((p) => p.seat);
-  return settle(state, bbSeat);
+  return settle(state, lastBlind);
 }
 
 /** What the player to act may do. */
@@ -386,6 +400,11 @@ function finish(state: HandState): HandState {
 /** The pot to show on the table: chips in the middle plus this street's bets. */
 export function streetBets(state: HandState): number {
   return state.players.reduce((s, p) => s + p.street, 0);
+}
+
+/** The straddle posted this hand, 0 when there is none. */
+export function straddleOf(state: Pick<HandState, 'log'>): number {
+  return state.log.find((a) => a.kind === 'straddle')?.amount ?? 0;
 }
 
 /** Each seat's stack once a finished hand is paid out: what was behind plus what came back. */

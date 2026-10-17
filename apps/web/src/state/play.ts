@@ -26,6 +26,7 @@ import {
   reaches,
   scoreRecall,
   seededRng,
+  straddleOf,
 } from '@felt/core';
 import { getChart } from './charts';
 import { recordRated } from './rating';
@@ -336,11 +337,13 @@ export function gradeHand(history: readonly PlayDecision[], seats: readonly Play
       const spot = preflopSpot(state, HERO);
       const found = chartForSpot(spot);
       const hand = handClassOf(me.cards[0], me.cards[1]);
-      if (!found || !reaches(found.chart, hand) || (!found.exact && spot.callers + spot.limpers > 0)) {
+      const straddled = straddleOf(state) > 0;
+      if (!found || straddled || !reaches(found.chart, hand) || (!found.exact && spot.callers + spot.limpers > 0)) {
         // No chart fits: grade by the approximate range, never toward the rating.
         const a = approxRange(spot, hand);
         const score = scoreRecall(a.mix, approxActionId(action));
-        grades.push({ ...base, tier: 'approx', grade: gradeOfScore(score), detail: `${a.what} ${hand} ${approxWords(a.mix)}.`, rated: false });
+        const why = straddled ? 'The charts assume no straddle. ' : '';
+        grades.push({ ...base, tier: 'approx', grade: gradeOfScore(score), detail: `${why}${a.what} ${hand} ${approxWords(a.mix)}.`, rated: false });
         return;
       }
       if (!found.exact) {
@@ -415,16 +418,38 @@ export async function rateHand(grades: readonly PlayGrade[], history: readonly P
   }
 }
 
-/** Whether the player's first decision is a hand the chart folds every time: Play can skip it. */
+/** How far past the edge of an approximate range a hand must sit to be skipped: about 8% of all hands. */
+export const SKIP_MARGIN = 0.08;
+
+/**
+ * Whether Play can fold the player's hand for them. It asks the same
+ * question the grade asks, so a hand is skipped exactly when folding it is
+ * clearly right:
+ *
+ * - An exact chart match skips hands the chart folds every time.
+ * - A chart that only roughly fits (a bigger open, callers, deep or short
+ *   stacks) skips hands it folds every time that are not close calls. Those
+ *   changes make the spot tighter or barely move its edge.
+ * - A spot no chart covers (limpers, 3bets, heads up, a straddle) skips hands
+ *   the approximate range folds that sit well past its edge.
+ *
+ * A hand the strategy plays even part of the time is always dealt.
+ */
 export function isClearFold(state: HandState): boolean {
-  if (state.toAct !== HERO || state.street !== 'preflop') return false;
-  const found = chartForSpot(preflopSpot(state, HERO));
-  if (!found?.exact) return false;
+  if (state.toAct !== HERO || state.street !== 'preflop' || !legalActions(state).fold) return false;
+  const spot = preflopSpot(state, HERO);
   const me = state.players[HERO];
   const hand = handClassOf(me.cards[0], me.cards[1]);
-  const mix = found.chart.mixes.get(hand);
+  const found = chartForSpot(spot);
   // A chart leaves fold out for hands it always plays.
-  return (mix ? (mix.fold ?? 0) : 1) >= 0.999 && legalActions(state).fold;
+  const alwaysFolds = (mix: HandMix | undefined) => (mix ? (mix.fold ?? 0) : 1) >= 0.999;
+  if (found && straddleOf(state) === 0 && reaches(found.chart, hand)) {
+    const mix = found.chart.mixes.get(hand);
+    if (found.exact) return alwaysFolds(mix);
+    return alwaysFolds(mix) && !boundaryHands(found.chart).includes(hand);
+  }
+  const a = approxRange(spot, hand);
+  return alwaysFolds(a.mix) && playPercentile(hand) >= a.width + SKIP_MARGIN;
 }
 
 /** Coaching notes for a finished hand. Never graded. */

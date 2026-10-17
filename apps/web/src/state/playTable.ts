@@ -1,6 +1,7 @@
 import { BOTS, TABLE_PRESETS } from '@felt/content';
 import type { HandState, PlayDecision } from '@felt/core';
 import { useSyncExternalStore } from 'react';
+import { customTables, toLobbyTable } from './customTables';
 import type { PlayGrade } from './play';
 
 /**
@@ -13,12 +14,23 @@ import type { PlayGrade } from './play';
 export interface LobbyTable {
   id: string;
   name: string;
-  /** Table preset in content: which bots sit here. */
+  /** Table preset in content: which bots sit here. `custom` for a table the player built. */
   preset: string;
   seats: number;
   /** Buy in choices in bb, the middle one is the default. */
   buyIns: [number, number, number];
   blurb: string;
+  /** A custom table's bots in seat order. Presets take theirs from content. */
+  bots?: string[];
+  /** A custom table's bot open size in bb. Presets take theirs from content. */
+  openBb?: number;
+  /** Small blind in bb. Default 0.5. */
+  sb?: number;
+  /** Straddle in bb, 0 for none. */
+  straddle?: number;
+  /** Stakes as people say them, such as $1/$2, with the big blind in dollars. */
+  stakes?: { label: string; bigBlind?: number };
+  custom?: boolean;
 }
 
 export const LOBBY: LobbyTable[] = [
@@ -30,8 +42,10 @@ export const LOBBY: LobbyTable[] = [
 ];
 
 export interface TableSettings {
-  /** Fold hands the chart always folds and deal the next one at once. */
+  /** Fold hands the strategy always folds and deal the next one at once. */
   skipFolds: boolean;
+  /** After you fold: deal the next hand at once (the rest plays out off screen), or watch the hand end. */
+  afterFold: 'next' | 'watch';
   /** How long bots take: Instant, Quick or Natural, which thinks like a person. */
   speed: 'instant' | 'quick' | 'natural';
   /** Show a short line of grades after each hand. Off keeps the table quiet. */
@@ -58,6 +72,8 @@ export interface HandRecord {
   history: PlayDecision[];
   final: HandState;
   grades?: PlayGrade[];
+  /** You folded and the rest played out off screen. */
+  offScreen?: boolean;
 }
 
 export interface TableSession {
@@ -76,11 +92,13 @@ export interface TableSession {
   hands: HandRecord[];
   /** The hand on the table, in memory only. */
   live?: { id: string; seed: number; state: HandState; history: PlayDecision[]; said: Record<number, string> };
+  /** Clear folds skipped before the hand on the table, for a short note. In memory only. */
+  justSkipped?: number;
 }
 
 const KEY = 'felt.play.table.v1';
 const SETTINGS_KEY = 'felt.play.settings.v1';
-const DEFAULT_SETTINGS: TableSettings = { skipFolds: true, speed: 'quick', showGrades: false };
+export const DEFAULT_SETTINGS: TableSettings = { skipFolds: true, afterFold: 'next', speed: 'quick', showGrades: false };
 
 /** Older saves had normal and fast. Both move up a step: waiting on bots is no fun. */
 const SPEEDS: Record<string, TableSettings['speed']> = { normal: 'quick', fast: 'instant', instant: 'instant', quick: 'quick', natural: 'natural' };
@@ -113,7 +131,8 @@ function load(): TableSession | undefined {
   const saved = read<Omit<TableSession, 'hands' | 'live'>>(KEY);
   if (!saved?.table || !Array.isArray(saved.stacks)) return undefined;
   const table = LOBBY.find((t) => t.id === saved.table.id) ?? saved.table;
-  return { ...saved, table, settings: withSpeed({ ...DEFAULT_SETTINGS, ...saved.settings }), hands: [] };
+  const { justSkipped: _skipped, ...rest } = saved as typeof saved & { justSkipped?: number };
+  return { ...rest, table, settings: withSpeed({ ...DEFAULT_SETTINGS, ...saved.settings }), hands: [] };
 }
 
 let session: TableSession | undefined = load();
@@ -127,7 +146,7 @@ function emit() {
 
 function persist() {
   if (!session) return write(KEY, undefined);
-  const { hands: _hands, live: _live, ...rest } = session;
+  const { hands: _hands, live: _live, justSkipped: _skipped, ...rest } = session;
   write(KEY, rest);
   write(SETTINGS_KEY, session.settings);
 }
@@ -162,11 +181,23 @@ function botStack(buyIn: number, i: number): number {
   return Math.round(buyIn * spread);
 }
 
-/** Sits the player down at a table with a buy in. */
-export function sitDown(table: LobbyTable, buyIn: number) {
+/** Bot ids for a table's seats, the player's seat left out. */
+export function tableBots(table: LobbyTable): string[] {
+  if (table.bots) return table.bots.slice(0, table.seats - 1);
   const preset = TABLE_PRESETS.find((p) => p.id === table.preset) ?? TABLE_PRESETS[0];
   const ids = [...preset.bots, ...BOTS.map((b) => b.id).filter((id) => !preset.bots.includes(id))];
-  const bots = ['', ...ids.slice(0, table.seats - 1)];
+  return ids.slice(0, table.seats - 1);
+}
+
+/** The room the bots play in: its open size. */
+export function tableRoom(table: LobbyTable): { openBb?: number } {
+  if (table.custom) return { openBb: table.openBb };
+  return TABLE_PRESETS.find((p) => p.id === table.preset) ?? {};
+}
+
+/** Sits the player down at a table with a buy in. */
+export function sitDown(table: LobbyTable, buyIn: number) {
+  const bots = ['', ...tableBots(table)];
   session = {
     table,
     buyIn,
@@ -187,10 +218,15 @@ export function sitDown(table: LobbyTable, buyIn: number) {
 
 const LAST_KEY = 'felt.play.last.v1';
 
+/** Every table in the lobby: the presets, then the player's own. */
+export function lobbyTables(): LobbyTable[] {
+  return [...LOBBY, ...customTables().map(toLobbyTable)];
+}
+
 /** The table and buy in the player last sat down with, for Play now. */
 export function lastSeat(): { table: LobbyTable; buyIn: number } {
   const saved = read<{ id: string; buyIn: number }>(LAST_KEY);
-  const table = LOBBY.find((t) => t.id === saved?.id) ?? LOBBY[0];
+  const table = lobbyTables().find((t) => t.id === saved?.id) ?? LOBBY[0];
   return { table, buyIn: saved && table.buyIns.includes(saved.buyIn) ? saved.buyIn : table.buyIns[1] };
 }
 

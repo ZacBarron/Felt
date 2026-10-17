@@ -119,12 +119,62 @@ export const TABLE_PRESETS: TablePreset[] = [
   { id: 'tough', name: 'Tough online', blurb: 'Mostly regulars who play well.', bots: ['tess', 'leo', 'otto', 'wes', 'nora', 'max', 'ike', 'lou', 'sam'] },
 ];
 
-export const botById = (id: string) => BOTS.find((b) => b.id === id);
+/** Names for stand ins, when a custom table seats more of a type than the roster has. */
+const STAND_IN_NAMES = ['Ada', 'Ben', 'Cleo', 'Dev', 'Elle', 'Finn', 'Gail', 'Hank', 'Iris', 'Jay'];
+const HAIRS: BotCharacter['look']['hair'][] = ['short', 'long', 'curly', 'bun', 'bald'];
+const EXTRAS: BotCharacter['look']['extra'][] = [undefined, 'glasses', 'cap', 'beard', 'shades', 'hood'];
 
-/** A bot as it plays at a table: live presets make it open to the table's live size. */
-export function botAtTable(id: string, preset?: TablePreset): BotCharacter | undefined {
+/**
+ * A bot by id. A stand in has the id of a roster bot plus a number, such as
+ * `nora.2`: it plays exactly like that bot under its own name and look.
+ */
+export function botById(id: string): BotCharacter | undefined {
+  const [baseId, n] = id.split('.');
+  const base = BOTS.find((b) => b.id === baseId);
+  const k = Number(n);
+  if (!base || n === undefined) return base;
+  if (!Number.isInteger(k) || k < 1) return undefined;
+  const name = STAND_IN_NAMES[(k - 1) % STAND_IN_NAMES.length];
+  return { ...base, id, name, look: { hair: HAIRS[(k + 1) % HAIRS.length], extra: EXTRAS[(k * 2) % EXTRAS.length] } };
+}
+
+/** The player types a custom table can seat, loosest and most passive first. */
+export const LINEUP_TYPES = ['calling-station', 'loose-passive', 'nit', 'weak-tight-reg', 'tag-reg', 'lag-reg', 'maniac'] as const;
+export type LineupType = (typeof LINEUP_TYPES)[number];
+
+/** Short names for the lineup picker. */
+export const LINEUP_LABELS: Record<LineupType, string> = {
+  'calling-station': 'Calling station',
+  'loose-passive': 'Loose passive',
+  nit: 'Nit',
+  'weak-tight-reg': 'Weak tight regular',
+  'tag-reg': 'Tight aggressive regular',
+  'lag-reg': 'Loose aggressive regular',
+  maniac: 'Maniac',
+};
+
+/**
+ * Bot ids for a lineup of player types, one per seat. Each type uses its
+ * roster bots first, then stand ins with their own names, so every seat at
+ * the table is a different character.
+ */
+export function lineupBots(types: readonly string[]): string[] {
+  const used = new Map<string, number>();
+  let standIns = 0;
+  return types.map((type) => {
+    const roster = BOTS.filter((b) => b.type === type);
+    if (!roster.length) throw new Error(`No bot plays as ${type}`);
+    const j = used.get(type) ?? 0;
+    used.set(type, j + 1);
+    const base = roster[j % roster.length].id;
+    return j < roster.length ? base : `${base}.${++standIns}`;
+  });
+}
+
+/** A bot as it plays at a table: live rooms make it open to the room's live size. */
+export function botAtTable(id: string, room?: { openBb?: number }): BotCharacter | undefined {
   const bot = botById(id);
-  if (!bot || !preset?.openBb) return bot;
-  return { ...bot, profile: { ...bot.profile, style: { ...bot.profile.style, openTo: preset.openBb } } };
+  if (!bot || !room?.openBb) return bot;
+  return { ...bot, profile: { ...bot.profile, style: { ...bot.profile.style, openTo: room.openBb } } };
 }
 export const playerTypeOf = (bot: BotCharacter) => PLAYER_TYPES.find((t) => t.id === bot.type);
