@@ -23,6 +23,7 @@ import { RangesPage } from './pages/RangesPage';
 import { ReviewPage } from './pages/ReviewPage';
 import { TrainPage } from './pages/TrainPage';
 import { PlayPage } from './pages/PlayPage';
+import { CustomTablePage } from './pages/CustomTablePage';
 import { InvitePage } from './pages/InvitePage';
 import { SavedPage } from './pages/SavedPage';
 import { SettingsPage } from './pages/SettingsPage';
@@ -158,6 +159,8 @@ export function App() {
             <Route path="/" element={<DashboardPage />} />
             <Route path="/train" element={<TrainPage />} />
             <Route path="/play" element={<PlayPage />} />
+            <Route path="/play/new" element={<CustomTablePage />} />
+            <Route path="/play/table/:id" element={<CustomTablePage />} />
             <Route path="/invite" element={<InvitePage />} />
             <Route path="/review" element={<ReviewPage />} />
             <Route path="/drills" element={<RangesPage />} />

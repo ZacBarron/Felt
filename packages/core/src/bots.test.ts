@@ -118,6 +118,12 @@ describe('open size', () => {
     expect(raiseTo(nit)).toBe(2.5);
     expect(raiseTo({ ...nit, style: { ...nit.style, openTo: 5 } })).toBe(5);
   });
+
+  it('scales the open with a straddle', () => {
+    const s = startHand({ stacks: [100, 100, 100, 100, 100, 100], button: 0, straddle: 2 }, seededRng(4));
+    const raise = botMix(s, two('AsAh'), nit).find((c) => c.action.kind === 'raise');
+    expect(raise && 'to' in raise.action ? raise.action.to : undefined).toBe(5);
+  });
 });
 
 describe('hand strength', () => {

@@ -863,3 +863,271 @@
 .play-hero .btn-hero {
   margin-top: 1rem;
 }
+
+/* Grouped settings in sheets: small labels over inset lists, as in iOS Settings. */
+.play-group-label {
+  margin: 0 0 0.4rem;
+  padding: 0 1rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--label-2);
+}
+
+/* A row whose control needs the full width sits under its label. */
+.list-row.play-stack-row {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.55rem;
+  padding-top: 0.75rem;
+  padding-bottom: 0.8rem;
+}
+
+.play-stack-row .chips {
+  margin: 0 -1rem;
+  padding: 0 1rem;
+}
+
+/* Lobby: create a table, your tables. */
+.play-create-icon {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  flex: none;
+  border-radius: 8px;
+  color: var(--on-tint);
+  background: var(--tint-fill);
+}
+
+.play-create-row .grow {
+  font-weight: 600;
+  color: var(--tint);
+}
+
+.play-faces-row {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  margin: 0 -1rem;
+  padding: 0 1rem;
+  scrollbar-width: none;
+}
+
+.play-faces-row::-webkit-scrollbar {
+  display: none;
+}
+
+.play-face {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  min-width: 46px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--label-2);
+}
+
+.play-confirm {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.play-confirm-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6rem;
+}
+
+.btn.play-delete {
+  color: #fff;
+  background: var(--red);
+}
+
+.btn.play-delete-soft {
+  color: var(--red);
+}
+
+/* The create form. */
+.play-name-row input {
+  width: 62%;
+  max-width: 260px;
+  font-size: 16px;
+  text-align: right;
+}
+
+.play-field-error {
+  margin: 0;
+  padding: 0.5rem 1rem 0;
+  font-size: 0.8rem;
+  line-height: 1.4;
+  color: var(--red);
+}
+
+.play-lineup-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin: 1rem 0 0.5rem;
+  padding: 0 0.25rem 0 1rem;
+}
+
+.play-lineup-faces {
+  display: flex;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.play-lineup-faces svg {
+  border-radius: 50%;
+  box-shadow: 0 0 0 2px var(--bg);
+}
+
+.play-lineup-faces svg + svg {
+  margin-left: -6px;
+}
+
+.btn.play-mix-btn {
+  flex: none;
+  min-height: 36px;
+  padding: 0 1rem;
+  font-size: 0.9rem;
+}
+
+/* The room: head, notes and the dock. */
+.play-head-name {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.play-head-title {
+  min-width: 0;
+}
+
+.play-toasts {
+  position: absolute;
+  top: calc(env(safe-area-inset-top, 0px) + 58px);
+  left: 0;
+  right: 0;
+  z-index: 3;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.play-toasts > * {
+  pointer-events: auto;
+}
+
+.play-head-note {
+  font-weight: 650;
+  opacity: 1;
+  animation: play-pop 240ms var(--spring) backwards;
+}
+
+.play-room .play-sizes {
+  gap: 6px;
+}
+
+.play-room .play-size {
+  min-height: 38px;
+  padding: 0 0.2rem;
+  font-size: 0.85rem;
+}
+
+.play-slide-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.play-nudge {
+  flex: none;
+  width: 38px;
+  min-height: 38px;
+  padding: 0;
+  border-radius: 999px;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: inherit;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.play-nudge:disabled {
+  opacity: 0.35;
+}
+
+.play-room .play-slide-row .play-slider {
+  margin: 0;
+}
+
+.play-buttons .btn.play-raise {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Last hand: the result first, then the history. */
+.play-recap-head {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 0 0.25rem;
+}
+
+.play-recap-cards,
+.play-recap-board {
+  display: flex;
+  gap: 4px;
+}
+
+.play-recap-board {
+  justify-content: center;
+}
+
+.play-recap-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.play-recap-net {
+  font-size: 1.6rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.play-recap-net.up {
+  color: var(--green);
+}
+
+.play-recap-net.down {
+  color: var(--red);
+}
+
+.play-recap-note {
+  margin: 0;
+  text-align: center;
+}
+
+/* Rows in Play's sheets and forms read at body size, like every other row. */
+.play-sheet label.list-row,
+.play-form label.list-row {
+  gap: 0.85rem;
+  font-size: inherit;
+  font-weight: inherit;
+  color: var(--label);
+}
+
+/* On a phone the felt grows into a taller oval and uses the height between the head and the dock. */
+@media (max-width: 760px) {
+  .play-stage .play-table {
+    aspect-ratio: auto;
+    width: 100cqw;
+    height: min(100cqh, 158cqw);
+  }
+}

@@ -2,7 +2,7 @@ import { type Card, rankIndex, remainingDeck, suitIndex } from './cards';
 import type { HandMix } from './charts';
 import type { Rng } from './equity';
 import { evaluate } from './evaluator';
-import { type HandState, legalActions, type PlayAction, PLAY_STREETS, potSize } from './play';
+import { type HandState, legalActions, type PlayAction, PLAY_STREETS, potSize, straddleOf } from './play';
 import { preflopPercentile } from './preflopStrength';
 import { handClassOf, type HandClass, type WeightedCombo } from './ranges';
 import type { Position } from './settings';
@@ -162,9 +162,11 @@ function inPosition(state: HandState, seat: number, spot: PreflopSpot): boolean 
 function preflopRaiseTo(state: HandState, seat: number, spot: PreflopSpot, style: BotStyle): number {
   const p = state.players[seat];
   const max = p.street + p.stack;
+  // In a straddled pot the straddle is the blind to raise: opens scale with it.
+  const unit = Math.max(1, straddleOf(state) / state.bb);
   let to: number;
-  if (spot.kind === 'open') to = spot.position === 'SB' ? Math.max(3, style.openTo ?? 3) : (style.openTo ?? 2.5);
-  else if (spot.kind === 'limped') to = 4 + spot.limpers;
+  if (spot.kind === 'open') to = unit * (spot.position === 'SB' ? Math.max(3, style.openTo ?? 3) : (style.openTo ?? 2.5));
+  else if (spot.kind === 'limped') to = unit * (4 + spot.limpers);
   else if (spot.kind === 'raised') to = spot.raiseTo * (inPosition(state, seat, spot) ? 3 : 4) + spot.callers * spot.raiseTo;
   else if (spot.kind === '3bet') to = spot.raiseTo * 2.3;
   else to = max;

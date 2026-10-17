@@ -20,16 +20,30 @@ interface Props {
   bannerRare?: boolean;
 }
 
-/** Seat anchors around an ellipse, the player at the bottom, clockwise like the action. */
-function anchors(count: number): [number, number][] {
+/**
+ * Seat anchors around the table, the player at the bottom, clockwise like
+ * the action. Big tables leave extra room on each side of the player, whose
+ * cards are larger.
+ */
+export function anchors(count: number): [number, number][] {
+  const even = (2 * Math.PI) / count;
+  const gap = count >= 7 ? even * 1.3 : even;
+  const step = count > 2 ? (2 * Math.PI - 2 * gap) / (count - 2) : even;
   return Array.from({ length: count }, (_, i) => {
-    const angle = Math.PI / 2 + (i * 2 * Math.PI) / count;
-    return [50 + 37 * Math.cos(angle), 50 + 41 * Math.sin(angle)];
+    const angle = Math.PI / 2 + (i === 0 ? 0 : gap + (i - 1) * step);
+    // A rounder rectangle than an ellipse, so the seats at the top and bottom spread out instead of touching.
+    const bend = (v: number) => Math.sign(v) * Math.abs(v) ** 0.7;
+    return [50 + 37 * bend(Math.cos(angle)), 50 + 41 * bend(Math.sin(angle))];
   });
 }
 
 const CENTER: [number, number] = [50, 47];
 const toward = ([x, y]: [number, number], t: number): [number, number] => [x + (CENTER[0] - x) * t, y + (CENTER[1] - y) * t];
+/** The dealer button sits between the seat and its bet, off to the side the bet is not on. */
+const dealerAt = (point: [number, number]): [number, number] => {
+  const [x, y] = toward(point, 0.3);
+  return [x + (point[0] < 50 ? 9 : -9), y];
+};
 const fmt = (n: number) => (Number.isInteger(n) ? String(n) : n.toFixed(1));
 
 interface Flight {
@@ -79,7 +93,8 @@ export function PlayTable({ handId, state, seats, said, thinking, banner, banner
   }, [state, handId]);
   useEffect(() => setFlights([]), [handId]);
 
-  const inMiddle = state.players.reduce((s, p) => s + p.total - (over ? 0 : p.street), 0);
+  // The pot as online clients show it: everything in, this street's bets included.
+  const pot = state.players.reduce((s, p) => s + p.total, 0);
   const me = state.players[HERO];
   // Before the flop a few hands have a table name; after it, say what you made.
   const myHand = me.folded ? undefined : state.board.length >= 3 ? describeHand([...me.cards, ...state.board]) : handNickname(handClassOf(me.cards[0], me.cards[1]));
@@ -98,7 +113,7 @@ export function PlayTable({ handId, state, seats, said, thinking, banner, banner
             {banner}
           </div>
         ) : (
-          <div className="play-pot num">{inMiddle > 0 ? `Pot ${fmt(inMiddle)}` : ' '}</div>
+          <div className="play-pot num">{pot > 0 ? `Pot ${fmt(Math.round(pot * 10) / 10)}` : ' '}</div>
         )}
       </div>
 
@@ -140,7 +155,7 @@ export function PlayTable({ handId, state, seats, said, thinking, banner, banner
                 </span>
               </div>
               {hero && myHand && <span className="play-myhand">{myHand}</span>}
-              {said[p.seat] && !hero && <span className="play-said">{said[p.seat]}</span>}
+              {said[p.seat] && !hero && !p.folded && <span className="play-said">{said[p.seat]}</span>}
             </div>
             {p.street > 0 && !over && (
               <div className="play-bet num" style={{ left: `${betAt(p.seat)[0]}%`, top: `${betAt(p.seat)[1]}%` }}>
@@ -149,7 +164,7 @@ export function PlayTable({ handId, state, seats, said, thinking, banner, banner
               </div>
             )}
             {state.button === p.seat && (
-              <span className="play-dealer" style={{ left: `${toward(point, 0.2)[0] + (point[0] < 50 ? 6 : -6)}%`, top: `${toward(point, 0.2)[1]}%` }} aria-label="Dealer button">
+              <span className="play-dealer" style={{ left: `${dealerAt(point)[0]}%`, top: `${dealerAt(point)[1]}%` }} aria-label="Dealer button">
                 D
               </span>
             )}

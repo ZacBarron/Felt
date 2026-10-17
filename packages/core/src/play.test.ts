@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { type Card, FULL_DECK, parseCards } from './cards';
 import { seededRng } from './equity';
-import { act, type HandState, legalActions, potSize, seatPositions, shuffledDeck, stacksAfter, startHand, startHandWithDeck } from './play';
+import { act, type HandState, legalActions, potSize, seatPositions, shuffledDeck, stacksAfter, startHand, startHandWithDeck, straddleOf } from './play';
 
 /** A deck that deals `holes` (one hand per seat, dealt from the small blind) and then `board`. */
 function deckFor(seats: number, button: number, holes: string[], board: string): Card[] {
@@ -55,6 +55,34 @@ describe('startHand', () => {
     expect(potSize(s)).toBeCloseTo(1.8);
     expect(s.players[0].street).toBe(0);
     expect(s.players[0].total).toBeCloseTo(0.1);
+  });
+});
+
+describe('straddle', () => {
+  it('posts a straddle after the big blind, which acts last preflop', () => {
+    let s = startHand({ stacks: [100, 100, 100, 100, 100, 100], button: 0, straddle: 2 }, seededRng(9));
+    expect(s.players[3].street).toBe(2);
+    expect(s.log.at(-1)!.kind).toBe('straddle');
+    expect(straddleOf(s)).toBe(2);
+    expect(s.currentBet).toBe(2);
+    // The action starts after the straddle and a raise goes to at least 4.
+    expect(s.toAct).toBe(4);
+    expect(legalActions(s).call).toBe(2);
+    expect(legalActions(s).raise!.min).toBe(4);
+    for (let i = 0; i < 4; i++) s = act(s, { kind: 'call' }); // seats 4, 5, BTN and SB call
+    s = act(s, { kind: 'call' }); // BB completes
+    // The straddle has the option.
+    expect(s.toAct).toBe(3);
+    expect(legalActions(s).check).toBe(true);
+    s = act(s, { kind: 'check' });
+    expect(s.street).toBe('flop');
+    expect(potSize(s)).toBe(12);
+  });
+
+  it('is ignored heads up and when not bigger than the big blind', () => {
+    expect(straddleOf(startHand({ stacks: [100, 100], button: 0, straddle: 2 }, seededRng(1)))).toBe(0);
+    expect(straddleOf(startHand({ stacks: [100, 100, 100], button: 0, straddle: 1 }, seededRng(1)))).toBe(0);
+    expect(straddleOf(startHand({ stacks: [100, 100, 100], button: 0 }, seededRng(1)))).toBe(0);
   });
 });
 

@@ -1,7 +1,4 @@
-import { botAtTable, botById, TABLE_PRESETS } from '@felt/content';
 import {
-  act,
-  botMix,
   type Card,
   cardsToString,
   rankOf,
@@ -12,46 +9,31 @@ import {
   openSize,
   legalActions,
   type PlayAction,
-  type PlayDecision,
   potSize,
   type Rng,
-  sampleAction,
   seededRng,
-  stacksAfter,
   startHand,
+  straddleOf,
 } from '@felt/core';
-import { type ReactNode, useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { OpenSizeRow } from '../components/OpenSizeRow';
+import { GroupLabel, Sheet, SessionSummary, SheetHead } from '../components/PlaySheet';
+import { PlayingCard } from '../components/PlayingCard';
 import { PlayTable } from '../components/PlayTable';
 import { useSettings } from '../state/settings';
 import { haptic } from '../haptics';
 import { useCanAskCoach } from '../state/coach';
-import { actionText, chartAdvisor, gradeHand, handNotes, HERO, isClearFold, type PlayGrade, type PlaySeat, rateHand } from '../state/play';
-import {
-  getSession,
-  lastSeat,
-  type HandRecord,
-  LOBBY,
-  type LobbyTable,
-  leaveTable,
-  refillBots,
-  type SessionStats,
-  setSession,
-  sitDown,
-  type TableSession,
-  useLastStats,
-  useTableSession,
-} from '../state/playTable';
+import { actionText, gradeHand, handNotes, HERO, type PlayGrade, type PlaySeat, rateHand } from '../state/play';
+import { applyAction, botAction, dealNext, liveRng, seatsOf } from '../state/playFlow';
+import { getSession, type HandRecord, leaveTable, setSession, type TableSession, useTableSession } from '../state/playTable';
 import { addHandsToReview } from '../state/review';
 import { shareUrl } from '../state/referral';
-import { BotPortrait } from '../ui/BotPortrait';
-import { HeroPattern } from '../ui/Brand';
-import { ChevronLeftIcon, ChevronRightIcon, CoachIcon, MoreIcon, ShareIcon } from '../ui/icons';
-import { PageHeader } from '../ui/PageHeader';
+import { ChevronLeftIcon, ChevronRightIcon, CoachIcon, MinusIcon, MoreIcon, PlusIcon, ShareIcon } from '../ui/icons';
 import { Segmented } from '../ui/Segmented';
 import { Toggle } from '../ui/Toggle';
 import { useBodyClass } from '../ui/useBodyClass';
+import { Lobby } from './PlayLobby';
 import './play.css';
 
 /** Cards as people write them, such as Q♦ 7♠. */
@@ -65,175 +47,12 @@ export function PlayPage() {
   return session ? <TableScreen session={session} /> : <Lobby />;
 }
 
-// Lobby ------------------------------------------------------------------------------
-
-function Lobby() {
-  const last = useLastStats();
-  const [picking, setPicking] = useState<LobbyTable>();
-  return (
-    <div className="stack" style={{ gap: '1.5rem' }}>
-      <PageHeader title="Play" />
-      <QuickSeat />
-      {last && <SessionSummary stats={last} />}
-      <section>
-        <h2 className="section-title">Tables</h2>
-        <div className="list">
-          {LOBBY.map((t) => {
-            const preset = TABLE_PRESETS.find((p) => p.id === t.preset) ?? TABLE_PRESETS[0];
-            const bots = preset.bots.slice(0, t.seats - 1).map((id) => botById(id)!);
-            return (
-              <button key={t.id} className="list-row play-lobby-row" aria-label={`Sit down at ${t.name}`} onClick={() => setPicking(t)}>
-                <span className="grow" style={{ minWidth: 0 }}>
-                  <span className="play-lobby-name">{t.name}</span>
-                  <span className="footnote" style={{ display: 'block' }}>
-                    {t.blurb}
-                  </span>
-                  <span className="play-lobby-meta num">
-                    <span className="play-lobby-faces" aria-hidden="true">
-                      {bots.slice(0, 5).map((b) => (
-                        <BotPortrait key={b.id} look={b.look} size={22} />
-                      ))}
-                    </span>
-                    {t.seats} seats · {t.buyIns[1]}bb
-                  </span>
-                </span>
-                <ChevronRightIcon size={16} className="chev" />
-              </button>
-            );
-          })}
-        </div>
-        <p className="section-footer">Bot play after the flop is approximate.</p>
-      </section>
-      <BuyInSheet table={picking} onClose={() => setPicking(undefined)} />
-    </div>
-  );
-}
-
-/** The main card, as on Today and Learn: one tap to sit at the table you played last. */
-function QuickSeat() {
-  const { table, buyIn } = lastSeat();
-  const preset = TABLE_PRESETS.find((p) => p.id === table.preset) ?? TABLE_PRESETS[0];
-  const bots = preset.bots.slice(0, table.seats - 1).map((id) => botById(id)!);
-  return (
-    <section className="hero learn-hero play-hero">
-      <HeroPattern />
-      <div className="learn-hero-body">
-        <div style={{ minWidth: 0 }}>
-          <div className="hero-label">Cash game</div>
-          <div className="display learn-hero-title">{table.name}</div>
-          <div className="hero-sub">
-            {table.seats} seats. {buyIn}bb buy in.
-          </div>
-          <div className="play-hero-faces" aria-hidden="true">
-            {bots.slice(0, 8).map((b) => (
-              <BotPortrait key={b.id} look={b.look} size={30} />
-            ))}
-          </div>
-        </div>
-      </div>
-      <button className="btn btn-lg btn-block btn-hero" onClick={() => sitDown(table, buyIn)}>
-        Play now
-      </button>
-    </section>
-  );
-}
-
-function Sheet({ open, onClose, label, children }: { open: boolean; onClose: () => void; label: string; children: ReactNode }) {
-  const ref = useRef<HTMLDialogElement>(null);
-  useEffect(() => {
-    const d = ref.current;
-    if (!d) return;
-    if (open && !d.open) d.showModal();
-    if (!open && d.open) d.close();
-  }, [open]);
-  return (
-    <dialog ref={ref} className="sheet" aria-label={label} onClose={onClose} onClick={(e) => e.target === ref.current && onClose()}>
-      <div className="sheet-body stack" style={{ gap: '1.1rem' }}>
-        <div className="sheet-grabber" aria-hidden="true" />
-        {children}
-      </div>
-    </dialog>
-  );
-}
-
-function BuyInSheet({ table, onClose }: { table?: LobbyTable; onClose: () => void }) {
-  const [buyIn, setBuyIn] = useState(100);
-  useEffect(() => {
-    if (table) setBuyIn(table.buyIns[1]);
-  }, [table]);
-  return (
-    <Sheet open={!!table} onClose={onClose} label="Buy in">
-      {table && (
-        <>
-          <div className="row between">
-            <h2 className="play-sheet-title">{table.name}</h2>
-            <button className="btn btn-plain" onClick={onClose}>
-              Cancel
-            </button>
-          </div>
-          <p className="footnote" style={{ margin: 0 }}>
-            {table.seats} seats. Blinds are 0.5 and 1. Amounts are in big blinds.
-          </p>
-          <Segmented stretch ariaLabel="Buy in" value={buyIn} options={table.buyIns.map((v) => ({ value: v, label: `${v}bb` }))} onChange={setBuyIn} />
-          <button
-            className="btn btn-primary btn-lg btn-block"
-            onClick={() => {
-              sitDown(table, buyIn);
-              onClose();
-            }}
-          >
-            Sit down with {buyIn}bb
-          </button>
-        </>
-      )}
-    </Sheet>
-  );
-}
-
-function SessionSummary({ stats, title = 'Last session' }: { stats: SessionStats; title?: string }) {
-  const share = stats.graded ? Math.round((stats.good / stats.graded) * 100) : undefined;
-  return (
-    <section className="card play-summary">
-      <span className="play-summary-label">{title}</span>
-      <div className="play-summary-grid">
-        <div>
-          <span className="play-summary-value num">{share === undefined ? 'None' : `${share}%`}</span>
-          <span className="footnote">Good decisions, of {stats.graded} graded</span>
-        </div>
-        <div>
-          <span className="play-summary-value num">{stats.evLost.toFixed(1)}bb</span>
-          <span className="footnote">Given up on graded calls and folds</span>
-        </div>
-      </div>
-      <span className="footnote">
-        {stats.hands} hands and {stats.skipped} clear folds. Result {signed(stats.net)}bb, which is mostly luck over this few hands.
-      </span>
-    </section>
-  );
-}
-
 // The table --------------------------------------------------------------------------
 
 const randomSeed = () => (Math.random() * 2 ** 31) | 0;
 const reduced = () => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
 
 type PreAction = 'checkfold' | 'check' | 'callany';
-
-function seatsOf(session: TableSession): PlaySeat[] {
-  const preset = TABLE_PRESETS.find((p) => p.id === session.table.preset);
-  return session.bots.map((id) => (id ? { bot: botAtTable(id, preset) } : {}));
-}
-
-/** Plays bots without pausing until the player acts or the hand ends. */
-function fastForward(state: HandState, history: PlayDecision[], seats: readonly PlaySeat[], rng: Rng) {
-  while (state.toAct !== null && state.toAct !== HERO) {
-    const seat = state.toAct;
-    const action = sampleAction(botMix(state, state.players[seat].cards, seats[seat].bot!.profile, chartAdvisor), rng);
-    history.push({ state, action });
-    state = act(state, action);
-  }
-  return state;
-}
 
 /** How long a bot takes over an action: folds are quick, big decisions take longer. */
 function thinkMs(state: HandState, action: PlayAction, speed: TableSession['settings']['speed']): number {
@@ -252,22 +71,10 @@ function resultMs(state: HandState, speed: TableSession['settings']['speed']): n
   return state.players[HERO].folded ? base * 0.6 : base;
 }
 
-/** Books a finished hand: stacks, session totals and the hand record. */
-function bookHand(s: TableSession, final: HandState, history: PlayDecision[], id: string, seed: number, skipped: boolean): TableSession {
-  const net = final.result!.net[HERO];
-  const record: HandRecord = { id, number: s.stats.hands + 1, seed, history, final };
-  return {
-    ...s,
-    stacks: stacksAfter(final),
-    stats: { ...s.stats, hands: s.stats.hands + (skipped ? 0 : 1), skipped: s.stats.skipped + (skipped ? 1 : 0), net: s.stats.net + net },
-    hands: skipped ? s.hands : [...s.hands.slice(-29), record],
-  };
-}
-
 function TableScreen({ session }: { session: TableSession }) {
   useBodyClass('focus-mode');
   useBodyClass('play-room-body');
-  const seats = useMemo(() => seatsOf(session), [session.bots]);
+  const seats = useMemo(() => seatsOf(session), [session.bots, session.table]);
   const rng = useRef<Rng>(seededRng(randomSeed()));
   const [pre, setPre] = useState<PreAction>();
   const [size, setSize] = useState<number>();
@@ -275,58 +82,30 @@ function TableScreen({ session }: { session: TableSession }) {
   const [menu, setMenu] = useState(false);
   const [lastOpen, setLastOpen] = useState(false);
   const [toast, setToast] = useState<string>();
+  const [note, setNote] = useState<string>();
   const [leaving, setLeaving] = useState(false);
   const live = session.live;
   const speed = session.settings.speed;
   const busted = !live && session.stacks[HERO] + session.pendingChips <= 0;
 
-  /** Deals the next hand, folding clear folds at once when asked. */
+  /** Deals the next hand. Clear folds are folded and played out at once when asked. */
   function deal() {
-    setSession((s) => {
-      let next = s;
-      for (let tries = 0; tries < 30; tries++) {
-        if (next.stacks[HERO] + next.pendingChips <= 0) return next;
-        const stacks = refillBots(next.stacks, next.table).map((x, i) => (i === HERO ? x + next.pendingChips : x));
-        const button = (next.button + 1) % next.table.seats;
-        const seed = randomSeed();
-        const state = startHand({ stacks, button }, seededRng(seed));
-        rng.current = seededRng(seed + 1);
-        const id = `${Date.now().toString(36)}-${seed}`;
-        next = { ...next, button, stacks, pendingChips: 0, stats: { ...next.stats, bought: next.stats.bought + next.pendingChips } };
-        if (next.settings.skipFolds) {
-          const history: PlayDecision[] = [];
-          const ahead = fastForward(state, history, seatsOf(next), seededRng(seed + 1));
-          if (ahead.toAct === HERO && isClearFold(ahead)) {
-            history.push({ state: ahead, action: { kind: 'fold' } });
-            const final = fastForward(act(ahead, { kind: 'fold' }), history, seatsOf(next), seededRng(seed + 2));
-            next = bookHand(next, final, history, id, seed, true);
-            continue;
-          }
-        }
-        return { ...next, live: { id, seed, state, history: [], said: {} } };
-      }
-      return next;
-    });
+    setSession((s) => dealNext(s, randomSeed));
+    const s = getSession();
+    if (s?.live) rng.current = liveRng(s.live.seed);
+    const skipped = s?.justSkipped ?? 0;
+    setNote(skipped ? `Skipped ${skipped} clear ${skipped === 1 ? 'fold' : 'folds'}` : undefined);
   }
 
   function advance(action: PlayAction) {
-    setSession((s) => {
-      if (!s.live) return s;
-      const { state, history, said } = s.live;
-      const seat = state.toAct!;
-      const nextState = act(state, action);
-      const nextSaid = nextState.street !== state.street ? {} : { ...said, [seat]: actionText(state, action) };
-      let next: TableSession = { ...s, live: { ...s.live, state: nextState, history: [...history, { state, action }], said: nextSaid } };
-      if (nextState.result) next = bookHand(next, nextState, next.live!.history, next.live!.id, next.live!.seed, false);
-      return next;
-    });
+    setSession((s) => applyAction(s, action, rng.current));
   }
 
   // The table loop: deal, let bots think and act, pause on the result, then deal again.
   useEffect(() => {
     if (!live) {
       if (session.sittingOut || busted || leaving) return;
-      const t = window.setTimeout(deal, 350);
+      const t = window.setTimeout(deal, 300);
       return () => window.clearTimeout(t);
     }
     const { state } = live;
@@ -336,7 +115,7 @@ function TableScreen({ session }: { session: TableSession }) {
     }
     if (state.toAct !== HERO) {
       const seat = state.toAct!;
-      const action = sampleAction(botMix(state, state.players[seat].cards, seats[seat].bot!.profile, chartAdvisor), rng.current);
+      const action = botAction(state, seats, rng.current);
       const ms = thinkMs(state, action, speed);
       setThinking(ms >= 400 ? { seat, ms } : undefined);
       const t = window.setTimeout(() => {
@@ -357,26 +136,28 @@ function TableScreen({ session }: { session: TableSession }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [live?.state, session.sittingOut, busted, leaving]);
 
-  // When a hand ends: grade it quietly and rate what counts.
+  // When hands end: grade them quietly and rate what counts. A fast deal can finish more than one before this runs.
   const lastId = session.hands.at(-1)?.id;
   useEffect(() => {
-    const rec = getSession()?.hands.at(-1);
-    if (!rec || rec.grades) return;
+    const todo = getSession()?.hands.filter((h) => !h.grades) ?? [];
+    if (!todo.length) return;
     const t = window.setTimeout(() => {
-      const grades = gradeHand(rec.history, seats, rec.seed);
-      void rateHand(grades, rec.history, rec.id);
-      const graded = grades.filter((g) => g.grade);
-      setSession((s) => ({
-        ...s,
-        hands: s.hands.map((h) => (h.id === rec.id ? { ...h, grades } : h)),
-        stats: {
-          ...s.stats,
-          graded: s.stats.graded + graded.length,
-          good: s.stats.good + graded.filter((g) => g.grade === 'best' || g.grade === 'correct').length,
-          evLost: s.stats.evLost + graded.reduce((a, g) => a + (g.evLoss ?? 0), 0),
-        },
-      }));
-      if (getSession()?.settings.showGrades && graded.length) setToast(gradeLine(graded));
+      for (const rec of todo) {
+        const grades = gradeHand(rec.history, seats, rec.seed);
+        void rateHand(grades, rec.history, rec.id);
+        const graded = grades.filter((g) => g.grade);
+        setSession((s) => ({
+          ...s,
+          hands: s.hands.map((h) => (h.id === rec.id ? { ...h, grades } : h)),
+          stats: {
+            ...s.stats,
+            graded: s.stats.graded + graded.length,
+            good: s.stats.good + graded.filter((g) => g.grade === 'best' || g.grade === 'correct').length,
+            evLost: s.stats.evLost + graded.reduce((a, g) => a + (g.evLoss ?? 0), 0),
+          },
+        }));
+        if (rec === todo.at(-1) && getSession()?.settings.showGrades && graded.length) setToast(gradeLine(graded));
+      }
     }, 60);
     return () => window.clearTimeout(t);
     // Once per finished hand.
@@ -388,6 +169,12 @@ function TableScreen({ session }: { session: TableSession }) {
     const t = window.setTimeout(() => setToast(undefined), 4000);
     return () => window.clearTimeout(t);
   }, [toast]);
+
+  useEffect(() => {
+    if (!note) return;
+    const t = window.setTimeout(() => setNote(undefined), 2400);
+    return () => window.clearTimeout(t);
+  }, [note]);
 
   // A new street or a new bet clears a plain check that no longer fits.
   useEffect(() => setPre((p) => (p === 'check' ? undefined : p)), [live?.state.currentBet, live?.state.street]);
@@ -402,18 +189,26 @@ function TableScreen({ session }: { session: TableSession }) {
   }, [rare]);
   const me = state?.players[HERO];
   const inHand = !!state && !state.result && !me!.folded && !me!.allIn;
+  const dealt = session.stats.hands + session.stats.skipped + (state && !state.result ? 1 : 0);
+  const stakes = session.table.stakes?.label;
 
   return (
     <div className="play-room">
       <header className="play-head">
-        <button className="play-icon-btn" onClick={() => setMenu(true)} aria-label="Table menu">
+        <button className="play-icon-btn" onClick={() => setMenu(true)} aria-label="Table settings">
           <MoreIcon size={22} />
         </button>
         <span className="play-head-title">
-          <span>{session.table.name}</span>
-          <span className="play-head-sub num">
-            Hand {session.stats.hands + (state && !state.result ? 1 : 0)} · {signed(session.stats.net)}bb
-          </span>
+          <span className="play-head-name">{session.table.name}</span>
+          {note ? (
+            <span className="play-head-sub play-head-note" role="status">
+              {note}
+            </span>
+          ) : (
+            <span className="play-head-sub num">
+              {stakes ? `${stakes} · ` : ''}Hand {dealt} · {signed(session.stats.net)}bb
+            </span>
+          )}
         </span>
         <button className="play-last-btn" onClick={() => setLastOpen(true)} disabled={!lastHand}>
           Last hand
@@ -421,11 +216,13 @@ function TableScreen({ session }: { session: TableSession }) {
         </button>
       </header>
 
-      {toast && (
-        <button className="play-toast" onClick={() => setLastOpen(true)}>
-          {toast}
-        </button>
-      )}
+      <div className="play-toasts" aria-live="polite">
+        {toast && (
+          <button className="play-toast" onClick={() => setLastOpen(true)}>
+            {toast}
+          </button>
+        )}
+      </div>
 
       <div className="play-stage">
         {state ? (
@@ -463,7 +260,7 @@ function TableScreen({ session }: { session: TableSession }) {
         ) : inHand ? (
           <PreActions state={state!} value={pre} onChange={setPre} />
         ) : (
-          <p className="play-dock-note">{state?.result ? ' ' : me?.folded ? 'Folded. The next hand comes soon.' : 'Dealing'}</p>
+          <p className="play-dock-note">{state?.result ? ' ' : me?.folded ? 'You folded. The next hand comes after this one.' : 'Dealing'}</p>
         )}
       </div>
 
@@ -501,7 +298,7 @@ function TableScreen({ session }: { session: TableSession }) {
 function PlayTableIdle({ session, seats }: { session: TableSession; seats: PlaySeat[] }) {
   const state = useMemo(() => {
     const s = startHand({ stacks: session.stacks.map((x) => Math.max(x, 1)), button: session.button }, seededRng(1));
-    return { ...s, toAct: null, players: s.players.map((p, i) => ({ ...p, stack: session.stacks[i], street: 0, total: 0, folded: true })) };
+    return { ...s, toAct: null, log: [], players: s.players.map((p, i) => ({ ...p, stack: session.stacks[i], street: 0, total: 0, folded: true })) };
   }, [session.stacks, session.button]);
   return <PlayTable handId="idle" state={state} seats={seats} said={{}} />;
 }
@@ -517,24 +314,30 @@ const order = (g: string) => ['best', 'correct', 'inaccuracy', 'mistake', 'blund
 
 const round = (x: number) => Math.round(x * 2) / 2;
 
-/** Bet sizes like an online client: multiples of the blind preflop, shares of the pot after. */
-/** Raise sizes to offer. Unopened before the flop that is your open, plus 1bb for each limper. */
-function sizeOptions(state: HandState, open: number): { label: string; to: number; mine?: boolean }[] {
+/**
+ * Raise sizes to offer, like an online client. Unopened before the flop
+ * that is your open plus 1bb for each limper (in straddles if there is
+ * one), then multiples of the raise, then shares of the pot after the flop.
+ */
+export function sizeOptions(state: HandState, open: number): { label: string; to: number; mine?: boolean }[] {
   const legal = legalActions(state);
   const r = legal.raise;
   if (!r) return [];
   const pot = potSize(state);
   const clampTo = (to: number) => Math.min(r.max, Math.max(r.min, round(to)));
   let list: { label: string; to: number; mine?: boolean }[];
-  if (state.street === 'preflop' && state.currentBet <= state.bb) {
-    const limps = state.log.filter((a) => a.street === 'preflop' && a.kind === 'call').length;
-    list = [...new Set([2.5, 3, open])].sort((x, y) => x - y).map((x) => ({ label: `${x}bb`, to: x + limps, mine: x === open }));
+  const preflop = state.log.filter((a) => a.street === 'preflop');
+  if (state.street === 'preflop' && !preflop.some((a) => a.kind === 'raise')) {
+    const unit = Math.max(1, straddleOf(state) / state.bb);
+    const limps = preflop.filter((a) => a.kind === 'call').length;
+    list = [...new Set([2.5, 3, open])].sort((x, y) => x - y).map((x) => ({ label: `${fmt((x + limps) * unit)}bb`, to: (x + limps) * unit, mine: x === open }));
   } else if (state.street === 'preflop') {
     list = [3, 4].map((x) => ({ label: `${x}x`, to: state.currentBet * x }));
   } else {
     // A pot sized raise calls first, then raises by the pot after the call.
     const potTo = (f: number) => (r.kind === 'bet' ? pot * f : state.currentBet + (pot + legal.call) * f);
     list = [
+      { label: '⅓ pot', to: potTo(1 / 3) },
       { label: '½ pot', to: potTo(0.5) },
       { label: '¾ pot', to: potTo(0.75) },
       { label: 'Pot', to: potTo(1) },
@@ -555,6 +358,7 @@ function Actions({ state, size, onSize, onAct }: { state: HandState; size?: numb
   const r = legal.raise;
   const chosen = r ? (size ?? options.find((o) => o.mine)?.to ?? options.find((o) => o.label !== 'Min')?.to ?? r.min) : undefined;
   const raiseLabel = !r || chosen === undefined ? '' : chosen >= r.max ? `All in ${fmt(r.max)}` : r.kind === 'bet' ? `Bet ${fmt(chosen)}` : `Raise to ${fmt(chosen)}`;
+  const step = (d: number) => r && chosen !== undefined && onSize(Math.min(r.max, Math.max(r.min, round(chosen + d))));
   return (
     <div className="play-actions">
       {r && (
@@ -567,7 +371,15 @@ function Actions({ state, size, onSize, onAct }: { state: HandState; size?: numb
             ))}
           </div>
           {r.max > r.min && (
-            <input className="play-slider" type="range" aria-label="Bet size" min={r.min} max={r.max} step={0.5} value={chosen} onChange={(e) => onSize(Number(e.target.value))} />
+            <div className="play-slide-row">
+              <button className="play-nudge" aria-label="Smaller" data-haptic="select" disabled={chosen! <= r.min} onClick={() => step(-(state.street === 'preflop' ? 0.5 : Math.max(0.5, round(potSize(state) * 0.1))))}>
+                <MinusIcon size={18} />
+              </button>
+              <input className="play-slider" type="range" aria-label="Bet size" min={r.min} max={r.max} step={0.5} value={chosen} onChange={(e) => onSize(Number(e.target.value))} />
+              <button className="play-nudge" aria-label="Bigger" data-haptic="select" disabled={chosen! >= r.max} onClick={() => step(state.street === 'preflop' ? 0.5 : Math.max(0.5, round(potSize(state) * 0.1)))}>
+                <PlusIcon size={18} />
+              </button>
+            </div>
           )}
         </>
       )}
@@ -587,7 +399,7 @@ function Actions({ state, size, onSize, onAct }: { state: HandState; size?: numb
           </button>
         )}
         {r && chosen !== undefined && (
-          <button className="btn btn-lg btn-primary" onClick={() => onAct({ kind: r.kind, to: chosen })}>
+          <button className="btn btn-lg btn-primary play-raise" onClick={() => onAct({ kind: r.kind, to: chosen })}>
             {raiseLabel}
           </button>
         )}
@@ -622,78 +434,110 @@ function PreActions({ state, value, onChange }: { state: HandState; value?: PreA
   );
 }
 
-// Menu -------------------------------------------------------------------------------
+// Table settings ---------------------------------------------------------------------
 
 function MenuSheet({ open, onClose, session, onLeave }: { open: boolean; onClose: () => void; session: TableSession; onLeave: () => void }) {
   const set = (patch: Partial<TableSession['settings']>) => setSession((s) => ({ ...s, settings: { ...s.settings, ...patch } }));
   const top = Math.max(0, session.table.buyIns[2] - session.stacks[HERO] - session.pendingChips);
+  const { settings } = session;
   return (
-    <Sheet open={open} onClose={onClose} label="Table menu">
-      <div className="row between">
-        <h2 className="play-sheet-title">{session.table.name}</h2>
-        <button className="btn btn-plain" onClick={onClose}>
-          Done
-        </button>
-      </div>
-      <div className="list">
-        <label className="list-row">
-          <span className="grow">
-            <span style={{ display: 'block' }}>Skip clear folds</span>
-            <span className="footnote">Hands the chart folds every time are folded for you</span>
-          </span>
-          <Toggle label="Skip clear folds" checked={session.settings.skipFolds} onChange={(skipFolds) => set({ skipFolds })} />
-        </label>
-        <div className="list-row">
-          <span className="grow">Bot speed</span>
-          <Segmented
-            ariaLabel="Bot speed"
-            value={session.settings.speed}
-            options={[
-              { value: 'instant', label: 'Instant' },
-              { value: 'quick', label: 'Quick' },
-              { value: 'natural', label: 'Natural' },
-            ]}
-            onChange={(speed) => set({ speed })}
-          />
+    <Sheet open={open} onClose={onClose} label="Table settings">
+      <SheetHead title="Table settings" onClose={onClose} />
+
+      <div>
+        <GroupLabel>Speed</GroupLabel>
+        <div className="list">
+          <div className="list-row play-stack-row">
+            <span>Bot speed</span>
+            <Segmented
+              stretch
+              ariaLabel="Bot speed"
+              value={settings.speed}
+              options={[
+                { value: 'instant', label: 'Instant' },
+                { value: 'quick', label: 'Quick' },
+                { value: 'natural', label: 'Natural' },
+              ]}
+              onChange={(speed) => set({ speed })}
+            />
+          </div>
+          <div className="list-row play-stack-row">
+            <span>After you fold</span>
+            <Segmented
+              stretch
+              ariaLabel="After you fold"
+              value={settings.afterFold}
+              options={[
+                { value: 'next', label: 'Deal next hand' },
+                { value: 'watch', label: 'Watch the hand' },
+              ]}
+              onChange={(afterFold) => set({ afterFold })}
+            />
+          </div>
+          <label className="list-row">
+            <span className="grow">
+              <span style={{ display: 'block' }}>Skip clear folds</span>
+              <span className="footnote">Hands you would always fold are folded for you</span>
+            </span>
+            <Toggle label="Skip clear folds" checked={settings.skipFolds} onChange={(skipFolds) => set({ skipFolds })} />
+          </label>
         </div>
-        <OpenSizeRow />
-        <label className="list-row">
-          <span className="grow">
-            <span style={{ display: 'block' }}>Grades after each hand</span>
-            <span className="footnote">Off keeps the table quiet. Last hand always has them.</span>
-          </span>
-          <Toggle label="Grades after each hand" checked={session.settings.showGrades} onChange={(showGrades) => set({ showGrades })} />
-        </label>
+        <p className="section-footer">Hands you fold still show in Last hand.</p>
       </div>
-      <div className="list">
-        <button
-          className="list-row"
-          disabled={top < 1}
-          onClick={() => {
-            setSession((s) => ({ ...s, pendingChips: s.pendingChips + top }));
-            onClose();
-          }}
-        >
-          <span className="grow" style={{ color: top < 1 ? 'var(--label-2)' : 'var(--tint)' }}>
-            {top < 1 ? 'Your stack is full' : `Top up ${fmt(top)}bb before the next hand`}
-          </span>
-        </button>
-        <button
-          className="list-row"
-          onClick={() => {
-            setSession((s) => ({ ...s, sittingOut: !s.sittingOut }));
-            onClose();
-          }}
-        >
-          <span className="grow" style={{ color: 'var(--tint)' }}>
-            {session.sittingOut ? 'Deal me in' : 'Sit out after this hand'}
-          </span>
-        </button>
-        <button className="list-row" onClick={onLeave}>
-          <span className="grow" style={{ color: 'var(--red)' }}>
-            Leave table
-          </span>
-        </button>
+
+      <div>
+        <GroupLabel>Coaching</GroupLabel>
+        <div className="list">
+          <label className="list-row">
+            <span className="grow">
+              <span style={{ display: 'block' }}>Grades after each hand</span>
+              <span className="footnote">Off keeps the table quiet</span>
+            </span>
+            <Toggle label="Grades after each hand" checked={settings.showGrades} onChange={(showGrades) => set({ showGrades })} />
+          </label>
+        </div>
+        <p className="section-footer">Last hand always has the grades.</p>
+      </div>
+
+      <div>
+        <GroupLabel>Your open size</GroupLabel>
+        <div className="list">
+          <OpenSizeRow />
+        </div>
+      </div>
+
+      <div>
+        <GroupLabel>Table</GroupLabel>
+        <div className="list">
+          <button
+            className="list-row"
+            disabled={top < 1}
+            onClick={() => {
+              setSession((s) => ({ ...s, pendingChips: s.pendingChips + top }));
+              onClose();
+            }}
+          >
+            <span className="grow" style={{ color: top < 1 ? 'var(--label-2)' : 'var(--tint)' }}>
+              {top < 1 ? 'Your stack is full' : `Top up ${fmt(top)}bb before the next hand`}
+            </span>
+          </button>
+          <button
+            className="list-row"
+            onClick={() => {
+              setSession((s) => ({ ...s, sittingOut: !s.sittingOut }));
+              onClose();
+            }}
+          >
+            <span className="grow" style={{ color: 'var(--tint)' }}>
+              {session.sittingOut ? 'Deal me in' : 'Sit out after this hand'}
+            </span>
+          </button>
+          <button className="list-row" onClick={onLeave}>
+            <span className="grow" style={{ color: 'var(--red)' }}>
+              Leave table
+            </span>
+          </button>
+        </div>
       </div>
     </Sheet>
   );
@@ -742,6 +586,15 @@ function historyLines(rec: HandRecord, seats: readonly PlaySeat[]): { street: Ha
   return out;
 }
 
+/** Who showed what at the end of a hand that went to showdown. */
+function showdownLines(rec: HandRecord, seats: readonly PlaySeat[]): string[] {
+  const r = rec.final.result!;
+  if (!r.showdown) return [];
+  return rec.final.players
+    .filter((p) => !p.folded)
+    .map((p) => `${p.seat === HERO ? 'You show' : `${seats[p.seat].bot?.name ?? 'Seat'} shows`} ${pretty(p.cards)}, ${(r.hands[p.seat] ?? '').toLowerCase()}`);
+}
+
 /** A question for the coach about this hand, as a draft. */
 function coachQuestion(rec: HandRecord, seats: readonly PlaySeat[]): string {
   const s0 = rec.history[0]?.state ?? rec.final;
@@ -786,27 +639,43 @@ function LastHandSheet({ open, onClose, hands, seats }: { open: boolean; onClose
   }, [open]);
   const rec = hands[hands.length - 1 - back];
   const notes = useMemo(() => (rec ? handNotes(rec.history) : []), [rec]);
+  const net = rec?.final.result!.net[HERO] ?? 0;
+  const graded = rec?.grades?.filter((g) => g.grade) ?? [];
+  const misses = graded.filter((g) => g.grade === 'mistake' || g.grade === 'blunder').length;
   return (
     <Sheet open={open} onClose={onClose} label="Last hand">
       {rec && (
         <>
-          <div className="row between">
+          <div className="row between" style={{ flexWrap: 'nowrap' }}>
             <button className="play-icon-btn light" onClick={() => setBack((b) => b + 1)} disabled={back >= hands.length - 1} aria-label="Earlier hand">
               <ChevronLeftIcon size={18} />
             </button>
-            <span className="play-hand-title num">
-              Hand {rec.number} · {signed(rec.final.result!.net[HERO])}bb
-            </span>
+            <span className="play-hand-title num">Hand {rec.number}</span>
             <button className="play-icon-btn light" onClick={() => setBack((b) => b - 1)} disabled={back === 0} aria-label="Later hand">
               <ChevronRightIcon size={18} />
             </button>
           </div>
-          <div className="play-hand-summary">
-            <span className="num">
-              {pretty(rec.final.players[HERO].cards)} in the {rec.final.players[HERO].position}
-            </span>
-            <span className="footnote">{resultLine(rec.final, seats)}</span>
+          <div className="play-recap-head">
+            <div className="play-recap-cards">
+              {rec.final.players[HERO].cards.map((c) => (
+                <PlayingCard key={c} card={c} size="sm" />
+              ))}
+            </div>
+            <div className="play-recap-text">
+              <span className={`play-recap-net num ${net > 0 ? 'up' : net < 0 ? 'down' : ''}`}>{signed(net)}bb</span>
+              <span className="footnote">
+                {rec.final.players[HERO].position}. {resultLine(rec.final, seats)}.
+              </span>
+            </div>
           </div>
+          {rec.final.board.length > 0 && (
+            <div className="play-recap-board" aria-label={`Board ${pretty(rec.final.board)}`}>
+              {rec.final.board.map((c) => (
+                <PlayingCard key={c} card={c} size="sm" />
+              ))}
+            </div>
+          )}
+          {rec.offScreen && <p className="footnote play-recap-note">You folded. The rest of the hand played out off screen.</p>}
           <div className="list">
             {historyLines(rec, seats).map((st) => (
               <div key={st.street} className="list-row play-hist">
@@ -821,6 +690,18 @@ function LastHandSheet({ open, onClose, hands, seats }: { open: boolean; onClose
                 </span>
               </div>
             ))}
+            {showdownLines(rec, seats).length > 0 && (
+              <div className="list-row play-hist">
+                <span className="grow">
+                  <span className="play-grade-street">Showdown</span>
+                  {showdownLines(rec, seats).map((a) => (
+                    <span key={a} className={`play-hist-line${a.startsWith('You') ? ' me' : ''}`}>
+                      {a}
+                    </span>
+                  ))}
+                </span>
+              </div>
+            )}
           </div>
           <h3 className="play-sub-title">Your decisions</h3>
           {!rec.grades ? (
@@ -828,23 +709,28 @@ function LastHandSheet({ open, onClose, hands, seats }: { open: boolean; onClose
           ) : rec.grades.length === 0 ? (
             <p className="footnote">You had no decisions this hand.</p>
           ) : (
-            <div className="list">
-              {rec.grades.map((g) => (
-                <div key={g.index} className="list-row play-grade">
-                  <span className="grow">
-                    <span className="play-grade-head">
-                      <span className="play-grade-street">{STREET_WORDS[g.street]}</span>
-                      {g.did}
+            <>
+              <p className="footnote" style={{ margin: 0 }}>
+                {graded.length === 0 ? 'None of them can be graded yet.' : misses ? `${misses} of ${graded.length} graded ${graded.length === 1 ? 'was a mistake' : 'were mistakes'}.` : `${graded.length} graded. No mistakes.`}
+              </p>
+              <div className="list">
+                {rec.grades.map((g) => (
+                  <div key={g.index} className="list-row play-grade">
+                    <span className="grow">
+                      <span className="play-grade-head">
+                        <span className="play-grade-street">{STREET_WORDS[g.street]}</span>
+                        {g.did}
+                      </span>
+                      <span className="footnote" style={{ display: 'block' }}>
+                        {g.detail}
+                      </span>
+                      {g.tier !== 'none' && <span className="play-grade-tier">{TIER_WORDS[g.tier]}</span>}
                     </span>
-                    <span className="footnote" style={{ display: 'block' }}>
-                      {g.detail}
-                    </span>
-                    {g.tier !== 'none' && <span className="play-grade-tier">{TIER_WORDS[g.tier]}</span>}
-                  </span>
-                  <span className={`play-grade-chip ${g.grade ?? 'none'}`}>{g.grade ? GRADE_WORDS[g.grade] : 'Not graded'}</span>
-                </div>
-              ))}
-            </div>
+                    <span className={`play-grade-chip ${g.grade ?? 'none'}`}>{g.grade ? GRADE_WORDS[g.grade] : 'Not graded'}</span>
+                  </div>
+                ))}
+              </div>
+            </>
           )}
           {notes.map((n) => (
             <p key={n} className="footnote" style={{ margin: 0 }}>
