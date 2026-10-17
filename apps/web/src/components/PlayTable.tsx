@@ -1,4 +1,5 @@
-import { describeHand, type HandState } from '@felt/core';
+import { handNickname } from '@felt/content';
+import { describeHand, handClassOf, type HandState } from '@felt/core';
 import { type CSSProperties, useEffect, useRef, useState } from 'react';
 import { HERO, type PlaySeat } from '../state/play';
 import { BotPortrait } from '../ui/BotPortrait';
@@ -15,6 +16,8 @@ interface Props {
   thinking?: { seat: number; ms: number };
   /** Words in the middle of the table at the end of a hand. */
   banner?: string;
+  /** A pot worth a little extra: the banner turns brass. */
+  bannerRare?: boolean;
 }
 
 /** Seat anchors around an ellipse, the player at the bottom, clockwise like the action. */
@@ -38,7 +41,7 @@ interface Flight {
 }
 
 /** A poker client style table: bots around the felt, the board and pot in the middle, the player at the bottom. */
-export function PlayTable({ handId, state, seats, said, thinking, banner }: Props) {
+export function PlayTable({ handId, state, seats, said, thinking, banner, bannerRare }: Props) {
   const n = state.players.length;
   const points = anchors(n);
   const at = (seat: number) => points[(seat - HERO + n) % n];
@@ -78,7 +81,8 @@ export function PlayTable({ handId, state, seats, said, thinking, banner }: Prop
 
   const inMiddle = state.players.reduce((s, p) => s + p.total - (over ? 0 : p.street), 0);
   const me = state.players[HERO];
-  const myHand = state.board.length >= 3 && !me.folded ? describeHand([...me.cards, ...state.board]) : undefined;
+  // Before the flop a few hands have a table name; after it, say what you made.
+  const myHand = me.folded ? undefined : state.board.length >= 3 ? describeHand([...me.cards, ...state.board]) : handNickname(handClassOf(me.cards[0], me.cards[1]));
 
   return (
     <div className={`play-table seats-${n}`}>
@@ -90,7 +94,7 @@ export function PlayTable({ handId, state, seats, said, thinking, banner }: Prop
           ))}
         </div>
         {banner ? (
-          <div className="play-banner" role="status">
+          <div className={`play-banner${bannerRare ? ' rare' : ''}`} role="status">
             {banner}
           </div>
         ) : (

@@ -145,6 +145,7 @@ function Result({ number, items, scores, before, after }: { number: number; item
             </span>
           ))}
         </div>
+        {right === scores.length && <p className="hand-nickname daily-nuts">You had the nuts today.</p>}
         {crowd && crowd.players > 0 && (
           <p className="footnote num" style={{ margin: 0 }}>
             {crowd.players === 1 ? 'You are the first to finish today.' : `${crowd.players.toLocaleString()} players have played today.`}

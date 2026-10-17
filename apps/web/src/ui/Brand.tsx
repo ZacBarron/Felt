@@ -1,5 +1,5 @@
 import { gridHandClass as handAt } from '@felt/core';
-import { type CSSProperties, useId } from 'react';
+import { type CSSProperties, useId, useState } from 'react';
 import { WORDMARK_PATH, WORDMARK_VIEWBOX } from './wordmark';
 
 /**
@@ -109,13 +109,30 @@ export function Lockup({ size = 30 }: { size?: number }) {
 
 export const TAGLINE = 'Poker, suited to you.';
 
-/** Quiet sign off at the bottom of More and Settings. */
+/**
+ * Quiet sign off at the bottom of You and Settings. Tapping the mark paints
+ * it again and says what it is: a small reward for the curious.
+ */
 export function BrandFooter() {
+  const [plays, setPlays] = useState(0);
   return (
     <footer className="brand-footer">
-      <BrandMark size={36} />
+      <button
+        className="brand-footer-mark"
+        aria-label="Paint the Suited mark"
+        data-haptic="select"
+        onClick={() => setPlays((n) => n + 1)}
+      >
+        <BrandMark key={plays} size={36} animate={plays > 0} />
+      </button>
       <Wordmark height={22} />
-      <div className="tagline">{TAGLINE}</div>
+      {plays > 0 ? (
+        <div className="tagline" role="status" key="secret">
+          The mark is a range chart. Suited hands sit above the pairs.
+        </div>
+      ) : (
+        <div className="tagline">{TAGLINE}</div>
+      )}
       <div className="caption">Version {__APP_VERSION__}</div>
     </footer>
   );

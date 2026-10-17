@@ -705,6 +705,30 @@
   animation: play-pop 260ms var(--spring) 380ms backwards;
 }
 
+.play-banner.rare {
+  position: relative;
+  overflow: hidden;
+  color: var(--on-tint);
+  background: var(--tint-fill);
+  box-shadow: 0 6px 22px color-mix(in srgb, var(--tint) 45%, transparent);
+}
+
+/* One sweep of light across the brass, like a chip catching the room light. */
+.play-banner.rare::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, transparent 30%, rgba(255, 255, 255, 0.55) 50%, transparent 70%);
+  transform: translateX(-120%);
+  animation: play-glint 900ms ease-out 700ms forwards;
+}
+
+@keyframes play-glint {
+  to {
+    transform: translateX(120%);
+  }
+}
+
 .play-fly {
   position: absolute;
   z-index: 2;

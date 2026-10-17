@@ -16,7 +16,14 @@ import { useCountUp } from "../ui/useCountUp";
 import "./tiers.css";
 
 const KEY = "felt.moments";
-const STREAK_MILESTONES = [3, 7, 14, 30, 50, 100, 200, 365];
+/** Some milestones count in cards: a suit, a deck, every starting hand. */
+const STREAK_MILESTONES = [3, 7, 13, 30, 52, 100, 169, 365];
+const STREAK_LINES: Record<number, string> = {
+  13: "A full suit of days. Small sessions add up.",
+  52: "One day for every card in the deck.",
+  169: "One day for every starting hand.",
+  365: "A full year at the table.",
+};
 /** Moments wait for a calm screen, never interrupting a question. */
 const CALM = ["/", "/you", "/train", "/learn"];
 
@@ -173,7 +180,8 @@ function MomentView({
             ? moment.next
               ? `Your answers put you here. ${moment.next.name} starts at ${moment.next.min}.`
               : "Your answers put you in the top tier."
-            : `You studied ${moment.days} days in a row. Small sessions add up.`}
+            : (STREAK_LINES[moment.days] ??
+              `You studied ${moment.days} days in a row. Small sessions add up.`)}
         </p>
       </div>
       <div className="moment-actions">

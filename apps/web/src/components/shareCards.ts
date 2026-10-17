@@ -393,7 +393,9 @@ export function paintDaily(ctx: Ctx, d: DailyCardData, design: CardDesign) {
 
   const w = text(ctx, `${dailyRight(d.scores)} of ${n}`, LEFT - 4, 1086, `200px ${SERIF}`, look.ink);
   text(ctx, 'right', LEFT + w + 18, 1086, `600 52px ${SANS}`, look.ink2);
-  text(ctx, `Everyone gets the same ${n} decisions today.`, LEFT, 1166, `500 38px ${SANS}`, look.ink2);
+  // A perfect day gets the one word every player knows.
+  const perfect = dailyRight(d.scores) === n;
+  text(ctx, perfect ? 'The nuts. Every decision right.' : `Everyone gets the same ${n} decisions today.`, LEFT, 1166, `500 38px ${SANS}`, perfect ? look.accent : look.ink2);
   footer(ctx, look);
 }
 

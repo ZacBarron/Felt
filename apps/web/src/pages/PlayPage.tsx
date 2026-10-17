@@ -8,6 +8,7 @@ import {
   SUIT_SYMBOLS,
   suitOf,
   type HandState,
+  handClassOf,
   legalActions,
   type PlayAction,
   type PlayDecision,
@@ -391,6 +392,10 @@ function TableScreen({ session }: { session: TableSession }) {
   const lastMiss = !!lastHand?.grades?.some((g) => g.grade === 'mistake' || g.grade === 'blunder');
   const state = live?.state;
   const banner = state?.result ? resultLine(state, seats) : undefined;
+  const rare = !!state && rarePot(state);
+  useEffect(() => {
+    if (rare) haptic('success');
+  }, [rare]);
   const me = state?.players[HERO];
   const inHand = !!state && !state.result && !me!.folded && !me!.allIn;
 
@@ -420,7 +425,7 @@ function TableScreen({ session }: { session: TableSession }) {
 
       <div className="play-stage">
         {state ? (
-          <PlayTable handId={live!.id} state={state} seats={seats} said={live!.said} thinking={thinking} banner={banner} />
+          <PlayTable handId={live!.id} state={state} seats={seats} said={live!.said} thinking={thinking} banner={banner} bannerRare={rare} />
         ) : (
           <PlayTableIdle session={session} seats={seats} />
         )}
@@ -700,8 +705,22 @@ function resultLine(state: HandState, seats: readonly PlaySeat[]): string {
   const top = r.net.map((net, i) => ({ net, i })).filter((x) => x.net > 0 && Math.abs(x.net - best) < 1e-9);
   if (top.length !== 1) return 'Split pot';
   const { i } = top[0];
-  const hand = r.showdown && r.hands[i] ? ` with ${r.hands[i].toLowerCase()}` : '';
+  const hammer = i === HERO && heroClass(state) === '72o';
+  const hand = hammer ? ' with the hammer' : r.showdown && r.hands[i] ? ` with ${r.hands[i].toLowerCase()}` : '';
   return `${name(i)} ${i === HERO ? 'win' : 'wins'} ${fmt(Math.round(r.won[i] * 10) / 10)}${hand}`;
+}
+
+const heroClass = (state: HandState) => handClassOf(state.players[HERO].cards[0], state.players[HERO].cards[1]);
+
+/**
+ * The rare pots worth a little extra: winning with 7 2 offsuit, or showing
+ * down a straight flush. A brass banner and a firmer tap, nothing more.
+ */
+export function rarePot(state: HandState): boolean {
+  const r = state.result;
+  if (!r || r.net[HERO] <= 0) return false;
+  if (heroClass(state) === '72o') return true;
+  return r.showdown && /^(Royal|Straight) flush/.test(r.hands[HERO] ?? '');
 }
 
 /** The hand street by street, as a hand history reads. */

@@ -1,3 +1,4 @@
+import { handNickname } from '@felt/content';
 import {
   ALL_HAND_CLASSES,
   actionFrequencies,
@@ -192,6 +193,7 @@ function ChartView({ chart }: { chart: Chart }) {
               </span>
               <span className="pill num">{comboCount(selected)} combos</span>
             </div>
+            {handNickname(selected) && <span className="hand-nickname">{handNickname(selected)}</span>}
             <MixBar mix={mix} labels={labels} />
           </div>
 

@@ -66,6 +66,21 @@ Rules:
 - The chip colors are the same in light and dark, like a printed chip.
 - **Marketing** uses Card room plus the chip set: spruce and brass lead, cobalt and gold for callouts, stickers and social cards.
 
+### Personality and easter eggs
+
+Suited's personality comes from the game itself: table talk, card counts and the craft of the mark. It is never a joke at the player's expense, never a reward for time spent, and never in the way of a question.
+
+| Where | What |
+| --- | --- |
+| Footer on You and Settings | Tap the mark. It paints itself again and says it is a range chart. |
+| Ranges and Play | Hands with table names show them: pocket rockets, cowboys, the hammer. Never on a quiz question. |
+| Play | Win a pot with 7 2 offsuit, or show down a straight flush, and the banner turns brass with one glint. |
+| Streaks | Milestones count in cards: 13 days is a suit, 52 a deck, 169 every starting hand. |
+| Daily challenge | A perfect 5 of 5 says "You had the nuts today." The share card says it too. |
+| Any dead link | The page folds: two card backs slide into the muck. |
+
+Rules: one small touch per moment, motion under a second and off with reduced motion, and copy that still follows VOICE.md.
+
 ### Themes
 
 Card room is the brand: it is what goes on the app icon, the splash screen and every marketing surface. People can pick an alternate theme in Settings for the app itself:

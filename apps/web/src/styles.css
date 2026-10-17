@@ -529,10 +529,24 @@ main {
 }
 
 .brand-footer .tagline {
+  max-width: 17rem;
   font-family: var(--font-display);
   font-style: italic;
   font-size: 1.15rem;
   color: var(--label-2);
+  text-wrap: balance;
+  animation: rise 360ms var(--ease) backwards;
+}
+
+.brand-footer-mark {
+  display: grid;
+  place-items: center;
+  min-height: 0;
+  padding: 4px;
+  border: 0;
+  border-radius: 12px;
+  background: none;
+  cursor: pointer;
 }
 
 .nav-group {
@@ -5641,4 +5655,49 @@ a.card.more-me,
   min-height: 38px;
   padding: 0 0.95rem;
   font-size: 0.95rem;
+}
+
+/* Table talk: a hand's nickname, as a quiet aside under the hand. */
+.hand-nickname {
+  margin-top: -0.35rem;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 1.05rem;
+  color: var(--label-2);
+}
+
+/* A perfect daily: the one word every player knows. */
+.daily-nuts {
+  margin: 0;
+  color: var(--tint);
+  font-size: 1.3rem;
+}
+
+/* 404: two card backs slide in and settle into the muck. */
+.nf-muck {
+  position: relative;
+  display: block;
+  width: 132px;
+  height: 120px;
+}
+
+.nf-muck > span {
+  position: absolute;
+  top: 6px;
+  left: 18px;
+  transform: rotate(-9deg);
+  animation: nf-muck 720ms var(--spring) 200ms backwards;
+}
+
+.nf-muck > span + span {
+  left: 40px;
+  transform: rotate(11deg);
+  animation-delay: 320ms;
+}
+
+@keyframes nf-muck {
+  from {
+    opacity: 0;
+    transform: translate(46px, -40px) rotate(40deg);
+  }
 }

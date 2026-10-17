@@ -3,6 +3,7 @@ import { useEffect, useRef } from 'react';
 import { Link, Navigate, NavLink, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { NAV_SECTIONS, TABS, tabFor } from './nav';
 import { CheckPage, PlacementPage } from './pages/CheckPage';
+import { NotFoundPage } from './pages/NotFoundPage';
 import { DailyPage } from './pages/DailyPage';
 import { WeeklyPage } from './pages/WeeklyPage';
 import { DashboardPage } from './pages/DashboardPage';
@@ -185,6 +186,7 @@ export function App() {
             <Route path="/glossary" element={<GlossaryPage />} />
             <Route path="/terms" element={<LegalPage doc="terms" />} />
             <Route path="/privacy" element={<LegalPage doc="privacy" />} />
+            <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </div>
       </main>
