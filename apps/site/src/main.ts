@@ -449,13 +449,13 @@ updateOpen();
 
 // Quotes: real ones always, drafts only while designing -------------------------------
 
-// The founder note: an initial and no photo, by choice.
+// The founder note: no name and no photo, by choice. The mark stands in for a face.
 const note = visibleFounderNote(FOUNDER_NOTE, import.meta.env.PROD);
 const noteEl = $<HTMLElement>('[data-founder-note]');
 if (note && noteEl) {
   $<HTMLElement>('[data-founder-lines]', noteEl)!.textContent = note.lines.join(' ');
   $<HTMLElement>('[data-founder-signoff]', noteEl)!.textContent = note.signoff;
-  $<HTMLElement>('[data-founder-initial]', noteEl)!.textContent = note.signoff.charAt(0);
+  $<HTMLElement>('[data-founder-initial]', noteEl)!.innerHTML = markSvg('note-mark');
   if (note.draft) noteEl.insertAdjacentHTML('afterbegin', '<span class="sample">Draft</span>');
   noteEl.hidden = false;
 }

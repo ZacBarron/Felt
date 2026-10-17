@@ -32,7 +32,8 @@ describe('founder note', () => {
   });
 
   it('keeps the founder semi anonymous and the copy plain', () => {
-    expect(FOUNDER_NOTE.signoff).toMatch(/^[A-Z]\.,/);
+    // No name or initial: the founder stays anonymous on the site.
+    expect(FOUNDER_NOTE.signoff).toBe('The founder of Aced');
     for (const line of FOUNDER_NOTE.lines) {
       expect(line).not.toMatch(/—/);
       expect((line.match(/,/g) ?? []).length).toBeLessThanOrEqual(1);

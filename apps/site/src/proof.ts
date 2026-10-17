@@ -59,8 +59,8 @@ export function visibleQuotes(quotes: readonly Quote[], production: boolean): Qu
 }
 
 /**
- * A short note from the founder. The founder stays semi anonymous: an initial,
- * no photo and no surname. Every sentence must be true, so it starts as a
+ * A short note from the founder. The founder stays anonymous on the site: no
+ * name, no initial and no photo. Every sentence must be true, so it starts as a
  * draft that only shows outside production. The founder confirms the words,
  * then sets `draft: false`.
  */
@@ -77,7 +77,7 @@ export const FOUNDER_NOTE: FounderNote = {
     'I built Aced so I could check those decisions on a break, in plain words.',
     "It's the coach I wanted at the table. I hope it helps your game too.",
   ],
-  signoff: 'Z., founder',
+  signoff: 'The founder of Aced',
   draft: true,
 };
 
