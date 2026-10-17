@@ -15,6 +15,10 @@ Play works like sitting down in an online cash game.
 - **Skip clear folds**: a hand is folded for you only when the chart folds it 100% from your seat in that spot. It still plays out, so the blinds you lose count. A hand the chart plays even 1% of the time is always dealt.
 - **The session** survives switching tabs. Stacks and totals are saved on the device, so a reload sits you back down. A hand in progress restarts, like a reconnect.
 
+### Your open size
+
+Settings has **Your open** (Game and stakes, also in the table menu). It defaults to the 2.5bb the charts assume. Live players often set 4 or 5bb. Play offers it as the first raise size before the flop, plus 1bb for each limper. Opening charts show a "You open 4bb" flag and say the chart is approximate for you. Bots still open to 2.5bb. Open size is not graded.
+
 ## Bots
 
 Each bot is a character with a name, a drawn portrait, a style and a rating, the way chess apps present their bots. Two rules keep it honest (CLAUDE.md: no fake competitors):

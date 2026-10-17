@@ -29,8 +29,8 @@ export function ProCard() {
   );
 }
 
-/** Your own hands and how you compare: the log, imports, saved hands and the league. */
-export function GameRows() {
+/** Your own hands: sessions you logged, histories you imported and hands you saved. */
+export function HandsRows() {
   const counts = useLiveQuery(async () => ({ sessions: await db.sessions.count(), saved: await db.saved.count() }), []);
   const row = (to: string, subtitle: string, detail?: string) => {
     const i = navItem(to);
@@ -38,20 +38,18 @@ export function GameRows() {
   };
   return (
     <section>
-      <h2 className="section-title">Your game</h2>
+      <h2 className="section-title">Your hands</h2>
       <div className="list with-icons">
-        <NavRow to="/invite" icon={ShareIcon} color="var(--chip-cobalt)" title="Invite friends" subtitle="Give a month of Pro, get a month" />
         {row('/log', 'Sessions you played', counts?.sessions ? String(counts.sessions) : undefined)}
         {row('/import', 'Hand histories from your poker site')}
         {row('/saved', 'Hands you kept for later', counts?.saved ? String(counts.saved) : undefined)}
-        {row('/league', 'Real players near your rating')}
       </div>
     </section>
   );
 }
 
-/** Account, plan and settings, last on the You tab. */
-export function AccountRows() {
+/** Friends, the league, your account, plan and settings: last on the You tab. */
+export function MoreRows() {
   const { settings } = useSettings();
   const session = useSession();
   const { cloud } = useClaudeCloud();
@@ -75,6 +73,8 @@ export function AccountRows() {
         : 'Active';
   return (
     <div className="list with-icons">
+      <NavRow to="/invite" icon={ShareIcon} color="var(--chip-cobalt)" title="Invite friends" subtitle="Give a month of Pro, get a month" />
+      <NavRow to="/league" icon={navItem('/league').icon} color={navItem('/league').color} title="League" subtitle="Real players near your rating" />
       <NavRow to="/account" icon={navItem('/you').icon} color="var(--gray)" title="Account" subtitle={accountLine} />
       {pro && <NavRow to={session ? '/account' : '/settings'} icon={MedalIcon} color="var(--chip-gold)" title="Suited Pro" detail={proLine} />}
       <NavRow to="/settings" icon={navItem('/settings').icon} color="var(--gray)" title="Settings" />

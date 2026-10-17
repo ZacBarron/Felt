@@ -4,6 +4,7 @@ import { Link, Navigate, NavLink, Route, Routes, useLocation, useNavigate } from
 import { NAV_SECTIONS, TABS, tabFor } from './nav';
 import { CheckPage, PlacementPage } from './pages/CheckPage';
 import { NotFoundPage } from './pages/NotFoundPage';
+import { WinRatePage } from './pages/WinRatePage';
 import { DailyPage } from './pages/DailyPage';
 import { WeeklyPage } from './pages/WeeklyPage';
 import { DashboardPage } from './pages/DashboardPage';
@@ -175,6 +176,7 @@ export function App() {
             <Route path="/log" element={<LogPage />} />
             <Route path="/stats" element={<Navigate to="/you" replace />} />
             <Route path="/you" element={<YouPage />} />
+            <Route path="/you/winrate" element={<WinRatePage />} />
             <Route path="/daily" element={<DailyPage />} />
             <Route path="/weekly" element={<WeeklyPage />} />
             <Route path="/import" element={<ImportPage />} />

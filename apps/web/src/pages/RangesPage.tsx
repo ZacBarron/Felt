@@ -1,12 +1,14 @@
 import { handNickname } from '@felt/content';
 import {
   ALL_HAND_CLASSES,
+  CHART_OPEN_BB,
   actionFrequencies,
   boundaryHands,
   type Chart,
   chartFormatLabel,
   comboCount,
   type HandClass,
+  openSize,
   PAINT_TARGET_MS,
   reaches,
   RECALL_TARGET_MS,
@@ -128,6 +130,8 @@ function ChartAbout({ chart, exact, mode }: { chart: Chart; exact: boolean; mode
   const approx = chart.spec.source === 'starter-approx';
   const exploit = chart.spec.basis === 'exploit';
   const offStack = Math.abs(settings.game.stackBb - chart.spec.stackBb) >= 30;
+  const myOpen = openSize(settings.game);
+  const bigOpen = chart.spec.spot === 'rfi' && myOpen !== CHART_OPEN_BB;
   const line = spotLine(chart) || chart.spec.title;
 
   return (
@@ -143,6 +147,7 @@ function ChartAbout({ chart, exact, mode }: { chart: Chart; exact: boolean; mode
         {exploit && <span className="pill pill-exploit">Exploit</span>}
         {!exact && <span className="pill pill-warn">Nearest table size</span>}
         {offStack && <span className="pill pill-warn">You play {settings.game.stackBb}bb</span>}
+        {bigOpen && <span className="pill pill-warn">You open {myOpen}bb</span>}
         <button
           type="button"
           className="chart-info-btn"
@@ -166,6 +171,11 @@ function ChartAbout({ chart, exact, mode }: { chart: Chart; exact: boolean; mode
             </p>
           )}
           {exploit && <p>This is an exploit chart. It targets a common leak, not a balanced opponent.</p>}
+          {bigOpen && (
+            <p>
+              This chart assumes a {CHART_OPEN_BB}bb open. You open to {myOpen}bb. {myOpen > CHART_OPEN_BB ? 'Bigger opens want a slightly tighter range, most of all from early seats.' : 'Smaller opens can play a few more hands.'} Treat it as approximate for you.
+            </p>
+          )}
           {chart.spec.note && <p>{chart.spec.note}</p>}
           {mode !== 'chart' && <p>Practice here does not change your review schedule.</p>}
         </div>

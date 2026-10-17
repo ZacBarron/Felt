@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { chartsForTable, formatAmount, positionsFor, PRESETS, rakeFor, stakesLabel } from '../src';
+import { CHART_OPEN_BB, chartsForTable, DEFAULT_SETTINGS, formatAmount, openSize, positionsFor, PRESETS, rakeFor, sameGame, stakesLabel } from '../src';
 
 describe('positionsFor', () => {
   it('names seats for every table size', () => {
@@ -40,5 +40,17 @@ describe('chartsForTable', () => {
     expect(chartsForTable(charts, 9, 'cash')).toMatchObject({ tableSize: 9, exact: true });
     expect(chartsForTable(charts, 8, 'cash')).toMatchObject({ tableSize: 9, exact: false });
     expect(chartsForTable(charts, 5, 'cash')).toMatchObject({ tableSize: 6, exact: false });
+  });
+});
+
+describe('open size', () => {
+  it('defaults to the size the charts assume', () => {
+    expect(openSize(DEFAULT_SETTINGS)).toBe(CHART_OPEN_BB);
+    expect(openSize({ ...DEFAULT_SETTINGS, openBb: 4 })).toBe(4);
+  });
+
+  it('does not stop a game from matching its preset', () => {
+    expect(sameGame({ ...DEFAULT_SETTINGS, openBb: 5 }, DEFAULT_SETTINGS)).toBe(true);
+    expect(sameGame({ ...DEFAULT_SETTINGS, tableSize: 6 }, DEFAULT_SETTINGS)).toBe(false);
   });
 });

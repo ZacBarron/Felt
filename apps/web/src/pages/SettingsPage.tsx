@@ -1,4 +1,5 @@
-import { type GameSettings, MAX_TABLE_SIZE, MIN_TABLE_SIZE, positionsFor, PRESETS, stakesLabel } from '@felt/core';
+import { type GameSettings, MAX_TABLE_SIZE, MIN_TABLE_SIZE, positionsFor, PRESETS, sameGame, stakesLabel } from '@felt/core';
+import { OpenSizeRow } from '../components/OpenSizeRow';
 import { type ReactNode, useEffect, useRef, useState } from 'react';
 import { Link, Navigate, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { haptic, hapticsSupported } from '../haptics';
@@ -37,7 +38,6 @@ import { ThemePicker } from '../ui/ThemePicker';
 import { Toggle } from '../ui/Toggle';
 import './settings.css';
 
-const same = (a: GameSettings, b: GameSettings) => JSON.stringify(a) === JSON.stringify(b);
 
 /** Sub pages of Settings, reached at /settings/:section. */
 const PAGES: Record<string, () => JSX.Element> = {
@@ -66,14 +66,14 @@ function money(v: number, currency: string) {
   return currency === 'USD' ? `$${n}` : `${n} ${currency}`;
 }
 
-function gameSummary(g: GameSettings) {
-  const preset = Object.values(PRESETS).find((p) => same(p.settings, g));
+export function gameSummary(g: GameSettings) {
+  const preset = Object.values(PRESETS).find((p) => sameGame(p.settings, g));
   if (preset) return preset.label;
   if (g.format === 'mtt') return `Tournament, ${g.tableSize}-handed`;
   return `${g.venue === 'live' ? 'Live' : 'Online'} ${stakesLabel(g.stakes)}, ${g.tableSize}-handed`;
 }
 
-function rakeSummary(g: GameSettings) {
+export function rakeSummary(g: GameSettings) {
   const pct = `${Math.round(g.rake.percent * 1000) / 10}%`;
   return g.rake.cap ? `${pct}, ${money(g.rake.cap, g.stakes.currency)} cap` : pct;
 }
@@ -224,9 +224,9 @@ function GamePage() {
       <Section title="Presets" info={<p>Pick a preset. Then fine tune anything below.</p>}>
         <div className="list">
           {Object.entries(PRESETS).map(([id, p]) => {
-            const active = same(p.settings, g);
+            const active = sameGame(p.settings, g);
             return (
-              <button key={id} className="list-row" data-haptic="select" onClick={() => update({ ...settings, game: p.settings })}>
+              <button key={id} className="list-row" data-haptic="select" onClick={() => update({ ...settings, game: { ...p.settings, openBb: settings.game.openBb } })}>
                 <span className="grow">
                   <span style={{ display: 'block' }}>{p.label}</span>
                   <span className="footnote">
@@ -279,6 +279,20 @@ function GamePage() {
           <Row label="Typical stack">
             <Stepper label="big blinds" value={g.stackBb} min={10} max={500} step={10} format={(v) => `${v}bb`} onChange={(stackBb) => setGame({ stackBb })} />
           </Row>
+        </div>
+      </Section>
+
+      <Section
+        title="Your sizing"
+        footer="Live games often open to 4 or 5bb. Bigger opens win more from players who call too much."
+        info={
+          <p>
+            The charts assume a 2.5bb open. With bigger opens play a little tighter from early seats. Play uses your open as its first raise size.
+          </p>
+        }
+      >
+        <div className="list">
+          <OpenSizeRow />
         </div>
       </Section>
 

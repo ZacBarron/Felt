@@ -1,4 +1,4 @@
-import { type GameSettings, MAX_TABLE_SIZE, MIN_TABLE_SIZE, PRESETS, stakesLabel } from '@felt/core';
+import { type GameSettings, MAX_TABLE_SIZE, MIN_TABLE_SIZE, PRESETS, sameGame, stakesLabel } from '@felt/core';
 import { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { chartsForGame } from '../state/charts';
@@ -7,7 +7,6 @@ import { CheckIcon } from '../ui/icons';
 import { Segmented } from '../ui/Segmented';
 import { Stepper } from '../ui/Stepper';
 
-const same = (a: GameSettings, b: GameSettings) => JSON.stringify(a) === JSON.stringify(b);
 
 /** Short line for the game you play, like "9 handed, 100bb". */
 export function gameLine(g: GameSettings): string {
@@ -98,14 +97,14 @@ export function GameSheet({ open, onClose }: { open: boolean; onClose: () => voi
           <h3 className="section-title">Presets</h3>
           <div className="list">
             {Object.entries(PRESETS).map(([id, p]) => (
-              <button key={id} className="list-row" data-haptic="select" onClick={() => update({ ...settings, game: p.settings })}>
+              <button key={id} className="list-row" data-haptic="select" onClick={() => update({ ...settings, game: { ...p.settings, openBb: settings.game.openBb } })}>
                 <span className="grow">
                   <span style={{ display: 'block' }}>{p.label}</span>
                   <span className="footnote">
                     {stakesLabel(p.settings.stakes)}, {gameLine(p.settings)}
                   </span>
                 </span>
-                {same(p.settings, g) && <CheckIcon size={20} style={{ color: 'var(--tint)' }} />}
+                {sameGame(p.settings, g) && <CheckIcon size={20} style={{ color: 'var(--tint)' }} />}
               </button>
             ))}
           </div>

@@ -1,19 +1,9 @@
 import {
-  blendWithResults,
   currentRating,
-  defaultAssumptions,
-  estimateWinRate,
-  formatAmount,
-  handsForPrecision,
   isProvisional,
   ratingInterval,
   SKILL_DOMAINS,
   type SkillRating,
-  heroStats,
-  resultsAreNoise,
-  skillEdge,
-  stakesLabel,
-  type TableAssumptions,
   tierLabel,
 } from "@felt/core";
 import { useLiveQuery } from "dexie-react-hooks";
@@ -27,14 +17,15 @@ import {
   streakNow,
 } from "../state/rating";
 import { useSettings } from "../state/settings";
+import { useWinRate } from "../state/winrate";
+import { gameSummary } from "./SettingsPage";
 import { signed } from "../ui/format";
 import { ChevronRightIcon, FlameIcon, SettingsIcon, ShareIcon } from "../ui/icons";
 import { BrandFooter } from "../ui/Brand";
-import { AccountRows, GameRows, ProCard } from "../components/YouLinks";
+import { HandsRows, MoreRows, ProCard } from "../components/YouLinks";
 import { AvatarPicker } from "../ui/Avatar";
 import { ShareSheet } from "../components/ShareSheet";
 import { bestSettled, type ShareKind } from "../state/share";
-import { TierCard } from "../components/TierCard";
 import { PageHeader } from "../ui/PageHeader";
 import { Section } from "../ui/Section";
 import { useCountUp } from "../ui/useCountUp";
@@ -112,41 +103,9 @@ function DomainRow({ label, r }: { label: string; r: SkillRating }) {
   );
 }
 
-const assumptionFields = (
-  currency: string,
-): { key: keyof TableAssumptions; label: string; step: number }[] => [
-  { key: "poolRating", label: "Average Suited Rating at your table", step: 25 },
-  {
-    key: "edgeScale",
-    label: "Best possible edge before rake, in bb per 100 hands",
-    step: 5,
-  },
-  { key: "flopShare", label: "Share of hands that see a flop", step: 0.05 },
-  {
-    key: "flopPotBb",
-    label: "Average pot after the flop, in big blinds",
-    step: 1,
-  },
-  { key: "tipPerPot", label: `Tip per pot you win, in ${currency}`, step: 0.5 },
-  {
-    key: "sd100",
-    label: "How much results swing, in bb per 100 hands",
-    step: 5,
-  },
-  { key: "handsPerHour", label: "Hands per hour", step: 1 },
-];
-
 export function YouPage() {
   const { settings, update } = useSettings();
-  const g = settings.game;
   const snap = useLiveQuery(ratingSnapshot, []);
-  const imported = useLiveQuery(async () => {
-    const cash = (await db.hands.where("game").equals("cash").toArray()).filter(
-      (h) => h.netBb !== undefined,
-    );
-    const sessions = await db.sessions.toArray();
-    return { cash, sessions };
-  }, []);
   const streak = useLiveQuery(() => streakNow(), []);
   const overview = useLiveQuery(async () => {
     const [lessons, dailies, dates] = await Promise.all([
@@ -159,7 +118,7 @@ export function YouPage() {
       : undefined;
     return { lessons, dailies, first };
   }, []);
-  const [showAssumptions, setShowAssumptions] = useState(false);
+  const win = useWinRate();
   const [sharing, setSharing] = useState<ShareKind>();
   // Arriving from the tier moment's "Share my rating": open the card once.
   const [params, setParams] = useSearchParams();
@@ -182,79 +141,11 @@ export function YouPage() {
 
   if (!snap || !overall) return null;
 
-  const a: TableAssumptions = {
-    ...defaultAssumptions(g),
-    ...settings.assumptions,
-  };
-  const model = estimateWinRate(overall.rating, overall.rd, g, a);
-  const results = settings.results;
-  // Only results from this game count: hands at this big blind online, and sessions at this big blind.
-  const gameHands =
-    g.venue === "online"
-      ? (imported?.cash ?? []).filter((h) => h.bb === g.stakes.bb)
-      : [];
-  const gameSessions = (imported?.sessions ?? []).filter(
-    (x) => (x.bb ?? g.stakes.bb) === g.stakes.bb,
-  );
-  const handsSource = gameHands.length
-    ? (() => {
-        const st = heroStats(gameHands.map((h) => ({ ...h, date: h.at })));
-        return {
-          hands: st.hands,
-          bb: st.netBb,
-          sd: st.hands >= 1000 ? st.sd100 : undefined,
-          label: `${st.hands.toLocaleString()} imported hands`,
-        };
-      })()
-    : undefined;
-  const sessionHours = gameSessions.reduce((t, x) => t + x.hours, 0);
-  const sessionSource = gameSessions.length
-    ? {
-        hands: Math.round(sessionHours * a.handsPerHour),
-        bb: gameSessions.reduce(
-          (t, x) => t + x.profit / (x.bb ?? g.stakes.bb),
-          0,
-        ),
-        sd: undefined,
-        label: `${gameSessions.length} imported ${gameSessions.length === 1 ? "session" : "sessions"} over ${Math.round(sessionHours)} hours`,
-      }
-    : undefined;
-  // Use whichever source covers more hands; typed results only when nothing was imported.
-  const source:
-    | { hands: number; bb: number; sd?: number; label: string }
-    | undefined =
-    [handsSource, sessionSource]
-      .filter(Boolean)
-      .sort((x, y) => y!.hands - x!.hands)[0] ??
-    (results && results.hands > 0
-      ? {
-          hands: results.hands,
-          bb: results.profit / g.stakes.bb,
-          label: "the results you entered",
-        }
-      : undefined);
-  const sd = source?.sd ?? a.sd100;
-  const observed = source ? (source.bb / source.hands) * 100 : undefined;
-  const blended =
-    source && observed !== undefined
-      ? blendWithResults(model, observed, source.hands, sd)
-      : undefined;
-  const per100Points =
-    skillEdge(overall.rating + 100, a) - skillEdge(overall.rating, a);
-  const best = blended ?? { ...model, weightOnResults: 0 };
-  const perHour = (bb100: number) =>
-    formatAmount((bb100 * a.handsPerHour) / 100, g);
   const [lo, hi] = ratingInterval(overall);
   const rated = overall.games > 0;
   const provisional = isProvisional(overall);
   // Personal best counts only settled ratings, so early swings do not set a record.
   const bestRating = bestSettled(snap.history);
-
-  const setAssumption = (key: keyof TableAssumptions, value: number) =>
-    update({
-      ...settings,
-      assumptions: { ...settings.assumptions, [key]: value },
-    });
 
   const since = overview?.first?.toLocaleDateString("en-US", {
     month: "short",
@@ -378,7 +269,7 @@ export function YouPage() {
       />
 
       <Section
-        title="Overview"
+        title="Progress"
         trailing={
           streak && streak.streak > 0 ? (
             <button
@@ -391,8 +282,8 @@ export function YouPage() {
           ) : undefined
         }
       >
-        <div className="you-stats">
-          <div className="you-stat">
+        <div className="card you-strip">
+          <div className="you-strip-cell">
             <span className="you-stat-value num">
               {streak?.streak ? (
                 <FlameIcon size={20} className="you-stat-flame" />
@@ -400,275 +291,72 @@ export function YouPage() {
               {streak?.streak ?? 0}
             </span>
             <span className="you-stat-label">Day streak</span>
-            {streak && streak.bank > 0 && (
-              <span className="you-stat-sub">
-                {streak.bank === 1
-                  ? "1 streak freeze saved"
-                  : `${streak.bank} streak freezes saved`}
-              </span>
-            )}
+            <span className="you-stat-sub num">
+              {streak && streak.bank > 0
+                ? `${streak.bank} ${streak.bank === 1 ? "freeze" : "freezes"} saved`
+                : `Best ${streak?.best ?? 0}`}
+            </span>
           </div>
-          <div className="you-stat">
-            <span className="you-stat-value num">{streak?.best ?? 0}</span>
-            <span className="you-stat-label">Longest streak</span>
-          </div>
-          <div className="you-stat">
+          <div className="you-strip-cell">
             <span className="you-stat-value num">{overview?.lessons ?? 0}</span>
-            <span className="you-stat-label">Lessons done</span>
+            <span className="you-stat-label">Lessons</span>
           </div>
-          <div className="you-stat">
+          <div className="you-strip-cell">
             <span className="you-stat-value num">{overview?.dailies ?? 0}</span>
-            <span className="you-stat-label">Daily challenges</span>
+            <span className="you-stat-label">Dailies</span>
           </div>
         </div>
       </Section>
 
-      <TierCard rating={overall} />
+      <Section
+        title="Skills"
+        info="Each area has its own rating. Harder questions count for more."
+      >
+        {SKILL_DOMAINS.some((d) => snap.domains[d].games > 0) ? (
+          <div className="list">
+            {SKILL_DOMAINS.map((d) => (
+              <DomainRow
+                key={d}
+                label={DOMAIN_LABELS[d]}
+                r={currentRating(snap.domains[d])}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="card you-skills-empty">
+            <span className="footnote">
+              Each area gets a rating once you answer questions in it.
+            </span>
+          </div>
+        )}
+      </Section>
+
+      <Section title="Win rate">
+        <div className="list">
+        <Link to="/you/winrate" className="list-row you-winrate">
+          <span className="grow" style={{ minWidth: 0 }}>
+            {win?.rated ? (
+              <span className="you-winrate-value num">
+                {signed(win.best.mean, 1)}
+                <span className="winrate-unit"> bb/100</span>
+              </span>
+            ) : (
+              <span className="you-winrate-value muted">Needs a rating</span>
+            )}
+            <span className="footnote" style={{ display: "block" }}>
+              Our estimate for {gameSummary(settings.game)}
+            </span>
+          </span>
+          <ChevronRightIcon size={16} className="chev" />
+        </Link>
+        </div>
+      </Section>
 
       <ProCard />
 
-      <GameRows />
+      <HandsRows />
 
-      <Section
-        title="By area"
-        info="Harder questions count for more. Getting a hard one right moves your rating the most."
-      >
-        <div className="list">
-          {SKILL_DOMAINS.map((d) => (
-            <DomainRow
-              key={d}
-              label={DOMAIN_LABELS[d]}
-              r={currentRating(snap.domains[d])}
-            />
-          ))}
-        </div>
-      </Section>
-
-      <Section
-        title={`Win rate at ${stakesLabel(g.stakes)} ${g.venue}`}
-        info={
-          <>
-            <p>
-              Rake and tips are plain math from your rake settings. Your edge is
-              our estimate from comparing your rating with a typical table.
-              Here, each 100 rating points is worth about{" "}
-              {signed(per100Points, 1)} bb per 100 hands. That is about{" "}
-              {perHour(per100Points)} an hour. As your real results grow, they
-              count for more.
-              {blended &&
-                ` Right now they count for ${Math.round(blended.weightOnResults * 100)}%.`}{" "}
-              bb/100 means big blinds won per 100 hands.
-            </p>
-          </>
-        }
-      >
-        {!rated ? (
-          <div className="card winrate-card">
-            <p style={{ margin: 0 }}>
-              Your estimate needs a Suited Rating first. The daily challenge gives
-              you one.
-            </p>
-            <p className="footnote" style={{ margin: 0 }}>
-              Then Suited turns your rating into bb per 100 hands at your stakes.
-            </p>
-          </div>
-        ) : (
-          <div className="card winrate-card">
-            <div className="row between" style={{ alignItems: "flex-end" }}>
-              <div>
-                <div className="footnote">
-                  {blended
-                    ? "Our estimate, using your results too"
-                    : "Our estimate from your rating"}
-                </div>
-                <div className="display num winrate-main">
-                  {signed(best.mean, 1)}
-                  <span className="winrate-unit"> bb/100</span>
-                </div>
-              </div>
-              <div
-                className="num"
-                style={{ textAlign: "right", fontWeight: 650 }}
-              >
-                {perHour(best.mean)}
-                <div className="footnote">per hour</div>
-              </div>
-            </div>
-            <div className="winrate-range">
-              <span className="footnote num">
-                Likely between {signed(best.mean - 1.96 * best.sd, 0)} and{" "}
-                {signed(best.mean + 1.96 * best.sd, 0)} bb per 100 hands
-              </span>
-            </div>
-            <div className="winrate-lines">
-              <div className="row between">
-                <span>
-                  Your skill edge before rake{" "}
-                  <span className="pill">Estimate</span>
-                </span>
-                <span className="num">{signed(model.edge, 1)}</span>
-              </div>
-              <div className="row between">
-                <span>
-                  Rake you pay <span className="pill">Math</span>
-                </span>
-                <span className="num">
-                  {signed(-model.costs.rakePer100, 1)}
-                </span>
-              </div>
-              {model.costs.tipsPer100 > 0 && (
-                <div className="row between">
-                  <span>
-                    Tips you pay <span className="pill">Math</span>
-                  </span>
-                  <span className="num">
-                    {signed(-model.costs.tipsPer100, 1)}
-                  </span>
-                </div>
-              )}
-              <div className="row between muted">
-                <span>An average player here</span>
-                <span className="num">{signed(model.average, 1)}</span>
-              </div>
-            </div>
-          </div>
-        )}
-      </Section>
-
-      <Section
-        title="Your results"
-        info={
-        <p>
-          {source && resultsAreNoise(source.hands, sd)
-            ? "You do not have enough results yet to show if you are winning. For now, the estimate leans on your rating. "
-            : ""}
-          Results alone need about{" "}
-          {(
-            Math.round(handsForPrecision(10, sd) / 1000) * 1000
-          ).toLocaleString()}{" "}
-          hands to pin down your win rate. That is roughly{" "}
-          {(
-            Math.round(handsForPrecision(10, sd) / a.handsPerHour / 100) * 100
-          ).toLocaleString()}{" "}
-          hours of play. So Suited combines your results with your rating.
-        </p>
-        }
-      >
-        {imported &&
-        (imported.cash.length > 0 || imported.sessions.length > 0) ? (
-          <Link to="/import" className="list-row card">
-            <span className="grow">
-              <span style={{ display: "block", fontWeight: 600 }}>
-                {observed !== undefined &&
-                  `${observed >= 0 ? "+" : ""}${observed.toFixed(1)} bb/100`}
-              </span>
-              <span className="footnote">From {source?.label}</span>
-            </span>
-            <ChevronRightIcon size={16} className="chev" />
-          </Link>
-        ) : (
-          <div className="list">
-            <Link to="/import" className="list-row">
-              <span className="grow">
-                <span
-                  style={{
-                    display: "block",
-                    fontWeight: 600,
-                    color: "var(--tint)",
-                  }}
-                >
-                  Import hands or sessions
-                </span>
-                <span className="footnote">
-                  Hand histories or a bankroll CSV file
-                </span>
-              </span>
-              <ChevronRightIcon size={16} className="chev" />
-            </Link>
-            <label className="list-row">
-              <span className="grow">Or enter hands played</span>
-              <input
-                className="you-input num"
-                type="number"
-                inputMode="numeric"
-                value={results?.hands ?? ""}
-                placeholder="0"
-                onChange={(e) =>
-                  update({
-                    ...settings,
-                    results: {
-                      hands: Number(e.target.value) || 0,
-                      profit: results?.profit ?? 0,
-                    },
-                  })
-                }
-              />
-            </label>
-            <label className="list-row">
-              <span className="grow">Profit in {g.stakes.currency}</span>
-              <input
-                className="you-input num"
-                type="number"
-                inputMode="decimal"
-                value={results?.profit ?? ""}
-                placeholder="0"
-                onChange={(e) =>
-                  update({
-                    ...settings,
-                    results: {
-                      hands: results?.hands ?? 0,
-                      profit: Number(e.target.value) || 0,
-                    },
-                  })
-                }
-              />
-            </label>
-          </div>
-        )}
-      </Section>
-
-      <section>
-        <button
-          className="list-row card assumptions-toggle"
-          aria-expanded={showAssumptions}
-          onClick={() => setShowAssumptions((s) => !s)}
-        >
-          <span className="grow">What the estimate assumes</span>
-          <span className="footnote">
-            {showAssumptions ? "Hide" : "Show and edit"}
-          </span>
-        </button>
-        {showAssumptions && (
-          <div className="list reveal" style={{ marginTop: "0.6rem" }}>
-            {assumptionFields(g.stakes.currency).map((f) => (
-              <label key={f.key} className="list-row">
-                <span className="grow">{f.label}</span>
-                <input
-                  className="you-input num"
-                  type="number"
-                  step={f.step}
-                  value={a[f.key]}
-                  onChange={(e) => setAssumption(f.key, Number(e.target.value))}
-                />
-              </label>
-            ))}
-            <button
-              className="list-row"
-              onClick={() => update({ ...settings, assumptions: undefined })}
-            >
-              <span className="grow" style={{ color: "var(--tint)" }}>
-                Reset to defaults
-              </span>
-            </button>
-          </div>
-        )}
-        <div className="section-footer">
-          Our best guesses for your game. Rake is set in{" "}
-          <Link to="/settings/rake">Settings</Link>.
-        </div>
-      </section>
-
-      <AccountRows />
+      <MoreRows />
 
       <BrandFooter />
     </div>

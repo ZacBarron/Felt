@@ -9,6 +9,7 @@ import {
   suitOf,
   type HandState,
   handClassOf,
+  openSize,
   legalActions,
   type PlayAction,
   type PlayDecision,
@@ -21,7 +22,9 @@ import {
 } from '@felt/core';
 import { type ReactNode, useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { OpenSizeRow } from '../components/OpenSizeRow';
 import { PlayTable } from '../components/PlayTable';
+import { useSettings } from '../state/settings';
 import { haptic } from '../haptics';
 import { useCanAskCoach } from '../state/coach';
 import { actionText, chartAdvisor, gradeHand, handNotes, HERO, isClearFold, type PlayGrade, type PlaySeat, rateHand } from '../state/play';
@@ -514,16 +517,17 @@ const order = (g: string) => ['best', 'correct', 'inaccuracy', 'mistake', 'blund
 const round = (x: number) => Math.round(x * 2) / 2;
 
 /** Bet sizes like an online client: multiples of the blind preflop, shares of the pot after. */
-function sizeOptions(state: HandState): { label: string; to: number }[] {
+/** Raise sizes to offer. Unopened before the flop that is your open, plus 1bb for each limper. */
+function sizeOptions(state: HandState, open: number): { label: string; to: number; mine?: boolean }[] {
   const legal = legalActions(state);
   const r = legal.raise;
   if (!r) return [];
   const pot = potSize(state);
   const clampTo = (to: number) => Math.min(r.max, Math.max(r.min, round(to)));
-  let list: { label: string; to: number }[];
+  let list: { label: string; to: number; mine?: boolean }[];
   if (state.street === 'preflop' && state.currentBet <= state.bb) {
     const limps = state.log.filter((a) => a.street === 'preflop' && a.kind === 'call').length;
-    list = [2.5, 3].map((x) => ({ label: `${x}bb`, to: x + limps }));
+    list = [...new Set([2.5, 3, open])].sort((x, y) => x - y).map((x) => ({ label: `${x}bb`, to: x + limps, mine: x === open }));
   } else if (state.street === 'preflop') {
     list = [3, 4].map((x) => ({ label: `${x}x`, to: state.currentBet * x }));
   } else {
@@ -545,9 +549,10 @@ function sizeOptions(state: HandState): { label: string; to: number }[] {
 
 function Actions({ state, size, onSize, onAct }: { state: HandState; size?: number; onSize: (n: number | undefined) => void; onAct: (a: PlayAction) => void }) {
   const legal = legalActions(state);
-  const options = sizeOptions(state);
+  const { settings } = useSettings();
+  const options = sizeOptions(state, openSize(settings.game));
   const r = legal.raise;
-  const chosen = r ? (size ?? options.find((o) => o.label !== 'Min')?.to ?? r.min) : undefined;
+  const chosen = r ? (size ?? options.find((o) => o.mine)?.to ?? options.find((o) => o.label !== 'Min')?.to ?? r.min) : undefined;
   const raiseLabel = !r || chosen === undefined ? '' : chosen >= r.max ? `All in ${fmt(r.max)}` : r.kind === 'bet' ? `Bet ${fmt(chosen)}` : `Raise to ${fmt(chosen)}`;
   return (
     <div className="play-actions">
@@ -650,6 +655,7 @@ function MenuSheet({ open, onClose, session, onLeave }: { open: boolean; onClose
             onChange={(speed) => set({ speed })}
           />
         </div>
+        <OpenSizeRow />
         <label className="list-row">
           <span className="grow">
             <span style={{ display: 'block' }}>Grades after each hand</span>

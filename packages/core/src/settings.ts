@@ -39,6 +39,28 @@ export interface GameSettings {
   rake: Rake;
   /** How amounts are shown. Engine math always runs in big blinds. */
   units: 'bb' | 'money';
+  /**
+   * Your standard first raise in big blinds, before adding for limpers.
+   * Missing means the size the charts assume. Live games often open to 4bb
+   * or more, which is an exploit against players who call too much.
+   */
+  openBb?: number;
+}
+
+/** The open size Suited's preflop charts assume. */
+export const CHART_OPEN_BB = 2.5;
+export const MIN_OPEN_BB = 2;
+export const MAX_OPEN_BB = 8;
+
+/** Your standard open in big blinds, before adding 1bb for each limper. */
+export function openSize(g: GameSettings): number {
+  return g.openBb ?? CHART_OPEN_BB;
+}
+
+/** Same game, ignoring personal habits such as the open size. Presets compare by this. */
+export function sameGame(a: GameSettings, b: GameSettings): boolean {
+  const strip = ({ openBb: _open, ...rest }: GameSettings) => rest;
+  return JSON.stringify(strip(a)) === JSON.stringify(strip(b));
 }
 
 export const MIN_TABLE_SIZE = 2;

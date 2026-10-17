@@ -1,4 +1,4 @@
-import { type Chart, DEFAULT_SETTINGS, type GameSettings, type HandClass, PRESETS, stakesLabel } from '@felt/core';
+import { type Chart, DEFAULT_SETTINGS, type GameSettings, type HandClass, PRESETS, sameGame, stakesLabel } from '@felt/core';
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { actionLabels } from '../drills/labels';
@@ -34,11 +34,10 @@ export function markRangesIntroSeen() {
   }
 }
 
-const same = (a: GameSettings, b: GameSettings) => JSON.stringify(a) === JSON.stringify(b);
 
 /** A player who never touched the game still has the default one, so we ask which game to match. */
 export function hasDefaultGame(game: GameSettings): boolean {
-  return same(game, DEFAULT_SETTINGS);
+  return sameGame(game, DEFAULT_SETTINGS);
 }
 
 /** Plain names for the presets. The preset settings stay in @felt/core. */
@@ -328,7 +327,7 @@ function GameStep() {
       <div className="list" role="radiogroup" aria-label="Your game">
         {choices.map((c) => {
           const p = PRESETS[c.id].settings;
-          const on = same(p, settings.game);
+          const on = sameGame(p, settings.game);
           return (
             <button
               key={c.id}
@@ -338,7 +337,7 @@ function GameStep() {
               className="list-row"
               data-haptic="select"
               data-game-option={c.id}
-              onClick={() => update({ ...settings, game: p })}
+              onClick={() => update({ ...settings, game: { ...p, openBb: settings.game.openBb } })}
             >
               <span className="grow">
                 <span className="intro-row-title">{c.title}</span>
