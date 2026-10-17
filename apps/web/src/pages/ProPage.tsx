@@ -5,6 +5,10 @@ import { RestoreSheet } from '../components/RestoreSheet';
 import {
   annualSavings,
   canOpenLesson,
+  FOUNDING,
+  foundingLeftLine,
+  type FoundingStatus,
+  foundingStatus,
   formatPrice,
   isLessonFree,
   isPro,
@@ -13,6 +17,7 @@ import {
   type ProPerkId,
   proPerks,
   purchase,
+  purchaseLifetime,
   purchasesOpen,
   SUPPORT_EMAIL,
   testingPro,
@@ -118,7 +123,9 @@ export function ProPage() {
   const from = params.get('from') ?? 'direct';
   const { settings, update } = useSettings();
   const features = useServerFeatures();
-  const [planId, setPlanId] = useState<PlanOption['id']>('annual');
+  // From the site's founding offer the founding plan starts selected.
+  const [planId, setPlanId] = useState<PlanOption['id'] | 'founding'>(params.get('plan') === 'founding' ? 'founding' : 'annual');
+  const [founding, setFounding] = useState<FoundingStatus | null>();
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<{ text: string; bad?: boolean }>();
   // Back from signing in to restore: the sheet opens again on its own.
@@ -127,7 +134,8 @@ export function ProPage() {
   const [remind, setRemind] = useState(true);
   const session = useSession();
   const coachLive = !!useCoachAvailable();
-  const plan = PLANS.find((p) => p.id === planId)!;
+  const founder = planId === 'founding' && !!founding?.open;
+  const plan = PLANS.find((p) => p.id === planId) ?? PLANS[0];
   const firstRun = FIRST_RUN_FROM.has(from);
   const close = () => {
     track('paywall_dismissed', { from });
@@ -139,6 +147,14 @@ export function ProPage() {
   useEffect(() => {
     track('paywall_viewed', { from });
   }, [from]);
+
+  useEffect(() => {
+    let live = true;
+    void foundingStatus().then((s) => live && setFounding(s));
+    return () => {
+      live = false;
+    };
+  }, []);
 
   useEffect(() => {
     if (params.get('restore') !== '1') return;
@@ -229,7 +245,26 @@ export function ProPage() {
     );
   }
 
+  const buyFounding = async () => {
+    track('paywall_cta_tapped', { from, plan: 'founding' });
+    setBusy(true);
+    setMessage(undefined);
+    const result = await purchaseLifetime();
+    track('purchase_result', { plan: 'founding', ok: String(result.ok) });
+    if (result.ok === 'redirect') return;
+    setBusy(false);
+    if (!result.ok) {
+      haptic('warning');
+      if (result.needsAccount) {
+        navigate(`/signin?next=${encodeURIComponent(`/pro?from=${from}&plan=founding`)}`);
+        return;
+      }
+      setMessage({ text: result.reason, bad: true });
+    }
+  };
+
   const buy = async () => {
+    if (founder) return buyFounding();
     track('paywall_cta_tapped', { from, plan: plan.id, remind: String(remindable && remind) });
     setBusy(true);
     setMessage(undefined);
@@ -260,7 +295,8 @@ export function ProPage() {
   const rows = compareRows(coachLive, LEAD_PERK[from]);
   const covers = heroLessons(settings.profile, settings.access);
   const decline = firstRun ? 'Continue with the free plan' : 'Not now';
-  const timeline = open === true && plan.trialDays > 0;
+  const timeline = open === true && plan.trialDays > 0 && !founder;
+  const seatsLine = founding ? foundingLeftLine(founding) : undefined;
   // A push is promised only where one can arrive: the server sends them and this browser can show them.
   const remindable = timeline && !!features?.push && !pushBlocker();
 
@@ -341,7 +377,35 @@ export function ProPage() {
             <span className="pw-plan-per">{p.period === 'year' ? `${formatPrice(perMonth(p))} a month` : 'Billed monthly'}</span>
           </button>
         ))}
+        {founding?.open && (
+          <button
+            role="radio"
+            aria-checked={planId === 'founding'}
+            className={`pw-plan pw-plan-founding${planId === 'founding' ? ' selected' : ''}`}
+            data-haptic="select"
+            onClick={() => setPlanId('founding')}
+          >
+            <span className="pw-badge">{seatsLine ?? `First ${founding.seats} players`}</span>
+            <span className="pw-check" aria-hidden="true">
+              {planId === 'founding' && <CheckIcon size={14} strokeWidth={2.6} />}
+            </span>
+            <span className="pw-plan-label">Founding member</span>
+            <span className="pw-plan-price num">{formatPrice(founding.price)}</span>
+            <span className="pw-plan-per">Once. Pro for as long as Aced runs.</span>
+          </button>
+        )}
       </div>
+
+      {founder && (
+        <ul className="pw-perks" aria-label="What founding members get">
+          {FOUNDING.perks.map((perk) => (
+            <li key={perk}>
+              <CheckIcon size={15} strokeWidth={2.6} aria-hidden="true" />
+              {perk}
+            </li>
+          ))}
+        </ul>
+      )}
 
       {timeline && (
         <ol className="pw-timeline" aria-label="How the free week works">
@@ -396,6 +460,10 @@ export function ProPage() {
           <p className="pw-charge">
             {open === false ? (
               'Nothing is charged. Free features stay free.'
+            ) : founder ? (
+              <>
+                <strong>{formatPrice(founding!.price)}</strong> once. Nothing renews.
+              </>
             ) : plan.trialDays > 0 ? (
               <>
                 Free until <strong>{charge}</strong>. Then {formatPrice(plan.price)} a year.
@@ -412,7 +480,7 @@ export function ProPage() {
             </div>
           ) : (
             <button className="btn btn-primary btn-lg btn-block" onClick={buy} disabled={busy || open === undefined} data-haptic="off">
-              {busy ? 'One moment' : plan.trialDays > 0 ? 'Start my free week' : 'Subscribe monthly'}
+              {busy ? 'One moment' : founder ? 'Become a founding member' : plan.trialDays > 0 ? 'Start my free week' : 'Subscribe monthly'}
             </button>
           )}
           <button className="btn btn-lg btn-block" onClick={close} data-haptic="off">

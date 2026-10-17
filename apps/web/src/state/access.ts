@@ -478,6 +478,30 @@ export async function resumePro() {
   return res;
 }
 
+/** The live founding offer, from the server. Only a real count is ever shown. */
+export interface FoundingStatus {
+  price: number;
+  seats: number;
+  taken: number;
+  left: number;
+  /** Checkout is set up and seats remain. */
+  open: boolean;
+}
+
+export async function foundingStatus(): Promise<FoundingStatus | null> {
+  try {
+    return await api<FoundingStatus>('/billing/founding', { timeoutMs: 8000 });
+  } catch {
+    return null;
+  }
+}
+
+/** "312 of 500 places left", or nothing until the server has sold any. */
+export function foundingLeftLine(s: Pick<FoundingStatus, 'seats' | 'left' | 'taken'>): string | undefined {
+  if (s.taken <= 0) return undefined;
+  return `${s.left} of ${s.seats} places left`;
+}
+
 /** Starts the founding (lifetime) purchase in Stripe Checkout. The server refuses once every seat is taken. */
 export async function purchaseLifetime(): Promise<PurchaseResult> {
   const features = await serverFeatures();

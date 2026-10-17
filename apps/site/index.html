@@ -288,6 +288,10 @@
         <div class="voices-in">
           <p class="eyebrow" data-voices-head>From the tables</p>
           <h2 class="display" id="voices-title" data-voices-head>What players say.</h2>
+          <figure class="founder-note" data-founder-note hidden>
+            <blockquote data-founder-lines></blockquote>
+            <figcaption><span class="avatar" aria-hidden="true" data-founder-initial></span><span data-founder-signoff></span></figcaption>
+          </figure>
           <div class="quotes" data-quotes></div>
           <div class="voices-empty" data-voices-empty hidden>
             <p class="eyebrow">Founding members</p>
@@ -318,14 +322,18 @@
                 <li>A private Discord group for founders</li>
                 <li>A swag pack if we hit our first milestone</li>
               </ul>
-              <form class="mini-form" data-waitlist="founding" novalidate>
+              <div class="founding-buy" data-founding-buy hidden>
+                <a class="btn btn-gold btn-lg btn-block" href="/app/pro?plan=founding&amp;from=site" data-app="pro?plan=founding&amp;from=site" data-cta="founding_buy" data-pos="pricing">Become a founding member</a>
+                <p class="form-note">One card payment. Nothing renews. You make a free account first so Pro follows you to every device.</p>
+              </div>
+              <form class="mini-form" data-waitlist="founding" data-founding-form novalidate>
                 <label class="field-label" for="founding-email">Email</label>
                 <div class="form-row">
                   <input id="founding-email" type="email" name="email" autocomplete="email" inputmode="email" autocapitalize="none" autocorrect="off" spellcheck="false" enterkeyhint="send" placeholder="you@example.com" required />
                   <input type="text" name="company" tabindex="-1" autocomplete="off" class="hp" aria-hidden="true" />
-                  <button class="btn btn-gold" type="submit">Request a founding place</button>
+                  <button class="btn btn-gold" type="submit">Email me when it opens</button>
                 </div>
-                <p class="form-note">We email you a checkout link. Pay only if you still want in.</p>
+                <p class="form-note">Founding places open soon. We'll email you the day they do.</p>
                 <p class="form-msg" role="status" data-msg></p>
               </form>
               <p class="fine"><span data-founding-left></span>The offer closes when <span data-founding-seats>500</span> places are filled.</p>

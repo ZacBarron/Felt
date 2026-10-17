@@ -57,3 +57,31 @@ export const QUOTES: Quote[] = [
 export function visibleQuotes(quotes: readonly Quote[], production: boolean): Quote[] {
   return quotes.filter((q) => !q.draft || !production);
 }
+
+/**
+ * A short note from the founder. The founder stays semi anonymous: an initial,
+ * no photo and no surname. Every sentence must be true, so it starts as a
+ * draft that only shows outside production. The founder confirms the words,
+ * then sets `draft: false`.
+ */
+export interface FounderNote {
+  lines: string[];
+  signoff: string;
+  draft: boolean;
+}
+
+export const FOUNDER_NOTE: FounderNote = {
+  lines: [
+    'I play live cash in Canada.',
+    "The hands that bugged me most came down to one decision I wasn't sure about.",
+    'I built Aced so I could check those decisions on a break, in plain words.',
+    "It's the coach I wanted at the table. I hope it helps your game too.",
+  ],
+  signoff: 'Z., founder',
+  draft: true,
+};
+
+/** The founder note a build may show: a confirmed note always, a draft only outside production. */
+export function visibleFounderNote(note: FounderNote, production: boolean): FounderNote | undefined {
+  return note.draft && production ? undefined : note;
+}

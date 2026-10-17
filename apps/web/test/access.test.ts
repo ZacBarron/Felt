@@ -1,3 +1,4 @@
+import { foundingLeftLine } from '../src/state/access';
 import { describe, expect, it } from 'vitest';
 import { accessFromServer, decideRestore, isPro, setTestingPro, testingPro } from '../src/state/access';
 import type { ServerFeatures, ServerUser } from '../src/state/api';
@@ -99,5 +100,12 @@ describe('Pro for testing', () => {
     const access = accessFromServer({ pro: true, until: null, plan: null, trialing: false }, free);
     expect(isPro(access, NOW)).toBe(true);
     expect(isPro(accessFromServer({ pro: false, until: null, plan: null, trialing: false }, { pro: true }), NOW)).toBe(false);
+  });
+});
+
+describe('founding seat count', () => {
+  it('shows a count only once some places are sold', () => {
+    expect(foundingLeftLine({ seats: 500, left: 500, taken: 0 })).toBeUndefined();
+    expect(foundingLeftLine({ seats: 500, left: 312, taken: 188 })).toBe('312 of 500 places left');
   });
 });

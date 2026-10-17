@@ -397,6 +397,36 @@
   box-shadow: none;
 }
 
+/* Founding: the full width tile under the two plans, and its perks. */
+.pw-plan-founding {
+  grid-column: 1 / -1;
+  min-height: 0;
+}
+
+.pw-perks {
+  display: grid;
+  gap: 0.45rem;
+  margin: 0;
+  padding: 0.85rem 1rem;
+  list-style: none;
+  border-radius: 18px;
+  background: var(--surface);
+  font-size: 0.92rem;
+  animation: rise 280ms var(--ease) backwards;
+}
+
+.pw-perks li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+}
+
+.pw-perks svg {
+  flex: none;
+  margin-top: 0.2rem;
+  color: var(--chip-gold);
+}
+
 /* Fine print: one row of links. */
 .pw-links {
   display: flex;

@@ -3,7 +3,7 @@ import { WORDMARK_PATH, WORDMARK_VIEWBOX } from '../../web/src/ui/wordmark';
 import { bbCallEquity, GRID, pct, raiseOverLimpers, SEATS } from './charts';
 import { API_URL, APP_URL, CONTENT, FOUNDING, PRICES } from './config';
 import { MARK, MARK_FILL, markSvg } from './mark';
-import { QUOTES, visibleQuotes } from './proof';
+import { FOUNDER_NOTE, QUOTES, visibleFounderNote, visibleQuotes } from './proof';
 import { type Choice, HANDS, mixLine, SPOT, spotMix, verdict } from './spots';
 import './styles.css';
 
@@ -52,17 +52,22 @@ for (const el of $$<HTMLElement>('[data-founding-price]')) el.textContent = mone
 for (const el of $$<HTMLElement>('[data-founding-seats]')) el.textContent = String(FOUNDING.seats);
 for (const el of $$<HTMLElement>('[data-content]')) el.textContent = String(CONTENT[el.dataset.content as keyof typeof CONTENT]);
 
-/** Show a seat count only when the server reports a real one. */
+/** Show a seat count only when the server reports a real one, and some are sold. */
 function showFoundingLeft(taken: number | null) {
-  if (taken === null) return;
+  if (!taken) return;
   const left = Math.max(0, FOUNDING.seats - taken);
   for (const el of $$<HTMLElement>('[data-founding-left]')) el.textContent = `${left} of ${FOUNDING.seats} places left. `;
 }
 showFoundingLeft(FOUNDING.taken);
+// When checkout is live the card sells directly. Until then it collects emails.
 fetch(`${API_URL}/api/billing/founding`)
   .then((r) => (r.ok ? r.json() : null))
-  .then((d: { taken?: unknown } | null) => {
+  .then((d: { taken?: unknown; open?: unknown } | null) => {
     if (d && typeof d.taken === 'number') showFoundingLeft(d.taken);
+    if (d?.open === true) {
+      for (const el of $$<HTMLElement>('[data-founding-buy]')) el.hidden = false;
+      for (const el of $$<HTMLElement>('[data-founding-form]')) el.hidden = true;
+    }
   })
   .catch(() => {});
 
@@ -444,6 +449,17 @@ updateOpen();
 
 // Quotes: real ones always, drafts only while designing -------------------------------
 
+// The founder note: an initial and no photo, by choice.
+const note = visibleFounderNote(FOUNDER_NOTE, import.meta.env.PROD);
+const noteEl = $<HTMLElement>('[data-founder-note]');
+if (note && noteEl) {
+  $<HTMLElement>('[data-founder-lines]', noteEl)!.textContent = note.lines.join(' ');
+  $<HTMLElement>('[data-founder-signoff]', noteEl)!.textContent = note.signoff;
+  $<HTMLElement>('[data-founder-initial]', noteEl)!.textContent = note.signoff.charAt(0);
+  if (note.draft) noteEl.insertAdjacentHTML('afterbegin', '<span class="sample">Draft</span>');
+  noteEl.hidden = false;
+}
+
 const quotes = visibleQuotes(QUOTES, import.meta.env.PROD);
 const quoteBox = $<HTMLElement>('[data-quotes]');
 const esc = (s: string) => s.replace(/[&<>"]/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[ch]!);
@@ -496,7 +512,7 @@ for (const form of $$<HTMLFormElement>('[data-waitlist]')) {
       const body = (await res.json().catch(() => ({}))) as { error?: string };
       if (res.status === 429) throw new Error('Too many tries. Wait a minute and try again.');
       if (!res.ok) throw new Error(body.error ?? "That didn't go through. Try again.");
-      say(list === 'founding' ? "Thanks. We'll email you about your place soon." : "You're on the list. We'll send one email on launch day.");
+      say(list === 'founding' ? "You're on the list. We'll email you when founding places open." : "You're on the list. We'll send one email on launch day.");
       form.reset();
       if (list !== 'founding') {
         const after = $<HTMLElement>('[data-after]');
