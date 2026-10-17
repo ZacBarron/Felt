@@ -67,6 +67,7 @@ export interface CoachSpotRef {
 
 const SOURCE_LABEL: Record<Chart['spec']['source'], string> = {
   'starter-approx': 'Aced starter chart (approximate)',
+  'model-approx': 'Aced chart derived by rule from a starter chart for another stack or open size (an estimate, not a solve)',
   'solver-import': 'Aced chart imported from a solver',
   custom: 'Custom chart',
 };

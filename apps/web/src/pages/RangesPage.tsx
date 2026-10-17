@@ -1,23 +1,23 @@
 import { handNickname } from '@felt/content';
 import {
   ALL_HAND_CLASSES,
-  CHART_OPEN_BB,
   actionFrequencies,
   boundaryHands,
   type Chart,
-  chartFormatLabel,
+  chartOpenBb,
   comboCount,
   type HandClass,
   openSize,
   PAINT_TARGET_MS,
   reaches,
   RECALL_TARGET_MS,
+  spotKey,
 } from '@felt/core';
-import { useId, useRef, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useEffect, useId, useRef, useState } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import { actionColor, sortActions } from '../components/actionColors';
-import { ChartPicker } from '../components/ChartPicker';
-import { GameChip, GameSheet } from '../components/GameSheet';
+import { ChartPicker, type ChartSelection, selectionFor, variantLine } from '../components/ChartPicker';
+import { GameSheet, gameLine } from '../components/GameSheet';
 import { MixBar } from '../components/MixBar';
 import { hasDefaultGame, RangesIntro, rangesIntroSeen } from '../components/RangesIntro';
 import { RangeGrid } from '../components/RangeGrid';
@@ -26,13 +26,13 @@ import { DrillRunner } from '../drills/DrillRunner';
 import { QuickRecall } from '../drills/QuickRecall';
 import { actionLabels, spotLine } from '../drills/labels';
 import { paintRule } from '../drills/PaintDrill';
-import { chartsForGame, getChart } from '../state/charts';
+import { resolveVariant } from '../state/chartPicker';
+import { chartMeta, closestForGame, fitForGame, getChart } from '../state/charts';
 import { useSettings } from '../state/settings';
 import { BottomBar } from '../ui/BottomBar';
-import { CheckIcon, ChevronRightIcon, FlameIcon, HelpIcon, InfoIcon } from '../ui/icons';
+import { CheckIcon, ChevronLeftIcon, ChevronRightIcon, FlameIcon, HelpIcon, InfoIcon } from '../ui/icons';
 import { ProgressRing } from '../ui/ProgressRing';
 import { Section } from '../ui/Section';
-import { PageHeader } from '../ui/PageHeader';
 import { Segmented } from '../ui/Segmented';
 import './ranges.css';
 
@@ -40,25 +40,56 @@ type Mode = 'chart' | 'paint' | 'quick';
 
 const asMode = (m: string | null): Mode => (m === 'paint' || m === 'quick' ? m : 'chart');
 
+/** The chart to start on: a linked one, else the first open chart closest to the player's game. */
+function startSelection(linked: string | null, game: Parameters<typeof closestForGame>[0]): ChartSelection | undefined {
+  const m = linked ? chartMeta(linked) : undefined;
+  if (m) return selectionFor(m);
+  const { charts } = closestForGame(game);
+  const first = charts.find((c) => c.spot === 'rfi') ?? charts[0];
+  return first ? selectionFor(first) : undefined;
+}
+
 /**
  * Ranges: look at a chart, paint it from memory, or quiz yourself on its
- * edge hands. Practice here never changes the review schedule.
+ * edge hands. Practice here never changes the review schedule. The header is
+ * compact so the whole grid and the selected hand fit on a phone screen.
  */
 export function RangesPage() {
   const { settings } = useSettings();
+  const game = settings.game;
   const [params, setParams] = useSearchParams();
-  const fit = chartsForGame(settings.game);
-  const linked = params.get('chart');
-  // A lesson may link to a chart for another table size; include it so practice still starts there.
-  const linkedChart = linked && !fit.charts.some((c) => c.spec.id === linked) ? getChart(linked) : undefined;
-  const charts = linkedChart ? [linkedChart, ...fit.charts] : fit.charts;
-  const [chartId, setChartId] = useState<string | undefined>(linked ?? undefined);
+  const [sel, setSel] = useState<ChartSelection | undefined>(() => startSelection(params.get('chart'), game));
   const [mode, setModeState] = useState<Mode>(asMode(params.get('mode')));
-  const [sheet, setSheet] = useState(false);
+  const [picking, setPicking] = useState(false);
+  const [gameSheet, setGameSheet] = useState(false);
   // First visit: explain charts once, and ask which game to match if the player never chose one.
   const [intro, setIntro] = useState(() => !rangesIntroSeen());
-  const [askGame, setAskGame] = useState(() => !rangesIntroSeen() && hasDefaultGame(settings.game));
-  const chart = charts.find((c) => c.spec.id === chartId) ?? charts[0];
+  const [askGame, setAskGame] = useState(() => !rangesIntroSeen() && hasDefaultGame(game));
+  const meta = sel ? chartMeta(sel.id) : undefined;
+  const chart = meta ? getChart(meta.id) : undefined;
+
+  useEffect(() => {
+    document.title = 'Ranges · Aced';
+  }, []);
+
+  const choose = (next: ChartSelection) => {
+    setSel(next);
+    const p = new URLSearchParams(params);
+    p.set('chart', next.id);
+    setParams(p, { replace: true });
+  };
+
+  // When the player changes their game, move to the same spot in the new game.
+  const gameKey = `${game.tableSize}|${game.stackBb}|${openSize(game)}|${game.format}`;
+  const lastGame = useRef(gameKey);
+  useEffect(() => {
+    if (lastGame.current === gameKey || !meta || !sel) return;
+    lastGame.current = gameKey;
+    const target = closestForGame(game);
+    const same = resolveVariant(target.charts, spotKey(meta), game.stackBb, openSize(game)) ?? target.charts.find((c) => c.spot === 'rfi');
+    if (same) choose({ id: same.id, family: sel.family, villain: sel.villain });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [gameKey]);
 
   const setMode = (m: Mode) => {
     setModeState(m);
@@ -68,40 +99,18 @@ export function RangesPage() {
     setParams(next, { replace: true });
   };
 
-  if (!chart) return <p className="muted">No charts for this game yet.</p>;
+  if (!chart || !meta || !sel) return <p className="muted">No charts for this game yet.</p>;
 
   return (
-    <div className="stack">
-      <PageHeader
-        title="Ranges"
-        back={{ to: '/train', label: 'Train' }}
-        trailing={
-          <div className="ranges-head-actions">
-            <button
-              type="button"
-              className="ranges-help-btn"
-              aria-label="How charts work"
-              aria-haspopup="dialog"
-              data-haptic="select"
-              onClick={() => {
-                setAskGame(false);
-                setIntro(true);
-              }}
-            >
-              <HelpIcon size={22} />
-            </button>
-            <GameChip onOpen={() => setSheet(true)} />
-          </div>
-        }
-      />
-      <GameSheet open={sheet} onClose={() => setSheet(false)} />
-      <RangesIntro open={intro} askGame={askGame} onClose={() => setIntro(false)} />
-
-      <div className="ranges-top">
-        <ChartPicker charts={charts} value={chart} onChange={setChartId} />
+    <div className="stack ranges-page">
+      <h1 className="sr-only">Ranges</h1>
+      <div className="ranges-bar">
+        <Link to="/train" className="ranges-back">
+          <ChevronLeftIcon size={18} />
+          Train
+        </Link>
         <Segmented<Mode>
           ariaLabel="Mode"
-          stretch
           value={mode}
           onChange={setMode}
           options={[
@@ -110,8 +119,38 @@ export function RangesPage() {
             { value: 'paint', label: 'Paint' },
           ]}
         />
-        <ChartAbout chart={chart} exact={fit.exact} mode={mode} />
-        <SeatStrip spec={chart.spec} />
+        <button
+          type="button"
+          className="ranges-help-btn"
+          aria-label="How charts work"
+          aria-haspopup="dialog"
+          data-haptic="select"
+          onClick={() => {
+            setAskGame(false);
+            setIntro(true);
+          }}
+        >
+          <HelpIcon size={22} />
+        </button>
+      </div>
+      <GameSheet open={gameSheet} onClose={() => setGameSheet(false)} />
+      <RangesIntro open={intro} askGame={askGame} onClose={() => setIntro(false)} />
+
+      <div className="ranges-top">
+        <ChartPicker
+          value={meta}
+          selection={sel}
+          onChange={choose}
+          open={picking}
+          onOpen={() => setPicking(true)}
+          onClose={() => setPicking(false)}
+          onEditGame={() => {
+            setPicking(false);
+            setGameSheet(true);
+          }}
+        />
+        <ChartAbout chart={chart} mode={mode} />
+        <SeatStrip spec={chart.spec} compact />
       </div>
 
       {mode === 'chart' ? <ChartView chart={chart} /> : <Practice key={`${chart.spec.id}:${mode}`} chart={chart} mode={mode} onPaint={() => setMode('paint')} />}
@@ -120,42 +159,39 @@ export function RangesPage() {
 }
 
 /**
- * One quiet line under the controls: the spot, the honesty labels, and an
- * info button that opens the chart's assumptions and how practice is graded.
+ * One quiet line under the picker: the spot, a small honesty tag and an
+ * info button. The tag and the button open the details: where the chart
+ * comes from, how it fits your game and how practice is graded.
  */
-function ChartAbout({ chart, exact, mode }: { chart: Chart; exact: boolean; mode: Mode }) {
+function ChartAbout({ chart, mode }: { chart: Chart; mode: Mode }) {
   const { settings } = useSettings();
+  const game = settings.game;
   const [open, setOpen] = useState(false);
   const panelId = useId();
-  const approx = chart.spec.source === 'starter-approx';
-  const exploit = chart.spec.basis === 'exploit';
-  const offStack = Math.abs(settings.game.stackBb - chart.spec.stackBb) >= 30;
-  const myOpen = openSize(settings.game);
-  const bigOpen = chart.spec.spot === 'rfi' && myOpen !== CHART_OPEN_BB;
-  const line = spotLine(chart) || chart.spec.title;
+  const spec = chart.spec;
+  const exploit = spec.basis === 'exploit';
+  const derived = spec.source === 'model-approx';
+  const fit = fitForGame(spec, game);
+  const myOpen = openSize(game);
+  const openOff = !fit.open && spec.spot !== 'straddle';
+  const off = !fit.table || !fit.stack || openOff;
+  const line = spotLine(chart) || spec.title;
+  const toggle = () => setOpen((o) => !o);
 
   return (
     <div className="chart-about">
       <div className="chart-line">
         <span className="chart-line-text">{line}</span>
-        {approx && (
-          // Says what the chart is close to, and opens the reason on tap.
-          <button type="button" className="pill pill-button" aria-expanded={open} aria-controls={panelId} onClick={() => setOpen((o) => !o)}>
-            Close to solver
+        <button type="button" className={`pill pill-button${derived ? ' pill-estimate' : ''}`} aria-expanded={open} aria-controls={panelId} onClick={toggle}>
+          {derived ? 'Estimate' : 'Close to solver'}
+        </button>
+        {exploit && <span className="pill pill-exploit">Exploit</span>}
+        {off && (
+          <button type="button" className="pill pill-warn pill-button" aria-expanded={open} aria-controls={panelId} onClick={toggle}>
+            Not your game
           </button>
         )}
-        {exploit && <span className="pill pill-exploit">Exploit</span>}
-        {!exact && <span className="pill pill-warn">Nearest table size</span>}
-        {offStack && <span className="pill pill-warn">You play {settings.game.stackBb}bb</span>}
-        {bigOpen && <span className="pill pill-warn">You open {myOpen}bb</span>}
-        <button
-          type="button"
-          className="chart-info-btn"
-          aria-expanded={open}
-          aria-controls={panelId}
-          aria-label="Chart details"
-          onClick={() => setOpen((o) => !o)}
-        >
+        <button type="button" className="chart-info-btn" aria-expanded={open} aria-controls={panelId} aria-label="Chart details" onClick={toggle}>
           <InfoIcon size={22} filled={open} />
         </button>
       </div>
@@ -163,20 +199,28 @@ function ChartAbout({ chart, exact, mode }: { chart: Chart; exact: boolean; mode
         <div id={panelId} className="chart-about-panel reveal">
           {mode === 'paint' && <p>{paintRule(settings.study.paintMixes !== false)}</p>}
           <p>
-            <strong>{chart.spec.title}.</strong> Built for {chartFormatLabel(chart.spec)}.
+            <strong>{spec.title}.</strong> Built for {variantLine(spec)}.
           </p>
-          {approx && (
+          {!derived && (
             <p>
-              <strong>Close to solver.</strong> Aced built this chart by hand to match published solver results. It is close but not exact. The percentages on mixed hands are the least certain.
+              <strong>Close to solver.</strong> Aced wrote this chart by hand to match published solver results. It is close but not exact. The percentages on mixed hands are the least certain.
+            </p>
+          )}
+          {derived && (
+            <p>
+              <strong>Estimate.</strong> Aced derived this chart by rule from a hand written chart. It is not a solve. {spec.derived?.how}
             </p>
           )}
           {exploit && <p>This is an exploit chart. It targets a common leak, not a balanced opponent.</p>}
-          {bigOpen && (
+          {off && (
             <p>
-              This chart assumes a {CHART_OPEN_BB}bb open. You open to {myOpen}bb. {myOpen > CHART_OPEN_BB ? 'Bigger opens want a slightly tighter range, most of all from early seats.' : 'Smaller opens can play a few more hands.'} Treat it as approximate for you.
+              <strong>Not your game.</strong> You play {gameLine(game).replace(/^\w/, (c) => c.toLowerCase())} with {myOpen}bb opens.
+              {!fit.table && ' This chart is for the nearest table size.'}
+              {!fit.stack && ` This chart is for ${spec.stackBb}bb stacks.`}
+              {openOff && ` This chart assumes ${chartOpenBb(spec)}bb opens.`} Treat it as approximate for you.
             </p>
           )}
-          {chart.spec.note && <p>{chart.spec.note}</p>}
+          {spec.note && !derived && <p>{spec.note}</p>}
           {mode !== 'chart' && <p>Practice here does not change your review schedule.</p>}
         </div>
       )}
@@ -189,23 +233,26 @@ function ChartView({ chart }: { chart: Chart }) {
   const totals = actionFrequencies(chart);
   const labels = actionLabels(chart);
   const mix = chart.mixes.get(selected) ?? { fold: 1 };
+  const greyed = !reaches(chart, selected);
+
+  const handCard = (
+    <div className="hand-card reveal" key={selected}>
+      <div className="hand-card-head">
+        <span className="display hand-card-name">{selected}</span>
+        {handNickname(selected) && <span className="hand-nickname">{handNickname(selected)}</span>}
+        <span className="pill num hand-card-combos">{comboCount(selected)} combos</span>
+      </div>
+      {greyed ? <p className="footnote" style={{ margin: 0 }}>This hand never gets here. It folded or raised earlier.</p> : <MixBar mix={mix} labels={labels} />}
+    </div>
+  );
 
   return (
     <>
-      <div className="grid-2" style={{ alignItems: 'start' }}>
+      <div className="grid-2 ranges-body" style={{ alignItems: 'start' }}>
         <RangeGrid key={chart.spec.id} mixes={chart.mixes} reach={chart.reach} selected={selected} onSelect={setSelected} />
 
-        <div className="stack" style={{ position: 'sticky', top: '4.5rem' }}>
-          <div className="card stack reveal" key={selected} style={{ gap: '0.7rem' }}>
-            <div className="row between">
-              <span className="display" style={{ fontSize: '2.2rem', lineHeight: 1 }}>
-                {selected}
-              </span>
-              <span className="pill num">{comboCount(selected)} combos</span>
-            </div>
-            {handNickname(selected) && <span className="hand-nickname">{handNickname(selected)}</span>}
-            <MixBar mix={mix} labels={labels} />
-          </div>
+        <div className="stack ranges-side" style={{ position: 'sticky', top: '4.5rem' }}>
+          <div className="card hand-side">{handCard}</div>
 
           <div className="card stack" style={{ gap: '0.5rem' }}>
             <div className="row between">
@@ -225,6 +272,10 @@ function ChartView({ chart }: { chart: Chart }) {
           </div>
         </div>
       </div>
+      {/* On a phone the selected hand peeks above the tab bar, so the grid and the hand both fit. */}
+      <BottomBar>
+        <div className="hand-peek">{handCard}</div>
+      </BottomBar>
     </>
   );
 }

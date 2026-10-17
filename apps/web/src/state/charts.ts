@@ -1,17 +1,71 @@
-import { STARTER_CHARTS } from '@felt/content';
-import { buildChart, type Chart, chartsForTable, type GameSettings } from '@felt/core';
+import { CHART_LIBRARY, chartSpec, STARTER_CHARTS } from '@felt/content';
+import {
+  buildChart,
+  type Chart,
+  type ChartFit,
+  chartFit,
+  type ChartMeta,
+  type ChartQuery,
+  chartsForTable,
+  closestCharts,
+  type GameSettings,
+  openSize,
+} from '@felt/core';
 
-const BUILT = new Map<string, Chart>(STARTER_CHARTS.map((spec) => [spec.id, buildChart(spec)]));
+/**
+ * Charts on the app side. The library holds over two thousand charts (the
+ * hand written starters and their derived stack and open size variants), so
+ * charts are built on first use and cached.
+ */
+
+const BUILT = new Map<string, Chart>();
 
 export function getChart(id: string): Chart | undefined {
-  return BUILT.get(id);
+  let c = BUILT.get(id);
+  if (!c) {
+    const spec = chartSpec(id);
+    if (!spec) return undefined;
+    c = buildChart(spec);
+    BUILT.set(id, c);
+  }
+  return c;
 }
 
-/** Charts that fit the current game, with a flag when we fell back to another table size. */
-export function chartsForGame(game: GameSettings) {
-  const pick = chartsForTable(STARTER_CHARTS, game.tableSize, game.format);
-  return { ...pick, charts: pick.charts.map((spec) => BUILT.get(spec.id)!) };
+/** The player's game as a chart query. */
+export function chartQuery(game: GameSettings): ChartQuery {
+  return { format: game.format, tableSize: game.tableSize, stackBb: game.stackBb, openBb: openSize(game) };
 }
+
+const REVIEW = STARTER_CHARTS.filter((s) => s.core);
+
+/**
+ * The review set for a game: the hand written review charts for the nearest
+ * table size, with a flag when we fell back to another size. It depends only
+ * on the table size and format, so saved cards keep their charts when the
+ * stack or open size changes.
+ */
+export function chartsForGame(game: Pick<GameSettings, 'tableSize' | 'format'>) {
+  const pick = chartsForTable(REVIEW, game.tableSize, game.format);
+  return { ...pick, charts: pick.charts.map((spec) => getChart(spec.id)!) };
+}
+
+/** Every chart in the library for the table size nearest the game's, with the size used. */
+export function libraryForGame(game: GameSettings): { charts: ChartMeta[]; tableSize: number; exact: boolean } {
+  const { tableSize, exact } = chartsForTable(CHART_LIBRARY, game.tableSize, game.format);
+  return { charts: CHART_LIBRARY.filter((c) => c.tableSize === tableSize && (c.game === game.format || !CHART_LIBRARY.some((x) => x.game === game.format))), tableSize, exact };
+}
+
+/** The closest chart to the game for every spot, one per spot. */
+export function closestForGame(game: GameSettings) {
+  return closestCharts(CHART_LIBRARY, chartQuery(game));
+}
+
+/** How well a chart fits the player's game. */
+export function fitForGame(chart: Pick<ChartMeta, 'tableSize' | 'stackBb' | 'openBb'>, game: GameSettings): ChartFit {
+  return chartFit(chart, chartQuery(game));
+}
+
+export const chartMeta = (id: string): ChartMeta | undefined => CHART_LIBRARY.find((c) => c.id === id);
 
 /** Hands that make a good first question: well known, and not the obvious premiums. */
 const FIRST_HANDS = ['A5s', 'KTs', 'QJs', 'A9o', 'K9s', 'T9s', 'J9s', 'KJo', 'QTs', 'A8o', '98s'];

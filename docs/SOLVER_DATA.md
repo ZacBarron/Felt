@@ -4,7 +4,45 @@ GTO answers are only as good as the data behind them. This doc covers where Aced
 
 ## Current state
 
-The starter charts in `packages/content/src/charts.ts` are hand-written approximations of widely published 100bb solutions for 9-handed and 6-handed cash. They are marked `source: 'starter-approx'` and the UI labels them. Their mixes are graded to match the shape of published solutions, with close calls opening part of the time. They are good enough to learn structure (which hands open from which seat and roughly how often) but the exact frequencies are approximations. The BTN vs limper chart is marked `basis: 'exploit'`, since limped pots have no clean GTO answer.
+The preflop library lives in `packages/content/src/charts/`. It has two kinds of chart, and the app always says which one you are looking at.
+
+### Hand written starter charts (`source: 'starter-approx'`)
+
+Approximations of widely published 100bb cash solutions (2.5bb opens, 3bb from the small blind, typical online rake), written by hand with graded mixes. They are good enough to learn structure (which hands play from which seat, and roughly how often), but the exact frequencies are approximations. The UI labels them "Close to solver".
+
+| Spot type | Coverage, 9-handed and 6-max |
+| --- | --- |
+| Open | Every seat, UTG to SB (SB raise only) |
+| Vs open | Every seat against every earlier opener: 3bet, call or fold, the blinds included (BB vs SB too) |
+| Vs 3bet | Every opener against every 3bettor: 4bet, call or fold. 3bettors that play alike share a chart (the seats in position before the button, the button, the blinds) |
+| Vs 4bet | The common pairings (BB and SB vs BTN and CO, BTN vs CO, CO vs HJ, BB vs SB, BB and BTN vs LJ, BB vs UTG): 5bet all in, call or fold |
+| Squeeze | BB vs BTN plus SB, BB vs CO plus a caller, SB vs CO plus BTN, BTN vs HJ plus CO, BB vs HJ plus a caller, BB vs UTG plus a caller, BTN vs LJ plus a caller. Facing a squeeze: CO, BTN and HJ opens |
+| Blind vs blind | SB limp or raise, BB vs SB limp, SB limp vs BB raise (plus the raised pots under Vs open, Vs 3bet and Vs 4bet) |
+| Limpers | CO, BTN, SB and BB against 1, 2 and 3 limpers: iso raise, overlimp (complete or check from the blinds) or fold. These are `basis: 'exploit'` charts for a typical live limper |
+
+A 6-max table plays like the last six seats of a full ring (the same players behind each seat), so 6-max charts reuse the 9-handed ranges with UTG standing in for LJ. Content tests check the shape: later seats open wider, defense widens as the opener widens, the small blind 3bets or folds, squeezes are tighter than 3bets, 4bets and 5bets come only from hands that reach the spot, aces never fold.
+
+### Derived charts (`source: 'model-approx'`)
+
+Variants for other stack depths and open sizes, made by a documented rule in `packages/core/src/chartModel.ts` from the starter chart of the same spot. Each one names the chart it comes from and what changed, and the UI labels it "Estimate". They are never presented as a solve, and Play grades against them without feeding the Aced Rating.
+
+| Family | Variants |
+| --- | --- |
+| Open, Vs open, Vs 3bet | Stacks 40, 60, 100, 150 and 200bb times opens of 2.5, 3, 4 and 5bb |
+| Squeeze, facing a squeeze | Every stack, 2.5bb opens |
+| Vs 4bet | 150 and 200bb (at 60bb and less a 4bet is all in, so the 3bet answer charts cover it) |
+| Straddle | Opens in a straddled pot at 100, 150 and 200bb with opens of 2.5 and 3 straddles, from the opening chart of the seat with the same players behind |
+
+The rule, in two steps:
+
+1. **Width.** Each hand is scored by its continue frequency in the starter chart (pure hands ranked by strength above mixed ones, folded hands ranked below zero by strength and playability). A tilt favours pairs and suited connectors deep and high cards short. One threshold moves until the range holds the target share of combos, in 5% steps. Premiums the starter chart always plays are never cut.
+2. **Split.** Each continuing hand keeps the starter chart's raise share, then an aggression shift moves high card calls to raises at short stacks (a 4bet at 40bb is all in) or moderate raises to calls at deep stacks. Facing a bigger open, 3bets fall with the square root of the defense width, so the cut comes mostly from flats.
+
+The anchors (in `STACK_RULES` and `openSizeRule`) are model choices that follow the direction of published results: bigger opens come from tighter ranges (width times (2.5 / size) to the power 0.38), defense against a bigger open falls faster for the big blind (power 0.75) than for the small blind (0.6) or a player in position (0.5), and so on. Their sizes are rough. Unit tests check the direction and the arithmetic, not that the numbers match a solve. A real preflop solver (below) would replace this rule.
+
+### Picking a chart
+
+`closestCharts` and `chartFit` in `packages/core/src/chartPick.ts` find the chart nearest a game: the nearest table size, then the nearest stack and open size on a log scale. The fit says plainly which parts are approximate (table size, stack, open size). The review deck uses only the hand written charts marked for review in the player's table size, so it grows by a few dozen charts, not thousands, and saved card ids never change.
 
 The Spot Lab decision demo uses illustrative numbers and says so.
 

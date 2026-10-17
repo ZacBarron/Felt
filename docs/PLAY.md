@@ -20,7 +20,7 @@ Play works like sitting down in an online cash game.
 
 ### Your open size
 
-Settings has **Your open** (Game and stakes, also in the table menu). It defaults to the 2.5bb the charts assume. Live players often set 4 or 5bb. Play offers it as a raise size before the flop, plus 1bb for each limper. Opening charts show a "You open 4bb" flag and say the chart is approximate for you. Bots open like the room they sit in: 5bb at the Live 1/2 table, 4bb at the home game and 2.5bb at the online tables. Facing a live size open, the defense charts (which assume 2.5bb) do not grade the spot and say why. Open size is not graded.
+Settings has **Your open** (Game and stakes, also in the table menu). It defaults to the 2.5bb the charts assume. Live players often set 4 or 5bb. Play offers it as the first raise size before the flop, plus 1bb for each limper. The Ranges page defaults to the charts for your stack and open size, and flags any chart that is not your game. Bots open like the room they sit in: 5bb at the Live 1/2 table, 4bb at the home game and 2.5bb at the online tables. Facing a live size open, Play grades the spot against the chart for that size and stack (derived by rule from the 2.5bb chart, so it is labelled approximate and not rated). Open size itself is not graded.
 
 ### Table settings
 
@@ -121,7 +121,7 @@ The engine lives in `packages/core` as pure TypeScript, with unit tests for ever
 
 ## What ships first
 
-- Preflop: graded by the chart when the spot matches what the chart assumes (no callers before you, about a 2.5bb open, 60 to 150bb stacks, 3 to 9 players). Seats match charts by the players behind them. Other preflop spots say why they are not graded.
+- Preflop: graded by the chart for the spot (open, facing an open, a 3bet, a 4bet, a squeeze, limpers or a blind vs blind limp) at the stack and open size nearest to the hand's. Seats match charts by the players behind them: 6-max charts for 3 to 6 players, 9-handed charts for 7 to 10. A hand written chart that matches the stack and size grades the spot as a chart grade and can be rated. A derived chart, or one for another stack, size or caller seat, still grades the spot but says why it is approximate and is never rated. Spots no chart covers (two callers, a raise after limpers) fall back to the approximate range and say why.
 - Calls and folds after the flop: graded against the bots' real ranges (tier 2). Only exact river calls against one bot, with no one left to act, count toward the rating, in the exploit area.
 - Bets, raises and checks after the flop: shown as not graded until solver grading lands.
 - Bots show no rating yet. A rating appears only once it has been measured.

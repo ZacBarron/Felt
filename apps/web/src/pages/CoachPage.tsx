@@ -405,7 +405,11 @@ function SpotCard({ spot }: { spot: CoachSpotRef }) {
       <MixBar mix={mix} labels={actionLabels(chart)} />
       <p className="footnote" style={{ margin: 0 }}>
         {spot.chose ? `You chose ${spot.chose}. ` : ''}
-        {chart.spec.source === 'starter-approx' ? 'The mix is from a Aced starter chart. It is approximate.' : 'The mix is from Aced’s chart.'}
+        {chart.spec.source === 'starter-approx'
+          ? 'The mix is from an Aced starter chart. It is approximate.'
+          : chart.spec.source === 'model-approx'
+            ? 'The mix is from a chart Aced derived by rule. It is an estimate.'
+            : 'The mix is from Aced’s chart.'}
       </p>
     </div>
   );

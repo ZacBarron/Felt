@@ -1,9 +1,14 @@
-import { botById, type BotCharacter, STARTER_CHARTS } from '@felt/content';
+import { botById, type BotCharacter, CHART_LIBRARY, STARTER_CHARTS } from '@felt/content';
 import {
   ALL_HAND_CLASSES,
   botRange,
   boundaryHands,
   type Chart,
+  chartFit,
+  type ChartMeta,
+  chartOpenBb,
+  CHART_OPEN_BB,
+  closestVariant,
   chartItemDifficulty,
   comboCount,
   type DecisionGrade,
@@ -17,6 +22,7 @@ import {
   legalActions,
   type PlayAction,
   type PlayDecision,
+  type Position,
   positionsFor,
   potSize,
   type PreflopAdvice,
@@ -41,6 +47,7 @@ import { recordRated } from './rating';
 export const HERO = 0;
 
 const NINE = positionsFor(9);
+const SIX = positionsFor(6);
 
 /**
  * The 9-handed seat with the same number of players behind. Aced's charts
@@ -53,39 +60,124 @@ export function chartPosition(position: string, tableSize: number): string | und
   return order.indexOf(position) === -1 ? undefined : NINE[8 - behind];
 }
 
-const NINE_CHARTS = STARTER_CHARTS.filter((c) => c.tableSize === 9 && c.game === 'cash');
+/**
+ * The library format and seat for a seat at the table: 6-max charts for 3 to
+ * 6 players, 9-handed charts for 7 to 10, matched by the players behind. At
+ * 10 players the two earliest seats both use UTG.
+ */
+export function chartSeat(position: string, tableSize: number): { tableSize: 6 | 9; seat: Position; exact: boolean } | undefined {
+  if (tableSize < 3 || tableSize > 10) return undefined;
+  const order = positionsFor(tableSize);
+  const i = order.indexOf(position);
+  if (i === -1) return undefined;
+  const behind = order.length - 1 - i;
+  if (tableSize <= 6) return { tableSize: 6, seat: SIX[5 - behind], exact: tableSize === 6 };
+  return { tableSize: 9, seat: NINE[Math.max(0, 8 - behind)], exact: tableSize === 9 };
+}
+
+const NINE_RFI = STARTER_CHARTS.filter((c) => c.tableSize === 9 && c.game === 'cash' && c.spot === 'rfi');
 
 export interface SpotChart {
   chart: Chart;
-  /** The spot matches what the chart assumes closely enough to grade by it. */
+  /** The spot matches what the chart assumes closely enough to grade by it and rate it. */
   exact: boolean;
   /** Why the match is not exact, in a short sentence. */
   why?: string;
 }
 
-/** The chart that covers a preflop spot, if one does. */
-export function chartForSpot(spot: PreflopSpot): SpotChart | undefined {
-  const hero = chartPosition(spot.position, spot.tableSize);
-  if (!hero) return undefined;
-  const raisers = spot.raisers.map((r) => chartPosition(r, spot.tableSize));
-  const pick = (test: (spec: (typeof NINE_CHARTS)[number]) => boolean) => {
-    const spec = NINE_CHARTS.find((c) => c.hero === hero && test(c));
-    return spec ? getChart(spec.id) : undefined;
-  };
-  let chart: Chart | undefined;
+/** Options for finding a chart: what the player did, which can decide between two strategies. */
+export interface SpotChartOptions {
+  /** The player limped from the small blind: grade by the limp or raise chart. */
+  limped?: boolean;
+  /** The size the player raised to, for an open. */
+  raiseTo?: number;
+}
+
+/**
+ * The game's standard open behind an actual raise size. The small blind
+ * opens at least 3bb, so a 3bb small blind open counts as a 2.5bb game.
+ */
+const standardOpen = (opener: Position, to: number) => (opener === 'SB' && to <= 3 + 1e-9 ? 2.5 : to);
+
+const sizeWords = (n: number) => `${Math.round(n * 10) / 10}bb`;
+
+/**
+ * The chart that covers a preflop spot, if one does: the right spot type and
+ * seats, at the stack and open size nearest to the hand's. Hand written
+ * charts that match the stack and size are exact. Derived charts, and charts
+ * for another stack or size, still grade the spot but say why it is
+ * approximate.
+ */
+export function chartForSpot(spot: PreflopSpot, opts: SpotChartOptions = {}): SpotChart | undefined {
+  const at = chartSeat(spot.position, spot.tableSize);
+  if (!at) return undefined;
+  const seatOf = (p: Position) => chartSeat(p, spot.tableSize)?.seat;
+  const lib = CHART_LIBRARY.filter((c) => c.tableSize === at.tableSize && c.game === 'cash');
+  const hero = at.seat;
+  const line = spot.line ?? [];
+  const raises = line.filter((a) => a.kind === 'raise');
+  const firstRaise = raises[0];
+  // Calls after the first raise and before the next one: callers of the open.
+  const coldCallers = line.slice(firstRaise ? line.indexOf(firstRaise) + 1 : 0, raises[1] ? line.indexOf(raises[1]) : undefined).filter((a) => a.kind === 'call');
+
+  let candidates: ChartMeta[] = [];
+  let openBb = CHART_OPEN_BB;
   let why: string | undefined;
-  if (spot.kind === 'open') chart = pick((c) => c.spot === 'rfi');
-  else if (spot.kind === 'limped' && spot.limpers <= 2) chart = pick((c) => c.spot === 'vs-limp' && c.id.endsWith(`${spot.limpers}limp`));
-  else if (spot.kind === 'raised' && spot.limpers === 0) {
-    chart = pick((c) => c.spot === 'vs-open' && !!c.versus?.startsWith(`${raisers[0]} opens`));
-    if (spot.callers > 0) why = 'The chart assumes no one has called the open.';
-    else if (spot.raiseTo < 2 || spot.raiseTo > 3) why = 'The chart assumes a 2.5bb open.';
+  const pick = (test: (m: ChartMeta) => boolean) => lib.filter((m) => m.hero === hero && test(m));
+
+  if (spot.kind === 'open') {
+    if (hero === 'SB' && opts.limped) candidates = pick((m) => m.spot === 'bvb' && !m.villains);
+    else candidates = pick((m) => m.spot === 'rfi');
+    openBb = opts.raiseTo !== undefined ? standardOpen(hero, opts.raiseTo) : CHART_OPEN_BB;
+  } else if (spot.kind === 'limped') {
+    if (hero === 'BB' && spot.limpers === 1 && line[0]?.position === 'SB') candidates = pick((m) => m.spot === 'bvb' && !!m.limpers);
+    else if (spot.limpers <= 3) candidates = pick((m) => m.spot === 'vs-limp' && m.limpers === spot.limpers);
+    else why = 'No chart covers more than three limpers.';
+  } else if (spot.kind === 'raised') {
+    const opener = seatOf(spot.raisers[0]);
+    if (spot.limpers === 1 && hero === 'SB' && opener === 'BB') {
+      candidates = pick((m) => m.spot === 'bvb' && !!m.villains?.includes('BB'));
+    } else if (spot.limpers > 0) {
+      why = 'No chart covers a raise after limpers.';
+    } else if (spot.callers === 0) {
+      candidates = pick((m) => m.spot === 'vs-open' && m.villains?.[0] === opener);
+      openBb = standardOpen(spot.raisers[0], spot.raiseTo);
+    } else if (spot.callers === 1) {
+      const caller = coldCallers[0] ? seatOf(coldCallers[0].position) : undefined;
+      const squeezes = pick((m) => m.spot === 'squeeze' && m.villains?.[0] === opener);
+      candidates = squeezes.filter((m) => !!caller && !!m.caller?.includes(caller));
+      if (candidates.length === 0 && squeezes.length > 0) {
+        candidates = squeezes;
+        why = `The squeeze chart assumes the caller sits in ${squeezes[0].caller!.join(' or ')}.`;
+      }
+      if (candidates.length === 0) why = 'No squeeze chart covers this opener and seat.';
+      openBb = standardOpen(spot.raisers[0], firstRaise?.to ?? spot.raiseTo);
+      if (Math.abs(openBb - CHART_OPEN_BB) > 0.5) why ??= `The squeeze charts assume a ${sizeWords(CHART_OPEN_BB)} open.`;
+    } else why = 'No chart covers an open with two or more callers.';
   } else if (spot.kind === '3bet' && spot.reraised && spot.raisers.length === 2 && spot.raisers[0] === spot.position) {
-    chart = pick((c) => c.spot === 'vs-3bet' && (!c.versus?.includes('BB 3bets') || raisers[1] === 'BB'));
-    if (spot.callers > 0) why = 'The chart assumes no one has called the 3bet.';
+    const threeBettor = seatOf(spot.raisers[1]);
+    if (spot.callers > 0) why = 'No chart covers a 3bet that someone has already called.';
+    else if (coldCallers.length === 1) {
+      candidates = pick((m) => m.spot === 'vs-squeeze' && !!m.villains?.includes(threeBettor ?? ''));
+      if (candidates.length === 0) why = 'No chart covers this squeeze.';
+    } else if (coldCallers.length > 1) why = 'No chart covers a squeeze with two callers.';
+    else candidates = pick((m) => m.spot === 'vs-3bet' && !!threeBettor && !!m.villains?.includes(threeBettor));
+    openBb = standardOpen(spot.position, firstRaise?.to ?? CHART_OPEN_BB);
+  } else if (spot.kind === '4bet' && spot.reraised && spot.raisers.length === 3 && spot.raisers[1] === spot.position && spot.raisers[0] === spot.raisers[2]) {
+    const opener = seatOf(spot.raisers[0]);
+    if (spot.callers > 0 || coldCallers.length > 0) why = 'No chart covers a 4bet pot with callers.';
+    else candidates = pick((m) => m.spot === 'vs-4bet' && m.villains?.[0] === opener);
+    if (candidates.length === 0) why ??= 'The 4bet charts cover the common seat pairs only.';
   }
-  if (!chart) return undefined;
-  if (!why && (spot.stackBb < 60 || spot.stackBb > 150)) why = 'The chart assumes about 100bb stacks.';
+
+  const meta = closestVariant(candidates, { stackBb: spot.stackBb, openBb });
+  const chart = meta ? getChart(meta.id) : undefined;
+  if (!chart || !meta) return undefined;
+  const fit = chartFit(meta, { format: 'cash', tableSize: at.tableSize, stackBb: spot.stackBb, openBb });
+  if (!why && !fit.open) why = `The nearest chart assumes a ${sizeWords(chartOpenBb(meta))} open, not ${sizeWords(openBb)}.`;
+  if (!why && !fit.stack) why = `The nearest chart is for ${meta.stackBb}bb stacks, not ${Math.round(spot.stackBb)}bb.`;
+  if (!why && meta.source === 'model-approx') why = `Aced derived this ${meta.stackBb}bb, ${sizeWords(chartOpenBb(meta))} chart by rule. It is an estimate.`;
+  if (!why && !at.exact && spot.tableSize === 10) why = 'The chart is for 9 players, not 10.';
   return { chart, exact: !why, why };
 }
 
@@ -114,7 +206,7 @@ const RFI_SEATS = ['UTG', 'UTG+1', 'UTG+2', 'LJ', 'HJ', 'CO', 'BTN', 'SB'];
 export const PLAY_ORDER: string[] = (() => {
   const tier = (h: string) => {
     const i = RFI_SEATS.findIndex((pos) => {
-      const spec = NINE_CHARTS.find((c) => c.spot === 'rfi' && c.hero === pos);
+      const spec = NINE_RFI.find((c) => c.hero === pos);
       const m = spec ? getChart(spec.id)?.mixes.get(h) : undefined;
       return !!m && 1 - (m.fold ?? 0) >= 0.5;
     });
@@ -140,7 +232,7 @@ export const playPercentile = (hand: string) => ORDER_ABOVE.get(hand) ?? 1;
 function openWidth(position: string | undefined, tableSize: number): number {
   if (tableSize === 2) return 0.8;
   const seat = position ? chartPosition(position, tableSize) : undefined;
-  const spec = NINE_CHARTS.find((c) => c.spot === 'rfi' && c.hero === seat);
+  const spec = NINE_RFI.find((c) => c.hero === seat);
   const chart = spec ? getChart(spec.id) : undefined;
   return chart ? chartWidth(chart) : 0.12;
 }
@@ -335,10 +427,11 @@ export function gradeHand(history: readonly PlayDecision[], seats: readonly Play
     const base = { index, street: state.street, did };
     if (state.street === 'preflop') {
       const spot = preflopSpot(state, HERO);
-      const found = chartForSpot(spot);
+      // What the player did can pick the chart: a small blind limp is graded by the limp or raise chart, an open by its size.
+      const found = chartForSpot(spot, { limped: spot.kind === 'open' && action.kind === 'call', raiseTo: action.kind === 'raise' ? action.to : undefined });
       const hand = handClassOf(me.cards[0], me.cards[1]);
       const straddled = straddleOf(state) > 0;
-      if (!found || straddled || !reaches(found.chart, hand) || (!found.exact && spot.callers + spot.limpers > 0)) {
+      if (!found || straddled || !reaches(found.chart, hand)) {
         // No chart fits: grade by the approximate range, never toward the rating.
         const a = approxRange(spot, hand);
         const score = scoreRecall(a.mix, approxActionId(action));
@@ -353,7 +446,7 @@ export function gradeHand(history: readonly PlayDecision[], seats: readonly Play
           ...base,
           tier: 'approx',
           grade: gradeOfScore(score),
-          detail: `${found.why} Graded by ${found.chart.spec.title}, which plays ${hand} as ${mixWords(found.chart, hand)}.`,
+          detail: `${found.why} Graded by ${found.chart.spec.title} (${found.chart.spec.stackBb}bb, ${chartOpenBb(found.chart.spec)}bb opens), which plays ${hand} as ${mixWords(found.chart, hand)}.`,
           rated: false,
         });
         return;

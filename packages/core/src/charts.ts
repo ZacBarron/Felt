@@ -1,5 +1,5 @@
 import { ALL_HAND_CLASSES, comboCount, type HandClass, parseRange } from './ranges';
-import type { GameFormat, Position } from './settings';
+import { CHART_OPEN_BB, type GameFormat, type Position } from './settings';
 
 /**
  * Preflop charts with mixed strategies.
@@ -16,6 +16,27 @@ export interface ChartActionSpec {
   range: string;
 }
 
+/**
+ * Spot families, in the order a hand plays out.
+ * - rfi: folded to you, you open.
+ * - vs-open: one player opened, no callers yet.
+ * - vs-3bet: you opened and someone 3bet.
+ * - vs-4bet: you 3bet and the opener 4bet.
+ * - squeeze: an open and one caller before you.
+ * - vs-squeeze: you opened, someone called and someone behind squeezed.
+ * - bvb: blind vs blind spots with a limp (SB limp or raise, BB vs a limp, SB facing a raise after limping).
+ * - vs-limp: limpers before you.
+ * - straddle: you open in a straddled pot, the straddle acting as the big blind.
+ */
+export type ChartSpot = 'rfi' | 'vs-open' | 'vs-3bet' | 'vs-4bet' | 'squeeze' | 'vs-squeeze' | 'bvb' | 'vs-limp' | 'straddle' | 'push-fold';
+
+/**
+ * Where the numbers come from.
+ * - starter-approx: written by hand to match published solver results. Close, not exact.
+ * - model-approx: derived by rule from a starter chart (see chartModel.ts). An estimate, never a solve.
+ */
+export type ChartSource = 'starter-approx' | 'model-approx' | 'solver-import' | 'custom';
+
 export interface ChartSpec {
   id: string;
   title: string;
@@ -26,11 +47,11 @@ export interface ChartSpec {
   /** Who acted before hero and how, e.g. "BTN opens 2.5bb". Empty for opens. */
   versus?: string;
   /** Spot family, used to group charts and order the drill deck. */
-  spot: 'rfi' | 'vs-open' | 'vs-3bet' | 'vs-limp' | 'push-fold';
+  spot: ChartSpot;
   /** Equilibrium baseline, or a deliberate exploit of a player pool. */
   basis: 'gto' | 'exploit';
   /** Where the numbers come from. Starter charts are approximations. */
-  source: 'starter-approx' | 'solver-import' | 'custom';
+  source: ChartSource;
   /** What the chart assumes that a player might not, such as the open size. Shown with the chart. */
   note?: string;
   /**
@@ -40,6 +61,39 @@ export interface ChartSpec {
    */
   reach?: string;
   actions: ChartActionSpec[];
+  /**
+   * The game's standard open in big blinds (the first raise from any seat
+   * but the small blind). Missing means CHART_OPEN_BB. For a defense chart it
+   * is the size faced; for an open or a 3bet answer it is your own.
+   */
+  openBb?: number;
+  /**
+   * The seats this chart covers for the player hero is up against: the
+   * opener, the 3bettor, the 4bettor or the squeezer (the last raiser), or the
+   * limper in a blind vs blind pot. Several seats when they play alike.
+   */
+  villains?: Position[];
+  /** Seats the caller can sit in, for squeeze spots. */
+  caller?: Position[];
+  /** Limpers before hero. */
+  limpers?: number;
+  /** For model-approx charts: the starter chart it comes from and what changed, in words. */
+  derived?: { from: string; how: string };
+  /** In the review deck for its table size. Other charts are for viewing, practice and Play. */
+  core?: boolean;
+}
+
+/** A chart's identity and labels without its ranges: enough to list and pick it. */
+export type ChartMeta = Omit<ChartSpec, 'actions' | 'reach'>;
+
+/** Stack depths the library covers, in big blinds. */
+export const CHART_STACKS = [40, 60, 100, 150, 200] as const;
+/** Standard open sizes the library covers, in big blinds: online 2.5bb, then 3bb and the live 4bb and 5bb. */
+export const CHART_OPENS = [2.5, 3, 4, 5] as const;
+
+/** The open size a chart assumes. */
+export function chartOpenBb(spec: Pick<ChartSpec, 'openBb'>): number {
+  return spec.openBb ?? CHART_OPEN_BB;
 }
 
 export function chartFormatLabel(spec: ChartSpec): string {
