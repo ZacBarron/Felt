@@ -100,12 +100,10 @@ export function StudyTimeCard() {
 
   return (
     <div className="card study-card reveal">
-      <div className="row between" style={{ alignItems: 'flex-start' }}>
-        <div className="study-card-title">When will you do tomorrow's lesson?</div>
-        <button className="icon-btn install-close" aria-label="Not now" onClick={close}>
-          <CloseIcon size={14} />
-        </button>
-      </div>
+      <div className="study-card-title">When will you study tomorrow?</div>
+      <button className="card-close" aria-label="Not now" onClick={close}>
+        <CloseIcon size={14} />
+      </button>
       <div className="study-card-chips" role="radiogroup" aria-label="Study time">
         {CUES.map((c) => (
           <button

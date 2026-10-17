@@ -125,3 +125,20 @@
   background: rgba(255, 255, 255, 0.14);
   color: #fff;
 }
+
+/* The whole tier card opens the ladder. */
+.tier-card-button {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+}
+
+.tier-card-button .tier-card-progress {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}

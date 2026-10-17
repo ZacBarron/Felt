@@ -63,8 +63,8 @@ export function LeaguePage() {
               <LeagueIcon size={34} />
             </span>
           }
-          title="No leagues here yet"
-          body="This version of Suited has no league server. Practice still moves your Suited Rating."
+          title="Leagues are coming"
+          body="Until then practice still moves your Suited Rating."
           action={
             <Link to="/practice" className="btn btn-primary" style={{ marginTop: '0.4rem' }}>
               Start practice

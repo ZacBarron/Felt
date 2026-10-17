@@ -36,16 +36,21 @@ export function TierCard({ rating }: { rating: SkillRating }) {
           {pts(p.practice.perRight)} points and a miss costs about {pts(p.practice.perMiss)}. Your rating climbs when you beat what it expects.
         </p>
       )}
+      {!p.settling && p.next && (
+        <p>
+          You are {p.pointsAway} points from {p.next.name}. That is about {p.rightAnswers} more right answers than misses at your level.
+        </p>
+      )}
       <p>The count of answers is our estimate. It depends on the questions you get.</p>
     </>
   );
   return (
     <Section title="Your tier" info={info}>
-      <div className="list tier-card">
+      <button type="button" className="list tier-card tier-card-button" onClick={() => setOpen(true)} aria-haspopup="dialog">
         <div className="tier-card-body">
-          <div className="row between" style={{ alignItems: 'baseline', flexWrap: 'nowrap' }}>
+          <div className="row between" style={{ alignItems: 'center', flexWrap: 'nowrap' }}>
             <span className="display tier-card-name">{p.settling ? 'Still settling' : p.tier.name}</span>
-            {!p.settling && <span className="footnote num">{range(p.tier)}</span>}
+            <ChevronRightIcon size={16} className="chev" />
           </div>
           {p.settling ? (
             <p className="tier-card-line">{settleLine(p)}</p>
@@ -54,12 +59,6 @@ export function TierCard({ rating }: { rating: SkillRating }) {
               <p className="tier-card-thinks">“{p.tier.thinks}”</p>
               {p.next ? (
                 <div className="tier-card-progress">
-                  <div className="row between footnote">
-                    <span className="num">
-                      {p.pointsAway} points to {p.next.name}
-                    </span>
-                    <span className="num">{p.next.min}</span>
-                  </div>
                   <span
                     className="tier-card-bar"
                     role="progressbar"
@@ -70,23 +69,20 @@ export function TierCard({ rating }: { rating: SkillRating }) {
                   >
                     <span style={{ width: `${Math.max(2, p.progress! * 100)}%` }} />
                   </span>
-                  <p className="tier-card-line">
-                    That is about <span className="num">{p.rightAnswers}</span> more right answers than misses at your level.
-                  </p>
+                  <div className="row between footnote">
+                    <span className="num">
+                      {p.pointsAway} points to {p.next.name}
+                    </span>
+                    <span className="num">{p.next.min}</span>
+                  </div>
                 </div>
               ) : (
-                <p className="tier-card-line">You are in the top tier. Suited cannot measure higher than this yet.</p>
+                <p className="tier-card-line">The top tier. Suited cannot measure higher yet.</p>
               )}
             </>
           )}
         </div>
-        <button className="list-row" onClick={() => setOpen(true)}>
-          <span className="grow" style={{ color: 'var(--tint)', fontWeight: 600 }}>
-            See all tiers
-          </span>
-          <ChevronRightIcon size={16} className="chev" />
-        </button>
-      </div>
+      </button>
       <TierLadderSheet open={open} onClose={() => setOpen(false)} progress={p} />
     </Section>
   );

@@ -74,8 +74,8 @@ export function CoachPage() {
           <PageHeader title="Coach" back={{ to: '/learn', label: 'Learn' }} />
           <EmptyState
             art={<Art />}
-            title="No coach here yet"
-            body="The coach needs a Suited account on a server where the coach is turned on. This version of Suited has none."
+            title="The coach is coming"
+            body="Soon you can ask about any hand you play."
           />
         </>
       ) : !session ? (

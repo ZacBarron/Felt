@@ -444,10 +444,24 @@ export function YouPage() {
         </div>
       </Section>
 
-      <section>
-        <h2 className="section-title">
-          Win rate at {stakesLabel(g.stakes)} {g.venue}
-        </h2>
+      <Section
+        title={`Win rate at ${stakesLabel(g.stakes)} ${g.venue}`}
+        info={
+          <>
+            <p>
+              Rake and tips are plain math from your rake settings. Your edge is
+              our estimate from comparing your rating with a typical table.
+              Here, each 100 rating points is worth about{" "}
+              {signed(per100Points, 1)} bb per 100 hands. That is about{" "}
+              {perHour(per100Points)} an hour. As your real results grow, they
+              count for more.
+              {blended &&
+                ` Right now they count for ${Math.round(blended.weightOnResults * 100)}%.`}{" "}
+              bb/100 means big blinds won per 100 hands.
+            </p>
+          </>
+        }
+      >
         {!rated ? (
           <div className="card winrate-card">
             <p style={{ margin: 0 }}>
@@ -517,23 +531,29 @@ export function YouPage() {
                 <span className="num">{signed(model.average, 1)}</span>
               </div>
             </div>
-            <p className="footnote" style={{ margin: 0 }}>
-              Rake and tips are plain math from your rake settings. Your edge is
-              our estimate from comparing your rating with a typical table.
-              Here, each 100 rating points is worth about{" "}
-              {signed(per100Points, 1)} bb per 100 hands. That is about{" "}
-              {perHour(per100Points)} an hour. As your real results grow, they
-              count for more.
-              {blended &&
-                ` Right now they count for ${Math.round(blended.weightOnResults * 100)}%.`}{" "}
-              bb/100 means big blinds won per 100 hands.
-            </p>
           </div>
         )}
-      </section>
+      </Section>
 
-      <section>
-        <h2 className="section-title">Your results</h2>
+      <Section
+        title="Your results"
+        info={
+        <p>
+          {source && resultsAreNoise(source.hands, sd)
+            ? "You do not have enough results yet to show if you are winning. For now, the estimate leans on your rating. "
+            : ""}
+          Results alone need about{" "}
+          {(
+            Math.round(handsForPrecision(10, sd) / 1000) * 1000
+          ).toLocaleString()}{" "}
+          hands to pin down your win rate. That is roughly{" "}
+          {(
+            Math.round(handsForPrecision(10, sd) / a.handsPerHour / 100) * 100
+          ).toLocaleString()}{" "}
+          hours of play. So Suited combines your results with your rating.
+        </p>
+        }
+      >
         {imported &&
         (imported.cash.length > 0 || imported.sessions.length > 0) ? (
           <Link to="/import" className="list-row card">
@@ -605,21 +625,7 @@ export function YouPage() {
             </label>
           </div>
         )}
-        <div className="section-footer">
-          {source && resultsAreNoise(source.hands, sd)
-            ? "You do not have enough results yet to show if you are winning. For now, the estimate leans on your rating. "
-            : ""}
-          Results alone need about{" "}
-          {(
-            Math.round(handsForPrecision(10, sd) / 1000) * 1000
-          ).toLocaleString()}{" "}
-          hands to pin down your win rate. That is roughly{" "}
-          {(
-            Math.round(handsForPrecision(10, sd) / a.handsPerHour / 100) * 100
-          ).toLocaleString()}{" "}
-          hours of play. So Suited combines your results with your rating.
-        </div>
-      </section>
+      </Section>
 
       <section>
         <button
@@ -657,8 +663,7 @@ export function YouPage() {
           </div>
         )}
         <div className="section-footer">
-          These starting numbers are our best guesses for your game. Change any
-          of them if you know better. Rake is set in{" "}
+          Our best guesses for your game. Rake is set in{" "}
           <Link to="/settings/rake">Settings</Link>.
         </div>
       </section>

@@ -78,7 +78,7 @@ function Lobby() {
             const preset = TABLE_PRESETS.find((p) => p.id === t.preset) ?? TABLE_PRESETS[0];
             const bots = preset.bots.slice(0, t.seats - 1).map((id) => botById(id)!);
             return (
-              <div key={t.id} className="list-row play-lobby-row">
+              <button key={t.id} className="list-row play-lobby-row" aria-label={`Sit down at ${t.name}`} onClick={() => setPicking(t)}>
                 <span className="grow" style={{ minWidth: 0 }}>
                   <span className="play-lobby-name">{t.name}</span>
                   <span className="footnote" style={{ display: 'block' }}>
@@ -93,14 +93,12 @@ function Lobby() {
                     {t.seats} seats · {t.buyIns[1]}bb
                   </span>
                 </span>
-                <button className="btn btn-primary play-sit" onClick={() => setPicking(t)}>
-                  Sit down
-                </button>
-              </div>
+                <ChevronRightIcon size={16} className="chev" />
+              </button>
             );
           })}
         </div>
-        <p className="section-footer">Bots are player types from Exploits. They play by rules after the flop, so treat their play there as approximate.</p>
+        <p className="section-footer">Bot play after the flop is approximate.</p>
       </section>
       <BuyInSheet table={picking} onClose={() => setPicking(undefined)} />
     </div>
@@ -120,7 +118,7 @@ function QuickSeat() {
           <div className="hero-label">Cash game</div>
           <div className="display learn-hero-title">{table.name}</div>
           <div className="hero-sub">
-            {table.seats} seats, {buyIn}bb buy in. Every other seat is a bot.
+            {table.seats} seats. {buyIn}bb buy in.
           </div>
           <div className="play-hero-faces" aria-hidden="true">
             {bots.slice(0, 8).map((b) => (

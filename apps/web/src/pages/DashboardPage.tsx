@@ -255,10 +255,11 @@ export function DashboardPage() {
       {stats && stats.reviewedToday > 0 && (
         <section className="reveal">
           <div className="section-title">Today so far</div>
-          <div className="stat-grid three">
+          {/* Time per card only when it was timed: untimed drills report nothing to show. */}
+          <div className={`stat-grid ${stats.avgSecondsToday ? 'three' : 'two'}`}>
             <Stat label="Reviewed" value={stats.reviewedToday} />
             <Stat label="Accuracy" value={Math.round((stats.accuracyToday ?? 0) * 100)} suffix="%" />
-            <Stat label="Time per card" value={stats.avgSecondsToday ?? 0} suffix="s" decimals={1} />
+            {!!stats.avgSecondsToday && <Stat label="Per card" value={stats.avgSecondsToday} suffix="s" decimals={1} />}
           </div>
         </section>
       )}

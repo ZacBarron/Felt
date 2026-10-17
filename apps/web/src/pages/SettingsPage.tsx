@@ -587,7 +587,7 @@ function TestingSection() {
             ? session
               ? 'The server has Suited Pro on for every signed in player. The AI coach works too.'
               : 'The server has Suited Pro on for signed in players. Sign in to get it everywhere.'
-            : 'For testing only. This unlocks Suited Pro on this device and charges nothing. The AI coach still checks your account.'}
+            : 'Nothing is charged. The coach still checks your account.'}
         </span>
       }
     >
