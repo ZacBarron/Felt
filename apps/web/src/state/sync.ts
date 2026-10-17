@@ -345,6 +345,10 @@ async function afterSync() {
 
   if (studiedToday && session.user.lastStudyDay !== today) tasks.push(updateMe({ lastStudyDay: today }));
 
+  // The server keeps pushes out of 9 pm to 8 am in the player's own time, so it needs the time zone.
+  const tz = timeZone();
+  if (tz && session.user.tz !== tz) tasks.push(updateMe({ tz }));
+
   // The daily reminder names the lesson that is actually waiting. Sent only when it changes.
   if (session.user.reminders) {
     // Loaded here: nudge reads settings, which import this module.
@@ -378,6 +382,14 @@ async function afterSync() {
   }
   tasks.push(refreshMe());
   await Promise.allSettled(tasks);
+}
+
+function timeZone(): string | undefined {
+  try {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone || undefined;
+  } catch {
+    return undefined;
+  }
 }
 
 function mondayUtc(now: Date) {

@@ -85,12 +85,16 @@ See [MONETIZATION.md](MONETIZATION.md).
 - [x] Calendar reminders (.ics) for the study time and the trial end; local event log with export
 - [x] Copy, accessibility (WCAG 2.2 AA pass) and visual review from simulated expert panels
 - [x] Server: item calibration, real pool ratings per stake, leagues with real players, push reminders, global daily stats
+- [x] Retention: Manage Pro with a reason first cancel flow and one offer per reason (yearly switch, a coupon once a year, or a pause), resume, a billing issue banner with a grace period, and the founding (lifetime) purchase with a 500 seat cap on the server (see MONETIZATION.md)
+- [x] Lifecycle messages: push caps (1 a day, 4 a week), quiet hours, decay and one closing note; trial, billing, weekly digest and win-back email with opt in, one tap unsubscribe, a sunset and a holdout (see ENGAGEMENT.md)
 
 ## Before launch
 
 - [ ] Turn on push on the live server: set the 3 VAPID values on Render (see DEPLOY.md). Reminders and the trial reminder stay off until then.
 - [ ] Turn on billing (Stripe keys and prices) and email codes (Resend)
 - [ ] Turn off `PRO_FOR_EVERYONE` and remove the Pro testing switch from Settings
+- [ ] Set up the retention pieces: founding price, retention coupon, portal settings, Smart Retries, the new webhook events and `MAIL_POSTAL_ADDRESS` (see DEPLOY.md)
+- [ ] A founding member buy button on the site or in the app (the seam is `purchaseLifetime()` in `state/access.ts`)
 
 ## Train, Play and You
 

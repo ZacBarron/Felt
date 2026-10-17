@@ -235,7 +235,8 @@ export function ProPage() {
     setMessage(undefined);
     // Set the reminder while the tap still counts as the player's, so the browser can ask for permission.
     if (remindable && currentSession()) await setTrialReminder(remind).catch(() => undefined);
-    const result = await purchase(plan, settings);
+    // From the win-back email: the server checks the offer is still open for this account.
+    const result = await purchase(plan, settings, params.get('offer') === 'winback' ? { offer: 'winback' } : {});
     track('purchase_result', { plan: plan.id, ok: String(result.ok) });
     // Leaving for Stripe Checkout: keep the button busy until the page goes.
     if (result.ok === 'redirect') return;

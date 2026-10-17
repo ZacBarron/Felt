@@ -163,7 +163,12 @@ Every setting is an environment variable. `apps/server/.env.example` lists them 
 | `VAPID_SUBJECT` | A `mailto:` address push services can contact. | For reminders |
 | `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` | Takes payments for Aced Pro. | Optional |
 | `STRIPE_PRICE_ANNUAL`, `STRIPE_PRICE_MONTHLY` | The 2 Stripe price ids. | Optional |
+| `STRIPE_PRICE_LIFETIME` | The one time price for founding members ($79.99). Without it the founding purchase is off. | Optional |
+| `STRIPE_RETENTION_COUPON` | The coupon id offered to a yearly player who cancels because of price (once a year) and in the win-back email. Without it those offers are off. | Optional |
 | `TRIAL_DAYS` | Length of the free trial. The default is 7. | Optional |
+| `MAIL_POSTAL_ADDRESS` | The business mailing address printed in every marketing email (CASL requires it). Without it no marketing email is sent. Account and payment email still goes. | For marketing email |
+| `LIFECYCLE_HOLDOUT` | Share of new accounts that never get marketing email, to measure what it is worth. A number from 0 to 1. The default is 0.1. | Optional |
+| `SERVER_URL` | This server's public address, for unsubscribe links. Set it when the app is hosted elsewhere, such as `https://felt.onrender.com`. The default is the origin of `APP_URL`. | When the app and server are on different hosts |
 | `ANTHROPIC_API_KEY` | Turns on the AI coach for Aced Pro players. Without it the coach is off. | Optional |
 | `COACH_MODEL` | The Claude model the coach uses. The default is `claude-opus-5-5`. | Optional |
 | `COACH_EFFORT` | How hard the model thinks: `low`, `medium`, `high`, `xhigh` or `max`. The default is `medium`. | Optional |
@@ -192,10 +197,20 @@ For real testers, set up Resend. Its free tier is enough.
 ### Aced Pro payments (optional)
 
 1. In Stripe, create a product with a monthly and an annual price. Copy both price ids.
-2. Add a webhook endpoint at `<APP_URL>/api/billing/webhook`. Send it `checkout.session.completed` and the `customer.subscription` events.
+2. Add a webhook endpoint at `<server>/api/billing/webhook`. Send it `checkout.session.completed`, `checkout.session.expired`, `invoice.paid`, `invoice.payment_failed` and every `customer.subscription` event.
 3. Set the 4 Stripe variables and redeploy.
 
 The health check reports billing as on once all 4 are set. Use test mode keys until you are ready to charge.
+
+Then the retention pieces (all optional; see MONETIZATION.md):
+
+4. **Founding members.** Create a one time price of $79.99 (on the same product or a "Founding member" product). Set `STRIPE_PRICE_LIFETIME`. The server caps it at 500 seats.
+5. **Retention coupon.** Create a coupon, for example 30% off once. Set `STRIPE_RETENTION_COUPON` to its id. The app words the offer from the coupon, so change it in Stripe, not in code.
+6. **Customer portal.** In Stripe's billing portal settings, allow updating the payment method and viewing invoices. Aced's own Manage Pro screen handles cancelling, so the portal's cancel option can stay off.
+7. **Failed payments.** In Stripe's subscription settings, turn on Smart Retries and choose what happens after the last retry (cancel the subscription). Aced keeps Pro on while Stripe retries.
+8. **Email.** For lifecycle email, verify the sending domain in Resend (SPF, DKIM and a DMARC record), then set `MAIL_POSTAL_ADDRESS`. Leave it empty to send account and payment email only.
+
+Pauses end on their own: the scheduler restarts billing on the day a pause ends.
 
 ### The AI coach (optional)
 

@@ -17,8 +17,13 @@ export const validHandle = (h: unknown): h is string => typeof h === 'string' &&
 
 // Email ----------------------------------------------------------------
 
+export interface MailOptions {
+  /** Extra headers, such as List-Unsubscribe on marketing email. */
+  headers?: Record<string, string>;
+}
+
 export interface Mailer {
-  send(to: string, subject: string, text: string): Promise<void>;
+  send(to: string, subject: string, text: string, options?: MailOptions): Promise<void>;
 }
 
 /** Sends through Resend when a key is set; otherwise prints to the log for local use. */
@@ -31,11 +36,11 @@ export function createMailer(resendKey: string | undefined, from: string): Maile
     };
   }
   return {
-    async send(to, subject, text) {
+    async send(to, subject, text, options) {
       const res = await fetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: { Authorization: `Bearer ${resendKey}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ from, to, subject, text }),
+        body: JSON.stringify({ from, to, subject, text, ...(options?.headers ? { headers: options.headers } : {}) }),
       });
       if (!res.ok) throw new Error(`Email failed: ${res.status} ${await res.text()}`);
     },
@@ -90,11 +95,20 @@ export interface Entitlement {
   proUntil: string | null;
   plan: string | null;
   trialing: boolean;
+  /** Stripe's status: active, trialing, past_due, canceled, unpaid and so on. */
+  status: string | null;
+  subscriptionId: string | null;
+  /** The player cancelled: Pro runs to the period end, then stops. */
+  cancelAtPeriodEnd: boolean;
+  /** Collection is paused (the "not using it" offer). */
+  paused: boolean;
 }
 
 /**
  * What a Stripe subscription grants. Newer API versions keep the period end
- * on each item instead of the subscription, so both are read.
+ * on each item instead of the subscription, so both are read. A past_due
+ * subscription keeps Pro to its period end: that is the grace period while
+ * Stripe retries the card.
  */
 export function entitlementFromSubscription(
   sub: Record<string, unknown>,
@@ -104,7 +118,7 @@ export function entitlementFromSubscription(
   const items = (sub.items as { data?: { price?: { id?: string }; current_period_end?: number }[] } | undefined)?.data ?? [];
   const priceId = items[0]?.price?.id;
   const plan = priceId === prices.annual ? 'annual' : priceId === prices.monthly ? 'monthly' : null;
-  const status = sub.status as string;
+  const status = (sub.status as string | undefined) ?? null;
   const periodEnd = (sub.current_period_end as number | undefined) ?? items[0]?.current_period_end;
   const trialEnd = sub.trial_end as number | undefined;
   const live = status === 'active' || status === 'trialing' || status === 'past_due';
@@ -113,6 +127,10 @@ export function entitlementFromSubscription(
     proUntil: end ? new Date(end * 1000).toISOString() : null,
     plan,
     trialing: status === 'trialing',
+    status,
+    subscriptionId: typeof sub.id === 'string' ? sub.id : null,
+    cancelAtPeriodEnd: !!sub.cancel_at_period_end,
+    paused: !!sub.pause_collection,
   };
 }
 
@@ -128,34 +146,95 @@ export function localTime(now: Date, tz: string): { day: string; minutes: number
   return { day: `${parts.year}-${parts.month}-${parts.day}`, minutes: Number(parts.hour) * 60 + Number(parts.minute) };
 }
 
+const DAY_MS = 86_400_000;
+
+/** No push from 9 pm to 8 am in the player's own time. */
+export const QUIET_START_MIN = 21 * 60;
+export const QUIET_END_MIN = 8 * 60;
+/** At most this many pushes in one local day, and in any 7 days. */
+export const PUSH_DAY_CAP = 1;
+export const PUSH_WEEK_CAP = 4;
+/** Days without opening Aced before the one closing note. */
+export const CLOSING_AFTER_DAYS = 14;
+
+export const inQuietHours = (minutes: number) => minutes >= QUIET_START_MIN || minutes < QUIET_END_MIN;
+
+/** The time zone if Intl knows it, otherwise UTC. */
+export function safeZone(tz: string | null | undefined): string {
+  if (!tz) return 'UTC';
+  try {
+    new Intl.DateTimeFormat('en', { timeZone: tz });
+    return tz;
+  } catch {
+    return 'UTC';
+  }
+}
+
+/**
+ * Whether the caps leave room for one more push: at most PUSH_DAY_CAP in the
+ * player's local day and PUSH_WEEK_CAP in the last 7 days. Every push counts,
+ * transactional ones too.
+ */
+export function underPushCaps(sentAt: readonly string[], now: Date, tz: string): boolean {
+  const t = now.getTime();
+  const recent = sentAt.map((s) => Date.parse(s)).filter((s) => s <= t && s > t - 7 * DAY_MS);
+  if (recent.length >= PUSH_WEEK_CAP) return false;
+  const today = localTime(now, tz).day;
+  return recent.filter((s) => localTime(new Date(s), tz).day === today).length < PUSH_DAY_CAP;
+}
+
+/** A push at a time the player did not pick (the trial reminder) waits out quiet hours. */
+export const outsideQuietHours = (now: Date, tz: string) => !inQuietHours(localTime(now, tz).minutes);
+
 export interface ReminderCandidate {
   tz: string;
   cueMinutes: number;
   lastStudyDay: string | null;
   /** Reminders sent since the player last studied, newest first. */
   sentSinceStudy: string[];
+  /** Every push sent to the player recently, any kind (ISO times), for the caps. */
+  pushesSent?: string[];
+  /** The last time the player opened Aced (ISO), if known. */
+  lastOpenAt?: string | null;
+  /** When the closing note went out, if it has. */
+  closingSentAt?: string | null;
 }
+
+export type ReminderDecision =
+  | { send: true; day: string; kind: 'reminder' | 'closing' }
+  | { send: false; day: string; why: 'window' | 'closed' | 'studied' | 'sent' | 'cap' | 'decay' | 'stopped' };
 
 /** Window after the cue time in which a reminder may go out (the scheduler runs every few minutes). */
 export const REMINDER_WINDOW_MIN = 30;
 
 /**
  * One reminder a day at the player's own study time, only if they have not
- * studied yet. Ignored reminders decay: after three in a row, every third
- * day; after seven, none until the player comes back.
+ * studied yet, within the push caps. Ignored reminders decay: after three in
+ * a row, every third day; after seven, none until the player comes back.
+ * After CLOSING_AFTER_DAYS without opening Aced, one closing note goes
+ * instead, and then nothing until the player opens Aced again.
+ *
+ * Quiet hours (9 pm to 8 am) do not hold this one back: it goes at a time
+ * the player picked, and many players study late. Every other push waits
+ * them out (see outsideQuietHours).
  */
-export function shouldRemind(c: ReminderCandidate, now: Date): { send: boolean; day: string } {
+export function shouldRemind(c: ReminderCandidate, now: Date): ReminderDecision {
   const { day, minutes } = localTime(now, c.tz);
   const inWindow = minutes >= c.cueMinutes && minutes < c.cueMinutes + REMINDER_WINDOW_MIN;
-  if (!inWindow || c.lastStudyDay === day || c.sentSinceStudy.includes(day)) return { send: false, day };
+  if (!inWindow) return { send: false, day, why: 'window' };
+  if (c.closingSentAt && (!c.lastOpenAt || c.closingSentAt >= c.lastOpenAt)) return { send: false, day, why: 'closed' };
+  if (c.lastStudyDay === day) return { send: false, day, why: 'studied' };
+  if (c.sentSinceStudy.includes(day)) return { send: false, day, why: 'sent' };
+  if (!underPushCaps(c.pushesSent ?? [], now, c.tz)) return { send: false, day, why: 'cap' };
   const ignored = c.sentSinceStudy.length;
-  if (ignored >= 7) return { send: false, day };
+  if (ignored > 0 && c.lastOpenAt && now.getTime() - Date.parse(c.lastOpenAt) >= CLOSING_AFTER_DAYS * DAY_MS) return { send: true, day, kind: 'closing' };
+  if (ignored >= 7) return { send: false, day, why: 'stopped' };
   if (ignored >= 3) {
     const last = c.sentSinceStudy[0];
-    const daysSince = (Date.parse(day) - Date.parse(last)) / 86_400_000;
-    if (daysSince < 3) return { send: false, day };
+    const daysSince = (Date.parse(day) - Date.parse(last)) / DAY_MS;
+    if (daysSince < 3) return { send: false, day, why: 'decay' };
   }
-  return { send: true, day };
+  return { send: true, day, kind: 'reminder' };
 }
 
 // Leagues -----------------------------------------------------------------
