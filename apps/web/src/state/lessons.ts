@@ -1,4 +1,5 @@
-import { CURRICULUM, LESSON_CONTENT, type LessonContent, lessonKey, quizVersion, type QuizStep, variantSeed } from '@felt/content';
+import { CURRICULUM, LESSON_CONTENT, type LessonContent, lessonKey, quizVersion, quizVersions, type QuizStep, SUIT_ORDERS, variantSeed } from '@felt/content';
+import { markSeen, recentKeys, versionKey } from './seen';
 import { db, type StoredLesson } from './db';
 
 export interface LessonEntry {
@@ -56,6 +57,34 @@ export function quizAt(key: string, step: number, seed: number): QuizStep | unde
 
 /** A fresh seed, so each visit can show another version of a question. */
 export const freshSeed = () => Math.floor(Math.random() * 0x7fffffff) + 1;
+
+/**
+ * A seed for a lesson question that shows a version other than the ones
+ * shown lately on this device, when the question has more than one. With n
+ * versions, the last n - 1 shown wait, so a replay or a skip ahead quiz
+ * walks through every version before any comes back. Suits are dealt fresh
+ * each time when the question allows it. The version shown is remembered.
+ */
+export function dealQuizSeed(key: string, step: number, rand: () => number = Math.random): number {
+  const s = entryFor(key)?.content?.steps[step];
+  if (s?.kind !== 'quiz') return freshSeed();
+  const n = quizVersions(s).length;
+  const prefix = `v:${key}#${step}:`;
+  const recent = new Set(recentKeys(prefix, Math.max(0, n - 1)).map((k) => Number(k.slice(prefix.length))));
+  const open = Array.from({ length: n }, (_, i) => i).filter((i) => !recent.has(i));
+  const pool = open.length ? open : Array.from({ length: n }, (_, i) => i);
+  const version = pool[Math.floor(rand() * pool.length)];
+  const suits = s.shuffleSuits ? Math.floor(rand() * SUIT_ORDERS.length) : 0;
+  markSeen([versionKey(key, step, version)]);
+  return version + n * suits;
+}
+
+/** The version a seed shows, as dealQuizSeed counts them. */
+export function versionIndex(key: string, step: number, seed: number): number {
+  const s = entryFor(key)?.content?.steps[step];
+  if (s?.kind !== 'quiz') return 0;
+  return (Math.abs(Math.trunc(seed)) || 0) % quizVersions(s).length;
+}
 
 /**
  * A seed shared by everyone who plays the same challenge: the daily challenge

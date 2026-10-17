@@ -15,7 +15,8 @@
     "check": "pnpm typecheck && pnpm test",
     "build:site": "pnpm --filter @felt/site build",
     "build:domain": "node scripts/build-domain.mjs",
-    "dev:site": "pnpm --filter @felt/site dev"
+    "dev:site": "pnpm --filter @felt/site dev",
+    "bank:scenarios": "pnpm --filter @felt/content bank:scenarios"
   },
   "devDependencies": {
     "typescript": "^5.9.3"

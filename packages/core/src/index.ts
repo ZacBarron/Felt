@@ -28,3 +28,5 @@ export * from './play';
 export * from './preflopStrength';
 export * from './bots';
 export * from './handName';
+export * from './novelty';
+export * from './scenarioGen';

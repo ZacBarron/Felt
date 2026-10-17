@@ -9,7 +9,8 @@
   },
   "scripts": {
     "test": "vitest run",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "bank:scenarios": "BUILD_SCENARIO_BANK=1 vitest run test/scenarioBank.build.test.ts"
   },
   "dependencies": {
     "@felt/core": "workspace:*"

@@ -1,4 +1,6 @@
-import { type Chart, deckForCharts, MATH_FACTS, State } from '@felt/core';
+import { STARTER_CHARTS } from '@felt/content';
+import { type Chart, growDeck, MATH_FACTS, mixedDeck, spreadOrder, State } from '@felt/core';
+import { getChart } from './charts';
 import { db, type StoredCard } from './db';
 import { isComplete, LESSON_ENTRIES, lessonProgress } from './lessons';
 import { type QueueItem, SAVED_CHART, savedQueue, startOfToday, toItem } from './review';
@@ -65,9 +67,43 @@ export function mathTaught(progress: ReadonlyMap<string, Parameters<typeof isCom
   return isComplete(progress.get(MATH_INTRO)) || [...progress].some(([key, l]) => key.startsWith('foundations/math/') && isComplete(l));
 }
 
+/** Cards in long term review it takes to add one more chart to the review deck. */
+export const CARDS_PER_NEW_CHART = 30;
+
+/** Hand written charts at the deck's table size that are not review charts yet, mixed across spot types. */
+function extraCharts(charts: readonly Chart[]): Chart[] {
+  const first = charts[0]?.spec;
+  if (!first) return [];
+  const ids = new Set(charts.map((c) => c.spec.id));
+  const rest = STARTER_CHARTS.filter((s) => s.tableSize === first.tableSize && s.game === first.game && !ids.has(s.id)).map((s) => getChart(s.id)!);
+  const bySpot = new Map<string, Chart[]>();
+  for (const c of rest) bySpot.set(c.spec.spot, [...(bySpot.get(c.spec.spot) ?? []), c]);
+  const lists = [...bySpot.values()];
+  const out: Chart[] = [];
+  for (let i = 0; out.length < rest.length; i++) for (const l of lists) if (i < l.length) out.push(l[i]);
+  return out;
+}
+
+/**
+ * The charts in the review deck: the review charts for the game, plus more
+ * hand written charts as the deck matures (one per CARDS_PER_NEW_CHART cards
+ * in long term review). A chart that has cards always stays, so saved cards
+ * keep their place.
+ */
+export async function reviewCharts(charts: readonly Chart[]): Promise<Chart[]> {
+  const cards = (await db.cards.toArray()).filter((c) => deckOf(c) === 'charts');
+  const started = new Set(cards.map((c) => c.chartId));
+  const mature = cards.filter((c) => c.fsrs.state === State.Review && charts.some((ch) => ch.spec.id === c.chartId)).length;
+  return growDeck(charts, extraCharts(charts), { mature, started, perChart: CARDS_PER_NEW_CHART });
+}
+
 /** Every card a deck could hold, in the order new ones are introduced. */
-async function seedsFor(deck: DeckId, charts: readonly Chart[]): Promise<QueueItem[]> {
-  if (deck === 'charts') return chartsTaught(await lessonProgress()) ? deckForCharts(charts).map((s) => toItem(s, true)) : [];
+async function seedsFor(deck: DeckId, charts: readonly Chart[], known: readonly StoredCard[] = []): Promise<QueueItem[]> {
+  if (deck === 'charts') {
+    if (!chartsTaught(await lessonProgress())) return [];
+    // A few charts at a time from different spot types, mixed together.
+    return mixedDeck(charts, { known: new Set(known.map((c) => c.id)) }).map((s) => toItem(s, true));
+  }
   if (deck === 'math') {
     if (!mathTaught(await lessonProgress())) return [];
     return MATH_FACTS.map((f) => ({ id: f.id, chartId: MATH_DECK, mode: 'math', factId: f.id, targetMs: MATH_TARGET_MS, isNew: true }));
@@ -122,7 +158,9 @@ async function deckQueue(deck: DeckId, charts: readonly Chart[], pref: DeckPref,
     const known = (await db.cards.where('chartId').equals(SAVED_CHART).toArray()) as StoredCard[];
     return { deck, due: s.due, fresh: s.fresh, known, seeds: s.fresh, learning: 0 };
   }
-  const [known, seeds] = await Promise.all([knownFor(deck, charts), seedsFor(deck, charts)]);
+  const deckCharts = deck === 'charts' ? await reviewCharts(charts) : charts;
+  const known = await knownFor(deck, deckCharts);
+  const seeds = await seedsFor(deck, deckCharts, known);
   const knownIds = new Set(known.map((c) => c.id));
   const dueCards = known.filter((c) => c.due <= now).sort((a, b) => a.due.getTime() - b.due.getTime());
   const introducedToday = known.filter((c) => c.createdAt >= startOfToday(now)).length;
@@ -185,7 +223,8 @@ export async function buildSession(
   if (config.kind === 'today') {
     const dueAt = new Map(queues.flatMap((q) => q.known.map((c) => [c.id, c.due.getTime()] as const)));
     const due = queues.flatMap((q) => q.due).sort((a, b) => (dueAt.get(a.id) ?? 0) - (dueAt.get(b.id) ?? 0));
-    return take([...due, ...interleave(queues.map((q) => q.fresh))]);
+    // Mixed together: neighbours come from different charts and spot types where the due order allows.
+    return take(spreadOrder([...due, ...interleave(queues.map((q) => q.fresh))], itemFacets));
   }
 
   const known = queues.flatMap((q) => q.known.map((c) => ({ card: c, deck: q.deck })));
@@ -229,7 +268,17 @@ export async function buildSession(
     }
     return out;
   });
-  return interleave(piles).slice(0, n);
+  return spreadOrder(interleave(piles), itemFacets).slice(0, n);
+}
+
+/** What a queue item is about, so a session can keep neighbours apart. */
+export function itemFacets(item: QueueItem): string[] {
+  if (item.mode === 'quick' || item.mode === 'paint') {
+    const spec = getChart(item.chartId)?.spec;
+    return [`chart:${item.chartId}`, `spot:${spec?.spot ?? ''}`, `seat:${spec?.hero ?? ''}`];
+  }
+  if (item.mode === 'quiz') return [`lesson:${item.lessonKey}`, `module:${item.lessonKey?.split('/').slice(0, 2).join('/')}`];
+  return [`deck:${item.mode}`];
 }
 
 /** Due plus new cards today across the decks that are on, for badges and the Today screen. */

@@ -1,4 +1,3 @@
-import { SCENARIOS } from '@felt/content';
 import { DIFFICULTY, handClassOf, isoWeek, isProvisional, parseCards, shareGrid, type SkillRating, tierLabel, weeklySummary, weekRange } from '@felt/core';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -12,6 +11,7 @@ import { track } from '../state/events';
 import { lessonPath } from '../state/lessons';
 import { ratingSnapshot, recordRated } from '../state/rating';
 import { gradeChoice, type RiverResult, solveRiver } from '../state/scenarioSolve';
+import { findScenario } from '../state/scenarios';
 import { useSettings } from '../state/settings';
 import {
   addWeeklyMissesToReview,
@@ -66,11 +66,11 @@ const pct = (x: number) => `${Math.round(x * 100)}%`;
 const riverSolves = new Map<string, Promise<RiverResult>>();
 
 function solveFor(scenarioId: string): Promise<RiverResult> | undefined {
-  const scenario = SCENARIOS.find((s) => s.id === scenarioId);
+  const scenario = findScenario(scenarioId);
   if (!scenario) return undefined;
   let solve = riverSolves.get(scenarioId);
   if (!solve) {
-    solve = solveRiver(scenario.river, scenario.hero.cards);
+    solve = solveRiver(scenario.river, scenario.hero.cards, scenario.id);
     // A failed solve can be tried again on the next visit.
     solve.catch(() => riverSolves.delete(scenarioId));
     riverSolves.set(scenarioId, solve);
@@ -84,7 +84,7 @@ function prefetchRivers(items: readonly WeeklyDecision[]) {
 
 /** A scenario's river on its own: the hand so far, then the decision, graded by EV loss from Aced Solver. */
 function RiverDecision({ scenarioId, last, onScore, onNext }: { scenarioId: string; last: boolean; onScore: (s: number) => void; onNext: () => void }) {
-  const scenario = SCENARIOS.find((s) => s.id === scenarioId);
+  const scenario = useMemo(() => findScenario(scenarioId), [scenarioId]);
   const [river, setRiver] = useState<RiverResult>();
   const [error, setError] = useState<string>();
   const [choice, setChoice] = useState<number>();

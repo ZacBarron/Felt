@@ -8,7 +8,7 @@ import { haptic } from '../haptics';
 import { StepView } from '../lesson/StepView';
 import { db, type SavedItem, type SavedSolverSpot } from '../state/db';
 import { LessonSheet } from '../lesson/LessonSheet';
-import { entryFor, freshSeed, quizAt } from '../state/lessons';
+import { dealQuizSeed, entryFor, quizAt } from '../state/lessons';
 import { BottomBar } from '../ui/BottomBar';
 import { BookmarkIcon } from '../ui/icons';
 import { untimedMs, useSettings } from '../state/settings';
@@ -47,7 +47,7 @@ function Header({ item, revealed = false }: { item: SavedItem; revealed?: boolea
 
 /** A saved lesson quiz: answered and graded like any quiz. */
 function SavedQuiz({ item, targetMs, onAnswer, onNext }: Props & { item: SavedItem }) {
-  const [seed] = useState(freshSeed);
+  const [seed] = useState(() => dealQuizSeed(item.lessonKey!, item.step!));
   const step = quizAt(item.lessonKey!, item.step!, seed);
   const started = useRef(performance.now());
   const untimed = !!useSettings().settings.study.untimed;

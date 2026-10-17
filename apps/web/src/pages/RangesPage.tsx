@@ -1,12 +1,12 @@
 import { handNickname } from '@felt/content';
 import {
-  ALL_HAND_CLASSES,
   actionFrequencies,
-  boundaryHands,
   type Chart,
   chartOpenBb,
   comboCount,
+  drillHands,
   type HandClass,
+  noveltyPick,
   openSize,
   PAINT_TARGET_MS,
   reaches,
@@ -29,6 +29,7 @@ import { paintRule } from '../drills/PaintDrill';
 import { resolveVariant } from '../state/chartPicker';
 import { chartMeta, closestForGame, fitForGame, getChart } from '../state/charts';
 import { useSettings } from '../state/settings';
+import { handKey, markSeen, seenMap } from '../state/seen';
 import { BottomBar } from '../ui/BottomBar';
 import { CheckIcon, ChevronLeftIcon, ChevronRightIcon, FlameIcon, HelpIcon, InfoIcon } from '../ui/icons';
 import { ProgressRing } from '../ui/ProgressRing';
@@ -319,14 +320,24 @@ function shuffle<T>(items: readonly T[]): T[] {
   return out;
 }
 
-/** Mostly close calls, plus a couple of other hands so the obvious ones stay honest too. No hand twice in a set. */
-function dealSet(chart: Chart): HandClass[] {
-  const edges = shuffle(boundaryHands(chart));
-  const others = shuffle(ALL_HAND_CLASSES.filter((h) => reaches(chart, h) && !edges.includes(h)));
-  const fromEdges = Math.min(edges.length, SET_SIZE - 2);
-  const picks = [...edges.slice(0, fromEdges), ...others.slice(0, SET_SIZE - fromEdges)];
-  if (picks.length < SET_SIZE) picks.push(...edges.slice(fromEdges, fromEdges + SET_SIZE - picks.length));
-  return shuffle(picks);
+/** Hands of a chart are not dealt again within three days while others are left. */
+const HAND_WINDOW_MS = 3 * 24 * 3600 * 1000;
+
+/**
+ * Mostly mixed hands and close calls, with a clear hand now and then so the
+ * obvious ones stay honest too. Hands from recent sets wait their turn, so a
+ * new set brings new hands. No hand twice in a set.
+ */
+export function dealSet(chart: Chart, rand: () => number = Math.random, now = Date.now()): HandClass[] {
+  return noveltyPick(drillHands(chart), {
+    n: SET_SIZE,
+    key: (h) => handKey(chart.spec.id, h.hand),
+    weight: (h) => h.weight,
+    seen: seenMap(`h:${chart.spec.id}:`),
+    now,
+    windowMs: HAND_WINDOW_MS,
+    rand,
+  }).map((h) => h.hand);
 }
 
 /** Right answers in a row at the end of the list. */
@@ -453,7 +464,10 @@ function QuizSet({ chart, onPaint }: { chart: Chart; onPaint: () => void }) {
         targetMs={RECALL_TARGET_MS}
         compact
         nextLabel={last ? 'See my results' : 'Next hand'}
-        onAnswer={(o) => setAnswers((a) => [...a, { hand, accuracy: o.accuracy, ms: o.responseMs }])}
+        onAnswer={(o) => {
+          markSeen([handKey(chart.spec.id, hand)]);
+          setAnswers((a) => [...a, { hand, accuracy: o.accuracy, ms: o.responseMs }]);
+        }}
         onNext={() => {
           if (last) {
             finish(answers);
@@ -572,6 +586,15 @@ function QuizResult({
           </div>
         </Section>
       )}
+
+      <Section footer="Ten hands, each from another spot in your game.">
+        <div className="list">
+          <Link to="/quiz" className="list-row">
+            <span className="grow">Quiz across all spots</span>
+            <ChevronRightIcon size={16} className="chev" />
+          </Link>
+        </div>
+      </Section>
 
       <BottomBar>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>

@@ -14,6 +14,8 @@ import { db } from '../state/db';
 import { track } from '../state/events';
 import { recordRated } from '../state/rating';
 import { gradeChoice, type RiverResult, solveRiver } from '../state/scenarioSolve';
+import { dealFreshScenario, findScenario, markScenarioSeen, nextScenarios, scenarioRated } from '../state/scenarios';
+import { useSettings } from '../state/settings';
 import { BottomBar } from '../ui/BottomBar';
 import { ChevronRightIcon, CloseIcon } from '../ui/icons';
 import { PageHeader } from '../ui/PageHeader';
@@ -57,10 +59,13 @@ export function Board({ cards }: { cards: string }) {
 
 export function ScenariosPage() {
   const { id } = useParams();
-  const scenario = SCENARIOS.find((s) => s.id === id);
+  const scenario = useMemo(() => (id ? findScenario(id) : undefined), [id]);
   if (id && scenario) return <ScenarioPlayer key={scenario.id} scenario={scenario} />;
   return <ScenarioList />;
 }
+
+/** "9-handed, 100bb" for the hand, from its generator or the hand written set. */
+const gameWords = (s: ScenarioSpec) => `${s.generated?.tableSize ?? 9}-handed, ${s.generated?.stackBb ?? 100}bb`;
 
 function HoleCards({ cards, size }: { cards: string; size: 'sm' | 'md' }) {
   return (
@@ -73,65 +78,105 @@ function HoleCards({ cards, size }: { cards: string; size: 'sm' | 'md' }) {
 }
 
 function ScenarioList() {
+  const navigate = useNavigate();
+  const { settings } = useSettings();
   const results = useLiveQuery(() => db.scenarios.toArray(), [], []);
   const byId = new Map(results.map((r) => [r.id, r]));
-  const next = SCENARIOS.find((s) => !byId.has(s.id)) ?? SCENARIOS[0];
+  const [dealing, setDealing] = useState(false);
+  const [dealError, setDealError] = useState(false);
+  const playedKey = results.map((r) => r.id).join(',');
+  const nextId = useMemo(() => nextScenarios(new Set(byId.keys()), { tableSize: settings.game.tableSize })[0], [playedKey]); // eslint-disable-line react-hooks/exhaustive-deps
+  const next = nextId ? findScenario(nextId) : undefined;
+  const recent = results
+    .filter((r) => r.id.startsWith('g.'))
+    .sort((a, b) => b.at.getTime() - a.at.getTime())
+    .slice(0, 8)
+    .flatMap((r) => {
+      const spec = findScenario(r.id);
+      return spec ? [{ spec, result: r }] : [];
+    });
+
+  const deal = async () => {
+    setDealing(true);
+    setDealError(false);
+    const code = await dealFreshScenario(settings.game);
+    setDealing(false);
+    if (code) navigate(`/scenarios/${code}`);
+    else setDealError(true);
+  };
+
+  const row = (sc: ScenarioSpec) => {
+    const r = byId.get(sc.id);
+    return (
+      <Link key={sc.id} to={`/scenarios/${sc.id}`} className="list-row">
+        <HoleCards cards={sc.hero.cards} size="sm" />
+        <span className="grow">
+          <span style={{ display: 'block', fontWeight: 600 }}>{sc.title}</span>
+          <span className="footnote">
+            {sc.hero.seat} vs {sc.villain.seat}
+            {sc.generated && `, ${sc.generated.stackBb}bb`}
+            {sc.level === 'advanced' && (
+              <span className="pill" style={{ marginLeft: 6 }}>
+                Advanced
+              </span>
+            )}
+            {sc.generated && !sc.generated.rated && (
+              <span className="pill pill-estimate" style={{ marginLeft: 6 }}>
+                Estimate
+              </span>
+            )}
+          </span>
+        </span>
+        {r && <span className={`pill grade-pill grade-${r.grade}`}>{GRADE_TEXT[r.grade]}</span>}
+        <ChevronRightIcon size={14} className="chev" />
+      </Link>
+    );
+  };
+
   return (
     <div className="stack" style={{ gap: '1.4rem' }}>
       <PageHeader title="Scenarios" subtitle="Graded by Aced Solver" back={{ to: '/train', label: 'Train' }} />
-      {SCENARIOS.length === 0 ? (
-        <p className="muted">Scenarios are on their way.</p>
-      ) : (
-        <>
-          {next && (
-            <Link to={`/scenarios/${next.id}`} className="sc-next" aria-label={`${byId.size === 0 ? 'Start here' : 'Up next'}: ${next.title}. ${next.summary}`}>
-              <HoleCards cards={next.hero.cards} size="md" />
-              <span className="grow" style={{ minWidth: 0 }}>
-                <span className="sc-next-kicker">{byId.size === 0 ? 'Start here' : 'Up next'}</span>
-                <span className="sc-next-title">{next.title}</span>
-                <span className="sc-next-meta">
-                  {next.hero.seat} vs {next.villain.seat}, 100bb
-                </span>
-              </span>
-              <span className="sc-next-go" aria-hidden="true">
-                <ChevronRightIcon size={18} />
-              </span>
-            </Link>
-          )}
-          <Section
-            title="All scenarios"
-            info={
-              <p>
-                Play each hand street by street. Aced Solver solves the river on your device for the ranges in the hand. The grade is exact for those ranges.
-              </p>
-            }
-          >
-            <div className="list" style={{ '--sep-inset': '5.4rem' } as React.CSSProperties}>
-              {SCENARIOS.map((s) => {
-                const r = byId.get(s.id);
-                return (
-                  <Link key={s.id} to={`/scenarios/${s.id}`} className="list-row">
-                    <HoleCards cards={s.hero.cards} size="sm" />
-                    <span className="grow">
-                      <span style={{ display: 'block', fontWeight: 600 }}>{s.title}</span>
-                      <span className="footnote">
-                        {s.hero.seat} vs {s.villain.seat}
-                        {s.level === 'advanced' && (
-                          <span className="pill" style={{ marginLeft: 6 }}>
-                            Advanced
-                          </span>
-                        )}
-                      </span>
-                    </span>
-                    {r && <span className={`pill grade-pill grade-${r.grade}`}>{GRADE_TEXT[r.grade]}</span>}
-                    <ChevronRightIcon size={14} className="chev" />
-                  </Link>
-                );
-              })}
-            </div>
-          </Section>
-        </>
+      {next && (
+        <Link to={`/scenarios/${next.id}`} className="sc-next" aria-label={`${byId.size === 0 ? 'Start here' : 'Up next'}: ${next.title}. ${next.summary}`}>
+          <HoleCards cards={next.hero.cards} size="md" />
+          <span className="grow" style={{ minWidth: 0 }}>
+            <span className="sc-next-kicker">{byId.size === 0 ? 'Start here' : 'Up next'}</span>
+            <span className="sc-next-title">{next.title}</span>
+            <span className="sc-next-meta">
+              {next.hero.seat} vs {next.villain.seat}, {gameWords(next)}
+            </span>
+          </span>
+          <span className="sc-next-go" aria-hidden="true">
+            <ChevronRightIcon size={18} />
+          </span>
+        </Link>
       )}
+      <Section
+        footer={dealError ? 'That hand had no river decision worth asking. Try again.' : 'A new hand from the charts with new seats and a new board. Aced Solver solves the river on your device.'}
+      >
+        <button type="button" className="btn btn-tinted btn-block" disabled={dealing} onClick={() => void deal()}>
+          {dealing ? 'Dealing a new hand…' : 'Deal a new hand'}
+        </button>
+      </Section>
+      {recent.length > 0 && (
+        <Section title="Your recent hands">
+          <div className="list" style={{ '--sep-inset': '5.4rem' } as React.CSSProperties}>
+            {recent.map(({ spec }) => row(spec))}
+          </div>
+        </Section>
+      )}
+      <Section
+        title="Hand written"
+        info={
+          <p>
+            Play each hand street by street. Aced Solver solves the river on your device for the ranges in the hand. The grade is exact for those ranges.
+          </p>
+        }
+      >
+        <div className="list" style={{ '--sep-inset': '5.4rem' } as React.CSSProperties}>
+          {SCENARIOS.map(row)}
+        </div>
+      </Section>
     </div>
   );
 }
@@ -150,7 +195,8 @@ function ScenarioPlayer({ scenario }: { scenario: ScenarioSpec }) {
   // Solve the river as soon as the hand opens, so it is ready by the time you get there.
   useEffect(() => {
     let live = true;
-    solveRiver(scenario.river, scenario.hero.cards)
+    markScenarioSeen(scenario.id);
+    solveRiver(scenario.river, scenario.hero.cards, scenario.id)
       .then((r) => live && setRiver(r))
       .catch((e) => live && setRiverError(e instanceof Error ? e.message : 'The solver could not finish this spot.'));
     track('scenario_started', { id: scenario.id });
@@ -188,7 +234,8 @@ function ScenarioPlayer({ scenario }: { scenario: ScenarioSpec }) {
     const g = gradeChoice(river.hand, i);
     const score = g.grade === 'best' || g.grade === 'good' ? 1 : g.grade === 'inaccuracy' ? 0.5 : 0;
     haptic(score === 1 ? 'success' : score > 0 ? 'warning' : 'error');
-    void recordRated({ itemId: `scenario:${scenario.id}`, domain: 'postflop', difficulty: DIFFICULTY.scenarioRiver, score, source: 'review' });
+    // Generated hands from derived charts are estimates, so they never move the rating.
+    if (scenarioRated(scenario)) void recordRated({ itemId: `scenario:${scenario.id}`, domain: 'postflop', difficulty: DIFFICULTY.scenarioRiver, score, source: 'review' });
     void db.scenarios.put({ id: scenario.id, at: new Date(), grade: g.grade, preflopRight: preflopScore === 1, lossBb: g.lossBb });
     track('scenario_graded', { id: scenario.id, grade: g.grade });
   };
@@ -213,9 +260,10 @@ function ScenarioPlayer({ scenario }: { scenario: ScenarioSpec }) {
                 You are {scenario.hero.seat}
                 <span className="muted" style={{ fontWeight: 500, fontSize: '1rem' }}>
                   {' '}
-                  9-handed, 100bb
+                  {gameWords(scenario)}
                 </span>
               </div>
+              {scenario.generated && !scenario.generated.rated && <span className="pill pill-estimate">Estimate</span>}
             </div>
             <div className="row felt-strip" style={{ justifyContent: 'center', gap: 12 }}>
               {(scenario.hero.cards.match(/.{2}/g) ?? []).map((c, i) => (
@@ -303,6 +351,11 @@ function ScenarioPlayer({ scenario }: { scenario: ScenarioSpec }) {
                 : scenario.river.line.map((id, i) => lineText(id, (i % 2 === 0) === (scenario.river.hero === 1) ? villain : 'You')).join(' ')}{' '}
               What do you do?
             </p>
+            {scenario.generated && !graded && (
+              <p className="footnote" style={{ margin: 0 }}>
+                The flop and turn are our estimate of how each range plays. The river is solved exactly.
+              </p>
+            )}
             {graded && river && (
               <RiverResultView hand={river.hand} chosen={choice!} graded={graded} explain={scenario.river.explain} exploitability={river.exploitability} />
             )}
@@ -398,14 +451,19 @@ export function RiverResultView({
 }
 
 function ScenarioDone({ scenario }: { scenario: ScenarioSpec }) {
-  const i = SCENARIOS.findIndex((s) => s.id === scenario.id);
-  const next = SCENARIOS[i + 1];
+  const { settings } = useSettings();
+  const played = useLiveQuery(async () => new Set((await db.scenarios.toArray()).map((r) => r.id)), []);
+  const nextId = useMemo(() => (played ? nextScenarios(new Set([...played, scenario.id]), { tableSize: settings.game.tableSize })[0] : undefined), [played, scenario.id, settings.game.tableSize]);
+  const next = nextId ? findScenario(nextId) : undefined;
+  const rated = scenarioRated(scenario);
   return (
     <>
       <div className="card stack reveal" style={{ gap: '0.6rem', alignItems: 'flex-start' }}>
         <strong style={{ fontSize: '1.2rem' }}>Hand finished</strong>
         <p className="footnote" style={{ margin: 0 }}>
-          Your result is saved. Your river decision counted toward your Aced Rating.
+          {rated
+            ? 'Your result is saved. Your river decision counted toward your Aced Rating.'
+            : 'Your result is saved. This hand uses estimated ranges, so it does not count toward your Aced Rating.'}
         </p>
       </div>
       <BottomBar>

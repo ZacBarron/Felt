@@ -1,4 +1,4 @@
-import { type LessonStep, lessonPoints, stepVersion, variantSeed } from '@felt/content';
+import { type LessonStep, lessonPoints, stepVersion } from '@felt/content';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, Navigate, useNavigate, useParams, useSearchParams } from 'react-router-dom';
@@ -13,7 +13,7 @@ import { recordLessonQuiz } from '../state/rating';
 import { lessonStepId, saveLessonStep, unsave } from '../state/saved';
 import { useSettings } from '../state/settings';
 import { db, type StoredLesson } from '../state/db';
-import { entryFor, freshSeed, isComplete, type LessonEntry, lessonPath, lessonProgress, moduleEntries, nextLesson, saveLesson } from '../state/lessons';
+import { dealQuizSeed, entryFor, isComplete, type LessonEntry, lessonPath, lessonProgress, moduleEntries, nextLesson, saveLesson } from '../state/lessons';
 import { BottomBar } from '../ui/BottomBar';
 import { BookmarkIcon, CheckIcon, ChevronRightIcon, CloseIcon, LockIcon, ReviewIcon, UndoIcon } from '../ui/icons';
 import { ProgressRing } from '../ui/ProgressRing';
@@ -85,9 +85,8 @@ function Lesson({ lessonKey: key }: { lessonKey: string }) {
     if (!saved) void saveLesson(key, { step: 0 });
   }, [saved, content, index, key, jumpTo]);
 
-  // Each visit can deal another version of a question: another seat, hand or board.
-  const [seed] = useState(freshSeed);
-  const steps = useMemo(() => (content?.steps ?? []).map((s, n) => stepVersion(s, variantSeed(seed, n))), [content, seed]);
+  // Each visit deals another version of a question than last time: another seat, hand, board or size.
+  const steps = useMemo(() => (content?.steps ?? []).map((s, n) => (s.kind === 'quiz' ? stepVersion(s, dealQuizSeed(key, n)) : s)), [content, key]);
   const quizIdx = steps.flatMap((s, n) => (s.kind === 'quiz' ? [n] : []));
   const missed = quizIdx.filter((n) => answers[n] !== (steps[n] as QuizStep).answer);
   const missedIds = missed.map((n) => lessonStepId(key, n));

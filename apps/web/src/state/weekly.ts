@@ -1,4 +1,4 @@
-import { SCENARIOS, STARTER_CHARTS } from '@felt/content';
+import { BANKED_SCENARIOS, parseScenarioCode, SCENARIOS, scenarioTemplate, STARTER_CHARTS } from '@felt/content';
 import {
   boundaryHands,
   chartItemDifficulty,
@@ -23,6 +23,7 @@ import { entryFor, LESSON_ENTRIES, quizSteps } from './lessons';
 import { lessonQuizDifficulty } from './rating';
 import { addHandsToReview } from './review';
 import { saveLessonStep } from './saved';
+import { findScenario } from './scenarios';
 import type { Access } from './settings';
 
 /**
@@ -106,6 +107,11 @@ export function weeklyPool(): WeeklyCandidateItem[] {
   }
 
   for (const s of SCENARIOS) add('river', DIFFICULTY.scenarioRiver, { kind: 'river', scenarioId: s.id });
+  // Banked generated hands from hand written charts: solved on the device like the hand written ones.
+  for (const code of BANKED_SCENARIOS) {
+    const t = scenarioTemplate(parseScenarioCode(code)!.template);
+    if (t?.rated) add('river', DIFFICULTY.scenarioRiver, { kind: 'river', scenarioId: code });
+  }
 
   for (const entry of LESSON_ENTRIES) {
     if (entry.content?.level !== 'advanced') continue;
@@ -140,7 +146,7 @@ export function describeWeekly(d: WeeklyDecision): { title: string; note: string
     const f = mathFact(d.factId);
     return { title: f?.prompt ?? 'Math', note: 'Exact answer' };
   }
-  const s = SCENARIOS.find((x) => x.id === d.scenarioId);
+  const s = findScenario(d.scenarioId);
   return { title: s?.title ?? 'River decision', note: 'Graded by Aced Solver' };
 }
 

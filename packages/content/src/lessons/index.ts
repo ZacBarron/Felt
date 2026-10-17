@@ -32,10 +32,12 @@ import { TOURNAMENT_ICM_LESSONS } from './tournaments-icm';
 import { FOUNDATIONS_LESSONS } from './foundations';
 import { POSTFLOP_LESSONS } from './postflop';
 import { PREFLOP_LESSONS } from './preflop';
+import { withGenerated } from './generated';
 import type { LessonContent } from './types';
 
 export * from './types';
 export * from './variants';
+export { GENERATED_QUESTIONS, cardsFor, verdictFor } from './generated';
 
 const ALL: LessonContent[] = [
   ...BASICS_LESSONS,
@@ -74,7 +76,7 @@ const ALL: LessonContent[] = [
   ...GAPS_MINDSET_LESSONS,
 ];
 
-export const LESSON_CONTENT: ReadonlyMap<string, LessonContent> = new Map(ALL.map((l) => [l.key, l]));
+export const LESSON_CONTENT: ReadonlyMap<string, LessonContent> = new Map(withGenerated(ALL).map((l) => [l.key, l]));
 
 export function lessonKey(trackId: string, moduleId: string, lessonId: string): string {
   return `${trackId}/${moduleId}/${lessonId}`;

@@ -1,5 +1,5 @@
 /// <reference lib="webworker" />
-import { type Card, cardsToString, isTerminal, parseCards, parseComboRange, PostflopSolver, rangeToCombos, type SolverAction } from '@felt/core';
+import { type Card, cardsToString, isTerminal, parseCards, parseComboRange, pickRiverDecision, PostflopSolver, rangeToCombos, seededRandom, solverActionId } from '@felt/core';
 import type { FromWorker, NodeView, RangeInput, ToWorker } from './protocol';
 
 /** Text may name exact combos as well as hand classes; chart ranges arrive as class weights. */
@@ -11,10 +11,7 @@ let stopped = false;
 const post = (m: FromWorker) => (self as unknown as Worker).postMessage(m);
 
 /** Stable ids so action colors match the rest of the app: bet75 is a 75% pot bet. */
-function actionId(a: SolverAction, pot: number): string {
-  if (a.kind === 'bet' || a.kind === 'raise') return `${a.kind}${Math.round((a.amount / pot) * 100)}`;
-  return a.kind;
-}
+const actionId = solverActionId;
 
 function view(path: number[]): NodeView {
   const { node, reach, board } = solver!.walk(path);
@@ -43,6 +40,12 @@ self.onmessage = (e: MessageEvent<ToWorker>) => {
     if (msg.type === 'node') {
       if (!solver) throw new Error('Nothing solved yet');
       post({ type: 'node', path: msg.path, view: view(msg.path) });
+      return;
+    }
+    if (msg.type === 'pick') {
+      if (!solver) throw new Error('Nothing solved yet');
+      const pick = pickRiverDecision(solver, msg.hero, seededRandom(msg.seed));
+      post({ type: 'picked', pick: pick && { line: pick.line, cards: cardsToString([...pick.heroCards].sort((a, b) => b - a)), gap: pick.gap } });
       return;
     }
     if (msg.type === 'hand') {

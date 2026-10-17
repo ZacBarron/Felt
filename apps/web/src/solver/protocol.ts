@@ -38,6 +38,8 @@ export type ToWorker =
   | { type: 'node'; path: number[] }
   /** EV of each action for one hand at a decision, for grading. */
   | { type: 'hand'; path: number[]; cards: string }
+  /** After a river solve: pick the hero's decision for a generated scenario. */
+  | { type: 'pick'; hero: 0 | 1; seed: number }
   | { type: 'stop' };
 
 export interface HandView {
@@ -54,4 +56,5 @@ export type FromWorker =
   | { type: 'solved'; iterations: number; exploitability: number; ev: [number, number]; seconds: number; nodes: number }
   | { type: 'node'; path: number[]; view: NodeView }
   | { type: 'hand'; path: number[]; view: HandView }
+  | { type: 'picked'; pick?: { line: string[]; cards: string; gap: number } }
   | { type: 'error'; message: string };

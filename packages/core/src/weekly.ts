@@ -1,4 +1,5 @@
 import { seededRandom } from './habits';
+import { hashString } from './hash';
 
 /**
  * The weekly challenge: ten harder decisions, the same for every player in an
@@ -64,13 +65,6 @@ export interface WeeklySlot {
   count: number;
 }
 
-/** A small string hash (FNV-1a) so each spot type gets its own stable seed. */
-function hashString(s: string): number {
-  let h = 0x811c9dc5;
-  for (let i = 0; i < s.length; i++) h = Math.imul(h ^ s.charCodeAt(i), 0x01000193) >>> 0;
-  return h;
-}
-
 /** The harder half of a spot type: items at or above its median difficulty. */
 function harderHalf<T extends WeeklyCandidate>(items: readonly T[]): T[] {
   if (items.length === 0) return [];
@@ -87,21 +81,29 @@ function harderHalf<T extends WeeklyCandidate>(items: readonly T[]): T[] {
 function* cycle<T>(items: readonly T[], salt: number, start: number): Generator<T> {
   const n = items.length;
   if (n === 0) return;
-  let pass = -1;
-  let order: T[] = [];
-  for (let p = start; ; p++) {
-    const now = Math.floor(p / n);
-    if (now !== pass) {
-      pass = now;
-      const rand = seededRandom(salt + pass * 7919);
-      order = [...items];
-      for (let i = order.length - 1; i > 0; i--) {
-        const j = Math.floor(rand() * (i + 1));
-        [order[i], order[j]] = [order[j], order[i]];
-      }
+  const raw = (pass: number) => {
+    const rand = seededRandom(salt + pass * 7919);
+    const order = [...items];
+    for (let i = order.length - 1; i > 0; i--) {
+      const j = Math.floor(rand() * (i + 1));
+      [order[i], order[j]] = [order[j], order[i]];
     }
-    yield order[p % n];
-  }
+    return order;
+  };
+  // Where one pass meets the next, the items that closed the last pass go to the back of the new one,
+  // so nothing comes back within half a pass.
+  const guard = Math.floor(n / 2);
+  const passes: T[][] = [raw(0)];
+  const orderOf = (pass: number) => {
+    while (passes.length <= pass) {
+      const prev = passes[passes.length - 1];
+      const tail = new Set(prev.slice(n - guard));
+      const next = raw(passes.length);
+      passes.push([...next.filter((x) => !tail.has(x)), ...next.filter((x) => tail.has(x))]);
+    }
+    return passes[pass];
+  };
+  for (let p = start; ; p++) yield orderOf(Math.floor(p / n))[p % n];
 }
 
 /**
