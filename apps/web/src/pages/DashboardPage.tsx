@@ -1,6 +1,7 @@
 import { ideaForDay } from '@felt/content';
 import { actionRange, challengeNumber, currentRating, handClassCombos, isProvisional, nextTier, tierLabel } from '@felt/core';
 import { useLiveQuery } from 'dexie-react-hooks';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { BillingIssueBanner } from '../components/BillingIssueBanner';
 import { MasteryGrid } from '../components/MasteryGrid';
@@ -17,6 +18,8 @@ import { ratingSnapshot } from '../state/rating';
 import { chartsTaught, reviewTotal } from '../state/decks';
 import { buildQueue, masteryForCharts, todayStats } from '../state/review';
 import { useSettings } from '../state/settings';
+import { APP_TOUR, endTour, getTour, setTour, shouldStartAppTour, useTour } from '../state/tour';
+import { CoachMarks } from '../ui/CoachMarks';
 import { Avatar } from '../ui/Avatar';
 import { ImportCard } from '../ui/ImportCard';
 import { StudyTimeCard } from '../ui/StudyTimeCard';
@@ -43,8 +46,32 @@ function previewCombo(id: string, hand: string) {
   return combos[h % combos.length];
 }
 
+/**
+ * The first run tour starts on a calm Today: after the page has settled and
+ * only when no sheet or moment is open. If something is open it waits for the
+ * next visit.
+ */
+function useAppTour(onboarded: boolean) {
+  const tour = useTour();
+  const [running, setRunning] = useState(false);
+  const due = shouldStartAppTour(tour, { onboarded });
+  useEffect(() => {
+    if (!due) return;
+    const t = window.setTimeout(() => {
+      if (!document.querySelector('dialog[open], .moment')) setRunning(true);
+    }, 700);
+    return () => window.clearTimeout(t);
+  }, [due]);
+  const end = (how: 'done' | 'skipped') => {
+    setTour(endTour(getTour(), how));
+    setRunning(false);
+  };
+  return { running, end };
+}
+
 export function DashboardPage() {
   const { settings } = useSettings();
+  const tour = useAppTour(settings.profile.onboarded);
   const g = settings.game;
   const deps = [g.tableSize, g.format, settings.study.newPerDay];
   const charts = chartsForGame(g).charts;
@@ -119,7 +146,7 @@ export function DashboardPage() {
       <BillingIssueBanner />
 
       {nextLesson?.content && !lessonToday ? (
-        <Link to={lessonPath(nextLesson.key)} className="hero learn-hero">
+        <Link to={lessonPath(nextLesson.key)} className="hero learn-hero" data-tour="today-main">
           <HeroPattern mixes={heroRange} />
           <div className="learn-hero-body">
             <div style={{ minWidth: 0 }}>
@@ -133,7 +160,7 @@ export function DashboardPage() {
           <span className="btn btn-lg btn-block btn-hero">{progress.get(nextLesson.key)?.status === 'started' ? 'Continue lesson' : 'Start lesson'}</span>
         </Link>
       ) : (
-        <section className="hero">
+        <section className="hero" data-tour="today-main">
           <HeroPattern mixes={heroRange} />
           <div className="hero-body">
             <div className="hero-copy">
@@ -344,6 +371,7 @@ export function DashboardPage() {
           </div>
         </section>
       )}
+      {tour.running && <CoachMarks steps={APP_TOUR} label="App tour" onEnd={tour.end} />}
     </div>
   );
 }

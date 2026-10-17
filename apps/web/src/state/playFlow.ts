@@ -48,7 +48,16 @@ export function playOut(state: HandState, history: PlayDecision[], seats: readon
 export function bookHand(s: TableSession, final: HandState, history: PlayDecision[], id: string, seed: number, how: 'played' | 'offscreen' | 'skipped'): TableSession {
   const net = final.result!.net[HERO];
   const skipped = how === 'skipped';
-  const record: HandRecord = { id, number: s.stats.hands + s.stats.skipped + 1, seed, history, final, ...(how === 'offscreen' ? { offScreen: true } : {}) };
+  const hinted = s.live?.id === id ? s.live.hinted : undefined;
+  const record: HandRecord = {
+    id,
+    number: s.stats.hands + s.stats.skipped + 1,
+    seed,
+    history,
+    final,
+    ...(how === 'offscreen' ? { offScreen: true } : {}),
+    ...(hinted?.length ? { hinted } : {}),
+  };
   return {
     ...s,
     stacks: stacksAfter(final),
@@ -91,6 +100,17 @@ export function dealNext(s: TableSession, nextSeed: () => number): TableSession 
     return { ...next, live: { id, seed, state, history: [], said: {} } };
   }
   return next;
+}
+
+/**
+ * Marks the player's coming decision as hinted: they asked what a coach would
+ * do before acting. The decision is still graded but never rated.
+ */
+export function markHinted(s: TableSession): TableSession {
+  if (!s.live || s.live.state.toAct === null) return s;
+  const index = s.live.history.length;
+  const hinted = s.live.hinted ?? [];
+  return hinted.includes(index) ? s : { ...s, live: { ...s.live, hinted: [...hinted, index] } };
 }
 
 /** The rng the screen uses for the bots in a dealt hand: the same draws `dealNext` used. */

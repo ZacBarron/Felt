@@ -1,4 +1,4 @@
-import { LINEUP_LABELS, LINEUP_TYPES, type LineupType, lineupBots, botById } from '@felt/content';
+import { BOTS, LINEUP_LABELS, LINEUP_TYPES, type LineupType, lineupBots, botById } from '@felt/content';
 import { seededRng } from '@felt/core';
 import { useMemo, useRef, useState } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
@@ -177,7 +177,7 @@ function TableForm({ initial }: { initial?: CustomTable }) {
         <div className="play-lineup-head">
           <span className="play-lineup-faces" aria-hidden="true">
             {faces.map((b) => (
-              <BotPortrait key={b.id} look={b.look} size={26} />
+              <BotPortrait key={b.id} bot={b} size={26} />
             ))}
           </span>
           <button className="btn btn-tinted play-mix-btn" onClick={() => set({ lineup: mixLineup(t.seats - 1, rng.current) })}>
@@ -187,6 +187,7 @@ function TableForm({ initial }: { initial?: CustomTable }) {
         <div className="list">
           {LINEUP_TYPES.map((type) => (
             <div key={type} className="list-row">
+              <BotPortrait bot={BOTS.find((b) => b.type === type)!} size={30} />
               <span className="grow">{LINEUP_LABELS[type]}</span>
               <Stepper
                 label={LINEUP_LABELS[type]}

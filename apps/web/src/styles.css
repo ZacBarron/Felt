@@ -65,6 +65,22 @@
   --feature-cobalt: linear-gradient(140deg, #4272f2 0%, #2448b9 46%, #132667 100%);
   --feature-gold: linear-gradient(140deg, #f8dc9b 0%, #e6b764 46%, #b47a24 100%);
   --feature-gold-ink: #1d1505;
+  /*
+   * Bot portraits: a muted disc behind each drawn face, one per player type,
+   * so a lineup shows its mix at a glance. Warm for loose players, cool for
+   * tight ones. Pale and low in saturation, never an action color. The same
+   * in both themes, like the chip set.
+   */
+  --bot-calling-station: #d8c597;
+  --bot-loose-passive: #bccbaa;
+  --bot-nit: #a9bccd;
+  --bot-weak-tight-reg: #a8c9c3;
+  --bot-tag-reg: #c6b9db;
+  --bot-lag-reg: #e0b993;
+  --bot-maniac: #d9a79c;
+  --bot-ink: #11140f;
+  /* Coach marks float over a dimmed screen, so at night they sit a step lighter than a card. */
+  --coach-surface: var(--surface);
   --brand-gradient: radial-gradient(120% 140% at 0% 0%, var(--felt-1) 0%, var(--felt-2) 38%, var(--felt-3) 100%);
   /* Text and fills that sit on the felt. */
   --on-felt-accent: var(--accent);
@@ -149,6 +165,7 @@
     --bg: #080c0b;
     --surface: #131917;
     --surface-2: #1c2421;
+    --coach-surface: #242e2a;
     --fill: rgba(180, 190, 170, 0.12);
     --fill-2: rgba(180, 190, 170, 0.19);
     --fill-3: rgba(180, 190, 170, 0.28);
@@ -189,6 +206,7 @@
   --bg: #080c0b;
   --surface: #131917;
   --surface-2: #1c2421;
+  --coach-surface: #242e2a;
   --fill: rgba(180, 190, 170, 0.12);
   --fill-2: rgba(180, 190, 170, 0.19);
   --fill-3: rgba(180, 190, 170, 0.28);
@@ -5699,5 +5717,144 @@ a.card.more-me,
   from {
     opacity: 0;
     transform: translate(46px, -40px) rotate(40deg);
+  }
+}
+
+/* Bot portraits: a drawn face on a disc tinted by player type (see BotPortrait.tsx). */
+.bot-portrait {
+  flex: none;
+  display: inline-grid;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 50%;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--bot-ink);
+  background: var(--bot-bg, var(--fill-2));
+}
+
+.bot-portrait img {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* Coach marks: the first run tour and one time tips (CoachMarks.tsx). The lit window is a box shadow, never a mask. */
+.coach-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  pointer-events: none;
+}
+
+.coach-scrim {
+  position: absolute;
+  inset: 0;
+  pointer-events: auto;
+  background: rgba(8, 12, 11, 0.5);
+  animation: coach-fade 220ms var(--ease) backwards;
+}
+
+.coach-scrim.has-spot {
+  background: transparent;
+}
+
+.coach-spot {
+  position: absolute;
+  pointer-events: none;
+  box-shadow:
+    0 0 0 2px var(--tint-fill),
+    0 0 0 9999px rgba(8, 12, 11, 0.5);
+  transition:
+    left 280ms var(--ease-spring),
+    top 280ms var(--ease-spring),
+    width 280ms var(--ease-spring),
+    height 280ms var(--ease-spring),
+    border-radius 280ms var(--ease);
+  animation: coach-fade 220ms var(--ease) backwards;
+}
+
+.coach-mark {
+  position: absolute;
+  pointer-events: auto;
+  padding: 0.95rem 1rem 0.8rem 1.1rem;
+  border-radius: 22px;
+  color: var(--label);
+  background: var(--coach-surface);
+  box-shadow:
+    0 14px 40px rgba(0, 0, 0, 0.32),
+    0 0 0 1px var(--separator);
+  animation: coach-in 240ms var(--ease) backwards;
+}
+
+/* The arrow points at the lit control. */
+.coach-mark::before {
+  content: '';
+  position: absolute;
+  left: calc(var(--arrow-x, 50%) - 8px);
+  width: 16px;
+  height: 16px;
+  border-radius: 3px;
+  background: var(--coach-surface);
+  transform: rotate(45deg);
+}
+
+.coach-mark.below::before {
+  top: -6px;
+}
+
+.coach-mark.above::before {
+  bottom: -6px;
+}
+
+.coach-mark.floating::before {
+  content: none;
+}
+
+.coach-mark-count {
+  position: relative;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--label-2);
+}
+
+.coach-mark-title {
+  position: relative;
+  margin: 0.1rem 0 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.coach-mark-body {
+  position: relative;
+  margin: 0.25rem 0 0.85rem;
+  line-height: 1.38;
+}
+
+.coach-mark-buttons {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.btn.coach-mark-skip {
+  margin-right: auto;
+  padding-left: 0;
+  color: var(--label-2);
+}
+
+@keyframes coach-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes coach-in {
+  from {
+    opacity: 0;
+    translate: 0 6px;
   }
 }

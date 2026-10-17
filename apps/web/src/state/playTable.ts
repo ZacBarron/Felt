@@ -50,6 +50,20 @@ export interface TableSettings {
   speed: 'instant' | 'quick' | 'natural';
   /** Show a short line of grades after each hand. Off keeps the table quiet. */
   showGrades: boolean;
+  /** Simple or Full. Unset follows the player's experience (see `tableLayout`). */
+  layout?: TableLayout;
+}
+
+/**
+ * Simple shows three buttons, one raise size and a line that says what is
+ * happening. Full has every size, the slider and the boxes to act early.
+ */
+export type TableLayout = 'simple' | 'full';
+
+/** The layout to show: the player's choice, else Simple for new and casual players and Full for regulars. */
+export function tableLayout(chosen: TableLayout | undefined, experience: string | undefined): TableLayout {
+  if (chosen === 'simple' || chosen === 'full') return chosen;
+  return experience === 'new' || experience === 'casual' ? 'simple' : 'full';
 }
 
 export interface SessionStats {
@@ -74,6 +88,8 @@ export interface HandRecord {
   grades?: PlayGrade[];
   /** You folded and the rest played out off screen. */
   offScreen?: boolean;
+  /** Decisions made after asking what a coach would do. Graded, never rated. */
+  hinted?: number[];
 }
 
 export interface TableSession {
@@ -91,7 +107,15 @@ export interface TableSession {
   pendingChips: number;
   hands: HandRecord[];
   /** The hand on the table, in memory only. */
-  live?: { id: string; seed: number; state: HandState; history: PlayDecision[]; said: Record<number, string> };
+  live?: {
+    id: string;
+    seed: number;
+    state: HandState;
+    history: PlayDecision[];
+    said: Record<number, string>;
+    /** Decisions the player made after asking what a coach would do. */
+    hinted?: number[];
+  };
   /** Clear folds skipped before the hand on the table, for a short note. In memory only. */
   justSkipped?: number;
 }
@@ -195,17 +219,21 @@ export function tableRoom(table: LobbyTable): { openBb?: number } {
   return TABLE_PRESETS.find((p) => p.id === table.preset) ?? {};
 }
 
-/** Sits the player down at a table with a buy in. */
-export function sitDown(table: LobbyTable, buyIn: number) {
+/**
+ * Sits the player down at a table with a buy in. `stack` sits down with the
+ * stack saved when the player last left this table instead.
+ */
+export function sitDown(table: LobbyTable, buyIn: number, stack?: number) {
   const bots = ['', ...tableBots(table)];
+  const mine = stack && stack > 0 ? stack : buyIn;
   session = {
     table,
     buyIn,
     bots,
-    stacks: bots.map((_, i) => (i === 0 ? buyIn : botStack(table.buyIns[1], i))),
+    stacks: bots.map((_, i) => (i === 0 ? mine : botStack(table.buyIns[1], i))),
     button: Math.floor(Math.random() * table.seats),
     settings: savedSettings(),
-    stats: { ...NO_STATS, bought: buyIn },
+    stats: { ...NO_STATS, bought: mine },
     sittingOut: false,
     pendingChips: 0,
     hands: [],
@@ -223,15 +251,54 @@ export function lobbyTables(): LobbyTable[] {
   return [...LOBBY, ...customTables().map(toLobbyTable)];
 }
 
-/** The table and buy in the player last sat down with, for Play now. */
-export function lastSeat(): { table: LobbyTable; buyIn: number } {
-  const saved = read<{ id: string; buyIn: number }>(LAST_KEY);
+/**
+ * The table and buy in the player last sat down with, for Play now, and the
+ * stack they left that table with, if they left with chips.
+ */
+export function lastSeat(): { table: LobbyTable; buyIn: number; stack?: number } {
+  const saved = read<{ id: string; buyIn: number; stack?: number }>(LAST_KEY);
   const table = lobbyTables().find((t) => t.id === saved?.id) ?? LOBBY[0];
-  return { table, buyIn: saved && table.buyIns.includes(saved.buyIn) ? saved.buyIn : table.buyIns[1] };
+  const same = saved?.id === table.id;
+  return {
+    table,
+    buyIn: saved && table.buyIns.includes(saved.buyIn) ? saved.buyIn : table.buyIns[1],
+    ...(same && saved.stack && saved.stack > 0 ? { stack: saved.stack } : {}),
+  };
 }
 
+/** The player's seat in a session. */
+const ME = 0;
+
+/** Whether the player still has cards in a hand that has not ended: leaving now folds them. */
+export function handInProgress(s: TableSession | undefined): boolean {
+  const live = s?.live;
+  return !!live && !live.state.result && !live.state.players[ME].folded;
+}
+
+/**
+ * What leaving keeps: the chips behind the player, and the session result
+ * with anything already in the pot of an unfinished hand counted as lost,
+ * as when you fold.
+ */
+export function leaveResult(s: TableSession): { stack: number; stats: SessionStats } {
+  const live = s.live && !s.live.state.result ? s.live.state : undefined;
+  const me = live?.players[ME];
+  const stack = me ? me.stack : s.stacks[ME];
+  const lost = me ? me.total : 0;
+  return { stack, stats: { ...s.stats, net: s.stats.net - lost } };
+}
+
+/**
+ * Leaves the table. A hand in progress is folded. The stack is saved for
+ * Play now at this table, and the session totals show in the lobby.
+ */
 export function leaveTable() {
-  lastStats = session?.stats.hands ? session.stats : undefined;
+  if (session) {
+    const { stack, stats } = leaveResult(session);
+    lastStats = stats.hands || stats.net ? stats : undefined;
+    const saved = read<{ id: string; buyIn: number }>(LAST_KEY);
+    write(LAST_KEY, { id: session.table.id, buyIn: saved?.id === session.table.id ? saved.buyIn : session.buyIn, ...(stack > 0 ? { stack } : {}) });
+  } else lastStats = undefined;
   session = undefined;
   persist();
   emit();

@@ -35,6 +35,8 @@ import { ProgressRing } from '../ui/ProgressRing';
 import { Section } from '../ui/Section';
 import { Segmented } from '../ui/Segmented';
 import './ranges.css';
+import { getTour, RANGES_TIPS, seeTip, setTour, tipPending, useTour } from '../state/tour';
+import { CoachMarks } from '../ui/CoachMarks';
 
 type Mode = 'chart' | 'paint' | 'quick';
 
@@ -65,6 +67,7 @@ export function RangesPage() {
   // First visit: explain charts once, and ask which game to match if the player never chose one.
   const [intro, setIntro] = useState(() => !rangesIntroSeen());
   const [askGame, setAskGame] = useState(() => !rangesIntroSeen() && hasDefaultGame(game));
+  const rangesTip = tipPending(useTour(), 'ranges');
   const meta = sel ? chartMeta(sel.id) : undefined;
   const chart = meta ? getChart(meta.id) : undefined;
 
@@ -135,6 +138,10 @@ export function RangesPage() {
       </div>
       <GameSheet open={gameSheet} onClose={() => setGameSheet(false)} />
       <RangesIntro open={intro} askGame={askGame} onClose={() => setIntro(false)} />
+      {/* After the intro, one tip on the real grid: how to read its colors. Once. */}
+      {mode === 'chart' && !intro && rangesTip && (
+        <CoachMarks steps={RANGES_TIPS} label="Ranges tip" skipLabel="Skip tip" onEnd={() => setTour(seeTip(getTour(), 'ranges'))} />
+      )}
 
       <div className="ranges-top">
         <ChartPicker

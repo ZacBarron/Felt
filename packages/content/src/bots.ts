@@ -15,90 +15,94 @@ export interface BotCharacter {
   type: string;
   /** One short sentence on how it plays. */
   blurb: string;
-  /** Drawn portrait features, used by the app's portrait component. */
-  look: { hair: 'short' | 'long' | 'bald' | 'curly' | 'bun'; extra?: 'glasses' | 'shades' | 'cap' | 'beard' | 'hood' };
+  /**
+   * Seed of the bot's drawn portrait: its own id, or a stand in's name. The
+   * portraits are pre-drawn from these seeds by `scripts/make-bot-avatars.mjs`
+   * into `apps/web/public/bots`, so a bot always looks the same.
+   */
+  avatar: string;
   profile: BotProfile;
 }
 
 export const BOTS: BotCharacter[] = [
   {
     id: 'sam',
+    avatar: 'sam',
     name: 'Sam',
     type: 'calling-station',
     blurb: 'Calls almost anything and rarely bluffs.',
-    look: { hair: 'curly', extra: 'cap' },
     profile: { strength: 0.4, style: { looseness: 2.6, aggression: 0.1, foldiness: 0.35, bluff: 0.02, limp: 0.75, sizes: [0.5] } },
   },
   {
     id: 'rita',
+    avatar: 'rita',
     name: 'Rita',
     type: 'calling-station',
     blurb: 'Hates to fold a pair.',
-    look: { hair: 'long' },
     profile: { strength: 0.45, style: { looseness: 2.2, aggression: 0.15, foldiness: 0.45, bluff: 0.03, limp: 0.6, sizes: [0.5, 0.75] } },
   },
   {
     id: 'lou',
+    avatar: 'lou',
     name: 'Lou',
     type: 'loose-passive',
     blurb: 'Limps a lot and gives up when he misses.',
-    look: { hair: 'bald', extra: 'beard' },
     profile: { strength: 0.45, style: { looseness: 2, aggression: 0.2, foldiness: 0.95, bluff: 0.04, limp: 0.65, sizes: [0.33, 0.5] } },
   },
   {
     id: 'nora',
+    avatar: 'nora',
     name: 'Nora',
     type: 'nit',
     blurb: 'Plays few hands and means it when she bets.',
-    look: { hair: 'bun', extra: 'glasses' },
     profile: { strength: 0.65, style: { looseness: 0.55, aggression: 0.45, foldiness: 1.6, bluff: 0.02, limp: 0, sizes: [0.66] } },
   },
   {
     id: 'ike',
+    avatar: 'ike',
     name: 'Ike',
     type: 'nit',
     blurb: 'Waits for big pairs and folds to pressure.',
-    look: { hair: 'short', extra: 'glasses' },
     profile: { strength: 0.6, style: { looseness: 0.6, aggression: 0.3, foldiness: 1.5, bluff: 0.02, limp: 0.1, sizes: [0.5] } },
   },
   {
     id: 'wes',
+    avatar: 'wes',
     name: 'Wes',
     type: 'weak-tight-reg',
     blurb: 'Solid preflop but folds too much later on.',
-    look: { hair: 'short', extra: 'hood' },
     profile: { strength: 0.7, style: { looseness: 0.85, aggression: 0.35, foldiness: 1.3, bluff: 0.05, limp: 0, sizes: [0.5] } },
   },
   {
     id: 'tess',
+    avatar: 'tess',
     name: 'Tess',
     type: 'tag-reg',
     blurb: 'Tight and aggressive with few leaks.',
-    look: { hair: 'long', extra: 'shades' },
     profile: { strength: 0.85, style: { looseness: 1, aggression: 0.55, foldiness: 1, bluff: 0.12, limp: 0, sizes: [0.33, 0.75] } },
   },
   {
     id: 'otto',
+    avatar: 'otto',
     name: 'Otto',
     type: 'tag-reg',
     blurb: 'Plays close to the charts.',
-    look: { hair: 'short' },
     profile: { strength: 0.85, style: { looseness: 1, aggression: 0.5, foldiness: 1.05, bluff: 0.1, limp: 0, sizes: [0.33, 0.66] } },
   },
   {
     id: 'leo',
+    avatar: 'leo',
     name: 'Leo',
     type: 'lag-reg',
     blurb: 'Opens wide and keeps up the pressure.',
-    look: { hair: 'curly', extra: 'beard' },
     profile: { strength: 0.8, style: { looseness: 1.35, aggression: 0.75, foldiness: 0.85, bluff: 0.22, limp: 0, sizes: [0.33, 0.75] } },
   },
   {
     id: 'max',
+    avatar: 'max',
     name: 'Max',
     type: 'maniac',
     blurb: 'Raises constantly and bluffs every street.',
-    look: { hair: 'short', extra: 'shades' },
     profile: { strength: 0.4, style: { looseness: 2.2, aggression: 0.95, foldiness: 0.6, bluff: 0.45, limp: 0, sizes: [0.75, 1.2] } },
   },
 ];
@@ -120,13 +124,17 @@ export const TABLE_PRESETS: TablePreset[] = [
 ];
 
 /** Names for stand ins, when a custom table seats more of a type than the roster has. */
-const STAND_IN_NAMES = ['Ada', 'Ben', 'Cleo', 'Dev', 'Elle', 'Finn', 'Gail', 'Hank', 'Iris', 'Jay'];
-const HAIRS: BotCharacter['look']['hair'][] = ['short', 'long', 'curly', 'bun', 'bald'];
-const EXTRAS: BotCharacter['look']['extra'][] = [undefined, 'glasses', 'cap', 'beard', 'shades', 'hood'];
+export const STAND_IN_NAMES = ['Ada', 'Ben', 'Cleo', 'Dev', 'Elle', 'Finn', 'Gail', 'Hank', 'Iris', 'Jay'];
+
+/** The portrait seed for a stand in: its own name, so it keeps its face whichever bot it stands in for. */
+export const standInAvatar = (name: string) => `stand-in-${name.toLowerCase()}`;
+
+/** Every portrait seed the app can show: the roster, then the stand ins. One drawn file each. */
+export const AVATAR_SEEDS: string[] = [...BOTS.map((b) => b.avatar), ...STAND_IN_NAMES.map(standInAvatar)];
 
 /**
  * A bot by id. A stand in has the id of a roster bot plus a number, such as
- * `nora.2`: it plays exactly like that bot under its own name and look.
+ * `nora.2`: it plays exactly like that bot under its own name and face.
  */
 export function botById(id: string): BotCharacter | undefined {
   const [baseId, n] = id.split('.');
@@ -135,7 +143,7 @@ export function botById(id: string): BotCharacter | undefined {
   if (!base || n === undefined) return base;
   if (!Number.isInteger(k) || k < 1) return undefined;
   const name = STAND_IN_NAMES[(k - 1) % STAND_IN_NAMES.length];
-  return { ...base, id, name, look: { hair: HAIRS[(k + 1) % HAIRS.length], extra: EXTRAS[(k * 2) % EXTRAS.length] } };
+  return { ...base, id, name, avatar: standInAvatar(name) };
 }
 
 /** The player types a custom table can seat, loosest and most passive first. */
@@ -152,6 +160,20 @@ export const LINEUP_LABELS: Record<LineupType, string> = {
   'lag-reg': 'Loose aggressive regular',
   maniac: 'Maniac',
 };
+
+/** Two word names for small spaces, such as under a face at the table. Poker players know TAG and LAG. */
+export const TYPE_SHORT: Record<LineupType, string> = {
+  'calling-station': 'Calling station',
+  'loose-passive': 'Loose passive',
+  nit: 'Nit',
+  'weak-tight-reg': 'Weak regular',
+  'tag-reg': 'TAG regular',
+  'lag-reg': 'LAG regular',
+  maniac: 'Maniac',
+};
+
+/** A bot's player type in a few words. */
+export const typeShort = (bot: Pick<BotCharacter, 'type'>) => TYPE_SHORT[bot.type as LineupType] ?? 'Bot';
 
 /**
  * Bot ids for a lineup of player types, one per seat. Each type uses its

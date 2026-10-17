@@ -99,6 +99,12 @@ function useChallengeLink() {
   }, [settings.profile.onboarded]);
 }
 
+/**
+ * The key that replays a page's entrance. Sitting down at a Play table and
+ * leaving it stay one page, so the fixed table never rides an animation.
+ */
+const pageKey = (pathname: string) => (pathname === '/play/seat' ? '/play' : pathname);
+
 export function App() {
   const location = useLocation();
   const { settings } = useSettings();
@@ -139,7 +145,7 @@ export function App() {
           <div key={section} className="nav-group">
             {section && <div className="section">{section}</div>}
             {items.map(({ to, label, icon: Icon }) => (
-              <NavLink key={to} to={to} end={to === '/'} data-haptic="select">
+              <NavLink key={to} to={to} end={to === '/'} data-haptic="select" data-tour={section ? undefined : `tab-${label.toLowerCase()}`}>
                 {({ isActive }) => (
                   <>
                     <Icon size={22} filled={isActive} />
@@ -154,11 +160,12 @@ export function App() {
       </nav>
       <main>
         {/* Keyed on the path so every page change replays the entrance animation. */}
-        <div key={location.pathname} className="page">
+        <div key={pageKey(location.pathname)} className="page">
           <Routes location={location}>
             <Route path="/" element={<DashboardPage />} />
             <Route path="/train" element={<TrainPage />} />
             <Route path="/play" element={<PlayPage />} />
+            <Route path="/play/seat" element={<PlayPage />} />
             <Route path="/play/new" element={<CustomTablePage />} />
             <Route path="/play/table/:id" element={<CustomTablePage />} />
             <Route path="/invite" element={<InvitePage />} />
@@ -203,7 +210,7 @@ export function App() {
       <nav className="tabbar glass" aria-label="Tabs" style={{ "--tabs": TABS.length } as React.CSSProperties}>
         <span ref={indicator} className="tab-indicator" style={{ transform: `translateX(${activeTab * 100}%)` }} />
         {TABS.map(({ to, label, icon: Icon }, i) => (
-          <NavLink key={to} to={to} end={to === '/'} data-haptic="select" className={i === activeTab ? 'active' : undefined}>
+          <NavLink key={to} to={to} end={to === '/'} data-haptic="select" data-tour={`tab-${label.toLowerCase()}`} className={i === activeTab ? 'active' : undefined}>
             <Icon size={25} filled={i === activeTab} />
             {label}
             {to === '/train' && reviewCount > 0 && (

@@ -1,4 +1,4 @@
-import { botById } from '@felt/content';
+import { botById, typeShort } from '@felt/content';
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Sheet, SessionSummary, SheetHead } from '../components/PlaySheet';
@@ -12,7 +12,32 @@ import { PageHeader } from '../ui/PageHeader';
 import { Section } from '../ui/Section';
 import { Segmented } from '../ui/Segmented';
 
+/**
+ * Set when the lobby pushes the table onto the history, so leaving can step
+ * back to the lobby instead of adding a second lobby entry.
+ */
+let pushedSeat = false;
+
+/** Whether the lobby opened the table on the history. Reading it clears it. */
+export function takePushedSeat(): boolean {
+  const was = pushedSeat;
+  pushedSeat = false;
+  return was;
+}
+
+/** Sits down and opens the table as its own page, so the back gesture leaves it. */
+function useSit() {
+  const navigate = useNavigate();
+  return (table: LobbyTable, buyIn: number, stack?: number) => {
+    sitDown(table, buyIn, stack);
+    pushedSeat = true;
+    navigate('/play/seat');
+  };
+}
+
 const facesOf = (table: LobbyTable) => tableBots(table).map((id) => botById(id)!).filter(Boolean);
+
+const fmtBb = (n: number) => (Number.isInteger(n) ? String(n) : n.toFixed(1));
 
 /** Buy in range in words, such as 50 to 150bb. */
 const buyInRange = (t: LobbyTable) => (t.buyIns[0] === t.buyIns[2] ? `${t.buyIns[0]}bb` : `${t.buyIns[0]} to ${t.buyIns[2]}bb`);
@@ -66,7 +91,7 @@ function TableRow({ table, onPick }: { table: LobbyTable; onPick: () => void }) 
         <span className="play-lobby-meta num">
           <span className="play-lobby-faces" aria-hidden="true">
             {bots.slice(0, 5).map((b) => (
-              <BotPortrait key={b.id} look={b.look} size={22} />
+              <BotPortrait key={b.id} bot={b} size={22} />
             ))}
           </span>
           {table.seats} seats · {buyInRange(table)}
@@ -79,7 +104,8 @@ function TableRow({ table, onPick }: { table: LobbyTable; onPick: () => void }) 
 
 /** The main card, as on Today and Learn: one tap to sit at the table you played last. */
 function QuickSeat() {
-  const { table, buyIn } = lastSeat();
+  const { table, buyIn, stack } = lastSeat();
+  const sit = useSit();
   const bots = facesOf(table);
   return (
     <section className="hero learn-hero play-hero">
@@ -88,17 +114,15 @@ function QuickSeat() {
         <div style={{ minWidth: 0 }}>
           <div className="hero-label">{table.custom ? 'Your table' : 'Cash game'}</div>
           <div className="display learn-hero-title">{table.name}</div>
-          <div className="hero-sub">
-            {table.seats} seats. {buyIn}bb buy in.
-          </div>
+          <div className="hero-sub">{stack ? `${table.seats} seats. Your ${fmtBb(stack)}bb stack is saved.` : `${table.seats} seats. ${buyIn}bb buy in.`}</div>
           <div className="play-hero-faces" aria-hidden="true">
             {bots.slice(0, 8).map((b) => (
-              <BotPortrait key={b.id} look={b.look} size={30} />
+              <BotPortrait key={b.id} bot={b} size={30} />
             ))}
           </div>
         </div>
       </div>
-      <button className="btn btn-lg btn-block btn-hero" onClick={() => sitDown(table, buyIn)}>
+      <button className="btn btn-lg btn-block btn-hero" onClick={() => sit(table, buyIn, stack)}>
         Play now
       </button>
     </section>
@@ -107,6 +131,7 @@ function QuickSeat() {
 
 function BuyInSheet({ table, onClose }: { table?: LobbyTable; onClose: () => void }) {
   const navigate = useNavigate();
+  const sit = useSit();
   const [buyIn, setBuyIn] = useState(100);
   const [confirm, setConfirm] = useState(false);
   useEffect(() => {
@@ -123,22 +148,23 @@ function BuyInSheet({ table, onClose }: { table?: LobbyTable; onClose: () => voi
           <p className="footnote" style={{ margin: 0 }}>
             {table.seats} seats. {table.custom ? table.blurb : 'Blinds are 0.5 and 1bb.'} Amounts are in big blinds.
           </p>
-          <div className="play-faces-row" aria-hidden="true">
+          <ul className="play-faces-row" aria-label="Bots at this table">
             {facesOf(table).map((b) => (
-              <span key={b.id} className="play-face">
-                <BotPortrait look={b.look} size={34} />
-                <span>{b.name}</span>
-              </span>
+              <li key={b.id} className="play-face">
+                <BotPortrait bot={b} size={40} />
+                <span className="play-face-name">{b.name}</span>
+                <span className="play-face-type">{typeShort(b)}</span>
+              </li>
             ))}
-          </div>
+          </ul>
           {choices.length > 1 && (
             <Segmented stretch ariaLabel="Buy in" value={buyIn} options={choices.map((v) => ({ value: v, label: `${v}bb` }))} onChange={setBuyIn} />
           )}
           <button
             className="btn btn-primary btn-lg btn-block"
             onClick={() => {
-              sitDown(table, buyIn);
               onClose();
+              sit(table, buyIn);
             }}
           >
             Sit down with {buyIn}bb{cash ? ` (${cash})` : ''}
