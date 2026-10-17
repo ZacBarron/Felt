@@ -98,6 +98,26 @@ export const FOUNDATIONS_LESSONS: LessonContent[] = [
         answer: 0,
         explain: 'Use the formula. You call 75 to make a final pot of 250, and 75 ÷ 250 = 30.0%. The 42.9% answer is 75 ÷ 175, which leaves out your own call.',
         point: 0,
+        variants: [
+          {
+            question: 'Villain bets 50 into a pot of 100. What equity do you need to call?',
+            choices: ['33.3%', '25.0%', '20.0%', '50.0%'],
+            answer: 1,
+            explain: 'Use the formula. You call 50 to make a final pot of 200, and 50 ÷ 200 = 25.0%. The 33.3% answer is 50 ÷ 150, which leaves out your own call.',
+          },
+          {
+            question: 'Villain bets 100 into a pot of 100. What equity do you need to call?',
+            choices: ['25.0%', '40.0%', '50.0%', '33.3%'],
+            answer: 3,
+            explain: 'Use the formula. You call 100 to make a final pot of 300, and 100 ÷ 300 = 33.3%. The 50.0% answer is 100 ÷ 200, which leaves out your own call.',
+          },
+          {
+            question: 'Villain bets 30 into a pot of 90. What equity do you need to call?',
+            choices: ['16.7%', '25.0%', '20.0%', '33.3%'],
+            answer: 2,
+            explain: 'Use the formula. You call 30 to make a final pot of 150, and 30 ÷ 150 = 20.0%. The 25.0% answer is 30 ÷ 120, which leaves out your own call.',
+          },
+        ],
       },
       {
         kind: 'quiz',
@@ -324,6 +344,20 @@ export const FOUNDATIONS_LESSONS: LessonContent[] = [
         answer: 2,
         explain: 'On the turn, outs × 2 gives 16%. The table shows the exact 17.4%, from 8 outs among 46 unseen cards. The 31.5% answer is the flop number, with 2 cards to come.',
         point: 1,
+        variants: [
+          {
+            question: 'You have a flush draw on the turn. How often do you hit on the river?',
+            choices: ['35.0%', '19.6%', '17.4%'],
+            answer: 1,
+            explain: 'On the turn, outs × 2 gives 18%. The exact chance is 19.6%, from 9 outs among 46 unseen cards. The 35.0% answer is the flop number, with 2 cards to come.',
+          },
+          {
+            question: 'You have a gutshot on the turn. How often do you hit on the river?',
+            choices: ['16.5%', '8.7%', '17.4%'],
+            answer: 1,
+            explain: 'On the turn, outs × 2 gives 8%. The exact chance is 8.7%, from 4 outs among 46 unseen cards. The 16.5% answer is the flop number, with 2 cards to come.',
+          },
+        ],
       },
       {
         kind: 'quiz',
@@ -333,6 +367,18 @@ export const FOUNDATIONS_LESSONS: LessonContent[] = [
         explain:
           'Use the corrected rule. 12 × 4 − 4 = 44%, close to the exact 45.0% in the table. Plain outs × 4 says 48%, which overstates big draws. 26.1% is the chance with one card to come.',
         point: 0,
+        variants: [
+          {
+            question: 'Flush draw plus an open ender on the flop gives 15 outs. How often do you hit by the river?',
+            choices: ['32.6%', '54.1%', '60.0%', '45.0%'],
+            explain: 'Use the corrected rule. 15 × 4 − 7 = 53%, close to the exact 54.1%. Plain outs × 4 says 60%, which overstates big draws. 32.6% is the chance with one card to come.',
+          },
+          {
+            question: 'A flush draw on the flop gives 9 outs. How often do you hit by the river?',
+            choices: ['19.6%', '35.0%', '40.0%', '36.0%'],
+            explain: 'Use the corrected rule. 9 × 4 − 1 = 35%, the same as the exact 35.0%. Plain outs × 4 says 36%. 19.6% is the chance with one card to come.',
+          },
+        ],
       },
       {
         kind: 'quiz',
@@ -578,6 +624,26 @@ export const FOUNDATIONS_LESSONS: LessonContent[] = [
         explain:
           'Like the table showed, bluff share = bet ÷ (pot + 2 × bet). 0.75 ÷ 2.5 = 30.0%. The 42.9% answer is alpha, which is how often a pure bluff must work.',
         point: 2,
+        variants: [
+          {
+            question: 'You bet half pot on the river with strong hands and bluffs. What share of your bets should be bluffs?',
+            choices: ['33.3%', '25.0%', '50.0%', '20.0%'],
+            answer: 1,
+            explain: 'Like the table showed, bluff share = bet ÷ (pot + 2 × bet). 0.5 ÷ 2 = 25.0%. The 33.3% answer is alpha, which is how often a pure bluff must work.',
+          },
+          {
+            question: 'You bet pot on the river with strong hands and bluffs. What share of your bets should be bluffs?',
+            choices: ['50.0%', '33.3%', '66.7%', '25.0%'],
+            answer: 1,
+            explain: 'Like the table showed, bluff share = bet ÷ (pot + 2 × bet). 1 ÷ 3 = 33.3%. The 50.0% answer is alpha, which is how often a pure bluff must work.',
+          },
+          {
+            question: 'You bet 2 times the pot on the river with strong hands and bluffs. What share of your bets should be bluffs?',
+            choices: ['40.0%', '66.7%', '33.3%', '50.0%'],
+            answer: 0,
+            explain: 'Like the table showed, bluff share = bet ÷ (pot + 2 × bet). 2 ÷ 5 = 40.0%. The 66.7% answer is alpha, which is how often a pure bluff must work.',
+          },
+        ],
       },
       {
         kind: 'quiz',
@@ -586,6 +652,26 @@ export const FOUNDATIONS_LESSONS: LessonContent[] = [
         answer: 3,
         explain: 'Like the formula showed, alpha = bet ÷ (pot + bet). 0.75 ÷ 1.75 = 42.9%. The 57.1% answer is MDF, which is how often the defender must continue.',
         point: 0,
+        variants: [
+          {
+            question: 'You bluff half pot with nothing. How often must villain fold for you to break even?',
+            choices: ['25.0%', '33.3%', '66.7%', '50.0%'],
+            answer: 1,
+            explain: 'Like the formula showed, alpha = bet ÷ (pot + bet). 0.5 ÷ 1.5 = 33.3%. The 66.7% answer is MDF, which is how often the defender must continue.',
+          },
+          {
+            question: 'You bluff 2 times the pot with nothing. How often must villain fold for you to break even?',
+            choices: ['40.0%', '33.3%', '66.7%', '50.0%'],
+            answer: 2,
+            explain: 'Like the formula showed, alpha = bet ÷ (pot + bet). 2 ÷ 3 = 66.7%. The 33.3% answer is MDF, which is how often the defender must continue.',
+          },
+          {
+            question: 'You bluff a third of the pot with nothing. How often must villain fold for you to break even?',
+            choices: ['25.0%', '75.0%', '20.0%', '33.3%'],
+            answer: 0,
+            explain: 'Like the formula showed, alpha = bet ÷ (pot + bet). ⅓ ÷ 1⅓ = 25.0%. The 75.0% answer is MDF, which is how often the defender must continue.',
+          },
+        ],
       },
       {
         kind: 'quiz',
@@ -594,6 +680,18 @@ export const FOUNDATIONS_LESSONS: LessonContent[] = [
         answer: 1,
         explain: 'Like the table showed, MDF = pot ÷ (pot + bet). 1 ÷ 2 = 50.0%. The 66.7% answer is MDF against a half pot bet.',
         point: 1,
+        variants: [
+          {
+            question: 'Villain bets half pot on the river. What share of your range must continue so their bluffs cannot profit automatically?',
+            answer: 2,
+            explain: 'Like the table showed, MDF = pot ÷ (pot + bet). 1 ÷ 1.5 = 66.7%. The 33.3% answer is alpha for a half pot bet.',
+          },
+          {
+            question: 'Villain bets 2 times the pot on the river. What share of your range must continue so their bluffs cannot profit automatically?',
+            answer: 0,
+            explain: 'Like the table showed, MDF = pot ÷ (pot + bet). 1 ÷ 3 = 33.3%. The 66.7% answer is alpha for a bet of 2 times the pot.',
+          },
+        ],
       },
       {
         kind: 'takeaway',
@@ -660,6 +758,19 @@ export const FOUNDATIONS_LESSONS: LessonContent[] = [
         answer: 1,
         explain: 'Like the card removal picture showed, one board card cuts a matching pair from 6 combos to 3. KK, 77 and 22 give 3 + 3 + 3 = 9. The 18 answer forgets the cards on the board.',
         point: 1,
+        shuffleSuits: true,
+        variants: [
+          {
+            question: 'The board is Q83 with three suits. You hold none of those ranks. How many set combos can villain have?',
+            board: 'Qd8s3c',
+            explain: 'Like the card removal picture showed, one board card cuts a matching pair from 6 combos to 3. QQ, 88 and 33 give 3 + 3 + 3 = 9. The 18 answer forgets the cards on the board.',
+          },
+          {
+            question: 'The board is J62 with three suits. You hold none of those ranks. How many set combos can villain have?',
+            board: 'Jh6c2d',
+            explain: 'Like the card removal picture showed, one board card cuts a matching pair from 6 combos to 3. JJ, 66 and 22 give 3 + 3 + 3 = 9. The 18 answer forgets the cards on the board.',
+          },
+        ],
       },
       {
         kind: 'quiz',
@@ -670,6 +781,21 @@ export const FOUNDATIONS_LESSONS: LessonContent[] = [
         answer: 2,
         explain: 'Cards in your hand remove combos too. Three aces and three kings are left, so 3 × 3 = 9 combos. The 12 answer removes only one of the two cards you can see.',
         point: 1,
+        shuffleSuits: true,
+        variants: [
+          {
+            question: 'You hold one king and the board shows one queen. How many KQ combos can villain have?',
+            cards: 'Kc8h',
+            board: 'Qd7s2h',
+            explain: 'Cards in your hand remove combos too. Three kings and three queens are left, so 3 × 3 = 9 combos. The 12 answer removes only one of the two cards you can see.',
+          },
+          {
+            question: 'You hold one jack and the board shows one ten. How many JT combos can villain have?',
+            cards: 'Jd4c',
+            board: 'Th8s3s',
+            explain: 'Cards in your hand remove combos too. Three jacks and three tens are left, so 3 × 3 = 9 combos. The 12 answer removes only one of the two cards you can see.',
+          },
+        ],
       },
       {
         kind: 'quiz',
@@ -799,6 +925,20 @@ export const FOUNDATIONS_LESSONS: LessonContent[] = [
         explain:
           'Use the geometric formula with 2 streets. √(1 + 2 × 35 ÷ 10) = √8 = 2.83, and (2.83 − 1) ÷ 2 = 0.91. Bet 9.1 and the pot grows to 28.3. A 91% bet of 25.9 then puts in the rest. The 175% answer splits the chips evenly, which leaves a second bet of only 39% pot.',
         point: 2,
+        variants: [
+          {
+            question: 'The pot is 10 with effective stacks of 20 and two streets left. What geometric bet gets it all in?',
+            choices: ['50% pot', '62% pot', '100% pot', '200% pot'],
+            answer: 1,
+            explain: 'Use the geometric formula with 2 streets. √(1 + 2 × 20 ÷ 10) = √5 = 2.24, and (2.24 − 1) ÷ 2 = 0.62. Bet 6.2 and the pot grows to 22.4. A 62% bet of 13.8 then puts in the rest.',
+          },
+          {
+            question: 'The pot is 20 with effective stacks of 80 and two streets left. What geometric bet gets it all in?',
+            choices: ['67% pot', '100% pot', '150% pot', '200% pot'],
+            answer: 1,
+            explain: 'Use the geometric formula with 2 streets. √(1 + 2 × 80 ÷ 20) = √9 = 3, and (3 − 1) ÷ 2 = 1. Bet 20 and the pot grows to 60. A pot sized bet of 60 then puts in the rest.',
+          },
+        ],
       },
       {
         kind: 'quiz',
@@ -807,6 +947,20 @@ export const FOUNDATIONS_LESSONS: LessonContent[] = [
         answer: 1,
         explain: 'Like the 3bet pot picture showed, the pot is 11 + 11 + 0.5 = 22.5bb with 89bb behind. 89 ÷ 22.5 ≈ 4. About 18 is the single raised pot number.',
         point: 0,
+        variants: [
+          {
+            question: 'Stacks are 100bb. CO opens 2.5bb, BTN 3bets to 7.5bb and CO calls. What is the flop SPR?',
+            choices: ['About 2', 'About 5.6', 'About 11', 'About 18'],
+            answer: 1,
+            explain: 'The pot is 7.5 + 7.5 + 1.5 = 16.5bb with 92.5bb behind. 92.5 ÷ 16.5 ≈ 5.6. A smaller 3bet in position leaves a higher SPR.',
+          },
+          {
+            question: 'Stacks are 150bb. BTN opens 2.5bb, BB 3bets to 11bb and BTN calls. What is the flop SPR?',
+            choices: ['About 4', 'About 6.2', 'About 9', 'About 27'],
+            answer: 1,
+            explain: 'The pot is 11 + 11 + 0.5 = 22.5bb with 139bb behind. 139 ÷ 22.5 ≈ 6.2. Deeper stacks raise the SPR of the same 3bet pot.',
+          },
+        ],
       },
       {
         kind: 'quiz',
@@ -1174,6 +1328,7 @@ export const FOUNDATIONS_LESSONS: LessonContent[] = [
         explain:
           'Like the T9s picture showed, playability keeps equity. Flushes and strong draws let T9s continue on more boards. T9o and K4o get pushed off their equity far more often.',
         point: 1,
+        shuffleSuits: true,
       },
       {
         kind: 'quiz',

@@ -250,6 +250,7 @@ export const POSTFLOP_MORE_LESSONS: LessonContent[] = [
         answer: 0,
         explain: 'Like the sizing step said, the 3bettor has a large range advantage. On dry high boards, small bets with a wide range still work out of position. Checking everything gives that edge away.',
         point: 2,
+        shuffleSuits: true,
       },
       {
         kind: 'takeaway',
@@ -360,6 +361,7 @@ export const POSTFLOP_MORE_LESSONS: LessonContent[] = [
         explain:
           'Like the probe table showed, two pair is strong against a capped range and wants to build the pot. Bottom pair and ace high check. They have showdown value but gain little by betting.',
         point: 1,
+        shuffleSuits: true,
       },
       {
         kind: 'quiz',
@@ -462,6 +464,7 @@ export const POSTFLOP_MORE_LESSONS: LessonContent[] = [
         explain:
           'Like the turn barrel hand showed, J♥T♥ now has a flush draw. So it wins sometimes when called. Q♣J♣ has no draw and little equity. 8♣8♠ has showdown value, so it usually checks.',
         point: 1,
+        shuffleSuits: true,
       },
       {
         kind: 'quiz',
@@ -481,6 +484,17 @@ export const POSTFLOP_MORE_LESSONS: LessonContent[] = [
         answer: 0,
         explain: 'Like the turn boards showed, the ace is an overcard you hold more of than the caller. Low connecting cards like the 5 or 4 can complete the caller’s straights.',
         point: 0,
+        shuffleSuits: true,
+        variants: [
+          {
+            question: 'You bet 9♦ 5♣ 2♠ and got called. Which turn is the best card to keep betting?',
+            board: '9d5c2s',
+            choiceCards: ['6h', 'Kh', '4c'],
+            choices: ['6♥', 'K♥', '4♣'],
+            answer: 1,
+            explain: 'Like the turn boards showed, the king is an overcard you hold more of than the caller. Low connecting cards like the 6 or 4 can complete the caller’s straights.',
+          },
+        ],
       },
       {
         kind: 'takeaway',
@@ -595,6 +609,20 @@ export const POSTFLOP_MORE_LESSONS: LessonContent[] = [
         answer: 1,
         explain: 'Like the table showed, multiply 0.6 × 0.6 × 0.6 to get 21.6%. The 36.0% figure is for 2 opponents. Each extra player multiplies the chance again.',
         point: 0,
+        variants: [
+          {
+            question: 'Two opponents each fold 70% of the time, independently. How often do both fold?',
+            choices: ['34.3%', '49.0%', '70.0%'],
+            answer: 1,
+            explain: 'Like the table showed, multiply 0.7 × 0.7 to get 49.0%. The 34.3% figure is for 3 opponents. Each extra player multiplies the chance again.',
+          },
+          {
+            question: 'Four opponents each fold 70% of the time, independently. How often do all 4 fold?',
+            choices: ['24.0%', '34.3%', '49.0%', '70.0%'],
+            answer: 0,
+            explain: 'Like the table showed, multiply 0.7 four times to get 24.0%. The 34.3% figure is for 3 opponents. Each extra player multiplies the chance again.',
+          },
+        ],
       },
       {
         kind: 'quiz',
@@ -604,6 +632,14 @@ export const POSTFLOP_MORE_LESSONS: LessonContent[] = [
         explain:
           'Both must fold, and 0.5 × 0.5 = 25%. A half pot bluff needs 33.3% folds, so it loses. The 75% figure is the chance that at least one player folds, which does not win the pot.',
         point: 0,
+        variants: [
+          {
+            question: 'You bluff half pot into 2 opponents. Each folds 60% of the time, independently. How often does the bluff win?',
+            choices: ['84%, so it profits', '36%, so it profits', '16%, so it loses'],
+            answer: 1,
+            explain: 'Both must fold, and 0.6 × 0.6 = 36%. A half pot bluff needs 33.3% folds, so it profits by a little. The 84% figure is the chance that at least one player folds.',
+          },
+        ],
       },
       {
         kind: 'quiz',
@@ -614,6 +650,7 @@ export const POSTFLOP_MORE_LESSONS: LessonContent[] = [
         answer: 1,
         explain: 'Like the bars showed, it falls to about 56.5% against 4 random hands. With more players, someone more often connects. So multiway you bet stronger hands for value.',
         point: 1,
+        shuffleSuits: true,
       },
       {
         kind: 'takeaway',

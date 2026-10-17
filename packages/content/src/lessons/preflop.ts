@@ -85,6 +85,29 @@ export const PREFLOP_LESSONS: LessonContent[] = [
         answer: 1,
         explain: 'Like the hand showed, AK and KQ dominate KJo. UTG opens KQo 70% of the time but never KJo. UTG+1 mixes it in 10% of the time. At UTG it always folds.',
         point: 1,
+        shuffleSuits: true,
+        variants: [
+          {
+            question: '9-handed at 100bb, it folds to you UTG with KTo. What does the chart do?',
+            cards: 'KdTs',
+            explain: 'AK, KQ and KJ all dominate KTo. UTG opens KTs most of the time but never KTo. At UTG it always folds.',
+          },
+          {
+            question: '9-handed at 100bb, it folds to you UTG with QJo. What does the chart do?',
+            cards: 'QhJd',
+            explain: 'QJo makes second best pairs against AQ and KQ. UTG opens QJs every time but never QJo. At UTG it always folds.',
+          },
+          {
+            question: '9-handed at 100bb, it folds to you in UTG+1 with KTo. What does the chart do?',
+            cards: 'KcTh',
+            explain: 'UTG+1 still has 7 players behind. It opens KJo only 10% of the time and never KTo. So KTo always folds.',
+          },
+          {
+            question: '9-handed at 100bb, it folds to you in UTG+1 with QJo. What does the chart do?',
+            cards: 'QsJc',
+            explain: 'UTG+1 still has 7 players behind. QJo makes dominated pairs, so the chart never opens it there. UTG+2 is the first seat that mixes it in.',
+          },
+        ],
       },
       {
         kind: 'quiz',
@@ -94,6 +117,17 @@ export const PREFLOP_LESSONS: LessonContent[] = [
         answer: 2,
         explain: 'Like the LJ chart showed, A3s to A5s always open there. They can make the nut flush and a wheel. A2s is the weakest suited ace. It still opens 80% of the time.',
         point: 2,
+        shuffleSuits: true,
+        variants: [
+          {
+            question: 'Folded to you in the LJ with A4s. What does the chart do?',
+            cards: 'Ad4d',
+          },
+          {
+            question: 'Folded to you in the LJ with A5s. What does the chart do?',
+            cards: 'Ah5h',
+          },
+        ],
       },
       {
         kind: 'quiz',
@@ -103,6 +137,7 @@ export const PREFLOP_LESSONS: LessonContent[] = [
         answer: 1,
         explain: 'At UTG, pairs always open from 77. Just below that edge, 66 opens 85% of the time. So it is a mix, not a pure raise or a pure fold.',
         point: 0,
+        shuffleSuits: true,
       },
       {
         kind: 'takeaway',
@@ -166,6 +201,24 @@ export const PREFLOP_LESSONS: LessonContent[] = [
         answer: 1,
         explain: 'Like the button chart showed, every suited king always opens down to K2s. So K5s is a pure raise. The mixes start lower, with hands like Q3s and K7o.',
         point: 1,
+        shuffleSuits: true,
+        variants: [
+          {
+            question: 'Folded to you on the button with K4s. What does the chart do?',
+            cards: 'Kh4h',
+            explain: 'Like the button chart showed, every suited king always opens down to K2s. So K4s is a pure raise. The mixes start lower, with hands like Q3s and K7o.',
+          },
+          {
+            question: 'Folded to you on the button with K3s. What does the chart do?',
+            cards: 'Kc3c',
+            explain: 'Like the button chart showed, every suited king always opens down to K2s. So K3s is a pure raise. The mixes start lower, with hands like Q3s and K7o.',
+          },
+          {
+            question: 'Folded to you on the button with K2s. What does the chart do?',
+            cards: 'Ks2s',
+            explain: 'Like the button chart showed, every suited king always opens down to K2s. So even K2s is a pure raise. The mixes start lower, with hands like Q3s and K7o.',
+          },
+        ],
       },
       {
         kind: 'quiz',
@@ -175,6 +228,24 @@ export const PREFLOP_LESSONS: LessonContent[] = [
         answer: 1,
         explain: 'Like the cutoff chart showed, suited queens always open from Q9s. Q7s is a close call. It raises 45% of the time and folds the rest. Q4s and below always fold.',
         point: 2,
+        shuffleSuits: true,
+        variants: [
+          {
+            question: 'Folded to you in the cutoff with Q6s. What does the chart do?',
+            cards: 'Qd6d',
+            explain: 'Like the cutoff chart showed, suited queens always open from Q9s. Q6s is a close call. It raises 25% of the time and folds the rest. Q4s and below always fold.',
+          },
+          {
+            question: 'Folded to you in the cutoff with Q5s. What does the chart do?',
+            cards: 'Qh5h',
+            explain: 'Like the cutoff chart showed, suited queens always open from Q9s. Q5s is a close call. It raises 10% of the time and folds the rest. Q4s and below always fold.',
+          },
+          {
+            question: 'Folded to you in the cutoff with J7s. What does the chart do?',
+            cards: 'Jc7c',
+            explain: 'Like the cutoff chart showed, suited jacks always open from J9s. J7s is a close call. It raises 35% of the time and folds the rest.',
+          },
+        ],
       },
       {
         kind: 'quiz',
@@ -265,6 +336,24 @@ export const PREFLOP_LESSONS: LessonContent[] = [
         answer: 0,
         explain: 'Like the chart showed, suited queens always open down to Q4s in the small blind. Q3s and Q2s are mixes. They raise 60% and 35% of the time.',
         point: 1,
+        shuffleSuits: true,
+        variants: [
+          {
+            question: 'Folded to you in the small blind with Q5s. What does the raise only chart do?',
+            cards: 'Qs5s',
+            explain: 'Like the chart showed, suited queens always open down to Q4s in the small blind. So Q5s is a pure raise. Q3s and Q2s are mixes.',
+          },
+          {
+            question: 'Folded to you in the small blind with K8s. What does the raise only chart do?',
+            cards: 'Kd8d',
+            explain: 'Like the chart showed, every suited king opens in the small blind. So K8s is a pure raise.',
+          },
+          {
+            question: 'Folded to you in the small blind with K2s. What does the raise only chart do?',
+            cards: 'Kc2c',
+            explain: 'Like the chart showed, every suited king opens in the small blind. Even K2s is a pure raise.',
+          },
+        ],
       },
       {
         kind: 'quiz',
@@ -274,6 +363,19 @@ export const PREFLOP_LESSONS: LessonContent[] = [
         answer: 0,
         explain: 'Like the chart showed, offsuit kings always open from K9o in the small blind. Below that they mix. K7o raises 35% of the time and folds the rest.',
         point: 1,
+        shuffleSuits: true,
+        variants: [
+          {
+            question: 'Folded to you in the small blind with K8o. What does the raise only chart do?',
+            cards: 'Kd8c',
+            explain: 'Like the chart showed, offsuit kings always open from K9o in the small blind. Below that they mix. K8o raises 70% of the time and folds the rest.',
+          },
+          {
+            question: 'Folded to you in the small blind with Q9o. What does the raise only chart do?',
+            cards: 'Qh9s',
+            explain: 'Like the chart showed, offsuit queens always open from QTo in the small blind. Q9o mixes. It raises 70% of the time and folds the rest.',
+          },
+        ],
       },
       {
         kind: 'quiz',
@@ -387,6 +489,24 @@ export const PREFLOP_LESSONS: LessonContent[] = [
         answer: 0,
         explain: 'Like the chart showed, suited jacks from J7s down to J5s always call. Lower ones mix calls and folds. J6s is a pure call. Suited hands keep their equity, so they defend deep.',
         point: 1,
+        shuffleSuits: true,
+        variants: [
+          {
+            question: 'Big blind against a 2.5bb button open with J7s. What does the chart do?',
+            cards: 'Jd7d',
+            explain: 'Like the chart showed, suited jacks from J7s down to J5s always call. J7s is a pure call. Suited hands keep their equity, so they defend deep.',
+          },
+          {
+            question: 'Big blind against a 2.5bb button open with T6s. What does the chart do?',
+            cards: 'Th6h',
+            explain: 'Like the chart showed, T6s is a pure call. Suited hands keep their equity, so they defend deep.',
+          },
+          {
+            question: 'Big blind against a 2.5bb button open with 96s. What does the chart do?',
+            cards: '9s6s',
+            explain: 'Like the chart showed, 96s is a pure call. Suited hands keep their equity, so they defend deep.',
+          },
+        ],
       },
       {
         kind: 'quiz',
@@ -396,6 +516,7 @@ export const PREFLOP_LESSONS: LessonContent[] = [
         answer: 2,
         explain: 'Like the 3bet step said, A4s 3bets 60% of the time and calls the rest. The ace makes AA and AK less likely, which suits a 3bet. These hands are too good to fold, so they call when they do not 3bet.',
         point: 2,
+        shuffleSuits: true,
       },
       {
         kind: 'quiz',
@@ -404,6 +525,20 @@ export const PREFLOP_LESSONS: LessonContent[] = [
         answer: 1,
         explain: 'Like the formula showed, you call 1.5bb to win a 5.5bb pot. 1.5 ÷ 5.5 is about 27%. Out of position you realize less, so the real bar is higher.',
         point: 0,
+        variants: [
+          {
+            question: 'The cutoff opens 2bb and the small blind folds. What raw equity does a big blind call need?',
+            choices: ['About 22%', 'About 27%', 'About 33%', 'About 40%'],
+            answer: 0,
+            explain: 'Like the formula showed, you call 1bb to win a 4.5bb pot. 1 ÷ 4.5 is about 22%. Smaller opens give you a better price.',
+          },
+          {
+            question: 'UTG opens 3bb and the small blind folds. What raw equity does a big blind call need?',
+            choices: ['About 20%', 'About 27%', 'About 31%', 'About 40%'],
+            answer: 2,
+            explain: 'Like the formula showed, you call 2bb to win a 6.5bb pot. 2 ÷ 6.5 is about 31%. Out of position you realize less, so the real bar is higher.',
+          },
+        ],
       },
       {
         kind: 'takeaway',

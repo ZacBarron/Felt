@@ -80,8 +80,31 @@ export type LessonStep =
        * question ties back to something the lesson taught.
        */
       point?: number;
+      /**
+       * Other versions of the same question: another seat, hand, board, size
+       * or stack depth, each with its own correct answer. A seeded pick shows
+       * one (see `quizVersion`), so a replay or a review card is not the same
+       * question twice. Tests check every version like the question itself.
+       */
+      variants?: QuizVariant[];
+      /**
+       * Deal the cards in a seeded set of suits. Suits are symmetric, so the
+       * answer never changes. Only for questions whose words name no suit.
+       */
+      shuffleSuits?: boolean;
     }
   | { kind: 'takeaway'; points: string[] };
+
+/** What one version of a question changes. Fields left out keep the base question's. */
+export interface QuizVariant {
+  question?: string;
+  choices?: string[];
+  answer?: number;
+  explain?: string;
+  cards?: string;
+  board?: string;
+  choiceCards?: string[];
+}
 
 /** The points a lesson asks the player to remember: its takeaway. */
 export function lessonPoints(lesson: Pick<LessonContent, 'steps'>): string[] {

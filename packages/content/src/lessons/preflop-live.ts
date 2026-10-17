@@ -83,6 +83,20 @@ export const PREFLOP_LIVE_LESSONS: LessonContent[] = [
         answer: 1,
         explain: 'Like the SPR table showed, 49bb behind divided by a 22.5bb pot is 2.2. About 4 is the SPR at 100bb. At 2.2, top pair with a good kicker is usually happy to get all in.',
         point: 2,
+        variants: [
+          {
+            question: 'The button opens 2.5bb and the big blind 3bets to 11bb. The button calls with 40bb stacks. What is the flop SPR?',
+            choices: ['About 1.3', 'About 2', 'About 4', 'About 8'],
+            answer: 0,
+            explain: 'Like the SPR table showed, 29bb behind divided by a 22.5bb pot is 1.3. At that SPR most top pairs are committed.',
+          },
+          {
+            question: 'The button opens 2.5bb and the big blind 3bets to 11bb. The button calls with 150bb stacks. What is the flop SPR?',
+            choices: ['About 2', 'About 4', 'About 6', 'About 12'],
+            answer: 2,
+            explain: 'Like the SPR table showed, 139bb behind divided by a 22.5bb pot is 6.2. Deep, one pair needs more care.',
+          },
+        ],
       },
       {
         kind: 'quiz',
@@ -92,6 +106,7 @@ export const PREFLOP_LIVE_LESSONS: LessonContent[] = [
         answer: 2,
         explain: 'Like the deep hand showed, deep stacks pay off hands that make straights and flushes. KJo and AQo win mostly with one pair. One pair is worth less when the pot can grow to 200bb.',
         point: 1,
+        shuffleSuits: true,
       },
       {
         kind: 'quiz',
@@ -101,6 +116,7 @@ export const PREFLOP_LIVE_LESSONS: LessonContent[] = [
         answer: 0,
         explain: 'Like the shallow hand showed, a low SPR suits top pair with a good kicker. AJo makes those pairs, and it is happy to get all in. Small pairs and suited connectors need money behind to pay off their misses.',
         point: 0,
+        shuffleSuits: true,
       },
       {
         kind: 'takeaway',
@@ -366,6 +382,18 @@ export const PREFLOP_LIVE_LESSONS: LessonContent[] = [
         answer: 2,
         explain: 'Like the price table showed, you call 7bb into a 9.5bb pot. So 7 ÷ 16.5 = 42.4%. 45.7% is the cold call price. It forgets that your 1bb is already in.',
         point: 0,
+        variants: [
+          {
+            question: 'The HJ opens to 6bb and it folds to you in the big blind. How much equity do you need to call?',
+            choices: ['27.3%', '35.7%', '40%', '45%'],
+            explain: 'Like the price table showed, you call 5bb into a 7.5bb pot. So 5 ÷ 12.5 = 40%. Bigger opens raise the price.',
+          },
+          {
+            question: 'A player opens to 10bb and it folds to you in the big blind. How much equity do you need to call?',
+            choices: ['33%', '40%', '43.9%', '47.6%'],
+            explain: 'Like the price table showed, you call 9bb into an 11.5bb pot. So 9 ÷ 20.5 = 43.9%.',
+          },
+        ],
       },
       {
         kind: 'quiz',
@@ -375,6 +403,7 @@ export const PREFLOP_LIVE_LESSONS: LessonContent[] = [
         answer: 1,
         explain: 'Like the set mining step showed, you need about 51bb extra when you hit. This player will not pay that often. A 24bb 3bet bluff needs folds 71.6% of the time, and 55 plays badly when called.',
         point: 1,
+        shuffleSuits: true,
       },
       {
         kind: 'quiz',
@@ -384,6 +413,7 @@ export const PREFLOP_LIVE_LESSONS: LessonContent[] = [
         answer: 0,
         explain: 'Like the last bars showed, 3bet a linear value range against big openers. QQ+ and AK qualify. A light 3bet with A5s or 76s needs 71.6% folds, and this player rarely folds.',
         point: 2,
+        shuffleSuits: true,
       },
       {
         kind: 'takeaway',
@@ -492,6 +522,18 @@ export const PREFLOP_LIVE_LESSONS: LessonContent[] = [
         answer: 1,
         explain: 'Like the stack table showed, divide by the 2bb straddle. So 120bb is 60 straddles. Play it like a 60 deep game. 240 comes from multiplying by 2 instead of dividing.',
         point: 0,
+        variants: [
+          {
+            question: 'You have 200bb and the pot is straddled. How deep are you, measured in straddles?',
+            choices: ['50', '100', '200', '400'],
+            explain: 'Like the stack table showed, divide by the 2bb straddle. So 200bb is 100 straddles. Play it like a 100 deep game.',
+          },
+          {
+            question: 'You have 80bb and the pot is straddled. How deep are you, measured in straddles?',
+            choices: ['20', '40', '80', '160'],
+            explain: 'Like the stack table showed, divide by the 2bb straddle. So 80bb is 40 straddles. That plays like a short stack.',
+          },
+        ],
       },
       {
         kind: 'quiz',
@@ -500,6 +542,20 @@ export const PREFLOP_LIVE_LESSONS: LessonContent[] = [
         answer: 0,
         explain: 'Like the bars showed, the straddler calls 4bb into a 9.5bb pot. So 4 ÷ 13.5 = 29.6%. 34.5% is the big blind’s price. The posted 2bb is why the straddler’s price is better.',
         point: 1,
+        variants: [
+          {
+            question: 'The cutoff opens to 7bb in a straddled pot and the blinds fold. How much equity does the straddler need to call?',
+            choices: ['29.6%', '32.3%', '40%'],
+            answer: 1,
+            explain: 'Like the bars showed, the straddler calls 5bb into a 10.5bb pot. So 5 ÷ 15.5 = 32.3%.',
+          },
+          {
+            question: 'The HJ opens to 5bb in a straddled pot and the blinds fold. How much equity does the straddler need to call?',
+            choices: ['26.1%', '29.6%', '35%'],
+            answer: 0,
+            explain: 'Like the bars showed, the straddler calls 3bb into an 8.5bb pot. So 3 ÷ 11.5 = 26.1%.',
+          },
+        ],
       },
       {
         kind: 'quiz',
@@ -629,6 +685,19 @@ export const PREFLOP_LIVE_LESSONS: LessonContent[] = [
         answer: 1,
         explain: 'Like the chart showed, 65s overlimps. It wins big pots with straights and flushes and loses little when it misses. The chart iso raises only the top suited connectors, like T9s.',
         point: 1,
+        shuffleSuits: true,
+        variants: [
+          {
+            question: 'One early player limps and you hold 5♠4♠ on the button. What does the starter chart do?',
+            cards: '5s4s',
+            explain: 'Like the chart showed, 54s overlimps. It wins big pots with straights and flushes and loses little when it misses. The chart iso raises only the top suited connectors, like T9s.',
+          },
+          {
+            question: 'One early player limps and you hold 8♦7♦ on the button. What does the starter chart do?',
+            cards: '8d7d',
+            explain: 'Like the chart showed, 87s overlimps. It wins big pots with straights and flushes and loses little when it misses. The chart iso raises only the top suited connectors, like T9s.',
+          },
+        ],
       },
       {
         kind: 'quiz',
@@ -638,6 +707,13 @@ export const PREFLOP_LIVE_LESSONS: LessonContent[] = [
         answer: 2,
         explain: 'Like the size bars showed, start at about 5bb for one limper. Add about 2bb for the second, which makes 7bb. Smaller lets both limpers call at a great price.',
         point: 0,
+        shuffleSuits: true,
+        variants: [
+          {
+            question: 'Two players limp and you are on the button with AKo. What size does the starter chart iso raise to?',
+            cards: 'AdKc',
+          },
+        ],
       },
       {
         kind: 'quiz',
@@ -646,6 +722,14 @@ export const PREFLOP_LIVE_LESSONS: LessonContent[] = [
         answer: 1,
         explain: 'Like the bars showed, multiply 0.6 × 0.6 to get 36%. 21.6% is the chance for 3 players. 60% would need only one player to fold.',
         point: 2,
+        variants: [
+          {
+            question: 'You bluff into 3 players who each fold 70% of the time. How often do all 3 fold?',
+            choices: ['34.3%', '49%', '70%'],
+            answer: 0,
+            explain: 'Like the bars showed, multiply 0.7 × 0.7 × 0.7 to get 34.3%. 49% is the chance for 2 players. 70% would need only one player to fold.',
+          },
+        ],
       },
       {
         kind: 'takeaway',

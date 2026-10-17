@@ -18,7 +18,7 @@ import { canOpenLesson } from '../state/access';
 import { track } from '../state/events';
 import { clearPlacement, loadPlacement, savePlacement } from '../state/placementProgress';
 import { recordLessonQuiz } from '../state/rating';
-import { entryFor, LESSON_ENTRIES, lessonPath, markTested, moduleEntries, quizSteps } from '../state/lessons';
+import { entryFor, freshSeed, LESSON_ENTRIES, lessonPath, markTested, moduleEntries, quizAt, quizSteps } from '../state/lessons';
 import { useSettings } from '../state/settings';
 import { BottomBar } from '../ui/BottomBar';
 import { CheckIcon, CloseIcon, LockIcon } from '../ui/icons';
@@ -29,9 +29,9 @@ import { useBodyClass } from '../ui/useBodyClass';
 
 type Quiz = Extract<LessonStep, { kind: 'quiz' }>;
 
-function quizFor(q: CheckQuestion): Quiz {
-  const step = entryFor(q.lessonKey)?.content?.steps[q.step];
-  if (step?.kind !== 'quiz') throw new Error(`No quiz at ${q.lessonKey} step ${q.step}`);
+function quizFor(q: CheckQuestion, seed: number): Quiz {
+  const step = quizAt(q.lessonKey, q.step, seed);
+  if (!step) throw new Error(`No quiz at ${q.lessonKey} step ${q.step}`);
   return step;
 }
 
@@ -51,7 +51,8 @@ function QuestionScreen({
   closeLabel?: string;
 }) {
   const [choice, setChoice] = useState<number>();
-  const quiz = quizFor(question);
+  const [seed] = useState(freshSeed);
+  const quiz = quizFor(question, seed);
   const entry = entryFor(question.lessonKey);
   return (
     <div className="stack focus-column">

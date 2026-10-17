@@ -278,6 +278,7 @@ export const GAPS_TOURNAMENT_LESSONS: LessonContent[] = [
         answer: 1,
         explain: 'Like the hand showed, losing costs your whole seat. Winning adds little to a seat you almost have. Aces win about 85% against a random hand, far short of 95.8%.',
         point: 1,
+        shuffleSuits: true,
       },
       {
         kind: 'quiz',

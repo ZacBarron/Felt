@@ -123,6 +123,7 @@ export const PREFLOP_MORE_LESSONS: LessonContent[] = [
         answer: 0,
         explain: 'Like the blocker hand showed, A5s makes AA and AK less likely and can make straights and flushes. AJo also holds an ace, but a tight early range dominates it. When called, it makes too many second best hands.',
         point: 1,
+        shuffleSuits: true,
       },
       {
         kind: 'quiz',
@@ -233,6 +234,7 @@ export const PREFLOP_MORE_LESSONS: LessonContent[] = [
         answer: 1,
         explain: 'Like the table showed, 66 is a call. It flops a set or better 11.8% of the time and plays well in position. KTo looks playable, but AK and KQ dominate it. Q9o is dominated too and folds.',
         point: 0,
+        shuffleSuits: true,
       },
       {
         kind: 'quiz',
@@ -474,6 +476,18 @@ export const PREFLOP_MORE_LESSONS: LessonContent[] = [
         answer: 2,
         explain: 'Like the dead money step showed, 2.5 + 2.5 + 0.5 + 1 = 6.5bb. Your own 1bb counts, since it is already in the pot. Leaving it out gives 5.5bb.',
         point: 0,
+        variants: [
+          {
+            question: 'UTG opens 3bb and the HJ calls. How much is in the pot when the big blind acts?',
+            choices: ['4.5bb', '6.5bb', '7.5bb', '8.5bb'],
+            explain: 'Like the dead money step showed, add every chip in. 3 + 3 + 0.5 + 1 = 7.5bb. Your own 1bb counts, since it is already in the pot.',
+          },
+          {
+            question: 'The LJ opens 2.5bb and both the CO and the button call. How much is in the pot when the big blind acts?',
+            choices: ['6.5bb', '8bb', '9bb', '10.5bb'],
+            explain: 'Like the dead money step showed, 2.5 + 2.5 + 2.5 + 0.5 + 1 = 9bb. Each caller adds another 2.5bb of dead money.',
+          },
+        ],
       },
       {
         kind: 'quiz',
@@ -482,6 +496,18 @@ export const PREFLOP_MORE_LESSONS: LessonContent[] = [
         answer: 1,
         explain: 'Like the sizing table showed, 3 × 2.5 = 7.5bb. Add 2.5bb for the caller to make 10bb. 12.5bb uses the out of position rule. The button has position, so 3x is enough.',
         point: 1,
+        variants: [
+          {
+            question: 'UTG+1 opens 3bb and the LJ calls. Using 3x plus one open per caller, what is the HJ’s squeeze size?',
+            choices: ['9bb', '12bb', '15bb'],
+            explain: 'Like the sizing table showed, 3 × 3 = 9bb. Add 3bb for the caller to make 12bb. 15bb uses the out of position rule.',
+          },
+          {
+            question: 'The LJ opens 2.5bb and 2 players call. Using 3x plus one open per caller, what is the button’s squeeze size?',
+            choices: ['10bb', '12.5bb', '15bb'],
+            explain: 'Like the sizing table showed, 3 × 2.5 = 7.5bb. Add 2.5bb for each caller to make 12.5bb. More callers means a bigger squeeze.',
+          },
+        ],
       },
       {
         kind: 'quiz',
@@ -499,6 +525,7 @@ export const PREFLOP_MORE_LESSONS: LessonContent[] = [
         answer: 0,
         explain: 'Like the hand selection step said, suited aces from A5s down to A2s make good squeeze bluffs. They block AA and AK and keep straight and flush equity. Dominated offsuit hands like KJo and Q9o make poor squeezes.',
         point: 3,
+        shuffleSuits: true,
       },
       {
         kind: 'takeaway',
@@ -602,6 +629,18 @@ export const PREFLOP_MORE_LESSONS: LessonContent[] = [
         answer: 1,
         explain: 'Like the price table showed, the pot holds 11 + 2.5 + 0.5 = 14bb. You call 8.5bb, so 8.5 ÷ 22.5 = 37.8%. 43.6% leaves out your own 2.5bb and the small blind’s 0.5bb.',
         point: 0,
+        variants: [
+          {
+            question: 'You open the CO to 2.5bb and the button 3bets to 7.5bb. The blinds fold. What raw equity does a call need?',
+            choices: ['24%', '30.3%', '37.8%'],
+            explain: 'Like the price table showed, the pot holds 7.5 + 2.5 + 1.5 = 11.5bb. You call 5bb, so 5 ÷ 16.5 = 30.3%. 37.8% is the price against a big blind 3bet to 11bb.',
+          },
+          {
+            question: 'You open the HJ to 2.5bb and the small blind 3bets to 12bb. The big blind folds. What raw equity does a call need?',
+            choices: ['31%', '38%', '45%'],
+            explain: 'The pot holds 12 + 2.5 + 1 = 15.5bb, since the big blind’s 1bb stays in. You call 9.5bb, so 9.5 ÷ 25 = 38%.',
+          },
+        ],
       },
       {
         kind: 'quiz',
@@ -619,6 +658,24 @@ export const PREFLOP_MORE_LESSONS: LessonContent[] = [
         answer: 2,
         explain: 'Like the options table showed, weak offsuit hands like K9o fold. AK and KQ dominate it, and it has no blocker value worth a 4bet. Aced’s chart folds it every time.',
         point: 2,
+        shuffleSuits: true,
+        variants: [
+          {
+            question: 'You open K♥8♠ on the button and the big blind 3bets to 11bb. What does Aced’s chart do?',
+            cards: 'Kh8s',
+            explain: 'Like the options table showed, weak offsuit hands like K8o fold. AK and KQ dominate it, and it has no blocker value worth a 4bet. Aced’s chart folds it every time.',
+          },
+          {
+            question: 'You open Q♦9♣ on the button and the big blind 3bets to 11bb. What does Aced’s chart do?',
+            cards: 'Qd9c',
+            explain: 'Like the options table showed, weak offsuit hands like Q9o fold. AQ and KQ dominate it, and it has no blocker value worth a 4bet. Aced’s chart folds it every time.',
+          },
+          {
+            question: 'You open J♠9♥ on the button and the big blind 3bets to 11bb. What does Aced’s chart do?',
+            cards: 'Js9h',
+            explain: 'Like the options table showed, weak offsuit hands like J9o fold. AJ and KJ dominate it, and it has no blocker value worth a 4bet. Aced’s chart folds it every time.',
+          },
+        ],
       },
       {
         kind: 'takeaway',
@@ -744,6 +801,7 @@ export const PREFLOP_MORE_LESSONS: LessonContent[] = [
         answer: 2,
         explain: 'Like the blocker table showed, AA drops from 6 combos to 3. AK drops from 16 to 12. KK and QQ stay at 6 each, so 3 + 6 + 6 + 12 = 27. 34 is the count before your cards come out.',
         point: 1,
+        shuffleSuits: true,
       },
       {
         kind: 'quiz',
@@ -752,6 +810,19 @@ export const PREFLOP_MORE_LESSONS: LessonContent[] = [
         answer: 0,
         explain: 'Like the chips showed, the pot is 25 + 25 + 1 = 51bb with 75bb behind. 75 ÷ 51 = 1.5, so the 5bet is all in. About 3 comes from dividing by one 4bet instead of the whole pot.',
         point: 2,
+        variants: [
+          {
+            question: 'At 100bb, a 4bet to 22bb is called with 1.5bb dead. What is the SPR?',
+            choices: ['About 1.7', 'About 3', 'About 4'],
+            explain: 'Like the chips showed, add the whole pot. 22 + 22 + 1.5 = 45.5bb with 78bb behind. 78 ÷ 45.5 = 1.7.',
+          },
+          {
+            question: 'At 150bb, a 4bet to 30bb is called with 1bb dead. What is the SPR?',
+            choices: ['About 1.5', 'About 2', 'About 4'],
+            answer: 1,
+            explain: 'Like the chips showed, the pot is 30 + 30 + 1 = 61bb with 120bb behind. 120 ÷ 61 = 2. Deeper stacks leave a little more room.',
+          },
+        ],
       },
       {
         kind: 'quiz',
@@ -852,6 +923,18 @@ export const PREFLOP_MORE_LESSONS: LessonContent[] = [
         answer: 1,
         explain: 'Like the price table showed, you call 2bb into a 4bb pot. So 2 ÷ 6 = 33.3%. 40% comes from leaving your own 1bb out of the pot.',
         point: 0,
+        variants: [
+          {
+            question: 'The small blind raises to 2.5bb. What raw equity does the big blind need to call?',
+            choices: ['25%', '30%', '37.5%'],
+            explain: 'Like the price table showed, you call 1.5bb into a 3.5bb pot. So 1.5 ÷ 5 = 30%.',
+          },
+          {
+            question: 'The small blind raises to 3.5bb. What raw equity does the big blind need to call?',
+            choices: ['30%', '35.7%', '45%'],
+            explain: 'Like the price table showed, you call 2.5bb into a 4.5bb pot. So 2.5 ÷ 7 = 35.7%.',
+          },
+        ],
       },
       {
         kind: 'quiz',
@@ -868,6 +951,20 @@ export const PREFLOP_MORE_LESSONS: LessonContent[] = [
         answer: 2,
         explain: 'Like the fight back step said, the big blind 3bets about 3 times the open. That makes 9bb. 12bb is an out of position size, and the big blind has position here.',
         point: 1,
+        variants: [
+          {
+            question: 'The small blind raises to 2.5bb. What is a common big blind 3bet size?',
+            choices: ['5bb', '7.5bb', '10bb', '12bb'],
+            answer: 1,
+            explain: 'Like the fight back step said, the big blind 3bets about 3 times the open. That makes 7.5bb.',
+          },
+          {
+            question: 'The small blind raises to 3.5bb. What is a common big blind 3bet size?',
+            choices: ['7bb', '10.5bb', '14bb'],
+            answer: 1,
+            explain: 'Like the fight back step said, the big blind 3bets about 3 times the open. That makes 10.5bb.',
+          },
+        ],
       },
       {
         kind: 'takeaway',

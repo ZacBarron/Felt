@@ -67,6 +67,7 @@ export const BASICS_LESSONS: LessonContent[] = [
         answer: 0,
         explain: 'Like the picture showed, you get 2 hole cards. The 5 board cards are shared by everyone. You pick your best 5 from all 7.',
         point: 0,
+        shuffleSuits: true,
       },
       {
         kind: 'quiz',
@@ -173,6 +174,7 @@ export const BASICS_LESSONS: LessonContent[] = [
         answer: 2,
         explain: 'Like the ladder showed, a flush sits above a straight because it is rarer. It is easy to think the straight wins. Three of a kind and two pair rank below both.',
         point: 0,
+        shuffleSuits: true,
       },
       {
         kind: 'quiz',
@@ -182,6 +184,7 @@ export const BASICS_LESSONS: LessonContent[] = [
         answer: 1,
         explain: 'Like the straights picture showed, the ace can play low. That makes 5 4 3 2 A the lowest straight. It still beats three of a kind.',
         point: 2,
+        shuffleSuits: true,
       },
       {
         kind: 'quiz',
@@ -191,6 +194,7 @@ export const BASICS_LESSONS: LessonContent[] = [
         answer: 0,
         explain: 'Like the ladder showed, a full house ranks above a flush. Both are strong, so the order is easy to mix up. Only four of a kind and straight flushes beat a full house.',
         point: 1,
+        shuffleSuits: true,
       },
       {
         kind: 'takeaway',
@@ -250,6 +254,7 @@ export const BASICS_LESSONS: LessonContent[] = [
         answer: 1,
         explain: 'You both have a pair of aces. Like the kickers step showed, the next highest card decides. Your king beats their queen. Your best 5 are A A K 9 6.',
         point: 1,
+        shuffleSuits: true,
       },
       {
         kind: 'quiz',
@@ -260,6 +265,7 @@ export const BASICS_LESSONS: LessonContent[] = [
         answer: 2,
         explain: 'As in the playing the board picture, neither hand improves this straight. So you both play the board and split the pot. Your ace would only help if it made a better 5 card hand.',
         point: 2,
+        shuffleSuits: true,
       },
       {
         kind: 'quiz',
@@ -268,8 +274,9 @@ export const BASICS_LESSONS: LessonContent[] = [
         board: 'Kc9c7d7s2c',
         choices: ['A flush', 'Three 7s', 'Two pair'],
         answer: 0,
-        explain: 'You have three 7s. You also have 5 clubs with A K 9 7 2. A flush beats three of a kind, so the flush is your best 5.',
+        explain: 'You have three 7s. You also have 5 cards of one suit with A K 9 7 2. A flush beats three of a kind, so the flush is your best 5.',
         point: 0,
+        shuffleSuits: true,
       },
       {
         kind: 'takeaway',
@@ -367,6 +374,19 @@ export const BASICS_LESSONS: LessonContent[] = [
         answer: 1,
         explain: 'There are 4 board cards. Like the hand showed, the flop brings 3 and the turn adds the 4th. The river would make 5.',
         point: 1,
+        shuffleSuits: true,
+        variants: [
+          {
+            board: 'Qh8s3c',
+            answer: 0,
+            explain: 'There are 3 board cards. Like the hand showed, the flop brings 3. The turn would add a 4th.',
+          },
+          {
+            board: 'Kd8c5h3hJh',
+            answer: 2,
+            explain: 'There are 5 board cards. Like the hand showed, the river is the 5th and last card.',
+          },
+        ],
       },
       {
         kind: 'quiz',
@@ -385,6 +405,7 @@ export const BASICS_LESSONS: LessonContent[] = [
         answer: 0,
         explain: 'Like the flop step showed, the first player still in left of the button acts first. Here that is the big blind. The button acts last.',
         point: 2,
+        shuffleSuits: true,
       },
       {
         kind: 'quiz',
@@ -840,6 +861,7 @@ export const BASICS_LESSONS: LessonContent[] = [
         answer: 3,
         explain: 'Like the chart caption said, KTo folds from UTG with 8 players behind. On the button only the blinds are left, so KTo opens. Later seats play more hands.',
         point: 2,
+        shuffleSuits: true,
       },
       {
         kind: 'quiz',
@@ -934,6 +956,7 @@ export const BASICS_LESSONS: LessonContent[] = [
         answer: 2,
         explain: 'Like the chart showed, the raise rules out 72o. AKo, QQ and KQs all raise from UTG. Each action narrows the range.',
         point: 1,
+        shuffleSuits: true,
       },
       {
         kind: 'quiz',

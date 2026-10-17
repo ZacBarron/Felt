@@ -344,6 +344,7 @@ export const TOURNAMENT_ICM_LESSONS: LessonContent[] = [
         answer: 0,
         explain: 'Like the table showed, AK has about 65% against any 2 cards. B needs 74.4%. So even AK folds here.',
         point: 2,
+        shuffleSuits: true,
       },
       {
         kind: 'quiz',
