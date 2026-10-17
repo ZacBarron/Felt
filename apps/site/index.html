@@ -71,8 +71,8 @@
           </div>
           <div class="stage" data-tilt>
             <canvas class="hero-grid" aria-hidden="true" data-grid></canvas>
-            <figure class="phone phone-back"><img src="shots/ranges-dark.webp" alt="The under the gun opening chart in Aced" width="393" height="806" decoding="async" /></figure>
-            <figure class="phone phone-front"><img src="shots/play-dark.webp" alt="The practice table: nine seats, bots and your hand with raise sizes" width="393" height="806" fetchpriority="high" /></figure>
+            <figure class="phone phone-back"><video class="clip" data-clip="ranges" muted playsinline loop preload="none" poster="clips/ranges.jpg" aria-label="A range quiz in Aced: a hand, an answer and the chart"><source src="clips/ranges.webm" type="video/webm" /><source src="clips/ranges.mp4" type="video/mp4" /></video></figure>
+            <figure class="phone phone-front"><video class="clip" data-clip="play" muted playsinline loop preload="metadata" poster="clips/play.jpg" aria-label="A hand at the Live 1/2 practice table, then its grade"><source src="clips/play.webm" type="video/webm" /><source src="clips/play.mp4" type="video/mp4" /></video></figure>
             <a class="sticker" href="/app/daily" data-app="daily" data-cta="daily" data-pos="sticker">
               <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="9" r="5.25" fill="none" stroke="currentColor" stroke-width="1.75"/><path d="M8.6 13.2 7 21l5-2.6 5 2.6-1.6-7.8" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/></svg>
               <span><b>Daily challenge</b><span>5 decisions. Same for everyone.</span></span>
@@ -148,11 +148,11 @@
           <div class="story-grid">
             <div class="story-phone" aria-hidden="true">
               <figure class="phone phone-sticky">
-                <img data-story-img="play" class="on" src="shots/play-dark.webp" alt="" width="393" height="806" />
-                <img data-story-img="lesson" src="shots/lesson-dark.webp" alt="" width="393" height="806" loading="lazy" />
-                <img data-story-img="ranges" src="shots/ranges-dark.webp" alt="" width="393" height="806" loading="lazy" />
-                <img data-story-img="you" src="shots/you-dark.webp" alt="" width="393" height="806" loading="lazy" />
-                <img data-story-img="daily" src="shots/daily-dark.webp" alt="" width="393" height="806" loading="lazy" />
+                <div class="screen on" data-story-img="play"><video class="clip" data-clip="play" muted playsinline loop preload="none" poster="clips/play.jpg" aria-label=""><source src="clips/play.webm" type="video/webm" /><source src="clips/play.mp4" type="video/mp4" /></video></div>
+                <div class="screen" data-story-img="lesson"><video class="clip" data-clip="lesson" muted playsinline loop preload="none" poster="clips/lesson.jpg" aria-label=""><source src="clips/lesson.webm" type="video/webm" /><source src="clips/lesson.mp4" type="video/mp4" /></video></div>
+                <div class="screen" data-story-img="ranges"><video class="clip" data-clip="ranges" muted playsinline loop preload="none" poster="clips/ranges.jpg" aria-label=""><source src="clips/ranges.webm" type="video/webm" /><source src="clips/ranges.mp4" type="video/mp4" /></video></div>
+                <div class="screen" data-story-img="you"><video class="clip" data-clip="today" muted playsinline loop preload="none" poster="clips/today.jpg" aria-label=""><source src="clips/today.webm" type="video/webm" /><source src="clips/today.mp4" type="video/mp4" /></video></div>
+                <div class="screen" data-story-img="daily"><video class="clip" data-clip="daily" muted playsinline loop preload="none" poster="clips/daily.jpg" aria-label=""><source src="clips/daily.webm" type="video/webm" /><source src="clips/daily.mp4" type="video/mp4" /></video></div>
               </figure>
             </div>
             <ol class="story-steps">
@@ -160,31 +160,31 @@
                 <span class="step-k"><i class="tile tile-spruce" aria-hidden="true"></i>Play</span>
                 <h3>A practice table that grades you.</h3>
                 <p>Bots play like the regs and recs at a typical card room. They limp and call too much the way real players do. When Aced can't grade a decision honestly, it says so.</p>
-                <figure class="phone phone-inline"><img src="shots/play-dark.webp" alt="The practice table with nine seats" width="393" height="806" loading="lazy" /></figure>
+                <figure class="phone phone-inline"><video class="clip" data-clip="play" muted playsinline loop preload="none" poster="clips/play.jpg" aria-label="The practice table with nine seats"><source src="clips/play.webm" type="video/webm" /><source src="clips/play.mp4" type="video/mp4" /></video></figure>
               </li>
               <li class="step" data-story="lesson">
                 <span class="step-k"><i class="tile tile-spruce" aria-hidden="true"></i>Learn</span>
                 <h3>Lessons that take a few minutes.</h3>
                 <p>Each screen teaches one idea with a picture. Every answer explains why. A short placement quiz lets you skip ahead.</p>
-                <figure class="phone phone-inline"><img src="shots/lesson-dark.webp" alt="A pot odds lesson with a bar chart" width="393" height="806" loading="lazy" /></figure>
+                <figure class="phone phone-inline"><video class="clip" data-clip="lesson" muted playsinline loop preload="none" poster="clips/lesson.jpg" aria-label="A pot odds lesson with a bar chart"><source src="clips/lesson.webm" type="video/webm" /><source src="clips/lesson.mp4" type="video/mp4" /></video></figure>
               </li>
               <li class="step" data-story="ranges">
                 <span class="step-k"><i class="tile tile-spruce" aria-hidden="true"></i>Ranges</span>
                 <h3>Charts that stick.</h3>
                 <p>Learn a chart for every seat. Quiz yourself or paint it from memory. Review brings back the hands you miss right before you forget them.</p>
-                <figure class="phone phone-inline"><img src="shots/ranges-dark.webp" alt="The under the gun opening chart" width="393" height="806" loading="lazy" /></figure>
+                <figure class="phone phone-inline"><video class="clip" data-clip="ranges" muted playsinline loop preload="none" poster="clips/ranges.jpg" aria-label="The under the gun opening chart"><source src="clips/ranges.webm" type="video/webm" /><source src="clips/ranges.mp4" type="video/mp4" /></video></figure>
               </li>
               <li class="step" data-story="you">
                 <span class="step-k"><i class="tile tile-brass" aria-hidden="true"></i>Rating</span>
                 <h3>A rating you earn.</h3>
                 <p>Your Aced Rating moves only on questions with a right answer. Chips won never count, because one session is mostly luck. There are no points for showing up.</p>
-                <figure class="phone phone-inline"><img src="shots/you-dark.webp" alt="Your Aced Rating with a rising chart" width="393" height="806" loading="lazy" /></figure>
+                <figure class="phone phone-inline"><video class="clip" data-clip="today" muted playsinline loop preload="none" poster="clips/today.jpg" aria-label="Your Aced Rating with a rising chart"><source src="clips/today.webm" type="video/webm" /><source src="clips/today.mp4" type="video/mp4" /></video></figure>
               </li>
               <li class="step" data-story="daily">
                 <span class="step-k"><i class="tile tile-gold" aria-hidden="true"></i>Daily</span>
                 <h3>One daily challenge. Same for everyone.</h3>
                 <p>You get 5 new decisions each day. See how you compare with every player. Share your result without spoiling a hand.</p>
-                <figure class="phone phone-inline"><img src="shots/daily-dark.webp" alt="A daily challenge result" width="393" height="806" loading="lazy" /></figure>
+                <figure class="phone phone-inline"><video class="clip" data-clip="daily" muted playsinline loop preload="none" poster="clips/daily.jpg" aria-label="A daily challenge result"><source src="clips/daily.webm" type="video/webm" /><source src="clips/daily.mp4" type="video/mp4" /></video></figure>
               </li>
             </ol>
           </div>

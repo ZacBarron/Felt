@@ -344,13 +344,55 @@ if (seatsSection && seatCanvas) {
   }
 }
 
+// App clips: real recordings of the app. They play only while on screen (and,
+// in the story phone, only for the step in view). Reduced motion and Save-Data
+// keep the still poster.
+const clips = $$<HTMLVideoElement>('video[data-clip]');
+const saveData = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData === true;
+const stillOnly = reduceMotion || saveData;
+const onScreen = new Set<HTMLVideoElement>();
+function syncClips() {
+  if (stillOnly) return;
+  for (const v of clips) {
+    const screen = v.closest<HTMLElement>('[data-story-img]');
+    const active = !screen || screen.classList.contains('on');
+    if (onScreen.has(v) && active) {
+      if (v.preload === 'none') v.preload = 'auto';
+      v.play().catch(() => {});
+    } else v.pause();
+  }
+}
+if (!stillOnly && 'IntersectionObserver' in window) {
+  const io = new IntersectionObserver(
+    (es) => {
+      for (const e of es) {
+        const v = e.target as HTMLVideoElement;
+        if (e.isIntersecting) onScreen.add(v);
+        else onScreen.delete(v);
+      }
+      syncClips();
+    },
+    { rootMargin: '200px 0px' },
+  );
+  for (const v of clips) io.observe(v);
+}
+
 // Story: the sticky phone shows the step in view -------------------------------------
 
 const steps = $$<HTMLElement>('[data-story]');
-const shots = $$<HTMLImageElement>('[data-story-img]');
+const shots = $$<HTMLElement>('[data-story-img]');
 const show = (key: string) => {
   for (const s of steps) s.classList.toggle('on', s.dataset.story === key);
-  for (const img of shots) img.classList.toggle('on', img.dataset.storyImg === key);
+  for (const screen of shots) {
+    const on = screen.dataset.storyImg === key;
+    if (on && !screen.classList.contains('on')) {
+      // Each step's clip starts from the top when it comes into view.
+      const v = $<HTMLVideoElement>('video', screen);
+      if (v) v.currentTime = 0;
+    }
+    screen.classList.toggle('on', on);
+  }
+  syncClips();
 };
 show(steps[0]?.dataset.story ?? 'play');
 if ('IntersectionObserver' in window) {

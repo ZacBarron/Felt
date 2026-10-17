@@ -194,7 +194,7 @@ p { margin: 0; }
 /* Phone frame ---------------------------------------------------------------------- */
 /* Screens are captured 393 by 806 so they sit under a drawn status bar, never under the island. */
 .phone { margin: 0; position: relative; container-type: inline-size; aspect-ratio: 393 / 852; max-width: 100%; border-radius: 13.5% / 6.3%; padding: 3.2%; background: linear-gradient(145deg, #3a3f3d, #121615 40%, #2a2f2d); box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08), 0 50px 90px -30px rgba(0, 0, 0, 0.8), 0 20px 40px -20px rgba(0, 0, 0, 0.6), inset 0 0 0 1.5px rgba(255, 255, 255, 0.06); }
-.phone img { width: 100%; height: 100%; padding-top: 11.7%; object-fit: cover; object-position: top; border-radius: 10.6% / 4.9%; background: var(--screen, #0a0e0d); }
+.phone img, .phone video { display: block; width: 100%; height: 100%; padding-top: 11.7%; object-fit: cover; object-position: top; border-radius: 10.6% / 4.9%; background: var(--screen, #0a0e0d); }
 .phone::before { content: ''; position: absolute; z-index: 2; top: 4.4%; left: 50%; width: 30%; height: 3.3%; transform: translateX(-50%); border-radius: 999px; background: #000; }
 .phone::after { content: '9:41'; position: absolute; z-index: 2; top: 4.55%; left: 10%; right: 9%; height: 3%; display: flex; align-items: center; padding-left: 4cqw; font: 650 4.4cqw/1 var(--body); color: var(--status, #f1ede3); background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 68 12'><g fill='%23f1ede3'><rect x='0' y='8' width='3' height='4' rx='1'/><rect x='5' y='5.5' width='3' height='6.5' rx='1'/><rect x='10' y='3' width='3' height='9' rx='1'/><rect x='15' y='0.5' width='3' height='11.5' rx='1'/><path d='M30 3.2a10 10 0 0 1 12.6 0l-1.5 1.7a7.6 7.6 0 0 0-9.6 0zm2.9 3.3a5.6 5.6 0 0 1 6.8 0l-1.5 1.7a3.2 3.2 0 0 0-3.8 0zm3.4 2.6 1.6 1.8-1.6 1.6-1.6-1.6z'/><rect x='48' y='1' width='17' height='10' rx='3' fill='none' stroke='%23f1ede3' stroke-opacity='.5' stroke-width='1.2'/><rect x='50' y='3' width='12' height='6' rx='1.5'/><rect x='66' y='4' width='1.6' height='4' rx='.8' fill-opacity='.5'/></g></svg>") right center / 22cqw auto no-repeat; }
 .phone.phone-light { --screen: #f4f1ea; --status: #16201c; box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1), 0 40px 80px -40px rgba(22, 32, 28, 0.45); }
@@ -277,9 +277,11 @@ p { margin: 0; }
 .story-grid { display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1fr); gap: 72px; }
 .story-phone { position: relative; }
 .phone-sticky { position: sticky; top: 110px; width: min(340px, 100%); margin-inline: auto; }
-.phone-sticky img { position: absolute; top: 1.47%; left: 3.2%; width: 93.6%; height: 97.05%; opacity: 0; transform: scale(0.985); transition: opacity 500ms var(--ease), transform 600ms var(--ease); }
-.phone-sticky img.on { opacity: 1; transform: none; }
-.phone-sticky img:first-child { position: relative; inset: auto; width: 100%; height: 100%; }
+.phone-sticky .screen { position: absolute; top: 1.47%; left: 3.2%; width: 93.6%; height: 97.05%; opacity: 0; transform: scale(0.97) translateY(8px); transition: opacity 520ms var(--ease), transform 640ms var(--ease); }
+.phone-sticky .screen video { padding-top: 12%; }
+.phone-sticky .screen.on { opacity: 1; transform: none; }
+.phone-sticky .screen:first-child { position: relative; inset: auto; width: 100%; height: 100%; }
+.phone-sticky .screen:first-child video { padding-top: 11.7%; }
 .story-steps { list-style: none; margin: 0; padding: 0; display: grid; }
 .step { min-height: 72vh; display: grid; align-content: center; gap: 14px; padding-block: 32px; border-top: 1px solid var(--line); }
 .step:first-child { border-top: 0; }
