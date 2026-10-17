@@ -54,6 +54,19 @@ services:
         sync: false
       - key: STRIPE_PRICE_MONTHLY
         sync: false
+      # Optional: founding price, retention coupon. See docs/MONETIZATION.md.
+      - key: STRIPE_PRICE_LIFETIME
+        sync: false
+      - key: STRIPE_RETENTION_COUPON
+        sync: false
+      # Lifecycle email: the postal address every marketing email carries (CASL),
+      # the holdout share (default 0.1) and this server's address for unsubscribe links.
+      - key: MAIL_POSTAL_ADDRESS
+        sync: false
+      - key: LIFECYCLE_HOLDOUT
+        sync: false
+      - key: SERVER_URL
+        sync: false
       # AI coach for Suited Pro players (console.anthropic.com). Optional: off without a key.
       - key: ANTHROPIC_API_KEY
         sync: false

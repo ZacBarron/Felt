@@ -71,6 +71,8 @@ export interface PasskeyContext {
   /** Creates a session and returns the token and the user as the app shows it. */
   signIn: (userId: string) => { token: string; user: unknown };
   userJson: (userId: string) => unknown;
+  /** Runs once for a new account, inside the transaction that made it. */
+  onUserCreated?: (userId: string) => void;
 }
 
 const UNAVAILABLE = 'Passkeys are not set up on this server.';
@@ -182,7 +184,10 @@ export function mountPasskeys(app: Hono<any>, ctx: PasskeyContext) {
 
     const userId = flow.user_id!;
     tx(db, () => {
-      if (!flow.existing) db.prepare('INSERT INTO users (id, email, created_at) VALUES (?, NULL, ?)').run(userId, iso());
+      if (!flow.existing) {
+        db.prepare('INSERT INTO users (id, email, created_at) VALUES (?, NULL, ?)').run(userId, iso());
+        ctx.onUserCreated?.(userId);
+      }
       db.prepare(
         'INSERT INTO passkeys (id, user_id, public_key, counter, transports, device_type, backed_up, created_at, last_used) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
       ).run(

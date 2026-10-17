@@ -185,6 +185,57 @@ const MIGRATIONS: string[] = [
     PRIMARY KEY (email, list)
   );
   `,
+  // Retention and lifecycle: the subscription as Stripe last reported it, the
+  // cancel flow, the founding (lifetime) purchase, billing issues, push caps,
+  // email consent (CASL: marketing email is opt in) and a holdout group.
+  // Seats in lifetime_checkouts keep no foreign key: a seat stays taken after
+  // its account is deleted.
+  `
+  ALTER TABLE users ADD COLUMN stripe_subscription TEXT;
+  ALTER TABLE users ADD COLUMN sub_status TEXT;
+  ALTER TABLE users ADD COLUMN cancel_at_period_end INTEGER NOT NULL DEFAULT 0;
+  ALTER TABLE users ADD COLUMN paid_through TEXT;
+  ALTER TABLE users ADD COLUMN paused_until TEXT;
+  ALTER TABLE users ADD COLUMN billing_issue INTEGER NOT NULL DEFAULT 0;
+  ALTER TABLE users ADD COLUMN billing_issue_at TEXT;
+  ALTER TABLE users ADD COLUMN lifetime INTEGER NOT NULL DEFAULT 0;
+  ALTER TABLE users ADD COLUMN retention_coupon_at TEXT;
+  ALTER TABLE users ADD COLUMN churned_at TEXT;
+  ALTER TABLE users ADD COLUMN last_paid_at TEXT;
+  ALTER TABLE users ADD COLUMN last_active_at TEXT;
+  ALTER TABLE users ADD COLUMN email_opt_in INTEGER NOT NULL DEFAULT 0;
+  ALTER TABLE users ADD COLUMN email_opt_in_at TEXT;
+  ALTER TABLE users ADD COLUMN unsub_token TEXT;
+  ALTER TABLE users ADD COLUMN holdout INTEGER NOT NULL DEFAULT 0;
+  UPDATE users SET unsub_token = lower(hex(randomblob(16)));
+  UPDATE users SET last_active_at = (SELECT MAX(last_seen) FROM sessions s WHERE s.user_id = users.id);
+  CREATE UNIQUE INDEX users_unsub_token ON users (unsub_token);
+  CREATE TABLE cancel_feedback (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id TEXT NOT NULL REFERENCES users (id) ON DELETE CASCADE,
+    reason TEXT NOT NULL,
+    detail TEXT,
+    offer_shown TEXT,
+    offer_taken INTEGER NOT NULL DEFAULT 0,
+    at TEXT NOT NULL
+  );
+  CREATE INDEX cancel_feedback_user ON cancel_feedback (user_id, at);
+  CREATE TABLE push_log (
+    user_id TEXT NOT NULL REFERENCES users (id) ON DELETE CASCADE,
+    kind TEXT NOT NULL,
+    at TEXT NOT NULL
+  );
+  CREATE INDEX push_log_user ON push_log (user_id, at);
+  CREATE TABLE lifetime_checkouts (
+    session_id TEXT PRIMARY KEY,
+    user_id TEXT NOT NULL,
+    created_at TEXT NOT NULL,
+    expires_at TEXT NOT NULL,
+    completed_at TEXT
+  );
+  ALTER TABLE waitlist ADD COLUMN source TEXT;
+  ALTER TABLE waitlist ADD COLUMN platform TEXT;
+  `,
 ];
 
 export function openDb(path: string): Db {

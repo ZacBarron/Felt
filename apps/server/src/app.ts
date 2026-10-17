@@ -1,14 +1,32 @@
 import { Hono, type Context } from 'hono';
 import { bodyLimit } from 'hono/body-limit';
 import { cors } from 'hono/cors';
+import { getConnInfo } from '@hono/node-server/conninfo';
 import { askCoach, type CoachClient, coachErrorResponse, parseCoachRequest, REFUSAL_REPLY, TRUNCATED_NOTE } from './coach.ts';
 import type { Config } from './config.ts';
 import { type Db, tx } from './db.ts';
+import { applyCoupon, applySubscription, cancelAtPeriodEnd, pause, resume, switchToAnnual } from './billing.ts';
+import {
+  type CouponInfo,
+  couponInfo,
+  describeCoupon,
+  FOUNDING_PRICE,
+  FOUNDING_SEATS,
+  isCancelReason,
+  offerLabel,
+  offersByReason,
+  PAUSE_MONTHS,
+  type RetentionOffer,
+  retentionOffer,
+  SEAT_HOLD_MINUTES,
+  seatsLeft,
+  subscriptionStatus,
+  winbackEligible,
+} from './lifecycle.ts';
 import { mountPasskeys, passkeysReady, simpleWebAuthn, type WebAuthnLib } from './passkeys.ts';
 import {
   CALIBRATION_MIN_ANSWERS,
   dailySummary,
-  entitlementFromSubscription,
   localTime,
   fitDifficulty,
   LEAGUE_SIZE,
@@ -35,6 +53,8 @@ export interface Deps {
   /** Passkey verification. Tests pass a fake; the real library is the default. */
   webauthn?: WebAuthnLib;
   now?: () => Date;
+  /** Random numbers for the lifecycle holdout. Tests pass a fixed one. */
+  random?: () => number;
 }
 
 interface UserRow {
@@ -61,6 +81,29 @@ interface UserRow {
   ref_code: string | null;
   /** Free Pro from invites runs to this date. */
   bonus_until: string | null;
+  /** The subscription as Stripe last reported it. */
+  stripe_subscription: string | null;
+  sub_status: string | null;
+  cancel_at_period_end: number;
+  /** While paused: Pro runs to paid_through, billing starts again at paused_until. */
+  paid_through: string | null;
+  paused_until: string | null;
+  /** A renewal payment failed. Pro stays on while Stripe retries. */
+  billing_issue: number;
+  billing_issue_at: string | null;
+  /** The founding purchase: Pro for as long as Aced runs. */
+  lifetime: number;
+  retention_coupon_at: string | null;
+  /** When paid Pro ended, for win-back. Cleared when it comes back. */
+  churned_at: string | null;
+  last_paid_at: string | null;
+  last_active_at: string | null;
+  /** Marketing email consent (CASL: explicit opt in, off by default), with when it was given. */
+  email_opt_in: number;
+  email_opt_in_at: string | null;
+  unsub_token: string | null;
+  /** In the lifecycle holdout: no marketing email. Never shown anywhere. */
+  holdout: number;
 }
 
 type Env = { Variables: { user: UserRow; token: string } };
@@ -83,14 +126,16 @@ export const REFERRAL_MONTH_DAYS = 30;
 /** How long after making an account a player can still claim an invite. */
 export const REFERRAL_CLAIM_DAYS = 14;
 
-/** Paid through a date still ahead. */
-const paidPro = (u: UserRow, now: Date) => !!u.pro_until && new Date(u.pro_until) > now;
+/** Paid through a date still ahead, or the founding purchase, which never ends. */
+const paidPro = (u: UserRow, now: Date) => !!u.lifetime || (!!u.pro_until && new Date(u.pro_until) > now);
 
 /** Free Pro earned from invites, still running. */
 const bonusPro = (u: UserRow, now: Date) => !!u.bonus_until && new Date(u.bonus_until) > now;
 
 /** Lists the site can add an email to. */
 const WAITLISTS = ['ios', 'android', 'founding'];
+/** Waitlist requests one address may make in a minute. */
+export const WAITLIST_PER_MINUTE = 5;
 
 /** Aced Pro for this player: paid, from invites, or every signed in player while PRO_FOR_EVERYONE is on. */
 export function userHasPro(u: UserRow, now: Date, proForEveryone = false) {
@@ -116,7 +161,16 @@ export function publicUser(u: UserRow, now: Date, passkeys = 0, proForEveryone =
     reminderBody: u.reminder_body,
     leagues: !!u.leagues,
     lastStudyDay: u.last_study_day,
-    access: { pro, until, plan: paid ? u.plan : bonus ? 'invite' : u.plan, trialing: paid && !!u.trialing },
+    emailOptIn: !!u.email_opt_in,
+    access: {
+      pro,
+      // Lifetime Pro has no end date.
+      until: u.lifetime ? null : until,
+      plan: u.lifetime ? 'lifetime' : paid ? u.plan : bonus ? 'invite' : u.plan,
+      trialing: paid && !u.lifetime && !!u.trialing,
+      lifetime: !!u.lifetime,
+      billingIssue: !!u.billing_issue && !u.lifetime,
+    },
   };
 }
 
@@ -128,7 +182,7 @@ async function json<T>(c: Context): Promise<Partial<T>> {
   }
 }
 
-export function createApp({ db, config, mailer, stripe, coach, webauthn = simpleWebAuthn, now = () => new Date() }: Deps) {
+export function createApp({ db, config, mailer, stripe, coach, webauthn = simpleWebAuthn, now = () => new Date(), random = Math.random }: Deps) {
   const app = new Hono<Env>();
   const iso = () => now().toISOString();
 
@@ -168,6 +222,9 @@ export function createApp({ db, config, mailer, stripe, coach, webauthn = simple
       return undefined;
     }
     db.prepare('UPDATE sessions SET last_seen = ? WHERE token_hash = ?').run(iso(), sha256(token));
+    // The last visit, for the closing note and the email sunset. Written at most once an hour.
+    const hourAgo = new Date(now().getTime() - 3_600_000).toISOString();
+    db.prepare('UPDATE users SET last_active_at = ? WHERE id = ? AND (last_active_at IS NULL OR last_active_at < ?)').run(iso(), row.id, hourAgo);
     const { last_seen: _seen, ...user } = row;
     return { user, token };
   };
@@ -191,6 +248,15 @@ export function createApp({ db, config, mailer, stripe, coach, webauthn = simple
     const token = newToken();
     db.prepare('INSERT INTO sessions (token_hash, user_id, created_at, last_seen) VALUES (?, ?, ?, ?)').run(sha256(token), userId, iso(), iso());
     return { token, user: userJson(freshUser(userId)) };
+  };
+
+  /**
+   * Every new account gets an unsubscribe token and, by chance, a place in
+   * the lifecycle holdout (no marketing email), so the emails can be
+   * measured against players who never got them.
+   */
+  const initUser = (id: string) => {
+    db.prepare('UPDATE users SET unsub_token = ?, holdout = ? WHERE id = ?').run(newToken(), random() < config.lifecycle.holdout ? 1 : 0, id);
   };
 
   const emailReady = () => !!config.email.resendKey || config.devCodes;
@@ -264,7 +330,9 @@ export function createApp({ db, config, mailer, stripe, coach, webauthn = simple
     const user = tx(db, () => {
       let u = db.prepare('SELECT * FROM users WHERE email = ?').get(email) as unknown as UserRow | undefined;
       if (!u) {
-        db.prepare('INSERT INTO users (id, email, created_at) VALUES (?, ?, ?)').run(newId(), email, iso());
+        const id = newId();
+        db.prepare('INSERT INTO users (id, email, created_at) VALUES (?, ?, ?)').run(id, email, iso());
+        initUser(id);
         u = db.prepare('SELECT * FROM users WHERE email = ?').get(email) as unknown as UserRow;
       }
       return u;
@@ -309,6 +377,7 @@ export function createApp({ db, config, mailer, stripe, coach, webauthn = simple
       reminderBody: string | null;
       leagues: boolean;
       lastStudyDay: string;
+      emailOptIn: boolean;
     }>(c);
     const u = c.get('user');
     const set: Record<string, unknown> = {};
@@ -339,6 +408,11 @@ export function createApp({ db, config, mailer, stripe, coach, webauthn = simple
       set.reminder_body = line || null;
     }
     if (body.leagues !== undefined) set.leagues = body.leagues ? 1 : 0;
+    // Consent is recorded with its time (CASL asks for proof). Turning it off keeps the record of when it was given.
+    if (body.emailOptIn !== undefined && !!body.emailOptIn !== !!u.email_opt_in) {
+      set.email_opt_in = body.emailOptIn ? 1 : 0;
+      if (body.emailOptIn) set.email_opt_in_at = iso();
+    }
     if (body.lastStudyDay !== undefined) {
       if (!/^\d{4}-\d{2}-\d{2}$/.test(body.lastStudyDay)) return c.json({ error: 'Bad date.' }, 400);
       set.last_study_day = body.lastStudyDay;
@@ -406,32 +480,122 @@ export function createApp({ db, config, mailer, stripe, coach, webauthn = simple
     userFor: (c) => sessionUser(c)?.user,
     signIn: startSession,
     userJson: (id) => userJson(freshUser(id)),
+    onUserCreated: initUser,
   });
 
   // Billing (Stripe) ---------------------------------------------------------
 
   const billingReady = () => !!(stripe && config.stripe.priceAnnual && config.stripe.priceMonthly);
+  const lifetimeReady = () => !!(stripe && config.stripe.priceLifetime);
+  const LIVE = ['active', 'trialing', 'past_due'];
+
+  /** The player's Stripe customer, made on their first purchase. */
+  const customerFor = async (u: UserRow) => {
+    if (u.stripe_customer) return u.stripe_customer;
+    const customer = (await stripe!('POST', 'customers', { email: u.email ?? undefined, metadata: { user_id: u.id } })).id as string;
+    db.prepare('UPDATE users SET stripe_customer = ? WHERE id = ?').run(customer, u.id);
+    return customer;
+  };
+
+  /** The retention coupon as Stripe describes it, cached for an hour (a failed read is retried after 5 minutes). */
+  let couponCache: { until: number; info?: CouponInfo } | undefined;
+  const retentionCoupon = async (): Promise<CouponInfo | undefined> => {
+    const id = config.stripe.retentionCoupon;
+    if (!stripe || !id) return undefined;
+    if (couponCache && now().getTime() < couponCache.until) return couponCache.info;
+    try {
+      const info = couponInfo(await stripe('GET', `coupons/${encodeURIComponent(id)}`));
+      couponCache = { until: now().getTime() + 3_600_000, info };
+    } catch (e) {
+      console.error('Could not read the retention coupon', e);
+      couponCache = { until: now().getTime() + 300_000 };
+    }
+    return couponCache.info;
+  };
+
+  /**
+   * Accounts that paid before Aced stored the subscription id: ask Stripe
+   * once for the latest subscription and store it.
+   */
+  const syncSubscription = async (u: UserRow): Promise<UserRow> => {
+    if (!stripe || !u.stripe_customer || u.stripe_subscription || u.lifetime) return u;
+    const list = await stripe('GET', `subscriptions?customer=${encodeURIComponent(u.stripe_customer)}&status=all&limit=1`);
+    const sub = (list.data as Record<string, unknown>[] | undefined)?.[0];
+    if (sub) applySubscription(db, config, u.id, sub, now());
+    return freshUser(u.id);
+  };
+
+  const statusOf = (u: UserRow) =>
+    subscriptionStatus({ lifetime: !!u.lifetime, subStatus: u.sub_status, pausedUntil: u.paused_until, proUntil: u.pro_until, now: now() });
+
+  /** What decides the cancel flow's offers. Stripe is asked about the coupon only when it could be offered. */
+  const offerFacts = async (u: UserRow) => {
+    const base = {
+      plan: u.plan,
+      status: statusOf(u),
+      cancelAtPeriodEnd: !!u.cancel_at_period_end,
+      couponTakenAt: u.retention_coupon_at,
+      annualAvailable: !!config.stripe.priceAnnual,
+      now: now(),
+    };
+    const couldShow = retentionOffer('too_expensive', { ...base, coupon: { id: 'probe', percentOff: 1, duration: 'once' } })?.kind === 'coupon';
+    return { ...base, coupon: couldShow ? await retentionCoupon() : undefined };
+  };
+
+  const offerJson = (o: RetentionOffer | null) =>
+    !o
+      ? null
+      : o.kind === 'coupon'
+        ? { kind: 'coupon' as const, text: describeCoupon(o.coupon), percentOff: o.coupon.percentOff ?? null, amountOff: o.coupon.amountOff ?? null, duration: o.coupon.duration, months: o.coupon.months ?? null }
+        : o.kind === 'pause'
+          ? { kind: 'pause' as const, months: [...o.months] }
+          : { kind: 'annual' as const };
+
+  /** The subscription as the Manage Pro screen shows it. */
+  const subscriptionJson = async (u: UserRow) => {
+    const status = statusOf(u);
+    const bonus = bonusPro(u, now());
+    const offers = offersByReason(await offerFacts(u));
+    return {
+      plan: u.lifetime ? 'lifetime' : paidPro(u, now()) ? u.plan : bonus ? 'invite' : u.plan,
+      status,
+      // Where it is billed. App Store and Play come with the native apps.
+      store: u.lifetime || u.stripe_subscription ? ('stripe' as const) : null,
+      currentPeriodEnd: u.lifetime ? null : u.paused_until ? u.paid_through : u.pro_until,
+      cancelAtPeriodEnd: !!u.cancel_at_period_end,
+      pausedUntil: u.paused_until,
+      billingIssue: !!u.billing_issue && !u.lifetime,
+      bonusUntil: bonus ? u.bonus_until : null,
+      offers: Object.fromEntries(Object.entries(offers).map(([k, o]) => [k, offerJson(o)])),
+    };
+  };
+
+  app.get('/api/billing/subscription', requireUser, async (c) => {
+    const u = await syncSubscription(c.get('user'));
+    return c.json(await subscriptionJson(u));
+  });
 
   app.post('/api/billing/checkout', requireUser, async (c) => {
     if (!billingReady()) return c.json({ error: 'Purchases are not open yet.' }, 503);
-    const plan = (await json<{ plan: string }>(c)).plan;
+    const body = await json<{ plan: string; offer: string }>(c);
+    const plan = body.plan;
     const price = plan === 'annual' ? config.stripe.priceAnnual : plan === 'monthly' ? config.stripe.priceMonthly : undefined;
     if (!price) return c.json({ error: 'Choose a plan.' }, 400);
     const u = c.get('user');
-    let customer = u.stripe_customer;
-    if (!customer) {
-      customer = (await stripe!('POST', 'customers', { email: u.email ?? undefined, metadata: { user_id: u.id } })).id as string;
-      db.prepare('UPDATE users SET stripe_customer = ? WHERE id = ?').run(customer, u.id);
-    }
+    if (u.lifetime) return c.json({ error: 'You have Aced Pro for as long as Aced runs. There is nothing more to buy.' }, 409);
+    const customer = await customerFor(u);
     // One free trial per player, on the yearly plan, matching the paywall.
     const trial = plan === 'annual' && !u.trial_used && config.stripe.trialDays > 0 ? config.stripe.trialDays : undefined;
+    // The win-back offer: the retention coupon, 60 to 90 days after Pro ended, at most once a year.
+    const winback = body.offer === 'winback' && !!config.stripe.retentionCoupon && winbackEligible(u.churned_at, u.retention_coupon_at, now());
     const session = await stripe!('POST', 'checkout/sessions', {
       mode: 'subscription',
       customer,
       client_reference_id: u.id,
       line_items: [{ price, quantity: 1 }],
       subscription_data: { metadata: { user_id: u.id }, ...(trial ? { trial_period_days: trial } : {}) },
-      allow_promotion_codes: true,
+      // Stripe takes a coupon or promotion codes, not both.
+      ...(winback ? { discounts: [{ coupon: config.stripe.retentionCoupon }], metadata: { offer: 'winback' } } : { allow_promotion_codes: true }),
       success_url: `${config.appUrl}/pro?checkout=success`,
       cancel_url: `${config.appUrl}/pro?checkout=cancel`,
     });
@@ -441,8 +605,108 @@ export function createApp({ db, config, mailer, stripe, coach, webauthn = simple
   app.post('/api/billing/portal', requireUser, async (c) => {
     const u = c.get('user');
     if (!billingReady() || !u.stripe_customer) return c.json({ error: 'No subscription found for this account.' }, 404);
-    const session = await stripe!('POST', 'billing_portal/sessions', { customer: u.stripe_customer, return_url: `${config.appUrl}/settings` });
+    const session = await stripe!('POST', 'billing_portal/sessions', { customer: u.stripe_customer, return_url: `${config.appUrl}/account` });
     return c.json({ url: session.url });
+  });
+
+  /**
+   * The cancel flow. The reason comes first (and may be skipped). With acceptOffer the one offer
+   * for that reason is taken (a coupon, yearly or a pause); without it the
+   * subscription cancels at the end of the paid period, and Pro stays on
+   * until then. Either way the answer is stored for us to read.
+   */
+  app.post('/api/billing/cancel', requireUser, async (c) => {
+    if (!stripe) return c.json({ error: 'Purchases are not open yet.' }, 503);
+    const body = await json<{ reason: unknown; detail: unknown; acceptOffer: unknown; pauseMonths: unknown }>(c);
+    // A reason is optional: cancelling never waits on an answer. A skipped one is stored as none.
+    const given = body.reason === undefined || body.reason === null || body.reason === '' ? null : body.reason;
+    if (given !== null && !isCancelReason(given)) return c.json({ error: 'That reason is not one Aced knows.' }, 400);
+    const reason = given;
+    const u = await syncSubscription(c.get('user'));
+    if (u.lifetime) return c.json({ error: 'Your Aced Pro is for as long as Aced runs. There is nothing to cancel.' }, 409);
+    if (!u.stripe_subscription || !u.sub_status || !LIVE.includes(u.sub_status)) return c.json({ error: 'There is no subscription to cancel on this account.' }, 404);
+    const detail = typeof body.detail === 'string' ? body.detail.replace(/[\u0000-\u001f\u007f]/g, ' ').trim().slice(0, 1000) || null : null;
+    const offer = reason ? retentionOffer(reason, await offerFacts(u)) : null;
+    if (body.acceptOffer && !offer) return c.json({ error: 'That offer is not open for this account.' }, 409);
+    const take = !!body.acceptOffer && !!offer;
+    if (take && offer.kind === 'coupon') await applyCoupon(db, config, stripe, u.id, offer.coupon.id, now());
+    else if (take && offer.kind === 'annual') await switchToAnnual(db, config, stripe, u.id, now());
+    else if (take && offer.kind === 'pause') {
+      const months = PAUSE_MONTHS.find((m) => m === body.pauseMonths) ?? PAUSE_MONTHS[0];
+      await pause(db, config, stripe, u.id, months, now());
+    } else await cancelAtPeriodEnd(db, config, stripe, u.id, now());
+    db.prepare('INSERT INTO cancel_feedback (user_id, reason, detail, offer_shown, offer_taken, at) VALUES (?, ?, ?, ?, ?, ?)').run(
+      u.id,
+      reason ?? 'none',
+      detail,
+      offerLabel(offer),
+      take ? 1 : 0,
+      iso(),
+    );
+    const after = freshUser(u.id);
+    return c.json({ outcome: take ? offer!.kind : 'canceled', subscription: await subscriptionJson(after), user: userJson(after) });
+  });
+
+  /** Undoes a cancel before the period ends, or ends a pause early. */
+  app.post('/api/billing/resume', requireUser, async (c) => {
+    if (!stripe) return c.json({ error: 'Purchases are not open yet.' }, 503);
+    const u = c.get('user');
+    if (!u.stripe_subscription || !(u.cancel_at_period_end || u.paused_until)) return c.json({ error: 'Aced Pro is not cancelled or paused.' }, 409);
+    await resume(db, config, stripe, u.id, now());
+    const after = freshUser(u.id);
+    return c.json({ subscription: await subscriptionJson(after), user: userJson(after) });
+  });
+
+  // Founding members: one payment, Pro for as long as Aced runs, FOUNDING_SEATS seats.
+
+  /** Seats bought, and seats held by checkouts still open. A seat stays taken after its account is deleted. */
+  const foundingCounts = () => ({
+    taken: (db.prepare('SELECT COUNT(*) AS n FROM lifetime_checkouts WHERE completed_at IS NOT NULL').get() as { n: number }).n,
+    held: (db.prepare('SELECT COUNT(*) AS n FROM lifetime_checkouts WHERE completed_at IS NULL AND expires_at > ?').get(iso()) as { n: number }).n,
+  });
+
+  app.get('/api/billing/founding', (c) => {
+    const { taken, held } = foundingCounts();
+    const left = seatsLeft(taken, held);
+    return c.json({ price: FOUNDING_PRICE, seats: FOUNDING_SEATS, taken, left, open: lifetimeReady() && left > 0 });
+  });
+
+  app.post('/api/billing/lifetime', requireUser, async (c) => {
+    if (!lifetimeReady()) return c.json({ error: 'Founding seats are not open yet.' }, 503);
+    const u = c.get('user');
+    if (u.lifetime) return c.json({ error: 'You already have Aced Pro for as long as Aced runs.' }, 409);
+    // Count and hold in one step, so two checkouts at once cannot pass the cap.
+    const hold = `hold_${newId()}`;
+    const expires = new Date(now().getTime() + (SEAT_HOLD_MINUTES + 2) * 60_000);
+    const full = tx(db, () => {
+      db.prepare('DELETE FROM lifetime_checkouts WHERE user_id = ? AND completed_at IS NULL').run(u.id);
+      const { taken, held } = foundingCounts();
+      if (seatsLeft(taken, held) <= 0) return true;
+      db.prepare('INSERT INTO lifetime_checkouts (session_id, user_id, created_at, expires_at) VALUES (?, ?, ?, ?)').run(hold, u.id, iso(), expires.toISOString());
+      return false;
+    });
+    if (full) return c.json({ error: `All ${FOUNDING_SEATS} founding seats are taken. Yearly Pro costs the same and is still open.` }, 409);
+    try {
+      const customer = await customerFor(u);
+      const meta = { kind: 'lifetime', user_id: u.id };
+      const session = await stripe!('POST', 'checkout/sessions', {
+        mode: 'payment',
+        customer,
+        client_reference_id: u.id,
+        line_items: [{ price: config.stripe.priceLifetime, quantity: 1 }],
+        metadata: meta,
+        payment_intent_data: { metadata: meta },
+        // Stripe's shortest expiry is 30 minutes. The seat is held a little longer.
+        expires_at: Math.floor(now().getTime() / 1000) + (SEAT_HOLD_MINUTES + 1) * 60,
+        success_url: `${config.appUrl}/pro?checkout=success&plan=lifetime`,
+        cancel_url: `${config.appUrl}/pro?checkout=cancel`,
+      });
+      db.prepare('UPDATE lifetime_checkouts SET session_id = ? WHERE session_id = ?').run(session.id as string, hold);
+      return c.json({ url: session.url });
+    } catch (e) {
+      db.prepare('DELETE FROM lifetime_checkouts WHERE session_id = ?').run(hold);
+      throw e;
+    }
   });
 
   app.post('/api/billing/webhook', async (c) => {
@@ -455,29 +719,85 @@ export function createApp({ db, config, mailer, stripe, coach, webauthn = simple
     // Stripe can deliver an event more than once.
     if (db.prepare('SELECT 1 FROM stripe_events WHERE id = ?').get(event.id)) return c.json({ received: true });
     const obj = event.data.object;
+    const meta = (obj.metadata as { user_id?: string; kind?: string; offer?: string } | null | undefined) ?? {};
+    const byCustomer = (customer: unknown) =>
+      typeof customer === 'string' ? (db.prepare('SELECT * FROM users WHERE stripe_customer = ?').get(customer) as UserRow | undefined) : undefined;
+    // A subscription left running after a founding purchase is cancelled once the webhook is done.
+    let retire: string | undefined;
     tx(db, () => {
       db.prepare('INSERT INTO stripe_events (id, at) VALUES (?, ?)').run(event.id, iso());
       if (event.type === 'checkout.session.completed' && obj.client_reference_id && obj.customer) {
         db.prepare('UPDATE users SET stripe_customer = ? WHERE id = ? AND stripe_customer IS NULL').run(obj.customer as string, obj.client_reference_id as string);
       }
+      if (event.type === 'checkout.session.completed' && obj.mode === 'payment' && meta.kind === 'lifetime' && obj.payment_status === 'paid') {
+        const userId = (obj.client_reference_id as string | undefined) ?? meta.user_id;
+        const u = userId ? userById(userId) : undefined;
+        db.prepare(
+          'INSERT INTO lifetime_checkouts (session_id, user_id, created_at, expires_at, completed_at) VALUES (?, ?, ?, ?, ?) ON CONFLICT (session_id) DO UPDATE SET completed_at = excluded.completed_at',
+        ).run(obj.id as string, userId ?? 'unknown', iso(), iso(), iso());
+        if (u) {
+          db.prepare(
+            "UPDATE users SET lifetime = 1, plan = 'lifetime', pro_until = NULL, trialing = 0, churned_at = NULL, billing_issue = 0, billing_issue_at = NULL, paused_until = NULL, paid_through = NULL, last_paid_at = ? WHERE id = ?",
+          ).run(iso(), u.id);
+          if (u.stripe_subscription && u.sub_status && LIVE.includes(u.sub_status) && !u.cancel_at_period_end) retire = u.stripe_subscription;
+        }
+      }
+      if (event.type === 'checkout.session.completed' && meta.offer === 'winback' && obj.client_reference_id) {
+        db.prepare('UPDATE users SET retention_coupon_at = ? WHERE id = ?').run(iso(), obj.client_reference_id as string);
+      }
+      // An abandoned founding checkout gives its seat back.
+      if (event.type === 'checkout.session.expired' && meta.kind === 'lifetime') {
+        db.prepare('DELETE FROM lifetime_checkouts WHERE session_id = ? AND completed_at IS NULL').run(obj.id as string);
+      }
+      // A failed renewal: Pro stays on while Stripe retries (the grace period), and Aced asks for a new card.
+      if (event.type === 'invoice.payment_failed') {
+        const u = byCustomer(obj.customer);
+        if (u) db.prepare('UPDATE users SET billing_issue = 1, billing_issue_at = COALESCE(billing_issue_at, ?) WHERE id = ?').run(iso(), u.id);
+      }
+      if (event.type === 'invoice.paid') {
+        const u = byCustomer(obj.customer);
+        const paid = typeof obj.amount_paid === 'number' && obj.amount_paid > 0;
+        if (u)
+          db.prepare('UPDATE users SET billing_issue = 0, billing_issue_at = NULL, last_paid_at = CASE WHEN ? THEN ? ELSE last_paid_at END WHERE id = ?').run(
+            paid ? 1 : 0,
+            iso(),
+            u.id,
+          );
+      }
       if (event.type.startsWith('customer.subscription.')) {
-        const metaUser = (obj.metadata as { user_id?: string } | undefined)?.user_id;
-        const user = (metaUser
-          ? db.prepare('SELECT id FROM users WHERE id = ?').get(metaUser)
-          : db.prepare('SELECT id FROM users WHERE stripe_customer = ?').get(obj.customer as string)) as { id: string } | undefined;
+        const user = meta.user_id ? userById(meta.user_id) : byCustomer(obj.customer);
         if (!user) return;
-        const e = entitlementFromSubscription(obj, { annual: config.stripe.priceAnnual, monthly: config.stripe.priceMonthly }, Math.floor(now().getTime() / 1000));
-        db.prepare('UPDATE users SET pro_until = ?, plan = ?, trialing = ?, trial_used = CASE WHEN ? THEN 1 ELSE trial_used END WHERE id = ?').run(
-          e.proUntil,
-          e.plan,
-          e.trialing ? 1 : 0,
-          obj.trial_end ? 1 : 0,
-          user.id,
-        );
+        applySubscription(db, config, user.id, obj, now());
       }
     });
+    if (retire && stripe) {
+      try {
+        await stripe('POST', `subscriptions/${retire}`, { cancel_at_period_end: true });
+      } catch (e) {
+        console.error('Could not cancel the subscription after a founding purchase', e);
+      }
+    }
     return c.json({ received: true });
   });
+
+  // Email preferences ---------------------------------------------------------------
+
+  /** A small plain page for the one tap unsubscribe link. */
+  const unsubscribePage = (ok: boolean) => {
+    const [title, lines] = ok
+      ? ["You're unsubscribed", ["Aced won't send you tips or news.", 'Emails about your account and payments still come.', 'Changed your mind? Turn it back on in Settings in Aced.']]
+      : ['This link does not work', ['It may be old or copied wrong.', 'Turn off tips and news in Settings in Aced instead.']];
+    return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Aced email</title><style>body{margin:0;padding:48px 16px;font:17px/1.5 -apple-system,system-ui,sans-serif;background:#f4f1ec;color:#1f1d1a}main{max-width:28rem;margin:0 auto}h1{font-size:1.5rem}@media (prefers-color-scheme:dark){body{background:#161513;color:#ece8e1}}</style></head><body><main><h1>${title}</h1>${lines.map((l) => `<p>${l}</p>`).join('')}</main></body></html>`;
+  };
+
+  /** One tap, from the link (GET) or the mail app's unsubscribe button (POST, RFC 8058). */
+  const unsubscribe = (c: Context) => {
+    const token = c.req.query('token') ?? '';
+    const done = token.length >= 16 && Number(db.prepare('UPDATE users SET email_opt_in = 0 WHERE unsub_token = ?').run(token).changes) > 0;
+    return c.html(unsubscribePage(done), done ? 200 : 404);
+  };
+  app.get('/api/email/unsubscribe', unsubscribe);
+  app.post('/api/email/unsubscribe', unsubscribe);
 
   // Push reminders -----------------------------------------------------------
 
@@ -716,13 +1036,38 @@ export function createApp({ db, config, mailer, stripe, coach, webauthn = simple
   // Waitlists -------------------------------------------------------------------------
 
   // The site's "notify me" forms: iPhone, Android and founding members. Joining twice is fine.
+  // A bot that fills the hidden company field gets the normal answer and nothing is stored.
+  // Each address may try WAITLIST_PER_MINUTE times a minute.
+  const waitlistHits = new Map<string, number[]>();
+  const clientIp = (c: Context) => {
+    const header = c.req.header('fly-client-ip') ?? c.req.header('cf-connecting-ip') ?? c.req.header('true-client-ip') ?? c.req.header('x-forwarded-for')?.split(',')[0];
+    if (header?.trim()) return header.trim();
+    try {
+      return getConnInfo(c).remote.address ?? 'unknown';
+    } catch {
+      return 'unknown';
+    }
+  };
+  const tooMany = (ip: string) => {
+    const t = now().getTime();
+    const hits = (waitlistHits.get(ip) ?? []).filter((at) => at > t - 60_000);
+    hits.push(t);
+    waitlistHits.set(ip, hits);
+    // Forget quiet addresses now and then, so the map stays small.
+    if (waitlistHits.size > 5000) for (const [k, v] of waitlistHits) if (v.every((at) => at <= t - 60_000)) waitlistHits.delete(k);
+    return hits.length > WAITLIST_PER_MINUTE;
+  };
+
   app.post('/api/waitlist', async (c) => {
-    const body = await json<{ email?: unknown; list?: unknown }>(c);
+    if (tooMany(clientIp(c))) return c.json({ error: 'Too many tries. Wait a minute and try again.' }, 429);
+    const body = await json<{ email?: unknown; list?: unknown; source?: unknown; platform?: unknown; company?: unknown }>(c);
     const email = String(body.email ?? '').trim().toLowerCase();
     const list = String(body.list ?? '');
+    if (typeof body.company === 'string' && body.company.trim()) return c.json({ ok: true });
     if (!WAITLISTS.includes(list)) return c.json({ error: 'Pick iPhone, Android or founding member.' }, 400);
     if (email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return c.json({ error: 'Enter a valid email address.' }, 400);
-    db.prepare('INSERT OR IGNORE INTO waitlist (email, list, joined_at) VALUES (?, ?, ?)').run(email, list, iso());
+    const tag = (v: unknown) => (typeof v === 'string' && v.trim() ? v.replace(/[^\w.:/-]/g, '').slice(0, 80) || null : null);
+    db.prepare('INSERT OR IGNORE INTO waitlist (email, list, joined_at, source, platform) VALUES (?, ?, ?, ?, ?)').run(email, list, iso(), tag(body.source), tag(body.platform));
     return c.json({ ok: true });
   });
 

@@ -17,6 +17,10 @@ describe('entitlement', () => {
       proUntil: new Date((now + 100) * 1000).toISOString(),
       plan: 'monthly',
       trialing: false,
+      status: 'active',
+      subscriptionId: null,
+      cancelAtPeriodEnd: false,
+      paused: false,
     });
     expect(entitlementFromSubscription({ status: 'canceled', ended_at: now - 5, items: { data: [item] } }, { monthly: 'm' }, now).proUntil).toBe(
       new Date((now - 5) * 1000).toISOString(),
@@ -38,6 +42,13 @@ describe('reminder timing', () => {
   it('skips players who already studied today or were already reminded', () => {
     expect(shouldRemind({ ...base, lastStudyDay: '2026-10-14' }, at).send).toBe(false);
     expect(shouldRemind({ ...base, sentSinceStudy: ['2026-10-14'] }, at).send).toBe(false);
+  });
+
+  it('says why it holds a reminder back', () => {
+    expect(shouldRemind(base, new Date('2026-10-14T06:50:00Z'))).toMatchObject({ send: false, why: 'window' });
+    expect(shouldRemind({ ...base, lastStudyDay: '2026-10-14' }, at)).toMatchObject({ send: false, why: 'studied' });
+    expect(shouldRemind({ ...base, sentSinceStudy: ['2026-10-14'] }, at)).toMatchObject({ send: false, why: 'sent' });
+    expect(shouldRemind(base, at)).toEqual({ send: true, day: '2026-10-14', kind: 'reminder' });
   });
 
   it('backs off when reminders are ignored', () => {

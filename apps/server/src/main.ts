@@ -6,16 +6,20 @@ import { createApp } from './app.ts';
 import { createCoachClient } from './coach.ts';
 import { loadConfig } from './config.ts';
 import { openDb } from './db.ts';
+import { runPauseResumes } from './billing.ts';
+import { runLifecycleEmails } from './emails.ts';
 import { createPushSender, runReminders, runTrialNotices } from './push.ts';
 import { createMailer, createStripe } from './services.ts';
 
 const config = loadConfig();
 const db = openDb(config.databasePath);
+const mailer = createMailer(config.email.resendKey, config.email.from);
+const stripe = config.stripe.secretKey ? createStripe(config.stripe.secretKey) : undefined;
 const app = createApp({
   db,
   config,
-  mailer: createMailer(config.email.resendKey, config.email.from),
-  stripe: config.stripe.secretKey ? createStripe(config.stripe.secretKey) : undefined,
+  mailer,
+  stripe,
   coach: config.coach.apiKey ? createCoachClient(config.coach.apiKey) : undefined,
 });
 
@@ -43,15 +47,19 @@ serve({ fetch: app.fetch, port: config.port }, ({ port }) => {
   if (config.proForEveryone) console.log('Testing: PRO_FOR_EVERYONE is on, so every signed in player has Aced Pro.');
 });
 
+// The scheduler: pushes when VAPID keys are set, lifecycle email always
+// (transactional mail needs no opt in), and pauses that are due to end.
 const sender = createPushSender(config);
-if (sender) {
-  const tick = () => {
+const tick = () => {
+  if (sender) {
     void runReminders(db, sender).catch((e) => console.error('Reminders failed', e));
     void runTrialNotices(db, sender).catch((e) => console.error('Trial reminders failed', e));
-  };
-  setInterval(tick, 5 * 60 * 1000);
-  void tick();
-}
+  }
+  void runLifecycleEmails(db, mailer, config, new Date(), stripe).catch((e) => console.error('Lifecycle email failed', e));
+  if (stripe) void runPauseResumes(db, config, stripe).catch((e) => console.error('Resuming pauses failed', e));
+};
+setInterval(tick, 5 * 60 * 1000);
+void tick();
 
 for (const signal of ['SIGINT', 'SIGTERM'] as const) {
   process.on(signal, () => {

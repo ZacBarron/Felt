@@ -15,7 +15,23 @@ export interface Config {
   /** Development only: return sign in codes in the API response. */
   devCodes: boolean;
   email: { resendKey?: string; from: string };
-  stripe: { secretKey?: string; webhookSecret?: string; priceAnnual?: string; priceMonthly?: string; trialDays: number };
+  stripe: {
+    secretKey?: string;
+    webhookSecret?: string;
+    priceAnnual?: string;
+    priceMonthly?: string;
+    /** One time price for the founding (lifetime) purchase. */
+    priceLifetime?: string;
+    /** Coupon offered once a year to a player who cancels because of price, and in the win-back offer. */
+    retentionCoupon?: string;
+    trialDays: number;
+  };
+  /**
+   * Lifecycle messages. Marketing email needs a postal address (CASL), so it
+   * stays off until one is set. `holdout` is the share of new accounts that
+   * get no marketing email, to measure what the emails are worth.
+   */
+  lifecycle: { postalAddress?: string; holdout: number; serverUrl: string };
   push: { publicKey?: string; privateKey?: string; subject: string };
   /** Largest sync snapshot accepted, in bytes. */
   maxSnapshotBytes: number;
@@ -59,7 +75,15 @@ export function loadConfig(raw: Record<string, string | undefined> = process.env
       webhookSecret: env.STRIPE_WEBHOOK_SECRET,
       priceAnnual: env.STRIPE_PRICE_ANNUAL,
       priceMonthly: env.STRIPE_PRICE_MONTHLY,
+      priceLifetime: env.STRIPE_PRICE_LIFETIME,
+      retentionCoupon: env.STRIPE_RETENTION_COUPON,
       trialDays: Number(env.TRIAL_DAYS ?? 7),
+    },
+    lifecycle: {
+      postalAddress: env.MAIL_POSTAL_ADDRESS?.trim(),
+      holdout: share(env.LIFECYCLE_HOLDOUT, 0.1),
+      // Unsubscribe links point at this server. Without SERVER_URL it is the app's origin, right when one service hosts both.
+      serverUrl: env.SERVER_URL ? env.SERVER_URL.replace(/\/$/, '') : originOf(env.APP_URL) ?? 'http://localhost:8787',
     },
     push: { publicKey: env.VAPID_PUBLIC_KEY, privateKey: env.VAPID_PRIVATE_KEY, subject: env.VAPID_SUBJECT ?? 'mailto:support@example.com' },
     maxSnapshotBytes: Number(env.MAX_SNAPSHOT_BYTES ?? 40 * 1024 * 1024),
@@ -98,6 +122,20 @@ function originList(raw: string | undefined): string[] {
 /** true, 1, yes or on (any case) turn a switch on. Anything else is off. */
 function flag(raw: string | undefined): boolean {
   return ['true', '1', 'yes', 'on'].includes((raw ?? '').trim().toLowerCase());
+}
+
+function originOf(raw: string | undefined): string | undefined {
+  try {
+    return raw ? new URL(raw).origin : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+/** A share between 0 and 1, such as 0.1. Anything else falls back. */
+function share(raw: string | undefined, fallback: number): number {
+  const n = Number(raw);
+  return raw !== undefined && Number.isFinite(n) && n >= 0 && n <= 1 ? n : fallback;
 }
 
 function positiveInt(raw: string | undefined, fallback: number): number {
