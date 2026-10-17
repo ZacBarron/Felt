@@ -65,6 +65,8 @@ Free gives a real taste of every track. The natural upgrade moments are: the end
 
 Set in `PLANS` in `state/access.ts`. Current placeholders: yearly $79.99 with a 7 day free trial, monthly $14.99 without a trial. The yearly plan is preselected and shows its saving against monthly, computed rather than typed.
 
+The founding offer sits next to them in `FOUNDING`: one payment of $79.99 (the same as a year) for Pro as long as Aced runs, capped at 500 seats. See [Founding members](#founding-members-lifetime).
+
 ### Paywall layout
 
 Everything that decides a purchase fits above the bottom bar at 390 by 844. Code in `ProPage.tsx` and `pages/pro.css`. The layout follows the patterns the strongest subscription paywalls share (reviewed on Mobbin: Speak, Lifesum, Insight Timer, AllTrails and Cleo for the compare table; Strava, Copilot, Mesh and Vocabulary for the trial timeline).
@@ -97,7 +99,55 @@ Health gets 15 seconds here, so a host waking from sleep is not mistaken for no 
 
 ### Connecting payments
 
-`purchase()` and `restorePurchases()` in `state/access.ts` are the only seams. To go live, wire them to a store SDK (for example RevenueCat for App Store and Play, or Stripe Checkout on the web) and set `access.pro`, `plan` and `trialEndsAt` from the store's entitlement. Until then, the paywall says purchases are not open yet.
+`purchase()`, `purchaseLifetime()` and `restorePurchases()` in `state/access.ts` are the seams for buying, and `manageRoute()` is the seam for managing. On the web they go to Stripe through the server. For native builds, wire the buying seams to a store SDK (for example RevenueCat for App Store and Play) and set `access.pro`, `plan` and `trialEndsAt` from the store's entitlement. `manageRoute()` already sends App Store and Play subscriptions to the store's own subscriptions page, because Apple and Google own the last cancel step. Until purchases open, the paywall says so.
+
+## Managing and cancelling Pro
+
+Manage Pro opens from the plan card on Account (and from Settings, Aced Pro). It lives at `/account?manage=1` with no route of its own. Code: `components/ManagePro.tsx`, with the words and decisions in `state/access.ts` (`manageSummary`, `offerCopy`, `outcomeCopy`; unit tested in `apps/web/test/manage.test.ts`). The server side is `GET /api/billing/subscription`, `POST /api/billing/cancel` and `POST /api/billing/resume` in `apps/server/src/app.ts`, with the rules in `apps/server/src/lifecycle.ts` and the Stripe calls in `billing.ts`.
+
+**What it shows.** The plan and where it stands: "Renews on Oct 23", a trial and its charge date, "Pro ends on Oct 23" after cancelling, the dates of a pause, or "Pro for as long as Aced runs" for a founding member. Update payment opens the Stripe billing portal. A founding member sees no renew or cancel controls.
+
+**The cancel flow.** The pattern the strongest flows share: ask why in one tap, make one offer that fits, keep cancel one tap away at the same size, and confirm the end date (lifecycle research, section 1.1; Paddle Retain and Churnkey build the same).
+
+1. Cancel Pro opens one screen. The reasons are Chips: it costs too much, not using it enough, missing something, got what I needed, something is broken, something else. Picking one is optional. A skipped reason is stored as `none`.
+2. A reason with an offer shows that one offer. Cancel Pro stays on screen below it, the same size. There is never a second offer and never an "Are you sure?" loop.
+3. The confirmation states the end date. Pro stays on to the end of the paid period, and the free plan and all progress stay. Keep Aced Pro undoes it in one tap.
+
+| Reason | The one offer | Notes |
+| --- | --- | --- |
+| Too expensive, monthly plan | Switch to yearly | Stripe starts the yearly period at once and credits the rest of the month |
+| Too expensive, yearly plan | The retention coupon (`STRIPE_RETENTION_COUPON`) | At most once in 12 months per account. The copy comes from the coupon itself, such as "30% off your next payment" |
+| Not using it enough | Pause for 1 or 2 months | Pro stays on to the end of what was paid. Invoices in the pause are voided (`pause_collection`). The server resumes billing on the last day with a fresh period, so a yearly plan pauses for months, not a year. Resume sooner from Manage Pro |
+| Missing something, broken, something else | None | An optional note box. "We read every note." |
+| Got what I needed | None | "Nice work. Review and the daily challenge stay free." |
+
+Nobody in a free trial, already cancelling, paused or with a failed payment sees an offer. Discounts are capped because an offer at every cancel teaches players that cancelling is how to get a lower price (research 1.1). Every answer goes into `cancel_feedback` (reason, note, offer shown, offer taken, time) for us to read.
+
+**Law.** The flow is built to meet the strictest rules in force: California's auto renewal law (AB 2863) allows a save offer only when cancelling stays immediate and unobstructed, and the FTC is writing a new click to cancel rule (research 1.5). One offer, one screen and a same size Cancel button should survive whatever it says.
+
+## Founding members (lifetime)
+
+One payment of $79.99, the same as a year, for Aced Pro as long as Aced runs. 500 seats. The perks: Pro for as long as Aced runs, a monthly feedback call with the team for a limited time, a private Discord group, and a swag pack if we hit a milestone. They are listed in `FOUNDING` in `state/access.ts`.
+
+- `POST /api/billing/lifetime` opens a one time Stripe Checkout (`mode: payment`, price `STRIPE_PRICE_LIFETIME`). The server counts and holds a seat in one step, so two checkouts at once cannot pass the cap. A hold lasts as long as the checkout (about 30 minutes) and an expired checkout gives its seat back. When every seat is taken it answers 409: "All 500 founding seats are taken. Yearly Pro costs the same and is still open."
+- `GET /api/billing/founding` returns `{ price, seats, taken, left, open }`, so the site can show a real count.
+- The webhook (`checkout.session.completed`, paid) sets `lifetime` on the account. Lifetime is Pro with no end date, on the server and on the device. A subscription still running is set to cancel at its period end, so the player is not charged twice. A seat stays counted after its account is deleted.
+- Not built yet: a buy button in the app (the seam is `purchaseLifetime()`), and refunds of a founding purchase (handle them by hand in Stripe and clear `lifetime` on the account).
+
+## Billing issues
+
+When a renewal fails, Stripe retries the card (Smart Retries) and the subscription goes `past_due`. Aced keeps Pro on through that grace period: the period end still counts.
+
+- The webhook sets `billing_issue` on `invoice.payment_failed` and clears it on `invoice.paid`.
+- A calm one line banner, "Your payment didn't go through." with Update payment (the Stripe billing portal), shows on Today, Settings and Account (`components/BillingIssueBanner.tsx`). Manage Pro says Pro stays on while we retry.
+- Two transactional emails: at once, and once more after a week if it still fails (see ENGAGEMENT.md).
+- If Stripe gives up, its subscription update ends Pro the usual way.
+
+Involuntary churn is a large share of all churn (20 to 40% in SaaS by vendor figures, research section 2), and a few clear messages plus retries recover a good part of it.
+
+## Win-back offer
+
+60 to 90 days after paid Pro ends, a player who opted in to email gets one offer: the retention coupon on a new subscription. The link opens `/pro?offer=winback`. The server checks the window and the once a year cap again at checkout, so an expired link is simply the usual price. Players in the lifecycle holdout never get it.
 
 ### Pro for testing
 
@@ -116,4 +166,4 @@ In Settings, tap the version number seven times to show the Developer section (a
 
 ## Metrics to watch once live
 
-Onboarding completion by step, placement start and finish rate, lessons skipped per placement, paywall view to trial, trial to paid, day 1, 7 and 30 retention, share of days the daily goal is met.
+Onboarding completion by step, placement start and finish rate, lessons skipped per placement, paywall view to trial, trial to paid, day 1, 7 and 30 retention, share of days the daily goal is met. For retention: cancel reasons, offer take rate by reason, paused players who come back, failed payments recovered, and founding seats taken.

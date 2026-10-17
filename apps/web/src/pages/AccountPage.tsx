@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
-import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
+import { Link, Navigate, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import { BillingIssueBanner } from '../components/BillingIssueBanner';
 import { EmailCode } from '../components/EmailCode';
 import { KeepCopy } from '../components/KeepCopy';
 import { LogOutSheet } from '../components/LogOutSheet';
+import { ManagePro, type ManageStep } from '../components/ManagePro';
 import { haptic } from '../haptics';
-import { manageSubscription } from '../state/access';
 import { api, emailOn, serverFeatures, type ServerFeatures, type ServerUser, setSession, updateMe, useSession } from '../state/api';
 import { addPasskey, Cancelled, passkeysSupported, sendAddEmailCode, verifyAddEmail } from '../state/auth';
 import { cueCopy } from '../state/goals';
@@ -63,10 +64,23 @@ export function AccountPage() {
   const session = useSession();
   const { cloud } = useClaudeCloud();
   const location = useLocation();
+  const [params] = useSearchParams();
+  const manage = params.get('manage');
 
   useEffect(() => {
     void serverFeatures().then(setFeatures);
   }, []);
+
+  // Manage Pro lives under Account (/account?manage=1), so it needs no route of its own.
+  if (manage && session && features === undefined) return null;
+  if (manage && session && features?.accounts) {
+    const step: ManageStep = manage === 'cancel' ? 'cancel' : manage === 'done' ? 'done' : 'overview';
+    return (
+      <div className="stack" style={{ gap: '1.6rem' }}>
+        <ManagePro step={step} />
+      </div>
+    );
+  }
 
   return (
     <div className="stack" style={{ gap: '1.6rem' }}>
@@ -139,32 +153,29 @@ function SignedIn({ user, features }: { user: ServerUser; features: ServerFeatur
         </div>
       </section>
 
+      <BillingIssueBanner />
+
       {features.billing && (
         <Section>
           <div className="card account-plan">
             <span className="grow">
-              <span className="account-plan-name">{user.access.pro ? (user.access.trialing ? 'Aced Pro trial' : 'Aced Pro') : 'Free plan'}</span>
+              <span className="account-plan-name">
+                {user.access.lifetime ? 'Founding member' : user.access.pro ? (user.access.trialing ? 'Aced Pro trial' : 'Aced Pro') : 'Free plan'}
+              </span>
               <span className="footnote">
-                {user.access.pro && user.access.until
-                  ? `${user.access.trialing ? 'Trial ends' : user.access.plan === 'invite' ? 'From invites, free until' : 'Renews'} ${shortDate(user.access.until)}`
-                  : user.access.pro
-                    ? 'Active'
-                    : 'Every track has free lessons.'}
+                {user.access.lifetime
+                  ? 'Pro for as long as Aced runs'
+                  : user.access.pro && user.access.until
+                    ? `${user.access.trialing ? 'Trial ends' : user.access.plan === 'invite' ? 'From invites, free until' : 'Renews'} ${shortDate(user.access.until)}`
+                    : user.access.pro
+                      ? 'Active'
+                      : 'Every track has free lessons.'}
               </span>
             </span>
-            {user.access.until ? (
-              <button
-                className="btn btn-tinted"
-                disabled={busy}
-                onClick={() =>
-                  void run(async () => {
-                    const err = await manageSubscription();
-                    if (err) throw new Error(err);
-                  })
-                }
-              >
-                Manage or cancel
-              </button>
+            {user.access.lifetime || (user.access.until && user.access.plan !== 'invite') ? (
+              <Link to="/account?manage=1" className="btn btn-tinted">
+                Manage Pro
+              </Link>
             ) : !user.access.pro ? (
               <Link to="/pro?from=account" className="btn btn-primary">
                 See Aced Pro

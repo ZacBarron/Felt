@@ -1,5 +1,5 @@
 import { CURRICULUM } from '@felt/content';
-import { api, currentSession, refreshMe, serverFeatures, type ServerAccess, type ServerFeatures, type ServerUser } from './api';
+import { api, currentSession, refreshMe, serverFeatures, type ServerAccess, type ServerFeatures, type ServerUser, updateSessionUser } from './api';
 import type { Access, AppSettings } from './settings';
 
 /**
@@ -27,6 +27,22 @@ export const PLANS: PlanOption[] = [
   { id: 'monthly', label: 'Monthly', price: 14.99, period: 'month', trialDays: 0 },
 ];
 
+/**
+ * Founding members: one payment, the same as a year of Pro, for Pro as long
+ * as Aced runs. The server holds the seat count and refuses a purchase once
+ * every seat is taken (GET /api/billing/founding has the live count).
+ */
+export const FOUNDING = {
+  price: 79.99,
+  seats: 500,
+  perks: [
+    'Aced Pro for as long as Aced runs',
+    'A monthly feedback call with the team, for a limited time',
+    'A private Discord group',
+    'A swag pack if we hit a milestone',
+  ],
+} as const;
+
 export function formatPrice(amount: number): string {
   return new Intl.NumberFormat(undefined, { style: 'currency', currency: CURRENCY }).format(amount);
 }
@@ -51,6 +67,8 @@ export function isPro(access: Access, now = new Date()): boolean {
   // The testing switch unlocks Pro on its own. Forcing Pro off needs developer mode.
   if (access.devPro === true) return true;
   if (access.devMode && access.devPro === false) return false;
+  // The founding purchase never lapses.
+  if (access.lifetime) return true;
   // A server entitlement has an end date and lapses on its own, even offline.
   if (access.until !== undefined) return new Date(access.until) > now;
   if (access.trialEndsAt && new Date(access.trialEndsAt) > now) return true;
@@ -74,9 +92,10 @@ export function accessFromServer(server: ServerAccess, local: Access): Access {
     devPro: local.devPro,
     pro: server.pro,
     plan: server.plan ?? undefined,
-    // Pro with no end date (testing on the server) stays on. No Pro and no date reads as lapsed.
-    until: server.until ?? (server.pro ? undefined : new Date(0).toISOString()),
+    // Pro with no end date (lifetime, or testing on the server) stays on. No Pro and no date reads as lapsed.
+    until: server.lifetime ? undefined : (server.until ?? (server.pro ? undefined : new Date(0).toISOString())),
     trialEndsAt: server.trialing && server.until ? server.until : undefined,
+    ...(server.lifetime ? { lifetime: true } : {}),
   };
 }
 
@@ -147,12 +166,13 @@ export function purchasesOpen(features: ServerFeatures | null | undefined, acces
  * Stripe Checkout for the signed in player. Otherwise only developer mode
  * can complete one, locally.
  */
-export async function purchase(plan: PlanOption, settings: AppSettings): Promise<PurchaseResult> {
+export async function purchase(plan: PlanOption, settings: AppSettings, options: { offer?: 'winback' } = {}): Promise<PurchaseResult> {
   const features = await serverFeatures();
   if (features?.billing && !(settings.access.devMode && settings.access.devPro !== undefined)) {
     if (!currentSession()) return { ok: false, reason: 'Sign in first. That way Aced Pro works on all your devices.', needsAccount: true };
     try {
-      const { url } = await api<{ url: string }>('/billing/checkout', { body: { plan: plan.id } });
+      // The win-back offer is checked again on the server; an expired one is simply the usual price.
+      const { url } = await api<{ url: string }>('/billing/checkout', { body: { plan: plan.id, ...(options.offer ? { offer: options.offer } : {}) } });
       location.assign(url);
       return { ok: 'redirect' };
     } catch (e) {
@@ -233,7 +253,7 @@ export async function restorePurchases(settings: AppSettings): Promise<RestoreRe
   return decideRestore({ features, signedIn: !!currentSession(), user, error, local: settings.access });
 }
 
-/** Opens Stripe's page for changing or cancelling a subscription. */
+/** Opens Stripe's page for the card on file and invoices. */
 export async function manageSubscription(): Promise<string | undefined> {
   try {
     const { url } = await api<{ url: string }>('/billing/portal', { body: {} });
@@ -241,5 +261,233 @@ export async function manageSubscription(): Promise<string | undefined> {
     return undefined;
   } catch (e) {
     return e instanceof Error ? e.message : 'We could not open your subscription settings. Try again.';
+  }
+}
+
+/* Managing Aced Pro: status, the cancel flow and its one offer --------------------- */
+
+export type SubscriptionStatus = 'active' | 'trialing' | 'past_due' | 'paused' | 'canceled' | 'lifetime' | 'none';
+/** Where a subscription is billed. Only Stripe exists today; App Store and Play come with the native apps. */
+export type Store = 'stripe' | 'app_store' | 'play';
+
+export const CANCEL_REASONS = ['too_expensive', 'not_using', 'missing_feature', 'finished', 'technical', 'other'] as const;
+export type CancelReason = (typeof CANCEL_REASONS)[number];
+
+export const CANCEL_REASON_LABELS: Record<CancelReason, string> = {
+  too_expensive: 'It costs too much',
+  not_using: "I'm not using it enough",
+  missing_feature: "It's missing something",
+  finished: 'I got what I needed',
+  technical: 'Something is broken',
+  other: 'Something else',
+};
+
+/** Reasons where a note helps us most. The box is optional. */
+export const ASK_DETAIL: ReadonlySet<CancelReason> = new Set(['missing_feature', 'technical', 'other']);
+
+export type CancelOffer =
+  | { kind: 'coupon'; text: string; percentOff: number | null; amountOff: number | null; duration: 'once' | 'repeating' | 'forever'; months: number | null }
+  | { kind: 'annual' }
+  | { kind: 'pause'; months: number[] };
+
+/** The subscription as GET /api/billing/subscription reports it. */
+export interface Subscription {
+  plan: string | null;
+  status: SubscriptionStatus;
+  store: Store | null;
+  /** End of the paid period (or the trial). While paused, the end of what was paid. */
+  currentPeriodEnd: string | null;
+  cancelAtPeriodEnd: boolean;
+  pausedUntil: string | null;
+  billingIssue: boolean;
+  bonusUntil: string | null;
+  /** The one offer for each reason, or null. Decided by the server. */
+  offers: Record<CancelReason, CancelOffer | null>;
+}
+
+export type CancelOutcome = 'canceled' | 'coupon' | 'annual' | 'pause';
+
+/**
+ * Where a subscription is managed. Stripe runs in Aced's own cancel flow.
+ * Apple owns the last cancel step for App Store subscriptions, and Play for
+ * its own, so native builds hand off to the store's page (on iOS,
+ * StoreKit's showManageSubscriptions does the same in app).
+ */
+export function manageRoute(store: Store | null): { kind: 'in-app' } | { kind: 'store'; url: string; label: string } | { kind: 'none' } {
+  if (store === 'app_store') return { kind: 'store', url: 'https://apps.apple.com/account/subscriptions', label: 'Open App Store subscriptions' };
+  if (store === 'play') return { kind: 'store', url: 'https://play.google.com/store/account/subscriptions', label: 'Open Google Play subscriptions' };
+  if (store === 'stripe') return { kind: 'in-app' };
+  return { kind: 'none' };
+}
+
+/** Oct 23, or Oct 23, 2027 when it is not this year. */
+export function billingDate(iso: string, now = new Date()): string {
+  const d = new Date(iso);
+  const sameYear = d.getFullYear() === now.getFullYear();
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', ...(sameYear ? {} : { year: 'numeric' }) });
+}
+
+const planPrice = (id: PlanOption['id']) => PLANS.find((p) => p.id === id)!;
+
+export interface ManageSummary {
+  title: string;
+  /** One or two short sentences about where the plan stands. */
+  line: string;
+  canCancel: boolean;
+  /** Undo a cancel or end a pause, with the button label. */
+  resume?: string;
+}
+
+/** What the Manage Pro screen says about a subscription. Lifetime has nothing to renew or cancel. */
+export function manageSummary(sub: Subscription, now = new Date()): ManageSummary {
+  const date = (iso: string | null) => (iso ? billingDate(iso, now) : '');
+  const title =
+    sub.status === 'lifetime'
+      ? 'Founding member'
+      : sub.plan === 'annual'
+        ? 'Aced Pro yearly'
+        : sub.plan === 'monthly'
+          ? 'Aced Pro monthly'
+          : sub.plan === 'invite' && sub.bonusUntil
+            ? 'Aced Pro from invites'
+            : 'Free plan';
+  const live = sub.status === 'active' || sub.status === 'trialing' || sub.status === 'past_due';
+  const canCancel = live && !sub.cancelAtPeriodEnd && !!sub.store;
+  const end = date(sub.currentPeriodEnd);
+  switch (sub.status) {
+    case 'lifetime':
+      return { title, line: 'Pro for as long as Aced runs.', canCancel: false };
+    case 'trialing':
+      return sub.cancelAtPeriodEnd
+        ? { title, line: `Your trial ends on ${end}. You won't be charged.`, canCancel, resume: 'Keep Aced Pro' }
+        : { title, line: `Free trial until ${end}. Then ${formatPrice(planPrice('annual').price)} a year.`, canCancel };
+    case 'active':
+      return sub.cancelAtPeriodEnd
+        ? { title, line: `Pro ends on ${end}. Then you're on the free plan.`, canCancel, resume: 'Keep Aced Pro' }
+        : { title, line: `Renews on ${end}.`, canCancel };
+    case 'past_due':
+      return { title, line: "Your last payment didn't go through. Pro stays on while we retry.", canCancel };
+    case 'paused': {
+      const back = date(sub.pausedUntil);
+      const inPaid = !!sub.currentPeriodEnd && Date.parse(sub.currentPeriodEnd) > now.getTime();
+      return inPaid
+        ? { title, line: `Pro stays on until ${end}. Then it pauses until ${back}.`, canCancel: false, resume: 'Cancel the pause' }
+        : { title, line: `Paused until ${back}. Billing starts again then.`, canCancel: false, resume: 'Resume Pro today' };
+    }
+    default:
+      return sub.plan === 'invite' && sub.bonusUntil
+        ? { title, line: `Free from invites until ${date(sub.bonusUntil)}.`, canCancel: false }
+        : { title, line: 'Every track has free lessons.', canCancel: false };
+  }
+}
+
+/** "30% off" or "$20 off": the short form for a button. */
+export function couponShort(o: Extract<CancelOffer, { kind: 'coupon' }>): string {
+  if (o.percentOff !== null) return `${o.percentOff}% off`;
+  return `${formatPrice(o.amountOff ?? 0).replace(/\.00$/, '')} off`;
+}
+
+export interface OfferCopy {
+  title: string;
+  body: string[];
+  action: string;
+}
+
+/** The one offer, in words. Cancel Pro sits next to it at the same size. */
+export function offerCopy(offer: CancelOffer, pauseMonths = 1): OfferCopy {
+  if (offer.kind === 'coupon')
+    return { title: 'Stay for less', body: [`Keep Pro with ${offer.text}.`, 'Everything in Pro stays the same.'], action: `Take ${couponShort(offer)}` };
+  if (offer.kind === 'annual') {
+    const annual = planPrice('annual').price;
+    return {
+      title: 'Switch to yearly',
+      body: [`Yearly is ${formatPrice(annual)} a year. That's ${formatPrice(Math.floor((annual / 12) * 100) / 100)} a month.`, `You save ${annualSavings()}% against monthly.`, "You pay today. What's left of this month comes off."],
+      action: 'Switch to yearly',
+    };
+  }
+  return {
+    title: 'Take a break instead',
+    body: ["Pause Pro for 1 or 2 months. You pay nothing while it's paused.", 'Your rating and plan wait for you.'],
+    action: `Pause for ${pauseMonths} ${pauseMonths === 1 ? 'month' : 'months'}`,
+  };
+}
+
+/** A line under the reasons when there is no offer. */
+export function reasonNote(reason: CancelReason): string {
+  switch (reason) {
+    case 'finished':
+      return 'Nice work. Review and the daily challenge stay free.';
+    case 'technical':
+      return 'Sorry about that. Tell us what broke. We read every note.';
+    case 'missing_feature':
+      return 'Tell us what Aced should add. We read every note.';
+    case 'other':
+      return 'Anything you want to tell us? We read every note.';
+    case 'too_expensive':
+      return 'The free plan keeps review and the daily challenge.';
+    case 'not_using':
+      return 'Your progress stays. Come back any time.';
+  }
+}
+
+/** The confirmation after the cancel flow: the end date, and that the free plan and all progress stay. */
+export function outcomeCopy(outcome: CancelOutcome, sub: Subscription, wasTrial: boolean, now = new Date()): { title: string; body: string[] } {
+  const end = sub.currentPeriodEnd ? billingDate(sub.currentPeriodEnd, now) : '';
+  switch (outcome) {
+    case 'canceled':
+      return wasTrial
+        ? { title: 'Your trial is cancelled', body: [`Pro stays on until ${end}. You won't be charged.`, 'After that the free plan and all your progress stay.'] }
+        : {
+            title: `Aced Pro ends on ${end}`,
+            body: ['You keep Pro until then. Nothing more is charged.', "After that you're on the free plan. Your rating, review and progress all stay."],
+          };
+    case 'coupon': {
+      const offer = sub.offers.too_expensive;
+      return { title: 'Your discount is on', body: [offer?.kind === 'coupon' ? `You get ${offer.text}.` : 'The discount is on your plan.', `Pro renews on ${end}.`] };
+    }
+    case 'annual':
+      return { title: "You're on yearly now", body: [`Pro renews on ${end}.`, 'The rest of your month came off the price.'] };
+    case 'pause':
+      return {
+        title: 'Your break is set',
+        body: [`Pro stays on until ${end}.`, `Billing starts again on ${sub.pausedUntil ? billingDate(sub.pausedUntil, now) : ''}.`, 'You can resume sooner in Account.'],
+      };
+  }
+}
+
+export async function fetchSubscription(): Promise<Subscription> {
+  return api<Subscription>('/billing/subscription');
+}
+
+/**
+ * The cancel flow's one request. A reason is optional: cancelling never
+ * waits on an answer. With acceptOffer the reason's offer is taken instead.
+ */
+export async function cancelPro(body: { reason?: CancelReason; detail?: string; acceptOffer?: boolean; pauseMonths?: number }) {
+  const token = currentSession()?.token;
+  const res = await api<{ outcome: CancelOutcome; subscription: Subscription; user: ServerUser }>('/billing/cancel', { body });
+  if (token) updateSessionUser(token, res.user);
+  return res;
+}
+
+/** Undoes a cancel or ends a pause. */
+export async function resumePro() {
+  const token = currentSession()?.token;
+  const res = await api<{ subscription: Subscription; user: ServerUser }>('/billing/resume', { body: {} });
+  if (token) updateSessionUser(token, res.user);
+  return res;
+}
+
+/** Starts the founding (lifetime) purchase in Stripe Checkout. The server refuses once every seat is taken. */
+export async function purchaseLifetime(): Promise<PurchaseResult> {
+  const features = await serverFeatures();
+  if (!features?.billing) return { ok: false, reason: 'You cannot buy Aced Pro yet. Your progress is safe, and free features stay free.' };
+  if (!currentSession()) return { ok: false, reason: 'Sign in first. That way Aced Pro works on all your devices.', needsAccount: true };
+  try {
+    const { url } = await api<{ url: string }>('/billing/lifetime', { body: {} });
+    location.assign(url);
+    return { ok: 'redirect' };
+  } catch (e) {
+    return { ok: false, reason: e instanceof Error ? e.message : 'We could not open checkout. Try again in a moment.' };
   }
 }

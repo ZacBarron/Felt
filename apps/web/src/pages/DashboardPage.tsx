@@ -2,6 +2,7 @@ import { ideaForDay } from '@felt/content';
 import { actionRange, challengeNumber, currentRating, handClassCombos, isProvisional, nextTier, tierLabel } from '@felt/core';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { Link } from 'react-router-dom';
+import { BillingIssueBanner } from '../components/BillingIssueBanner';
 import { MasteryGrid } from '../components/MasteryGrid';
 import { StreakWeek, useStreakWeek } from '../components/StreakWeek';
 import { TierCard } from '../components/TierCard';
@@ -114,6 +115,8 @@ export function DashboardPage() {
           </Link>
         }
       />
+
+      <BillingIssueBanner />
 
       {nextLesson?.content && !lessonToday ? (
         <Link to={lessonPath(nextLesson.key)} className="hero learn-hero">

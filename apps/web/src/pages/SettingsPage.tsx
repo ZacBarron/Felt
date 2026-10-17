@@ -7,7 +7,8 @@ import { isPro, setTestingPro, testingPro } from '../state/access';
 import { RestoreSheet } from '../components/RestoreSheet';
 import { db } from '../state/db';
 import { useClaudeCloud } from '../state/cloud';
-import { useServerFeatures, useSession } from '../state/api';
+import { updateMe, useServerFeatures, useSession } from '../state/api';
+import { BillingIssueBanner } from '../components/BillingIssueBanner';
 import { exportBackup, importBackup, requestPersistentStorage } from '../state/backup';
 import { exportEvents } from '../state/events';
 import { studyReminder, trialReminder } from '../state/reminders';
@@ -87,6 +88,7 @@ function shortDate(iso: string) {
 function proSummary(access: Access) {
   if (testingPro(access)) return 'On for testing';
   if (!isPro(access)) return 'Free plan';
+  if (access.lifetime) return 'Founding member';
   return access.trialEndsAt ? `Trial to ${shortDate(access.trialEndsAt)}` : 'Active';
 }
 
@@ -122,6 +124,7 @@ function SettingsHome() {
   return (
     <div className="stack settings" style={{ gap: '1.6rem' }}>
       <PageHeader title="Settings" back={{ to: '/you', label: 'You' }} />
+      <BillingIssueBanner />
 
       <div className="list with-icons">
         <NavRow
@@ -175,6 +178,8 @@ function SettingsHome() {
         </div>
       </Section>
 
+      {session?.user.email && <EmailSection />}
+
       <div className="list with-icons settings-pro">
         <NavRow to="/settings/pro" icon={ProGlyph} color="var(--chip-gold)" title="Aced Pro" detail={proSummary(access)} />
       </div>
@@ -199,6 +204,43 @@ function SettingsHome() {
         <BrandFooter />
       </div>
     </div>
+  );
+}
+
+/**
+ * Marketing email is opt in (CASL), off until the player turns it on.
+ * Account and payment email does not depend on it.
+ */
+function EmailSection() {
+  const session = useSession();
+  const [busy, setBusy] = useState(false);
+  const [message, setMessage] = useState<string>();
+  const on = !!session?.user.emailOptIn;
+  return (
+    <Section
+      title="Email"
+      footer={message ? <span role="status">{message}</span> : 'We send a weekly recap and news about Aced. Every email has a one tap unsubscribe.'}
+    >
+      <div className="list">
+        <Row label="Email me tips and news">
+          <Toggle
+            label="Email me tips and news"
+            checked={on}
+            onChange={async (next) => {
+              if (busy) return;
+              setBusy(true);
+              setMessage(undefined);
+              try {
+                await updateMe({ emailOptIn: next });
+              } catch (e) {
+                setMessage(e instanceof Error ? e.message : 'Aced could not save that. Try again.');
+              }
+              setBusy(false);
+            }}
+          />
+        </Row>
+      </div>
+    </Section>
   );
 }
 
@@ -616,6 +658,7 @@ function TestingSection() {
 
 function ProSettingsPage() {
   const { settings } = useSettings();
+  const session = useSession();
   const access = settings.access;
   const [params, setParams] = useSearchParams();
   // Back from signing in to restore: the sheet opens again on its own.
@@ -636,10 +679,18 @@ function ProSettingsPage() {
           <Link to="/pro?from=settings" className="list-row">
             <span className="grow">Aced Pro</span>
             <span className="detail">
-              {!isPro(access) ? 'Free plan' : access.trialEndsAt ? `Free trial until ${shortDate(access.trialEndsAt)}` : 'Active'}
+              {!isPro(access) ? 'Free plan' : access.lifetime ? 'Founding member' : access.trialEndsAt ? `Free trial until ${shortDate(access.trialEndsAt)}` : 'Active'}
             </span>
             <ChevronRightIcon size={16} className="chev" />
           </Link>
+          {session && (access.lifetime || (access.until && access.plan !== 'invite')) && (
+            <Link to="/account?manage=1" className="list-row">
+              <span className="grow" style={{ color: 'var(--tint)' }}>
+                Manage Pro
+              </span>
+              <ChevronRightIcon size={16} className="chev" />
+            </Link>
+          )}
           {isPro(access) && access.trialEndsAt && (
             <button className="list-row" onClick={() => trialReminder(access.trialEndsAt!)}>
               <span className="grow" style={{ color: 'var(--tint)' }}>

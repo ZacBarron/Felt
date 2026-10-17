@@ -92,6 +92,8 @@ export interface Access {
   plan?: string;
   /** Paid through this date, as reported by the Aced server. */
   until?: string;
+  /** The founding purchase: Pro for as long as Aced runs, with no end date. */
+  lifetime?: boolean;
 }
 
 /** Results the player entered, used to calibrate the win rate estimate. */

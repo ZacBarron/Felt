@@ -101,6 +101,42 @@ Code: `packages/core/src/handhistory.ts`, `packages/core/src/sessions.ts`, `apps
 
 Adaptive difficulty already ships without a server: Practice picks items near 80% expected success from the rating model (Klinkenberg et al. 2011; Wilson et al. 2019 derive about 85% for model learners).
 
+## Push and email
+
+The rule is Duolingo's "protect the channel": the volume is fixed and only the content gets better, because a player who turns notifications off rarely turns them back on (Mazal 2023; Yancey and Settles 2020; see research/sources.md, section 7). Every message says what is waiting or what changed. None uses guilt, a streak threat or a countdown.
+
+### Push
+
+Code: `shouldRemind` and `underPushCaps` in `apps/server/src/services.ts` (every branch unit tested in `apps/server/test/pushcaps.test.ts`), run by `runReminders` and `runTrialNotices` in `push.ts`.
+
+| Rule | What it does |
+| --- | --- |
+| Caps | At most 1 push a day (the player's local day) and 4 in any 7 days. Every push counts, the trial reminder too. In a 2017 survey, 37% said 2 to 5 pushes a week would make them turn notifications off (Localytics, *secondary*) |
+| Quiet hours | No push from 9 pm to 8 am in the player's time zone. The trial reminder waits until morning (its 24 hour window always has room). The daily reminder goes at the time the player picked, even inside those hours, since many players study late. The app sends the device's time zone on every sync |
+| Decay | Reminders since the player last studied or opened Aced count as ignored. After 3, one every third day. After 7, none until the player comes back |
+| Closing note | After 14 days without opening Aced, one last push: "We'll stop reminders here. Your plan is waiting when you're back." Then nothing until the player opens Aced again. Duolingo's stop rule without its sulk |
+
+### Email
+
+Code: `dueEmails` and the email text in `apps/server/src/lifecycle.ts` (unit tested in `apps/server/test/lifecycle.test.ts`), sent by `runLifecycleEmails` in `emails.ts` from the same 5 minute scheduler as push. Plain text, short, in the voice guide.
+
+| Email | Kind | When |
+| --- | --- | --- |
+| Your free week ends | Transactional | 2 days before a trial charges, if the player kept the trial reminder on. The push goes too |
+| Your payment didn't go through | Transactional | When a renewal fails, then once more after a week if it still fails |
+| Your week in decisions | Marketing | Monday from 9 am local, only after a week with graded answers. Real numbers from the server: decisions, right answers, the Aced Rating change (labelled "about", since each stored answer carries the rating before it) and daily challenges played. It reports skill, never minutes |
+| Your progress is still here | Marketing (win-back) | 30 to 45 days after paid Pro ends. News, no discount |
+| Come back to Aced Pro for less | Marketing (win-back) | 60 to 90 days after paid Pro ends. One offer, with its end date stated plainly |
+
+- **Consent.** Marketing email is opt in, off by default: Settings, Email me tips and news. The time of consent is stored. Canada's anti spam law (CASL) asks for express consent, the sender's mailing address and a working unsubscribe in every commercial message. Account and payment email is transactional and goes without opt in.
+- **Unsubscribe.** Every marketing email ends with why it came, a one tap unsubscribe link and the postal address from `MAIL_POSTAL_ADDRESS`. It also carries `List-Unsubscribe` and `List-Unsubscribe-Post` headers, so mail apps show their own unsubscribe button (RFC 8058, which Gmail and Yahoo require of bulk senders). `GET` or `POST /api/email/unsubscribe?token=` turns marketing email off at once and shows a short page. Without `MAIL_POSTAL_ADDRESS` no marketing email is sent at all.
+- **Cap.** At most 2 marketing emails in 7 days and none within a day of the last.
+- **Sunset.** No marketing email after 90 days without a visit. Opens are not tracked (Apple Mail preloads images, so opens are noise), so a visit to the app is the signal. Transactional email is never sunset.
+
+### Holdout
+
+Each new account has a chance of `LIFECYCLE_HOLDOUT` (default 0.1) of joining the holdout. Holdout players get no marketing email and no win-back offer, ever. Transactional email and the reminders a player turned on still go. The flag is stored on the account and shown nowhere in the app. Compare the two groups on D30 retention, rating gained per active week, trial to paid and 90 day paid retention, and watch the guardrails: unsubscribes, push opt outs and spam complaints (research section 7). Accounts made before the holdout existed are all outside it.
+
 ## Measurement
 
 Aced logs events to a local table on the device (`apps/web/src/state/events.ts`): onboarding steps, placement, plan commitment, paywall views, plan choice and purchase results, and daily challenge starts and finishes. Nothing is sent anywhere; developer mode can export the log. Metrics to watch once events can be collected with consent: first lesson within 24 hours, D1, D7 and D30 retention, share of days the plan is done, paywall to trial, trial to paid, day 0 cancellations, and rating gained per active week.

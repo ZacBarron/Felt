@@ -112,6 +112,21 @@ Compiled October 2026 to ground Suited's rating, scheduling, motivation and mone
 
 ---
 
+## 7. Retention and lifecycle messaging
+
+From the October 2026 lifecycle brief. Labels as above; most are *secondary* or vendor figures and are used for direction, not as facts to quote.
+
+- **Notification volume.** Jorge Mazal, "How Duolingo reignited user growth," *Lenny's Newsletter*, 2023 (*insider essay*): the "protect the channel" rule, no added volume without strong reason. Yancey, K. P., Settles, B. (2020), "A sleeping, recovering bandit algorithm for optimizing recurring notifications," *KDD 2020*, 3008-3016: picking the template, not raising volume, gave +0.5% DAU and +2% new user retention (*abstract level*).
+- **Push frequency.** Localytics 2017 survey (n = 1,000 US), via MarketingProfs 2018: 10% would turn off notifications at 1 a week, 37% at 2 to 5 a week (*secondary*, stated intent).
+- **Quiet hours.** Braze and OneSignal documentation: quiet hours in each user's local time, held messages sent when the window ends (*company source*).
+- **Cancel flows.** Paddle Retain and Churnkey documentation and site data: reason first, one offer per reason, pause retains better than a discount (*vendor*). Stripe docs on retention rules and `pause_collection` (*company source*).
+- **Click to cancel.** Eighth Circuit vacated the FTC's 2024 rule on July 8, 2025 (Fenwick, 2025); the FTC reopened rulemaking in March 2026 (Covington, 2026). California AB 2863 (in force July 1, 2025) allows save offers only if cancelling stays immediate (Davis Wright Tremaine, 2024).
+- **Involuntary churn.** RevenueCat State of Subscription Apps 2026: billing errors cause 32.3% of Play cancellations and 15.2% on the App Store; ProfitWell and Paddle put involuntary churn at 20 to 40% of SaaS churn (*industry report*).
+- **Win-back.** RevenueCat 2026 via 9to5Mac (May 27, 2026): cancelled annual subscribers reactivate at about 5%; monthly at about 4 times that (*industry report*).
+- **Email deliverability.** Gmail and Yahoo bulk sender rules (Feb 2024, enforcement stepped up Nov 2025): SPF, DKIM, DMARC, one click unsubscribe per RFC 8058, spam rate under 0.3% (*secondary*: Bird; Spam Resource). Sunset after 90 to 180 days without engagement is common practice (Suped; Scalero, *secondary*).
+- **Holdouts.** Sellforte, Bluecore and Bird documentation: a global holdout of 5 to 10% for large audiences, more for small ones (*vendor*).
+- **CASL.** Canada's Anti-Spam Legislation (S.C. 2010, c. 23) requires consent, sender identification with a mailing address and an unsubscribe mechanism in commercial electronic messages (*not verified* against the statute text here).
+
 ## 6. Implications for Suited
 
 1. **One rating engine for player and spots**: Elo on a logistic curve with `K(n) = 1.8 / (1 + 0.05 n)`, provisional while uncertain (Pelánek 2016; Pelánek et al. 2017; Klinkenberg et al. 2011; Lichess).
@@ -125,5 +140,5 @@ Compiled October 2026 to ground Suited's rating, scheduling, motivation and mone
 9. **Compete with your past self first**; any social board groups similar levels (Festinger 1954; Landers et al. 2017; Hanus and Fox 2015).
 10. **Onboarding earns trust**: a winnable first hand before any ask (Bandura 1977; Duolingo, *secondary*), shown work and a step already done in the plan (Buell and Norton 2011; Nunes and Drèze 2006), and only real social proof (Goldstein et al. 2008).
 11. **Rewards inform, not bribe**: badges mark real competence gains; no false urgency or confirmshaming in reminders or paywalls (Deci, Koestner and Ryan 1999; Ryan and Deci 2000; Mathur et al. 2019).
-12. **Few, varied reminders** that decay when ignored (Duolingo KDD 2020).
+12. **Few, varied reminders** that decay when ignored, within fixed caps and quiet hours (Duolingo KDD 2020; section 7).
 13. **Monetization**: freemium with annual plans and a longer trial suits education (RevenueCat 2025, 2026); about 9% paid share is achievable at scale (Duolingo 10-K); poker players accept tiers by depth of solver content (GTO Wizard).

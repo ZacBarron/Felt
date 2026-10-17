@@ -1,0 +1,127 @@
+/* Manage Pro and the cancel flow. Gold is the Pro color (BRAND.md). */
+
+.billing-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.7rem 0.8rem 0.7rem 1rem;
+  border-radius: 18px;
+  background: var(--surface);
+  box-shadow: inset 3px 0 0 var(--orange);
+  font-size: 0.92rem;
+}
+
+.billing-banner .btn {
+  flex: none;
+  min-height: 38px;
+  padding: 0 0.9rem;
+  font-size: 0.9rem;
+}
+
+.mp-plan {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.mp-plan-name {
+  font-size: 1.3rem;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  margin: 0.2rem 0 0;
+}
+
+.mp-plan-line {
+  margin: 0;
+  color: var(--label-2);
+}
+
+.mp-reasons .chips {
+  flex-wrap: wrap;
+  overflow: visible;
+  margin: 0;
+  padding: 0;
+}
+
+.mp-offer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  box-shadow: inset 0 0 0 2px var(--chip-gold);
+  background: color-mix(in srgb, var(--chip-gold) 8%, var(--surface));
+}
+
+.mp-offer h2 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.mp-offer p,
+.mp-note {
+  margin: 0;
+}
+
+.mp-note {
+  color: var(--label-2);
+}
+
+.mp-detail label {
+  display: block;
+  margin-bottom: 0.4rem;
+  color: var(--label-2);
+  font-size: 0.9rem;
+}
+
+.mp-detail textarea {
+  font: inherit;
+  font-size: max(16px, 1rem);
+  width: 100%;
+  min-height: 5.5rem;
+  padding: 0.7rem 0.9rem;
+  border: none;
+  border-radius: 14px;
+  color: var(--label);
+  background: var(--surface);
+  resize: vertical;
+}
+
+.mp-detail textarea:focus {
+  outline: 2px solid var(--tint);
+}
+
+.mp-done {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.6rem;
+  padding-top: 1rem;
+}
+
+.mp-done-icon {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  color: var(--chip-gold);
+  background: color-mix(in srgb, var(--chip-gold) 14%, transparent);
+}
+
+.mp-done h2 {
+  margin: 0.4rem 0 0;
+  font-size: 1.4rem;
+}
+
+.mp-done p {
+  margin: 0;
+  max-width: 26rem;
+  color: var(--label-2);
+}
+
+.mp-status {
+  margin: 0;
+  font-size: 0.92rem;
+  color: var(--label-2);
+  text-align: center;
+}

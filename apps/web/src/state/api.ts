@@ -30,6 +30,10 @@ export interface ServerAccess {
   until: string | null;
   plan: string | null;
   trialing: boolean;
+  /** The founding purchase: Pro for as long as Aced runs. Older servers leave it out. */
+  lifetime?: boolean;
+  /** A renewal payment failed. Pro stays on while it is retried. Older servers leave it out. */
+  billingIssue?: boolean;
 }
 
 export interface ServerUser {
@@ -48,6 +52,8 @@ export interface ServerUser {
   reminderBody?: string | null;
   leagues: boolean;
   lastStudyDay: string | null;
+  /** Tips and news by email. Off until the player turns it on. Older servers leave it out. */
+  emailOptIn?: boolean;
   access: ServerAccess;
 }
 
@@ -190,7 +196,9 @@ export async function refreshMe(): Promise<ServerUser | null> {
   return user;
 }
 
-export async function updateMe(patch: Partial<Pick<ServerUser, 'handle' | 'tz' | 'cueMinutes' | 'reminders' | 'trialReminder' | 'reminderBody' | 'leagues' | 'lastStudyDay'>>) {
+export async function updateMe(
+  patch: Partial<Pick<ServerUser, 'handle' | 'tz' | 'cueMinutes' | 'reminders' | 'trialReminder' | 'reminderBody' | 'leagues' | 'lastStudyDay' | 'emailOptIn'>>,
+) {
   const token = session?.token;
   const { user } = await api<{ user: ServerUser }>('/me', { method: 'PATCH', body: patch });
   if (token) updateSessionUser(token, user);
