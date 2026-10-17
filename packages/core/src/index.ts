@@ -5,6 +5,8 @@ export * from './equity';
 export * from './odds';
 export * from './strategy';
 export * from './charts';
+export * from './chartPick';
+export * from './chartModel';
 export * from './srs';
 export * from './settings';
 export * from './drills';

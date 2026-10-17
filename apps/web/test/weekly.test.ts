@@ -7,6 +7,7 @@ import { db } from '../src/state/db';
 import { entryFor } from '../src/state/lessons';
 import {
   addWeeklyMissesToReview,
+  FACING,
   WEEKLY_SIZE,
   WEEKLY_SLOTS,
   weeklyAvailable,
@@ -39,7 +40,7 @@ describe('weekly pool', () => {
           expect(scoreMixAnswer(mix, { [primaryAction(mix)]: 1 }).accuracy).toBeLessThan(1);
           expect(mixAnswerOptions(chart).some((o) => scoreMixAnswer(mix, o.mix).accuracy === 1)).toBe(true);
         } else {
-          expect(['vs-open', 'vs-3bet']).toContain(chart.spec.spot);
+          expect(FACING.has(chart.spec.spot)).toBe(true);
         }
       } else if (d.kind === 'quiz') {
         expect(entryFor(d.key)?.content?.level).toBe('advanced');

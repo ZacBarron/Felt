@@ -124,3 +124,76 @@ describe('every preflop decision is graded', () => {
     }
   });
 });
+
+describe('chartForSpot with the library', () => {
+  /** Deals a hand with the player in `heroPos`, then plays the given actions by position (others fold or check) until the player acts. */
+  function spotFor(tableSize: number, heroPos: string, actions: Record<string, ({ kind: 'raise'; to: number } | { kind: 'call' })[]>, stack = 100, hero = 'AsAh') {
+    for (let button = 0; button < tableSize; button++) {
+      let s = startHandWithDeck({ stacks: Array(tableSize).fill(stack), button }, deckFor(tableSize, button, [hero, ...others].slice(0, tableSize)));
+      if (s.players[HERO].position !== heroPos) continue;
+      const queues = Object.fromEntries(Object.entries(actions).map(([k, v]) => [k, [...v]]));
+      for (let guard = 0; guard < 40; guard++) {
+        const q = queues[s.players[s.toAct!].position];
+        if (s.toAct === HERO && (!q || q.length === 0)) break;
+        s = act(s, q && q.length ? q.shift()! : legalActions(s).check ? { kind: 'check' } : { kind: 'fold' });
+      }
+      return { state: s, spot: preflopSpot(s, HERO) };
+    }
+    throw new Error(`No seat ${heroPos} at ${tableSize}`);
+  }
+
+  it('grades the big blind against a 2.5bb button open with the hand written chart', () => {
+    const { spot } = spotFor(9, 'BB', { BTN: [{ kind: 'raise', to: 2.5 }] });
+    const found = chartForSpot(spot)!;
+    expect(found.chart.spec.id).toBe('9max-100-bb-vs-btn');
+    expect(found.exact).toBe(true);
+  });
+
+  it('matches the open size faced instead of refusing live opens', () => {
+    const { spot } = spotFor(9, 'BB', { BTN: [{ kind: 'raise', to: 5 }] });
+    const found = chartForSpot(spot)!;
+    expect(found.chart.spec.id).toBe('9max-100-o5-bb-vs-btn');
+    expect(found.exact).toBe(false);
+    expect(found.why).toMatch(/derived/);
+  });
+
+  it('matches the stack', () => {
+    const { spot } = spotFor(9, 'CO', { HJ: [{ kind: 'raise', to: 2.5 }] }, 200);
+    expect(chartForSpot(spot)!.chart.spec.id).toBe('9max-200-co-vs-hj');
+  });
+
+  it('finds the 3bet answer for the 3bettor seat and the open size', () => {
+    const { spot } = spotFor(9, 'CO', { CO: [{ kind: 'raise', to: 2.5 }], BB: [{ kind: 'raise', to: 11 }] });
+    const found = chartForSpot(spot)!;
+    expect(found.chart.spec.id).toBe('9max-100-co-vs-blinds-3bet');
+    expect(found.exact).toBe(true);
+    const big = spotFor(9, 'CO', { CO: [{ kind: 'raise', to: 4 }], BTN: [{ kind: 'raise', to: 12 }] });
+    expect(chartForSpot(big.spot)!.chart.spec.id).toBe('9max-100-o4-co-vs-btn-3bet');
+  });
+
+  it('finds 4bet, squeeze and blind vs blind charts', () => {
+    const four = spotFor(9, 'BB', { BTN: [{ kind: 'raise', to: 2.5 }, { kind: 'raise', to: 24 }], BB: [{ kind: 'raise', to: 11 }] });
+    expect(chartForSpot(four.spot)!.chart.spec.id).toBe('9max-100-bb-vs-btn-4bet');
+    const sq = spotFor(9, 'BB', { BTN: [{ kind: 'raise', to: 2.5 }], SB: [{ kind: 'call' }] });
+    expect(chartForSpot(sq.spot)!.chart.spec.id).toBe('9max-100-bb-squeeze-vs-btn-sb');
+    const limp = spotFor(9, 'BB', { SB: [{ kind: 'call' }] });
+    expect(chartForSpot(limp.spot)!.chart.spec.id).toBe('9max-100-bvb-bb-vs-limp');
+    const sb = spotFor(9, 'SB', {});
+    expect(chartForSpot(sb.spot)!.chart.spec.id).toBe('9max-100-rfi-sb');
+    expect(chartForSpot(sb.spot, { limped: true })!.chart.spec.id).toBe('9max-100-bvb-sb-open');
+  });
+
+  it('uses 6-max charts at a 6-handed table', () => {
+    const { spot } = spotFor(6, 'BTN', { UTG: [{ kind: 'raise', to: 2.5 }] });
+    expect(chartForSpot(spot)!.chart.spec.id).toBe('6max-100-btn-vs-utg');
+  });
+
+  it('grades a live size open as approximate and never rates it', () => {
+    const seats = seatsFor(9, BOTS.map((b) => b.id));
+    const { state } = spotFor(9, 'BB', { BTN: [{ kind: 'raise', to: 5 }] });
+    const [g] = gradeHand([{ state, action: { kind: 'fold' } }], seats, 1);
+    expect(g.tier).toBe('approx');
+    expect(g.rated).toBe(false);
+    expect(g.detail).toMatch(/5bb opens/);
+  });
+});

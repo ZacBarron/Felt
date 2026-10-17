@@ -2,6 +2,7 @@ import { SCENARIOS, STARTER_CHARTS } from '@felt/content';
 import {
   boundaryHands,
   chartItemDifficulty,
+  type ChartSpot,
   DIFFICULTY,
   isMixed,
   type IsoWeek,
@@ -54,6 +55,9 @@ export const KIND_LABELS: Record<WeeklyKind, string> = {
   lesson: 'Advanced question',
 };
 
+/** Spots where a pure close call earns a weekly slot: facing action, not opening. */
+export const FACING = new Set<ChartSpot>(['vs-open', 'vs-3bet', 'vs-4bet', 'squeeze', 'vs-squeeze', 'bvb']);
+
 export type WeeklyCandidateItem = WeeklyCandidate & { kind: WeeklyKind; decision: WeeklyDecision };
 
 export function weeklyAvailable(access: Access, now = new Date()): boolean {
@@ -79,9 +83,9 @@ export function weeklyPool(): WeeklyCandidateItem[] {
 
   for (const f of MATH_FACTS) add('math', DIFFICULTY.mathFact, { kind: 'math', factId: f.id });
 
-  // Equilibrium charts only, and only hands where some answer is wrong.
+  // Hand written 9-handed equilibrium charts only (6-max charts repeat their ranges), and only hands where some answer is wrong.
   for (const spec of STARTER_CHARTS) {
-    if (spec.basis !== 'gto') continue;
+    if (spec.basis !== 'gto' || spec.tableSize !== 9) continue;
     const chart = getChart(spec.id);
     if (!chart) continue;
     const choices = [...chart.spec.actions.map((a) => a.id), 'fold'];
@@ -96,8 +100,8 @@ export function weeklyPool(): WeeklyCandidateItem[] {
         const mainOnly = scoreMixAnswer(mix, { [primaryAction(mix)]: 1 }).accuracy;
         if (mainOnly < 1 && options.some((o) => scoreMixAnswer(mix, o.mix).accuracy === 1)) add('mixed', difficulty, decision);
       }
-      // Pure close calls only when facing a raise or a 3bet.
-      else if (spec.spot === 'vs-open' || spec.spot === 'vs-3bet') add('edge', difficulty, decision);
+      // Pure close calls only when facing action: an open, a 3bet, a 4bet, a squeeze or the other blind.
+      else if (FACING.has(spec.spot)) add('edge', difficulty, decision);
     }
   }
 

@@ -62,6 +62,8 @@ export interface PreflopSpot {
   raiseTo: number;
   /** Effective stack at the start of the hand. */
   stackBb: number;
+  /** Every call and raise before this decision, in order: who, what and to how much. */
+  line?: { position: Position; kind: 'call' | 'raise'; to: number }[];
 }
 
 export interface PreflopAdvice {
@@ -96,8 +98,10 @@ export function preflopSpot(state: HandState, seat: number): PreflopSpot {
   let limpers = 0;
   let callers = 0;
   let reraised = false;
+  const line: NonNullable<PreflopSpot['line']> = [];
   for (const a of state.log) {
     if (a.street !== 'preflop') continue;
+    if (a.kind === 'raise' || a.kind === 'call') line.push({ position: state.players[a.seat].position, kind: a.kind, to: a.to });
     if (a.kind === 'raise') {
       raisers.push(state.players[a.seat].position);
       if (a.seat === seat) reraised = true;
@@ -122,6 +126,7 @@ export function preflopSpot(state: HandState, seat: number): PreflopSpot {
     reraised: reraised && raisers.length > 1,
     raiseTo: state.currentBet,
     stackBb: Math.min(own, biggestOther),
+    line,
   };
 }
 

@@ -1,9 +1,46 @@
-/* Ranges: compact controls above the grid, so the range itself leads. */
+/* Ranges: compact controls above the grid, so the range itself leads.
+   On a 393x852 phone the whole grid and the selected hand fit without scrolling. */
+
+.ranges-page {
+  gap: 0.6rem;
+}
+
+/* One compact row instead of a large title: back, mode and help. */
+.ranges-bar {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.5rem;
+  padding-top: 0.5rem;
+  max-width: 620px;
+}
+
+.ranges-bar .segmented {
+  justify-self: center;
+}
+
+.ranges-bar .segmented button {
+  min-height: 32px;
+  padding: 0 0.85rem;
+  font-size: 0.82rem;
+}
+
+.ranges-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.1rem;
+  min-height: 44px;
+  margin-left: -0.35rem;
+  padding-right: 0.25rem;
+  color: var(--tint);
+  font-size: 1rem;
+  text-decoration: none;
+}
 
 .ranges-top {
   display: flex;
   flex-direction: column;
-  gap: 0.6rem;
+  gap: 0.45rem;
   /* Lines up with the range grid on wide screens. */
   max-width: 620px;
 }
@@ -26,17 +63,33 @@
 
 .chart-select {
   min-width: 0;
-  min-height: 44px;
-  padding: 0 0.9rem 0 1.1rem;
+  min-height: 48px;
+  padding: 0.3rem 0.9rem 0.3rem 1.1rem;
   gap: 0.45rem;
   color: var(--label);
   background: var(--surface);
   box-shadow: inset 0 0 0 1px var(--separator);
 }
 
+.chart-select-text {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 0;
+  line-height: 1.15;
+}
+
+.chart-select-top {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  min-width: 0;
+  max-width: 100%;
+}
+
 .chart-select-spot {
   flex: none;
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   font-weight: 600;
   color: var(--label-2);
 }
@@ -46,13 +99,118 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-size: 1rem;
+  font-size: 0.98rem;
   font-weight: 650;
+}
+
+.chart-select-meta {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.75rem;
+  color: var(--label-2);
 }
 
 .chart-select-chev {
   flex: none;
   color: var(--tint);
+}
+
+/* The selected hand: in the side column on wide screens, peeking above the tab bar on phones. */
+.hand-card {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.hand-card-head {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  min-width: 0;
+}
+
+.hand-card-name {
+  font-size: 2.2rem;
+  line-height: 1;
+}
+
+.hand-card .hand-nickname {
+  margin: 0;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hand-card-combos {
+  margin-left: auto;
+  flex: none;
+}
+
+.hand-peek {
+  display: none;
+}
+
+@media (max-width: 760px) {
+  .ranges-side .hand-side {
+    display: none;
+  }
+
+  .hand-peek {
+    display: block;
+    padding: 0.55rem 0.9rem 0.65rem;
+    border-radius: var(--r-card, 18px);
+    background: var(--surface);
+  }
+
+  .ranges-page ~ .bottom-bar,
+  .bottom-bar:has(.hand-peek) {
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
+
+  .hand-peek .hand-card {
+    gap: 0.3rem;
+  }
+
+  .hand-peek .hand-card-name {
+    font-size: 1.6rem;
+  }
+
+}
+
+@media (min-width: 761px) {
+  .bottom-bar:has(.hand-peek) {
+    display: none;
+  }
+}
+
+/* Derived charts carry a quieter, distinct tag. */
+.pill-estimate {
+  background: color-mix(in srgb, var(--label-2) 14%, transparent);
+}
+
+.chart-sheet-only {
+  margin: 0;
+  padding: 0 0.25rem;
+}
+
+.chart-sheet-source {
+  margin: 0;
+  padding: 0 0.25rem;
+}
+
+.chart-sheet-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6rem;
+}
+
+.chart-sheet .chips {
+  margin: 0 -1rem;
+  padding: 2px 1rem;
+  scroll-padding: 0 1rem;
 }
 
 /* The spot line: what happened before you act, the honesty pills and an info button. */
@@ -61,7 +219,7 @@
   align-items: center;
   flex-wrap: wrap;
   gap: 0.25rem 0.4rem;
-  min-height: 28px;
+  min-height: 24px;
   font-size: 0.85rem;
   color: var(--label-2);
 }
@@ -69,6 +227,10 @@
 .chart-line-text {
   min-width: 0;
   margin-right: 0.1rem;
+}
+
+.chart-line .pill {
+  padding-block: 0.12rem;
 }
 
 /* 44pt target, drawn small. Negative margins keep the line short. */
@@ -111,7 +273,10 @@
 /* Chart sheet: one wrapping group per spot, with full size touch targets. */
 .chart-sheet .section-title {
   margin: 0;
-  padding: 0 0.25rem 0.5rem;
+  padding: 0 0.25rem 0.4rem;
+  font-size: 0.95rem;
+  font-weight: 650;
+  color: var(--label-2);
 }
 
 .chart-sheet .seat-pick {
@@ -123,14 +288,7 @@
   letter-spacing: 0;
 }
 
-/* Header: a quiet help button beside the game chip. */
-.ranges-head-actions {
-  display: flex;
-  align-items: center;
-  gap: 0.15rem;
-  flex: none;
-}
-
+/* A quiet help button in the header row. */
 .ranges-help-btn {
   display: grid;
   place-items: center;

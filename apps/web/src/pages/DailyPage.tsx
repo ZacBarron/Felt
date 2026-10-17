@@ -1,5 +1,5 @@
 import { STARTER_CHARTS } from '@felt/content';
-import { boundaryHands, challengeNumber, chartItemDifficulty, DIFFICULTY, dailyPicks, isProvisional } from '@felt/core';
+import { boundaryHands, challengeNumber, chartItemDifficulty, type ChartSpot, DIFFICULTY, dailyPicks, isProvisional } from '@felt/core';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
@@ -28,7 +28,7 @@ import './screens.css';
 
 type ChartDecision = Extract<Decision, { kind: 'chart' }> & { difficulty: number };
 
-/** Every rated edge hand of every 9-handed chart, and every lesson quiz: the same pool for everyone. */
+/** Every rated edge hand of every hand written 9-handed chart, and every lesson quiz: the same pool for everyone. */
 function dailyPool() {
   // Equilibrium charts only, and only hands where some answer is wrong.
   const charts: ChartDecision[] = STARTER_CHARTS.filter((s) => s.tableSize === 9 && s.basis === 'gto').flatMap((spec) => {
@@ -44,17 +44,30 @@ function dailyPool() {
 }
 
 /**
- * Three range decisions that get harder (a mixed hand, an edge of an opening
- * range, then an edge when facing a raise or 3bet), with two lesson
- * questions between them.
+ * The spot type of the day's hardest range decision. It rotates, so the
+ * daily challenge brings defense, 3bets, 4bets, squeezes and blind battles,
+ * not just opens.
+ */
+export const DAILY_FACING: ChartSpot[][] = [['vs-open'], ['vs-3bet'], ['vs-open'], ['vs-4bet', 'vs-squeeze'], ['squeeze'], ['vs-3bet'], ['bvb']];
+
+/** The spot types the day's last range decision comes from. */
+export const dailyFacing = (date: Date) => DAILY_FACING[((challengeNumber(date) % DAILY_FACING.length) + DAILY_FACING.length) % DAILY_FACING.length];
+
+/**
+ * Three range decisions that get harder (a mixed hand from any spot, an edge
+ * of an opening range, then an edge when facing a raise, a 3bet, a 4bet, a
+ * squeeze or the other blind), with two lesson questions between them.
  */
 export function dailyItems(date = new Date()): Decision[] {
   const { charts, quizzes } = dailyPool();
   const spotOf = (c: ChartDecision) => getChart(c.chartId)?.spec.spot;
+  const facing = dailyFacing(date);
+  const hard = charts.filter((c) => c.difficulty >= DIFFICULTY.chartEdge && spotOf(c) !== 'rfi');
+  const today = hard.filter((c) => facing.includes(spotOf(c)!));
   const bands = [
     charts.filter((c) => c.difficulty < DIFFICULTY.chartEdge),
     charts.filter((c) => c.difficulty === DIFFICULTY.chartEdge && spotOf(c) === 'rfi'),
-    charts.filter((c) => c.difficulty >= DIFFICULTY.chartEdge && spotOf(c) !== 'rfi'),
+    today.length ? today : hard,
   ];
   const c = bands.map((band, i) => dailyPicks(band.length ? band : charts, date, 1, 10 + i)[0]);
   const q = dailyPicks(quizzes, date, 2, 2);
