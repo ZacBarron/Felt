@@ -25,8 +25,8 @@ export const FOUNDING = {
 
 /** Real counts from the app's content. Update them when content ships. */
 export const CONTENT = {
-  lessons: 127,
-  questions: 448,
-  charts: 27,
+  lessons: 154,
+  questions: 529,
+  charts: 163,
   playerTypes: 8,
 };
